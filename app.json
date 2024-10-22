@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "vupth-partner",
+    "slug": "vupth-partner",
+    "version": "1.0.0",
+    "plugins": [
+      "expo-font"
+    ],
+    "userInterfaceStyle": "automatic"
+  }
+}
