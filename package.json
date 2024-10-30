@@ -10,19 +10,17 @@
   },
   "dependencies": {
     "@expo-google-fonts/roboto-mono": "^0.2.3",
-    "@gluestack-ui/nativewind-utils": "^1.0.25",
-    "@gluestack-ui/overlay": "^0.1.15",
-    "@gluestack-ui/toast": "^1.0.7",
+    "@gluestack-style/react": "^1.0.57",
+    "@gluestack-ui/config": "^1.1.20",
+    "@gluestack-ui/themed": "^1.1.54",
     "@types/react": "~18.2.79",
     "expo": "~51.0.28",
     "expo-font": "~12.0.10",
     "expo-status-bar": "~1.12.1",
-    "nativewind": "4.0.36",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-reanimated": "~3.10.1",
     "react-native-svg": "15.2.0",
-    "tailwindcss": "^3.4.14",
     "typescript": "~5.3.3"
   },
   "devDependencies": {
