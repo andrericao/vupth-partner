@@ -20,9 +20,8 @@ export function InputSearch({ data, ...rest }: Props) {
   return (
     <GluestackInput
       h="$12"
-      px="$4"
 			w="$full"
-			mb="$6"
+			mb="$3"
       borderWidth="$1"
       borderColor="$success500"
       borderRadius="$md"

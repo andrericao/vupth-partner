@@ -9,26 +9,24 @@ import {
   FormControlErrorIcon,
   FormControlErrorText,
   AlertCircleIcon,
+  VStack,
 } from "@gluestack-ui/themed";
 
-export type InputProps = {
-  icon?: string;
-};
-
 type Props = ComponentProps<typeof InputField> & {
-  data?: InputProps;
+  textLabel: string;
+  messageError: string
 };
 
-export function Input({ data, ...rest }: Props) {
+export function Input({ textLabel, messageError, ...rest }: Props) {
   return (
-    <>
+    <VStack mb="$3">
       <FormControlLabel>
-        <FormControlLabelText>E-mail</FormControlLabelText>
+        <FormControlLabelText>{textLabel}</FormControlLabelText>
       </FormControlLabel>
       <GluestackInput
         h="$12"
-        px="$4"
 				w="$full"
+        
         borderWidth="$1"
         borderColor="$success500"
         borderRadius="$md"
@@ -40,9 +38,9 @@ export function Input({ data, ...rest }: Props) {
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />
         <FormControlErrorText>
-          Atleast 6 characters are required.
+          {messageError}
         </FormControlErrorText>
       </FormControlError>
-    </>
+    </VStack>
   );
 }

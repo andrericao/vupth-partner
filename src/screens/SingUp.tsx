@@ -3,9 +3,9 @@ import { useState } from "react";
 import {
   VStack,
   FormControl,
+  Heading,
   FormControlLabel,
   FormControlLabelText,
-  Input,
   InputField,
   InputSlot,
   InputIcon,
@@ -20,20 +20,20 @@ import {
   SearchIcon,
 } from "@gluestack-ui/themed";
 
-import { InputSearch } from "@components/InputSearch";
+import { Input } from "@components/Input";
+import { Select } from "@components/Select";
 import { InputPassword } from "@components/InputPassWord";
-import { Input as InputAndre } from "@components/Input";
+
+type Props = {
+
+  data: InputProps;
+
+}
 
 export function SingUp() {
-  const [showPassword, setShowPassword] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const handleState = () => {
-    setShowPassword((showState) => {
-      return !showState;
-    });
-  };
 
   const handleSubmit = () => {
     if (inputValue.length < 6) {
@@ -44,25 +44,32 @@ export function SingUp() {
   };
   return (
     <VStack
-      style={{
-        flex: 1,
-        padding: 15,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+        flex={1}
+        padding="$6"
+        alignItems="center"
+        justifyContent="center"
     >
       <FormControl isInvalid={isInvalid}>
 
-        <InputSearch />
-        <InputPassword />
-        <InputAndre
-        value={inputValue}
-        onChangeText={(inputValue) => setInputValue(inputValue)}
-        keyboardType="email-address" 
+        <Heading mb="$12" size="3xl">Cadastrar</Heading>
+
+        <Select />
+
+        <Input
+          placeholder="email@empresa.com"
+          value={inputValue}
+          onChangeText={(inputValue) => setInputValue(inputValue)}
+          textLabel="E-mail"
+          messageError="Test"
+          keyboardType="email-address"
         />
-      <Button bg="$green500" h="$12" mt="$12" onPress={handleSubmit}>
-        <ButtonText>Cadastrar</ButtonText>
-      </Button>
+
+        <InputPassword placeholder="senha" messageError="Oi" textLabel="Senha" />
+        <InputPassword placeholder="Confirmar senha" messageError="Oi" textLabel="Confirmar senha" />
+
+        <Button bg="$green500" h="$12" mt="$12" onPress={handleSubmit}>
+          <ButtonText>Cadastrar</ButtonText>
+        </Button>
       </FormControl>
     </VStack>
   );

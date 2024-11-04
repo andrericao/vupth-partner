@@ -12,18 +12,18 @@ import {
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
+  VStack,
   AlertCircleIcon,
 } from "@gluestack-ui/themed";
 
-export type InputProps = {
-  icon?: string;
-};
+
 
 type Props = ComponentProps<typeof InputField> & {
-  data?: InputProps;
+  messageError: string;
+  textLabel: string;
 };
 
-export function InputPassword({ data, ...rest }: Props) {
+export function InputPassword({ messageError, textLabel, ...rest }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const handleState = () => {
     setShowPassword((showState) => {
@@ -32,15 +32,16 @@ export function InputPassword({ data, ...rest }: Props) {
   };
 
   return (
-    <>
+    <VStack mb="$3" w="$full">
       <FormControlLabel>
-        <FormControlLabelText>Senha</FormControlLabelText>
+        <FormControlLabelText>{textLabel}</FormControlLabelText>
       </FormControlLabel>
 
       <GluestackInput
         h="$12"
-        px="$4"
 				w="$full"
+        mb="$3"  
+        pr="$3"
         borderWidth="$1"
         borderColor="$success500"
         borderRadius="$md"
@@ -64,9 +65,9 @@ export function InputPassword({ data, ...rest }: Props) {
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />
         <FormControlErrorText>
-          Atleast 6 characters are required.
+          {messageError}
         </FormControlErrorText>
       </FormControlError>
-    </>
+    </VStack>
   );
 }
