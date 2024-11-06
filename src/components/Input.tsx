@@ -12,16 +12,16 @@ import {
   VStack,
 } from "@gluestack-ui/themed";
 
-type Props = ComponentProps<typeof InputField> & {
+type InputProps = ComponentProps<typeof InputField> & {
   textLabel: string;
   messageError: string
 };
 
-export function Input({ textLabel, messageError, ...rest }: Props) {
+export function Input(props: InputProps) {
   return (
     <VStack mb="$3">
       <FormControlLabel>
-        <FormControlLabelText>{textLabel}</FormControlLabelText>
+        <FormControlLabelText>{props.textLabel}</FormControlLabelText>
       </FormControlLabel>
       <GluestackInput
         h="$12"
@@ -33,12 +33,12 @@ export function Input({ textLabel, messageError, ...rest }: Props) {
         variant="outline"
         $focus-borderWidth="$2"
       >
-        <InputField color="$success950" fontFamily="$body" {...rest} />
+        <InputField color="$success950" fontFamily="$body" {...props} />
       </GluestackInput>
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />
         <FormControlErrorText>
-          {messageError}
+          {props.messageError}
         </FormControlErrorText>
       </FormControlError>
     </VStack>

@@ -40,7 +40,7 @@ export function Select() {
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
           <SelectItem label="Proprietário" value="owner" />
-          <SelectItem label="Admnistrador" value="administrator" />
+          <SelectItem label="Administrador" value="administrator" />
           <SelectItem label="Profissional" value="professional" />
         </SelectContent>
       </SelectPortal>

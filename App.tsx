@@ -1,28 +1,27 @@
-import { View, StatusBar } from "react-native";
-import { GluestackUIProvider} from "@gluestack-ui/themed"
-import { config } from "@gluestack-ui/config" 
+import { StatusBar } from "react-native";
+import { GluestackUIProvider } from "@gluestack-ui/themed";
+import { config } from "./config/gluestack-ui.config";
 
-import { Home } from "@screens/Home";
-import { Login } from "@screens/Login";
-import { SingUp } from "@screens/SingUp";
+import { Routes } from "@routes/index";
+
+import { Loading } from "@components/Loading"
 
 import {
   useFonts,
-  RobotoMono_400Regular,
-  RobotoMono_700Bold,
-} from "@expo-google-fonts/roboto-mono";
+  Inter_400Regular,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
 
 export default function App() {
-  const [fontLoaded] = useFonts({ RobotoMono_700Bold, RobotoMono_400Regular });
+  const [fontLoaded] = useFonts({ Inter_400Regular, Inter_700Bold });
   return (
     <GluestackUIProvider config={config}>
-      
       <StatusBar
         barStyle="dark-content"
         backgroundColor="transparent"
         translucent
       />
-      {fontLoaded ? <SingUp /> : <View />}
+      {fontLoaded ? <Routes /> : <Loading />}
     </GluestackUIProvider>
   );
 }

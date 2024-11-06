@@ -4,36 +4,22 @@ import {
   VStack,
   FormControl,
   Heading,
-  FormControlLabel,
-  FormControlLabelText,
-  InputField,
-  InputSlot,
-  InputIcon,
-  EyeIcon,
-  EyeOffIcon,
-  FormControlError,
-  FormControlErrorText,
-  AlertCircleIcon,
-  FormControlErrorIcon,
-  Button,
-  ButtonText,
-  SearchIcon,
+  Text,
+  Link,
+  HStack,
+  LinkText,
+  ScrollView,
 } from "@gluestack-ui/themed";
 
 import { Input } from "@components/Input";
 import { Select } from "@components/Select";
 import { InputPassword } from "@components/InputPassWord";
+import { Button } from "@components/Button"
 
-type Props = {
-
-  data: InputProps;
-
-}
-
-export function SingUp() {
+export function SingUp({ navigation }) {
+  
   const [isInvalid, setIsInvalid] = useState(false);
   const [inputValue, setInputValue] = useState("");
-
 
   const handleSubmit = () => {
     if (inputValue.length < 6) {
@@ -43,15 +29,21 @@ export function SingUp() {
     }
   };
   return (
-    <VStack
-        flex={1}
-        padding="$6"
-        alignItems="center"
-        justifyContent="center"
+    <ScrollView 
+    w="$full" 
+    contentContainerStyle={{ flexGrow: 1 }}
+    showsVerticalScrollIndicator={false}>
+    <VStack 
+      flex={1}
+      py="$12"
+      px="$6" 
+      alignItems="center" 
+      justifyContent="center"
     >
-      <FormControl isInvalid={isInvalid}>
-
-        <Heading mb="$12" size="3xl">Cadastrar</Heading>
+      <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
+        <Heading mb="$12" size="3xl" fontFamily="$heading">
+          Cadastrar
+        </Heading>
 
         <Select />
 
@@ -64,13 +56,27 @@ export function SingUp() {
           keyboardType="email-address"
         />
 
-        <InputPassword placeholder="senha" messageError="Oi" textLabel="Senha" />
-        <InputPassword placeholder="Confirmar senha" messageError="Oi" textLabel="Confirmar senha" />
+        <InputPassword
+          placeholder="senha"
+          messageError="Oi"
+          textLabel="Senha"
+        />
+        <InputPassword
+          placeholder="senha"
+          messageError="Oi"
+          textLabel="Confirmar senha"
+        />
 
-        <Button bg="$green500" h="$12" mt="$12" onPress={handleSubmit}>
-          <ButtonText>Cadastrar</ButtonText>
-        </Button>
+        <Button title="Cadastrar" onPress={handleSubmit}/>
       </FormControl>
+
+      <HStack mt="$24" space="xs" flex={1}>
+        <Text fontFamily="$body">Já é cadastrado? </Text>
+        <Link onPress={ () => navigation.navigate("Login") }>
+          <LinkText fontFamily="$body">Login</LinkText>
+        </Link>
+      </HStack>
     </VStack>
+    </ScrollView>
   );
 }

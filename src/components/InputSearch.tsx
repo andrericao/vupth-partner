@@ -8,15 +8,13 @@ import {
 	SearchIcon,
 } from "@gluestack-ui/themed";
 
-export type InputProps = {
-  icon?: string;
-};
+type InputSearchProps = ComponentProps<typeof InputField> 
 
-type Props = ComponentProps<typeof InputField> & {
+/* type Props = ComponentProps<typeof InputField> & {
   data?: InputProps;
-};
+}; */
 
-export function InputSearch({ data, ...rest }: Props) {
+export function InputSearch(props: InputSearchProps) {
   return (
     <GluestackInput
       h="$12"
@@ -35,7 +33,7 @@ export function InputSearch({ data, ...rest }: Props) {
           color="$emerald900"
         />
       </InputSlot>
-      <InputField color="$success950" fontFamily="$body" {...rest} />
+      <InputField color="$success950" fontFamily="$body" {...props} />
     </GluestackInput>
   );
 }

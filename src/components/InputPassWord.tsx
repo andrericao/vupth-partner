@@ -18,12 +18,12 @@ import {
 
 
 
-type Props = ComponentProps<typeof InputField> & {
+type InputPasswordProps = ComponentProps<typeof InputField> & {
   messageError: string;
   textLabel: string;
 };
 
-export function InputPassword({ messageError, textLabel, ...rest }: Props) {
+export function InputPassword(props: InputPasswordProps) {
   const [showPassword, setShowPassword] = useState(false);
   const handleState = () => {
     setShowPassword((showState) => {
@@ -34,13 +34,12 @@ export function InputPassword({ messageError, textLabel, ...rest }: Props) {
   return (
     <VStack mb="$3" w="$full">
       <FormControlLabel>
-        <FormControlLabelText>{textLabel}</FormControlLabelText>
+        <FormControlLabelText>{props.textLabel}</FormControlLabelText>
       </FormControlLabel>
 
       <GluestackInput
         h="$12"
 				w="$full"
-        mb="$3"  
         pr="$3"
         borderWidth="$1"
         borderColor="$success500"
@@ -52,11 +51,11 @@ export function InputPassword({ messageError, textLabel, ...rest }: Props) {
           type={showPassword ? "text" : "password"}
           color="$success950"
           fontFamily="$body"
-          {...rest}
+          {...props}
         />
         <InputSlot onPress={handleState}>
           <InputIcon
-            size="xl"
+            size="lg"
             as={showPassword ? EyeOffIcon : EyeIcon}
             color="$emerald900"
           />
@@ -65,7 +64,7 @@ export function InputPassword({ messageError, textLabel, ...rest }: Props) {
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />
         <FormControlErrorText>
-          {messageError}
+          {props.messageError}
         </FormControlErrorText>
       </FormControlError>
     </VStack>
