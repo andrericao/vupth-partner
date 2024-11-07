@@ -3,10 +3,11 @@ import {
   Button as GlueStackButton,
   ButtonText,
   ButtonSpinner,
+  ArrowRightIcon,
 } from "@gluestack-ui/themed";
 
 type ButtonProps = ComponentProps<typeof GlueStackButton> & {
-  title: string;
+  title?: string;
   isLoading?: boolean;
 };
 
@@ -23,7 +24,8 @@ export function Button(props: ButtonProps) {
       {props.isLoading ? (
         <ButtonSpinner color="$white" />
       ) : (
-        <ButtonText fontFamily="$body" color="$white">{props.title}</ButtonText>
+        <ButtonText fontFamily="$body" color="$white" mr="$3">{props.title}</ButtonText>
+        
       )}
     </GlueStackButton>
   );

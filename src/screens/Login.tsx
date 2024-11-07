@@ -12,10 +12,13 @@ import {
 } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
+import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { InputPassword } from "@components/InputPassWord";
 
-export function Login({ navigation }) {
+import { LoginScreenProps } from "src/@types/navigation/NavigationScreensTypes";
+
+export function Login({ navigation }: LoginScreenProps) {
   const [isInvalid, setIsInvalid] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -40,12 +43,13 @@ export function Login({ navigation }) {
         alignItems="center"
         justifyContent="center"
       >
+        <Header />
         <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
           <Heading mb="$12" size="3xl" fontFamily="$heading">
             Login
           </Heading>
           <Input
-            placeholder="email@empresa.com"
+            placeholder="email@email.com"
             messageError="Oi"
             textLabel="Email"
             value={inputValue}
@@ -58,15 +62,20 @@ export function Login({ navigation }) {
             textLabel="Senha"
           />
 
-          <Link mt="$6" onPress={() => navigation.navigate("SingUp")}>
-            <LinkText textAlign="right" fontFamily="$body">Esqueceu a senha?</LinkText>
+          <Link
+            mt="$6"
+            onPress={() => navigation.navigate("SingUpStepOne_Contacts")}
+          >
+            <LinkText textAlign="right" fontFamily="$body">
+              Esqueceu a senha?
+            </LinkText>
           </Link>
           <Button title="Entrar" onPress={handleSubmit} />
         </FormControl>
 
         <HStack mt="$12" space="xs" flex={1}>
           <Text fontFamily="$body">Não possui cadastro? </Text>
-          <Link onPress={() => navigation.navigate("SingUp")}>
+          <Link onPress={() => navigation.navigate("SingUpStepOne_Contacts")}>
             <LinkText fontFamily="$body">Criar Conta</LinkText>
           </Link>
         </HStack>
