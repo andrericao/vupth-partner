@@ -1,6 +1,6 @@
 import {
-	FormControlLabel,
-	FormControlLabelText,
+  FormControlLabel,
+  FormControlLabelText,
   Select as SelectGlueStack,
   SelectTrigger,
   SelectPortal,
@@ -14,11 +14,11 @@ import {
   ChevronDownIcon,
 } from "@gluestack-ui/themed";
 
-export function Select() {
+export function SelectService() {
   return (
     <SelectGlueStack mb="$3">
-			<FormControlLabel>
-        <FormControlLabelText>Cargo</FormControlLabelText>
+      <FormControlLabel>
+        <FormControlLabelText>Tipo de Loja</FormControlLabelText>
       </FormControlLabel>
       <SelectTrigger
         w="$full"
@@ -30,7 +30,7 @@ export function Select() {
         variant="outline"
         $focus-borderWidth="$2"
       >
-        <SelectInput placeholder="Selecionar opção" />
+        <SelectInput placeholder="Barbearia, Manicure etc" />
         <SelectIcon as={ChevronDownIcon} />
       </SelectTrigger>
       <SelectPortal>
@@ -39,9 +39,10 @@ export function Select() {
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
-          <SelectItem label="Proprietário" value="owner" />
-          <SelectItem label="Administrador" value="administrator" />
-          <SelectItem label="Profissional" value="professional" />
+          <SelectItem label="Barbearia" value="barbearia" />
+          <SelectItem label="Manicure" value="manicure" />
+          <SelectItem label="Salão de Beleza" value="salao_de_beleza" />
+          <SelectItem label="Sobrancelha" value="sobrancelha" />
         </SelectContent>
       </SelectPortal>
     </SelectGlueStack>

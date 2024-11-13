@@ -6,9 +6,9 @@ import {
   ChevronLeftIcon,
 } from "@gluestack-ui/themed";
 
-type GoBackButtonProps = ComponentProps<typeof GlueStackButton>;
+type ButtonGoBackProps = ComponentProps<typeof GlueStackButton>;
 
-export function GoBackButton(props: GoBackButtonProps) {
+export function ButtonGoBack(props: ButtonGoBackProps) {
   return (
     <ButtonGroup flex={1}>
       <GlueStackButton
@@ -18,7 +18,7 @@ export function GoBackButton(props: GoBackButtonProps) {
         w={39}
         h={39}
         bg="$green500"
-				{...props}
+        {...props}
       >
         <ButtonIcon borderRadius={30} size="xl" as={ChevronLeftIcon} />
       </GlueStackButton>

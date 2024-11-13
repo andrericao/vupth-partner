@@ -58,7 +58,6 @@ export function SingUpStepOne_Contacts({
             messageError="Test"
           />
 
-
           <Input
             placeholder="email@email.com"
             value={inputValue}

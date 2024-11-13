@@ -1,20 +1,11 @@
-// TODO? definir dados que pediremos para cadastro
-// tomar cuidado com dados pessoais
-// Refinar Select
-
 import { useState } from "react";
 
-import {
-  VStack,
-  FormControl,
-  Heading,
-  ScrollView,
-} from "@gluestack-ui/themed";
+import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
 
 import { Input } from "@components/Input";
 import { Header } from "@components/Header";
 import { StepsButton } from "@components/StepsButton";
-import { Select } from "@components/Select";
+import { SelectService } from "@components/SelectService";
 
 import { SingUpStepTrhee_AdminScreenProps } from "src/@types/navigation/NavigationScreensTypes";
 
@@ -59,7 +50,7 @@ export function SingUpStepTrhee_Admin({
             messageError="Test"
           />
 
-					<Select />
+          <SelectService />
 
           <StepsButton
             title="Loja"

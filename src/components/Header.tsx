@@ -4,7 +4,7 @@ import { HStack, Center } from "@gluestack-ui/themed";
 
 import Logo from "../assets/vupth-logo/people-waiting.svg";
 
-import { GoBackButton } from "@components/GoBackButton";
+import { ButtonGoBack } from "@components/ButtonGoBack";
 
 type Props = {
   showBackButton?: boolean;
@@ -15,7 +15,7 @@ export function Header({ showBackButton = false }: Props) {
 
   return (
     <HStack alignItems="center">
-      {showBackButton && <GoBackButton onPress={() => navigation.goBack()} />}
+      {showBackButton && <ButtonGoBack onPress={() => navigation.goBack()} />}
       <Center>
         <Logo width={50} height={50} />
       </Center>
