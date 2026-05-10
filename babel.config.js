@@ -8,13 +8,13 @@ module.exports = function (api) {
         {
           root: ["./src"],
           alias: {
-            "@assets": ".src/assets",
+            "@lib": "./src/lib",
+            "@store": "./src/store",
+            "@hooks": "./src/hooks",
             "@components": "./src/components",
-            "@routes": "./src/routes",
-            "@screens": "./src/screens",
-            "@storage": "./src/storage",
+            "@assets": "./src/assets",
             "@theme": "./src/theme",
-            "@utils": ".src/utils"
+            "@utils": "./src/utils",
           },
         },
       ],

@@ -1,27 +1,24 @@
 import { useState } from "react";
-
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
-
-import { Input } from "@components/Input";
+import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { StepsButton } from "@components/StepsButton";
+import { Input } from "@components/Input";
 import { SelectService } from "@components/SelectService";
+import { StepsButton } from "@components/StepsButton";
 
-import { SingUpStepTrhee_AdminScreenProps } from "src/@types/navigation/NavigationScreensTypes";
-
-export function SingUpStepTrhee_Admin({
-  navigation,
-}: SingUpStepTrhee_AdminScreenProps) {
+export default function EstablishmentScreen() {
+  const [name, setName] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
-  const [inputValue, setInputValue] = useState("");
 
-  const handleSubmit = () => {
-    if (inputValue.length < 6) {
+  const handleNext = () => {
+    if (!name.trim()) {
       setIsInvalid(true);
-    } else {
-      setIsInvalid(false);
+      return;
     }
+    setIsInvalid(false);
+    router.push("/(owner)/onboarding/address");
   };
+
   return (
     <ScrollView
       w="$full"
@@ -45,17 +42,14 @@ export function SingUpStepTrhee_Admin({
           <Input
             textLabel="Nome da Loja"
             placeholder="Rei do Corte LTDA"
-            //value={inputValue}
-            //onChangeText={(inputValue) => setInputValue(inputValue)}
-            messageError="Test"
+            messageError="Nome obrigatório"
+            value={name}
+            onChangeText={setName}
           />
 
           <SelectService />
 
-          <StepsButton
-            title="Loja"
-            onPress={() => navigation.navigate("SingUpStepTwo_Shop")}
-          />
+          <StepsButton title="Endereço" onPress={handleNext} />
         </FormControl>
       </VStack>
     </ScrollView>

@@ -3,8 +3,11 @@
     "name": "vupth-partner",
     "slug": "vupth-partner",
     "version": "1.0.0",
+    "scheme": "vupth-partner",
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-router",
+      "expo-secure-store"
     ],
     "userInterfaceStyle": "automatic"
   }
