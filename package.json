@@ -7,7 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -37,10 +37,30 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "jest-expo": "~51.0.0",
     "jscodeshift": "^0.15.2",
     "prettier": "^3.3.3",
     "react-native-svg-transformer": "^1.5.0"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@gluestack-ui/.*|@gluestack-style/.*|@legendapp/.*|@tanstack/.*|zustand|expo-router|expo-secure-store|expo-font|expo-status-bar)"
+    ],
+    "setupFilesAfterSetup": ["@testing-library/jest-native/extend-expect"],
+    "moduleNameMapper": {
+      "^@lib/(.*)$": "<rootDir>/src/lib/$1",
+      "^@store/(.*)$": "<rootDir>/src/store/$1",
+      "^@hooks/(.*)$": "<rootDir>/src/hooks/$1",
+      "^@components/(.*)$": "<rootDir>/src/components/$1",
+      "^@assets/(.*)$": "<rootDir>/src/assets/$1",
+      "^@theme/(.*)$": "<rootDir>/src/theme/$1",
+      "^@utils/(.*)$": "<rootDir>/src/utils/$1"
+    }
   },
   "private": true
 }
