@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { Slot } from "expo-router";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
@@ -13,10 +12,6 @@ import { Loading } from "@components/Loading";
 export default function RootLayout() {
   const [fontLoaded] = useFonts({ Inter_400Regular, Inter_700Bold });
 
-  if (!fontLoaded) {
-    return <Loading />;
-  }
-
   return (
     <GluestackUIProvider config={config}>
       <StatusBar
@@ -24,7 +19,7 @@ export default function RootLayout() {
         backgroundColor="transparent"
         translucent
       />
-      <Slot />
+      {fontLoaded ? <Slot /> : <Loading />}
     </GluestackUIProvider>
   );
 }

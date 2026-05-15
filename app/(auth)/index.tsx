@@ -31,6 +31,7 @@ export default function RoleChoiceScreen() {
           borderWidth="$1"
           borderColor="$green500"
           $active-bg="$coolGray100"
+          textColor="$green500"
         />
       </VStack>
     </VStack>

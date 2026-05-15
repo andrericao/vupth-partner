@@ -9,6 +9,7 @@ import {
 type ButtonProps = ComponentProps<typeof GlueStackButton> & {
   title?: string;
   isLoading?: boolean;
+  textColor?: string;
 };
 
 export function Button(props: ButtonProps) {
@@ -24,7 +25,7 @@ export function Button(props: ButtonProps) {
       {props.isLoading ? (
         <ButtonSpinner color="$white" />
       ) : (
-        <ButtonText fontFamily="$body" color="$white" mr="$3">{props.title}</ButtonText>
+        <ButtonText fontFamily="$body" color={props.textColor ?? "$white"} mr="$3">{props.title}</ButtonText>
         
       )}
     </GlueStackButton>

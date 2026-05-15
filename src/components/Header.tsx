@@ -1,6 +1,5 @@
 import { router } from "expo-router";
-import { HStack, Center } from "@gluestack-ui/themed";
-import Logo from "../assets/vupth-logo/people-waiting.svg";
+import { HStack, Center, Heading } from "@gluestack-ui/themed";
 import { ButtonGoBack } from "@components/ButtonGoBack";
 
 type Props = {
@@ -12,7 +11,9 @@ export function Header({ showBackButton = false }: Props) {
     <HStack alignItems="center">
       {showBackButton && <ButtonGoBack onPress={() => router.back()} />}
       <Center>
-        <Logo width={50} height={50} />
+        <Heading size="xl" fontFamily="$heading" color="$green700">
+          VUPTH
+        </Heading>
       </Center>
     </HStack>
   );

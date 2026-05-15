@@ -1,3 +1,6 @@
+import MockAdapter from "axios-mock-adapter";
+import * as SecureStore from "expo-secure-store";
+import { api } from "@lib/api";
 import { useAuthStore } from "../auth.store";
 
 jest.mock("expo-secure-store", () => ({
@@ -6,14 +9,7 @@ jest.mock("expo-secure-store", () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-jest.mock("@lib/api", () => ({
-  api: {
-    post: jest.fn(),
-  },
-}));
-
-import * as SecureStore from "expo-secure-store";
-import { api } from "@lib/api";
+const mock = new MockAdapter(api);
 
 function makeToken(payload: object): string {
   const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
@@ -21,44 +17,91 @@ function makeToken(payload: object): string {
   return `${header}.${body}.fake`;
 }
 
+const CLIENT_TOKEN = makeToken({
+  sub: "uuid-1",
+  email: "owner@test.com",
+  roles: ["CLIENT"],
+  exp: 9999999999,
+});
+
+const OWNER_TOKEN = makeToken({
+  sub: "uuid-1",
+  email: "owner@test.com",
+  roles: ["CLIENT", "OWNER"],
+  exp: 9999999999,
+});
+
+const PROFESSIONAL_TOKEN = makeToken({
+  sub: "uuid-2",
+  email: "prof@test.com",
+  roles: ["CLIENT", "PROFESSIONAL"],
+  exp: 9999999999,
+});
+
 beforeEach(() => {
   useAuthStore.setState({
     user: null,
     isAuthenticated: false,
     isLoading: true,
   });
+  mock.reset();
   jest.clearAllMocks();
 });
 
 describe("auth.store", () => {
-  describe("login", () => {
-    it("saves tokens and sets user on successful login", async () => {
-      const accessToken = makeToken({
-        sub: "uuid-1",
-        email: "test@email.com",
-        roles: ["CLIENT", "OWNER"],
-        exp: 9999999999,
+  describe("register", () => {
+    it("calls POST /auth/register with email and password", async () => {
+      mock.onPost("/auth/register").reply(201);
+
+      await useAuthStore.getState().register("new@test.com", "Senha@123");
+
+      expect(mock.history.post[0].url).toBe("/auth/register");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({
+        email: "new@test.com",
+        password: "Senha@123",
+      });
+    });
+
+    it("throws on 422 validation error", async () => {
+      mock.onPost("/auth/register").reply(422, {
+        status: 422,
+        code: "VALIDATION_ERROR",
+        message: "Field validation error",
+        fieldErrors: { email: "must be a valid email" },
       });
 
-      (api.post as jest.Mock).mockResolvedValue({
-        data: {
-          user: { id: "uuid-1", email: "test@email.com" },
-          tokens: {
-            access_token: accessToken,
-            refresh_token: "refresh-abc",
-          },
+      await expect(
+        useAuthStore.getState().register("invalid", "Senha@123")
+      ).rejects.toThrow();
+    });
+
+    it("does not change auth state after register (register only creates account)", async () => {
+      mock.onPost("/auth/register").reply(201);
+
+      await useAuthStore.getState().register("new@test.com", "Senha@123");
+
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.user).toBeNull();
+    });
+  });
+
+  describe("login", () => {
+    it("saves tokens and sets user with roles on success", async () => {
+      mock.onPost("/auth/login").reply(200, {
+        user: { id: "uuid-1", email: "owner@test.com" },
+        tokens: {
+          access_token: CLIENT_TOKEN,
+          refresh_token: "refresh-abc",
+          expires_in: 604799,
         },
       });
 
-      await useAuthStore.getState().login("test@email.com", "Senha@123");
+      await useAuthStore.getState().login("owner@test.com", "Senha@123");
 
-      expect(api.post).toHaveBeenCalledWith("/auth/login", {
-        email: "test@email.com",
-        password: "Senha@123",
-      });
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
         "vupth_access_token",
-        accessToken
+        CLIENT_TOKEN
       );
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
         "vupth_refresh_token",
@@ -67,19 +110,113 @@ describe("auth.store", () => {
 
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(true);
-      expect(state.user?.id).toBe("uuid-1");
-      expect(state.user?.roles).toEqual(["CLIENT", "OWNER"]);
+      expect(state.user).toEqual({
+        id: "uuid-1",
+        email: "owner@test.com",
+        roles: ["CLIENT"],
+      });
+    });
+
+    it("throws on 401 invalid credentials", async () => {
+      mock.onPost("/auth/login").reply(401, {
+        status: 401,
+        message: "Invalid credentials",
+      });
+
+      await expect(
+        useAuthStore.getState().login("wrong@test.com", "wrong")
+      ).rejects.toThrow();
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    });
+
+    it("extracts OWNER roles from token after login", async () => {
+      mock.onPost("/auth/login").reply(200, {
+        user: { id: "uuid-1", email: "owner@test.com" },
+        tokens: {
+          access_token: OWNER_TOKEN,
+          refresh_token: "refresh-xyz",
+          expires_in: 604799,
+        },
+      });
+
+      await useAuthStore.getState().login("owner@test.com", "Senha@123");
+
+      expect(useAuthStore.getState().user?.roles).toEqual([
+        "CLIENT",
+        "OWNER",
+      ]);
+    });
+
+    it("extracts PROFESSIONAL roles from token after login", async () => {
+      mock.onPost("/auth/login").reply(200, {
+        user: { id: "uuid-2", email: "prof@test.com" },
+        tokens: {
+          access_token: PROFESSIONAL_TOKEN,
+          refresh_token: "refresh-prof",
+          expires_in: 604799,
+        },
+      });
+
+      await useAuthStore.getState().login("prof@test.com", "Senha@123");
+
+      expect(useAuthStore.getState().user?.roles).toEqual([
+        "CLIENT",
+        "PROFESSIONAL",
+      ]);
+    });
+  });
+
+  describe("refreshToken", () => {
+    it("updates tokens and roles after gaining OWNER role", async () => {
+      useAuthStore.setState({
+        user: { id: "uuid-1", email: "owner@test.com", roles: ["CLIENT"] },
+        isAuthenticated: true,
+      });
+
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("old-refresh");
+
+      mock.onPost("/auth/refresh").reply(200, {
+        tokens: {
+          access_token: OWNER_TOKEN,
+          refresh_token: "new-refresh",
+        },
+      });
+
+      await useAuthStore.getState().refreshToken();
+
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        "vupth_access_token",
+        OWNER_TOKEN
+      );
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        "vupth_refresh_token",
+        "new-refresh"
+      );
+
+      expect(useAuthStore.getState().user?.roles).toEqual([
+        "CLIENT",
+        "OWNER",
+      ]);
+    });
+
+    it("does nothing when no refresh token stored", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+
+      await useAuthStore.getState().refreshToken();
+
+      expect(mock.history.post.length).toBe(0);
     });
   });
 
   describe("logout", () => {
-    it("clears tokens and resets state", async () => {
+    it("calls POST /auth/logout, clears tokens and resets state", async () => {
       useAuthStore.setState({
-        user: { id: "uuid-1", email: "test@email.com", roles: ["CLIENT"] },
+        user: { id: "uuid-1", email: "test@test.com", roles: ["CLIENT"] },
         isAuthenticated: true,
       });
 
-      (api.post as jest.Mock).mockResolvedValue({});
+      mock.onPost("/auth/logout").reply(204);
 
       await useAuthStore.getState().logout();
 
@@ -94,26 +231,35 @@ describe("auth.store", () => {
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
     });
+
+    it("still clears local state even if logout API fails", async () => {
+      useAuthStore.setState({
+        user: { id: "uuid-1", email: "test@test.com", roles: ["CLIENT"] },
+        isAuthenticated: true,
+      });
+
+      mock.onPost("/auth/logout").networkError();
+
+      await useAuthStore.getState().logout();
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+      expect(useAuthStore.getState().user).toBeNull();
+    });
   });
 
   describe("loadStoredTokens", () => {
-    it("sets authenticated when token exists", async () => {
-      const token = makeToken({
-        sub: "uuid-1",
-        email: "t@t.com",
-        roles: ["CLIENT"],
-        exp: 9999999999,
-      });
-      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(token);
+    it("restores session when valid token exists", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(OWNER_TOKEN);
 
       await useAuthStore.getState().loadStoredTokens();
 
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(true);
+      expect(state.user?.roles).toEqual(["CLIENT", "OWNER"]);
       expect(state.isLoading).toBe(false);
     });
 
-    it("stays unauthenticated when no token", async () => {
+    it("stays unauthenticated when no token stored", async () => {
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
 
       await useAuthStore.getState().loadStoredTokens();
