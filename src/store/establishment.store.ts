@@ -59,6 +59,7 @@ type EstablishmentState = {
     price: number
   ) => Promise<ServiceItemResponse>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
+  reset: () => void;
 };
 
 export const useEstablishmentStore = create<EstablishmentState>((set) => ({
@@ -111,4 +112,6 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     const { data } = await api.get("/establishment", { params });
     return data;
   },
+
+  reset: () => set({ establishment: null, isLoading: false, error: null }),
 }));

@@ -9,6 +9,20 @@ jest.mock("expo-secure-store", () => ({
   deleteItemAsync: jest.fn(),
 }));
 
+const mockEstablishmentReset = jest.fn();
+jest.mock("@store/establishment.store", () => ({
+  useEstablishmentStore: {
+    getState: () => ({ reset: mockEstablishmentReset }),
+  },
+}));
+
+const mockProfessionalReset = jest.fn();
+jest.mock("@store/professional.store", () => ({
+  useProfessionalStore: {
+    getState: () => ({ reset: mockProfessionalReset }),
+  },
+}));
+
 const mock = new MockAdapter(api);
 
 function makeToken(payload: object): string {
@@ -208,7 +222,7 @@ describe("auth.store", () => {
   });
 
   describe("logout", () => {
-    it("calls POST /auth/logout, clears tokens and resets state", async () => {
+    it("calls POST /auth/logout, clears tokens and resets all stores", async () => {
       useAuthStore.setState({
         user: { id: "uuid-1", email: "test@test.com", roles: ["CLIENT"] },
         isAuthenticated: true,
@@ -228,6 +242,8 @@ describe("auth.store", () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
       expect(state.user).toBeNull();
+      expect(mockEstablishmentReset).toHaveBeenCalled();
+      expect(mockProfessionalReset).toHaveBeenCalled();
     });
 
     it("still clears local state even if logout API fails", async () => {

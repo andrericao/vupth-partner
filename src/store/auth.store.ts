@@ -2,6 +2,8 @@ import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import { getRolesFromToken } from "@lib/jwt";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { useProfessionalStore } from "@store/professional.store";
 
 type User = {
   id: string;
@@ -81,6 +83,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     await SecureStore.deleteItemAsync("vupth_access_token");
     await SecureStore.deleteItemAsync("vupth_refresh_token");
+
+    useEstablishmentStore.getState().reset();
+    useProfessionalStore.getState().reset();
 
     set({ user: null, isAuthenticated: false });
   },

@@ -18,6 +18,7 @@ type ProfessionalState = {
 
   register: (name: string, specialty?: string) => Promise<void>;
   affiliate: (establishmentId: string) => Promise<void>;
+  reset: () => void;
 };
 
 export const useProfessionalStore = create<ProfessionalState>((set) => ({
@@ -45,4 +46,6 @@ export const useProfessionalStore = create<ProfessionalState>((set) => ({
 
     set({ professional: data, isLoading: false });
   },
+
+  reset: () => set({ professional: null, isLoading: false, error: null }),
 }));
