@@ -1,0 +1,16 @@
+appId: host.exp.exponent
+---
+# Fluxo: Abrir Establishment (toggle CLOSED → OPEN)
+# Pré-condição: dashboard com establishment FECHADO
+# Pós-condição: dashboard com establishment ABERTO
+
+- assertVisible: "FECHADO"
+- tapOn: "Abrir Estabelecimento"
+
+# Aguarda status mudar
+- assertVisible:
+    text: "ABERTO"
+    timeout: 10000
+
+# Verifica que o botão agora diz "Fechar"
+- assertVisible: "Fechar Estabelecimento"

@@ -1,0 +1,34 @@
+appId: host.exp.exponent
+---
+# Fluxo: Adicionar Profissional
+# Pré-condição: dashboard com establishment
+# Pós-condição: volta ao dashboard após profissional criado
+
+- assertVisible: "Adicionar Profissional"
+- tapOn: "Adicionar Profissional"
+
+# Tela de novo profissional
+- assertVisible:
+    text: "Novo Profissional"
+    timeout: 5000
+
+# Preencher nome
+- tapOn: "Nome do profissional"
+- inputText: "Carlos Barbeiro"
+- hideKeyboard
+
+# Especialidade já vem BARBER selecionado — manter padrão
+
+# Submeter
+- tapOn: "Adicionar Profissional"
+
+# Alert de sucesso
+- assertVisible:
+    text: "Profissional criado"
+    timeout: 10000
+- tapOn: "OK"
+
+# Volta ao dashboard
+- assertVisible:
+    text: "Barbearia Maestro Test"
+    timeout: 5000

@@ -177,10 +177,8 @@ describe("auth.store", () => {
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("old-refresh");
 
       mock.onPost("/auth/refresh").reply(200, {
-        tokens: {
-          access_token: OWNER_TOKEN,
-          refresh_token: "new-refresh",
-        },
+        access_token: OWNER_TOKEN,
+        refresh_token: "new-refresh",
       });
 
       await useAuthStore.getState().refreshToken();

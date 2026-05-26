@@ -1,0 +1,30 @@
+appId: host.exp.exponent
+---
+# Fluxo: Criar Establishment
+# Pré-condição: tela "Dados da Loja" (após register como owner)
+# Pós-condição: dashboard com establishment criado
+
+- assertVisible: "Dados da Loja"
+
+# Preencher nome
+- tapOn: "Rei do Corte LTDA"
+- inputText: "Barbearia Maestro Test"
+- hideKeyboard
+
+# Selecionar tipo (Gluestack Select — tap no trigger, depois no item)
+- tapOn: "Barbearia, Salão etc"
+- assertVisible: "Barbearia"
+- tapOn:
+    text: "Barbearia"
+    index: 0
+
+# Criar
+- tapOn: "Criar Estabelecimento"
+
+# Aguarda dashboard
+- assertVisible:
+    text: "Barbearia Maestro Test"
+    timeout: 10000
+
+# Verifica que está FECHADO (establishment nasce CLOSED)
+- assertVisible: "FECHADO"

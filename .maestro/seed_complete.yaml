@@ -1,0 +1,495 @@
+appId: host.exp.exponent
+---
+# VUPTH Partner — SEED COMPLETO para E2E
+# Cria 4 establishments, 4 professionals (via owner), 2 professionals (self-register + affiliate).
+# Nomes com sufixo unico por execucao (ultimos 5 digitos do timestamp).
+# Rodar: maestro test .maestro/seed_complete.yaml
+
+- evalScript: ${output.TAG = Date.now().toString().slice(-5)}
+
+# ============================================================
+# OWNER 1 — Barbearia (BARBER)
+# ============================================================
+
+- evalScript: ${output.EMAIL1 = 'barber-' + Date.now() + '@test.dev'}
+- evalScript: ${output.EST1 = 'Barbearia ' + output.TAG}
+- evalScript: ${output.P1 = 'Carlos ' + output.TAG}
+
+- assertVisible: "Como deseja usar o VUPTH?"
+- tapOn: "Sou dono de estabelecimento"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.EMAIL1}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Dados da Loja"
+
+# Create Establishment
+- tapOn: "Rei do Corte LTDA"
+- inputText: "${output.EST1}"
+- hideKeyboard
+- tapOn: "Barbearia"
+- tapOn: "Criar Estabelecimento"
+- assertVisible: "${output.EST1}"
+
+# Open
+- tapOn: "Abrir Estabelecimento"
+- assertVisible: "ABERTO"
+
+# Professional 1: Carlos
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Novo Profissional"
+- tapOn: "Nome do profissional"
+- inputText: "${output.P1}"
+- hideKeyboard
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Profissional criado"
+- tapOn: "OK"
+- assertVisible: "${output.EST1}"
+
+# Service 1: Corte a maquina R$30 (default, no type tap needed)
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn:
+    id: "service-custom-name"
+- inputText: "Corte Degrade"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "30"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+- assertVisible: "${output.EST1}"
+
+# Service 2: Barba R$25
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn: "Barba"
+- tapOn:
+    id: "service-custom-name"
+- eraseText: 30
+- inputText: "Barba Completa"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "25"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+- assertVisible: "${output.EST1}"
+
+# Service 3: Corte Tesoura R$40
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- scrollUntilVisible:
+    element: "Corte à tesoura"
+    direction: DOWN
+- tapOn: "Corte à tesoura"
+- tapOn:
+    id: "service-custom-name"
+- eraseText: 30
+- inputText: "Corte Tesoura Premium"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "40"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+
+# Logout
+- assertVisible: "${output.EST1}"
+- scrollUntilVisible:
+    element: "Sair"
+    direction: DOWN
+- tapOn: "Sair"
+- assertVisible: "Como deseja usar o VUPTH?"
+
+# ============================================================
+# OWNER 2 — Salao (BEAUTY_SALON)
+# ============================================================
+
+- evalScript: ${output.EMAIL2 = 'salon-' + Date.now() + '@test.dev'}
+- evalScript: ${output.EST2 = 'Salao ' + output.TAG}
+- evalScript: ${output.P2 = 'Ana ' + output.TAG}
+
+- tapOn: "Sou dono de estabelecimento"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.EMAIL2}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Dados da Loja"
+
+# Create Establishment
+- tapOn: "Rei do Corte LTDA"
+- inputText: "${output.EST2}"
+- hideKeyboard
+- tapOn: "Salão de Beleza"
+- tapOn: "Criar Estabelecimento"
+- assertVisible: "${output.EST2}"
+
+# Open
+- tapOn: "Abrir Estabelecimento"
+- assertVisible: "ABERTO"
+
+# Professional: Ana
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Novo Profissional"
+- tapOn: "Nome do profissional"
+- inputText: "${output.P2}"
+- hideKeyboard
+- tapOn: "Cabeleireiro(a)"
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Profissional criado"
+- tapOn: "OK"
+- assertVisible: "${output.EST2}"
+
+# Service 1: Recorte das pontas R$45 (default for BEAUTY_SALON)
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn:
+    id: "service-custom-name"
+- inputText: "Recorte Pontas"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "45"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+- assertVisible: "${output.EST2}"
+
+# Service 2: Escova R$60
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn: "Escova"
+- tapOn:
+    id: "service-custom-name"
+- eraseText: 30
+- inputText: "Escova Modeladora"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "60"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+
+# Logout
+- assertVisible: "${output.EST2}"
+- scrollUntilVisible:
+    element: "Sair"
+    direction: DOWN
+- tapOn: "Sair"
+- assertVisible: "Como deseja usar o VUPTH?"
+
+# ============================================================
+# OWNER 3 — Nail Studio (NAIL_SALON)
+# ============================================================
+
+- evalScript: ${output.EMAIL3 = 'nail-' + Date.now() + '@test.dev'}
+- evalScript: ${output.EST3 = 'NailStudio ' + output.TAG}
+- evalScript: ${output.P3 = 'Fernanda ' + output.TAG}
+
+- tapOn: "Sou dono de estabelecimento"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.EMAIL3}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Dados da Loja"
+
+# Create Establishment
+- tapOn: "Rei do Corte LTDA"
+- inputText: "${output.EST3}"
+- hideKeyboard
+- tapOn: "Manicure / Pedicure"
+- tapOn: "Criar Estabelecimento"
+- assertVisible: "${output.EST3}"
+
+# Open
+- tapOn: "Abrir Estabelecimento"
+- assertVisible: "ABERTO"
+
+# Professional: Fernanda
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Novo Profissional"
+- tapOn: "Nome do profissional"
+- inputText: "${output.P3}"
+- hideKeyboard
+- tapOn: "Manicure"
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Profissional criado"
+- tapOn: "OK"
+- assertVisible: "${output.EST3}"
+
+# Service 1: Manicure Gel R$45
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- scrollUntilVisible:
+    element: "Manicure"
+    direction: DOWN
+- tapOn:
+    text: "Manicure"
+    index: 0
+- tapOn:
+    id: "service-custom-name"
+- eraseText: 30
+- inputText: "Manicure Gel"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "45"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+- assertVisible: "${output.EST3}"
+
+# Service 2: Pedicure Completa R$50
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- scrollUntilVisible:
+    element: "Pedicure"
+    direction: DOWN
+- tapOn: "Pedicure"
+- tapOn:
+    id: "service-custom-name"
+- eraseText: 30
+- inputText: "Pedicure Completa"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "50"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+
+# Logout
+- assertVisible: "${output.EST3}"
+- scrollUntilVisible:
+    element: "Sair"
+    direction: DOWN
+- tapOn: "Sair"
+- assertVisible: "Como deseja usar o VUPTH?"
+
+# ============================================================
+# OWNER 4 — SPA (SPA)
+# ============================================================
+
+- evalScript: ${output.EMAIL4 = 'spa-' + Date.now() + '@test.dev'}
+- evalScript: ${output.EST4 = 'SPA ' + output.TAG}
+- evalScript: ${output.P4 = 'Juliana ' + output.TAG}
+
+- tapOn: "Sou dono de estabelecimento"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.EMAIL4}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Dados da Loja"
+
+# Create Establishment
+- tapOn: "Rei do Corte LTDA"
+- inputText: "${output.EST4}"
+- hideKeyboard
+- tapOn: "SPA"
+- tapOn: "Criar Estabelecimento"
+- assertVisible: "${output.EST4}"
+
+# Open
+- tapOn: "Abrir Estabelecimento"
+- assertVisible: "ABERTO"
+
+# Professional: Juliana
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Novo Profissional"
+- tapOn: "Nome do profissional"
+- inputText: "${output.P4}"
+- hideKeyboard
+- tapOn: "Massagista"
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Profissional criado"
+- tapOn: "OK"
+- assertVisible: "${output.EST4}"
+
+# Service 1: Massagem relaxante R$120 (default for SPA)
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn:
+    id: "service-custom-name"
+- inputText: "Massagem Relaxante"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "120"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+- assertVisible: "${output.EST4}"
+
+# Service 2: Depilacao R$80
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn: "Depilação"
+- tapOn:
+    id: "service-custom-name"
+- eraseText: 30
+- inputText: "Depilacao Completa"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "80"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+
+# Logout
+- assertVisible: "${output.EST4}"
+- scrollUntilVisible:
+    element: "Sair"
+    direction: DOWN
+- tapOn: "Sair"
+- assertVisible: "Como deseja usar o VUPTH?"
+
+# ============================================================
+# PROFESSIONAL 1 — afilia a Barbearia (EST1)
+# ============================================================
+
+- evalScript: ${output.PE1 = 'profbarber-' + Date.now() + '@test.dev'}
+- evalScript: ${output.P5 = 'Ricardo ' + output.TAG}
+
+- tapOn: "Sou profissional"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.PE1}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Cadastro Profissional"
+
+# Profile step
+- tapOn:
+    id: "professional-name"
+- inputText: "${output.P5}"
+- hideKeyboard
+- tapOn: "Barbeiro"
+- tapOn: "Continuar"
+
+# Search step
+- assertVisible: "Buscar Estabelecimento"
+- tapOn:
+    id: "search-establishment"
+- inputText: "${output.EST1}"
+- hideKeyboard
+- tapOn: "Buscar"
+- assertVisible: "${output.EST1}"
+
+# Select and confirm
+- tapOn: "${output.EST1}"
+- assertVisible: "Confirmar Vinculacao"
+- tapOn: "Confirmar e Afiliar"
+- assertVisible: "Minha Fila"
+
+# Logout
+- tapOn: "Sair"
+- assertVisible: "Como deseja usar o VUPTH?"
+
+# ============================================================
+# PROFESSIONAL 2 — afilia ao Salao (EST2)
+# ============================================================
+
+- evalScript: ${output.PE2 = 'profsalon-' + Date.now() + '@test.dev'}
+- evalScript: ${output.P6 = 'Lucia ' + output.TAG}
+
+- tapOn: "Sou profissional"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.PE2}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Cadastro Profissional"
+
+# Profile step
+- tapOn:
+    id: "professional-name"
+- inputText: "${output.P6}"
+- hideKeyboard
+- tapOn: "Cabeleireiro(a)"
+- tapOn: "Continuar"
+
+# Search step
+- assertVisible: "Buscar Estabelecimento"
+- tapOn:
+    id: "search-establishment"
+- inputText: "${output.EST2}"
+- hideKeyboard
+- tapOn: "Buscar"
+- assertVisible: "${output.EST2}"
+
+# Select and confirm
+- tapOn: "${output.EST2}"
+- assertVisible: "Confirmar Vinculacao"
+- tapOn: "Confirmar e Afiliar"
+- assertVisible: "Minha Fila"
+
+# Logout
+- tapOn: "Sair"
+- assertVisible: "Como deseja usar o VUPTH?"

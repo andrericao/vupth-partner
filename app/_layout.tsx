@@ -1,5 +1,7 @@
-import { StatusBar } from "react-native";
+import { StatusBar, LogBox } from "react-native";
 import { Slot } from "expo-router";
+
+LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "../config/gluestack-ui.config";
 import {

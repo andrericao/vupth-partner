@@ -1,0 +1,34 @@
+appId: host.exp.exponent
+---
+# Fluxo: Register como Owner
+# Pré-condição: app aberto na tela inicial (escolha de papel)
+# Pós-condição: tela de onboarding establishment
+
+# Gera email único por execução
+- runScript:
+    file: ../helpers/generate_email.js
+    env:
+      PREFIX: "owner"
+    outputs:
+      EMAIL: EMAIL
+
+# Tela de escolha de papel
+- assertVisible: "Como deseja usar o VUPTH?"
+- tapOn: "Sou dono de estabelecimento"
+
+# Tela de cadastro
+- assertVisible: "Cadastrar"
+- tapOn: "email@email.com"
+- inputText: "${output.EMAIL}"
+- hideKeyboard
+- tapOn:
+    text: "senha"
+    index: 0
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+
+# Aguarda redirect para onboarding establishment
+- assertVisible:
+    text: "Dados da Loja"
+    timeout: 10000

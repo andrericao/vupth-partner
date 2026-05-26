@@ -1,0 +1,39 @@
+appId: host.exp.exponent
+---
+# Fluxo: Adicionar Serviço
+# Pré-condição: dashboard com establishment
+# Pós-condição: volta ao dashboard após serviço criado
+
+- assertVisible: "Adicionar Serviço"
+- tapOn: "Adicionar Serviço"
+
+# Tela de novo serviço
+- assertVisible:
+    text: "Novo Serviço"
+    timeout: 5000
+
+# Tipo já vem CORTE_MAQUINA selecionado — manter
+
+# Preencher nome personalizado (auto-fill pode já ter "Corte Máquina")
+- tapOn: "Ex: Corte Social"
+- inputText: "Corte Simples"
+- hideKeyboard
+
+# Preencher preço
+- tapOn: "35.00"
+- inputText: "35"
+- hideKeyboard
+
+# Submeter
+- tapOn: "Adicionar Serviço"
+
+# Alert de sucesso
+- assertVisible:
+    text: "Serviço adicionado"
+    timeout: 10000
+- tapOn: "OK"
+
+# Volta ao dashboard
+- assertVisible:
+    text: "Barbearia Maestro Test"
+    timeout: 5000

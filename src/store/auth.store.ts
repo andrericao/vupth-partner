@@ -60,14 +60,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     await SecureStore.setItemAsync(
       "vupth_access_token",
-      data.tokens.access_token
+      data.access_token
     );
     await SecureStore.setItemAsync(
       "vupth_refresh_token",
-      data.tokens.refresh_token
+      data.refresh_token
     );
 
-    const roles = getRolesFromToken(data.tokens.access_token);
+    const roles = getRolesFromToken(data.access_token);
 
     set((state) => ({
       user: state.user ? { ...state.user, roles } : null,

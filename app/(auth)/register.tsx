@@ -89,6 +89,7 @@ export default function RegisterScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            testID="register-email"
           />
 
           <InputPassword
@@ -97,6 +98,7 @@ export default function RegisterScreen() {
             messageError="Mínimo 6 caracteres"
             value={password}
             onChangeText={setPassword}
+            testID="register-password"
           />
 
           <Button

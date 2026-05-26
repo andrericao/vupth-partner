@@ -1,22 +1,52 @@
 import { useState } from "react";
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { SelectService } from "@components/SelectService";
-import { StepsButton } from "@components/StepsButton";
+import { Button } from "@components/Button";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { useAuthStore } from "@store/auth.store";
 
 export default function EstablishmentScreen() {
   const [name, setName] = useState("");
+  const [serviceType, setServiceType] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleNext = () => {
-    if (!name.trim()) {
+  const quickCreate = useEstablishmentStore((s) => s.quickCreate);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !serviceType) {
       setIsInvalid(true);
       return;
     }
+
     setIsInvalid(false);
-    router.push("/(owner)/onboarding/address");
+    setIsLoading(true);
+
+    try {
+      await quickCreate(name.trim(), serviceType);
+
+      try {
+        await refreshToken();
+      } catch {}
+
+      router.replace("/(owner)/dashboard" as any);
+    } catch (error: any) {
+      const code = error?.response?.data?.code;
+      if (code === "VALIDATION_ERROR") {
+        const fieldErrors = error.response.data.fieldErrors;
+        const msg = Object.values(fieldErrors).join("\n");
+        Alert.alert("Erro de validação", msg);
+      } else {
+        Alert.alert("Erro", "Não foi possível criar o estabelecimento. Tente novamente.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -47,9 +77,13 @@ export default function EstablishmentScreen() {
             onChangeText={setName}
           />
 
-          <SelectService />
+          <SelectService value={serviceType} onValueChange={setServiceType} />
 
-          <StepsButton title="Endereço" onPress={handleNext} />
+          <Button
+            title="Criar Estabelecimento"
+            onPress={handleSubmit}
+            isLoading={isLoading}
+          />
         </FormControl>
       </VStack>
     </ScrollView>
