@@ -36,14 +36,14 @@ api.interceptors.response.use(
 
         await SecureStore.setItemAsync(
           "vupth_access_token",
-          data.tokens.access_token
+          data.access_token
         );
         await SecureStore.setItemAsync(
           "vupth_refresh_token",
-          data.tokens.refresh_token
+          data.refresh_token
         );
 
-        originalRequest.headers.Authorization = `Bearer ${data.tokens.access_token}`;
+        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
         return api(originalRequest);
       } catch {
         await SecureStore.deleteItemAsync("vupth_access_token");

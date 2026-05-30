@@ -192,31 +192,32 @@ export default function ProfessionalOnboardingScreen() {
         <VStack flex={1} py="$12" px="$6">
           <Header showBackButton />
 
-          <Heading mt="$12" mb="$4" size="2xl" fontFamily="$heading">
-            Buscar Estabelecimento
-          </Heading>
+          <FormControl flex={1} mt="$12">
+            <Heading mb="$4" size="2xl" fontFamily="$heading">
+              Buscar Estabelecimento
+            </Heading>
 
-          <Text fontFamily="$body" mb="$6" color="$coolGray600">
-            Busque o estabelecimento onde voce vai trabalhar.
-          </Text>
+            <Text fontFamily="$body" mb="$6" color="$coolGray600">
+              Busque o estabelecimento onde voce vai trabalhar.
+            </Text>
 
-          <HStack space="sm" mb="$4" alignItems="center">
-            <VStack flex={1}>
-              <Input
-                textLabel=""
-                placeholder="Nome do estabelecimento"
-                messageError=""
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                testID="search-establishment"
+            <HStack space="sm" mb="$4" alignItems="center">
+              <VStack flex={1}>
+                <Input
+                  textLabel=""
+                  placeholder="Nome do estabelecimento"
+                  messageError=""
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  testID="search-establishment"
+                />
+              </VStack>
+              <Button
+                title="Buscar"
+                onPress={handleSearch}
+                isLoading={isSearching}
               />
-            </VStack>
-            <Button
-              title="Buscar"
-              onPress={handleSearch}
-              isLoading={isSearching}
-            />
-          </HStack>
+            </HStack>
 
           {isSearching && <Spinner color="$green500" size="large" />}
 
@@ -225,6 +226,7 @@ export default function ProfessionalOnboardingScreen() {
               {searchResults.map((estab) => (
                 <Pressable
                   key={estab.id}
+                  testID="establishment-card"
                   onPress={() => handleSelectEstablishment(estab)}
                   bg="$white"
                   py="$3"
@@ -258,6 +260,7 @@ export default function ProfessionalOnboardingScreen() {
               Nenhum estabelecimento encontrado.
             </Text>
           )}
+          </FormControl>
         </VStack>
       </ScrollView>
     );

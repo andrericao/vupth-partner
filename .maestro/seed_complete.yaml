@@ -12,7 +12,7 @@ appId: host.exp.exponent
 # ============================================================
 
 - evalScript: ${output.EMAIL1 = 'barber-' + Date.now() + '@test.dev'}
-- evalScript: ${output.EST1 = 'Barbearia ' + output.TAG}
+- evalScript: ${output.EST1 = 'Corte Real ' + output.TAG}
 - evalScript: ${output.P1 = 'Carlos ' + output.TAG}
 
 - assertVisible: "Como deseja usar o VUPTH?"
@@ -121,11 +121,11 @@ appId: host.exp.exponent
 - assertVisible: "Como deseja usar o VUPTH?"
 
 # ============================================================
-# OWNER 2 — Salao (BEAUTY_SALON)
+# OWNER 2 — BeautySalon (BEAUTY_SALON)
 # ============================================================
 
 - evalScript: ${output.EMAIL2 = 'salon-' + Date.now() + '@test.dev'}
-- evalScript: ${output.EST2 = 'Salao ' + output.TAG}
+- evalScript: ${output.EST2 = 'Tesoura de Ouro ' + output.TAG}
 - evalScript: ${output.P2 = 'Ana ' + output.TAG}
 
 - tapOn: "Sou dono de estabelecimento"
@@ -215,7 +215,7 @@ appId: host.exp.exponent
 # ============================================================
 
 - evalScript: ${output.EMAIL3 = 'nail-' + Date.now() + '@test.dev'}
-- evalScript: ${output.EST3 = 'NailStudio ' + output.TAG}
+- evalScript: ${output.EST3 = 'Unhas de Cristal ' + output.TAG}
 - evalScript: ${output.P3 = 'Fernanda ' + output.TAG}
 
 - tapOn: "Sou dono de estabelecimento"
@@ -315,7 +315,7 @@ appId: host.exp.exponent
 # ============================================================
 
 - evalScript: ${output.EMAIL4 = 'spa-' + Date.now() + '@test.dev'}
-- evalScript: ${output.EST4 = 'SPA ' + output.TAG}
+- evalScript: ${output.EST4 = 'Zen Vida Nova ' + output.TAG}
 - evalScript: ${output.P4 = 'Juliana ' + output.TAG}
 
 - tapOn: "Sou dono de estabelecimento"
@@ -437,8 +437,8 @@ appId: host.exp.exponent
 - tapOn: "Buscar"
 - assertVisible: "${output.EST1}"
 
-# Select and confirm
-- tapOn: "${output.EST1}"
+# Select and confirm — tapa no texto do service type (unico no card)
+- tapOn: "BARBER"
 - assertVisible: "Confirmar Vinculacao"
 - tapOn: "Confirmar e Afiliar"
 - assertVisible: "Minha Fila"
@@ -484,8 +484,8 @@ appId: host.exp.exponent
 - tapOn: "Buscar"
 - assertVisible: "${output.EST2}"
 
-# Select and confirm
-- tapOn: "${output.EST2}"
+# Select and confirm — tapa no texto do service type (unico no card)
+- tapOn: "BEAUTY_SALON"
 - assertVisible: "Confirmar Vinculacao"
 - tapOn: "Confirmar e Afiliar"
 - assertVisible: "Minha Fila"

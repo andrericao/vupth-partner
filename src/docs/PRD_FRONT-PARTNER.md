@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-05-26
+> **Ultima atualizacao:** 2026-05-28
 
 ---
 
@@ -17,13 +17,13 @@
 1. [Visao Geral dos Fluxos](#1-visao-geral-dos-fluxos)
 2. [Endpoints Consumidos — Status](#2-endpoints-consumidos--status)
 3. [Fluxo 1 — Owner Solo Shop](#3-fluxo-1--owner-solo-shop)
-4. [Fluxo 2 — Professional (novo)](#4-fluxo-2--professional-novo)
+4. [Fluxo 2 — Professional](#4-fluxo-2--professional)
 5. [Stores Implementados](#5-stores-implementados)
 6. [Telas Implementadas](#6-telas-implementadas)
 7. [Formato dos Tokens e Refresh](#7-formato-dos-tokens-e-refresh)
-8. [Testes E2E — Maestro](#8-testes-e2e--maestro)
-9. [Pendente de Implementacao](#9-pendente-de-implementacao)
-10. [Duvidas para o Backend](#10-duvidas-para-o-backend)
+8. [Enums da API](#8-enums-da-api)
+9. [Testes E2E — Maestro](#9-testes-e2e--maestro)
+10. [Pendente de Implementacao](#10-pendente-de-implementacao)
 
 ---
 
@@ -49,25 +49,33 @@ Register → Login → Register professional (sem establishment) → Refresh tok
 
 ## 2. Endpoints Consumidos — Status
 
-| Endpoint | Fluxo | Status Frontend | Testes |
-|----------|-------|-----------------|--------|
-| `POST /auth/register` | Ambos | Implementado | 14 testes |
-| `POST /auth/login` | Ambos | Implementado | 14 testes |
-| `POST /auth/refresh` | Ambos | Implementado | 14 testes |
-| `POST /auth/logout` | Ambos | Implementado | - |
-| `POST /establishment/quick-create` | Owner | Implementado | 2 testes |
-| `PATCH /establishment/{id}/open-status` | Owner | Implementado | 2 testes |
-| `POST /professional/quick-create` | Owner | Implementado | 2 testes |
-| `POST /establishment/{id}/service-items` | Owner | Implementado | 1 teste |
-| `GET /establishment` | Professional | **PENDENTE** | - |
-| `GET /establishment?name=X` | Professional | **PENDENTE** | - |
-| `POST /professional/register` | Professional | **PENDENTE** | - |
-| `POST /professional/affiliate` | Professional | **PENDENTE** | - |
-| `POST /establishment/{id}/professionals` | Owner | **FUTURO** | - |
-| `DELETE /establishment/{id}/professionals/{pid}` | Owner | **FUTURO** | - |
-| `PATCH /establishment/{id}/owner` | Owner | **FUTURO** | - |
-| `POST /professional/me/affiliations` | Professional | **FUTURO** | - |
-| `PATCH /affiliations/{id}/accept` | Owner | **FUTURO** | - |
+| Endpoint | Metodo | Fluxo | Status Frontend | Testes |
+|----------|--------|-------|-----------------|--------|
+| `/auth/register` | POST | Ambos | Implementado | 14 |
+| `/auth/login` | POST | Ambos | Implementado | 14 |
+| `/auth/refresh` | POST | Ambos | Implementado | 14 |
+| `/auth/logout` | POST | Ambos | Implementado | 14 |
+| `/establishment/quick-create` | POST | Owner | Implementado | 2 |
+| `/establishment/{id}/open-status` | PATCH | Owner | Implementado | 2 |
+| `/professional/quick-create` | POST | Owner | Implementado | 2 |
+| `/establishment/{id}/service-items` | POST | Owner | Implementado | 1 |
+| `/establishment?name=X` | GET | Professional | Implementado | 2 |
+| `/professional/register` | POST | Professional | Implementado | 2 |
+| `/professional/affiliate` | POST | Professional | Implementado | 2 |
+| `/establishment/{id}/professionals` | POST | Owner | **FUTURO** | — |
+| `/establishment/id/{id}/professionals-with-queue` | GET | Owner | **FUTURO** | — |
+| `/attendances` | POST | Ambos | **FUTURO** | — |
+| `/attendances/{id}/start` | PATCH | Professional | **FUTURO** | — |
+| `/attendances/{id}/finish` | PATCH | Professional | **FUTURO** | — |
+| `/attendances/{id}/pause` | PATCH | Professional | **FUTURO** | — |
+| `/attendances/{id}/resume` | PATCH | Professional | **FUTURO** | — |
+| `/attendances/{id}/cancel` | PUT | Client | **FUTURO** | — |
+| `/professional-queue/add-quest-attendance` | POST | Publico | **FUTURO** | — |
+| `/professional-queue/{id}/remove` | DELETE | Professional | **FUTURO** | — |
+| `/client-queue/{profId}/queue` | GET | Publico | **FUTURO** | — |
+| `/profile/general-infos` | PATCH | Client | **FUTURO** | — |
+| `/establishments/{id}/addresses` | POST | Owner | **FUTURO** | — |
+| `/users/me/addresses` | POST | Client | **FUTURO** | — |
 
 ---
 
@@ -79,7 +87,7 @@ Register → Login → Register professional (sem establishment) → Refresh tok
 3. **(owner)/onboarding/establishment.tsx** — Nome + tipo → `POST /establishment/quick-create`
 4. **(owner)/dashboard.tsx** — Badge ABERTO/FECHADO, toggle, adicionar profissional/servico, logout
 5. **(owner)/add-professional.tsx** — Nome + especialidade → `POST /professional/quick-create`
-6. **(owner)/add-service.tsx** — Tipo + nome + preco → `POST /establishment/{id}/service-items`
+6. **(owner)/add-service.tsx** — Especialidade → tipo de servico → nome + preco → `POST /establishment/{id}/service-items`
 
 ### Sequencia de chamadas
 ```
@@ -88,33 +96,34 @@ POST /auth/login { email, password }
   → armazena tokens no SecureStore
 POST /establishment/quick-create { name, serviceType }
   → ganha OWNER
-POST /auth/refresh { refreshToken }
+POST /auth/refresh { refresh_token }
   → novo token com ROLE_OWNER
 POST /professional/quick-create { name, establishmentId, specialty? }
   → ganha PROFESSIONAL
-POST /auth/refresh { refreshToken }
+POST /auth/refresh { refresh_token }
   → novo token com ROLE_PROFESSIONAL
 POST /establishment/{id}/service-items { serviceItemType, customName, price }
 PATCH /establishment/{id}/open-status { openStatus: "OPEN" }
 ```
 
-### Regra de negocio
+### Regras de negocio
 - Owner so pode criar UM perfil profissional (o dele mesmo)
 - Service items sao vinculados ao profissional (JWT userId), nao ao establishment
-- Owner PRECISA ter perfil profissional para adicionar services
+- Owner PRECISA ter perfil profissional antes de adicionar services
+- `estimatedMinutes` nao e enviado — backend tem default 30 via @PrePersist, atualizado semanalmente pela media dos atendimentos
 
 ---
 
-## 4. Fluxo 2 — Professional (novo)
+## 4. Fluxo 2 — Professional
 
-### Telas planejadas
-1. **(auth)/index.tsx** — Escolha "Sou profissional" (ja existe)
-2. **(auth)/register.tsx** — Email + senha (ja existe)
-3. **(professional)/onboarding.tsx** — **A IMPLEMENTAR:**
+### Telas
+1. **(auth)/index.tsx** — Escolha "Sou profissional" (compartilhada)
+2. **(auth)/register.tsx** — Email + senha (compartilhada)
+3. **(professional)/onboarding.tsx** — 3 steps:
    - Step 1: Nome + especialidade → `POST /professional/register`
    - Step 2: Buscar establishment → `GET /establishment?name=X`
    - Step 3: Selecionar da lista → `POST /professional/affiliate { establishmentId }`
-4. **(professional)/queue.tsx** — Tela de fila (placeholder)
+4. **(professional)/queue.tsx** — Placeholder com botao "Sair"
 
 ### Sequencia de chamadas
 ```
@@ -123,7 +132,7 @@ POST /auth/login { email, password }
   → armazena tokens no SecureStore
 POST /professional/register { name, specialty? }
   → ganha PROFESSIONAL (sem establishment)
-POST /auth/refresh { refreshToken }
+POST /auth/refresh { refresh_token }
   → novo token com ROLE_PROFESSIONAL
 GET /establishment?name=barbearia
   → lista de establishments
@@ -131,14 +140,20 @@ POST /professional/affiliate { establishmentId }
   → profissional vinculado ao establishment
 ```
 
-### Responses esperados do backend
+### Regras de negocio
+- Profissional so pode estar vinculado a 1 establishment por vez (MVP)
+- affiliate requer establishment_id == null (nao pode estar afiliado a outro)
+- Ja afiliado → 409 PROFESSIONAL_ALREADY_AFFILIATED
+- Specialty e String livre (max 100 chars), nao e enum no backend
+
+### Responses do backend
 
 **POST /professional/register (201):**
 ```json
 {
   "id": "uuid",
   "name": "Joao Silva",
-  "specialty": "Corte masculino",
+  "specialty": "BARBER",
   "establishment_id": null,
   "establishment_name": null,
   "is_available": true,
@@ -166,7 +181,7 @@ POST /professional/affiliate { establishmentId }
 {
   "id": "uuid",
   "name": "Joao Silva",
-  "specialty": "Corte masculino",
+  "specialty": "BARBER",
   "establishment_id": "uuid",
   "establishment_name": "Barbearia do Andre",
   "is_available": true,
@@ -182,7 +197,7 @@ POST /professional/affiliate { establishmentId }
 - `login(email, password)` — POST /auth/login → armazena tokens
 - `register(email, password)` — POST /auth/register
 - `refreshToken()` — POST /auth/refresh → atualiza tokens e roles
-- `logout()` — POST /auth/logout → limpa SecureStore
+- `logout()` — POST /auth/logout → limpa SecureStore → reseta establishmentStore e professionalStore
 - `loadStoredTokens()` — carrega tokens salvos ao abrir app
 
 ### establishment.store.ts
@@ -190,11 +205,13 @@ POST /professional/affiliate { establishmentId }
 - `updateOpenStatus(id, status)` — PATCH /establishment/{id}/open-status
 - `quickCreateProfessional(name, establishmentId, specialty?)` — POST /professional/quick-create
 - `addServiceItem(establishmentId, serviceItemType, customName, price)` — POST /establishment/{id}/service-items
-- **PENDENTE:** `searchByName(name)` — GET /establishment?name=X
+- `searchByName(name)` — GET /establishment?name=X
+- `reset()` — limpa estado ao fazer logout
 
-### professional.store.ts (A CRIAR)
+### professional.store.ts
 - `register(name, specialty?)` — POST /professional/register
 - `affiliate(establishmentId)` — POST /professional/affiliate
+- `reset()` — limpa estado ao fazer logout
 
 ---
 
@@ -202,7 +219,7 @@ POST /professional/affiliate { establishmentId }
 
 ```
 app/
-  _layout.tsx                    — GluestackUIProvider + fontes
+  _layout.tsx                    — GluestackUIProvider + fontes + LogBox suppress
   (auth)/
     index.tsx                    — Escolha de papel (Owner vs Professional)
     login.tsx                    — Login conectado ao authStore
@@ -212,12 +229,12 @@ app/
       establishment.tsx          — Quick-create establishment
       address.tsx                — Endereco (visual, sem API)
       services.tsx               — Servicos (visual, sem API)
-    dashboard.tsx                — Dashboard principal do owner
-    add-professional.tsx         — Criar profissional (quick-create)
-    add-service.tsx              — Adicionar servico
+    dashboard.tsx                — Dashboard: nome + badge + toggle + add prof/service + logout
+    add-professional.tsx         — Criar profissional (quick-create) com especialidade
+    add-service.tsx              — Adicionar servico com filtro por especialidade (21 tipos)
   (professional)/
-    onboarding.tsx               — PLACEHOLDER → A IMPLEMENTAR
-    queue.tsx                    — PLACEHOLDER
+    onboarding.tsx               — 3 steps: profile → busca → afiliacao
+    queue.tsx                    — Placeholder com botao Sair
 ```
 
 ---
@@ -227,7 +244,7 @@ app/
 ### Login response
 ```json
 {
-  "user": { "id", "email", ... },
+  "user": { "id": "uuid", "email": "user@test.com" },
   "tokens": {
     "access_token": "eyJ...",
     "refresh_token": "uuid",
@@ -235,14 +252,23 @@ app/
   }
 }
 ```
+Frontend le: `data.tokens.access_token`, `data.tokens.refresh_token`
 
 ### Refresh request
-> **DUVIDA:** O campo e `refreshToken` (camelCase) ou `refresh_token` (snake_case)?
-> Nosso codigo atual envia `refresh_token` (snake_case).
+```json
+{ "refresh_token": "uuid" }
+```
+Campo em snake_case. Confirmado com backend via @JsonProperty("refresh_token").
 
 ### Refresh response
-> **DUVIDA:** Retorna direto `{ access_token, refresh_token }` ou dentro de `{ tokens: { ... } }`?
-> Nosso codigo atual le `data.tokens.access_token`.
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "uuid",
+  "expires_in": 3600
+}
+```
+Resposta flat (sem wrapper). Frontend le: `data.access_token`, `data.refresh_token`
 
 ### Interceptor Axios
 - Request interceptor: adiciona `Authorization: Bearer <access_token>` em todas as requests
@@ -251,60 +277,121 @@ app/
 
 ---
 
-## 8. Testes E2E — Maestro
+## 8. Enums da API
+
+### ServiceType (tipo de estabelecimento)
+| Valor | Descricao |
+|-------|-----------|
+| BARBER | Barbearia |
+| BEAUTY_SALON | Salao de beleza |
+| NAIL_SALON | Manicure / pedicure |
+| SPA | SPA |
+| CLINIC | Clinica estetica |
+
+### ServiceItemType (21 valores)
+| Valor | ServiceType compativel |
+|-------|----------------------|
+| CORTE_MAQUINA | BARBER |
+| CORTE_TESOURA | BARBER |
+| BARBA | BARBER |
+| SOBRANCELHA | BARBER |
+| PINTURA | BARBER, BEAUTY_SALON |
+| RECORTE_PONTAS | BEAUTY_SALON |
+| ESCOVA | BEAUTY_SALON |
+| HIDRATACAO | BEAUTY_SALON |
+| PROGRESSIVA | BEAUTY_SALON |
+| MANICURE | NAIL_SALON |
+| PEDICURE | NAIL_SALON |
+| UNHAS_GEL | NAIL_SALON |
+| NAIL_ART | NAIL_SALON |
+| MASSAGEM_RELAXANTE | SPA |
+| MASSAGEM_MODELADORA | SPA |
+| LIMPEZA_PELE | SPA, CLINIC |
+| DEPILACAO | SPA |
+| DRENAGEM | SPA |
+| PEELING | CLINIC |
+| BOTOX | CLINIC |
+| MICROAGULHAMENTO | CLINIC |
+
+### Specialty (profissional)
+String livre, max 100 caracteres. Nao e enum no backend.
+Frontend usa: BARBER, HAIRDRESSER, NAIL_TECH, MASSEUSE, ESTHETICIAN.
+
+### OpenStatus
+| Valor | Descricao |
+|-------|-----------|
+| OPEN | Aberto e recebendo clientes |
+| CLOSED | Fechado |
+| TEMPORARILY_CLOSED | Fechado temporariamente (obra, licenca) |
+
+### AttendanceStatus
+| Valor | Descricao |
+|-------|-----------|
+| SCHEDULED | Na fila, aguardando |
+| IN_PROGRESS | Sendo atendido |
+| PAUSED | Pausado temporariamente |
+| FINISHED | Concluido |
+| CANCELLED | Cancelado (duplo L) |
+
+---
+
+## 9. Testes E2E — Maestro
 
 ### seed_complete.yaml
-Cria 4 establishments com 1 profissional cada (owner = profissional):
-- Barbearia do Andre (BARBER) — 3 servicos
-- Salao Beleza Total (BEAUTY_SALON) — 2 servicos
-- Nail Studio Premium (NAIL_SALON) — 2 servicos
-- SPA Relaxe Bem (SPA) — 1 servico
+Cria 4 establishments com profissionais e servicos, depois 2 profissionais independentes afiliando:
+
+| Owner | Tipo | Servicos |
+|-------|------|----------|
+| Owner 1 | BARBER | Corte Degrade, Barba Completa, Corte Tesoura Premium |
+| Owner 2 | BEAUTY_SALON | Recorte Pontas, Escova Modeladora |
+| Owner 3 | NAIL_SALON | Manicure Gel, Pedicure Completa |
+| Owner 4 | SPA | Massagem Relaxante, Depilacao Completa |
+
+| Professional | Especialidade | Afilia a |
+|-------------|---------------|----------|
+| Ricardo | BARBER | Barbearia (Owner 1) |
+| Lucia | HAIRDRESSER | Salao (Owner 2) |
+
+Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ### Limitacoes do Maestro
 - `inputText` nao suporta Unicode (acentos removidos nos nomes)
 - Nao suporta `- wait: N` — usar `assertVisible` que ja tem timeout
 - Seletores por `id` (testID) preferidos sobre `text` para evitar ambiguidade
+- Spell checker do Android converte palavras sem acento → desabilitar via `adb shell settings put secure spell_checker_enabled 0`
 
-### Pendente no Maestro
-- Adicionar fluxo de professional independente (register → buscar establishment → afiliar)
-- Testar multiplos profissionais por establishment
+### Status atual
+- Owner 1 (BARBER): passa completo ✅
+- Owner 2 (BEAUTY_SALON): bloqueado pelo spell checker do Android ("Salao" → "Salao")
+- Owners 3-4 e Professionals 1-2: nao testados ainda
 
 ---
 
-## 9. Pendente de Implementacao
+## 10. Pendente de Implementacao
 
 ### Alta prioridade (MVP)
-| Item | Descricao | Depende de |
-|------|-----------|------------|
-| professional.store | register + affiliate | — |
-| Busca de establishments | GET /establishment?name=X no establishment.store | — |
-| Tela professional onboarding | Nome + especialidade + busca + afiliacao | stores acima |
-| Maestro seed multiplos profissionais | 2+ profissionais por establishment | tela acima |
-| Corrigir formato refresh token | Verificar camelCase vs snake_case | resposta backend |
+| Item | Descricao |
+|------|-----------|
+| Profissional auto-registrado adiciona servicos | Apos afiliar, profissional adiciona seus proprios servicos (servicos sao vinculados ao profissional, nao ao establishment) |
+| Dashboard Owner | Filas dos clientes, resumo de atendimentos, tempos medios, valores por profissional, quantidade de clientes atendidos |
+| Dashboard Profissional | Ver fila, acessar informacoes de clientes |
+| Tela de fila do profissional | start/pause/resume/finish attendance |
+| Dashboard com polling | GET /establishment/id/{id}/professionals-with-queue a cada 30s (TanStack React Query) |
+| Completar dados do establishment | Endereco completo (bairro, cidade, CEP) via POST /establishments/{id}/addresses — necessario para busca por bairro/cidade no app cliente |
+| Variavel de ambiente API | EXPO_PUBLIC_API_ENV para alternar local/staging/prod |
 
 ### Media prioridade
 | Item | Descricao |
 |------|-----------|
-| Dashboard com polling | TanStack React Query, refresh a cada 30s |
-| Tela de fila do profissional | Start/pause/resume/finish attendance |
 | React Hook Form + Zod | Validacao nos formularios |
-| Variavel de ambiente API | EXPO_PUBLIC_API_ENV para alternar local/dev/prod |
+| Tratar TEMPORARILY_CLOSED | Terceiro estado no toggle do dashboard |
+| Paleta PRD | #1B4332, #52B788, #00B37E, #F7FAF8 |
+| Fontes DM Sans + DM Mono | — |
 
 ### Baixa prioridade
 | Item | Descricao |
 |------|-----------|
-| Sistema de afiliacao bidirecional | POST /professional/me/affiliations + PATCH /affiliations/{id}/accept |
-| Owner gerencia profissionais | POST/DELETE /establishment/{id}/professionals |
-| Transferencia de ownership | PATCH /establishment/{id}/owner |
-| Paleta PRD | #1B4332, #52B788, #00B37E, #F7FAF8 |
-| Fontes DM Sans + DM Mono | — |
-
----
-
-## 10. Duvidas para o Backend
-
-1. **Formato refresh token request:** `refreshToken` (camelCase) ou `refresh_token` (snake_case)?
-2. **Formato refresh token response:** direto `{ access_token, ... }` ou dentro de `{ tokens: { ... } }`?
-3. **POST /professional/affiliate requer establishment OPEN?** Ou funciona com establishment CLOSED tambem?
-4. **GET /establishment retorna establishments CLOSED?** Ou so ACTIVE + OPEN?
-5. **Limite de profissionais por establishment?** Existe restricao no backend?
+| Owner gerencia profissionais | POST /establishment/{id}/professionals |
+| Profile do usuario | PATCH /profile/general-infos |
+| Enderecos | POST /establishments/{id}/addresses |
+| Migrar Gluestack v1 → v2 | Resolver warnings React 19 |
