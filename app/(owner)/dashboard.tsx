@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
+import { useQueuePolling } from "@hooks/useQueuePolling";
 
 export default function OwnerDashboardScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -22,6 +23,8 @@ export default function OwnerDashboardScreen() {
   const [isToggling, setIsToggling] = useState(false);
 
   const isOpen = establishment?.open_status === "OPEN";
+  const { data: queueData } = useQueuePolling(establishment?.id ?? null);
+  const totalInQueue = queueData?.total_in_queue ?? 0;
 
   const handleToggleStatus = async () => {
     if (!establishment) return;
@@ -80,6 +83,23 @@ export default function OwnerDashboardScreen() {
           {establishment.service_type}
         </Text>
 
+        {isOpen && (
+          <HStack mt="$4" space="md">
+            <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
+              <Text fontFamily="$body" fontSize="$xs" color="$green700">Na fila</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+                {totalInQueue}
+              </Text>
+            </VStack>
+            <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
+              <Text fontFamily="$body" fontSize="$xs" color="$blue700">Profissionais</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
+                {queueData?.available_professionals ?? 0}
+              </Text>
+            </VStack>
+          </HStack>
+        )}
+
         <Divider my="$6" />
 
         <Button
@@ -100,6 +120,18 @@ export default function OwnerDashboardScreen() {
           }
           bg="$blue500"
           $active-bg="$blue600"
+        />
+
+        <Button
+          title="Ver Filas"
+          onPress={() =>
+            router.push({
+              pathname: "/(owner)/queues",
+              params: { establishmentId: establishment.id },
+            } as any)
+          }
+          bg="$amber500"
+          $active-bg="$amber600"
         />
 
         <Button
