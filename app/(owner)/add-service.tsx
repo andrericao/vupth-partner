@@ -18,6 +18,7 @@ const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
   { label: "Cabeleireiro(a)", value: "HAIRDRESSER", serviceType: "BEAUTY_SALON" },
   { label: "Manicure", value: "NAIL_TECH", serviceType: "NAIL_SALON" },
+  { label: "Designer de sobrancelha", value: "EYEBROW_TECH", serviceType: "EYEBROW" },
   { label: "Massagista", value: "MASSEUSE", serviceType: "SPA" },
   { label: "Esteticista", value: "ESTHETICIAN", serviceType: "CLINIC" },
 ];
@@ -26,6 +27,7 @@ const SERVICE_TYPE_TO_SPECIALTY: Record<string, string> = {
   BARBER: "BARBER",
   BEAUTY_SALON: "HAIRDRESSER",
   NAIL_SALON: "NAIL_TECH",
+  EYEBROW: "EYEBROW_TECH",
   SPA: "MASSEUSE",
   CLINIC: "ESTHETICIAN",
 };
@@ -34,7 +36,7 @@ const SERVICE_ITEM_TYPES = [
   { label: "Corte à máquina", value: "CORTE_MAQUINA", serviceTypes: ["BARBER"] },
   { label: "Corte à tesoura", value: "CORTE_TESOURA", serviceTypes: ["BARBER"] },
   { label: "Barba", value: "BARBA", serviceTypes: ["BARBER"] },
-  { label: "Design de sobrancelha", value: "SOBRANCELHA", serviceTypes: ["BARBER"] },
+  { label: "Design de sobrancelha", value: "SOBRANCELHA", serviceTypes: ["BARBER", "EYEBROW"] },
   { label: "Pintura", value: "PINTURA", serviceTypes: ["BARBER", "BEAUTY_SALON"] },
   { label: "Recorte das pontas", value: "RECORTE_PONTAS", serviceTypes: ["BEAUTY_SALON"] },
   { label: "Escova", value: "ESCOVA", serviceTypes: ["BEAUTY_SALON"] },
@@ -52,6 +54,10 @@ const SERVICE_ITEM_TYPES = [
   { label: "Peeling facial", value: "PEELING", serviceTypes: ["CLINIC"] },
   { label: "Aplicação de botox", value: "BOTOX", serviceTypes: ["CLINIC"] },
   { label: "Microagulhamento", value: "MICROAGULHAMENTO", serviceTypes: ["CLINIC"] },
+  { label: "Henna de sobrancelha", value: "HENNA_SOBRANCELHA", serviceTypes: ["EYEBROW"] },
+  { label: "Micropigmentacao fio a fio", value: "MICROPIGMENTACAO_SOBRANCELHA", serviceTypes: ["EYEBROW"] },
+  { label: "Brow lamination", value: "BROW_LAMINATION", serviceTypes: ["EYEBROW"] },
+  { label: "Tintura de sobrancelha", value: "TINTURA_SOBRANCELHA", serviceTypes: ["EYEBROW"] },
 ];
 
 export default function AddServiceScreen() {

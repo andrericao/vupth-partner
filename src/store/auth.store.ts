@@ -4,6 +4,7 @@ import { api } from "@lib/api";
 import { getRolesFromToken } from "@lib/jwt";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
+import { useAttendanceStore } from "@store/attendance.store";
 
 type User = {
   id: string;
@@ -86,6 +87,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     useEstablishmentStore.getState().reset();
     useProfessionalStore.getState().reset();
+    useAttendanceStore.getState().reset();
 
     set({ user: null, isAuthenticated: false });
   },

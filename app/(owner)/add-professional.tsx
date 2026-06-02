@@ -16,6 +16,7 @@ const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
   { label: "Cabeleireiro(a)", value: "HAIRDRESSER" },
   { label: "Manicure", value: "NAIL_TECH" },
+  { label: "Designer de sobrancelha", value: "EYEBROW_TECH" },
   { label: "Massagista", value: "MASSEUSE" },
   { label: "Esteticista", value: "ESTHETICIAN" },
 ];

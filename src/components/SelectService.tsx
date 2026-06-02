@@ -10,6 +10,7 @@ const SERVICE_TYPES = [
   { label: "Barbearia", value: "BARBER" },
   { label: "Salão de Beleza", value: "BEAUTY_SALON" },
   { label: "Manicure / Pedicure", value: "NAIL_SALON" },
+  { label: "Sobrancelha", value: "EYEBROW" },
   { label: "SPA", value: "SPA" },
   { label: "Clínica", value: "CLINIC" },
 ] as const;

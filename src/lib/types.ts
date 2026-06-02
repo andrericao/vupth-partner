@@ -1,0 +1,60 @@
+export type AttendanceStatus =
+  | "SCHEDULED"
+  | "IN_PROGRESS"
+  | "PAUSED"
+  | "FINISHED"
+  | "CANCELLED";
+
+export type AttendanceServiceItem = {
+  id: string;
+  customName: string;
+  estimatedMinutes: number;
+};
+
+export type AttendanceInQueue = {
+  id: string;
+  establishmentId: string;
+  establishmentName: string;
+  professionalId: string;
+  professionalName: string;
+  clientId: string;
+  clientName: string;
+  services: AttendanceServiceItem[];
+  status: AttendanceStatus;
+  totalValue: number;
+  scheduledTime: string;
+  estimatedMinutes: number;
+  durationInMinutes: number | null;
+};
+
+export type AttendanceInProgress = AttendanceInQueue & {
+  startTime: string;
+  elapsedMinutes: number;
+  pausedTimeMinutes: number;
+  totalElapsedMinutes: number;
+  remainingMinutes: number;
+  isPaused: boolean;
+};
+
+export type ProfessionalWithQueue = {
+  id: string;
+  name: string;
+  specialty: string;
+  is_available: boolean;
+  current_attendance: AttendanceInQueue | null;
+  waiting_list: AttendanceInQueue[];
+  queue_count: number;
+  estimated_wait_minutes: number;
+};
+
+export type EstablishmentWithProfessionals = {
+  id: string;
+  name: string;
+  url_image: string | null;
+  services: string[];
+  owner_id: string;
+  open_status: string;
+  total_in_queue: number;
+  available_professionals: number;
+  professionals: ProfessionalWithQueue[];
+};

@@ -23,6 +23,13 @@ jest.mock("@store/professional.store", () => ({
   },
 }));
 
+const mockAttendanceReset = jest.fn();
+jest.mock("@store/attendance.store", () => ({
+  useAttendanceStore: {
+    getState: () => ({ reset: mockAttendanceReset }),
+  },
+}));
+
 const mock = new MockAdapter(api);
 
 function makeToken(payload: object): string {
@@ -244,6 +251,7 @@ describe("auth.store", () => {
       expect(state.user).toBeNull();
       expect(mockEstablishmentReset).toHaveBeenCalled();
       expect(mockProfessionalReset).toHaveBeenCalled();
+      expect(mockAttendanceReset).toHaveBeenCalled();
     });
 
     it("still clears local state even if logout API fails", async () => {

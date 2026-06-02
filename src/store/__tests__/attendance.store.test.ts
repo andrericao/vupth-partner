@@ -1,0 +1,219 @@
+import MockAdapter from "axios-mock-adapter";
+import { api } from "@lib/api";
+import { useAttendanceStore } from "../attendance.store";
+
+jest.mock("expo-secure-store", () => ({
+  getItemAsync: jest.fn(),
+  setItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(),
+}));
+
+const mock = new MockAdapter(api);
+
+const QUEUE_RESPONSE = {
+  id: "estab-uuid-1",
+  name: "Barbearia Teste",
+  url_image: null,
+  services: ["BARBER"],
+  owner_id: "uuid-1",
+  open_status: "OPEN",
+  total_in_queue: 2,
+  available_professionals: 1,
+  professionals: [
+    {
+      id: "prof-uuid-1",
+      name: "Carlos",
+      specialty: "BARBER",
+      is_available: true,
+      current_attendance: null,
+      waiting_list: [
+        {
+          id: "att-uuid-1",
+          establishmentId: "estab-uuid-1",
+          establishmentName: "Barbearia Teste",
+          professionalId: "prof-uuid-1",
+          professionalName: "Carlos",
+          clientId: "client-uuid-1",
+          clientName: "Joao",
+          services: [{ id: "svc-1", customName: "Corte Degradê", estimatedMinutes: 30 }],
+          status: "SCHEDULED",
+          totalValue: 35.0,
+          scheduledTime: "2026-05-30T14:00:00Z",
+          estimatedMinutes: 30,
+          durationInMinutes: null,
+        },
+      ],
+      queue_count: 1,
+      estimated_wait_minutes: 30,
+    },
+  ],
+};
+
+const IN_PROGRESS_RESPONSE = {
+  id: "att-uuid-1",
+  establishmentId: "estab-uuid-1",
+  establishmentName: "Barbearia Teste",
+  professionalId: "prof-uuid-1",
+  professionalName: "Carlos",
+  clientId: "client-uuid-1",
+  clientName: "Joao",
+  services: [{ id: "svc-1", customName: "Corte Degradê", estimatedMinutes: 30 }],
+  status: "IN_PROGRESS",
+  totalValue: 35.0,
+  scheduledTime: "2026-05-30T14:00:00Z",
+  estimatedMinutes: 30,
+  durationInMinutes: null,
+  startTime: "2026-05-30T14:02:00Z",
+  elapsedMinutes: 0,
+  pausedTimeMinutes: 0,
+  totalElapsedMinutes: 0,
+  remainingMinutes: 30,
+  isPaused: false,
+};
+
+beforeEach(() => {
+  useAttendanceStore.setState({
+    professionals: [],
+    establishmentData: null,
+    isLoading: false,
+    error: null,
+  });
+  mock.reset();
+  jest.clearAllMocks();
+});
+
+describe("attendance.store", () => {
+  describe("fetchQueue", () => {
+    it("calls GET /establishment/id/{id}/professionals-with-queue and stores result", async () => {
+      mock
+        .onGet("/establishment/id/estab-uuid-1/professionals-with-queue")
+        .reply(200, QUEUE_RESPONSE);
+
+      await useAttendanceStore.getState().fetchQueue("estab-uuid-1");
+
+      expect(mock.history.get[0].url).toBe(
+        "/establishment/id/estab-uuid-1/professionals-with-queue"
+      );
+
+      const state = useAttendanceStore.getState();
+      expect(state.professionals).toHaveLength(1);
+      expect(state.professionals[0].name).toBe("Carlos");
+      expect(state.professionals[0].queue_count).toBe(1);
+      expect(state.establishmentData?.name).toBe("Barbearia Teste");
+      expect(state.isLoading).toBe(false);
+    });
+
+    it("throws on 404 establishment not found", async () => {
+      mock
+        .onGet("/establishment/id/invalid-uuid/professionals-with-queue")
+        .reply(404, { code: "ESTABLISHMENT_NOT_FOUND" });
+
+      await expect(
+        useAttendanceStore.getState().fetchQueue("invalid-uuid")
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("startAttendance", () => {
+    it("calls PATCH /attendances/{id}/start and returns in-progress data", async () => {
+      mock
+        .onPatch("/attendances/att-uuid-1/start")
+        .reply(200, IN_PROGRESS_RESPONSE);
+
+      const result = await useAttendanceStore
+        .getState()
+        .startAttendance("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/start");
+      expect(result.status).toBe("IN_PROGRESS");
+      expect(result.startTime).toBeDefined();
+      expect(result.remainingMinutes).toBe(30);
+    });
+
+    it("throws on 400 invalid status transition", async () => {
+      mock.onPatch("/attendances/att-uuid-1/start").reply(400, {
+        code: "ATTENDANCE_INVALID_STATUS",
+        message: "Cannot start attendance with status FINISHED",
+      });
+
+      await expect(
+        useAttendanceStore.getState().startAttendance("att-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("finishAttendance", () => {
+    it("calls PATCH /attendances/{id}/finish", async () => {
+      mock.onPatch("/attendances/att-uuid-1/finish").reply(200);
+
+      await useAttendanceStore.getState().finishAttendance("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/finish");
+    });
+
+    it("throws on 404 attendance not found", async () => {
+      mock.onPatch("/attendances/invalid/finish").reply(404, {
+        code: "ATTENDANCE_NOT_FOUND",
+      });
+
+      await expect(
+        useAttendanceStore.getState().finishAttendance("invalid")
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("pauseAttendance", () => {
+    it("calls PATCH /attendances/{id}/pause", async () => {
+      mock.onPatch("/attendances/att-uuid-1/pause").reply(200);
+
+      await useAttendanceStore.getState().pauseAttendance("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/pause");
+    });
+  });
+
+  describe("resumeAttendance", () => {
+    it("calls PATCH /attendances/{id}/resume and returns updated data", async () => {
+      const resumeResponse = { ...IN_PROGRESS_RESPONSE, isPaused: false, elapsedMinutes: 5 };
+      mock.onPatch("/attendances/att-uuid-1/resume").reply(200, resumeResponse);
+
+      const result = await useAttendanceStore
+        .getState()
+        .resumeAttendance("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/resume");
+      expect(result.isPaused).toBe(false);
+    });
+  });
+
+  describe("removeFromQueue", () => {
+    it("calls DELETE /professional-queue/{id}/remove", async () => {
+      mock.onDelete("/professional-queue/att-uuid-1/remove").reply(200);
+
+      await useAttendanceStore.getState().removeFromQueue("att-uuid-1");
+
+      expect(mock.history.delete[0].url).toBe(
+        "/professional-queue/att-uuid-1/remove"
+      );
+    });
+  });
+
+  describe("reset", () => {
+    it("clears all state", () => {
+      useAttendanceStore.setState({
+        professionals: QUEUE_RESPONSE.professionals as any,
+        establishmentData: QUEUE_RESPONSE as any,
+        isLoading: true,
+        error: "some error",
+      });
+
+      useAttendanceStore.getState().reset();
+
+      const state = useAttendanceStore.getState();
+      expect(state.professionals).toEqual([]);
+      expect(state.establishmentData).toBeNull();
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBeNull();
+    });
+  });
+});
