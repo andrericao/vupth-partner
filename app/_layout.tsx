@@ -1,5 +1,7 @@
 import { StatusBar, LogBox } from "react-native";
 import { Slot } from "expo-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@lib/queryClient";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 import { GluestackUIProvider } from "@gluestack-ui/themed";
@@ -15,13 +17,15 @@ export default function RootLayout() {
   const [fontLoaded] = useFonts({ Inter_400Regular, Inter_700Bold });
 
   return (
-    <GluestackUIProvider config={config}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
-      />
-      {fontLoaded ? <Slot /> : <Loading />}
-    </GluestackUIProvider>
+    <QueryClientProvider client={queryClient}>
+      <GluestackUIProvider config={config}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        {fontLoaded ? <Slot /> : <Loading />}
+      </GluestackUIProvider>
+    </QueryClientProvider>
   );
 }
