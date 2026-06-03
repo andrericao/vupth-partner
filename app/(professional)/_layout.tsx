@@ -31,6 +31,15 @@ export default function ProfessionalLayout() {
         }}
       />
       <Tabs.Screen
+        name="my-services"
+        options={{
+          title: "Servicos",
+          tabBarIcon: ({ color }) => (
+            <Text fontSize="$xl" color={color}>&#9733;</Text>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Perfil",
@@ -49,10 +58,6 @@ export default function ProfessionalLayout() {
       />
       <Tabs.Screen
         name="reports"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="my-services"
         options={{ href: null }}
       />
       <Tabs.Screen

@@ -14,13 +14,23 @@ type Professional = {
   message: string;
 };
 
+type ServiceItem = {
+  id: string;
+  serviceItemType: string;
+  customName: string;
+  price: number;
+  estimatedMinutes: number;
+};
+
 type ProfessionalState = {
   professional: Professional | null;
+  myServices: ServiceItem[];
   isLoading: boolean;
   error: string | null;
 
   register: (name: string, specialty?: string) => Promise<void>;
   affiliate: (establishmentId: string) => Promise<void>;
+  fetchMyServices: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
   reset: () => void;
 };
@@ -29,8 +39,9 @@ async function persistProfessional(professional: Professional) {
   await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(professional));
 }
 
-export const useProfessionalStore = create<ProfessionalState>((set) => ({
+export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   professional: null,
+  myServices: [],
   isLoading: false,
   error: null,
 
@@ -57,6 +68,14 @@ export const useProfessionalStore = create<ProfessionalState>((set) => ({
     set({ professional: data, isLoading: false });
   },
 
+  fetchMyServices: async () => {
+    const prof = get().professional;
+    if (!prof) return;
+
+    const { data } = await api.get(`/professional/${prof.id}/service-items`);
+    set({ myServices: data });
+  },
+
   restoreProfessional: async () => {
     const stored = await SecureStore.getItemAsync(STORAGE_KEY);
     if (stored) {
@@ -66,6 +85,6 @@ export const useProfessionalStore = create<ProfessionalState>((set) => ({
 
   reset: () => {
     SecureStore.deleteItemAsync(STORAGE_KEY);
-    set({ professional: null, isLoading: false, error: null });
+    set({ professional: null, myServices: [], isLoading: false, error: null });
   },
 }));
