@@ -1,11 +1,13 @@
 import { useState } from "react";
 import {
   VStack,
+  HStack,
   FormControl,
   Heading,
   ScrollView,
   Text,
   Pressable,
+  Switch,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert } from "react-native";
@@ -13,6 +15,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
+import { calculateClientPrice, formatPrice } from "@utils/pricing";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
@@ -74,6 +77,7 @@ export default function AddServiceScreen() {
   const [serviceItemType, setServiceItemType] = useState(filteredTypes[0]?.value ?? "CORTE_MAQUINA");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
+  const [usePlatformPricing, setUsePlatformPricing] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -198,13 +202,52 @@ export default function AddServiceScreen() {
           />
 
           <Input
-            textLabel="Preço (R$)"
+            textLabel={usePlatformPricing ? "Seu preco (R$) — voce recebe" : "Preco (R$)"}
             placeholder="35.00"
             messageError="Preço inválido"
             value={price}
             onChangeText={setPrice}
             keyboardType="decimal-pad"
           />
+
+          <HStack
+            alignItems="center"
+            justifyContent="space-between"
+            bg="$coolGray50"
+            p="$3"
+            borderRadius="$md"
+            mb="$3"
+            borderWidth="$1"
+            borderColor={usePlatformPricing ? "$green300" : "$coolGray200"}
+          >
+            <VStack flex={1} mr="$3">
+              <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
+                Precificacao inteligente
+              </Text>
+              <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">
+                Adiciona taxas + ajuste estetico (R$X,90)
+              </Text>
+            </VStack>
+            <Switch
+              value={usePlatformPricing}
+              onToggle={setUsePlatformPricing}
+              trackColor={{ false: "#D1D5DB", true: "#22C55E" }}
+            />
+          </HStack>
+
+          {usePlatformPricing && price && !isNaN(parseFloat(price.replace(",", "."))) && parseFloat(price.replace(",", ".")) > 0 && (
+            <VStack bg="$green50" p="$3" borderRadius="$md" mb="$3" borderWidth="$1" borderColor="$green200">
+              <Text fontFamily="$body" fontSize="$xs" color="$green700">
+                O cliente vera:
+              </Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$green800">
+                {formatPrice(calculateClientPrice(parseFloat(price.replace(",", "."))).clientPrice)}
+              </Text>
+              <Text fontFamily="$body" fontSize="$xs" color="$green600" mt="$1">
+                4% intermediador + 2% plataforma + ajuste estetico
+              </Text>
+            </VStack>
+          )}
 
           <Button
             title="Adicionar Serviço"

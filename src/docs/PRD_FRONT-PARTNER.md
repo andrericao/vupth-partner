@@ -395,3 +395,18 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | Profile do usuario | PATCH /profile/general-infos |
 | Enderecos | POST /establishments/{id}/addresses |
 | Migrar Gluestack v1 → v2 | Resolver warnings React 19 |
+
+---
+
+## 11. Pendencias futuras para o Backend (escrito pelo front-partner)
+
+> Itens que o frontend partner precisa do backend para funcionalidades futuras.
+> Nao sao bloqueantes agora, mas devem ser planejados.
+
+| # | Item | Descricao | Justificativa |
+|---|------|-----------|---------------|
+| 1 | **Endpoint de historico de atendimentos** | `GET /attendances?establishmentId=X&dateFrom=Y&dateTo=Z&status=FINISHED` | Relatorios semanais/mensais (receita, atendimentos, tempo medio) nao podem ser construidos sem dados historicos. O endpoint `professionals-with-queue` so retorna fila ativa |
+| 2 | **`GET /professional/me`** | Retorna dados do profissional logado (id, name, specialty, establishment_id) | O frontend precisa recuperar o establishment_id apos reiniciar o app. Hoje usa SecureStore como fallback, mas o ideal e ter um endpoint |
+| 3 | **Precificacao inteligente no ServiceItem** | Adicionar campos `uses_platform_pricing: boolean` e `client_price: number` ao ServiceItem | Hoje o calculo (4% intermediador + 2% plataforma + arredondamento estetico para R$X,90) e feito no frontend. O backend deve ser a fonte da verdade para que o app cliente exiba o preco correto |
+| 4 | **Endpoint de relatorios agregados** | `GET /establishment/{id}/reports?period=day\|week\|month` retornando total_attendances, total_revenue, avg_duration, top_professional, top_service | Evita que o frontend faca agregacao client-side de centenas de atendimentos. Melhor performance e consistencia |
+| 5 | **Endpoint de historico de receita por profissional** | `GET /professional/{id}/revenue?dateFrom=Y&dateTo=Z` | Para o owner ver quanto cada profissional faturou no periodo e calcular comissoes |

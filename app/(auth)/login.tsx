@@ -79,6 +79,7 @@ export default function LoginScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            testID="login-email"
           />
           <InputPassword
             placeholder="senha"
@@ -86,6 +87,7 @@ export default function LoginScreen() {
             textLabel="Senha"
             value={password}
             onChangeText={setPassword}
+            testID="login-password"
           />
 
           <Button
