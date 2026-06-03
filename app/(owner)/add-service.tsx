@@ -7,7 +7,6 @@ import {
   ScrollView,
   Text,
   Pressable,
-  Switch,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert } from "react-native";
@@ -15,7 +14,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
-import { calculateClientPrice, formatPrice } from "@utils/pricing";
+import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
@@ -77,7 +76,8 @@ export default function AddServiceScreen() {
   const [serviceItemType, setServiceItemType] = useState(filteredTypes[0]?.value ?? "CORTE_MAQUINA");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
-  const [usePlatformPricing, setUsePlatformPricing] = useState(false);
+  const [absorption, setAbsorption] = useState(0);
+  const [showPricing, setShowPricing] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -202,52 +202,90 @@ export default function AddServiceScreen() {
           />
 
           <Input
-            textLabel={usePlatformPricing ? "Seu preco (R$) — voce recebe" : "Preco (R$)"}
+            textLabel="Preco (R$)"
             placeholder="35.00"
-            messageError="Preço inválido"
+            messageError="Preco invalido"
             value={price}
             onChangeText={setPrice}
             keyboardType="decimal-pad"
           />
 
-          <HStack
-            alignItems="center"
-            justifyContent="space-between"
+          <Pressable
+            onPress={() => setShowPricing(!showPricing)}
             bg="$coolGray50"
             p="$3"
             borderRadius="$md"
             mb="$3"
             borderWidth="$1"
-            borderColor={usePlatformPricing ? "$green300" : "$coolGray200"}
+            borderColor={showPricing ? "$green300" : "$coolGray200"}
           >
-            <VStack flex={1} mr="$3">
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
-                Precificacao inteligente
-              </Text>
-              <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">
-                Adiciona taxas + ajuste estetico (R$X,90)
-              </Text>
-            </VStack>
-            <Switch
-              value={usePlatformPricing}
-              onToggle={setUsePlatformPricing}
-              trackColor={{ false: "#D1D5DB", true: "#22C55E" }}
-            />
-          </HStack>
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
+              {showPricing ? "▼" : "▶"} Politica de preco (preview)
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">
+              Simule como ficara com taxas + arredondamento R$X,90
+            </Text>
+          </Pressable>
 
-          {usePlatformPricing && price && !isNaN(parseFloat(price.replace(",", "."))) && parseFloat(price.replace(",", ".")) > 0 && (
-            <VStack bg="$green50" p="$3" borderRadius="$md" mb="$3" borderWidth="$1" borderColor="$green200">
-              <Text fontFamily="$body" fontSize="$xs" color="$green700">
-                O cliente vera:
-              </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$green800">
-                {formatPrice(calculateClientPrice(parseFloat(price.replace(",", "."))).clientPrice)}
-              </Text>
-              <Text fontFamily="$body" fontSize="$xs" color="$green600" mt="$1">
-                4% intermediador + 2% plataforma + ajuste estetico
-              </Text>
-            </VStack>
-          )}
+          {showPricing && price && !isNaN(parseFloat(price.replace(",", "."))) && parseFloat(price.replace(",", ".")) > 0 && (() => {
+            const priceNum = parseFloat(price.replace(",", "."));
+            const options = getAbsorptionOptions(priceNum);
+            const pricing = calculatePricing(priceNum, absorption);
+            const labels: Record<number, string> = {
+              0: "Cliente paga tudo",
+              25: "Pro paga 25%",
+              50: "Metade cada",
+              75: "Pro paga 75%",
+              100: "Pro paga tudo",
+            };
+            return (
+              <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200" mb="$3">
+                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
+                  Quem absorve a taxa (6%)?
+                </Text>
+                <HStack space="xs" mb="$3" flexWrap="wrap">
+                  {options.map((pct) => (
+                    <Pressable
+                      key={pct}
+                      onPress={() => setAbsorption(pct)}
+                      bg={absorption === pct ? "$green500" : "$white"}
+                      py="$1.5"
+                      px="$3"
+                      borderRadius="$full"
+                      borderWidth="$1"
+                      borderColor={absorption === pct ? "$green600" : "$coolGray300"}
+                      mb="$1"
+                    >
+                      <Text fontFamily="$body" fontSize="$xs" color={absorption === pct ? "$white" : "$coolGray600"}>
+                        {labels[pct] ?? `${pct}%`}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </HStack>
+                <HStack justifyContent="space-between" mb="$1">
+                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Cliente paga:</Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$green700" fontSize="$lg">
+                    R$ {pricing.clientPrice.toFixed(2)}
+                  </Text>
+                </HStack>
+                <HStack justifyContent="space-between" mb="$1">
+                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Pro recebe:</Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$blue600">
+                    R$ {pricing.proReceives.toFixed(2)}
+                  </Text>
+                </HStack>
+                <HStack justifyContent="space-between">
+                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Taxa plataforma:</Text>
+                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
+                    R$ {pricing.platformFee.toFixed(2)}
+                  </Text>
+                </HStack>
+                <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
+                  * Preview — no MVP o profissional recebe o valor integral
+                </Text>
+              </VStack>
+            );
+          })()}
 
           <Button
             title="Adicionar Serviço"
