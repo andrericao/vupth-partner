@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-05-28
+> **Ultima atualizacao:** 2026-06-03
 
 ---
 
@@ -370,16 +370,18 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ## 10. Pendente de Implementacao
 
 ### Alta prioridade (MVP)
-| Item | Descricao |
-|------|-----------|
-| Profissional auto-registrado adiciona servicos | Apos afiliar, profissional adiciona seus proprios servicos (servicos sao vinculados ao profissional, nao ao establishment) |
-| Dashboard Owner | Filas dos clientes, resumo de atendimentos, tempos medios, valores por profissional, quantidade de clientes atendidos |
-| Dashboard Profissional | Ver fila, acessar informacoes de clientes |
-| Tela de fila do profissional | start/pause/resume/finish attendance |
-| Dashboard com polling | GET /establishment/id/{id}/professionals-with-queue a cada 30s (TanStack React Query) |
-| Completar dados do establishment | Endereco completo (bairro, cidade, CEP) via POST /establishments/{id}/addresses — necessario para busca por bairro/cidade no app cliente |
-| Variavel de ambiente API | EXPO_PUBLIC_API_ENV para alternar local/staging/prod |
-| Preview de pricing para profissional | Tela mostrando como o preco sera calculado quando o intermediador for implementado. Profissional insere preco desejado, escolhe absorpcao, ve preview: preco cliente (X,90), quanto recebe, taxa plataforma. Engine pronto em `src/lib/pricing.ts` (27 testes). **No MVP nao ha split real — cliente paga e profissional recebe tudo.** |
+| Item | Descricao | Status |
+|------|-----------|--------|
+| ~~Profissional auto-registrado adiciona servicos~~ | Tela my-services.tsx com lista + formulario + preview pricing com absorcao | ✅ Implementado (2026-06-03) |
+| ~~Dashboard Owner~~ | Filas dos clientes via polling 30s, total na fila, profissionais disponiveis, toggle abrir/fechar, botoes add prof/service/endereco | ✅ Implementado |
+| ~~Dashboard Profissional~~ | Ver fila, info clientes, servicos, valor, tempo decorrido | ✅ Implementado |
+| ~~Tela de fila do profissional~~ | start/pause/resume/finish/remove attendance com cards expandiveis | ✅ Implementado |
+| ~~Dashboard com polling~~ | useQueuePolling hook com TanStack React Query, refetch 30s, staleTime 15s | ✅ Implementado |
+| ~~Variavel de ambiente API~~ | EXPO_PUBLIC_API_ENV (local/staging/prod) + EXPO_PUBLIC_API_LOCAL_IP no .env | ✅ Implementado (2026-06-03) |
+| ~~Preview de pricing~~ | Engine em `src/lib/pricing.ts` com absorcao por faixa (<R$50: 0/50/100%, >=R$50: 0/25/75/100%). Preview em add-service (owner) e my-services (professional). **No MVP nao ha split real.** | ✅ Implementado (2026-06-03) |
+| Completar dados do establishment | Frontend pronto (address.tsx conectado + addAddress no store). **Aguardando endpoint backend POST /establishments/{id}/addresses** | ⚠️ Bloqueado pelo backend |
+| Testar manualmente no celular | Validar todos os fluxos (owner e professional) com backend local via Expo Go | ❌ Pendente |
+| Rodar Maestro seed_complete.yaml | Seed E2E: 4 establishments + profissionais + servicos | ❌ Pendente (depende do teste manual) |
 
 ### Media prioridade
 | Item | Descricao |
