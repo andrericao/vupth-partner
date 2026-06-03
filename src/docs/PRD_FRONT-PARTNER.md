@@ -379,6 +379,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | Dashboard com polling | GET /establishment/id/{id}/professionals-with-queue a cada 30s (TanStack React Query) |
 | Completar dados do establishment | Endereco completo (bairro, cidade, CEP) via POST /establishments/{id}/addresses — necessario para busca por bairro/cidade no app cliente |
 | Variavel de ambiente API | EXPO_PUBLIC_API_ENV para alternar local/staging/prod |
+| Preview de pricing para profissional | Tela mostrando como o preco sera calculado quando o intermediador for implementado. Profissional insere preco desejado, escolhe absorpcao, ve preview: preco cliente (X,90), quanto recebe, taxa plataforma. Engine pronto em `src/lib/pricing.ts` (27 testes). **No MVP nao ha split real — cliente paga e profissional recebe tudo.** |
 
 ### Media prioridade
 | Item | Descricao |
@@ -387,6 +388,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | Tratar TEMPORARILY_CLOSED | Terceiro estado no toggle do dashboard |
 | Paleta PRD | #1B4332, #52B788, #00B37E, #F7FAF8 |
 | Fontes DM Sans + DM Mono | — |
+| Implementar intermediador de pagamento | Integrar Stripe/Pagar.me, ativar split real de taxas (6% = 4% intermediador + 2% plataforma). Unificar `src/utils/pricing.ts` e `src/lib/pricing.ts` neste momento |
 
 ### Baixa prioridade
 | Item | Descricao |
@@ -400,12 +402,12 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ## 11. Pendencias futuras para o Backend (escrito pelo front-partner)
 
-> Itens que o frontend partner precisa do backend para funcionalidades futuras.
-> Nao sao bloqueantes agora, mas devem ser planejados.
+> Itens que o frontend partner precisa do backend.
+> Marcados com **PRIORIDADE** os que serao implementados em breve.
 
 | # | Item | Descricao | Justificativa |
 |---|------|-----------|---------------|
-| 1 | **Endpoint de historico de atendimentos** | `GET /attendances?establishmentId=X&dateFrom=Y&dateTo=Z&status=FINISHED` | Relatorios semanais/mensais (receita, atendimentos, tempo medio) nao podem ser construidos sem dados historicos. O endpoint `professionals-with-queue` so retorna fila ativa |
+| 1 | ~~PRIORIDADE — Endpoint de historico de atendimentos~~ | `GET /attendances?establishmentId=X&dateFrom=Y&dateTo=Z&status=FINISHED` — listar atendimentos por periodo, establishment, profissional e status. | ✅ **IMPLEMENTADO** (2026-06-03). Acesso: OWNER ou PROFESSIONAL. Response: `AttendanceListResponse[]` com clientId, clientName, services, totalValue, scheduledTime, startTime, endTime, durationInMinutes. |
 | 2 | **`GET /professional/me`** | Retorna dados do profissional logado (id, name, specialty, establishment_id) | O frontend precisa recuperar o establishment_id apos reiniciar o app. Hoje usa SecureStore como fallback, mas o ideal e ter um endpoint |
 | 3 | **Precificacao inteligente no ServiceItem** | Adicionar campos `uses_platform_pricing: boolean` e `client_price: number` ao ServiceItem | Hoje o calculo (4% intermediador + 2% plataforma + arredondamento estetico para R$X,90) e feito no frontend. O backend deve ser a fonte da verdade para que o app cliente exiba o preco correto |
 | 4 | **Endpoint de relatorios agregados** | `GET /establishment/{id}/reports?period=day\|week\|month` retornando total_attendances, total_revenue, avg_duration, top_professional, top_service | Evita que o frontend faca agregacao client-side de centenas de atendimentos. Melhor performance e consistencia |
