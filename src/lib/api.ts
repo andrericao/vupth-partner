@@ -1,7 +1,14 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const BASE_URL = "https://vupth-backend-ia.onrender.com";
+const API_URLS: Record<string, string> = {
+  local: `http://${process.env.EXPO_PUBLIC_API_LOCAL_IP ?? "192.168.0.16"}:8080`,
+  staging: "https://vupth-backend-ia.onrender.com",
+  prod: "https://vupth-backend-ia-production.up.railway.app",
+};
+
+const env = process.env.EXPO_PUBLIC_API_ENV ?? "staging";
+const BASE_URL = API_URLS[env] ?? API_URLS.staging;
 
 export const api = axios.create({
   baseURL: BASE_URL,
