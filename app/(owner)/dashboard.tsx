@@ -147,6 +147,13 @@ export default function OwnerDashboardScreen() {
         />
 
         <Button
+          title="Endereco"
+          onPress={() => router.push("/(owner)/onboarding/address" as any)}
+          bg="$cyan500"
+          $active-bg="$cyan600"
+        />
+
+        <Button
           title="Sair"
           onPress={handleLogout}
           bg="$coolGray400"

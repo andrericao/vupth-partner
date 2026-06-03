@@ -58,6 +58,17 @@ type EstablishmentState = {
     customName: string,
     price: number
   ) => Promise<ServiceItemResponse>;
+  addAddress: (
+    establishmentId: string,
+    address: {
+      street: string;
+      number: string;
+      neighborhood: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    }
+  ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
   reset: () => void;
 };
@@ -104,6 +115,14 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
       { serviceItemType, customName, price }
     );
 
+    return data;
+  },
+
+  addAddress: async (establishmentId, address) => {
+    const { data } = await api.post(
+      `/establishments/${establishmentId}/addresses`,
+      address
+    );
     return data;
   },
 

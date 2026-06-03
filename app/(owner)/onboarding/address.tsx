@@ -1,15 +1,57 @@
 import { useState } from "react";
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
+import { Alert } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
-import { StepsButton } from "@components/StepsButton";
+import { Button } from "@components/Button";
+import { useEstablishmentStore } from "@store/establishment.store";
 
 export default function AddressScreen() {
-  const [isInvalid, setIsInvalid] = useState(false);
+  const establishment = useEstablishmentStore((s) => s.establishment);
+  const addAddress = useEstablishmentStore((s) => s.addAddress);
 
-  const handleNext = () => {
-    router.push("/(owner)/onboarding/services");
+  const [zipCode, setZipCode] = useState("");
+  const [street, setStreet] = useState("");
+  const [number, setNumber] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!street.trim() || !number.trim() || !neighborhood.trim() || !city.trim() || !state.trim()) {
+      setIsInvalid(true);
+      return;
+    }
+
+    if (!establishment) {
+      Alert.alert("Erro", "Nenhum estabelecimento encontrado.");
+      return;
+    }
+
+    setIsInvalid(false);
+    setIsLoading(true);
+
+    try {
+      await addAddress(establishment.id, {
+        street: street.trim(),
+        number: number.trim(),
+        neighborhood: neighborhood.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        zipCode: zipCode.replace(/\D/g, ""),
+      });
+      Alert.alert("Endereco salvo", "Endereco do estabelecimento atualizado.", [
+        { text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) },
+      ]);
+    } catch (error: any) {
+      const msg = error?.response?.data?.message ?? "Nao foi possivel salvar o endereco.";
+      Alert.alert("Erro", msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -18,59 +60,69 @@ export default function AddressScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack
-        flex={1}
-        py="$12"
-        px="$6"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
         <Header showBackButton />
 
         <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
           <Heading mb="$12" size="3xl" fontFamily="$heading">
-            Endereço da Loja
+            Endereco da Loja
           </Heading>
 
           <Input
             textLabel="CEP"
             placeholder="01310100"
-            messageError="CEP inválido"
+            messageError="CEP invalido"
+            value={zipCode}
+            onChangeText={setZipCode}
             keyboardType="number-pad"
           />
 
           <Input
             textLabel="Logradouro"
             placeholder="Rua de exemplo"
-            messageError="Campo obrigatório"
+            messageError="Campo obrigatorio"
+            value={street}
+            onChangeText={setStreet}
           />
 
           <Input
-            textLabel="Número"
+            textLabel="Numero"
             placeholder="123"
-            messageError="Campo obrigatório"
+            messageError="Campo obrigatorio"
+            value={number}
+            onChangeText={setNumber}
             keyboardType="numeric"
           />
 
           <Input
             textLabel="Bairro"
             placeholder="Bairro"
-            messageError="Campo obrigatório"
+            messageError="Campo obrigatorio"
+            value={neighborhood}
+            onChangeText={setNeighborhood}
           />
 
           <Input
             textLabel="Cidade"
             placeholder="Cidade"
-            messageError="Campo obrigatório"
+            messageError="Campo obrigatorio"
+            value={city}
+            onChangeText={setCity}
           />
 
           <Input
             textLabel="Estado"
             placeholder="SP"
-            messageError="Campo obrigatório"
+            messageError="Campo obrigatorio"
+            value={state}
+            onChangeText={setState}
           />
 
-          <StepsButton title="Serviços" onPress={handleNext} />
+          <Button
+            title="Salvar Endereco"
+            onPress={handleSubmit}
+            isLoading={isLoading}
+          />
         </FormControl>
       </VStack>
     </ScrollView>
