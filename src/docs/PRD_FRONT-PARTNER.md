@@ -62,19 +62,19 @@ Register → Login → Register professional (sem establishment) → Refresh tok
 | `/establishment?name=X` | GET | Professional | Implementado | 2 |
 | `/professional/register` | POST | Professional | Implementado | 2 |
 | `/professional/affiliate` | POST | Professional | Implementado | 2 |
+| `/establishment/id/{id}/professionals-with-queue` | GET | Owner | Implementado | 2 |
+| `/attendances/{id}/start` | PATCH | Professional | Implementado | 2 |
+| `/attendances/{id}/finish` | PATCH | Professional | Implementado | 2 |
+| `/attendances/{id}/pause` | PATCH | Professional | Implementado | 1 |
+| `/attendances/{id}/resume` | PATCH | Professional | Implementado | 2 |
+| `/professional-queue/{id}/remove` | DELETE | Professional | Implementado | 1 |
+| `/professional/{id}/service-items` | GET | Professional | Implementado | — |
+| `/client-queue/{profId}/queue` | GET | Publico | **PENDENTE** | — |
+| `/professional-queue/add-quest-attendance` | POST | Professional | **PENDENTE** | — |
 | `/establishment/{id}/professionals` | POST | Owner | **FUTURO** | — |
-| `/establishment/id/{id}/professionals-with-queue` | GET | Owner | **FUTURO** | — |
-| `/attendances` | POST | Ambos | **FUTURO** | — |
-| `/attendances/{id}/start` | PATCH | Professional | **FUTURO** | — |
-| `/attendances/{id}/finish` | PATCH | Professional | **FUTURO** | — |
-| `/attendances/{id}/pause` | PATCH | Professional | **FUTURO** | — |
-| `/attendances/{id}/resume` | PATCH | Professional | **FUTURO** | — |
 | `/attendances/{id}/cancel` | PUT | Client | **FUTURO** | — |
-| `/professional-queue/add-quest-attendance` | POST | Publico | **FUTURO** | — |
-| `/professional-queue/{id}/remove` | DELETE | Professional | **FUTURO** | — |
-| `/client-queue/{profId}/queue` | GET | Publico | **FUTURO** | — |
 | `/profile/general-infos` | PATCH | Client | **FUTURO** | — |
-| `/establishments/{id}/addresses` | POST | Owner | **FUTURO** | — |
+| `/establishments/{id}/addresses` | POST | Owner | **FUTURO** (frontend pronto) | — |
 | `/users/me/addresses` | POST | Client | **FUTURO** | — |
 
 ---
@@ -370,22 +370,17 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ## 10. Pendente de Implementacao
 
 ### Alta prioridade (MVP)
-| Item | Descricao | Status |
-|------|-----------|--------|
-| ~~Profissional auto-registrado adiciona servicos~~ | Tela my-services.tsx com lista + formulario + preview pricing com absorcao | ✅ Implementado (2026-06-03) |
-| ~~Dashboard Owner~~ | Filas dos clientes via polling 30s, total na fila, profissionais disponiveis, toggle abrir/fechar, botoes add prof/service/endereco | ✅ Implementado |
-| ~~Dashboard Profissional~~ | Ver fila, info clientes, servicos, valor, tempo decorrido | ✅ Implementado |
-| ~~Tela de fila do profissional~~ | start/pause/resume/finish/remove attendance com cards expandiveis | ✅ Implementado |
-| ~~Dashboard com polling~~ | useQueuePolling hook com TanStack React Query, refetch 30s, staleTime 15s | ✅ Implementado |
-| ~~Variavel de ambiente API~~ | EXPO_PUBLIC_API_ENV (local/staging/prod) + EXPO_PUBLIC_API_LOCAL_IP no .env | ✅ Implementado (2026-06-03) |
-| ~~Preview de pricing~~ | Engine em `src/lib/pricing.ts` com absorcao por faixa (<R$50: 0/50/100%, >=R$50: 0/25/75/100%). Preview em add-service (owner) e my-services (professional). **No MVP nao ha split real.** | ✅ Implementado (2026-06-03) |
-| Completar dados do establishment | Frontend pronto (address.tsx conectado + addAddress no store). **Aguardando endpoint backend POST /establishments/{id}/addresses** | ⚠️ Bloqueado pelo backend |
-| Testar manualmente no celular | Validar todos os fluxos (owner e professional) com backend local via Expo Go | ❌ Pendente |
-| Rodar Maestro seed_complete.yaml | Seed E2E: 4 establishments + profissionais + servicos | ❌ Pendente (depende do teste manual) |
+| Item | Descricao |
+|------|-----------|
+| Fila completa (visao publica) | Tela consumindo `GET /client-queue/{profId}/queue` — exibir a fila do profissional para qualquer pessoa (cliente ou visitante). Usado no app cliente mas o partner tambem precisa visualizar |
+| Adicionar client GUEST na fila | Tela/botao para o profissional adicionar um cliente sem conta (walk-in) via `POST /professional-queue/add-quest-attendance`. Request: `{ professionalId, establishmentId, guestName, serviceItemIds }` |
+| Testar manualmente no celular | Validar todos os fluxos (owner e professional) com backend local via Expo Go |
+| Rodar Maestro seed_complete.yaml | Seed E2E: 4 establishments + profissionais + servicos |
 
 ### Media prioridade
 | Item | Descricao |
 |------|-----------|
+| Completar dados do establishment | Frontend pronto (address.tsx conectado + addAddress no store). **Aguardando endpoint backend `POST /establishments/{id}/addresses`** |
 | React Hook Form + Zod | Validacao nos formularios |
 | Tratar TEMPORARILY_CLOSED | Terceiro estado no toggle do dashboard |
 | Paleta PRD | #1B4332, #52B788, #00B37E, #F7FAF8 |
@@ -395,9 +390,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ### Baixa prioridade
 | Item | Descricao |
 |------|-----------|
-| Owner gerencia profissionais | POST /establishment/{id}/professionals |
-| Profile do usuario | PATCH /profile/general-infos |
-| Enderecos | POST /establishments/{id}/addresses |
+| Owner gerencia profissionais externos | `POST /establishment/{id}/professionals` — owner vincula profissional existente |
+| Profile do usuario | `PATCH /profile/general-infos` |
 | Migrar Gluestack v1 → v2 | Resolver warnings React 19 |
 
 ---
