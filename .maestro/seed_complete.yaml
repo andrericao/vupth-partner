@@ -443,7 +443,9 @@ appId: host.exp.exponent
 - tapOn: "Confirmar e Afiliar"
 - assertVisible: "Minha Fila"
 
-# Logout
+# Logout — profissional tem tabs, "Sair" esta na tab Perfil
+- tapOn: "Perfil"
+- assertVisible: "Sair"
 - tapOn: "Sair"
 - assertVisible: "Como deseja usar o VUPTH?"
 
@@ -490,6 +492,8 @@ appId: host.exp.exponent
 - tapOn: "Confirmar e Afiliar"
 - assertVisible: "Minha Fila"
 
-# Logout
+# Logout — profissional tem tabs, "Sair" esta na tab Perfil
+- tapOn: "Perfil"
+- assertVisible: "Sair"
 - tapOn: "Sair"
 - assertVisible: "Como deseja usar o VUPTH?"

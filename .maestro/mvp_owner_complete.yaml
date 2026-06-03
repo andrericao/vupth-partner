@@ -1,108 +1,67 @@
 appId: host.exp.exponent
 ---
-# ===========================================
 # VUPTH Partner — MVP Owner E2E Completo
-# ===========================================
-# Testa o fluxo inteiro:
-#   Register → Create Establishment → Open → Add Professional → Add Service
-#
-# Rodar:
-#   maestro test .maestro/mvp_owner_complete.yaml
+# Register → Create Establishment → Open → Add Professional → Add Service
+# Rodar: maestro test .maestro/mvp_owner_complete.yaml
+
+- evalScript: ${output.EMAIL = 'mvp-owner-' + Date.now() + '@test.dev'}
 
 # ---- 1. REGISTER ----
-
-- evalScript: ${output.EMAIL = 'owner-' + Date.now() + '@test.dev'}
-
 - assertVisible: "Como deseja usar o VUPTH?"
 - tapOn: "Sou dono de estabelecimento"
-
 - assertVisible: "Cadastrar"
-- tapOn: "email@email.com"
+- tapOn:
+    id: "register-email"
 - inputText: "${output.EMAIL}"
 - hideKeyboard
 - tapOn:
-    text: "senha"
-    index: 0
+    id: "register-password"
 - inputText: "Senha@123"
 - hideKeyboard
 - tapOn: "Criar Conta"
-
-- assertVisible:
-    text: "Dados da Loja"
-    timeout: 10000
+- assertVisible: "Dados da Loja"
 
 # ---- 2. CREATE ESTABLISHMENT ----
-
 - tapOn: "Rei do Corte LTDA"
-- inputText: "Barbearia Maestro Test"
+- inputText: "Barbearia MVP Test"
 - hideKeyboard
-
-- tapOn: "Barbearia, Salão etc"
-- assertVisible: "Barbearia"
-- tapOn:
-    text: "Barbearia"
-    index: 0
-
+- tapOn: "Barbearia"
 - tapOn: "Criar Estabelecimento"
-
-- assertVisible:
-    text: "Barbearia Maestro Test"
-    timeout: 10000
+- assertVisible: "Barbearia MVP Test"
 - assertVisible: "FECHADO"
 
 # ---- 3. OPEN ESTABLISHMENT ----
-
 - tapOn: "Abrir Estabelecimento"
-- assertVisible:
-    text: "ABERTO"
-    timeout: 10000
-- assertVisible: "Fechar Estabelecimento"
+- assertVisible: "ABERTO"
 
 # ---- 4. ADD PROFESSIONAL ----
-
 - tapOn: "Adicionar Profissional"
-- assertVisible:
-    text: "Novo Profissional"
-    timeout: 5000
-
+- assertVisible: "Novo Profissional"
 - tapOn: "Nome do profissional"
 - inputText: "Carlos Barbeiro"
 - hideKeyboard
-
 - tapOn: "Adicionar Profissional"
-- assertVisible:
-    text: "Profissional criado"
-    timeout: 10000
+- assertVisible: "Profissional criado"
 - tapOn: "OK"
-
-- assertVisible:
-    text: "Barbearia Maestro Test"
-    timeout: 5000
+- assertVisible: "Barbearia MVP Test"
 
 # ---- 5. ADD SERVICE ----
-
 - tapOn: "Adicionar Serviço"
-- assertVisible:
-    text: "Novo Serviço"
-    timeout: 5000
-
-- tapOn: "Ex: Corte Social"
+- assertVisible: "Novo Serviço"
+- tapOn:
+    id: "service-custom-name"
 - inputText: "Corte Simples"
 - hideKeyboard
-
 - tapOn: "35.00"
 - inputText: "35"
 - hideKeyboard
-
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
 - tapOn: "Adicionar Serviço"
-- assertVisible:
-    text: "Serviço adicionado"
-    timeout: 10000
+- assertVisible: "Serviço adicionado"
 - tapOn: "OK"
 
-# ---- VERIFICAÇÃO FINAL ----
-
-- assertVisible:
-    text: "Barbearia Maestro Test"
-    timeout: 5000
+# ---- VERIFICACAO FINAL ----
+- assertVisible: "Barbearia MVP Test"
 - assertVisible: "ABERTO"
