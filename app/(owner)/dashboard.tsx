@@ -135,6 +135,13 @@ export default function OwnerDashboardScreen() {
         />
 
         <Button
+          title="Atendimentos"
+          onPress={() => router.push("/(owner)/attendances" as any)}
+          bg="$cyan600"
+          $active-bg="$cyan700"
+        />
+
+        <Button
           title="Adicionar Serviço"
           onPress={() =>
             router.push({
