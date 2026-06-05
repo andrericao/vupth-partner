@@ -12,7 +12,7 @@ import {
   Spinner,
 } from "@gluestack-ui/themed";
 import { RefreshControl } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
@@ -60,7 +60,7 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
   );
 }
 
-function ProfessionalCard({ professional }: { professional: ProfessionalWithQueue }) {
+function ProfessionalCard({ professional, establishmentId }: { professional: ProfessionalWithQueue; establishmentId: string }) {
   const [expanded, setExpanded] = useState(false);
   const allAttendances = [
     ...(professional.current_attendance ? [professional.current_attendance] : []),
@@ -93,6 +93,30 @@ function ProfessionalCard({ professional }: { professional: ProfessionalWithQueu
           </VStack>
         </HStack>
       </Pressable>
+
+      {expanded && (
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: "/(owner)/professional-queue",
+              params: {
+                professionalId: professional.id,
+                establishmentId,
+                professionalName: professional.name,
+              },
+            } as any)
+          }
+          py="$2"
+          px="$4"
+          bg="$green50"
+          borderTopWidth="$1"
+          borderTopColor="$coolGray100"
+        >
+          <Text fontFamily="$body" fontSize="$sm" color="$green700" textAlign="center">
+            Ver fila detalhada
+          </Text>
+        </Pressable>
+      )}
 
       {expanded && allAttendances.length > 0 && (
         <VStack borderTopWidth="$1" borderTopColor="$coolGray100">
@@ -167,7 +191,7 @@ export default function OwnerQueuesScreen() {
         )}
 
         {professionals.map((prof) => (
-          <ProfessionalCard key={prof.id} professional={prof} />
+          <ProfessionalCard key={prof.id} professional={prof} establishmentId={establishmentId ?? ""} />
         ))}
 
         {!isLoading && professionals.length === 0 && (

@@ -58,3 +58,33 @@ export type EstablishmentWithProfessionals = {
   available_professionals: number;
   professionals: ProfessionalWithQueue[];
 };
+
+export type QueueResponse = {
+  professionalId: string;
+  professionalName: string;
+  establishmentId: string;
+  establishmentName: string;
+  size: number;
+  attendancesInQueue: AttendanceInQueue[];
+  totalEstimatedMinutes: number;
+  totalElapsedMinutes: number;
+  totalRemainingMinutes: number;
+  inAttendance: AttendanceInProgress | null;
+};
+
+export type AttendanceHistoryItem = {
+  id: string;
+  establishmentId: string;
+  establishmentName: string;
+  professionalId: string;
+  professionalName: string;
+  clientId: string | null;
+  clientName: string;
+  services: AttendanceServiceItem[];
+  status: AttendanceStatus;
+  totalValue: number;
+  scheduledTime: string;
+  startTime: string | null;
+  endTime: string | null;
+  durationInMinutes: number | null;
+};

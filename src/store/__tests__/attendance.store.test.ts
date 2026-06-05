@@ -71,10 +71,59 @@ const IN_PROGRESS_RESPONSE = {
   isPaused: false,
 };
 
+const PROFESSIONAL_QUEUE_RESPONSE = {
+  professionalId: "prof-uuid-1",
+  professionalName: "Carlos",
+  establishmentId: "estab-uuid-1",
+  establishmentName: "Barbearia Teste",
+  size: 2,
+  attendancesInQueue: [
+    {
+      id: "att-uuid-1",
+      establishmentId: "estab-uuid-1",
+      establishmentName: "Barbearia Teste",
+      professionalId: "prof-uuid-1",
+      professionalName: "Carlos",
+      clientId: "client-uuid-1",
+      clientName: "Joao",
+      services: [{ id: "svc-1", customName: "Corte Degradê", estimatedMinutes: 30 }],
+      status: "SCHEDULED",
+      totalValue: 35.0,
+      scheduledTime: "2026-05-30T14:00:00Z",
+      estimatedMinutes: 30,
+      durationInMinutes: null,
+    },
+  ],
+  totalEstimatedMinutes: 60,
+  totalElapsedMinutes: 0,
+  totalRemainingMinutes: 60,
+  inAttendance: null,
+};
+
+const HISTORY_RESPONSE = [
+  {
+    id: "att-hist-1",
+    establishmentId: "estab-uuid-1",
+    establishmentName: "Barbearia Teste",
+    professionalId: "prof-uuid-1",
+    professionalName: "Carlos",
+    clientId: "client-uuid-1",
+    clientName: "Joao",
+    services: [{ id: "svc-1", customName: "Corte Degradê", estimatedMinutes: 30 }],
+    status: "FINISHED",
+    totalValue: 35.0,
+    scheduledTime: "2026-05-30T14:00:00Z",
+    startTime: "2026-05-30T14:02:00Z",
+    endTime: "2026-05-30T14:30:00Z",
+    durationInMinutes: 28,
+  },
+];
+
 beforeEach(() => {
   useAttendanceStore.setState({
     professionals: [],
     establishmentData: null,
+    history: [],
     isLoading: false,
     error: null,
   });
@@ -198,11 +247,126 @@ describe("attendance.store", () => {
     });
   });
 
+  describe("fetchProfessionalQueue", () => {
+    it("calls GET /client-queue/{profId}/queue with establishmentId param", async () => {
+      mock
+        .onGet("/client-queue/prof-uuid-1/queue")
+        .reply(200, PROFESSIONAL_QUEUE_RESPONSE);
+
+      const result = await useAttendanceStore
+        .getState()
+        .fetchProfessionalQueue("prof-uuid-1", "estab-uuid-1");
+
+      expect(mock.history.get[0].url).toBe("/client-queue/prof-uuid-1/queue");
+      expect(mock.history.get[0].params).toEqual({ establishmentId: "estab-uuid-1" });
+      expect(result.professionalName).toBe("Carlos");
+      expect(result.size).toBe(2);
+      expect(result.attendancesInQueue).toHaveLength(1);
+    });
+
+    it("throws on 404 professional not found", async () => {
+      mock
+        .onGet("/client-queue/invalid/queue")
+        .reply(404, { code: "PROFESSIONAL_NOT_FOUND" });
+
+      await expect(
+        useAttendanceStore.getState().fetchProfessionalQueue("invalid", "estab-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("addGuestAttendance", () => {
+    it("calls POST /professional-queue/add-quest-attendance with guest data", async () => {
+      mock
+        .onPost("/professional-queue/add-quest-attendance")
+        .reply(201, PROFESSIONAL_QUEUE_RESPONSE);
+
+      const result = await useAttendanceStore.getState().addGuestAttendance({
+        professionalId: "prof-uuid-1",
+        establishmentId: "estab-uuid-1",
+        serviceItemIds: ["svc-1"],
+        clientName: "Maria Walk-in",
+      });
+
+      expect(mock.history.post[0].url).toBe("/professional-queue/add-quest-attendance");
+      const sentData = JSON.parse(mock.history.post[0].data);
+      expect(sentData).toEqual({
+        professionalId: "prof-uuid-1",
+        establishmentId: "estab-uuid-1",
+        serviceItemIds: ["svc-1"],
+        clientName: "Maria Walk-in",
+      });
+      expect(result.professionalName).toBe("Carlos");
+    });
+
+    it("throws on 400 missing required fields", async () => {
+      mock
+        .onPost("/professional-queue/add-quest-attendance")
+        .reply(400, { message: "Lista de serviços não pode estar vazia" });
+
+      await expect(
+        useAttendanceStore.getState().addGuestAttendance({
+          professionalId: "prof-uuid-1",
+          establishmentId: "estab-uuid-1",
+          serviceItemIds: [],
+          clientName: "Guest",
+        })
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("fetchHistory", () => {
+    it("calls GET /attendances with query params and stores result", async () => {
+      mock.onGet("/attendances").reply(200, HISTORY_RESPONSE);
+
+      const result = await useAttendanceStore.getState().fetchHistory({
+        establishmentId: "estab-uuid-1",
+        status: "FINISHED",
+      });
+
+      expect(mock.history.get[0].url).toBe("/attendances");
+      expect(mock.history.get[0].params).toEqual({
+        establishmentId: "estab-uuid-1",
+        status: "FINISHED",
+      });
+      expect(result).toHaveLength(1);
+      expect(result[0].clientName).toBe("Joao");
+      expect(result[0].durationInMinutes).toBe(28);
+
+      const state = useAttendanceStore.getState();
+      expect(state.history).toHaveLength(1);
+    });
+
+    it("calls GET /attendances with professionalId param", async () => {
+      mock.onGet("/attendances").reply(200, HISTORY_RESPONSE);
+
+      await useAttendanceStore.getState().fetchHistory({
+        professionalId: "prof-uuid-1",
+      });
+
+      expect(mock.history.get[0].params).toEqual({
+        professionalId: "prof-uuid-1",
+      });
+    });
+
+    it("returns empty array when no history", async () => {
+      mock.onGet("/attendances").reply(200, []);
+
+      const result = await useAttendanceStore.getState().fetchHistory({
+        establishmentId: "estab-uuid-1",
+      });
+
+      expect(result).toEqual([]);
+      expect(useAttendanceStore.getState().history).toEqual([]);
+    });
+  });
+
   describe("reset", () => {
-    it("clears all state", () => {
+    it("clears all state including history", () => {
       useAttendanceStore.setState({
         professionals: QUEUE_RESPONSE.professionals as any,
         establishmentData: QUEUE_RESPONSE as any,
+        history: HISTORY_RESPONSE as any,
         isLoading: true,
         error: "some error",
       });
@@ -212,6 +376,7 @@ describe("attendance.store", () => {
       const state = useAttendanceStore.getState();
       expect(state.professionals).toEqual([]);
       expect(state.establishmentData).toBeNull();
+      expect(state.history).toEqual([]);
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
     });
