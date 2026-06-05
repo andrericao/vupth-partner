@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-03
+> **Ultima atualizacao:** 2026-06-05
 
 ---
 
@@ -42,7 +42,7 @@ Register → Login → Quick-create establishment → Refresh token
 ```
 Register → Login → Register professional (sem establishment) → Refresh token
 → Buscar establishment por nome → Selecionar → Afiliar-se
-→ Tela de fila/espera
+→ Tabs: Fila (gerenciamento) | Servicos (CRUD + pricing) | Perfil (menu)
 ```
 
 ---
@@ -69,8 +69,9 @@ Register → Login → Register professional (sem establishment) → Refresh tok
 | `/attendances/{id}/resume` | PATCH | Professional | Implementado | 2 |
 | `/professional-queue/{id}/remove` | DELETE | Professional | Implementado | 1 |
 | `/professional/{id}/service-items` | GET | Professional | Implementado | — |
-| `/client-queue/{profId}/queue` | GET | Publico | **PENDENTE** | — |
-| `/professional-queue/add-quest-attendance` | POST | Professional | **PENDENTE** | — |
+| `/client-queue/{profId}/queue` | GET | Publico | Implementado | 2 |
+| `/professional-queue/add-quest-attendance` | POST | Professional | Implementado | 2 |
+| `/attendances` | GET | Ambos | Implementado (frontend) | 3 |
 | `/establishment/{id}/professionals` | POST | Owner | **FUTURO** | — |
 | `/attendances/{id}/cancel` | PUT | Client | **FUTURO** | — |
 | `/profile/general-infos` | PATCH | Client | **FUTURO** | — |
@@ -85,9 +86,13 @@ Register → Login → Register professional (sem establishment) → Refresh tok
 1. **(auth)/index.tsx** — Escolha de papel: "Sou dono" vs "Sou profissional"
 2. **(auth)/register.tsx** — Email + senha → `POST /auth/register` → auto-login
 3. **(owner)/onboarding/establishment.tsx** — Nome + tipo → `POST /establishment/quick-create`
-4. **(owner)/dashboard.tsx** — Badge ABERTO/FECHADO, toggle, adicionar profissional/servico, logout
+4. **(owner)/dashboard.tsx** — Badge ABERTO/FECHADO, toggle, polling fila 30s, botoes: add prof/servico/filas/endereco/sair
 5. **(owner)/add-professional.tsx** — Nome + especialidade → `POST /professional/quick-create`
-6. **(owner)/add-service.tsx** — Especialidade → tipo de servico → nome + preco → `POST /establishment/{id}/service-items`
+6. **(owner)/add-service.tsx** — Especialidade → tipo de servico → nome + preco + pricing preview → `POST /establishment/{id}/service-items`
+7. **(owner)/queues.tsx** — Visao de todas as filas por profissional (cards expansiveis), total na fila, profissionais disponiveis, link para fila detalhada
+8. **(owner)/professional-queue.tsx** — Fila detalhada de um profissional via `GET /client-queue/{profId}/queue` — atendimento atual + lista de espera + tempo estimado
+9. **(owner)/attendances.tsx** — Historico de atendimentos do establishment: filtros (todos/finalizados/cancelados), resumo de receita
+10. **(owner)/onboarding/address.tsx** — Endereco do establishment (frontend pronto, backend pendente)
 
 ### Sequencia de chamadas
 ```
@@ -123,7 +128,14 @@ PATCH /establishment/{id}/open-status { openStatus: "OPEN" }
    - Step 1: Nome + especialidade → `POST /professional/register`
    - Step 2: Buscar establishment → `GET /establishment?name=X`
    - Step 3: Selecionar da lista → `POST /professional/affiliate { establishmentId }`
-4. **(professional)/queue.tsx** — Placeholder com botao "Sair"
+4. **(professional)/_layout.tsx** — Tab navigation: Fila | Servicos | Perfil
+5. **(professional)/queue.tsx** — Gerenciamento de fila: atendimento atual + lista de espera, start/pause/resume/finish/remove, polling 30s, pull-to-refresh, botao "Adicionar Walk-in"
+6. **(professional)/add-guest.tsx** — Adicionar cliente walk-in: nome + selecao multipla de servicos + total → `POST /professional-queue/add-quest-attendance`
+7. **(professional)/my-services.tsx** — Lista servicos + formulario com filtro por especialidade + pricing preview com absorcao
+8. **(professional)/profile.tsx** — Menu: Atendimentos, Relatorios, Meus Servicos, Configuracoes, Sair
+9. **(professional)/attendances.tsx** — Historico de atendimentos: filtros (todos/finalizados/cancelados) → `GET /attendances` (backend pendente)
+9. **(professional)/reports.tsx** — Stats do dia (fila, tempo estimado), semana/mes aguardando endpoint
+10. **(professional)/settings.tsx** — Dados do profissional (nome, email, senha, establishment) — edicao em breve
 
 ### Sequencia de chamadas
 ```
@@ -205,12 +217,27 @@ POST /professional/affiliate { establishmentId }
 - `updateOpenStatus(id, status)` — PATCH /establishment/{id}/open-status
 - `quickCreateProfessional(name, establishmentId, specialty?)` — POST /professional/quick-create
 - `addServiceItem(establishmentId, serviceItemType, customName, price)` — POST /establishment/{id}/service-items
+- `addAddress(establishmentId, addressData)` — POST /establishments/{id}/addresses (frontend pronto, backend pendente)
 - `searchByName(name)` — GET /establishment?name=X
 - `reset()` — limpa estado ao fazer logout
 
 ### professional.store.ts
 - `register(name, specialty?)` — POST /professional/register
 - `affiliate(establishmentId)` — POST /professional/affiliate
+- `fetchMyServices()` — GET /professional/{id}/service-items
+- `restoreProfessional()` — recupera dados do SecureStore ao reiniciar app
+- `reset()` — limpa estado ao fazer logout
+
+### attendance.store.ts
+- `fetchQueue(establishmentId)` — GET /establishment/id/{id}/professionals-with-queue
+- `fetchProfessionalQueue(professionalId, establishmentId)` — GET /client-queue/{profId}/queue
+- `addGuestAttendance({ professionalId, establishmentId, serviceItemIds, clientName })` — POST /professional-queue/add-quest-attendance
+- `fetchHistory({ establishmentId?, professionalId?, status? })` — GET /attendances (backend pendente)
+- `startAttendance(attendanceId)` — PATCH /attendances/{id}/start
+- `finishAttendance(attendanceId)` — PATCH /attendances/{id}/finish
+- `pauseAttendance(attendanceId)` — PATCH /attendances/{id}/pause
+- `resumeAttendance(attendanceId)` — PATCH /attendances/{id}/resume
+- `removeFromQueue(attendanceId)` — DELETE /professional-queue/{id}/remove
 - `reset()` — limpa estado ao fazer logout
 
 ---
@@ -227,14 +254,24 @@ app/
   (owner)/
     onboarding/
       establishment.tsx          — Quick-create establishment
-      address.tsx                — Endereco (visual, sem API)
+      address.tsx                — Endereco conectado ao store (backend pendente)
       services.tsx               — Servicos (visual, sem API)
-    dashboard.tsx                — Dashboard: nome + badge + toggle + add prof/service + logout
+    dashboard.tsx                — Badge ABERTO/FECHADO, toggle, polling fila, botoes: add prof/servico/filas/atendimentos/endereco/sair
     add-professional.tsx         — Criar profissional (quick-create) com especialidade
-    add-service.tsx              — Adicionar servico com filtro por especialidade (21 tipos)
+    add-service.tsx              — Adicionar servico com filtro por especialidade (21 tipos) + pricing preview
+    queues.tsx                   — Visao de todas as filas: cards por profissional (expansiveis), link para fila detalhada
+    professional-queue.tsx       — Fila detalhada de um profissional (GET /client-queue/{profId}/queue)
+    attendances.tsx              — Historico de atendimentos do establishment (filtros, resumo receita)
   (professional)/
+    _layout.tsx                  — Tab navigation: Fila | Servicos | Perfil
     onboarding.tsx               — 3 steps: profile → busca → afiliacao
-    queue.tsx                    — Placeholder com botao Sair
+    queue.tsx                    — Gerenciamento de fila + botao "Adicionar Walk-in", polling 30s
+    add-guest.tsx                — Adicionar walk-in: nome + multi-select servicos + total (POST /professional-queue/add-quest-attendance)
+    my-services.tsx              — Lista + CRUD servicos com pricing preview (absorcao por faixa)
+    profile.tsx                  — Menu: Atendimentos, Relatorios, Meus Servicos, Configuracoes, Sair
+    attendances.tsx              — Historico de atendimentos (filtros, GET /attendances — backend pendente)
+    reports.tsx                  — Stats do dia (fila + tempo), semana/mes aguardando endpoint
+    settings.tsx                 — Dados do profissional (edicao em breve)
 ```
 
 ---
@@ -354,16 +391,22 @@ Cria 4 establishments com profissionais e servicos, depois 2 profissionais indep
 
 Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
+### Outros testes Maestro
+- `mvp_owner_complete.yaml` — fluxo rapido: 1 owner completo (register → establishment → open → professional → service)
+- `test_affiliate.yaml` — teste isolado de afiliacao profissional
+- `test_professional_screens.yaml` — teste de navegacao profissional (tabs)
+
 ### Limitacoes do Maestro
 - `inputText` nao suporta Unicode (acentos removidos nos nomes)
-- Nao suporta `- wait: N` — usar `assertVisible` que ja tem timeout
+- Nao suporta `outputs` em `runScript` (Maestro 2.5.1) — usar `evalScript` com `${output.VAR}`
+- Nao suporta `timeout` em `assertVisible` nem `extendedWaitUntil`
 - Seletores por `id` (testID) preferidos sobre `text` para evitar ambiguidade
-- Spell checker do Android converte palavras sem acento → desabilitar via `adb shell settings put secure spell_checker_enabled 0`
+- Spell checker do Android converte palavras sem acento → desabilitar via `adb shell settings put secure spell_checker_enabled 0` (feito no setup.sh)
 
 ### Status atual
-- Owner 1 (BARBER): passa completo ✅
-- Owner 2 (BEAUTY_SALON): bloqueado pelo spell checker do Android ("Salao" → "Salao")
-- Owners 3-4 e Professionals 1-2: nao testados ainda
+- Maestro atualizado para estado atual das telas (tabs profissional, testIDs)
+- Flows antigos removidos (.maestro/flows/, .maestro/helpers/)
+- Pendente: rodar no celular fisico via Expo Go
 
 ---
 
@@ -372,8 +415,10 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ### Alta prioridade (MVP)
 | Item | Descricao |
 |------|-----------|
-| Fila completa (visao publica) | Tela consumindo `GET /client-queue/{profId}/queue` — exibir a fila do profissional para qualquer pessoa (cliente ou visitante). Usado no app cliente mas o partner tambem precisa visualizar |
-| Adicionar client GUEST na fila | Tela/botao para o profissional adicionar um cliente sem conta (walk-in) via `POST /professional-queue/add-quest-attendance`. Request: `{ professionalId, establishmentId, guestName, serviceItemIds }` |
+| ~~Fila completa (visao do owner)~~ | ~~`queues.tsx` + `professional-queue.tsx`~~ ✅ Implementado |
+| ~~Fila publica por profissional~~ | ~~`GET /client-queue/{profId}/queue` — hook `useProfessionalQueue`, tela `professional-queue.tsx`~~ ✅ Implementado |
+| ~~Adicionar client GUEST na fila~~ | ~~`add-guest.tsx` + botao Walk-in na fila — `POST /professional-queue/add-quest-attendance`~~ ✅ Implementado |
+| ~~Historico de atendimentos por role~~ | ~~Owner `attendances.tsx` (por establishment) + Professional `attendances.tsx` (pessoal) — filtros por status~~ ✅ Frontend implementado, **backend GET /attendances pendente** |
 | Testar manualmente no celular | Validar todos os fluxos (owner e professional) com backend local via Expo Go |
 | Rodar Maestro seed_complete.yaml | Seed E2E: 4 establishments + profissionais + servicos |
 
@@ -403,7 +448,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 | # | Item | Descricao | Justificativa |
 |---|------|-----------|---------------|
-| 1 | ~~PRIORIDADE — Endpoint de historico de atendimentos~~ | `GET /attendances?establishmentId=X&dateFrom=Y&dateTo=Z&status=FINISHED` — listar atendimentos por periodo, establishment, profissional e status. | ✅ **IMPLEMENTADO** (2026-06-03). Acesso: OWNER ou PROFESSIONAL. Response: `AttendanceListResponse[]` com clientId, clientName, services, totalValue, scheduledTime, startTime, endTime, durationInMinutes. |
+| 1 | **PRIORIDADE — Endpoint de historico de atendimentos** | `GET /attendances?establishmentId=X&professionalId=Y&status=FINISHED` — listar atendimentos por establishment, profissional e status. | ❌ **NAO EXISTE NO BACKEND** (verificado 2026-06-05). Nenhum `@GetMapping` em `AttendanceController`. Frontend partner ja implementou as telas (`attendances.tsx` owner e professional) e o store method `fetchHistory()` — aguardando backend. Response esperado: `AttendanceInQueueResponse[]` ou similar com clientId, clientName, services, totalValue, scheduledTime, startTime, endTime, durationInMinutes. |
 | 2 | **`GET /professional/me`** | Retorna dados do profissional logado (id, name, specialty, establishment_id) | O frontend precisa recuperar o establishment_id apos reiniciar o app. Hoje usa SecureStore como fallback, mas o ideal e ter um endpoint |
 | 3 | **Precificacao inteligente no ServiceItem** | Adicionar campos `uses_platform_pricing: boolean` e `client_price: number` ao ServiceItem | Hoje o calculo (4% intermediador + 2% plataforma + arredondamento estetico para R$X,90) e feito no frontend. O backend deve ser a fonte da verdade para que o app cliente exiba o preco correto |
 | 4 | **Endpoint de relatorios agregados** | `GET /establishment/{id}/reports?period=day\|week\|month` retornando total_attendances, total_revenue, avg_duration, top_professional, top_service | Evita que o frontend faca agregacao client-side de centenas de atendimentos. Melhor performance e consistencia |
