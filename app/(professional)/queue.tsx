@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl } from "react-native";
+import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -220,8 +221,18 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         )}
 
+        {myProfessional && (
+          <Button
+            title="Adicionar Walk-in"
+            onPress={() => router.push("/(professional)/add-guest" as any)}
+            bg="$amber500"
+            $active-bg="$amber600"
+            mt="$6"
+          />
+        )}
+
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
-          <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
+          <VStack flex={1} alignItems="center" justifyContent="center" mt="$6">
             <Text fontFamily="$body" color="$coolGray400" textAlign="center" fontSize="$lg">
               Nenhum cliente na fila
             </Text>
