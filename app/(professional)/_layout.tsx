@@ -1,7 +1,10 @@
 import { Tabs } from "expo-router";
 import { Text } from "@gluestack-ui/themed";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfessionalLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -11,8 +14,8 @@ export default function ProfessionalLayout() {
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E5E7EB",
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
         },
         tabBarLabelStyle: {

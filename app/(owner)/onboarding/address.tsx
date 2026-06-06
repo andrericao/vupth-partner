@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
@@ -55,10 +55,15 @@ export default function AddressScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
         <Header showBackButton />
@@ -126,5 +131,6 @@ export default function AddressScreen() {
         </FormControl>
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

@@ -10,7 +10,7 @@ import {
   Spinner,
 } from "@gluestack-ui/themed";
 import { router } from "expo-router";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -119,10 +119,15 @@ export default function ProfessionalOnboardingScreen() {
 
   if (step === "profile") {
     return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
       <ScrollView
         w="$full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
           <Header showBackButton />
@@ -180,15 +185,21 @@ export default function ProfessionalOnboardingScreen() {
           </FormControl>
         </VStack>
       </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
   if (step === "search") {
     return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
       <ScrollView
         w="$full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6">
           <Header showBackButton />
@@ -264,6 +275,7 @@ export default function ProfessionalOnboardingScreen() {
           </FormControl>
         </VStack>
       </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 

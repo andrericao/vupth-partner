@@ -24,6 +24,8 @@
 8. [Enums da API](#8-enums-da-api)
 9. [Testes E2E — Maestro](#9-testes-e2e--maestro)
 10. [Pendente de Implementacao](#10-pendente-de-implementacao)
+11. [Pendencias futuras para o Backend](#11-pendencias-futuras-para-o-backend-escrito-pelo-front-partner)
+12. [Features Futuras (Planejamento)](#12-features-futuras-planejamento)
 
 ---
 
@@ -222,11 +224,12 @@ POST /professional/affiliate { establishmentId }
 - `reset()` — limpa estado ao fazer logout
 
 ### professional.store.ts
-- `register(name, specialty?)` — POST /professional/register
-- `affiliate(establishmentId)` — POST /professional/affiliate
+- `register(name, specialty?)` — POST /professional/register (normaliza camelCase/snake_case)
+- `affiliate(establishmentId)` — POST /professional/affiliate (normaliza camelCase/snake_case)
 - `fetchMyServices()` — GET /professional/{id}/service-items
-- `restoreProfessional()` — recupera dados do SecureStore ao reiniciar app
+- `restoreProfessional()` — recupera dados do SecureStore ao reiniciar app (normaliza campos)
 - `reset()` — limpa estado ao fazer logout
+- `normalizeProfessional(data)` — funcao helper que aceita tanto camelCase (establishmentId) quanto snake_case (establishment_id) do backend
 
 ### attendance.store.ts
 - `fetchQueue(establishmentId)` — GET /establishment/id/{id}/professionals-with-queue
@@ -246,7 +249,7 @@ POST /professional/affiliate { establishmentId }
 
 ```
 app/
-  _layout.tsx                    — GluestackUIProvider + fontes + LogBox suppress
+  _layout.tsx                    — SafeAreaProvider + GluestackUIProvider + fontes + StatusBar (dark-content, sem translucent)
   (auth)/
     index.tsx                    — Escolha de papel (Owner vs Professional)
     login.tsx                    — Login conectado ao authStore
@@ -256,18 +259,18 @@ app/
       establishment.tsx          — Quick-create establishment
       address.tsx                — Endereco conectado ao store (backend pendente)
       services.tsx               — Servicos (visual, sem API)
-    dashboard.tsx                — Badge ABERTO/FECHADO, toggle, polling fila, botoes: add prof/servico/filas/atendimentos/endereco/sair
+    dashboard.tsx                — Badge ABERTO/FECHADO, toggle, polling fila, pull-to-refresh, botoes: add prof/servico/filas/atendimentos/endereco/sair
     add-professional.tsx         — Criar profissional (quick-create) com especialidade
     add-service.tsx              — Adicionar servico com filtro por especialidade (21 tipos) + pricing preview
     queues.tsx                   — Visao de todas as filas: cards por profissional (expansiveis), link para fila detalhada
     professional-queue.tsx       — Fila detalhada de um profissional (GET /client-queue/{profId}/queue)
     attendances.tsx              — Historico de atendimentos do establishment (filtros, resumo receita)
   (professional)/
-    _layout.tsx                  — Tab navigation: Fila | Servicos | Perfil
+    _layout.tsx                  — Tab navigation: Fila | Servicos | Perfil (safe area bottom insets)
     onboarding.tsx               — 3 steps: profile → busca → afiliacao
-    queue.tsx                    — Gerenciamento de fila + botao "Adicionar Walk-in", polling 30s
-    add-guest.tsx                — Adicionar walk-in: nome + multi-select servicos + total (POST /professional-queue/add-quest-attendance)
-    my-services.tsx              — Lista + CRUD servicos com pricing preview (absorcao por faixa)
+    queue.tsx                    — Gerenciamento de fila + botao "Adicionar Cliente", polling 30s, pull-to-refresh
+    add-guest.tsx                — Adicionar cliente: nome + multi-select servicos + total (POST /professional-queue/add-quest-attendance)
+    my-services.tsx              — Lista + CRUD servicos com pricing preview (absorcao por faixa), pull-to-refresh
     profile.tsx                  — Menu: Atendimentos, Relatorios, Meus Servicos, Configuracoes, Sair
     attendances.tsx              — Historico de atendimentos (filtros, GET /attendances — backend pendente)
     reports.tsx                  — Stats do dia (fila + tempo), semana/mes aguardando endpoint
@@ -412,13 +415,31 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ## 10. Pendente de Implementacao
 
+### Bugs reportados — Teste manual (2026-06-05)
+
+| # | Bug | Status | Detalhe |
+|---|-----|--------|---------|
+| 1 | "Walk-in" → "Adicionar Cliente" | ✅ Corrigido | Renomeado em queue.tsx e add-guest.tsx |
+| 2 | Entrar/sair do establishment nas configs do profissional | PENDENTE | Feature: professional settings deve ter opcao de desafiliar e reafiliar |
+| 3 | Tela toda branca, status bar invisivel | ✅ Corrigido | SafeAreaProvider + StatusBar sem translucent + Header com useSafeAreaInsets |
+| 4 | Tab bar atras dos botoes de navegacao Android | ✅ Corrigido | useSafeAreaInsets().bottom no paddingBottom do tabBarStyle |
+| 5/10/11 | Erro ao adicionar servico no fluxo de afiliacao | FIX PARCIAL | Adicionada normalizacao camelCase/snake_case em professional.store (normalizeProfessional). Se persistir, e bug no backend GET /professional/{id}/service-items |
+| 6 | Cliente entra na fila sem servicos existentes | BACKEND | Validacao deve estar no backend — negar attendance se profissional nao tem service items |
+| 7 | "checking for new update..." no rodape | EXPO GO | Mensagem do Expo Go dev client, nao aparece em build de producao. Pode ser suprimida com `expo-updates` configurado |
+| 8 | Validacao de senha segura (letra, numero, especial, confirmar) | PENDENTE | Adicionar validacao Zod no register.tsx: min 8 chars, 1 letra, 1 numero, 1 especial + campo confirmar senha |
+| 9 | Politica de Precos: renomear "Taxas Vupth" | PENDENTE | Renomear labels de pricing para "Taxas Vupth" conforme identidade da marca |
+| 12 | Teclado cobre formularios | ✅ Corrigido | KeyboardAvoidingView adicionado em todas as 10 telas de formulario |
+| 13 | Icone de lupa na aba de pesquisa | PENDENTE | Nao existe aba de pesquisa ainda — precisa criar tela + tab |
+| 14 | Profissionais sem servicos nao devem aparecer para clientes | BACKEND/FRONTEND | Filtrar no backend (GET /establishment?name=X nao listar profissionais sem services) ou no frontend ao exibir |
+| 15 | Pull-to-refresh em telas de dados | ✅ Implementado | RefreshControl em my-services.tsx, dashboard.tsx. queue.tsx ja tinha |
+
 ### Alta prioridade (MVP)
 | Item | Descricao |
 |------|-----------|
-| ~~Fila completa (visao do owner)~~ | ~~`queues.tsx` + `professional-queue.tsx`~~ ✅ Implementado |
-| ~~Fila publica por profissional~~ | ~~`GET /client-queue/{profId}/queue` — hook `useProfessionalQueue`, tela `professional-queue.tsx`~~ ✅ Implementado |
-| ~~Adicionar client GUEST na fila~~ | ~~`add-guest.tsx` + botao Walk-in na fila — `POST /professional-queue/add-quest-attendance`~~ ✅ Implementado |
-| ~~Historico de atendimentos por role~~ | ~~Owner `attendances.tsx` (por establishment) + Professional `attendances.tsx` (pessoal) — filtros por status~~ ✅ Frontend implementado, **backend GET /attendances pendente** |
+| ~~Fila completa (visao do owner)~~ | ✅ Implementado |
+| ~~Fila publica por profissional~~ | ✅ Implementado |
+| ~~Adicionar client GUEST na fila~~ | ✅ Implementado |
+| ~~Historico de atendimentos por role~~ | ✅ Frontend implementado, **backend GET /attendances pendente** |
 | Testar manualmente no celular | Validar todos os fluxos (owner e professional) com backend local via Expo Go |
 | Rodar Maestro seed_complete.yaml | Seed E2E: 4 establishments + profissionais + servicos |
 
@@ -453,3 +474,53 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | 3 | **Precificacao inteligente no ServiceItem** | Adicionar campos `uses_platform_pricing: boolean` e `client_price: number` ao ServiceItem | Hoje o calculo (4% intermediador + 2% plataforma + arredondamento estetico para R$X,90) e feito no frontend. O backend deve ser a fonte da verdade para que o app cliente exiba o preco correto |
 | 4 | **Endpoint de relatorios agregados** | `GET /establishment/{id}/reports?period=day\|week\|month` retornando total_attendances, total_revenue, avg_duration, top_professional, top_service | Evita que o frontend faca agregacao client-side de centenas de atendimentos. Melhor performance e consistencia |
 | 5 | **Endpoint de historico de receita por profissional** | `GET /professional/{id}/revenue?dateFrom=Y&dateTo=Z` | Para o owner ver quanto cada profissional faturou no periodo e calcular comissoes |
+
+---
+
+## 12. Features Futuras (Planejamento)
+
+### Encaixe (Premium Walk-in)
+
+Popup solicitado pelo profissional quando um cliente quer atendimento sem estar na fila. Calculo de tempo:
+
+**Formula:** `T_encaixe = (T_cliente_atual_restante + soma(T_clientes_fila)) + T_servico_encaixe`
+
+- Se nao houver ninguem na fila → encaixe = `T_servico_encaixe` (atendimento imediato)
+- Se houver fila → encaixe = tempo restante do atual + todos na frente + servico solicitado
+- Valor do encaixe: `preco_servico * multiplicador_encaixe` (ex: 1.5x, configuravel pelo profissional)
+- Popup mostra: tempo estimado de espera, preco com acrescimo, confirmacao
+
+**Backend necessario:**
+- `POST /professional-queue/add-encaixe-attendance` com campos: professionalId, establishmentId, serviceItemIds, clientName, encaixeMultiplier
+- Calculo do tempo estimado pode ser feito no frontend usando dados do QueueResponse
+
+### Agenda / Agendamento
+
+Sistema de intencoes semanais para clientes reservarem horario na fila:
+
+**Fluxo:**
+1. Profissional define horarios disponiveis por dia da semana (ex: seg-sex 9h-18h, sab 9h-13h)
+2. Cliente visualiza horarios e registra intencao de atendimento (nao e reserva fixa)
+3. No dia, cliente faz check-in para confirmar presenca → entra na fila
+4. Ordem da fila: check-in do dia ordena por horario agendado, depois por ordem de chegada
+
+**Backend necessario:**
+- `POST /professional/{id}/schedule` — definir disponibilidade semanal
+- `GET /professional/{id}/schedule` — consultar disponibilidade
+- `POST /professional-queue/schedule-intention` — cliente registra intencao
+- `POST /professional-queue/check-in` — cliente confirma presenca no dia
+- Novo status: INTENDED (antes do check-in), depois vira SCHEDULED
+
+### Menu de Pendencias
+
+No menu do usuario (profile), adicionar icone/link para tela de pendencias:
+- Profissional: servicos sem preco, dados incompletos, afiliacao pendente
+- Owner: establishment sem endereco, sem profissional, sem servicos
+
+### Relatorios Expandidos
+
+Adicionar ao relatorio do profissional e do owner:
+- Recebiveis por multa (cancelamento tardio)
+- Recebiveis por encaixe (acrescimo pago pelo cliente)
+- Breakdown por tipo de servico
+- Comparativo semanal/mensal

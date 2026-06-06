@@ -35,6 +35,18 @@ type ProfessionalState = {
   reset: () => void;
 };
 
+function normalizeProfessional(data: any): Professional {
+  return {
+    id: data.id,
+    name: data.name,
+    specialty: data.specialty ?? null,
+    establishment_id: data.establishment_id ?? data.establishmentId ?? null,
+    establishment_name: data.establishment_name ?? data.establishmentName ?? null,
+    is_available: data.is_available ?? data.isAvailable ?? true,
+    message: data.message ?? "",
+  };
+}
+
 async function persistProfessional(professional: Professional) {
   await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(professional));
 }
@@ -53,8 +65,9 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
       specialty,
     });
 
-    await persistProfessional(data);
-    set({ professional: data, isLoading: false });
+    const professional = normalizeProfessional(data);
+    await persistProfessional(professional);
+    set({ professional, isLoading: false });
   },
 
   affiliate: async (establishmentId) => {
@@ -64,8 +77,9 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
       establishmentId,
     });
 
-    await persistProfessional(data);
-    set({ professional: data, isLoading: false });
+    const professional = normalizeProfessional(data);
+    await persistProfessional(professional);
+    set({ professional, isLoading: false });
   },
 
   fetchMyServices: async () => {
@@ -79,7 +93,7 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   restoreProfessional: async () => {
     const stored = await SecureStore.getItemAsync(STORAGE_KEY);
     if (stored) {
-      set({ professional: JSON.parse(stored) });
+      set({ professional: normalizeProfessional(JSON.parse(stored)) });
     }
   },
 

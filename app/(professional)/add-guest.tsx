@@ -8,7 +8,7 @@ import {
   Text,
   Pressable,
 } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
@@ -72,7 +72,7 @@ export default function AddGuestScreen() {
         serviceItemIds: selectedServices,
         clientName: clientName.trim(),
       });
-      Alert.alert("Cliente adicionado", `${clientName.trim()} entrou na fila.`, [
+      Alert.alert("Adicionado", `${clientName.trim()} entrou na fila.`, [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
@@ -84,19 +84,24 @@ export default function AddGuestScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6">
         <Header showBackButton />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Adicionar Walk-in
+          Adicionar Cliente
         </Heading>
         <Text fontFamily="$body" color="$coolGray500" mt="$1">
-          Cliente sem conta no app
+          Cliente sem cadastro no app
         </Text>
 
         <FormControl isInvalid={isInvalid} mt="$6">
@@ -202,5 +207,6 @@ export default function AddGuestScreen() {
         </FormControl>
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

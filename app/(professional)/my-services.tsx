@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   VStack,
   HStack,
@@ -9,7 +9,7 @@ import {
   Pressable,
   Divider,
 } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -65,6 +65,7 @@ export default function MyServicesScreen() {
   const [absorption, setAbsorption] = useState(0);
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const mySpecialty = professional?.specialty ?? "BARBER";
   const filteredTypes = SERVICE_ITEM_TYPES.filter(
@@ -78,6 +79,12 @@ export default function MyServicesScreen() {
   useEffect(() => {
     fetchMyServices();
   }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchMyServices();
+    setRefreshing(false);
+  }, [fetchMyServices]);
 
   const handleSubmit = async () => {
     if (!customName.trim() || isNaN(priceNum) || priceNum <= 0 || !serviceItemType) {
@@ -116,10 +123,16 @@ export default function MyServicesScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
         <Header showBackButton />
@@ -324,5 +337,6 @@ export default function MyServicesScreen() {
         )}
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

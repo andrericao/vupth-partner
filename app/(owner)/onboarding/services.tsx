@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
@@ -13,10 +14,15 @@ export default function ServicesScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <VStack
         flex={1}
@@ -56,5 +62,6 @@ export default function ServicesScreen() {
         </FormControl>
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

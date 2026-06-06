@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { InputPassword } from "@components/InputPassWord";
@@ -62,10 +62,15 @@ export default function RegisterScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <VStack
         flex={1}
@@ -116,5 +121,6 @@ export default function RegisterScreen() {
         </HStack>
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

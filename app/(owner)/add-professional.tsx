@@ -6,7 +6,7 @@ import {
   ScrollView,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -62,10 +62,15 @@ export default function AddProfessionalScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <VStack
         flex={1}
@@ -116,5 +121,6 @@ export default function AddProfessionalScreen() {
         </FormControl>
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

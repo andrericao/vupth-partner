@@ -223,7 +223,7 @@ export default function ProfessionalQueueScreen() {
 
         {myProfessional && (
           <Button
-            title="Adicionar Walk-in"
+            title="Adicionar Cliente"
             onPress={() => router.push("/(professional)/add-guest" as any)}
             bg="$amber500"
             $active-bg="$amber600"

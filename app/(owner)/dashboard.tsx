@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   VStack,
   Heading,
@@ -9,7 +9,7 @@ import {
   Divider,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -23,8 +23,15 @@ export default function OwnerDashboardScreen() {
   const [isToggling, setIsToggling] = useState(false);
 
   const isOpen = establishment?.open_status === "OPEN";
-  const { data: queueData } = useQueuePolling(establishment?.id ?? null);
+  const { data: queueData, refetch } = useQueuePolling(establishment?.id ?? null);
   const totalInQueue = queueData?.total_in_queue ?? 0;
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const handleToggleStatus = async () => {
     if (!establishment) return;
@@ -64,6 +71,7 @@ export default function OwnerDashboardScreen() {
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
         <HStack justifyContent="space-between" alignItems="center">
