@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   VStack,
   Heading,
@@ -9,9 +9,10 @@ import {
   Divider,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl } from "react-native";
+import { Alert, RefreshControl, BackHandler } from "react-native";
 import { router } from "expo-router";
 import { Button } from "@components/Button";
+import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -21,6 +22,11 @@ export default function OwnerDashboardScreen() {
   const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
   const logout = useAuthStore((s) => s.logout);
   const [isToggling, setIsToggling] = useState(false);
+
+  useEffect(() => {
+    const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => handler.remove();
+  }, []);
 
   const isOpen = establishment?.open_status === "OPEN";
   const { data: queueData, refetch } = useQueuePolling(establishment?.id ?? null);
@@ -47,21 +53,33 @@ export default function OwnerDashboardScreen() {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    router.replace("/(auth)" as any);
+  const handleLogout = () => {
+    Alert.alert("Sair", "Tem certeza que deseja sair?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/(auth)" as any);
+        },
+      },
+    ]);
   };
 
   if (!establishment) {
     return (
-      <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
-        <Text fontFamily="$body" color="$coolGray500">
-          Nenhum estabelecimento encontrado.
-        </Text>
-        <Button
-          title="Criar Estabelecimento"
-          onPress={() => router.replace("/(owner)/onboarding/establishment" as any)}
-        />
+      <VStack flex={1} pb="$6" px="$6">
+        <Header />
+        <VStack flex={1} alignItems="center" justifyContent="center">
+          <Text fontFamily="$body" color="$coolGray500">
+            Nenhum estabelecimento encontrado.
+          </Text>
+          <Button
+            title="Criar Estabelecimento"
+            onPress={() => router.push("/(owner)/onboarding/establishment" as any)}
+          />
+        </VStack>
       </VStack>
     );
   }
@@ -73,8 +91,10 @@ export default function OwnerDashboardScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <HStack justifyContent="space-between" alignItems="center">
+      <VStack flex={1} pb="$6" px="$6">
+        <Header />
+
+        <HStack justifyContent="space-between" alignItems="center" mt="$4">
           <Heading size="2xl" fontFamily="$heading">
             {establishment.name}
           </Heading>

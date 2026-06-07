@@ -7,6 +7,7 @@ import {
   Divider,
   ScrollView,
 } from "@gluestack-ui/themed";
+import { Alert } from "react-native";
 import { router } from "expo-router";
 import { useAuthStore } from "@store/auth.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -41,9 +42,18 @@ export default function ProfessionalProfileScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const logout = useAuthStore((s) => s.logout);
 
-  const handleLogout = async () => {
-    await logout();
-    router.replace("/(auth)" as any);
+  const handleLogout = () => {
+    Alert.alert("Sair", "Tem certeza que deseja sair?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/(auth)" as any);
+        },
+      },
+    ]);
   };
 
   return (

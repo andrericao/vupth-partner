@@ -11,6 +11,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
+import { useProfessionalStore } from "@store/professional.store";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -31,6 +32,8 @@ export default function AddProfessionalScreen() {
   const quickCreateProfessional = useEstablishmentStore(
     (s) => s.quickCreateProfessional
   );
+  const affiliate = useProfessionalStore((s) => s.affiliate);
+  const professional = useProfessionalStore((s) => s.professional);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -53,9 +56,42 @@ export default function AddProfessionalScreen() {
         [{ text: "OK", onPress: () => router.back() }]
       );
     } catch (error: any) {
-      const msg =
-        error?.response?.data?.message || "Não foi possível adicionar o profissional.";
-      Alert.alert("Erro", msg);
+      const code = error?.response?.data?.code;
+
+      if (code === "USER_ALREADY_PROFESSIONAL") {
+        const currentEstId = professional?.establishment_id;
+
+        if (currentEstId === establishmentId) {
+          Alert.alert(
+            "Tudo certo",
+            "Seu perfil profissional ja esta vinculado a este estabelecimento.",
+            [{ text: "OK", onPress: () => router.back() }]
+          );
+        } else {
+          try {
+            await affiliate(establishmentId!);
+            Alert.alert(
+              "Vinculado",
+              "Seu perfil profissional foi vinculado a este estabelecimento.",
+              [{ text: "OK", onPress: () => router.back() }]
+            );
+          } catch (affErr: any) {
+            const affCode = affErr?.response?.data?.code;
+            if (affCode === "PROFESSIONAL_ALREADY_AFFILIATED") {
+              Alert.alert(
+                "Ja vinculado a outro",
+                "Seu perfil profissional ja esta vinculado a outro estabelecimento. Acesse Perfil > Configuracoes para sair do atual antes de vincular a este.",
+              );
+            } else {
+              Alert.alert("Erro", "Nao foi possivel vincular ao estabelecimento.");
+            }
+          }
+        }
+      } else {
+        const msg =
+          error?.response?.data?.message || "Nao foi possivel adicionar o profissional.";
+        Alert.alert("Erro", msg);
+      }
     } finally {
       setIsLoading(false);
     }

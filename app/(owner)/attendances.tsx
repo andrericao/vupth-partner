@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { router } from "expo-router";
 import {
   VStack,
   HStack,
@@ -128,7 +129,7 @@ export default function OwnerAttendancesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Atendimentos

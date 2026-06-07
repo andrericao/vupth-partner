@@ -101,6 +101,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     const roles = getRolesFromToken(token);
 
+    await Promise.all([
+      useEstablishmentStore.getState().restoreEstablishment(),
+      useProfessionalStore.getState().restoreProfessional(),
+    ]);
+
     set({
       user: { id: "", email: "", roles },
       isAuthenticated: true,

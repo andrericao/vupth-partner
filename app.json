@@ -9,6 +9,14 @@
       "expo-router",
       "expo-secure-store"
     ],
-    "userInterfaceStyle": "automatic"
+    "userInterfaceStyle": "automatic",
+    "androidNavigationBar": {
+      "backgroundColor": "#FFFFFF",
+      "barStyle": "dark-content"
+    },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#F7FAF8"
+    }
   }
 }

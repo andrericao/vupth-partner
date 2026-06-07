@@ -10,6 +10,7 @@ import {
   Divider,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
+import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -135,7 +136,7 @@ export default function MyServicesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Meus Servicos

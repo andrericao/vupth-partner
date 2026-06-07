@@ -12,6 +12,7 @@ import {
   Divider,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl } from "react-native";
+import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -119,7 +120,7 @@ export default function ProfessionalAttendancesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Meus Atendimentos

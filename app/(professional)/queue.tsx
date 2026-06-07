@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   VStack,
   HStack,
@@ -9,7 +9,7 @@ import {
   ScrollView,
   Spinner,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl } from "react-native";
+import { Alert, RefreshControl, BackHandler } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
@@ -124,6 +124,11 @@ export default function ProfessionalQueueScreen() {
     useAttendanceStore();
 
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => handler.remove();
+  }, []);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;

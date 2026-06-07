@@ -1,5 +1,8 @@
 import { create } from "zustand";
+import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+
+const STORAGE_KEY = "vupth_establishment";
 
 type Establishment = {
   id: string;
@@ -40,6 +43,23 @@ type ServiceItemResponse = {
   estimatedMinutes: number;
 };
 
+function normalizeEstablishment(data: any): Establishment {
+  return {
+    id: data.id,
+    name: data.name,
+    service_type: data.service_type ?? data.serviceType ?? "",
+    status: data.status ?? "ACTIVE",
+    open_status: data.open_status ?? data.openStatus ?? "CLOSED",
+    owner_id: data.owner_id ?? data.ownerId ?? "",
+    created_at: data.created_at ?? data.createdAt,
+    message: data.message,
+  };
+}
+
+async function persistEstablishment(establishment: Establishment) {
+  await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(establishment));
+}
+
 type EstablishmentState = {
   establishment: Establishment | null;
   isLoading: boolean;
@@ -47,6 +67,7 @@ type EstablishmentState = {
 
   quickCreate: (name: string, serviceType: string) => Promise<void>;
   updateOpenStatus: (id: string, status: string) => Promise<void>;
+  restoreEstablishment: () => Promise<void>;
   quickCreateProfessional: (
     name: string,
     establishmentId: string,
@@ -86,7 +107,9 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
       serviceType,
     });
 
-    set({ establishment: data, isLoading: false });
+    const establishment = normalizeEstablishment(data);
+    await persistEstablishment(establishment);
+    set({ establishment, isLoading: false });
   },
 
   updateOpenStatus: async (id, status) => {
@@ -96,7 +119,16 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
       openStatus: status,
     });
 
-    set({ establishment: data, isLoading: false });
+    const establishment = normalizeEstablishment(data);
+    await persistEstablishment(establishment);
+    set({ establishment, isLoading: false });
+  },
+
+  restoreEstablishment: async () => {
+    const stored = await SecureStore.getItemAsync(STORAGE_KEY);
+    if (stored) {
+      set({ establishment: normalizeEstablishment(JSON.parse(stored)) });
+    }
   },
 
   quickCreateProfessional: async (name, establishmentId, specialty?) => {
@@ -132,5 +164,8 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     return data;
   },
 
-  reset: () => set({ establishment: null, isLoading: false, error: null }),
+  reset: () => {
+    SecureStore.deleteItemAsync(STORAGE_KEY);
+    set({ establishment: null, isLoading: false, error: null });
+  },
 }));
