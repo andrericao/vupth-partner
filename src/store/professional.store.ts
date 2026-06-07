@@ -30,6 +30,7 @@ type ProfessionalState = {
 
   register: (name: string, specialty?: string) => Promise<void>;
   affiliate: (establishmentId: string) => Promise<void>;
+  setProfessional: (data: Professional) => Promise<void>;
   fetchMyServices: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
   reset: () => void;
@@ -68,6 +69,12 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     const professional = normalizeProfessional(data);
     await persistProfessional(professional);
     set({ professional, isLoading: false });
+  },
+
+  setProfessional: async (data) => {
+    const professional = normalizeProfessional(data);
+    await persistProfessional(professional);
+    set({ professional });
   },
 
   affiliate: async (establishmentId) => {

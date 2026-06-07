@@ -10,16 +10,24 @@ jest.mock("expo-secure-store", () => ({
 }));
 
 const mockEstablishmentReset = jest.fn();
+const mockRestoreEstablishment = jest.fn().mockResolvedValue(undefined);
 jest.mock("@store/establishment.store", () => ({
   useEstablishmentStore: {
-    getState: () => ({ reset: mockEstablishmentReset }),
+    getState: () => ({
+      reset: mockEstablishmentReset,
+      restoreEstablishment: mockRestoreEstablishment,
+    }),
   },
 }));
 
 const mockProfessionalReset = jest.fn();
+const mockRestoreProfessional = jest.fn().mockResolvedValue(undefined);
 jest.mock("@store/professional.store", () => ({
   useProfessionalStore: {
-    getState: () => ({ reset: mockProfessionalReset }),
+    getState: () => ({
+      reset: mockProfessionalReset,
+      restoreProfessional: mockRestoreProfessional,
+    }),
   },
 }));
 

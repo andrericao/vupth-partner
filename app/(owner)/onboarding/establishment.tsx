@@ -34,7 +34,14 @@ export default function EstablishmentScreen() {
         await refreshToken();
       } catch {}
 
-      router.replace("/(owner)/dashboard" as any);
+      const establishment = useEstablishmentStore.getState().establishment;
+      router.replace({
+        pathname: "/(owner)/onboarding/also-professional",
+        params: {
+          establishmentId: establishment?.id ?? "",
+          ownerName: name.trim(),
+        },
+      } as any);
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "VALIDATION_ERROR") {
