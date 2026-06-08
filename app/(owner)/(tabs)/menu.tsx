@@ -1,0 +1,166 @@
+import {
+  VStack,
+  Heading,
+  Text,
+  Pressable,
+  Divider,
+  ScrollView,
+} from "@gluestack-ui/themed";
+import { Alert } from "react-native";
+import { router } from "expo-router";
+import { Header } from "@components/Header";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { useAuthStore } from "@store/auth.store";
+
+type MenuItemProps = {
+  label: string;
+  onPress: () => void;
+  color?: string;
+};
+
+function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      py="$4"
+      px="$4"
+      bg="$white"
+      borderRadius="$md"
+      borderWidth="$1"
+      borderColor="$coolGray200"
+      $active-bg="$coolGray50"
+    >
+      <Text fontFamily="$body" fontSize="$md" color={color}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+export default function OwnerMenuScreen() {
+  const establishment = useEstablishmentStore((s) => s.establishment);
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  const isProfessional = user?.roles?.includes("PROFESSIONAL");
+
+  const handleLogout = () => {
+    Alert.alert("Sair", "Tem certeza que deseja sair?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/(auth)" as any);
+        },
+      },
+    ]);
+  };
+
+  return (
+    <ScrollView
+      w="$full"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} pb="$6" px="$6">
+        <Header />
+
+        <VStack mt="$8" mb="$6">
+          <Heading size="2xl" fontFamily="$heading">
+            {establishment?.name ?? "Meu Estabelecimento"}
+          </Heading>
+          <Text fontFamily="$body" color="$coolGray500" mt="$1">
+            {establishment?.service_type ?? ""}
+          </Text>
+          {isProfessional && (
+            <Text fontFamily="$body" color="$green600" mt="$1">
+              Tambem profissional
+            </Text>
+          )}
+        </VStack>
+
+        <Divider mb="$4" />
+
+        <VStack space="sm">
+          {establishment?.id && (
+            <>
+              <MenuItem
+                label="Adicionar Profissional"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/add-professional",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+              />
+
+              <MenuItem
+                label="Solicitacoes de Vinculacao"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/affiliations",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+              />
+
+              <MenuItem
+                label="Adicionar Servico"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/add-service",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+              />
+            </>
+          )}
+
+          <MenuItem
+            label="Endereco"
+            onPress={() => router.push("/(owner)/onboarding/address" as any)}
+          />
+
+          <MenuItem
+            label="Atendimentos"
+            onPress={() => router.push("/(owner)/attendances" as any)}
+          />
+
+          {establishment?.id && (
+            <MenuItem
+              label="Ver Filas"
+              onPress={() =>
+                router.push({
+                  pathname: "/(owner)/queues",
+                  params: { establishmentId: establishment.id },
+                } as any)
+              }
+            />
+          )}
+
+          {!isProfessional && establishment?.id && (
+            <MenuItem
+              label="Tambem serei profissional"
+              onPress={() =>
+                router.push({
+                  pathname: "/(owner)/onboarding/also-professional",
+                  params: { establishmentId: establishment.id },
+                } as any)
+              }
+            />
+          )}
+        </VStack>
+
+        <VStack mt="$8">
+          <MenuItem
+            label="Sair"
+            onPress={handleLogout}
+            color="$red500"
+          />
+        </VStack>
+      </VStack>
+    </ScrollView>
+  );
+}

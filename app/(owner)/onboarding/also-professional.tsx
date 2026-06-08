@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VStack, Heading, Text } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -18,10 +19,11 @@ const SPECIALTIES = [
 ];
 
 export default function AlsoProfessionalScreen() {
-  const { establishmentId, ownerName } = useLocalSearchParams<{
+  const { establishmentId, ownerName: paramName } = useLocalSearchParams<{
     establishmentId: string;
     ownerName: string;
   }>();
+  const [ownerName, setOwnerName] = useState(paramName ?? "");
   const [specialty, setSpecialty] = useState("BARBER");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,25 +31,72 @@ export default function AlsoProfessionalScreen() {
     (s) => s.quickCreateProfessional
   );
   const refreshToken = useAuthStore((s) => s.refreshToken);
+  const user = useAuthStore((s) => s.user);
+
+  const alreadyProfessional = user?.roles?.includes("PROFESSIONAL");
+
+  useEffect(() => {
+    if (alreadyProfessional) {
+      router.replace("/(owner)/dashboard" as any);
+    }
+  }, [alreadyProfessional]);
+
+  useEffect(() => {
+    if (!paramName) {
+      SecureStore.getItemAsync("vupth_owner_name").then((stored) => {
+        if (stored) setOwnerName(stored);
+      });
+    }
+  }, [paramName]);
 
   const handleYes = async () => {
+    if (!ownerName.trim()) {
+      Alert.alert("Erro", "Nome do proprietario nao encontrado.");
+      return;
+    }
+
+    if (!establishmentId) {
+      Alert.alert("Erro", "Estabelecimento nao encontrado.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const result = await quickCreateProfessional(
-        ownerName!,
-        establishmentId!,
+        ownerName.trim(),
+        establishmentId,
         specialty
       );
 
       await useProfessionalStore.getState().setProfessional(result);
-
       await refreshToken();
 
-      router.replace("/(owner)/dashboard" as any);
+      router.replace({
+        pathname: "/(owner)/add-service",
+        params: { establishmentId },
+      } as any);
     } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ??
-        "Nao foi possivel criar o perfil profissional.";
+      const code = error?.response?.data?.code;
+
+      if (code === "USER_ALREADY_PROFESSIONAL" || error?.response?.status === 409) {
+        await refreshToken();
+        Alert.alert(
+          "Tudo certo",
+          "Voce ja possui perfil profissional. Redirecionando...",
+          [{ text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) }]
+        );
+        return;
+      }
+
+      const data = error?.response?.data;
+      let msg = "Nao foi possivel criar o perfil profissional.";
+      if (data?.fieldErrors) {
+        msg = Object.entries(data.fieldErrors)
+          .map(([field, err]) => `${field}: ${err}`)
+          .join("\n");
+      } else if (data?.message) {
+        msg = data.message;
+      }
       Alert.alert("Erro", msg);
     } finally {
       setIsLoading(false);
@@ -58,56 +107,75 @@ export default function AlsoProfessionalScreen() {
     router.replace("/(owner)/dashboard" as any);
   };
 
+  if (alreadyProfessional) return null;
+
   return (
-    <VStack flex={1} pb="$6" px="$6">
-      <Header />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <VStack flex={1} pb="$6" px="$6">
+          <Header />
 
-      <VStack flex={1} justifyContent="center" px="$2">
-        <Heading size="2xl" fontFamily="$heading" mb="$4">
-          Voce tambem sera profissional?
-        </Heading>
+          <VStack flex={1} justifyContent="center" px="$2">
+            <Heading size="2xl" fontFamily="$heading" mb="$4">
+              Voce tambem sera profissional?
+            </Heading>
 
-        <Text fontFamily="$body" color="$coolGray600" mb="$8" fontSize="$md">
-          Se voce tambem atendera clientes neste estabelecimento, ative seu
-          perfil profissional agora.
-        </Text>
+            <Text fontFamily="$body" color="$coolGray600" mb="$2" fontSize="$md">
+              Se voce tambem atendera clientes neste estabelecimento, escolha sua
+              especialidade abaixo.
+            </Text>
 
-        <Heading size="md" fontFamily="$heading" mb="$2">
-          Especialidade
-        </Heading>
+            {ownerName ? (
+              <Text fontFamily="$body" color="$coolGray500" mb="$6" fontSize="$sm">
+                Profissional: {ownerName}
+              </Text>
+            ) : null}
 
-        <VStack space="xs" mb="$6">
-          {SPECIALTIES.map((s) => (
+            <Heading size="md" fontFamily="$heading" mb="$2">
+              Especialidade
+            </Heading>
+
+            <VStack space="xs" mb="$6">
+              {SPECIALTIES.map((s) => (
+                <Button
+                  key={s.value}
+                  title={s.label}
+                  onPress={() => setSpecialty(s.value)}
+                  bg={specialty === s.value ? "$green500" : "$coolGray200"}
+                  textColor={specialty === s.value ? "$white" : "$coolGray700"}
+                  $active-bg={specialty === s.value ? "$green600" : "$coolGray300"}
+                  h="$10"
+                  mt="$1"
+                />
+              ))}
+            </VStack>
+
             <Button
-              key={s.value}
-              title={s.label}
-              onPress={() => setSpecialty(s.value)}
-              bg={specialty === s.value ? "$green500" : "$coolGray200"}
-              textColor={specialty === s.value ? "$white" : "$coolGray700"}
-              $active-bg={specialty === s.value ? "$green600" : "$coolGray300"}
-              h="$10"
-              mt="$1"
+              title="Sim, tambem serei profissional"
+              onPress={handleYes}
+              isLoading={isLoading}
+              bg="$green500"
+              $active-bg="$green600"
             />
-          ))}
+
+            <Button
+              title="Nao, apenas proprietario"
+              onPress={handleNo}
+              bg="$coolGray300"
+              $active-bg="$coolGray400"
+              textColor="$coolGray800"
+              mt="$2"
+            />
+          </VStack>
         </VStack>
-
-        <Button
-          title="Sim, tambem serei profissional"
-          onPress={handleYes}
-          isLoading={isLoading}
-          bg="$green500"
-          $active-bg="$green600"
-        />
-
-        <Button
-          title="Nao, apenas proprietario"
-          onPress={handleNo}
-          bg="$coolGray300"
-          $active-bg="$coolGray400"
-          textColor="$coolGray800"
-          mt="$2"
-        />
-      </VStack>
-    </VStack>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

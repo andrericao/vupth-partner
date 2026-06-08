@@ -470,10 +470,12 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | # | Item | Descricao | Justificativa |
 |---|------|-----------|---------------|
 | 1 | **PRIORIDADE — Endpoint de historico de atendimentos** | `GET /attendances?establishmentId=X&professionalId=Y&status=FINISHED` — listar atendimentos por establishment, profissional e status. | ❌ **NAO EXISTE NO BACKEND** (verificado 2026-06-05). Nenhum `@GetMapping` em `AttendanceController`. Frontend partner ja implementou as telas (`attendances.tsx` owner e professional) e o store method `fetchHistory()` — aguardando backend. Response esperado: `AttendanceInQueueResponse[]` ou similar com clientId, clientName, services, totalValue, scheduledTime, startTime, endTime, durationInMinutes. |
-| 2 | **`GET /professional/me`** | Retorna dados do profissional logado (id, name, specialty, establishment_id) | O frontend precisa recuperar o establishment_id apos reiniciar o app. Hoje usa SecureStore como fallback, mas o ideal e ter um endpoint |
+| 2 | ~~**`GET /professional/me`**~~ | ~~Retorna dados do profissional logado~~ | ✅ **IMPLEMENTADO** no backend (2026-06-07). Auth: ROLE_PROFESSIONAL |
+| 2b | ~~**`GET /establishment/mine`**~~ | ~~Lista establishments do owner logado~~ | ✅ **IMPLEMENTADO** no backend (2026-06-07). Auth: ROLE_OWNER. Retorna `EstablishmentResponse[]` |
 | 3 | **Precificacao inteligente no ServiceItem** | Adicionar campos `uses_platform_pricing: boolean` e `client_price: number` ao ServiceItem | Hoje o calculo (4% intermediador + 2% plataforma + arredondamento estetico para R$X,90) e feito no frontend. O backend deve ser a fonte da verdade para que o app cliente exiba o preco correto |
 | 4 | **Endpoint de relatorios agregados** | `GET /establishment/{id}/reports?period=day\|week\|month` retornando total_attendances, total_revenue, avg_duration, top_professional, top_service | Evita que o frontend faca agregacao client-side de centenas de atendimentos. Melhor performance e consistencia |
 | 5 | **Endpoint de historico de receita por profissional** | `GET /professional/{id}/revenue?dateFrom=Y&dateTo=Z` | Para o owner ver quanto cada profissional faturou no periodo e calcular comissoes |
+| 6 | **PRIORIDADE — Busca de profissionais** | `GET /professional?name=X&specialty=Y` — listar profissionais por nome e/ou especialidade (publico ou OWNER). | ❌ **NAO EXISTE NO BACKEND** (verificado 2026-06-08). O owner precisa buscar profissionais para enviar convite de afiliacao via `POST /establishment/{id}/affiliations { "professionalId": "uuid" }`. Sem este endpoint, o owner so pode aceitar solicitacoes vindas dos profissionais, nao pode convidar proativamente. Response esperado: `[{ id, name, specialty, isAvailable }]` |
 
 ---
 

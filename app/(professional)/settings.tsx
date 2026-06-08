@@ -64,9 +64,19 @@ export default function ProfessionalSettingsScreen() {
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Estabelecimento
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$green700" mt="$1">
+            <Text fontFamily="$heading" fontWeight="$bold" color={professional?.establishment_name ? "$green700" : "$coolGray400"} mt="$1">
               {professional?.establishment_name ?? "Nao vinculado"}
             </Text>
+            {!professional?.establishment_id && (
+              <Button
+                title="Buscar Estabelecimento"
+                onPress={() => router.push("/(professional)/find-establishment" as any)}
+                bg="$green500"
+                $active-bg="$green600"
+                h="$9"
+                mt="$2"
+              />
+            )}
           </VStack>
         </VStack>
       </VStack>

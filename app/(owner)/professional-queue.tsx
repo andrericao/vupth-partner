@@ -11,7 +11,7 @@ import {
   Divider,
 } from "@gluestack-ui/themed";
 import { RefreshControl } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
@@ -131,7 +131,7 @@ export default function ProfessionalQueueScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
+        <Header showBackButton />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           {data?.professionalName ?? professionalName ?? "Fila"}

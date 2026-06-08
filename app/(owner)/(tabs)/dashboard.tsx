@@ -14,13 +14,11 @@ import { router } from "expo-router";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
-import { useAuthStore } from "@store/auth.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 
 export default function OwnerDashboardScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
-  const logout = useAuthStore((s) => s.logout);
   const [isToggling, setIsToggling] = useState(false);
 
   useEffect(() => {
@@ -47,24 +45,10 @@ export default function OwnerDashboardScreen() {
       const newStatus = isOpen ? "CLOSED" : "OPEN";
       await updateOpenStatus(establishment.id, newStatus);
     } catch {
-      Alert.alert("Erro", "Não foi possível atualizar o status.");
+      Alert.alert("Erro", "Nao foi possivel atualizar o status.");
     } finally {
       setIsToggling(false);
     }
-  };
-
-  const handleLogout = () => {
-    Alert.alert("Sair", "Tem certeza que deseja sair?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Sair",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/(auth)" as any);
-        },
-      },
-    ]);
   };
 
   if (!establishment) {
@@ -111,22 +95,20 @@ export default function OwnerDashboardScreen() {
           {establishment.service_type}
         </Text>
 
-        {isOpen && (
-          <HStack mt="$4" space="md">
-            <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
-              <Text fontFamily="$body" fontSize="$xs" color="$green700">Na fila</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
-                {totalInQueue}
-              </Text>
-            </VStack>
-            <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
-              <Text fontFamily="$body" fontSize="$xs" color="$blue700">Profissionais</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
-                {queueData?.available_professionals ?? 0}
-              </Text>
-            </VStack>
-          </HStack>
-        )}
+        <HStack mt="$4" space="md">
+          <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
+            <Text fontFamily="$body" fontSize="$xs" color="$green700">Na fila</Text>
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+              {totalInQueue}
+            </Text>
+          </VStack>
+          <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
+            <Text fontFamily="$body" fontSize="$xs" color="$blue700">Profissionais</Text>
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
+              {queueData?.available_professionals ?? 0}
+            </Text>
+          </VStack>
+        </HStack>
 
         <Divider my="$6" />
 
@@ -139,18 +121,6 @@ export default function OwnerDashboardScreen() {
         />
 
         <Button
-          title="Adicionar Profissional"
-          onPress={() =>
-            router.push({
-              pathname: "/(owner)/add-professional",
-              params: { establishmentId: establishment.id },
-            } as any)
-          }
-          bg="$blue500"
-          $active-bg="$blue600"
-        />
-
-        <Button
           title="Ver Filas"
           onPress={() =>
             router.push({
@@ -160,39 +130,6 @@ export default function OwnerDashboardScreen() {
           }
           bg="$amber500"
           $active-bg="$amber600"
-        />
-
-        <Button
-          title="Atendimentos"
-          onPress={() => router.push("/(owner)/attendances" as any)}
-          bg="$cyan600"
-          $active-bg="$cyan700"
-        />
-
-        <Button
-          title="Adicionar Serviço"
-          onPress={() =>
-            router.push({
-              pathname: "/(owner)/add-service",
-              params: { establishmentId: establishment.id },
-            } as any)
-          }
-          bg="$purple500"
-          $active-bg="$purple600"
-        />
-
-        <Button
-          title="Endereco"
-          onPress={() => router.push("/(owner)/onboarding/address" as any)}
-          bg="$cyan500"
-          $active-bg="$cyan600"
-        />
-
-        <Button
-          title="Sair"
-          onPress={handleLogout}
-          bg="$coolGray400"
-          $active-bg="$coolGray500"
         />
       </VStack>
     </ScrollView>

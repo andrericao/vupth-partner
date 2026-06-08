@@ -31,6 +31,7 @@ type ProfessionalState = {
   register: (name: string, specialty?: string) => Promise<void>;
   affiliate: (establishmentId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
+  addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   fetchMyServices: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
   reset: () => void;
@@ -87,6 +88,17 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     const professional = normalizeProfessional(data);
     await persistProfessional(professional);
     set({ professional, isLoading: false });
+  },
+
+  addMyServiceItem: async (serviceItemType, customName, price) => {
+    const prof = get().professional;
+    if (!prof) throw new Error("Professional not found");
+
+    const { data } = await api.post(
+      `/professional-queue/${prof.id}/add-service-items`,
+      { serviceItemType, customName, price }
+    );
+    return data;
   },
 
   fetchMyServices: async () => {

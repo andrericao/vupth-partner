@@ -157,6 +157,13 @@ export default function ProfessionalQueueScreen() {
         <Text fontFamily="$body" color="$coolGray500" textAlign="center" mt="$12">
           Voce nao esta vinculado a nenhum estabelecimento.
         </Text>
+        <Button
+          title="Buscar Estabelecimento"
+          onPress={() => router.push("/(professional)/find-establishment" as any)}
+          bg="$green500"
+          $active-bg="$green600"
+          mt="$4"
+        />
       </VStack>
     );
   }

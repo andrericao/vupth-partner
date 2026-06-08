@@ -15,7 +15,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
-import { useEstablishmentStore } from "@store/establishment.store";
+
 import {
   calculatePricing,
   getAbsorptionOptions,
@@ -57,7 +57,7 @@ export default function MyServicesScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
-  const addServiceItem = useEstablishmentStore((s) => s.addServiceItem);
+  const addMyServiceItem = useProfessionalStore((s) => s.addMyServiceItem);
 
   const [showForm, setShowForm] = useState(false);
   const [serviceItemType, setServiceItemType] = useState("");
@@ -93,17 +93,11 @@ export default function MyServicesScreen() {
       return;
     }
 
-    if (!professional?.establishment_id) {
-      Alert.alert("Erro", "Voce precisa estar vinculado a um estabelecimento.");
-      return;
-    }
-
     setIsInvalid(false);
     setIsLoading(true);
 
     try {
-      await addServiceItem(
-        professional.establishment_id,
+      await addMyServiceItem(
         serviceItemType,
         customName.trim(),
         priceNum

@@ -14,6 +14,7 @@ import {
 import { RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
+import { Button } from "@components/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
 
@@ -158,7 +159,7 @@ export default function OwnerQueuesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
+        <Header showBackButton />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Filas
@@ -195,9 +196,23 @@ export default function OwnerQueuesScreen() {
         ))}
 
         {!isLoading && professionals.length === 0 && (
-          <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$12">
-            Nenhum profissional cadastrado
-          </Text>
+          <VStack alignItems="center" mt="$12">
+            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
+              Nenhum profissional cadastrado
+            </Text>
+            <Button
+              title="Adicionar Profissional"
+              onPress={() =>
+                router.push({
+                  pathname: "/(owner)/add-professional",
+                  params: { establishmentId: establishmentId ?? "" },
+                } as any)
+              }
+              bg="$green500"
+              $active-bg="$green600"
+              mt="$4"
+            />
+          </VStack>
         )}
       </VStack>
     </ScrollView>

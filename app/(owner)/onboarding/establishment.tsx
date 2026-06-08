@@ -2,6 +2,7 @@ import { useState } from "react";
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
 import { router } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { SelectService } from "@components/SelectService";
@@ -10,6 +11,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 
 export default function EstablishmentScreen() {
+  const [ownerName, setOwnerName] = useState("");
   const [name, setName] = useState("");
   const [serviceType, setServiceType] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
@@ -19,7 +21,7 @@ export default function EstablishmentScreen() {
   const refreshToken = useAuthStore((s) => s.refreshToken);
 
   const handleSubmit = async () => {
-    if (!name.trim() || !serviceType) {
+    if (!ownerName.trim() || !name.trim() || !serviceType) {
       setIsInvalid(true);
       return;
     }
@@ -29,6 +31,7 @@ export default function EstablishmentScreen() {
 
     try {
       await quickCreate(name.trim(), serviceType);
+      await SecureStore.setItemAsync("vupth_owner_name", ownerName.trim());
 
       try {
         await refreshToken();
@@ -39,7 +42,7 @@ export default function EstablishmentScreen() {
         pathname: "/(owner)/onboarding/also-professional",
         params: {
           establishmentId: establishment?.id ?? "",
-          ownerName: name.trim(),
+          ownerName: ownerName.trim(),
         },
       } as any);
     } catch (error: any) {
@@ -80,6 +83,14 @@ export default function EstablishmentScreen() {
           <Heading mb="$12" size="3xl" fontFamily="$heading">
             Dados da Loja
           </Heading>
+
+          <Input
+            textLabel="Seu nome"
+            placeholder="Ex: João Silva"
+            messageError="Nome obrigatório"
+            value={ownerName}
+            onChangeText={setOwnerName}
+          />
 
           <Input
             textLabel="Nome da Loja"

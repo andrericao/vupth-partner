@@ -71,6 +71,10 @@ export default function ProfessionalLayout() {
         name="add-guest"
         options={{ href: null }}
       />
+      <Tabs.Screen
+        name="find-establishment"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
