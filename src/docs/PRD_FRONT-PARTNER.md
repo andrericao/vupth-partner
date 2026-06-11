@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-08
+> **Ultima atualizacao:** 2026-06-11
 
 ---
 
@@ -115,13 +115,13 @@ Register → Login → Register professional (sem establishment) → Refresh tok
 3. **(owner)/onboarding/establishment.tsx** — Seu nome + nome da loja + tipo → `POST /establishment/quick-create`. Salva ownerName no SecureStore e passa como param para also-professional
 4. **(owner)/onboarding/also-professional.tsx** — "Voce tambem sera profissional?" — usa ownerName automaticamente (sem input), verifica se ja tem PROFESSIONAL role e pula. Se "Sim" → `POST /professional/quick-create`. Se "Nao" → `router.replace` ao dashboard. Trata 409 graciosamente
 5. **(owner)/(tabs)/dashboard.tsx** — Badge ABERTO/FECHADO, toggle, polling fila 30s, cards (fila, profissionais). Se establishment null → botao "Criar Estabelecimento"
-6. **(owner)/(tabs)/menu.tsx** — Menu do owner: Adicionar Profissional, Solicitacoes de Vinculacao, Adicionar Servico, Endereco, Atendimentos, Ver Filas, Tambem serei profissional (condicional: so se !PROFESSIONAL), Sair (com confirmacao). Itens que dependem de establishment condicionados a `establishment?.id`
-7. **(owner)/add-professional.tsx** — Tela informativa: explica que profissionais se cadastram pelo app e solicitam vinculacao. Botao "Ver Solicitacoes" → affiliations.tsx. **NAO cria profissional** (endpoint `POST /professional/quick-create` so funciona para o usuario autenticado, nao para terceiros)
+6. **(owner)/(tabs)/menu.tsx** — Menu do owner: Adicionar Profissional, Solicitacoes de Vinculacao, Adicionar Servico, Ver Filas, Dados Pessoais (em breve), Dados do Estabelecimento (→ address), Atendimentos, Relatorios (em breve), Tambem serei profissional (condicional: so se !PROFESSIONAL). Secao inferior: "Sair do Estabelecimento" (amber, limpa dados, volta ao onboarding) e "Sair da Conta" (vermelho, logout). Itens que dependem de establishment condicionados a `establishment?.id`
+7. **(owner)/add-professional.tsx** — Dois modos: (a) Se owner NAO tem PROFESSIONAL role: formulario com nome + especialidade → `POST /professional/quick-create` com tratamento 409 (tenta affiliate automatico); (b) Se owner JA e profissional: tela informativa explicando sistema de afiliacao + botao "Ver Solicitacoes" → affiliations.tsx
 8. **(owner)/affiliations.tsx** — Lista solicitacoes de vinculacao do establishment: pendentes (aceitar/rejeitar) + historico. `GET /establishment/{id}/affiliations`, `PATCH /affiliations/{id}/accept`, `PATCH /affiliations/{id}/reject`
 9. **(owner)/add-service.tsx** — Especialidade → tipo de servico → nome + preco + pricing preview → `POST /establishment/{id}/service-items`
 10. **(owner)/queues.tsx** — Visao de todas as filas por profissional (cards expansiveis), total na fila, profissionais disponiveis, link para fila detalhada
 11. **(owner)/professional-queue.tsx** — Fila detalhada de um profissional via `GET /client-queue/{profId}/queue` — atendimento atual + lista de espera + tempo estimado
-12. **(owner)/attendances.tsx** — Historico de atendimentos do establishment: filtros (todos/finalizados/cancelados), resumo de receita
+12. **(owner)/attendances.tsx** — Historico de atendimentos do establishment: auto-load no mount, filtros (todos/finalizados/cancelados), resumo de receita, erro real do backend + "tentar novamente"
 13. **(owner)/onboarding/address.tsx** — Endereco do establishment (frontend pronto, backend pendente)
 
 ### Sequencia de chamadas
@@ -148,6 +148,8 @@ PATCH /establishment/{id}/open-status { openStatus: "OPEN" }
 ### Regras de negocio
 - Owner so pode criar UM perfil profissional (o dele mesmo) via `POST /professional/quick-create`
 - Owner NAO pode criar profissional para outra pessoa — profissionais se cadastram pelo app e solicitam vinculacao
+- Botao de hardware (Android) funciona em todas as telas com showBackButton via BackHandler no Header
+- Botoes de cancelar/negar: transparente com borda vermelha e texto vermelho
 - Service items sao vinculados ao profissional (JWT userId), nao ao establishment
 - `estimatedMinutes` nao e enviado — backend tem default 30 via @PrePersist, atualizado semanalmente pela media dos atendimentos
 - Establishment pode existir sem profissionais (status ACTIVE, openStatus CLOSED)
@@ -170,7 +172,7 @@ PATCH /establishment/{id}/open-status { openStatus: "OPEN" }
 7. **(professional)/my-services.tsx** — Lista servicos + formulario com filtro por especialidade + pricing preview com absorcao. Usa `POST /professional-queue/{profId}/add-service-items` (independente de establishment)
 8. **(professional)/find-establishment.tsx** — Buscar establishment por nome (`GET /establishment?name=X`), exibir resultados, solicitar vinculacao (`POST /professional/me/affiliations { establishmentId }`). Verifica se profissional tem servicos antes de solicitar
 9. **(professional)/profile.tsx** — Menu: Atendimentos, Relatorios, Meus Servicos, Configuracoes, Sair
-10. **(professional)/attendances.tsx** — Historico de atendimentos: filtros (todos/finalizados/cancelados) → `GET /attendances` (backend pendente)
+10. **(professional)/attendances.tsx** — Historico de atendimentos: auto-load no mount, filtros (todos/finalizados/cancelados) → `GET /attendances`, erro real do backend + "tentar novamente"
 11. **(professional)/reports.tsx** — Stats do dia (fila, tempo estimado), semana/mes aguardando endpoint
 12. **(professional)/settings.tsx** — Dados do profissional (nome, email, senha, establishment). Botao "Buscar Estabelecimento" quando nao afiliado
 

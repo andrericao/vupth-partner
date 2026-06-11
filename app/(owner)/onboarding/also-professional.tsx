@@ -79,12 +79,14 @@ export default function AlsoProfessionalScreen() {
       const code = error?.response?.data?.code;
 
       if (code === "USER_ALREADY_PROFESSIONAL" || error?.response?.status === 409) {
+        try {
+          await useProfessionalStore.getState().affiliate(establishmentId);
+        } catch {}
         await refreshToken();
-        Alert.alert(
-          "Tudo certo",
-          "Voce ja possui perfil profissional. Redirecionando...",
-          [{ text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) }]
-        );
+        router.replace({
+          pathname: "/(owner)/add-service",
+          params: { establishmentId },
+        } as any);
         return;
       }
 
@@ -120,7 +122,7 @@ export default function AlsoProfessionalScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} pb="$6" px="$6">
-          <Header />
+          <Header showBackButton />
 
           <VStack flex={1} justifyContent="center" px="$2">
             <Heading size="2xl" fontFamily="$heading" mb="$4">
@@ -168,9 +170,11 @@ export default function AlsoProfessionalScreen() {
             <Button
               title="Nao, apenas proprietario"
               onPress={handleNo}
-              bg="$coolGray300"
-              $active-bg="$coolGray400"
-              textColor="$coolGray800"
+              bg="transparent"
+              $active-bg="$red50"
+              borderWidth="$1"
+              borderColor="$red500"
+              textColor="$red500"
               mt="$2"
             />
           </VStack>

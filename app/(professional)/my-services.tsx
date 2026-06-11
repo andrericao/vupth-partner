@@ -324,8 +324,11 @@ export default function MyServicesScreen() {
               <Button
                 title="Cancelar"
                 onPress={() => setShowForm(false)}
-                bg="$coolGray300"
-                $active-bg="$coolGray400"
+                bg="transparent"
+                $active-bg="$red50"
+                borderWidth="$1"
+                borderColor="$red500"
+                textColor="$red500"
               />
             </FormControl>
           </VStack>

@@ -71,7 +71,7 @@ export default function LoginScreen() {
         alignItems="center"
         justifyContent="center"
       >
-        <Header />
+        <Header showBackButton />
         <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
           <Heading mb="$12" size="3xl" fontFamily="$heading">
             Login

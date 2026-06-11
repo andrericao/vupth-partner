@@ -10,6 +10,7 @@ import { Alert } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
+import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 
 type MenuItemProps = {
@@ -39,13 +40,34 @@ function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
 
 export default function OwnerMenuScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
+  const resetEstablishment = useEstablishmentStore((s) => s.reset);
+  const resetProfessional = useProfessionalStore((s) => s.reset);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
   const isProfessional = user?.roles?.includes("PROFESSIONAL");
 
+  const handleLeaveEstablishment = () => {
+    Alert.alert(
+      "Sair do Estabelecimento",
+      "Voce sera desvinculado deste estabelecimento. Deseja continuar?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair do Estabelecimento",
+          style: "destructive",
+          onPress: async () => {
+            resetEstablishment();
+            resetProfessional();
+            router.replace("/(owner)/onboarding/establishment" as any);
+          },
+        },
+      ]
+    );
+  };
+
   const handleLogout = () => {
-    Alert.alert("Sair", "Tem certeza que deseja sair?", [
+    Alert.alert("Sair", "Tem certeza que deseja sair da conta?", [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Sair",
@@ -56,6 +78,10 @@ export default function OwnerMenuScreen() {
         },
       },
     ]);
+  };
+
+  const handleComingSoon = () => {
+    Alert.alert("Em breve", "Esta funcionalidade sera implementada em breve.");
   };
 
   return (
@@ -115,30 +141,40 @@ export default function OwnerMenuScreen() {
                   } as any)
                 }
               />
+
+              <MenuItem
+                label="Ver Filas"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/queues",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+              />
             </>
           )}
 
           <MenuItem
-            label="Endereco"
-            onPress={() => router.push("/(owner)/onboarding/address" as any)}
+            label="Dados Pessoais"
+            onPress={handleComingSoon}
           />
+
+          {establishment?.id && (
+            <MenuItem
+              label="Dados do Estabelecimento"
+              onPress={() => router.push("/(owner)/onboarding/address" as any)}
+            />
+          )}
 
           <MenuItem
             label="Atendimentos"
             onPress={() => router.push("/(owner)/attendances" as any)}
           />
 
-          {establishment?.id && (
-            <MenuItem
-              label="Ver Filas"
-              onPress={() =>
-                router.push({
-                  pathname: "/(owner)/queues",
-                  params: { establishmentId: establishment.id },
-                } as any)
-              }
-            />
-          )}
+          <MenuItem
+            label="Relatorios"
+            onPress={handleComingSoon}
+          />
 
           {!isProfessional && establishment?.id && (
             <MenuItem
@@ -153,9 +189,17 @@ export default function OwnerMenuScreen() {
           )}
         </VStack>
 
-        <VStack mt="$8">
+        <VStack mt="$8" space="sm">
+          {establishment?.id && (
+            <MenuItem
+              label="Sair do Estabelecimento"
+              onPress={handleLeaveEstablishment}
+              color="$amber700"
+            />
+          )}
+
           <MenuItem
-            label="Sair"
+            label="Sair da Conta"
             onPress={handleLogout}
             color="$red500"
           />

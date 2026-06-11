@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 import {
   VStack,
@@ -86,24 +86,29 @@ export default function OwnerAttendancesScreen() {
   const [filter, setFilter] = useState<Filter>("ALL");
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   const loadHistory = useCallback(async () => {
     if (!establishment?.id) return;
     setIsLoading(true);
-    setHasError(false);
+    setErrorMsg(null);
     try {
       const params: Record<string, string> = { establishmentId: establishment.id };
       if (filter !== "ALL") params.status = filter;
       await fetchHistory(params);
       setLoaded(true);
-    } catch {
-      setHasError(true);
+    } catch (error: any) {
+      const msg = error?.response?.data?.message ?? "Nao foi possivel carregar os atendimentos.";
+      setErrorMsg(msg);
     } finally {
       setIsLoading(false);
     }
   }, [establishment?.id, filter, fetchHistory]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -161,22 +166,6 @@ export default function OwnerAttendancesScreen() {
           ))}
         </HStack>
 
-        {!loaded && !isLoading && (
-          <Pressable
-            onPress={loadHistory}
-            bg="$green500"
-            py="$3"
-            px="$6"
-            borderRadius="$md"
-            alignSelf="center"
-            mt="$6"
-          >
-            <Text fontFamily="$body" color="$white" textAlign="center">
-              Carregar atendimentos
-            </Text>
-          </Pressable>
-        )}
-
         {isLoading && (
           <VStack alignItems="center" mt="$12">
             <Spinner color="$green500" size="large" />
@@ -184,18 +173,20 @@ export default function OwnerAttendancesScreen() {
           </VStack>
         )}
 
-        {hasError && (
+        {errorMsg && (
           <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$4">
             <Text fontFamily="$body" color="$amber700" textAlign="center">
-              Endpoint de historico ainda nao disponivel no backend.
+              {errorMsg}
             </Text>
-            <Text fontFamily="$body" color="$amber600" fontSize="$xs" textAlign="center" mt="$1">
-              GET /attendances — aguardando implementacao
-            </Text>
+            <Pressable onPress={loadHistory} mt="$2">
+              <Text fontFamily="$body" color="$green600" textAlign="center" fontSize="$sm">
+                Tentar novamente
+              </Text>
+            </Pressable>
           </VStack>
         )}
 
-        {loaded && !hasError && history.length > 0 && (
+        {loaded && !errorMsg && history.length > 0 && (
           <VStack bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200" mb="$4">
             <HStack justifyContent="space-between" alignItems="center">
               <Text fontFamily="$body" fontSize="$sm" color="$green700">
@@ -208,13 +199,13 @@ export default function OwnerAttendancesScreen() {
           </VStack>
         )}
 
-        {loaded && !hasError && history.length === 0 && (
+        {loaded && !errorMsg && history.length === 0 && (
           <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$12">
             Nenhum atendimento encontrado
           </Text>
         )}
 
-        {loaded && !hasError && history.length > 0 && (
+        {loaded && !errorMsg && history.length > 0 && (
           <VStack>
             <Divider mb="$4" />
             {history.map((item) => (

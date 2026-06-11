@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   Spinner,
+  FormControl,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
@@ -108,7 +109,7 @@ export default function FindEstablishmentScreen() {
           </Text>
 
           <HStack space="sm" mb="$4">
-            <VStack flex={1}>
+            <FormControl flex={1}>
               <Input
                 textLabel=""
                 placeholder="Nome do estabelecimento"
@@ -117,7 +118,7 @@ export default function FindEstablishmentScreen() {
                 onChangeText={setSearch}
                 onSubmitEditing={handleSearch}
               />
-            </VStack>
+            </FormControl>
             <Button
               title="Buscar"
               onPress={handleSearch}

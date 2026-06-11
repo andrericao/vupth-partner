@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { BackHandler } from "react-native";
 import { router } from "expo-router";
 import { HStack, Center, Heading } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +20,16 @@ export function Header({ showBackButton = false, onBack }: Props) {
       router.back();
     }
   };
+
+  useEffect(() => {
+    if (!showBackButton) return;
+
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      handleBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [showBackButton, onBack]);
 
   return (
     <HStack alignItems="center" style={{ paddingTop: insets.top }}>
