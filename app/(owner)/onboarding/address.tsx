@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
+import { VStack, FormControl, Heading, ScrollView, HStack, Spinner, Text } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
@@ -8,6 +8,7 @@ import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskCEP, unmask } from "@lib/masks";
+import { lookupCep } from "@lib/cep";
 
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -21,6 +22,24 @@ export default function AddressScreen() {
   const [state, setState] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
+
+  const handleCepChange = async (text: string) => {
+    const masked = maskCEP(text);
+    setZipCode(masked);
+
+    if (unmask(masked).length === 8) {
+      setCepLoading(true);
+      const found = await lookupCep(masked);
+      setCepLoading(false);
+      if (found) {
+        if (found.street) setStreet(found.street);
+        if (found.neighborhood) setNeighborhood(found.neighborhood);
+        if (found.city) setCity(found.city);
+        if (found.state) setState(found.state);
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     if (!street.trim() || !number.trim() || !neighborhood.trim() || !city.trim() || !state.trim()) {
@@ -80,10 +99,19 @@ export default function AddressScreen() {
             placeholder="01310-100"
             messageError="CEP invalido"
             value={zipCode}
-            onChangeText={(t) => setZipCode(maskCEP(t))}
+            onChangeText={handleCepChange}
             keyboardType="number-pad"
             maxLength={9}
           />
+
+          {cepLoading && (
+            <HStack alignItems="center" space="sm" mb="$3" mt="-$1">
+              <Spinner size="small" color="$green500" />
+              <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                Buscando endereco pelo CEP...
+              </Text>
+            </HStack>
+          )}
 
           <Input
             textLabel="Logradouro"

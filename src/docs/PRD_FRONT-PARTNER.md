@@ -386,6 +386,10 @@ Resposta flat (sem wrapper). Frontend le: `data.access_token`, `data.refresh_tok
 - Funções puras testadas: `maskCEP` (00000-000), `maskPhone` ((00) 00000-0000 / fixo), `maskDate` (DD/MM/AAAA), `unmask` (só dígitos para enviar ao backend)
 - Aplicado: CEP em address.tsx (envia via `unmask`). Telefone/data prontos para quando existirem campos (hoje não há tela com esses campos)
 
+### Auto-preenchimento de endereço por CEP — src/lib/cep.ts (2026-06-13)
+- `lookupCep(cep)` consulta a **ViaCEP** (API pública, não depende do backend VUPTH); retorna null em CEP inválido/offline (nunca lança)
+- address.tsx: ao completar 8 dígitos no CEP, busca e preenche logradouro/bairro/cidade/UF automaticamente (com spinner "Buscando endereco pelo CEP..."); o usuário ainda pode editar os campos
+
 ### Mensagens de erro — getApiErrorMessage (api.ts)
 - Helper usado nos catches das telas para mostrar mensagens uteis ao usuario (nao apenas "houve um erro")
 - Sem `error.response` (rede) → "Sem conexao com o servidor. Verifique sua internet e tente novamente."
