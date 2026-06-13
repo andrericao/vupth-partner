@@ -39,7 +39,8 @@ export default function OwnerDashboardScreen() {
     return () => handler.remove();
   }, [isFocused]);
 
-  const isOpen = establishment?.open_status === "OPEN";
+  const status = establishment?.open_status ?? "CLOSED";
+  const isOpen = status === "OPEN";
   const { data: queueData, refetch } = useQueuePolling(establishment?.id ?? null);
   const totalInQueue = queueData?.total_in_queue ?? 0;
   const professionals: ProfessionalWithQueue[] = queueData?.professionals ?? [];
@@ -51,10 +52,17 @@ export default function OwnerDashboardScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  const handleToggleStatus = async () => {
-    if (!establishment) return;
+  const STATUS_BADGE: Record<string, { label: string; action: "success" | "error" | "warning" }> = {
+    OPEN: { label: "ABERTO", action: "success" },
+    CLOSED: { label: "FECHADO", action: "error" },
+    TEMPORARILY_CLOSED: { label: "FECHADO TEMPORARIAMENTE", action: "warning" },
+  };
+  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.CLOSED;
 
-    if (!isOpen && queueData && professionals.length === 0) {
+  const setStatus = async (newStatus: string) => {
+    if (!establishment || newStatus === status) return;
+
+    if (newStatus === "OPEN" && queueData && professionals.length === 0) {
       Alert.alert(
         "Estabelecimento sem profissionais",
         "Para abrir o estabelecimento e necessario ter pelo menos um profissional vinculado com servicos cadastrados.",
@@ -75,15 +83,11 @@ export default function OwnerDashboardScreen() {
 
     setIsToggling(true);
     try {
-      const newStatus = isOpen ? "CLOSED" : "OPEN";
       await updateOpenStatus(establishment.id, newStatus);
     } catch (error: any) {
       Alert.alert(
         "Erro",
-        getApiErrorMessage(
-          error,
-          `Nao foi possivel ${isOpen ? "fechar" : "abrir"} o estabelecimento. Tente novamente.`
-        )
+        getApiErrorMessage(error, "Nao foi possivel atualizar o status. Tente novamente.")
       );
     } finally {
       setIsToggling(false);
@@ -122,11 +126,11 @@ export default function OwnerDashboardScreen() {
             {establishment.name}
           </Heading>
           <Badge
-            action={isOpen ? "success" : "error"}
+            action={badge.action}
             variant="solid"
             borderRadius="$md"
           >
-            <BadgeText>{isOpen ? "ABERTO" : "FECHADO"}</BadgeText>
+            <BadgeText fontSize="$2xs">{badge.label}</BadgeText>
           </Badge>
         </HStack>
 
@@ -151,13 +155,44 @@ export default function OwnerDashboardScreen() {
 
         <Divider my="$6" />
 
-        <Button
-          title={isOpen ? "Fechar Estabelecimento" : "Abrir Estabelecimento"}
-          onPress={handleToggleStatus}
-          isLoading={isToggling}
-          bg={isOpen ? "$red500" : "$green500"}
-          $active-bg={isOpen ? "$red600" : "$green600"}
-        />
+        {!isOpen ? (
+          <Button
+            title="Abrir Estabelecimento"
+            onPress={() => setStatus("OPEN")}
+            isLoading={isToggling}
+            bg="$green500"
+            $active-bg="$green600"
+          />
+        ) : (
+          <Button
+            title="Fechar Estabelecimento"
+            onPress={() => setStatus("CLOSED")}
+            isLoading={isToggling}
+            bg="$red500"
+            $active-bg="$red600"
+          />
+        )}
+
+        {status !== "TEMPORARILY_CLOSED" ? (
+          <Button
+            title="Fechar Temporariamente"
+            onPress={() => setStatus("TEMPORARILY_CLOSED")}
+            isLoading={isToggling}
+            bg="transparent"
+            borderWidth="$1"
+            borderColor="$amber500"
+            textColor="$amber600"
+            $active-bg="$amber50"
+          />
+        ) : (
+          <Button
+            title="Reabrir Estabelecimento"
+            onPress={() => setStatus("OPEN")}
+            isLoading={isToggling}
+            bg="$green500"
+            $active-bg="$green600"
+          />
+        )}
 
         <Button
           title="Ver Filas"
