@@ -75,10 +75,6 @@ export default function ProfessionalLayout() {
         name="find-establishment"
         options={{ href: null }}
       />
-      <Tabs.Screen
-        name="coming-soon"
-        options={{ href: null }}
-      />
     </Tabs>
   );
 }
