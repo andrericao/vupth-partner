@@ -249,7 +249,7 @@ export default function AddServiceScreen() {
             return (
               <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200" mb="$3">
                 <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
-                  Quem absorve a taxa (6%)?
+                  Quem absorve as Taxas Vupth (6%)?
                 </Text>
                 <HStack space="xs" mb="$3" flexWrap="wrap">
                   {options.map((pct) => (
@@ -283,7 +283,7 @@ export default function AddServiceScreen() {
                   </Text>
                 </HStack>
                 <HStack justifyContent="space-between">
-                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Taxa plataforma:</Text>
+                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Taxas Vupth:</Text>
                   <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
                     R$ {pricing.platformFee.toFixed(2)}
                   </Text>

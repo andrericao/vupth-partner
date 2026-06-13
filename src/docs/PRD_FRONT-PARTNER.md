@@ -513,7 +513,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | 6 | Cliente entra na fila sem servicos existentes | BACKEND | Validacao deve estar no backend — negar attendance se profissional nao tem service items |
 | 7 | "checking for new update..." no rodape | EXPO GO | Mensagem do Expo Go dev client, nao aparece em build de producao. Pode ser suprimida com `expo-updates` configurado |
 | 8 | Validacao de senha segura (letra, numero, especial, confirmar) | ✅ Implementado (2026-06-13) | `src/lib/passwordValidation.ts` (funcao pura testada): min 8 chars + letra + numero + especial. register.tsx mostra o 1o erro no campo Senha + dica e campo "Confirmar senha" (valida coincidencia) |
-| 9 | Politica de Precos: renomear "Taxas Vupth" | PENDENTE | Renomear labels de pricing para "Taxas Vupth" conforme identidade da marca |
+| 9 | Politica de Precos: renomear "Taxas Vupth" | ✅ Implementado (2026-06-13) | add-service.tsx e my-services.tsx: "Taxa plataforma" → "Taxas Vupth" e "Quem absorve a taxa" → "Quem absorve as Taxas Vupth" |
 | 12 | Teclado cobre formularios | ✅ Corrigido | KeyboardAvoidingView adicionado em todas as 10 telas de formulario |
 | 13 | Icone de lupa na aba de pesquisa | PENDENTE | Nao existe aba de pesquisa ainda — precisa criar tela + tab |
 | 14 | Profissionais sem servicos nao devem aparecer para clientes | BACKEND/FRONTEND | Regra (2026-06-12): mesmo com a loja ABERTA, profissional sem nenhum servico cadastrado nao pode aparecer para os clientes (app client e filas publicas). Filtrar no backend (with-queue e busca de establishments) — frontend client nao tem como saber os servicos de cada profissional. Relacionado a pendencia backend #7 (status ATIVA) |

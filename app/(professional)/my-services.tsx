@@ -306,7 +306,7 @@ export default function MyServicesScreen() {
                   </Text>
 
                   <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
-                    Quem absorve a taxa (6%)?
+                    Quem absorve as Taxas Vupth (6%)?
                   </Text>
 
                   <HStack space="xs" mb="$3" flexWrap="wrap">
@@ -358,7 +358,7 @@ export default function MyServicesScreen() {
 
                   <HStack justifyContent="space-between">
                     <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
-                      Taxa plataforma:
+                      Taxas Vupth:
                     </Text>
                     <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
                       R$ {pricing.platformFee.toFixed(2)}
