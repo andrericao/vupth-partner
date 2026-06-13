@@ -176,12 +176,7 @@ export default function OwnerMenuScreen() {
 
           <MenuItem
             label="Relatorios"
-            onPress={() =>
-              router.push({
-                pathname: "/(owner)/coming-soon",
-                params: { title: "Relatorios" },
-              } as any)
-            }
+            onPress={() => router.push("/(owner)/reports" as any)}
           />
 
         </VStack>

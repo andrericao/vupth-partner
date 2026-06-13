@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   VStack,
   HStack,
@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useProfessionalStore } from "@store/professional.store";
+import { useAttendanceStore } from "@store/attendance.store";
 
 type Period = "day" | "week" | "month";
 
@@ -19,6 +20,8 @@ export default function ProfessionalReportsScreen() {
   const [period, setPeriod] = useState<Period>("day");
   const professional = useProfessionalStore((s) => s.professional);
   const { data } = useQueuePolling(professional?.establishment_id ?? null);
+  const history = useAttendanceStore((s) => s.history);
+  const fetchHistory = useAttendanceStore((s) => s.fetchHistory);
 
   const myProfessional = data?.professionals?.find(
     (p) => p.id === professional?.id
@@ -26,6 +29,22 @@ export default function ProfessionalReportsScreen() {
 
   const queueCount = myProfessional?.queue_count ?? 0;
   const waitMinutes = myProfessional?.estimated_wait_minutes ?? 0;
+
+  const loadHistory = useCallback(async () => {
+    if (!professional?.id) return;
+    try {
+      await fetchHistory({ professionalId: professional.id, status: "FINISHED" });
+    } catch {}
+  }, [professional?.id, fetchHistory]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  // history e estado global compartilhado; filtra FINISHED por seguranca
+  const finished = history.filter((a) => a.status === "FINISHED");
+  const finishedCount = finished.length;
+  const revenue = finished.reduce((sum, a) => sum + a.totalValue, 0);
 
   const periods: { key: Period; label: string }[] = [
     { key: "day", label: "Hoje" },
@@ -91,14 +110,24 @@ export default function ProfessionalReportsScreen() {
               </Text>
             </VStack>
 
-            <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                Atendimentos finalizados / Receita
-              </Text>
-              <Text fontFamily="$body" color="$coolGray400" mt="$2">
-                Em breve — aguardando endpoint de historico
-              </Text>
-            </VStack>
+            <HStack space="md">
+              <VStack flex={1} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+                  Finalizados (total)
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$coolGray800">
+                  {finishedCount}
+                </Text>
+              </VStack>
+              <VStack flex={1} bg="$green50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
+                <Text fontFamily="$body" fontSize="$sm" color="$green700">
+                  Receita
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+                  R$ {revenue.toFixed(2)}
+                </Text>
+              </VStack>
+            </HStack>
           </VStack>
         )}
 
