@@ -546,8 +546,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | Completar dados do establishment | Frontend pronto (address.tsx conectado + addAddress no store). Backend `POST /establishments/{id}/addresses` implementado |
 | React Hook Form + Zod | Validacao nos formularios |
 | ~~Tratar TEMPORARILY_CLOSED~~ | ✅ Implementado (2026-06-13): 3 estados no dashboard (Abrir/Fechar + Fechar Temporariamente/Reabrir) |
-| Paleta PRD | #1B4332, #52B788, #00B37E, #F7FAF8 |
-| Fontes DM Sans + DM Mono | — |
+| Paleta PRD | **COM O DESIGN** (decisao 2026-06-13): so ha 4 cores-ancora (#1B4332, #52B788, #00B37E, #F7FAF8); a escala completa (green/neutros) e decisao de design. Aplicar no tema (config/gluestack-ui.config.ts, escala `green`) quando o design entregar |
+| Fontes DM Sans + DM Mono | **COM O DESIGN** (decisao 2026-06-13) |
 | Implementar intermediador de pagamento | Integrar Stripe/Pagar.me, ativar split real de taxas (6% = 4% intermediador + 2% plataforma). Unificar `src/utils/pricing.ts` e `src/lib/pricing.ts` neste momento |
 
 ### Baixa prioridade
