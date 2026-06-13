@@ -382,6 +382,10 @@ Resposta flat (sem wrapper). Frontend le: `data.access_token`, `data.refresh_tok
 - Response interceptor: em 401, tenta refresh automatico e retry da request original
 - Refresh no interceptor usa `axios.post` direto (sem interceptor) para evitar loop
 
+### Máscaras de input — src/lib/masks.ts (2026-06-13)
+- Funções puras testadas: `maskCEP` (00000-000), `maskPhone` ((00) 00000-0000 / fixo), `maskDate` (DD/MM/AAAA), `unmask` (só dígitos para enviar ao backend)
+- Aplicado: CEP em address.tsx (envia via `unmask`). Telefone/data prontos para quando existirem campos (hoje não há tela com esses campos)
+
 ### Mensagens de erro — getApiErrorMessage (api.ts)
 - Helper usado nos catches das telas para mostrar mensagens uteis ao usuario (nao apenas "houve um erro")
 - Sem `error.response` (rede) → "Sem conexao com o servidor. Verifique sua internet e tente novamente."

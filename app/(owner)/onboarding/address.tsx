@@ -7,6 +7,7 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
+import { maskCEP, unmask } from "@lib/masks";
 
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -42,7 +43,7 @@ export default function AddressScreen() {
         neighborhood: neighborhood.trim(),
         city: city.trim(),
         state: state.trim(),
-        zipCode: zipCode.replace(/\D/g, ""),
+        zipCode: unmask(zipCode),
       });
       Alert.alert("Endereco salvo", "Endereco do estabelecimento atualizado.", [
         { text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) },
@@ -76,11 +77,12 @@ export default function AddressScreen() {
 
           <Input
             textLabel="CEP"
-            placeholder="01310100"
+            placeholder="01310-100"
             messageError="CEP invalido"
             value={zipCode}
-            onChangeText={setZipCode}
+            onChangeText={(t) => setZipCode(maskCEP(t))}
             keyboardType="number-pad"
+            maxLength={9}
           />
 
           <Input
