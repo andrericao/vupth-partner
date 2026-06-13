@@ -9,7 +9,7 @@ import {
   LinkText,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
@@ -17,36 +17,40 @@ import { Input } from "@components/Input";
 import { InputPassword } from "@components/InputPassWord";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
+import { getApiErrorMessage } from "@lib/api";
 
 export default function LoginScreen() {
+  const { role } = useLocalSearchParams<{ role: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isInvalid, setIsInvalid] = useState(false);
+  const [isEmailInvalid, setIsEmailInvalid] = useState(false);
+  const [isPasswordInvalid, setIsPasswordInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const login = useAuthStore((s) => s.login);
 
   const handleSubmit = async () => {
-    if (email.length < 6 || password.length < 6) {
-      setIsInvalid(true);
-      return;
-    }
+    const emailInvalid = email.length < 6 || !email.includes("@");
+    const passwordInvalid = password.length < 6;
+    setIsEmailInvalid(emailInvalid);
+    setIsPasswordInvalid(passwordInvalid);
+    if (emailInvalid || passwordInvalid) return;
 
-    setIsInvalid(false);
     setIsLoading(true);
 
     try {
       await login(email, password);
 
       const roles = useAuthStore.getState().user?.roles ?? [];
-      const route = getPostLoginRoute(roles);
+      const intent = role as "owner" | "professional" | undefined;
+      const route = getPostLoginRoute(roles, intent);
       router.replace(route as any);
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 401) {
         Alert.alert("Erro", "E-mail ou senha inválidos");
       } else {
-        Alert.alert("Erro", "Não foi possível fazer login. Tente novamente.");
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível fazer login. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -72,35 +76,39 @@ export default function LoginScreen() {
         justifyContent="center"
       >
         <Header showBackButton />
-        <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
+        <VStack flex={1} mt="$48" w="$full">
           <Heading mb="$12" size="3xl" fontFamily="$heading">
             Login
           </Heading>
-          <Input
-            placeholder="email@email.com"
-            messageError="E-mail inválido"
-            textLabel="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            testID="login-email"
-          />
-          <InputPassword
-            placeholder="senha"
-            messageError="Mínimo 6 caracteres"
-            textLabel="Senha"
-            value={password}
-            onChangeText={setPassword}
-            testID="login-password"
-          />
+          <FormControl isInvalid={isEmailInvalid}>
+            <Input
+              placeholder="email@email.com"
+              messageError="E-mail inválido"
+              textLabel="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              testID="login-email"
+            />
+          </FormControl>
+          <FormControl isInvalid={isPasswordInvalid}>
+            <InputPassword
+              placeholder="senha"
+              messageError="Informe sua senha (mínimo 6 caracteres)"
+              textLabel="Senha"
+              value={password}
+              onChangeText={setPassword}
+              testID="login-password"
+            />
+          </FormControl>
 
           <Button
             title="Entrar"
             onPress={handleSubmit}
             isLoading={isLoading}
           />
-        </FormControl>
+        </VStack>
 
         <HStack mt="$12" space="xs" flex={1}>
           <Text fontFamily="$body">Não possui cadastro? </Text>

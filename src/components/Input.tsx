@@ -32,7 +32,7 @@ export function Input(props: InputFieldProps) {
         variant="outline"
         $focus-borderWidth="$2"
       >
-        <InputField color="$success950" fontFamily="$body" autoCorrect={false} {...props} />
+        <InputField color="$success950" fontFamily="$body" autoCorrect={false} autoCapitalize="words" {...props} />
       </GluestackInput>
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />

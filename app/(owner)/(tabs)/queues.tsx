@@ -89,7 +89,7 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
               <BadgeText fontSize="$xs">{professional.queue_count} na fila</BadgeText>
             </Badge>
             <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
-              ~{professional.estimated_wait_minutes} min
+              {professional.estimated_wait_minutes} min
             </Text>
           </VStack>
         </HStack>
@@ -159,7 +159,7 @@ export default function OwnerQueuesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Filas

@@ -13,10 +13,12 @@ import {
   Divider,
 } from "@gluestack-ui/themed";
 import { RefreshControl } from "react-native";
+import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
+import { getApiErrorMessage } from "@lib/api";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   FINISHED: { label: "Finalizado", color: "$green500" },
@@ -99,7 +101,7 @@ export default function OwnerAttendancesScreen() {
       await fetchHistory(params);
       setLoaded(true);
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Nao foi possivel carregar os atendimentos.";
+      const msg = getApiErrorMessage(error, "Nao foi possivel carregar os atendimentos.");
       setErrorMsg(msg);
     } finally {
       setIsLoading(false);
@@ -134,7 +136,7 @@ export default function OwnerAttendancesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Atendimentos

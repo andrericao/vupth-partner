@@ -6,6 +6,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
+import { getApiErrorMessage } from "@lib/api";
 
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -47,7 +48,7 @@ export default function AddressScreen() {
         { text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) },
       ]);
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Nao foi possivel salvar o endereco.";
+      const msg = getApiErrorMessage(error, "Nao foi possivel salvar o endereco.");
       Alert.alert("Erro", msg);
     } finally {
       setIsLoading(false);
@@ -61,14 +62,14 @@ export default function AddressScreen() {
     >
     <ScrollView
       w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 160 }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
-        <Header showBackButton />
+      <VStack flex={1} py="$12" px="$6" alignItems="center">
+        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
-        <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
+        <FormControl flex={1} mt="$8" isInvalid={isInvalid}>
           <Heading mb="$12" size="3xl" fontFamily="$heading">
             Endereco da Loja
           </Heading>
@@ -121,6 +122,8 @@ export default function AddressScreen() {
             messageError="Campo obrigatorio"
             value={state}
             onChangeText={setState}
+            autoCapitalize="characters"
+            maxLength={2}
           />
 
           <Button

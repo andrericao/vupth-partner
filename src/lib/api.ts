@@ -15,6 +15,43 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
+const ERROR_MESSAGES_PT: Record<string, string> = {
+  AFFILIATION_ALREADY_PENDING:
+    "Voce ja tem uma solicitacao de vinculacao pendente para este estabelecimento. Aguarde a resposta do proprietario.",
+  PROFESSIONAL_ALREADY_AFFILIATED:
+    "Voce ja esta vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
+  USER_ALREADY_PROFESSIONAL: "Voce ja possui um perfil profissional.",
+  ESTABLISHMENT_NOT_FOUND: "Estabelecimento nao encontrado.",
+  PROFESSIONAL_NOT_FOUND: "Perfil profissional nao encontrado.",
+  AFFILIATION_NOT_FOUND: "Solicitacao de vinculacao nao encontrada.",
+  ESTABLISHMENT_NOT_READY:
+    "O estabelecimento precisa de pelo menos um profissional com servico cadastrado para abrir.",
+  VALIDATION_ERROR: "Verifique os dados informados e tente novamente.",
+};
+
+export function getApiErrorMessage(error: any, fallback: string): string {
+  if (!error?.response) {
+    return "Sem conexao com o servidor. Verifique sua internet e tente novamente.";
+  }
+  const data = error.response.data;
+
+  const code = data?.code;
+  if (code && ERROR_MESSAGES_PT[code]) {
+    return ERROR_MESSAGES_PT[code];
+  }
+
+  if (data?.fieldErrors) {
+    return Object.entries(data.fieldErrors)
+      .map(([field, msg]) => `${field}: ${msg}`)
+      .join("\n");
+  }
+  if (data?.message) {
+    return data.message;
+  }
+  return fallback;
+}
+
 api.interceptors.request.use(async (config) => {
   const token = await SecureStore.getItemAsync("vupth_access_token");
   if (token) {

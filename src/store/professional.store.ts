@@ -30,9 +30,13 @@ type ProfessionalState = {
 
   register: (name: string, specialty?: string) => Promise<void>;
   affiliate: (establishmentId: string) => Promise<void>;
+  switchEstablishment: (newEstablishmentId: string) => Promise<void>;
+  leaveEstablishment: () => Promise<void>;
+  requestAffiliation: (establishmentId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   fetchMyServices: () => Promise<void>;
+  fetchMe: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
   reset: () => void;
 };
@@ -90,6 +94,28 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     set({ professional, isLoading: false });
   },
 
+  switchEstablishment: async (newEstablishmentId) => {
+    await api.delete("/professional/me/establishment");
+    const { data } = await api.post("/professional/affiliate", {
+      establishmentId: newEstablishmentId,
+    });
+    const professional = normalizeProfessional(data);
+    await persistProfessional(professional);
+    set({ professional });
+  },
+
+  leaveEstablishment: async () => {
+    await api.delete("/professional/me/establishment");
+    set({ myServices: [] });
+    await get().fetchMe();
+  },
+
+  requestAffiliation: async (establishmentId) => {
+    await api.post("/professional/me/affiliations", {
+      establishmentId,
+    });
+  },
+
   addMyServiceItem: async (serviceItemType, customName, price) => {
     const prof = get().professional;
     if (!prof) throw new Error("Professional not found");
@@ -99,6 +125,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
       { serviceItemType, customName, price }
     );
     return data;
+  },
+
+  fetchMe: async () => {
+    const { data } = await api.get("/professional/me");
+    const professional = normalizeProfessional(data);
+    await persistProfessional(professional);
+    set({ professional });
   },
 
   fetchMyServices: async () => {

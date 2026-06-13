@@ -19,6 +19,8 @@ export function Header({ showBackButton = false, onBack }: Props) {
     } else if (router.canGoBack()) {
       router.back();
     }
+    // Sem onBack e sem para onde voltar: nao faz nada.
+    // O botao voltar nunca pode deslogar (cair em /(auth)).
   };
 
   useEffect(() => {

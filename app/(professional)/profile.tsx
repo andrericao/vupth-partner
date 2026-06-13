@@ -83,6 +83,15 @@ export default function ProfessionalProfileScreen() {
 
         <VStack space="sm">
           <MenuItem
+            label="Dados Pessoais"
+            onPress={() =>
+              router.push({
+                pathname: "/(professional)/coming-soon",
+                params: { title: "Dados Pessoais" },
+              } as any)
+            }
+          />
+          <MenuItem
             label="Atendimentos"
             onPress={() => router.push("/(professional)/attendances" as any)}
           />

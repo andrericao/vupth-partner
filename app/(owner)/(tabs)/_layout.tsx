@@ -42,6 +42,13 @@ export default function OwnerTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="add-professional" options={{ href: null }} />
+      <Tabs.Screen name="add-service" options={{ href: null }} />
+      <Tabs.Screen name="affiliations" options={{ href: null }} />
+      <Tabs.Screen name="attendances" options={{ href: null }} />
+      <Tabs.Screen name="queues" options={{ href: null }} />
+      <Tabs.Screen name="professional-queue" options={{ href: null }} />
+      <Tabs.Screen name="coming-soon" options={{ href: null }} />
     </Tabs>
   );
 }

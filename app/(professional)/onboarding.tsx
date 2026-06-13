@@ -8,6 +8,9 @@ import {
   Pressable,
   HStack,
   Spinner,
+  Input as GluestackInput,
+  InputField,
+  InputSlot,
 } from "@gluestack-ui/themed";
 import { router } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
@@ -17,6 +20,7 @@ import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useEstablishmentStore, EstablishmentSearchResult } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
+import { getApiErrorMessage } from "@lib/api";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -44,7 +48,7 @@ export default function ProfessionalOnboardingScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const registerProfessional = useProfessionalStore((s) => s.register);
-  const affiliate = useProfessionalStore((s) => s.affiliate);
+  const requestAffiliation = useProfessionalStore((s) => s.requestAffiliation);
   const searchByName = useEstablishmentStore((s) => s.searchByName);
   const refreshToken = useAuthStore((s) => s.refreshToken);
 
@@ -74,7 +78,7 @@ export default function ProfessionalOnboardingScreen() {
         const msg = Object.values(fieldErrors).join("\n");
         Alert.alert("Erro de validacao", msg);
       } else {
-        Alert.alert("Erro", "Nao foi possivel criar o perfil. Tente novamente.");
+        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel criar o perfil. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -86,8 +90,8 @@ export default function ProfessionalOnboardingScreen() {
     try {
       const results = await searchByName(searchQuery.trim());
       setSearchResults(results);
-    } catch {
-      Alert.alert("Erro", "Nao foi possivel buscar estabelecimentos.");
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel buscar estabelecimentos."));
     } finally {
       setIsSearching(false);
     }
@@ -103,14 +107,20 @@ export default function ProfessionalOnboardingScreen() {
 
     setIsLoading(true);
     try {
-      await affiliate(selectedEstablishment.id);
-      router.replace("/(professional)/queue" as any);
+      await requestAffiliation(selectedEstablishment.id);
+      Alert.alert(
+        "Solicitacao enviada",
+        `Sua solicitacao para ${selectedEstablishment.name} foi enviada. Aguarde a aprovacao do proprietario.`,
+        [{ text: "OK", onPress: () => router.replace("/(professional)/queue" as any) }]
+      );
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "PROFESSIONAL_ALREADY_AFFILIATED") {
         Alert.alert("Aviso", "Voce ja esta vinculado a um estabelecimento.");
+      } else if (code === "AFFILIATION_ALREADY_REQUESTED") {
+        Alert.alert("Aviso", "Voce ja solicitou vinculacao a este estabelecimento. Aguarde a aprovacao.");
       } else {
-        Alert.alert("Erro", "Nao foi possivel se afiliar. Tente novamente.");
+        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -130,7 +140,7 @@ export default function ProfessionalOnboardingScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
-          <Header showBackButton />
+          <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
 
           <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
             <Heading mb="$8" size="3xl" fontFamily="$heading">
@@ -202,7 +212,7 @@ export default function ProfessionalOnboardingScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton />
+          <Header showBackButton onBack={() => setStep("profile")} />
 
           <FormControl flex={1} mt="$12">
             <Heading mb="$4" size="2xl" fontFamily="$heading">
@@ -213,23 +223,34 @@ export default function ProfessionalOnboardingScreen() {
               Busque o estabelecimento onde voce vai trabalhar.
             </Text>
 
-            <HStack space="sm" mb="$4" alignItems="center">
-              <VStack flex={1}>
-                <Input
-                  textLabel=""
-                  placeholder="Nome do estabelecimento"
-                  messageError=""
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  testID="search-establishment"
-                />
-              </VStack>
-              <Button
-                title="Buscar"
-                onPress={handleSearch}
-                isLoading={isSearching}
+            <GluestackInput
+              h="$12"
+              borderWidth="$1"
+              borderColor="$green500"
+              borderRadius="$md"
+              $focus-borderWidth="$2"
+              mb="$4"
+            >
+              <InputField
+                placeholder="Nome do estabelecimento"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmitEditing={handleSearch}
+                color="$coolGray900"
+                fontFamily="$body"
+                autoCorrect={false}
+                returnKeyType="search"
+                testID="search-establishment"
               />
-            </HStack>
+              <InputSlot
+                pr="$3"
+                onPress={searchQuery.trim() ? () => { setSearchQuery(""); setSearchResults([]); } : handleSearch}
+              >
+                <Text fontSize="$lg" color={searchQuery.trim() ? "$red500" : "$coolGray400"}>
+                  {searchQuery.trim() ? "✕" : "🔍"}
+                </Text>
+              </InputSlot>
+            </GluestackInput>
 
           {isSearching && <Spinner color="$green500" size="large" />}
 
@@ -319,7 +340,7 @@ export default function ProfessionalOnboardingScreen() {
         )}
 
         <Button
-          title="Confirmar e Afiliar"
+          title="Solicitar Vinculacao"
           onPress={handleAffiliate}
           isLoading={isLoading}
         />

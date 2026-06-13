@@ -68,6 +68,7 @@ type EstablishmentState = {
   quickCreate: (name: string, serviceType: string) => Promise<void>;
   updateOpenStatus: (id: string, status: string) => Promise<void>;
   restoreEstablishment: () => Promise<void>;
+  fetchMine: () => Promise<void>;
   quickCreateProfessional: (
     name: string,
     establishmentId: string,
@@ -128,6 +129,15 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     const stored = await SecureStore.getItemAsync(STORAGE_KEY);
     if (stored) {
       set({ establishment: normalizeEstablishment(JSON.parse(stored)) });
+    }
+  },
+
+  fetchMine: async () => {
+    const { data } = await api.get("/establishment/mine");
+    if (Array.isArray(data) && data.length > 0) {
+      const establishment = normalizeEstablishment(data[0]);
+      await persistEstablishment(establishment);
+      set({ establishment });
     }
   },
 

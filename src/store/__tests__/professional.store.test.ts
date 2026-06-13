@@ -135,4 +135,92 @@ describe("professional.store", () => {
       ).rejects.toThrow();
     });
   });
+
+  describe("requestAffiliation", () => {
+    it("calls POST /professional/me/affiliations with establishmentId", async () => {
+      mock.onPost("/professional/me/affiliations").reply(201, {
+        id: "aff-uuid-1",
+        status: "PENDING",
+      });
+
+      await useProfessionalStore.getState().requestAffiliation("estab-uuid-1");
+
+      expect(mock.history.post[0].url).toBe("/professional/me/affiliations");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({
+        establishmentId: "estab-uuid-1",
+      });
+    });
+
+    it("rejects on 409 affiliation already pending", async () => {
+      mock.onPost("/professional/me/affiliations").reply(409, {
+        status: 409,
+        code: "AFFILIATION_ALREADY_PENDING",
+        message: "There is already a pending affiliation request.",
+      });
+
+      await expect(
+        useProfessionalStore.getState().requestAffiliation("estab-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("fetchMe", () => {
+    it("calls GET /professional/me and updates the professional", async () => {
+      mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);
+
+      await useProfessionalStore.getState().fetchMe();
+
+      expect(mock.history.get[0].url).toBe("/professional/me");
+      const state = useProfessionalStore.getState();
+      expect(state.professional?.establishment_id).toBe("estab-uuid-1");
+      expect(state.professional?.establishment_name).toBe("Barbearia do Andre");
+    });
+
+    it("detects affiliation accepted while unaffiliated locally", async () => {
+      useProfessionalStore.setState({ professional: REGISTER_RESPONSE });
+      mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);
+
+      await useProfessionalStore.getState().fetchMe();
+
+      expect(
+        useProfessionalStore.getState().professional?.establishment_id
+      ).toBe("estab-uuid-1");
+    });
+  });
+
+  describe("leaveEstablishment", () => {
+    it("calls DELETE /professional/me/establishment, clears services and refreshes", async () => {
+      useProfessionalStore.setState({
+        professional: AFFILIATE_RESPONSE,
+        myServices: [
+          { id: "svc-1", serviceItemType: "CORTE_MAQUINA", customName: "Corte", price: 37.9, estimatedMinutes: 30 },
+        ] as any,
+      });
+
+      mock.onDelete("/professional/me/establishment").reply(204);
+      mock.onGet("/professional/me").reply(200, REGISTER_RESPONSE);
+
+      await useProfessionalStore.getState().leaveEstablishment();
+
+      expect(mock.history.delete[0].url).toBe("/professional/me/establishment");
+      const state = useProfessionalStore.getState();
+      expect(state.professional?.establishment_id).toBeNull();
+      expect(state.myServices).toEqual([]);
+    });
+
+    it("keeps professional state if DELETE fails", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onDelete("/professional/me/establishment").reply(500, {
+        message: "Internal error",
+      });
+
+      await expect(
+        useProfessionalStore.getState().leaveEstablishment()
+      ).rejects.toThrow();
+
+      expect(
+        useProfessionalStore.getState().professional?.establishment_id
+      ).toBe("estab-uuid-1");
+    });
+  });
 });

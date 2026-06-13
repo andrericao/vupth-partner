@@ -15,6 +15,7 @@ import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
+import { api, getApiErrorMessage } from "@lib/api";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -68,24 +69,38 @@ export default function AddProfessionalScreen() {
 
       if (code === "USER_ALREADY_PROFESSIONAL" || error?.response?.status === 409) {
         try {
-          await useProfessionalStore.getState().affiliate(establishmentId!);
-          await refreshToken();
-          Alert.alert(
-            "Vinculado",
-            "Seu perfil profissional foi vinculado a este estabelecimento.",
-            [{ text: "OK", onPress: () => router.back() }]
-          );
-        } catch (affErr: any) {
-          const affCode = affErr?.response?.data?.code;
-          if (affCode === "PROFESSIONAL_ALREADY_AFFILIATED") {
+          const { data: me } = await api.get("/professional/me");
+          const currentEstId = me.establishment_id ?? me.establishmentId;
+
+          if (currentEstId === establishmentId) {
+            await useProfessionalStore.getState().setProfessional(me);
+            await refreshToken();
             Alert.alert(
               "Tudo certo",
-              "Seu perfil profissional ja esta vinculado a este estabelecimento.",
+              "Seu perfil profissional ja esta vinculado a este estabelecimento. Para adicionar outros profissionais, eles devem se cadastrar pelo app e solicitar vinculacao.",
+              [{ text: "OK", onPress: () => router.back() }]
+            );
+          } else if (currentEstId) {
+            await useProfessionalStore.getState().switchEstablishment(establishmentId!);
+            await useProfessionalStore.getState().fetchMe();
+            await refreshToken();
+            Alert.alert(
+              "Vinculado",
+              "Seu perfil profissional foi transferido para este estabelecimento.",
               [{ text: "OK", onPress: () => router.back() }]
             );
           } else {
-            Alert.alert("Erro", "Nao foi possivel vincular ao estabelecimento.");
+            await useProfessionalStore.getState().affiliate(establishmentId!);
+            await useProfessionalStore.getState().fetchMe();
+            await refreshToken();
+            Alert.alert(
+              "Vinculado",
+              "Seu perfil profissional foi vinculado a este estabelecimento.",
+              [{ text: "OK", onPress: () => router.back() }]
+            );
           }
+        } catch (err: any) {
+          Alert.alert("Erro", getApiErrorMessage(err, "Nao foi possivel verificar o perfil profissional."));
         }
       } else {
         const data = error?.response?.data;
@@ -116,7 +131,7 @@ export default function AddProfessionalScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading" mb="$4">
           Adicionar Profissional

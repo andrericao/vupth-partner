@@ -101,9 +101,12 @@ export default function AddServiceScreen() {
     setIsInvalid(false);
     setIsLoading(true);
 
+    // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
+    const finalPrice = calculatePricing(priceNum, absorption).clientPrice;
+
     try {
-      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), priceNum);
-      Alert.alert("Serviço adicionado", `${customName} — R$ ${priceNum.toFixed(2)}`, [
+      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), finalPrice);
+      Alert.alert("Serviço adicionado", `${customName} — R$ ${finalPrice.toFixed(2)}`, [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
@@ -119,7 +122,7 @@ export default function AddServiceScreen() {
       console.error("addServiceItem error:", {
         status: error?.response?.status,
         data,
-        sent: { serviceItemType, customName: customName.trim(), price: parseFloat(price.replace(",", ".")) },
+        sent: { serviceItemType, customName: customName.trim(), price: finalPrice },
       });
       Alert.alert("Erro", msg);
     } finally {
@@ -139,7 +142,7 @@ export default function AddServiceScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
         <FormControl flex={1} mt="$12" isInvalid={isInvalid}>
           <Heading mb="$6" size="3xl" fontFamily="$heading">
@@ -286,7 +289,7 @@ export default function AddServiceScreen() {
                   </Text>
                 </HStack>
                 <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
-                  * Preview — no MVP o profissional recebe o valor integral
+                  * O preco salvo do servico e o total pago pelo cliente
                 </Text>
               </VStack>
             );

@@ -7,6 +7,11 @@ export function getPostLoginRoute(
   const hasOwner = roles.includes("OWNER");
   const hasProfessional = roles.includes("PROFESSIONAL");
 
+  if (hasOwner && hasProfessional) {
+    if (intent === "professional") return "/(professional)/queue";
+    return "/(owner)/dashboard";
+  }
+
   if (hasOwner) return "/(owner)/dashboard";
   if (hasProfessional) return "/(professional)/queue";
 

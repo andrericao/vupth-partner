@@ -10,10 +10,10 @@ import {
   BadgeText,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { api } from "@lib/api";
+import { api, getApiErrorMessage } from "@lib/api";
 
 type Affiliation = {
   id: string;
@@ -40,8 +40,8 @@ export default function OwnerAffiliationsScreen() {
         `/establishment/${establishmentId}/affiliations`
       );
       setAffiliations(data);
-    } catch {
-      Alert.alert("Erro", "Nao foi possivel carregar as solicitacoes.");
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel carregar as solicitacoes."));
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +64,7 @@ export default function OwnerAffiliationsScreen() {
       Alert.alert("Aceito", `${affiliation.professionalName} foi vinculado ao estabelecimento.`);
       await fetchAffiliations();
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Erro ao aceitar.";
-      Alert.alert("Erro", msg);
+      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao aceitar."));
     } finally {
       setActionLoading(null);
     }
@@ -77,8 +76,7 @@ export default function OwnerAffiliationsScreen() {
       await api.patch(`/affiliations/${affiliation.id}/reject`);
       await fetchAffiliations();
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Erro ao rejeitar.";
-      Alert.alert("Erro", msg);
+      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao rejeitar."));
     } finally {
       setActionLoading(null);
     }
@@ -95,7 +93,7 @@ export default function OwnerAffiliationsScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Solicitacoes

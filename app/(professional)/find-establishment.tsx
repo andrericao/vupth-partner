@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   VStack,
   HStack,
@@ -7,16 +7,16 @@ import {
   Pressable,
   ScrollView,
   Spinner,
-  FormControl,
+  Input as GluestackInput,
+  InputField,
+  InputSlot,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
 import { Button } from "@components/Button";
-import { useEstablishmentStore } from "@store/establishment.store";
+import { api, getApiErrorMessage } from "@lib/api";
 import { useProfessionalStore } from "@store/professional.store";
-import { api } from "@lib/api";
 
 type EstablishmentResult = {
   id: string;
@@ -25,14 +25,61 @@ type EstablishmentResult = {
   openStatus: string;
 };
 
+// Profissional so pode trabalhar em um estabelecimento por vez:
+// - affiliated: ja vinculado → nao pode solicitar a outro
+// - pending: solicitacao em aberto → deve aguardar/cancelar antes de solicitar a outro
+// - open: livre para buscar e solicitar
+type Gate = "loading" | "affiliated" | "pending" | "open";
+
 export default function FindEstablishmentScreen() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<EstablishmentResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const professional = useProfessionalStore((s) => s.professional);
-  const myServices = useProfessionalStore((s) => s.myServices);
+  const [gate, setGate] = useState<Gate>("loading");
+  const [blockedName, setBlockedName] = useState<string | null>(null);
+
+  const loadAll = async () => {
+    setIsSearching(true);
+    try {
+      const { data } = await api.get("/establishment");
+      setResults(data);
+      setHasSearched(true);
+    } catch {} finally {
+      setIsSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await useProfessionalStore.getState().fetchMe();
+        const prof = useProfessionalStore.getState().professional;
+        if (prof?.establishment_id) {
+          setBlockedName(prof.establishment_name ?? null);
+          setGate("affiliated");
+          return;
+        }
+        try {
+          const { data: affs } = await api.get("/professional/me/affiliations");
+          const pending = Array.isArray(affs)
+            ? affs.find((a: any) => a.status === "PENDING")
+            : null;
+          if (pending) {
+            setBlockedName(
+              pending.establishmentName ?? pending.establishment_name ?? null
+            );
+            setGate("pending");
+            return;
+          }
+        } catch {}
+      } catch {}
+      setGate("open");
+      await loadAll();
+    };
+    init();
+  }, []);
 
   const handleSearch = async () => {
     if (!search.trim()) return;
@@ -44,29 +91,14 @@ export default function FindEstablishmentScreen() {
         params: { name: search.trim() },
       });
       setResults(data);
-    } catch {
-      Alert.alert("Erro", "Nao foi possivel buscar estabelecimentos.");
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel buscar estabelecimentos."));
     } finally {
       setIsSearching(false);
     }
   };
 
   const handleRequestAffiliation = async (establishment: EstablishmentResult) => {
-    if (!myServices || myServices.length === 0) {
-      Alert.alert(
-        "Adicione servicos primeiro",
-        "Voce precisa ter pelo menos um servico cadastrado para solicitar afiliacao.",
-        [
-          { text: "Cancelar", style: "cancel" },
-          {
-            text: "Adicionar servicos",
-            onPress: () => router.push("/(professional)/my-services" as any),
-          },
-        ]
-      );
-      return;
-    }
-
     setIsRequesting(true);
     try {
       await api.post("/professional/me/affiliations", {
@@ -78,10 +110,7 @@ export default function FindEstablishmentScreen() {
         [{ text: "OK", onPress: () => router.back() }]
       );
     } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ??
-        "Nao foi possivel enviar a solicitacao.";
-      Alert.alert("Erro", msg);
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao."));
     } finally {
       setIsRequesting(false);
     }
@@ -98,37 +127,98 @@ export default function FindEstablishmentScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton />
+          <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
 
           <Heading mt="$8" size="2xl" fontFamily="$heading">
             Buscar Estabelecimento
           </Heading>
 
+          {gate === "loading" && (
+            <VStack alignItems="center" mt="$12">
+              <Spinner color="$green500" size="large" />
+            </VStack>
+          )}
+
+          {gate === "affiliated" && (
+            <VStack
+              bg="$green50"
+              p="$4"
+              borderRadius="$lg"
+              borderWidth="$1"
+              borderColor="$green200"
+              mt="$6"
+            >
+              <Text fontFamily="$heading" fontWeight="$bold" color="$green700" mb="$2">
+                Voce ja esta vinculado
+              </Text>
+              <Text fontFamily="$body" color="$coolGray600" mb="$4">
+                Voce atende em {blockedName ?? "um estabelecimento"}. Um
+                profissional so pode trabalhar em um estabelecimento por vez.
+                Para mudar, desafilie-se em Configuracoes.
+              </Text>
+              <Button
+                title="Ir para Configuracoes"
+                onPress={() => router.navigate("/(professional)/settings" as any)}
+                bg="$green500"
+                $active-bg="$green600"
+              />
+            </VStack>
+          )}
+
+          {gate === "pending" && (
+            <VStack
+              bg="$amber50"
+              p="$4"
+              borderRadius="$lg"
+              borderWidth="$1"
+              borderColor="$amber200"
+              mt="$6"
+            >
+              <Text fontFamily="$heading" fontWeight="$bold" color="$amber700" mb="$2">
+                Solicitacao em andamento
+              </Text>
+              <Text fontFamily="$body" color="$coolGray600">
+                Voce ja solicitou vinculacao a {blockedName ?? "um estabelecimento"}{" "}
+                e esta aguardando a resposta do proprietario. So e possivel
+                solicitar a um estabelecimento por vez — aguarde o retorno ou
+                cancele a solicitacao atual para tentar outro.
+              </Text>
+            </VStack>
+          )}
+
+          {gate === "open" && (
+          <>
           <Text fontFamily="$body" color="$coolGray500" mt="$2" mb="$4">
             Encontre um estabelecimento e solicite vinculacao.
           </Text>
 
-          <HStack space="sm" mb="$4">
-            <FormControl flex={1}>
-              <Input
-                textLabel=""
-                placeholder="Nome do estabelecimento"
-                messageError=""
-                value={search}
-                onChangeText={setSearch}
-                onSubmitEditing={handleSearch}
-              />
-            </FormControl>
-            <Button
-              title="Buscar"
-              onPress={handleSearch}
-              isLoading={isSearching}
-              bg="$green500"
-              $active-bg="$green600"
-              w="$24"
-              h="$12"
+          <GluestackInput
+            h="$12"
+            borderWidth="$1"
+            borderColor="$green500"
+            borderRadius="$md"
+            $focus-borderWidth="$2"
+            mb="$4"
+          >
+            <InputField
+              placeholder="Nome do estabelecimento"
+              value={search}
+              onChangeText={setSearch}
+              onSubmitEditing={handleSearch}
+              color="$coolGray900"
+              fontFamily="$body"
+              autoCorrect={false}
+              returnKeyType="search"
             />
-          </HStack>
+            <InputSlot
+              pr="$3"
+              onPress={search.trim() ? () => { setSearch(""); setResults([]); setHasSearched(false); } : handleSearch}
+            >
+              <Text fontSize="$lg" color={search.trim() ? "$red500" : "$coolGray400"}>
+                {search.trim() ? "✕" : "🔍"}
+              </Text>
+            </InputSlot>
+          </GluestackInput>
 
           {isSearching && (
             <VStack alignItems="center" mt="$8">
@@ -177,6 +267,8 @@ export default function FindEstablishmentScreen() {
               </HStack>
             </Pressable>
           ))}
+          </>
+          )}
         </VStack>
       </ScrollView>
     </KeyboardAvoidingView>

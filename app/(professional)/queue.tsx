@@ -18,6 +18,7 @@ import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 import type { AttendanceInQueue } from "@lib/types";
+import { getApiErrorMessage } from "@lib/api";
 
 function AttendanceCard({
   attendance,
@@ -130,6 +131,12 @@ export default function ProfessionalQueueScreen() {
     return () => handler.remove();
   }, []);
 
+  useEffect(() => {
+    if (!establishmentId) {
+      useProfessionalStore.getState().fetchMe().catch(() => {});
+    }
+  }, [establishmentId]);
+
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
@@ -145,8 +152,7 @@ export default function ProfessionalQueueScreen() {
       await action();
       await refetch();
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Erro ao executar acao.";
-      Alert.alert("Erro", msg);
+      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar acao."));
     }
   };
 

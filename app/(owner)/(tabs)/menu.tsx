@@ -80,10 +80,6 @@ export default function OwnerMenuScreen() {
     ]);
   };
 
-  const handleComingSoon = () => {
-    Alert.alert("Em breve", "Esta funcionalidade sera implementada em breve.");
-  };
-
   return (
     <ScrollView
       w="$full"
@@ -116,7 +112,9 @@ export default function OwnerMenuScreen() {
                 label="Adicionar Profissional"
                 onPress={() =>
                   router.push({
-                    pathname: "/(owner)/add-professional",
+                    pathname: isProfessional
+                      ? "/(owner)/add-professional"
+                      : "/(owner)/onboarding/also-professional",
                     params: { establishmentId: establishment.id },
                   } as any)
                 }
@@ -156,7 +154,12 @@ export default function OwnerMenuScreen() {
 
           <MenuItem
             label="Dados Pessoais"
-            onPress={handleComingSoon}
+            onPress={() =>
+              router.push({
+                pathname: "/(owner)/coming-soon",
+                params: { title: "Dados Pessoais" },
+              } as any)
+            }
           />
 
           {establishment?.id && (
@@ -173,20 +176,14 @@ export default function OwnerMenuScreen() {
 
           <MenuItem
             label="Relatorios"
-            onPress={handleComingSoon}
+            onPress={() =>
+              router.push({
+                pathname: "/(owner)/coming-soon",
+                params: { title: "Relatorios" },
+              } as any)
+            }
           />
 
-          {!isProfessional && establishment?.id && (
-            <MenuItem
-              label="Tambem serei profissional"
-              onPress={() =>
-                router.push({
-                  pathname: "/(owner)/onboarding/also-professional",
-                  params: { establishmentId: establishment.id },
-                } as any)
-              }
-            />
-          )}
         </VStack>
 
         <VStack mt="$8" space="sm">

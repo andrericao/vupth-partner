@@ -15,6 +15,7 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
+import { getApiErrorMessage } from "@lib/api";
 
 type ServiceItem = {
   id: string;
@@ -76,8 +77,7 @@ export default function AddGuestScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Nao foi possivel adicionar o cliente.";
-      Alert.alert("Erro", msg);
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar o cliente."));
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +95,7 @@ export default function AddGuestScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Adicionar Cliente

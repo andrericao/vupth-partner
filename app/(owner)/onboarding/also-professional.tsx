@@ -8,6 +8,7 @@ import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
+import { api, getApiErrorMessage } from "@lib/api";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -36,10 +37,30 @@ export default function AlsoProfessionalScreen() {
   const alreadyProfessional = user?.roles?.includes("PROFESSIONAL");
 
   useEffect(() => {
-    if (alreadyProfessional) {
+    if (!alreadyProfessional || !establishmentId) return;
+
+    const ensureAffiliation = async () => {
+      try {
+        const { data } = await api.get("/professional/me");
+        const currentEstId = data.establishment_id ?? data.establishmentId;
+
+        if (currentEstId === establishmentId) {
+          router.replace("/(owner)/dashboard" as any);
+          return;
+        }
+
+        if (currentEstId) {
+          await useProfessionalStore.getState().switchEstablishment(establishmentId);
+        } else {
+          await useProfessionalStore.getState().affiliate(establishmentId);
+        }
+        await refreshToken();
+      } catch {}
       router.replace("/(owner)/dashboard" as any);
-    }
-  }, [alreadyProfessional]);
+    };
+
+    ensureAffiliation();
+  }, [alreadyProfessional, establishmentId]);
 
   useEffect(() => {
     if (!paramName) {
@@ -80,8 +101,23 @@ export default function AlsoProfessionalScreen() {
 
       if (code === "USER_ALREADY_PROFESSIONAL" || error?.response?.status === 409) {
         try {
-          await useProfessionalStore.getState().affiliate(establishmentId);
-        } catch {}
+          const { data: me } = await api.get("/professional/me");
+          const currentEstId = me.establishment_id ?? me.establishmentId;
+
+          if (currentEstId === establishmentId) {
+            await useProfessionalStore.getState().setProfessional(me);
+          } else if (currentEstId) {
+            await useProfessionalStore.getState().switchEstablishment(establishmentId);
+            await useProfessionalStore.getState().fetchMe();
+          } else {
+            await useProfessionalStore.getState().affiliate(establishmentId);
+            await useProfessionalStore.getState().fetchMe();
+          }
+        } catch (err: any) {
+          Alert.alert("Erro", getApiErrorMessage(err, "Nao foi possivel vincular ao estabelecimento."));
+          setIsLoading(false);
+          return;
+        }
         await refreshToken();
         router.replace({
           pathname: "/(owner)/add-service",
@@ -122,7 +158,7 @@ export default function AlsoProfessionalScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} pb="$6" px="$6">
-          <Header showBackButton />
+          <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
 
           <VStack flex={1} justifyContent="center" px="$2">
             <Heading size="2xl" fontFamily="$heading" mb="$4">

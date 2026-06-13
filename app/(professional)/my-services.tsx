@@ -15,6 +15,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
+import { getApiErrorMessage } from "@lib/api";
 
 import {
   calculatePricing,
@@ -45,6 +46,21 @@ const SERVICE_ITEM_TYPES = [
   { label: "Microagulhamento", value: "MICROAGULHAMENTO", specialties: ["ESTHETICIAN"] },
 ];
 
+const SERVICE_TYPE_LABELS: Record<string, string> = Object.fromEntries(
+  SERVICE_ITEM_TYPES.map((t) => [t.value, t.label])
+);
+
+function humanizeServiceType(value: string): string {
+  return (
+    SERVICE_TYPE_LABELS[value] ??
+    value
+      .toLowerCase()
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ")
+  );
+}
+
 const ABSORPTION_LABELS: Record<number, string> = {
   0: "Cliente paga tudo",
   25: "Eu pago 25%",
@@ -57,6 +73,7 @@ export default function MyServicesScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
+  const fetchMe = useProfessionalStore((s) => s.fetchMe);
   const addMyServiceItem = useProfessionalStore((s) => s.addMyServiceItem);
 
   const [showForm, setShowForm] = useState(false);
@@ -78,14 +95,25 @@ export default function MyServicesScreen() {
   const pricing = priceNum > 0 ? calculatePricing(priceNum, absorption) : null;
 
   useEffect(() => {
-    fetchMyServices();
-  }, []);
+    if (professional?.establishment_id) {
+      fetchMyServices();
+    } else {
+      fetchMe().catch(() => {});
+    }
+  }, [professional?.establishment_id]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchMyServices();
+    try {
+      if (!useProfessionalStore.getState().professional?.establishment_id) {
+        await fetchMe();
+      }
+      if (useProfessionalStore.getState().professional?.establishment_id) {
+        await fetchMyServices();
+      }
+    } catch {}
     setRefreshing(false);
-  }, [fetchMyServices]);
+  }, [fetchMe, fetchMyServices]);
 
   const handleSubmit = async () => {
     if (!customName.trim() || isNaN(priceNum) || priceNum <= 0 || !serviceItemType) {
@@ -96,13 +124,16 @@ export default function MyServicesScreen() {
     setIsInvalid(false);
     setIsLoading(true);
 
+    // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
+    const finalPrice = pricing ? pricing.clientPrice : priceNum;
+
     try {
       await addMyServiceItem(
         serviceItemType,
         customName.trim(),
-        priceNum
+        finalPrice
       );
-      Alert.alert("Servico adicionado", `${customName.trim()} — R$ ${priceNum.toFixed(2)}`);
+      Alert.alert("Servico adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
       setShowForm(false);
       setServiceItemType("");
       setCustomName("");
@@ -110,8 +141,7 @@ export default function MyServicesScreen() {
       setAbsorption(0);
       await fetchMyServices();
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Nao foi possivel adicionar o servico.";
-      Alert.alert("Erro", msg);
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar o servico."));
     } finally {
       setIsLoading(false);
     }
@@ -136,6 +166,32 @@ export default function MyServicesScreen() {
           Meus Servicos
         </Heading>
 
+        {professional?.establishment_id && professional?.establishment_name ? (
+          <Text fontFamily="$body" fontSize="$sm" color="$green600" mt="$1">
+            Vinculado a {professional.establishment_name}
+          </Text>
+        ) : null}
+
+        {!professional?.establishment_id && (
+          <VStack
+            bg="$amber50"
+            p="$4"
+            borderRadius="$lg"
+            borderWidth="$1"
+            borderColor="$amber200"
+            mt="$6"
+            alignItems="center"
+          >
+            <Text fontFamily="$body" color="$amber700" textAlign="center" mb="$4">
+              Voce precisa estar vinculado a um estabelecimento para adicionar servicos. Se ja solicitou vinculacao, aguarde a aprovacao do proprietario e arraste para baixo para atualizar.
+            </Text>
+            <Button
+              title="Buscar Estabelecimento"
+              onPress={() => router.push("/(professional)/find-establishment" as any)}
+            />
+          </VStack>
+        )}
+
         {myServices.length > 0 && (
           <VStack mt="$4" space="sm">
             {myServices.map((svc) => (
@@ -154,7 +210,7 @@ export default function MyServicesScreen() {
                     {svc.customName}
                   </Text>
                   <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                    {svc.serviceItemType} • {svc.estimatedMinutes}min
+                    {humanizeServiceType(svc.serviceItemType)} • {svc.estimatedMinutes}min
                   </Text>
                 </VStack>
                 <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
@@ -171,13 +227,13 @@ export default function MyServicesScreen() {
           </Text>
         )}
 
-        {!showForm ? (
+        {!showForm && professional?.establishment_id ? (
           <Button
             title="Adicionar Servico"
             onPress={() => setShowForm(true)}
             mt="$6"
           />
-        ) : (
+        ) : showForm ? (
           <VStack mt="$6">
             <Divider mb="$4" />
 
@@ -310,7 +366,7 @@ export default function MyServicesScreen() {
                   </HStack>
 
                   <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
-                    * Preview — no MVP o profissional recebe o valor integral
+                    * O preco salvo do servico e o total pago pelo cliente
                   </Text>
                 </VStack>
               )}
@@ -332,7 +388,7 @@ export default function MyServicesScreen() {
               />
             </FormControl>
           </VStack>
-        )}
+        ) : null}
       </VStack>
     </ScrollView>
     </KeyboardAvoidingView>

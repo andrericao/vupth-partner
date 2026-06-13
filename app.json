@@ -10,6 +10,9 @@
       "expo-secure-store"
     ],
     "userInterfaceStyle": "automatic",
+    "android": {
+      "softwareKeyboardLayoutMode": "pan"
+    },
     "androidNavigationBar": {
       "backgroundColor": "#FFFFFF",
       "barStyle": "dark-content"

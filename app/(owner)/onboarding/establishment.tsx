@@ -9,6 +9,7 @@ import { SelectService } from "@components/SelectService";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
+import { getApiErrorMessage } from "@lib/api";
 
 export default function EstablishmentScreen() {
   const [ownerName, setOwnerName] = useState("");
@@ -52,7 +53,7 @@ export default function EstablishmentScreen() {
         const msg = Object.values(fieldErrors).join("\n");
         Alert.alert("Erro de validação", msg);
       } else {
-        Alert.alert("Erro", "Não foi possível criar o estabelecimento. Tente novamente.");
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível criar o estabelecimento. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -77,7 +78,7 @@ export default function EstablishmentScreen() {
         alignItems="center"
         justifyContent="center"
       >
-        <Header showBackButton />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
 
         <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
           <Heading mb="$12" size="3xl" fontFamily="$heading">

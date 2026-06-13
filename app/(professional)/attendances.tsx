@@ -17,6 +17,7 @@ import { Header } from "@components/Header";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 import type { AttendanceHistoryItem } from "@lib/types";
+import { getApiErrorMessage } from "@lib/api";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   FINISHED: { label: "Finalizado", color: "$green500" },
@@ -94,7 +95,7 @@ export default function ProfessionalAttendancesScreen() {
       await fetchHistory(params);
       setLoaded(true);
     } catch (error: any) {
-      const msg = error?.response?.data?.message ?? "Nao foi possivel carregar os atendimentos.";
+      const msg = getApiErrorMessage(error, "Nao foi possivel carregar os atendimentos.");
       setErrorMsg(msg);
     } finally {
       setIsLoading(false);

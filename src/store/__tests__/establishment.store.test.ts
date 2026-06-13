@@ -268,4 +268,25 @@ describe("establishment.store", () => {
       expect(result).toEqual(serviceResponse);
     });
   });
+
+  describe("fetchMine", () => {
+    it("calls GET /establishment/mine and stores the first establishment", async () => {
+      mock.onGet("/establishment/mine").reply(200, [ESTABLISHMENT_RESPONSE]);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      expect(mock.history.get[0].url).toBe("/establishment/mine");
+      expect(useEstablishmentStore.getState().establishment?.id).toBe(
+        "estab-uuid-1"
+      );
+    });
+
+    it("keeps state when owner has no establishments", async () => {
+      mock.onGet("/establishment/mine").reply(200, []);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
+    });
+  });
 });
