@@ -512,7 +512,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | 5/10/11 | Erro ao adicionar servico no fluxo de afiliacao | FIX PARCIAL | Adicionada normalizacao camelCase/snake_case em professional.store (normalizeProfessional). Se persistir, e bug no backend GET /professional/{id}/service-items |
 | 6 | Cliente entra na fila sem servicos existentes | BACKEND | Validacao deve estar no backend — negar attendance se profissional nao tem service items |
 | 7 | "checking for new update..." no rodape | EXPO GO | Mensagem do Expo Go dev client, nao aparece em build de producao. Pode ser suprimida com `expo-updates` configurado |
-| 8 | Validacao de senha segura (letra, numero, especial, confirmar) | PENDENTE | Adicionar validacao Zod no register.tsx: min 8 chars, 1 letra, 1 numero, 1 especial + campo confirmar senha |
+| 8 | Validacao de senha segura (letra, numero, especial, confirmar) | ✅ Implementado (2026-06-13) | `src/lib/passwordValidation.ts` (funcao pura testada): min 8 chars + letra + numero + especial. register.tsx mostra o 1o erro no campo Senha + dica e campo "Confirmar senha" (valida coincidencia) |
 | 9 | Politica de Precos: renomear "Taxas Vupth" | PENDENTE | Renomear labels de pricing para "Taxas Vupth" conforme identidade da marca |
 | 12 | Teclado cobre formularios | ✅ Corrigido | KeyboardAvoidingView adicionado em todas as 10 telas de formulario |
 | 13 | Icone de lupa na aba de pesquisa | PENDENTE | Nao existe aba de pesquisa ainda — precisa criar tela + tab |

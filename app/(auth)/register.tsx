@@ -18,13 +18,16 @@ import { Button } from "@components/Button";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
+import { validatePassword } from "@lib/passwordValidation";
 
 export default function RegisterScreen() {
   const { role } = useLocalSearchParams<{ role: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
-  const [isPasswordInvalid, setIsPasswordInvalid] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const register = useAuthStore((s) => s.register);
@@ -32,10 +35,14 @@ export default function RegisterScreen() {
 
   const handleSubmit = async () => {
     const emailInvalid = email.length < 6 || !email.includes("@");
-    const passwordInvalid = password.length < 6;
+    const pwCheck = validatePassword(password);
+    const mismatch = password !== confirmPassword;
+
     setIsEmailInvalid(emailInvalid);
-    setIsPasswordInvalid(passwordInvalid);
-    if (emailInvalid || passwordInvalid) return;
+    setPasswordErrors(pwCheck.errors);
+    setConfirmError(mismatch ? "As senhas não coincidem" : null);
+
+    if (emailInvalid || !pwCheck.valid || mismatch) return;
 
     setIsLoading(true);
 
@@ -101,14 +108,29 @@ export default function RegisterScreen() {
             />
           </FormControl>
 
-          <FormControl isInvalid={isPasswordInvalid}>
+          <FormControl isInvalid={passwordErrors.length > 0}>
             <InputPassword
               placeholder="senha"
               textLabel="Senha"
-              messageError="Informe sua senha (mínimo 6 caracteres)"
+              messageError={passwordErrors[0] ?? "Senha inválida"}
               value={password}
               onChangeText={setPassword}
               testID="register-password"
+            />
+          </FormControl>
+
+          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$3" mt="-$1">
+            Use no mínimo 8 caracteres, com letra, número e caractere especial.
+          </Text>
+
+          <FormControl isInvalid={!!confirmError}>
+            <InputPassword
+              placeholder="confirmar senha"
+              textLabel="Confirmar senha"
+              messageError={confirmError ?? "As senhas não coincidem"}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              testID="register-confirm-password"
             />
           </FormControl>
 
