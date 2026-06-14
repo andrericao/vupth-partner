@@ -27,31 +27,44 @@ export function useQueueSocket(establishmentId: string | null) {
       const token = await SecureStore.getItemAsync("vupth_access_token");
       if (!active) return;
 
+      const topic = `/topic/establishment/${establishmentId}/queue`;
+
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
         connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         reconnectDelay: 5000,
         onConnect: () => {
-          client?.subscribe(
-            `/topic/establishment/${establishmentId}/queue`,
-            (message: IMessage) => {
-              try {
-                const snapshot = JSON.parse(
-                  message.body
-                ) as EstablishmentWithProfessionals;
-                queryClient.setQueryData(
-                  ["professionals-with-queue", establishmentId],
-                  snapshot
-                );
-                queryClient.invalidateQueries({
-                  queryKey: ["professional-queue"],
-                });
-              } catch {}
+          if (__DEV__) console.log(`[ws] conectado → subscribe ${topic}`);
+          client?.subscribe(topic, (message: IMessage) => {
+            try {
+              const snapshot = JSON.parse(
+                message.body
+              ) as EstablishmentWithProfessionals;
+              if (__DEV__) console.log("[ws] snapshot recebido");
+              queryClient.setQueryData(
+                ["professionals-with-queue", establishmentId],
+                snapshot
+              );
+              queryClient.invalidateQueries({
+                queryKey: ["professional-queue"],
+              });
+            } catch (e) {
+              if (__DEV__) console.log("[ws] erro ao processar snapshot", e);
             }
-          );
+          });
+        },
+        onStompError: (frame) => {
+          if (__DEV__) console.log("[ws] STOMP error:", frame.headers?.message);
+        },
+        onWebSocketError: (e) => {
+          if (__DEV__) console.log("[ws] WebSocket error", (e as any)?.message ?? e);
+        },
+        onWebSocketClose: () => {
+          if (__DEV__) console.log("[ws] socket fechado");
         },
       });
 
+      if (__DEV__) console.log(`[ws] conectando em ${WS_URL}`);
       client.activate();
     })();
 
