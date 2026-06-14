@@ -10,8 +10,11 @@ const API_URLS: Record<string, string> = {
 const env = process.env.EXPO_PUBLIC_API_ENV ?? "staging";
 const BASE_URL = API_URLS[env] ?? API_URLS.staging;
 
-// URL do WebSocket STOMP (handshake nativo em /ws). http→ws, https→wss.
-export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws`;
+// URL do WebSocket STOMP. http→ws, https→wss.
+// O backend registra /ws com SockJS; para um WebSocket NATIVO (sem a lib SockJS)
+// e preciso usar o transporte websocket do SockJS em /ws/websocket — senao o
+// GET /ws cai no handler SockJS (HTTP 200) e o upgrade nativo falha (socket fecha).
+export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws/websocket`;
 
 export const api = axios.create({
   baseURL: BASE_URL,
