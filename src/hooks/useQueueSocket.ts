@@ -56,11 +56,10 @@ export function useQueueSocket(establishmentId: string | null) {
         onStompError: (frame) => {
           if (__DEV__) console.log("[ws] STOMP error:", frame.headers?.message);
         },
-        onWebSocketError: (e) => {
-          if (__DEV__) console.log("[ws] WebSocket error", (e as any)?.message ?? e);
-        },
-        onWebSocketClose: () => {
-          if (__DEV__) console.log("[ws] socket fechado");
+        onWebSocketError: () => {
+          // Log conciso (sem despejar o evento inteiro). Causa comum: handshake
+          // barrado (401) quando o backend de staging nao tem /ws liberado/deployado.
+          if (__DEV__) console.log(`[ws] falha no handshake (${WS_URL}) — verifique o deploy do backend`);
         },
       });
 
