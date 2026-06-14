@@ -17,6 +17,7 @@ export default function AddressScreen() {
   const [zipCode, setZipCode] = useState("");
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
+  const [complement, setComplement] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -59,6 +60,7 @@ export default function AddressScreen() {
       await addAddress(establishment.id, {
         street: street.trim(),
         number: number.trim(),
+        complement: complement.trim() || undefined,
         neighborhood: neighborhood.trim(),
         city: city.trim(),
         state: state.trim(),
@@ -128,6 +130,14 @@ export default function AddressScreen() {
             value={number}
             onChangeText={setNumber}
             keyboardType="numeric"
+          />
+
+          <Input
+            textLabel="Complemento (opcional)"
+            placeholder="Apto 4B, sala 2, fundos..."
+            messageError=""
+            value={complement}
+            onChangeText={setComplement}
           />
 
           <Input

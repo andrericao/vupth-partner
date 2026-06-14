@@ -196,6 +196,71 @@ describe("auth.store", () => {
     });
   });
 
+  describe("updateEmail", () => {
+    it("PATCHes /profile/update-email/me, persists new tokens and updates user email", async () => {
+      useAuthStore.setState({
+        user: { id: "uuid-2", email: "old@test.com", roles: ["CLIENT", "PROFESSIONAL"] },
+        isAuthenticated: true,
+      });
+
+      mock.onPatch("/profile/update-email/me").reply(200, {
+        user: { id: "uuid-2", email: "novo@test.com" },
+        tokens: {
+          access_token: PROFESSIONAL_TOKEN,
+          refresh_token: "refresh-new-email",
+          expires_in: 604799,
+        },
+      });
+
+      await useAuthStore.getState().updateEmail("novo@test.com");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ email: "novo@test.com" });
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_access_token", PROFESSIONAL_TOKEN);
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_refresh_token", "refresh-new-email");
+
+      const state = useAuthStore.getState();
+      expect(state.user?.email).toBe("novo@test.com");
+      expect(state.user?.roles).toEqual(["CLIENT", "PROFESSIONAL"]);
+    });
+
+    it("throws and keeps user when backend rejects (e.g. role CLIENT required)", async () => {
+      useAuthStore.setState({
+        user: { id: "uuid-2", email: "old@test.com", roles: ["PROFESSIONAL"] },
+        isAuthenticated: true,
+      });
+
+      mock.onPatch("/profile/update-email/me").reply(403);
+
+      await expect(useAuthStore.getState().updateEmail("novo@test.com")).rejects.toThrow();
+      expect(useAuthStore.getState().user?.email).toBe("old@test.com");
+    });
+  });
+
+  describe("updatePassword", () => {
+    it("PATCHes /profile/update-password/me and persists new tokens", async () => {
+      useAuthStore.setState({
+        user: { id: "uuid-2", email: "prof@test.com", roles: ["CLIENT", "PROFESSIONAL"] },
+        isAuthenticated: true,
+      });
+
+      mock.onPatch("/profile/update-password/me").reply(200, {
+        user: { id: "uuid-2", email: "prof@test.com" },
+        tokens: {
+          access_token: PROFESSIONAL_TOKEN,
+          refresh_token: "refresh-new-pwd",
+          expires_in: 604799,
+        },
+      });
+
+      await useAuthStore.getState().updatePassword("NovaSenha@123");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ password: "NovaSenha@123" });
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_access_token", PROFESSIONAL_TOKEN);
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_refresh_token", "refresh-new-pwd");
+      expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    });
+  });
+
   describe("refreshToken", () => {
     it("updates tokens and roles after gaining OWNER role", async () => {
       useAuthStore.setState({

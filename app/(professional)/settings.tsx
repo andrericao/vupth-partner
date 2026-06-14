@@ -1,21 +1,91 @@
 import { useState } from "react";
-import { VStack, Heading, Text, ScrollView, Divider } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { VStack, HStack, Heading, Text, ScrollView, Divider } from "@gluestack-ui/themed";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { Input } from "@components/Input";
+import { InputPassword } from "@components/InputPassWord";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
+import { validatePassword } from "@lib/passwordValidation";
+
+type Editing = null | "email" | "password";
 
 export default function ProfessionalSettingsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const leaveEstablishment = useProfessionalStore((s) => s.leaveEstablishment);
   const user = useAuthStore((s) => s.user);
+  const updateEmail = useAuthStore((s) => s.updateEmail);
+  const updatePassword = useAuthStore((s) => s.updatePassword);
+
   const [isLeaving, setIsLeaving] = useState(false);
+  const [editing, setEditing] = useState<Editing>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fieldError, setFieldError] = useState<string | null>(null);
 
   const handleComingSoon = () => {
     Alert.alert("Em breve", "Esta funcionalidade sera implementada em breve.");
+  };
+
+  const startEdit = (field: Editing) => {
+    setFieldError(null);
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setEditing(field);
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    setFieldError(null);
+  };
+
+  const handleSaveEmail = async () => {
+    const value = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setFieldError("Informe um e-mail valido.");
+      return;
+    }
+    setFieldError(null);
+    setIsSaving(true);
+    try {
+      await updateEmail(value);
+      setEditing(null);
+      Alert.alert("E-mail atualizado", "Seu e-mail foi alterado com sucesso.");
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o e-mail."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    const check = validatePassword(password);
+    if (!check.valid) {
+      setFieldError(check.errors.join("\n"));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setFieldError("As senhas nao coincidem.");
+      return;
+    }
+    setFieldError(null);
+    setIsSaving(true);
+    try {
+      await updatePassword(password);
+      setEditing(null);
+      Alert.alert("Senha alterada", "Sua senha foi alterada com sucesso.");
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar a senha."));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLeave = () => {
@@ -47,10 +117,15 @@ export default function ProfessionalSettingsScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6">
         <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
@@ -74,20 +149,75 @@ export default function ProfessionalSettingsScreen() {
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               E-mail
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-              {user?.email ?? "—"}
-            </Text>
-            <Button title="Editar" onPress={handleComingSoon} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+            {editing === "email" ? (
+              <VStack mt="$2">
+                <Input
+                  textLabel="Novo e-mail"
+                  placeholder="voce@email.com"
+                  messageError=""
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                {fieldError && (
+                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
+                    {fieldError}
+                  </Text>
+                )}
+                <HStack space="sm">
+                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
+                  <Button title="Salvar" onPress={handleSaveEmail} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
+                </HStack>
+              </VStack>
+            ) : (
+              <>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
+                  {user?.email ?? "—"}
+                </Text>
+                <Button title="Editar" onPress={() => startEdit("email")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+              </>
+            )}
           </VStack>
 
           <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Senha
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-              ********
-            </Text>
-            <Button title="Alterar" onPress={handleComingSoon} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+            {editing === "password" ? (
+              <VStack mt="$2">
+                <InputPassword
+                  textLabel="Nova senha"
+                  placeholder="Nova senha"
+                  messageError=""
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <InputPassword
+                  textLabel="Confirmar nova senha"
+                  placeholder="Confirmar nova senha"
+                  messageError=""
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                />
+                {fieldError && (
+                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
+                    {fieldError}
+                  </Text>
+                )}
+                <HStack space="sm">
+                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
+                  <Button title="Salvar" onPress={handleSavePassword} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
+                </HStack>
+              </VStack>
+            ) : (
+              <>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
+                  ********
+                </Text>
+                <Button title="Alterar" onPress={() => startEdit("password")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+              </>
+            )}
           </VStack>
 
           <Divider my="$2" />
@@ -126,5 +256,6 @@ export default function ProfessionalSettingsScreen() {
         </VStack>
       </VStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
