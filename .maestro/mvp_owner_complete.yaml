@@ -1,0 +1,67 @@
+appId: host.exp.exponent
+---
+# VUPTH Partner — MVP Owner E2E Completo
+# Register → Create Establishment → Open → Add Professional → Add Service
+# Rodar: maestro test .maestro/mvp_owner_complete.yaml
+
+- evalScript: ${output.EMAIL = 'mvp-owner-' + Date.now() + '@test.dev'}
+
+# ---- 1. REGISTER ----
+- assertVisible: "Como deseja usar o VUPTH?"
+- tapOn: "Sou dono de estabelecimento"
+- assertVisible: "Cadastrar"
+- tapOn:
+    id: "register-email"
+- inputText: "${output.EMAIL}"
+- hideKeyboard
+- tapOn:
+    id: "register-password"
+- inputText: "Senha@123"
+- hideKeyboard
+- tapOn: "Criar Conta"
+- assertVisible: "Dados da Loja"
+
+# ---- 2. CREATE ESTABLISHMENT ----
+- tapOn: "Rei do Corte LTDA"
+- inputText: "Barbearia MVP Test"
+- hideKeyboard
+- tapOn: "Barbearia"
+- tapOn: "Criar Estabelecimento"
+- assertVisible: "Barbearia MVP Test"
+- assertVisible: "FECHADO"
+
+# ---- 3. OPEN ESTABLISHMENT ----
+- tapOn: "Abrir Estabelecimento"
+- assertVisible: "ABERTO"
+
+# ---- 4. ADD PROFESSIONAL ----
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Novo Profissional"
+- tapOn: "Nome do profissional"
+- inputText: "Carlos Barbeiro"
+- hideKeyboard
+- tapOn: "Adicionar Profissional"
+- assertVisible: "Profissional criado"
+- tapOn: "OK"
+- assertVisible: "Barbearia MVP Test"
+
+# ---- 5. ADD SERVICE ----
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Novo Serviço"
+- tapOn:
+    id: "service-custom-name"
+- inputText: "Corte Simples"
+- hideKeyboard
+- tapOn: "35.00"
+- inputText: "35"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar Serviço"
+    direction: DOWN
+- tapOn: "Adicionar Serviço"
+- assertVisible: "Serviço adicionado"
+- tapOn: "OK"
+
+# ---- VERIFICACAO FINAL ----
+- assertVisible: "Barbearia MVP Test"
+- assertVisible: "ABERTO"

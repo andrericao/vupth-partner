@@ -1,23 +1,45 @@
-import { useNavigation } from "@react-navigation/native";
-
-import { HStack, Center } from "@gluestack-ui/themed";
-
-import Logo from "../assets/vupth-logo/people-waiting.svg";
-
+import { useEffect } from "react";
+import { BackHandler } from "react-native";
+import { router } from "expo-router";
+import { HStack, Center, Heading } from "@gluestack-ui/themed";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ButtonGoBack } from "@components/ButtonGoBack";
 
 type Props = {
   showBackButton?: boolean;
+  onBack?: () => void;
 };
 
-export function Header({ showBackButton = false }: Props) {
-  const navigation = useNavigation();
+export function Header({ showBackButton = false, onBack }: Props) {
+  const insets = useSafeAreaInsets();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else if (router.canGoBack()) {
+      router.back();
+    }
+    // Sem onBack e sem para onde voltar: nao faz nada.
+    // O botao voltar nunca pode deslogar (cair em /(auth)).
+  };
+
+  useEffect(() => {
+    if (!showBackButton) return;
+
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      handleBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [showBackButton, onBack]);
 
   return (
-    <HStack alignItems="center">
-      {showBackButton && <ButtonGoBack onPress={() => navigation.goBack()} />}
+    <HStack alignItems="center" style={{ paddingTop: insets.top }}>
+      {showBackButton && <ButtonGoBack onPress={handleBack} />}
       <Center>
-        <Logo width={50} height={50} />
+        <Heading size="xl" fontFamily="$heading" color="$green700">
+          VUPTH
+        </Heading>
       </Center>
     </HStack>
   );

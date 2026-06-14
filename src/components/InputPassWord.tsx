@@ -51,6 +51,7 @@ export function InputPassword(props: InputPasswordProps) {
           type={showPassword ? "text" : "password"}
           color="$success950"
           fontFamily="$body"
+          autoCapitalize="none"
           {...props}
         />
         <InputSlot onPress={handleState}>

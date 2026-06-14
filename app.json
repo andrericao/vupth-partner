@@ -3,9 +3,23 @@
     "name": "vupth-partner",
     "slug": "vupth-partner",
     "version": "1.0.0",
+    "scheme": "vupth-partner",
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-router",
+      "expo-secure-store"
     ],
-    "userInterfaceStyle": "automatic"
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#FFFFFF",
+      "barStyle": "dark-content"
+    },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#F7FAF8"
+    }
   }
 }

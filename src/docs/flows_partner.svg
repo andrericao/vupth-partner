@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1100" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6B7280"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="1100" fill="#FAFAFA"/>
+  <text x="700" y="40" text-anchor="middle" font-size="24" font-weight="700" fill="#1F2937">VUPTH Partner — Fluxos de Navegacao</text>
+
+  <!-- ==================== ENTRADA COMUM ==================== -->
+  <text x="700" y="75" text-anchor="middle" font-size="14" font-weight="600" fill="#6B7280">ENTRADA COMUM</text>
+
+  <!-- Escolha de Papel -->
+  <rect x="550" y="90" width="300" height="70" rx="12" fill="#1B4332" stroke="#134E2A" stroke-width="2"/>
+  <text x="700" y="120" text-anchor="middle" font-size="16" font-weight="700" fill="white">Escolha de Papel</text>
+  <text x="700" y="140" text-anchor="middle" font-size="11" fill="white" opacity="0.8">Owner ou Profissional</text>
+
+  <!-- Arrow → Register -->
+  <line x1="700" y1="160" x2="700" y2="195" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Register -->
+  <rect x="575" y="200" width="250" height="60" rx="12" fill="#FFFFFF" stroke="#22C55E" stroke-width="2"/>
+  <text x="700" y="228" text-anchor="middle" font-size="14" font-weight="600" fill="#1F2937">Register / Login</text>
+  <text x="700" y="248" text-anchor="middle" font-size="11" fill="#6B7280">Email + Senha → auto-login</text>
+
+  <!-- Decision: Owner or Professional -->
+  <line x1="575" y1="230" x2="300" y2="320" stroke="#22C55E" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="400" y="280" font-size="12" font-weight="600" fill="#22C55E">OWNER</text>
+
+  <line x1="825" y1="230" x2="1100" y2="320" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="980" y="280" font-size="12" font-weight="600" fill="#3B82F6">PROFISSIONAL</text>
+
+  <!-- ==================== FLUXO OWNER (esquerda) ==================== -->
+  <rect x="30" y="295" width="540" height="25" rx="4" fill="#F0FDF4"/>
+  <text x="300" y="313" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">FLUXO OWNER</text>
+
+  <!-- Onboarding Establishment -->
+  <rect x="150" y="330" width="300" height="60" rx="12" fill="#22C55E" stroke="#16A34A" stroke-width="2"/>
+  <text x="300" y="355" text-anchor="middle" font-size="14" font-weight="700" fill="white">Criar Estabelecimento</text>
+  <text x="300" y="375" text-anchor="middle" font-size="11" fill="white" opacity="0.8">Nome + Tipo → quick-create</text>
+
+  <line x1="300" y1="390" x2="300" y2="425" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Dashboard -->
+  <rect x="100" y="430" width="400" height="80" rx="12" fill="#FFFFFF" stroke="#22C55E" stroke-width="2"/>
+  <text x="300" y="458" text-anchor="middle" font-size="16" font-weight="700" fill="#1F2937">Dashboard Owner</text>
+  <text x="300" y="478" text-anchor="middle" font-size="11" fill="#6B7280">Badge ABERTO/FECHADO | Resumo filas</text>
+  <text x="300" y="495" text-anchor="middle" font-size="11" fill="#6B7280">Toggle | Ver Filas | Add Prof | Add Servico</text>
+
+  <!-- Dashboard actions -->
+  <line x1="150" y1="510" x2="80" y2="570" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="250" y1="510" x2="220" y2="570" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="350" y1="510" x2="380" y2="570" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="450" y1="510" x2="520" y2="570" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Add Professional -->
+  <rect x="20" y="575" width="130" height="50" rx="8" fill="#3B82F6" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="85" y="598" text-anchor="middle" font-size="11" font-weight="600" fill="white">Add Profissional</text>
+  <text x="85" y="614" text-anchor="middle" font-size="9" fill="white" opacity="0.8">Nome + Especialidade</text>
+
+  <!-- Add Service -->
+  <rect x="160" y="575" width="130" height="50" rx="8" fill="#8B5CF6" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="225" y="598" text-anchor="middle" font-size="11" font-weight="600" fill="white">Add Servico</text>
+  <text x="225" y="614" text-anchor="middle" font-size="9" fill="white" opacity="0.8">Tipo + Nome + Preco</text>
+
+  <!-- Ver Filas -->
+  <rect x="310" y="575" width="130" height="50" rx="8" fill="#F59E0B" stroke="#D97706" stroke-width="1.5"/>
+  <text x="375" y="598" text-anchor="middle" font-size="11" font-weight="600" fill="white">Ver Filas</text>
+  <text x="375" y="614" text-anchor="middle" font-size="9" fill="white" opacity="0.8">Profissionais + Clientes</text>
+
+  <!-- Relatorios -->
+  <rect x="460" y="575" width="130" height="50" rx="8" fill="#06B6D4" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="525" y="598" text-anchor="middle" font-size="11" font-weight="600" fill="white">Relatorios</text>
+  <text x="525" y="614" text-anchor="middle" font-size="9" fill="white" opacity="0.8">Dia / Semana / Mes</text>
+
+  <!-- ==================== FLUXO PROFISSIONAL (direita) ==================== -->
+  <rect x="830" y="295" width="540" height="25" rx="4" fill="#EFF6FF"/>
+  <text x="1100" y="313" text-anchor="middle" font-size="13" font-weight="700" fill="#1E40AF">FLUXO PROFISSIONAL</text>
+
+  <!-- Onboarding Step 1 -->
+  <rect x="950" y="330" width="300" height="60" rx="12" fill="#3B82F6" stroke="#2563EB" stroke-width="2"/>
+  <text x="1100" y="355" text-anchor="middle" font-size="14" font-weight="700" fill="white">Cadastro Profissional</text>
+  <text x="1100" y="375" text-anchor="middle" font-size="11" fill="white" opacity="0.8">Nome + Especialidade</text>
+
+  <line x1="1100" y1="390" x2="1100" y2="420" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Onboarding Step 2 -->
+  <rect x="950" y="425" width="300" height="60" rx="12" fill="#FFFFFF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="1100" y="450" text-anchor="middle" font-size="14" font-weight="600" fill="#1F2937">Buscar Estabelecimento</text>
+  <text x="1100" y="470" text-anchor="middle" font-size="11" fill="#6B7280">Busca por nome → seleciona</text>
+
+  <line x1="1100" y1="485" x2="1100" y2="515" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Onboarding Step 3 -->
+  <rect x="950" y="520" width="300" height="50" rx="12" fill="#FFFFFF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="1100" y="545" text-anchor="middle" font-size="14" font-weight="600" fill="#1F2937">Confirmar e Afiliar</text>
+  <text x="1100" y="558" text-anchor="middle" font-size="11" fill="#6B7280">POST /professional/affiliate</text>
+
+  <line x1="1100" y1="570" x2="1100" y2="610" stroke="#22C55E" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Tab Bar -->
+  <rect x="830" y="615" width="540" height="30" rx="4" fill="#F0FDF4"/>
+  <text x="1100" y="635" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">TAB BAR: Fila | Perfil</text>
+
+  <!-- Tab Fila -->
+  <rect x="850" y="660" width="250" height="80" rx="12" fill="#22C55E" stroke="#16A34A" stroke-width="2"/>
+  <text x="975" y="690" text-anchor="middle" font-size="16" font-weight="700" fill="white">Minha Fila</text>
+  <text x="975" y="710" text-anchor="middle" font-size="11" fill="white" opacity="0.8">Atend. atual + Lista de espera</text>
+  <text x="975" y="728" text-anchor="middle" font-size="11" fill="white" opacity="0.8">Iniciar | Pausar | Finalizar</text>
+
+  <!-- Tab Perfil -->
+  <rect x="1120" y="660" width="250" height="80" rx="12" fill="#FFFFFF" stroke="#22C55E" stroke-width="2"/>
+  <text x="1245" y="688" text-anchor="middle" font-size="14" font-weight="600" fill="#1F2937">Perfil</text>
+  <text x="1245" y="708" text-anchor="middle" font-size="11" fill="#6B7280">Atendimentos | Relatorios</text>
+  <text x="1245" y="725" text-anchor="middle" font-size="11" fill="#6B7280">Meus Servicos | Config | Sair</text>
+
+  <!-- Perfil sub-screens -->
+  <line x1="1245" y1="740" x2="1120" y2="790" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="1245" y1="740" x2="1200" y2="790" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="1245" y1="740" x2="1280" y2="790" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="1245" y1="740" x2="1360" y2="790" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="1060" y="795" width="110" height="40" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+  <text x="1115" y="820" text-anchor="middle" font-size="10" fill="#1E40AF">Atendimentos</text>
+
+  <rect x="1180" y="795" width="90" height="40" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+  <text x="1225" y="820" text-anchor="middle" font-size="10" fill="#1E40AF">Relatorios</text>
+
+  <rect x="1280" y="795" width="90" height="40" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+  <text x="1325" y="820" text-anchor="middle" font-size="10" fill="#1E40AF">Config</text>
+
+  <!-- ==================== LEGENDA ==================== -->
+  <rect x="50" y="700" width="500" height="130" rx="12" fill="white" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="70" y="725" font-size="13" font-weight="700" fill="#374151">Legenda</text>
+
+  <rect x="70" y="740" width="16" height="16" rx="4" fill="#22C55E"/>
+  <text x="95" y="753" font-size="11" fill="#6B7280">Tela principal / ponto de entrada</text>
+
+  <rect x="70" y="765" width="16" height="16" rx="4" fill="white" stroke="#22C55E" stroke-width="2"/>
+  <text x="95" y="778" font-size="11" fill="#6B7280">Tela secundaria</text>
+
+  <rect x="70" y="790" width="16" height="16" rx="4" fill="#3B82F6"/>
+  <text x="95" y="803" font-size="11" fill="#6B7280">Acao / botao</text>
+
+  <rect x="300" y="740" width="16" height="16" rx="4" fill="#F59E0B"/>
+  <text x="325" y="753" font-size="11" fill="#6B7280">Funcionalidade operacional</text>
+
+  <rect x="300" y="765" width="16" height="16" rx="4" fill="#06B6D4"/>
+  <text x="325" y="778" font-size="11" fill="#6B7280">Relatorios / dados</text>
+
+  <rect x="300" y="790" width="16" height="16" rx="4" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+  <text x="325" y="803" font-size="11" fill="#6B7280">Sub-tela do perfil</text>
+</svg>
