@@ -33,6 +33,7 @@ type Gate = "loading" | "affiliated" | "pending" | "open";
 
 export default function FindEstablishmentScreen() {
   const [search, setSearch] = useState("");
+  const [searchMode, setSearchMode] = useState<"name" | "neighborhood">("name");
   const [results, setResults] = useState<EstablishmentResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
@@ -91,7 +92,7 @@ export default function FindEstablishmentScreen() {
     setHasSearched(true);
     try {
       const { data } = await api.get("/establishment", {
-        params: { name: search.trim() },
+        params: { [searchMode]: search.trim() },
       });
       setResults(data);
     } catch (error: any) {
@@ -234,6 +235,40 @@ export default function FindEstablishmentScreen() {
             Encontre um estabelecimento e solicite vinculacao.
           </Text>
 
+          <HStack space="sm" mb="$3">
+            {([
+              { mode: "name" as const, label: "Nome" },
+              { mode: "neighborhood" as const, label: "Bairro" },
+            ]).map(({ mode, label }) => {
+              const active = searchMode === mode;
+              return (
+                <Pressable
+                  key={mode}
+                  flex={1}
+                  onPress={() => {
+                    setSearchMode(mode);
+                    setSearch("");
+                    setResults([]);
+                    setHasSearched(false);
+                  }}
+                  py="$2"
+                  borderRadius="$md"
+                  borderWidth="$1"
+                  bg={active ? "$green500" : "$white"}
+                  borderColor={active ? "$green600" : "$coolGray300"}
+                >
+                  <Text
+                    fontFamily="$body"
+                    textAlign="center"
+                    color={active ? "$white" : "$coolGray600"}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </HStack>
+
           <GluestackInput
             h="$12"
             borderWidth="$1"
@@ -243,7 +278,7 @@ export default function FindEstablishmentScreen() {
             mb="$4"
           >
             <InputField
-              placeholder="Nome do estabelecimento"
+              placeholder={searchMode === "name" ? "Nome do estabelecimento" : "Bairro (ex.: Centro)"}
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={handleSearch}
