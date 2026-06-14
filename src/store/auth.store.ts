@@ -19,6 +19,8 @@ type AuthState = {
 
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
+  updateEmail: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   refreshToken: () => Promise<void>;
   logout: () => Promise<void>;
   loadStoredTokens: () => Promise<void>;
@@ -51,6 +53,34 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   register: async (email, password) => {
     await api.post("/auth/register", { email, password });
+  },
+
+  // Os endpoints de /profile retornam novos tokens (o email muda o subject do JWT).
+  // Persistimos os tokens novos e atualizamos o usuario para nao deslogar.
+  updateEmail: async (email) => {
+    const { data } = await api.patch("/profile/update-email/me", { email });
+
+    await SecureStore.setItemAsync("vupth_access_token", data.tokens.access_token);
+    await SecureStore.setItemAsync("vupth_refresh_token", data.tokens.refresh_token);
+
+    const roles = getRolesFromToken(data.tokens.access_token);
+    set((state) => ({
+      user: state.user
+        ? { ...state.user, email: data.user?.email ?? email, roles }
+        : null,
+    }));
+  },
+
+  updatePassword: async (password) => {
+    const { data } = await api.patch("/profile/update-password/me", { password });
+
+    await SecureStore.setItemAsync("vupth_access_token", data.tokens.access_token);
+    await SecureStore.setItemAsync("vupth_refresh_token", data.tokens.refresh_token);
+
+    const roles = getRolesFromToken(data.tokens.access_token);
+    set((state) => ({
+      user: state.user ? { ...state.user, roles } : null,
+    }));
   },
 
   refreshToken: async () => {
