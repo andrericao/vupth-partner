@@ -33,6 +33,7 @@ type ProfessionalState = {
   switchEstablishment: (newEstablishmentId: string) => Promise<void>;
   leaveEstablishment: () => Promise<void>;
   requestAffiliation: (establishmentId: string) => Promise<void>;
+  cancelAffiliation: (affiliationId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   fetchMyServices: () => Promise<void>;
@@ -114,6 +115,10 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     await api.post("/professional/me/affiliations", {
       establishmentId,
     });
+  },
+
+  cancelAffiliation: async (affiliationId) => {
+    await api.delete(`/affiliations/${affiliationId}`);
   },
 
   addMyServiceItem: async (serviceItemType, customName, price) => {

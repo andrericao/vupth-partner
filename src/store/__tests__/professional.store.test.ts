@@ -164,6 +164,29 @@ describe("professional.store", () => {
     });
   });
 
+  describe("cancelAffiliation", () => {
+    it("calls DELETE /affiliations/{id}", async () => {
+      mock.onDelete("/affiliations/aff-uuid-1").reply(200, {
+        id: "aff-uuid-1",
+        status: "CANCELLED",
+      });
+
+      await useProfessionalStore.getState().cancelAffiliation("aff-uuid-1");
+
+      expect(mock.history.delete[0].url).toBe("/affiliations/aff-uuid-1");
+    });
+
+    it("rejects when the request fails", async () => {
+      mock.onDelete("/affiliations/aff-uuid-1").reply(404, {
+        message: "Affiliation not found",
+      });
+
+      await expect(
+        useProfessionalStore.getState().cancelAffiliation("aff-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
+
   describe("fetchMe", () => {
     it("calls GET /professional/me and updates the professional", async () => {
       mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);

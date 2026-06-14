@@ -39,6 +39,8 @@ export default function FindEstablishmentScreen() {
   const [hasSearched, setHasSearched] = useState(false);
   const [gate, setGate] = useState<Gate>("loading");
   const [blockedName, setBlockedName] = useState<string | null>(null);
+  const [pendingAffiliationId, setPendingAffiliationId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const loadAll = async () => {
     setIsSearching(true);
@@ -70,6 +72,7 @@ export default function FindEstablishmentScreen() {
             setBlockedName(
               pending.establishmentName ?? pending.establishment_name ?? null
             );
+            setPendingAffiliationId(pending.id ?? null);
             setGate("pending");
             return;
           }
@@ -114,6 +117,35 @@ export default function FindEstablishmentScreen() {
     } finally {
       setIsRequesting(false);
     }
+  };
+
+  const handleCancelAffiliation = () => {
+    if (!pendingAffiliationId) return;
+    Alert.alert(
+      "Cancelar solicitacao",
+      `Deseja cancelar sua solicitacao para ${blockedName ?? "este estabelecimento"}? Voce podera solicitar a outro estabelecimento depois.`,
+      [
+        { text: "Voltar", style: "cancel" },
+        {
+          text: "Cancelar solicitacao",
+          style: "destructive",
+          onPress: async () => {
+            setIsCancelling(true);
+            try {
+              await useProfessionalStore.getState().cancelAffiliation(pendingAffiliationId);
+              setPendingAffiliationId(null);
+              setBlockedName(null);
+              setGate("open");
+              await loadAll();
+            } catch (error: any) {
+              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel cancelar a solicitacao."));
+            } finally {
+              setIsCancelling(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -177,12 +209,22 @@ export default function FindEstablishmentScreen() {
               <Text fontFamily="$heading" fontWeight="$bold" color="$amber700" mb="$2">
                 Solicitacao em andamento
               </Text>
-              <Text fontFamily="$body" color="$coolGray600">
+              <Text fontFamily="$body" color="$coolGray600" mb="$4">
                 Voce ja solicitou vinculacao a {blockedName ?? "um estabelecimento"}{" "}
                 e esta aguardando a resposta do proprietario. So e possivel
                 solicitar a um estabelecimento por vez — aguarde o retorno ou
                 cancele a solicitacao atual para tentar outro.
               </Text>
+              <Button
+                title="Cancelar solicitacao"
+                onPress={handleCancelAffiliation}
+                isLoading={isCancelling}
+                bg="transparent"
+                borderWidth="$1"
+                borderColor="$red500"
+                textColor="$red500"
+                $active-bg="$red50"
+              />
             </VStack>
           )}
 

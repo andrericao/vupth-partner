@@ -286,6 +286,7 @@ POST /professional/me/affiliations { establishmentId }
 - `setProfessional(data)` — salva profissional no estado e SecureStore
 - `switchEstablishment(newEstablishmentId)` — DELETE /professional/me/establishment → POST /professional/affiliate (troca de establishment)
 - `leaveEstablishment()` — DELETE /professional/me/establishment + limpa myServices + fetchMe (desafiliacao pelas configuracoes)
+- `cancelAffiliation(affiliationId)` — DELETE /affiliations/{id} (cancela a solicitacao PENDING; usado no find-establishment)
 - `fetchMe()` — GET /professional/me → atualiza estado local e SecureStore
 - `addMyServiceItem(serviceItemType, customName, price)` — POST /professional-queue/{profId}/add-service-items
 - `reset()` — limpa estado ao fazer logout
@@ -530,7 +531,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ### Alta prioridade (MVP)
 | Item | Descricao |
 |------|-----------|
-| Estado de solicitacao de afiliacao pendente | ✅ Parcial (2026-06-13): find-establishment.tsx ja bloqueia a lista quando o profissional ja esta afiliado ou tem solicitacao PENDING (card explicativo, sem permitir nova solicitacao). **Falta no FRONT (endpoint ja existe)**: botao "Cancelar solicitacao" via `DELETE /affiliations/{id}` (confirmado no PRD backend 2026-06-13). Validacao de pendencia unica global ainda pendente no backend. Usa `GET /professional/me/affiliations` (filtrar PENDING) |
+| Estado de solicitacao de afiliacao pendente | ✅ Implementado (2026-06-14): find-establishment.tsx bloqueia a lista quando ja afiliado ou com solicitacao PENDING, e no estado pending exibe o botao **"Cancelar solicitacao"** via `DELETE /affiliations/{id}` (store `cancelAffiliation`); apos cancelar, libera a busca. Usa `GET /professional/me/affiliations` (filtrar PENDING, guarda o id). Pendente no backend: validacao de pendencia unica global (PENDING bloquear qualquer outro establishment) |
 | Editar e remover servicos do profissional | my-services.tsx so permite adicionar. Adicionar acao de editar (nome/preco/absorcao) e remover cada servico da lista. Depende de endpoints no backend — ver pendencia backend #10 |
 | Busca de estabelecimento por proximidade/bairro ordenada por fila | find-establishment.tsx: (1) primeiro listar por proximidade de GPS do profissional; (2) se sem GPS, buscar por bairro; (3) ordenar o resultado por tempo de espera (menor → maior). Hoje so lista todos + busca por nome. Depende do backend — ver pendencia backend #11 |
 | ~~Fila completa (visao do owner)~~ | ✅ Implementado |
