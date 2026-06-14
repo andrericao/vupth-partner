@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { VStack, HStack, Heading, Text, ScrollView, Divider } from "@gluestack-ui/themed";
+import { VStack, HStack, Heading, Text, ScrollView, Divider, FormControl } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
@@ -150,7 +150,7 @@ export default function ProfessionalSettingsScreen() {
               E-mail
             </Text>
             {editing === "email" ? (
-              <VStack mt="$2">
+              <FormControl mt="$2">
                 <Input
                   textLabel="Novo e-mail"
                   placeholder="voce@email.com"
@@ -169,7 +169,7 @@ export default function ProfessionalSettingsScreen() {
                   <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
                   <Button title="Salvar" onPress={handleSaveEmail} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
                 </HStack>
-              </VStack>
+              </FormControl>
             ) : (
               <>
                 <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
@@ -185,7 +185,7 @@ export default function ProfessionalSettingsScreen() {
               Senha
             </Text>
             {editing === "password" ? (
-              <VStack mt="$2">
+              <FormControl mt="$2">
                 <InputPassword
                   textLabel="Nova senha"
                   placeholder="Nova senha"
@@ -209,7 +209,7 @@ export default function ProfessionalSettingsScreen() {
                   <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
                   <Button title="Salvar" onPress={handleSavePassword} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
                 </HStack>
-              </VStack>
+              </FormControl>
             ) : (
               <>
                 <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
