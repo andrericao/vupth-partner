@@ -10,6 +10,9 @@ const API_URLS: Record<string, string> = {
 const env = process.env.EXPO_PUBLIC_API_ENV ?? "staging";
 const BASE_URL = API_URLS[env] ?? API_URLS.staging;
 
+// URL do WebSocket STOMP (handshake nativo em /ws). http→ws, https→wss.
+export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws`;
+
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
