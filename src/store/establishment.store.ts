@@ -92,6 +92,7 @@ type EstablishmentState = {
     }
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
+  removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   reset: () => void;
 };
 
@@ -172,6 +173,12 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     const params = name.trim() ? { name } : {};
     const { data } = await api.get("/establishment", { params });
     return data;
+  },
+
+  removeProfessional: async (establishmentId, professionalId) => {
+    await api.delete(
+      `/establishment/${establishmentId}/professionals/${professionalId}`
+    );
   },
 
   reset: () => {

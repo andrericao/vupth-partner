@@ -289,4 +289,32 @@ describe("establishment.store", () => {
       expect(useEstablishmentStore.getState().establishment).toBeNull();
     });
   });
+
+  describe("removeProfessional", () => {
+    it("calls DELETE /establishment/{id}/professionals/{professionalId}", async () => {
+      mock
+        .onDelete("/establishment/estab-uuid-1/professionals/prof-uuid-1")
+        .reply(204);
+
+      await useEstablishmentStore
+        .getState()
+        .removeProfessional("estab-uuid-1", "prof-uuid-1");
+
+      expect(mock.history.delete[0].url).toBe(
+        "/establishment/estab-uuid-1/professionals/prof-uuid-1"
+      );
+    });
+
+    it("rejects when the professional has an active attendance", async () => {
+      mock
+        .onDelete("/establishment/estab-uuid-1/professionals/prof-uuid-1")
+        .reply(409, { message: "Professional has an active attendance" });
+
+      await expect(
+        useEstablishmentStore
+          .getState()
+          .removeProfessional("estab-uuid-1", "prof-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
 });

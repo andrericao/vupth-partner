@@ -10,11 +10,14 @@ import {
   Spinner,
   Divider,
 } from "@gluestack-ui/themed";
-import { RefreshControl } from "react-native";
+import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
+import { Button } from "@components/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { getApiErrorMessage } from "@lib/api";
 import type { AttendanceInQueue } from "@lib/types";
 
 function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; position: number }) {
@@ -116,12 +119,43 @@ export default function ProfessionalQueueScreen() {
   );
 
   const [refreshing, setRefreshing] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const removeProfessional = useEstablishmentStore((s) => s.removeProfessional);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
   }, [refetch]);
+
+  const handleRemove = () => {
+    if (!establishmentId || !professionalId) return;
+    const name = data?.professionalName ?? professionalName ?? "este profissional";
+    Alert.alert(
+      "Desvincular profissional",
+      `Deseja desvincular ${name} do estabelecimento? Ele deixara de atender aqui.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Desvincular",
+          style: "destructive",
+          onPress: async () => {
+            setIsRemoving(true);
+            try {
+              await removeProfessional(establishmentId, professionalId);
+              Alert.alert("Desvinculado", `${name} foi removido do estabelecimento.`, [
+                { text: "OK", onPress: () => router.navigate("/(owner)/dashboard" as any) },
+              ]);
+            } catch (error: any) {
+              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel desvincular o profissional. Verifique se nao ha atendimento em andamento."));
+            } finally {
+              setIsRemoving(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <ScrollView
@@ -196,6 +230,19 @@ export default function ProfessionalQueueScreen() {
             </Text>
           </VStack>
         )}
+
+        <Divider my="$6" />
+
+        <Button
+          title="Desvincular Profissional"
+          onPress={handleRemove}
+          isLoading={isRemoving}
+          bg="transparent"
+          borderWidth="$1"
+          borderColor="$red500"
+          textColor="$red500"
+          $active-bg="$red50"
+        />
       </VStack>
     </ScrollView>
   );
