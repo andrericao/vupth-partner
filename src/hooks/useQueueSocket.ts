@@ -33,14 +33,18 @@ export function useQueueSocket(establishmentId: string | null) {
         webSocketFactory: () => new WebSocket(WS_URL),
         connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         reconnectDelay: 5000,
+        // Workaround obrigatorio do @stomp/stompjs no React Native: o WebSocket
+        // nativo do RN "engole" o byte NULL que termina cada frame STOMP. Sem
+        // isto o frame CONNECTED chega mas o parser nunca o reconhece, entao
+        // onConnect nao dispara e a conexao trava em "conectando" (sem erro).
+        forceBinaryWSFrames: true,
+        appendMissingNULLonIncoming: true,
         onConnect: () => {
-          if (__DEV__) console.log(`[ws] conectado → subscribe ${topic}`);
           client?.subscribe(topic, (message: IMessage) => {
             try {
               const snapshot = JSON.parse(
                 message.body
               ) as EstablishmentWithProfessionals;
-              if (__DEV__) console.log("[ws] snapshot recebido");
               queryClient.setQueryData(
                 ["professionals-with-queue", establishmentId],
                 snapshot
@@ -63,7 +67,6 @@ export function useQueueSocket(establishmentId: string | null) {
         },
       });
 
-      if (__DEV__) console.log(`[ws] conectando em ${WS_URL}`);
       client.activate();
     })();
 
