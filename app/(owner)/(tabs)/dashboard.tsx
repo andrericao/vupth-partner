@@ -62,33 +62,34 @@ export default function OwnerDashboardScreen() {
   const setStatus = async (newStatus: string) => {
     if (!establishment || newStatus === status) return;
 
-    if (newStatus === "OPEN" && queueData && professionals.length === 0) {
-      Alert.alert(
-        "Estabelecimento sem profissionais",
-        "Para abrir o estabelecimento e necessario ter pelo menos um profissional vinculado com servicos cadastrados.",
-        [
-          { text: "Cancelar", style: "cancel" },
-          {
-            text: "Adicionar Profissional",
-            onPress: () =>
-              router.push({
-                pathname: "/(owner)/add-professional",
-                params: { establishmentId: establishment.id },
-              } as any),
-          },
-        ]
-      );
-      return;
-    }
-
+    // A validacao de "estabelecimento pronto" (>=1 profissional com >=1 servico)
+    // e feita no backend (422 ESTABLISHMENT_NOT_READY). Tentamos abrir e tratamos o erro.
     setIsToggling(true);
     try {
       await updateOpenStatus(establishment.id, newStatus);
     } catch (error: any) {
-      Alert.alert(
-        "Erro",
-        getApiErrorMessage(error, "Nao foi possivel atualizar o status. Tente novamente.")
-      );
+      if (error?.response?.data?.code === "ESTABLISHMENT_NOT_READY") {
+        Alert.alert(
+          "Estabelecimento sem profissional pronto",
+          getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com servico cadastrado."),
+          [
+            { text: "Cancelar", style: "cancel" },
+            {
+              text: "Adicionar Profissional",
+              onPress: () =>
+                router.push({
+                  pathname: "/(owner)/add-professional",
+                  params: { establishmentId: establishment.id },
+                } as any),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Erro",
+          getApiErrorMessage(error, "Nao foi possivel atualizar o status. Tente novamente.")
+        );
+      }
     } finally {
       setIsToggling(false);
     }

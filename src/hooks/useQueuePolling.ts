@@ -1,8 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@lib/api";
 import type { EstablishmentWithProfessionals } from "@lib/types";
+import { useQueueSocket } from "@hooks/useQueueSocket";
 
 export function useQueuePolling(establishmentId: string | null) {
+  // Tempo real via STOMP; o refetchInterval abaixo fica so como fallback.
+  useQueueSocket(establishmentId);
+
   return useQuery({
     queryKey: ["professionals-with-queue", establishmentId],
     queryFn: async () => {
@@ -12,7 +16,7 @@ export function useQueuePolling(establishmentId: string | null) {
       return data;
     },
     enabled: !!establishmentId,
-    refetchInterval: 30000,
+    refetchInterval: 60000,
     staleTime: 15000,
   });
 }
