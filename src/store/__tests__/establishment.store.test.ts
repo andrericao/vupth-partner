@@ -317,4 +317,40 @@ describe("establishment.store", () => {
       ).rejects.toThrow();
     });
   });
+
+  describe("updateGeneralInfos", () => {
+    it("calls PATCH /establishment/{id}/general-infos and updates the local name", async () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE });
+      mock
+        .onPatch("/establishment/estab-uuid-1/general-infos")
+        .reply(200, { ...ESTABLISHMENT_RESPONSE, name: "Barbearia Renomeada" });
+
+      await useEstablishmentStore
+        .getState()
+        .updateGeneralInfos("estab-uuid-1", { name: "Barbearia Renomeada" });
+
+      expect(mock.history.patch[0].url).toBe(
+        "/establishment/estab-uuid-1/general-infos"
+      );
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        name: "Barbearia Renomeada",
+      });
+      expect(useEstablishmentStore.getState().establishment?.name).toBe(
+        "Barbearia Renomeada"
+      );
+    });
+
+    it("rejects when the PATCH fails", async () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE });
+      mock
+        .onPatch("/establishment/estab-uuid-1/general-infos")
+        .reply(403, { message: "Forbidden" });
+
+      await expect(
+        useEstablishmentStore
+          .getState()
+          .updateGeneralInfos("estab-uuid-1", { name: "x" })
+      ).rejects.toThrow();
+    });
+  });
 });

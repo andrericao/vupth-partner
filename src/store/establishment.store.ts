@@ -94,6 +94,7 @@ type EstablishmentState = {
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
   removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
+  updateGeneralInfos: (id: string, changes: { name?: string }) => Promise<void>;
   reset: () => void;
 };
 
@@ -180,6 +181,20 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     await api.delete(
       `/establishment/${establishmentId}/professionals/${professionalId}`
     );
+  },
+
+  updateGeneralInfos: async (id, changes) => {
+    // PATCH /establishment/{id}/general-infos — backend so aceita campos
+    // conhecidos (ignoreUnknown=false); enviamos apenas o que muda.
+    const { data } = await api.patch(`/establishment/${id}/general-infos`, changes);
+    set((state) => {
+      const merged = normalizeEstablishment({
+        ...(state.establishment ?? {}),
+        ...data,
+      });
+      persistEstablishment(merged);
+      return { establishment: merged };
+    });
   },
 
   reset: () => {
