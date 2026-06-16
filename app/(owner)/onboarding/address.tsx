@@ -89,7 +89,7 @@ export default function AddressScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6" alignItems="center">
-        <Header showBackButton onBack={() => router.back()} />
+        <Header showBackButton onBack={() => router.navigate("/(owner)/establishment-data" as any)} />
 
         <FormControl flex={1} mt="$8" isInvalid={isInvalid}>
           <Heading mb="$12" size="3xl" fontFamily="$heading">

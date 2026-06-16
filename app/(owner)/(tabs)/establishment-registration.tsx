@@ -58,7 +58,10 @@ export default function EstablishmentRegistrationScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.back()} />
+          <Header
+            showBackButton
+            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+          />
 
           <Heading mt="$8" size="2xl" fontFamily="$heading">
             Dados Cadastrais
