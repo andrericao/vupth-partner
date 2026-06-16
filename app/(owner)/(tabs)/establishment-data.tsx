@@ -44,7 +44,7 @@ export default function EstablishmentDataScreen() {
       showsVerticalScrollIndicator={false}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
+        <Header showBackButton onBack={() => router.back()} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Dados do Estabelecimento
