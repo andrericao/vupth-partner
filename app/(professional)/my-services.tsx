@@ -264,21 +264,23 @@ export default function MyServicesScreen() {
                   borderWidth="$1"
                   borderColor="$green400"
                 >
-                  <Input
-                    textLabel="Nome do servico"
-                    placeholder="Ex: Corte Social"
-                    messageError=""
-                    value={editName}
-                    onChangeText={setEditName}
-                  />
-                  <Input
-                    textLabel="Preco total (R$)"
-                    placeholder="35.00"
-                    messageError=""
-                    value={editPrice}
-                    onChangeText={setEditPrice}
-                    keyboardType="decimal-pad"
-                  />
+                  <FormControl>
+                    <Input
+                      textLabel="Nome do servico"
+                      placeholder="Ex: Corte Social"
+                      messageError=""
+                      value={editName}
+                      onChangeText={setEditName}
+                    />
+                    <Input
+                      textLabel="Preco total (R$)"
+                      placeholder="35.00"
+                      messageError=""
+                      value={editPrice}
+                      onChangeText={setEditPrice}
+                      keyboardType="decimal-pad"
+                    />
+                  </FormControl>
                   <HStack space="sm" mt="$1">
                     <Button
                       title="Cancelar"
