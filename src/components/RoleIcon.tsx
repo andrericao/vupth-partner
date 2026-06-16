@@ -12,7 +12,8 @@ type Props = {
  *   - owner        → predio (estabelecimento)
  *   - professional → busto com chapeu (usuario "coberto")
  */
-export function RoleIcon({ role, size = 26, color = "#52525B" }: Props) {
+// Verde primario da paleta do PRD (4 cores-ancora: #1B4332, #52B788, #00B37E, #F7FAF8).
+export function RoleIcon({ role, size = 26, color = "#00B37E" }: Props) {
   if (role === "owner") {
     // Predio (Material "apartment"), silhueta cheia.
     return (
