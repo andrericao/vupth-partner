@@ -75,6 +75,13 @@ export default function MyServicesScreen() {
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
   const fetchMe = useProfessionalStore((s) => s.fetchMe);
   const addMyServiceItem = useProfessionalStore((s) => s.addMyServiceItem);
+  const updateMyServiceItem = useProfessionalStore((s) => s.updateMyServiceItem);
+  const removeMyServiceItem = useProfessionalStore((s) => s.removeMyServiceItem);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [isEditSaving, setIsEditSaving] = useState(false);
 
   const [showForm, setShowForm] = useState(false);
   const [serviceItemType, setServiceItemType] = useState("");
@@ -114,6 +121,59 @@ export default function MyServicesScreen() {
     } catch {}
     setRefreshing(false);
   }, [fetchMe, fetchMyServices]);
+
+  const startEditItem = (svc: { id: string; customName: string; price: number }) => {
+    setShowForm(false);
+    setEditingId(svc.id);
+    setEditName(svc.customName);
+    setEditPrice(String(svc.price));
+  };
+
+  const cancelEditItem = () => {
+    setEditingId(null);
+    setEditName("");
+    setEditPrice("");
+  };
+
+  const handleSaveEdit = async (itemId: string) => {
+    const trimmed = editName.trim();
+    const newPrice = parseFloat((editPrice || "0").replace(",", "."));
+    if (!trimmed || isNaN(newPrice) || newPrice <= 0) {
+      Alert.alert("Dados invalidos", "Informe um nome e um preco maior que zero.");
+      return;
+    }
+    setIsEditSaving(true);
+    try {
+      await updateMyServiceItem(itemId, { customName: trimmed, price: newPrice });
+      cancelEditItem();
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o servico."));
+    } finally {
+      setIsEditSaving(false);
+    }
+  };
+
+  const handleRemoveItem = (svc: { id: string; customName: string }) => {
+    Alert.alert(
+      "Remover servico",
+      `Deseja remover "${svc.customName}"? Esta acao nao pode ser desfeita.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Remover",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await removeMyServiceItem(svc.id);
+              if (editingId === svc.id) cancelEditItem();
+            } catch (error: any) {
+              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel remover o servico."));
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleSubmit = async () => {
     if (!customName.trim() || isNaN(priceNum) || priceNum <= 0 || !serviceItemType) {
@@ -194,30 +254,88 @@ export default function MyServicesScreen() {
 
         {myServices.length > 0 && (
           <VStack mt="$4" space="sm">
-            {myServices.map((svc) => (
-              <HStack
-                key={svc.id}
-                bg="$white"
-                p="$3"
-                borderRadius="$md"
-                borderWidth="$1"
-                borderColor="$coolGray200"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <VStack flex={1}>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                    {svc.customName}
-                  </Text>
-                  <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                    {humanizeServiceType(svc.serviceItemType)} • {svc.estimatedMinutes}min
-                  </Text>
+            {myServices.map((svc) =>
+              editingId === svc.id ? (
+                <VStack
+                  key={svc.id}
+                  bg="$white"
+                  p="$3"
+                  borderRadius="$md"
+                  borderWidth="$1"
+                  borderColor="$green400"
+                >
+                  <Input
+                    textLabel="Nome do servico"
+                    placeholder="Ex: Corte Social"
+                    messageError=""
+                    value={editName}
+                    onChangeText={setEditName}
+                  />
+                  <Input
+                    textLabel="Preco total (R$)"
+                    placeholder="35.00"
+                    messageError=""
+                    value={editPrice}
+                    onChangeText={setEditPrice}
+                    keyboardType="decimal-pad"
+                  />
+                  <HStack space="sm" mt="$1">
+                    <Button
+                      title="Cancelar"
+                      onPress={cancelEditItem}
+                      bg="$coolGray200"
+                      textColor="$coolGray700"
+                      h="$9"
+                      flex={1}
+                    />
+                    <Button
+                      title="Salvar"
+                      onPress={() => handleSaveEdit(svc.id)}
+                      isLoading={isEditSaving}
+                      bg="$green500"
+                      $active-bg="$green600"
+                      h="$9"
+                      flex={1}
+                    />
+                  </HStack>
                 </VStack>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
-                  R$ {svc.price.toFixed(2)}
-                </Text>
-              </HStack>
-            ))}
+              ) : (
+                <HStack
+                  key={svc.id}
+                  bg="$white"
+                  p="$3"
+                  borderRadius="$md"
+                  borderWidth="$1"
+                  borderColor="$coolGray200"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <VStack flex={1}>
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                      {svc.customName}
+                    </Text>
+                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                      {humanizeServiceType(svc.serviceItemType)} • {svc.estimatedMinutes}min
+                    </Text>
+                    <HStack space="md" mt="$1">
+                      <Pressable onPress={() => startEditItem(svc)}>
+                        <Text fontFamily="$body" fontSize="$xs" color="$blue600">
+                          Editar
+                        </Text>
+                      </Pressable>
+                      <Pressable onPress={() => handleRemoveItem(svc)}>
+                        <Text fontFamily="$body" fontSize="$xs" color="$red500">
+                          Remover
+                        </Text>
+                      </Pressable>
+                    </HStack>
+                  </VStack>
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+                    R$ {svc.price.toFixed(2)}
+                  </Text>
+                </HStack>
+              )
+            )}
           </VStack>
         )}
 

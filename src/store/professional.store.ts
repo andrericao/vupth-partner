@@ -36,6 +36,9 @@ type ProfessionalState = {
   cancelAffiliation: (affiliationId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
+  updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
+  updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
+  removeMyServiceItem: (itemId: string) => Promise<void>;
   fetchMyServices: () => Promise<void>;
   fetchMe: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
@@ -130,6 +133,31 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
       { serviceItemType, customName, price }
     );
     return data;
+  },
+
+  updateMyProfile: async (changes) => {
+    // PATCH /professional/me — name (=firstName) e/ou specialty, ambos opcionais.
+    await api.patch("/professional/me", changes);
+    await get().fetchMe();
+  },
+
+  updateMyServiceItem: async (itemId, changes) => {
+    const prof = get().professional;
+    if (!prof) throw new Error("Professional not found");
+
+    await api.patch(
+      `/professional-queue/${prof.id}/service-items/${itemId}`,
+      changes
+    );
+    await get().fetchMyServices();
+  },
+
+  removeMyServiceItem: async (itemId) => {
+    const prof = get().professional;
+    if (!prof) throw new Error("Professional not found");
+
+    await api.delete(`/professional-queue/${prof.id}/service-items/${itemId}`);
+    await get().fetchMyServices();
   },
 
   fetchMe: async () => {
