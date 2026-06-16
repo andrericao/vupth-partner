@@ -10,6 +10,9 @@ import {
   Input as GluestackInput,
   InputField,
   InputSlot,
+  InputIcon,
+  SearchIcon,
+  CloseIcon,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
@@ -254,11 +257,16 @@ export default function FindEstablishmentScreen() {
             />
             <InputSlot
               pr="$3"
-              onPress={search.trim() ? () => { setSearch(""); setResults([]); setHasSearched(false); } : handleSearch}
+              onPress={
+                search.trim()
+                  ? () => { setSearch(""); setResults([]); setHasSearched(false); }
+                  : handleSearch
+              }
             >
-              <Text fontSize="$lg" color={search.trim() ? "$red500" : "$coolGray400"}>
-                {search.trim() ? "✕" : "🔍"}
-              </Text>
+              <InputIcon
+                as={search.trim() ? CloseIcon : SearchIcon}
+                color={search.trim() ? "$coolGray500" : "$green600"}
+              />
             </InputSlot>
           </GluestackInput>
 
