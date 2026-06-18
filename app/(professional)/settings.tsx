@@ -11,11 +11,12 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
 
-type Editing = null | "email" | "password";
+type Editing = null | "name" | "email" | "password";
 
 export default function ProfessionalSettingsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const leaveEstablishment = useProfessionalStore((s) => s.leaveEstablishment);
+  const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
   const user = useAuthStore((s) => s.user);
   const updateEmail = useAuthStore((s) => s.updateEmail);
   const updatePassword = useAuthStore((s) => s.updatePassword);
@@ -24,21 +25,38 @@ export default function ProfessionalSettingsScreen() {
   const [editing, setEditing] = useState<Editing>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
 
-  const handleComingSoon = () => {
-    Alert.alert("Em breve", "Esta funcionalidade sera implementada em breve.");
-  };
-
   const startEdit = (field: Editing) => {
     setFieldError(null);
+    setName(field === "name" ? professional?.name ?? "" : "");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
     setEditing(field);
+  };
+
+  const handleSaveName = async () => {
+    const value = name.trim();
+    if (value.length < 2) {
+      setFieldError("Informe um nome valido.");
+      return;
+    }
+    setFieldError(null);
+    setIsSaving(true);
+    try {
+      await updateMyProfile({ name: value });
+      setEditing(null);
+      Alert.alert("Nome atualizado", "Seu nome foi alterado com sucesso.");
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const cancelEdit = () => {
@@ -139,10 +157,34 @@ export default function ProfessionalSettingsScreen() {
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Nome
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-              {professional?.name ?? "—"}
-            </Text>
-            <Button title="Editar" onPress={handleComingSoon} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+            {editing === "name" ? (
+              <FormControl mt="$2">
+                <Input
+                  textLabel="Novo nome"
+                  placeholder="Seu nome"
+                  messageError=""
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+                {fieldError && (
+                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
+                    {fieldError}
+                  </Text>
+                )}
+                <HStack space="sm">
+                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
+                  <Button title="Salvar" onPress={handleSaveName} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
+                </HStack>
+              </FormControl>
+            ) : (
+              <>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
+                  {professional?.name ?? "—"}
+                </Text>
+                <Button title="Editar" onPress={() => startEdit("name")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+              </>
+            )}
           </VStack>
 
           <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
@@ -221,6 +263,23 @@ export default function ProfessionalSettingsScreen() {
           </VStack>
 
           <Divider my="$2" />
+
+          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              Refeicoes (almoco/janta)
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+              Editar horario e duracao; entram no calculo da fila.
+            </Text>
+            <Button
+              title="Gerenciar Refeicoes"
+              onPress={() => router.push("/(professional)/meals" as any)}
+              bg="$coolGray200"
+              textColor="$coolGray700"
+              h="$9"
+              mt="$2"
+            />
+          </VStack>
 
           <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">

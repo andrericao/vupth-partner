@@ -11,8 +11,21 @@ type Establishment = {
   status: string;
   open_status: string;
   owner_id: string;
+  phone?: string | null;
+  instagram?: string | null;
+  opening_time?: string | null;
+  closing_time?: string | null;
   created_at?: string;
   message?: string;
+};
+
+// Campos editaveis via PATCH /establishment/{id}/general-infos.
+type GeneralInfosChanges = {
+  name?: string;
+  phone?: string;
+  instagram?: string;
+  opening_time?: string;
+  closing_time?: string;
 };
 
 export type EstablishmentSearchResult = {
@@ -51,6 +64,10 @@ function normalizeEstablishment(data: any): Establishment {
     status: data.status ?? "ACTIVE",
     open_status: data.open_status ?? data.openStatus ?? "CLOSED",
     owner_id: data.owner_id ?? data.ownerId ?? "",
+    phone: data.phone ?? null,
+    instagram: data.instagram ?? null,
+    opening_time: data.opening_time ?? data.openingTime ?? null,
+    closing_time: data.closing_time ?? data.closingTime ?? null,
     created_at: data.created_at ?? data.createdAt,
     message: data.message,
   };
@@ -94,6 +111,7 @@ type EstablishmentState = {
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
   removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
+  updateGeneralInfos: (id: string, changes: GeneralInfosChanges) => Promise<void>;
   reset: () => void;
 };
 
@@ -180,6 +198,20 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     await api.delete(
       `/establishment/${establishmentId}/professionals/${professionalId}`
     );
+  },
+
+  updateGeneralInfos: async (id, changes) => {
+    // PATCH /establishment/{id}/general-infos — backend so aceita campos
+    // conhecidos (ignoreUnknown=false); enviamos apenas o que muda.
+    const { data } = await api.patch(`/establishment/${id}/general-infos`, changes);
+    set((state) => {
+      const merged = normalizeEstablishment({
+        ...(state.establishment ?? {}),
+        ...data,
+      });
+      persistEstablishment(merged);
+      return { establishment: merged };
+    });
   },
 
   reset: () => {

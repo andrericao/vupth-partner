@@ -33,6 +33,13 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   AFFILIATION_NOT_FOUND: "Solicitacao de vinculacao nao encontrada.",
   ESTABLISHMENT_NOT_READY:
     "O estabelecimento precisa de pelo menos um profissional com servico cadastrado para abrir.",
+  ESTABLISHMENT_HOURS_REQUIRED:
+    "Defina o horario de funcionamento do estabelecimento antes de abrir.",
+  INTERVAL_INVALID_TIME:
+    "Horario da refeicao fora do horario de funcionamento do estabelecimento.",
+  INTERVAL_CONFLICT:
+    "Conflito de horario: a refeicao ja foi iniciada/encerrada hoje ou se sobrepoe a outra.",
+  INTERVAL_NOT_FOUND: "Refeicao/intervalo nao encontrado.",
   VALIDATION_ERROR: "Verifique os dados informados e tente novamente.",
 };
 

@@ -1,17 +1,30 @@
 import { useEffect } from "react";
 import { BackHandler } from "react-native";
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 import { HStack, Center, Heading } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ButtonGoBack } from "@components/ButtonGoBack";
+import { RoleIcon } from "@components/RoleIcon";
 
 type Props = {
   showBackButton?: boolean;
   onBack?: () => void;
 };
 
+// Papel ativo deduzido do grupo de rota atual — define qual silhueta exibir
+// (sempre no mesmo lugar, so muda o desenho). Ajuda no teste a distinguir a
+// sessao do estabelecimento (owner) da do profissional.
+const ROLE_BY_SEGMENT: Record<string, "owner" | "professional"> = {
+  "(owner)": "owner",
+  "(professional)": "professional",
+};
+
 export function Header({ showBackButton = false, onBack }: Props) {
   const insets = useSafeAreaInsets();
+  const segments = useSegments();
+  const role = segments
+    .map((s) => ROLE_BY_SEGMENT[s as string])
+    .find((r): r is "owner" | "professional" => Boolean(r));
 
   const handleBack = () => {
     if (onBack) {
@@ -41,6 +54,11 @@ export function Header({ showBackButton = false, onBack }: Props) {
           VUPTH
         </Heading>
       </Center>
+      {role && (
+        <HStack ml="auto" alignItems="center">
+          <RoleIcon role={role} />
+        </HStack>
+      )}
     </HStack>
   );
 }

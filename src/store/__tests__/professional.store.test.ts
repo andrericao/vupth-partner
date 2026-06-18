@@ -246,4 +246,76 @@ describe("professional.store", () => {
       ).toBe("estab-uuid-1");
     });
   });
+
+  describe("updateMyProfile", () => {
+    it("calls PATCH /professional/me with the changes and refreshes via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, name: "Joao Atualizado" });
+
+      await useProfessionalStore.getState().updateMyProfile({ name: "Joao Atualizado" });
+
+      expect(mock.history.patch[0].url).toBe("/professional/me");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ name: "Joao Atualizado" });
+      expect(useProfessionalStore.getState().professional?.name).toBe("Joao Atualizado");
+    });
+
+    it("rejects when the PATCH fails", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me").reply(400, { message: "Invalid name" });
+
+      await expect(
+        useProfessionalStore.getState().updateMyProfile({ name: "x" })
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("updateMyServiceItem", () => {
+    it("calls PATCH /professional-queue/{id}/service-items/{itemId} and refreshes the list", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock
+        .onPatch("/professional-queue/prof-uuid-1/service-items/svc-1")
+        .reply(200, {});
+      mock.onGet("/professional/prof-uuid-1/service-items").reply(200, [
+        { id: "svc-1", serviceItemType: "CORTE_MAQUINA", customName: "Corte Social", price: 42, estimatedMinutes: 30 },
+      ]);
+
+      await useProfessionalStore
+        .getState()
+        .updateMyServiceItem("svc-1", { customName: "Corte Social", price: 42 });
+
+      expect(mock.history.patch[0].url).toBe(
+        "/professional-queue/prof-uuid-1/service-items/svc-1"
+      );
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        customName: "Corte Social",
+        price: 42,
+      });
+      expect(useProfessionalStore.getState().myServices[0].customName).toBe("Corte Social");
+    });
+  });
+
+  describe("removeMyServiceItem", () => {
+    it("calls DELETE /professional-queue/{id}/service-items/{itemId} and refreshes the list", async () => {
+      useProfessionalStore.setState({
+        professional: AFFILIATE_RESPONSE,
+        myServices: [
+          { id: "svc-1", serviceItemType: "CORTE_MAQUINA", customName: "Corte", price: 37.9, estimatedMinutes: 30 },
+        ] as any,
+      });
+      mock
+        .onDelete("/professional-queue/prof-uuid-1/service-items/svc-1")
+        .reply(204);
+      mock.onGet("/professional/prof-uuid-1/service-items").reply(200, []);
+
+      await useProfessionalStore.getState().removeMyServiceItem("svc-1");
+
+      expect(mock.history.delete[0].url).toBe(
+        "/professional-queue/prof-uuid-1/service-items/svc-1"
+      );
+      expect(useProfessionalStore.getState().myServices).toEqual([]);
+    });
+  });
 });

@@ -18,6 +18,10 @@ const ESTABLISHMENT_RESPONSE = {
   status: "ACTIVE",
   open_status: "CLOSED",
   owner_id: "uuid-1",
+  phone: null,
+  instagram: null,
+  opening_time: null,
+  closing_time: null,
   created_at: "2026-05-17T10:00:00",
   message: "Establishment created!",
 };
@@ -315,6 +319,64 @@ describe("establishment.store", () => {
           .getState()
           .removeProfessional("estab-uuid-1", "prof-uuid-1")
       ).rejects.toThrow();
+    });
+  });
+
+  describe("updateGeneralInfos", () => {
+    it("calls PATCH /establishment/{id}/general-infos and updates the local name", async () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE });
+      mock
+        .onPatch("/establishment/estab-uuid-1/general-infos")
+        .reply(200, { ...ESTABLISHMENT_RESPONSE, name: "Barbearia Renomeada" });
+
+      await useEstablishmentStore
+        .getState()
+        .updateGeneralInfos("estab-uuid-1", { name: "Barbearia Renomeada" });
+
+      expect(mock.history.patch[0].url).toBe(
+        "/establishment/estab-uuid-1/general-infos"
+      );
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        name: "Barbearia Renomeada",
+      });
+      expect(useEstablishmentStore.getState().establishment?.name).toBe(
+        "Barbearia Renomeada"
+      );
+    });
+
+    it("rejects when the PATCH fails", async () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE });
+      mock
+        .onPatch("/establishment/estab-uuid-1/general-infos")
+        .reply(403, { message: "Forbidden" });
+
+      await expect(
+        useEstablishmentStore
+          .getState()
+          .updateGeneralInfos("estab-uuid-1", { name: "x" })
+      ).rejects.toThrow();
+    });
+
+    it("envia e guarda opening_time/closing_time", async () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE });
+      mock.onPatch("/establishment/estab-uuid-1/general-infos").reply(200, {
+        ...ESTABLISHMENT_RESPONSE,
+        opening_time: "09:00Z",
+        closing_time: "18:00Z",
+      });
+
+      await useEstablishmentStore.getState().updateGeneralInfos("estab-uuid-1", {
+        opening_time: "09:00:00Z",
+        closing_time: "18:00:00Z",
+      });
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        opening_time: "09:00:00Z",
+        closing_time: "18:00:00Z",
+      });
+      const est = useEstablishmentStore.getState().establishment;
+      expect(est?.opening_time).toBe("09:00Z");
+      expect(est?.closing_time).toBe("18:00Z");
     });
   });
 });

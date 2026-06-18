@@ -68,7 +68,8 @@ export default function OwnerDashboardScreen() {
     try {
       await updateOpenStatus(establishment.id, newStatus);
     } catch (error: any) {
-      if (error?.response?.data?.code === "ESTABLISHMENT_NOT_READY") {
+      const code = error?.response?.data?.code;
+      if (code === "ESTABLISHMENT_NOT_READY") {
         Alert.alert(
           "Estabelecimento sem profissional pronto",
           getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com servico cadastrado."),
@@ -81,6 +82,18 @@ export default function OwnerDashboardScreen() {
                   pathname: "/(owner)/add-professional",
                   params: { establishmentId: establishment.id },
                 } as any),
+            },
+          ]
+        );
+      } else if (code === "ESTABLISHMENT_HOURS_REQUIRED") {
+        Alert.alert(
+          "Defina o horario de funcionamento",
+          getApiErrorMessage(error, "Defina o horario de funcionamento do estabelecimento antes de abrir."),
+          [
+            { text: "Cancelar", style: "cancel" },
+            {
+              text: "Definir Horario",
+              onPress: () => router.push("/(owner)/establishment-hours" as any),
             },
           ]
         );

@@ -165,7 +165,12 @@ export default function OwnerMenuScreen() {
           {establishment?.id && (
             <MenuItem
               label="Dados do Estabelecimento"
-              onPress={() => router.push("/(owner)/onboarding/address" as any)}
+              onPress={() =>
+                router.push({
+                  pathname: "/(owner)/establishment-data",
+                  params: { establishmentId: establishment.id },
+                } as any)
+              }
             />
           )}
 
