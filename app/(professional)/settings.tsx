@@ -264,6 +264,23 @@ export default function ProfessionalSettingsScreen() {
 
           <Divider my="$2" />
 
+          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              Refeicoes (almoco/janta)
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+              Editar horario e duracao; entram no calculo da fila.
+            </Text>
+            <Button
+              title="Gerenciar Refeicoes"
+              onPress={() => router.push("/(professional)/meals" as any)}
+              bg="$coolGray200"
+              textColor="$coolGray700"
+              h="$9"
+              mt="$2"
+            />
+          </VStack>
+
           <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Estabelecimento
