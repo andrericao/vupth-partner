@@ -57,6 +57,11 @@ export default function EstablishmentDataScreen() {
             onPress={() => router.push("/(owner)/establishment-registration" as any)}
           />
           <MenuItem
+            label="Horario de Funcionamento"
+            description="Abertura e fechamento"
+            onPress={() => router.push("/(owner)/establishment-hours" as any)}
+          />
+          <MenuItem
             label="Endereco"
             description="Rua, numero, bairro, CEP"
             onPress={() => router.push("/(owner)/onboarding/address" as any)}

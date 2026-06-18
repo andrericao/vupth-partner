@@ -352,5 +352,27 @@ describe("establishment.store", () => {
           .updateGeneralInfos("estab-uuid-1", { name: "x" })
       ).rejects.toThrow();
     });
+
+    it("envia e guarda opening_time/closing_time", async () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE });
+      mock.onPatch("/establishment/estab-uuid-1/general-infos").reply(200, {
+        ...ESTABLISHMENT_RESPONSE,
+        opening_time: "09:00Z",
+        closing_time: "18:00Z",
+      });
+
+      await useEstablishmentStore.getState().updateGeneralInfos("estab-uuid-1", {
+        opening_time: "09:00:00Z",
+        closing_time: "18:00:00Z",
+      });
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        opening_time: "09:00:00Z",
+        closing_time: "18:00:00Z",
+      });
+      const est = useEstablishmentStore.getState().establishment;
+      expect(est?.opening_time).toBe("09:00Z");
+      expect(est?.closing_time).toBe("18:00Z");
+    });
   });
 });
