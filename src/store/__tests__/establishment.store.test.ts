@@ -18,6 +18,10 @@ const ESTABLISHMENT_RESPONSE = {
   status: "ACTIVE",
   open_status: "CLOSED",
   owner_id: "uuid-1",
+  phone: null,
+  instagram: null,
+  opening_time: null,
+  closing_time: null,
   created_at: "2026-05-17T10:00:00",
   message: "Establishment created!",
 };
