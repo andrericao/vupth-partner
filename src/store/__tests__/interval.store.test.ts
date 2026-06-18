@@ -1,12 +1,12 @@
 import MockAdapter from "axios-mock-adapter";
 import { api } from "@lib/api";
-import { useIntervalStore } from "../interval.store";
+import { useIntervalStore, type Interval } from "../interval.store";
 
 const mock = new MockAdapter(api);
 const PROF = "prof-uuid-1";
 const BASE = `/api/v1/professionals/${PROF}/intervals`;
 
-const LUNCH = {
+const LUNCH: Interval = {
   intervalId: "int-1",
   type: "RECURRENT",
   status: "SCHEDULED",

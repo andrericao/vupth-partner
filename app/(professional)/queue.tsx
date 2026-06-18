@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   VStack,
   HStack,
@@ -17,8 +17,16 @@ import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
+import { useIntervalStore, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
+import { parseApiTime } from "@lib/time";
+
+/** "HH:MM" do relogio local agora. */
+function nowHHMM(): string {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
 
 function AttendanceCard({
   attendance,
@@ -124,6 +132,15 @@ export default function ProfessionalQueueScreen() {
   const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, removeFromQueue } =
     useAttendanceStore();
 
+  const intervals = useIntervalStore((s) => s.intervals);
+  const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
+  const startInterval = useIntervalStore((s) => s.startInterval);
+  const finishInterval = useIntervalStore((s) => s.finishInterval);
+  const meals = intervals.filter((i) => i.type === "RECURRENT");
+
+  // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
+  const nudgedRef = useRef<Set<string>>(new Set());
+
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -137,6 +154,48 @@ export default function ProfessionalQueueScreen() {
     }
   }, [establishmentId]);
 
+  // Carrega as refeicoes do dia ao montar (e quando o profissional muda).
+  const profId = professional?.id;
+  useEffect(() => {
+    if (profId && establishmentId) fetchIntervals(profId).catch(() => {});
+  }, [profId, establishmentId, fetchIntervals]);
+
+  const handleStartMeal = useCallback(
+    async (m: Interval) => {
+      if (!profId) return;
+      try {
+        await startInterval(profId, m.intervalId);
+      } catch (error: any) {
+        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel iniciar a refeicao."));
+      }
+    },
+    [profId, startInterval]
+  );
+
+  // Nudge: no horario previsto, avisa o profissional (uma vez por refeicao/sessao).
+  useEffect(() => {
+    if (!profId) return;
+    const now = nowHHMM();
+    const due = meals.find((m) => {
+      if (m.status !== "SCHEDULED") return false;
+      const t = parseApiTime(m.fixedStartTime);
+      return t !== null && now >= t && !nudgedRef.current.has(m.intervalId);
+    });
+    if (!due) return;
+    nudgedRef.current.add(due.intervalId);
+    const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
+    Alert.alert(
+      `Hora do ${due.description}`,
+      count > 0
+        ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
+        : `Iniciar ${due.description} agora (${due.durationMinutes}min)?`,
+      [
+        { text: "Agora nao", style: "cancel" },
+        { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
+      ]
+    );
+  }, [meals, profId, data, handleStartMeal]);
+
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
@@ -144,15 +203,27 @@ export default function ProfessionalQueueScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
+    if (profId) await fetchIntervals(profId).catch(() => {});
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetch, profId, fetchIntervals]);
 
   const handleAction = async (action: () => Promise<any>) => {
     try {
       await action();
       await refetch();
+      // Iniciar um atendimento encerra a refeicao ativa no backend — refletir.
+      if (profId) await fetchIntervals(profId).catch(() => {});
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar acao."));
+    }
+  };
+
+  const handleFinishMeal = async (m: Interval) => {
+    if (!profId) return;
+    try {
+      await finishInterval(profId, m.intervalId);
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel encerrar a refeicao."));
     }
   };
 
@@ -236,6 +307,57 @@ export default function ProfessionalQueueScreen() {
                 }
               />
             ))}
+          </VStack>
+        )}
+
+        {myProfessional && meals.length > 0 && (
+          <VStack mt="$6">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+              Refeicoes
+            </Text>
+            {meals.map((m) => {
+              const active = m.status === "ACTIVE";
+              return (
+                <HStack
+                  key={m.intervalId}
+                  bg={active ? "$amber50" : "$white"}
+                  p="$3"
+                  mb="$2"
+                  borderRadius="$md"
+                  borderWidth="$1"
+                  borderColor={active ? "$amber300" : "$coolGray200"}
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <VStack flex={1}>
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                      {m.description}
+                    </Text>
+                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                      {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min
+                      {active ? " • em andamento" : ""}
+                    </Text>
+                  </VStack>
+                  {active ? (
+                    <Button
+                      title="Encerrar"
+                      onPress={() => handleFinishMeal(m)}
+                      bg="$amber500"
+                      $active-bg="$amber600"
+                      h="$9"
+                    />
+                  ) : (
+                    <Button
+                      title="Iniciar"
+                      onPress={() => handleStartMeal(m)}
+                      bg="$coolGray200"
+                      textColor="$coolGray700"
+                      h="$9"
+                    />
+                  )}
+                </HStack>
+              );
+            })}
           </VStack>
         )}
 
