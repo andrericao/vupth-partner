@@ -47,6 +47,16 @@ export type ProfessionalSearchResult = {
   is_available: boolean | null;
 };
 
+// Relatorio agregado do establishment (#4) — GET /establishment/{id}/reports.
+export type EstablishmentReport = {
+  totalAttendances: number;
+  totalRevenue: number;
+  avgDurationMinutes: number;
+  topService: string | null;
+  topProfessional: string | null;
+  professionals: { id: string; name: string; revenue: number; attendances: number }[];
+};
+
 type ProfessionalResponse = {
   id: string;
   name: string;
@@ -121,6 +131,7 @@ type EstablishmentState = {
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
   searchProfessionals: (name?: string, specialty?: string) => Promise<ProfessionalSearchResult[]>;
   inviteProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
+  fetchReport: (id: string, dateFrom?: string, dateTo?: string) => Promise<EstablishmentReport>;
   removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   updateGeneralInfos: (id: string, changes: GeneralInfosChanges) => Promise<void>;
   reset: () => void;
@@ -217,6 +228,14 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     await api.post(`/establishment/${establishmentId}/affiliations`, {
       professionalId,
     });
+  },
+
+  fetchReport: async (id, dateFrom, dateTo) => {
+    const params: Record<string, string> = {};
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
+    const { data } = await api.get(`/establishment/${id}/reports`, { params });
+    return data;
   },
 
   removeProfessional: async (establishmentId, professionalId) => {

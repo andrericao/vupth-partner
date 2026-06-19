@@ -4,6 +4,7 @@ import {
   HStack,
   Heading,
   Text,
+  Pressable,
   ScrollView,
   Spinner,
   Divider,
@@ -12,20 +13,11 @@ import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { useEstablishmentStore } from "@store/establishment.store";
-import { useAttendanceStore } from "@store/attendance.store";
+import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
+import { periodRange } from "@lib/time";
 
-type ProfStats = {
-  id: string;
-  name: string;
-  specialty: string;
-  queueCount: number;
-  waitMinutes: number;
-  isAvailable: boolean;
-  finishedCount: number;
-  revenue: number;
-};
+type Period = "day" | "week" | "month";
 
 function StatCard({
   label,
@@ -54,72 +46,58 @@ function StatCard({
 
 export default function OwnerReportsScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
+  const fetchReport = useEstablishmentStore((s) => s.fetchReport);
   const { data: queue, refetch } = useQueuePolling(establishment?.id ?? null);
-  const history = useAttendanceStore((s) => s.history);
-  const fetchHistory = useAttendanceStore((s) => s.fetchHistory);
 
+  const [period, setPeriod] = useState<Period>("day");
+  const [report, setReport] = useState<EstablishmentReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
-  const loadHistory = useCallback(async () => {
+  const loadReport = useCallback(async () => {
     if (!establishment?.id) return;
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      await fetchHistory({ establishmentId: establishment.id, status: "FINISHED" });
-      setLoaded(true);
+      const { dateFrom, dateTo } = periodRange(period);
+      setReport(await fetchReport(establishment.id, dateFrom, dateTo));
     } catch (error: any) {
       setErrorMsg(getApiErrorMessage(error, "Nao foi possivel carregar o relatorio."));
+      setReport(null);
     } finally {
       setIsLoading(false);
     }
-  }, [establishment?.id, fetchHistory]);
+  }, [establishment?.id, period, fetchReport]);
 
   useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
+    loadReport();
+  }, [loadReport]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([loadHistory(), refetch()]);
+    await Promise.all([loadReport(), refetch()]);
     setRefreshing(false);
-  }, [loadHistory, refetch]);
+  }, [loadReport, refetch]);
 
-  // history e estado global compartilhado com a tela de Atendimentos;
-  // filtramos FINISHED para nao contar cancelados caso haja dado residual
-  const finished = history.filter((a) => a.status === "FINISHED");
+  const totalInQueue = queue?.total_in_queue ?? 0;
+  const availableProfs = queue?.available_professionals ?? 0;
 
-  // Agrega o historico finalizado por profissional
-  const historyByProf = finished.reduce<Record<string, { count: number; revenue: number }>>(
-    (acc, a) => {
-      const cur = acc[a.professionalId] ?? { count: 0, revenue: 0 };
-      cur.count += 1;
-      cur.revenue += a.totalValue;
-      acc[a.professionalId] = cur;
+  // Breakdown do relatorio por profissional, indexado por id.
+  const revById = (report?.professionals ?? []).reduce<Record<string, { revenue: number; attendances: number }>>(
+    (acc, p) => {
+      acc[p.id] = { revenue: p.revenue, attendances: p.attendances };
       return acc;
     },
     {}
   );
+  const liveProfs = queue?.professionals ?? [];
 
-  // Unifica os profissionais do estabelecimento (fila ao vivo + historico)
-  const professionals = queue?.professionals ?? [];
-  const stats: ProfStats[] = professionals.map((p) => ({
-    id: p.id,
-    name: p.name,
-    specialty: p.specialty ?? "",
-    queueCount: p.queue_count,
-    waitMinutes: p.estimated_wait_minutes,
-    isAvailable: p.is_available,
-    finishedCount: historyByProf[p.id]?.count ?? 0,
-    revenue: historyByProf[p.id]?.revenue ?? 0,
-  }));
-
-  const totalFinished = finished.length;
-  const totalRevenue = finished.reduce((sum, a) => sum + a.totalValue, 0);
-  const totalInQueue = queue?.total_in_queue ?? 0;
-  const availableProfs = queue?.available_professionals ?? 0;
+  const periods: { key: Period; label: string }[] = [
+    { key: "day", label: "Hoje" },
+    { key: "week", label: "Semana" },
+    { key: "month", label: "Mes" },
+  ];
 
   return (
     <ScrollView
@@ -146,19 +124,28 @@ export default function OwnerReportsScreen() {
           <StatCard label="Profissionais disponiveis" value={String(availableProfs)} color="$blue800" bg="$blue50" border="$blue200" />
         </HStack>
 
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mt="$6" mb="$2">
-          Atendimentos finalizados
-        </Text>
-        <HStack space="md">
-          <StatCard label="Total" value={String(totalFinished)} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
-          <StatCard label="Receita" value={`R$ ${totalRevenue.toFixed(2)}`} color="$green800" bg="$green50" border="$green200" />
+        <HStack mt="$6" space="sm">
+          {periods.map((p) => (
+            <Pressable
+              key={p.key}
+              onPress={() => setPeriod(p.key)}
+              bg={period === p.key ? "$green500" : "$coolGray100"}
+              py="$2"
+              px="$4"
+              borderRadius="$full"
+              flex={1}
+            >
+              <Text
+                fontFamily="$body"
+                color={period === p.key ? "$white" : "$coolGray700"}
+                textAlign="center"
+                fontSize="$sm"
+              >
+                {p.label}
+              </Text>
+            </Pressable>
+          ))}
         </HStack>
-
-        {isLoading && !loaded && (
-          <VStack alignItems="center" mt="$8">
-            <Spinner color="$green500" size="large" />
-          </VStack>
-        )}
 
         {errorMsg && (
           <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$4">
@@ -168,58 +155,79 @@ export default function OwnerReportsScreen() {
           </VStack>
         )}
 
-        <Divider my="$6" />
-
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$3">
-          Por profissional
-        </Text>
-
-        {stats.length === 0 ? (
-          <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$4">
-            Nenhum profissional vinculado
-          </Text>
-        ) : (
-          <VStack space="sm">
-            {stats.map((p) => (
-              <VStack
-                key={p.id}
-                bg="$white"
-                p="$4"
-                borderRadius="$lg"
-                borderWidth="$1"
-                borderColor="$coolGray200"
-              >
-                <HStack justifyContent="space-between" alignItems="center">
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                      {p.name}
-                    </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                      {p.specialty || "Sem especialidade"}
-                    </Text>
-                  </VStack>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
-                    R$ {p.revenue.toFixed(2)}
-                  </Text>
-                </HStack>
-
-                <HStack mt="$3" space="md">
-                  <VStack flex={1}>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Na fila</Text>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.queueCount}</Text>
-                  </VStack>
-                  <VStack flex={1}>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Espera</Text>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.waitMinutes} min</Text>
-                  </VStack>
-                  <VStack flex={1}>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Finalizados</Text>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.finishedCount}</Text>
-                  </VStack>
-                </HStack>
-              </VStack>
-            ))}
+        {isLoading ? (
+          <VStack alignItems="center" mt="$8">
+            <Spinner color="$green500" size="large" />
           </VStack>
+        ) : (
+          <>
+            <HStack space="md" mt="$4">
+              <StatCard label="Atendimentos" value={String(report?.totalAttendances ?? 0)} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
+              <StatCard label="Receita" value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`} color="$green800" bg="$green50" border="$green200" />
+            </HStack>
+
+            <HStack space="md" mt="$3">
+              <StatCard label="Duracao media" value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
+              <VStack flex={1} bg="$white" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                  Destaque
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray800">
+                  {report?.topProfessional ?? "—"}
+                </Text>
+              </VStack>
+            </HStack>
+
+            <Divider my="$6" />
+
+            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$3">
+              Por profissional
+            </Text>
+
+            {liveProfs.length === 0 ? (
+              <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$4">
+                Nenhum profissional vinculado
+              </Text>
+            ) : (
+              <VStack space="sm">
+                {liveProfs.map((p) => {
+                  const r = revById[p.id] ?? { revenue: 0, attendances: 0 };
+                  return (
+                    <VStack key={p.id} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+                      <HStack justifyContent="space-between" alignItems="center">
+                        <VStack flex={1}>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                            {p.name}
+                          </Text>
+                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                            {p.specialty || "Sem especialidade"}
+                          </Text>
+                        </VStack>
+                        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+                          R$ {r.revenue.toFixed(2)}
+                        </Text>
+                      </HStack>
+
+                      <HStack mt="$3" space="md">
+                        <VStack flex={1}>
+                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Na fila</Text>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.queue_count}</Text>
+                        </VStack>
+                        <VStack flex={1}>
+                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Espera</Text>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.estimated_wait_minutes} min</Text>
+                        </VStack>
+                        <VStack flex={1}>
+                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Finalizados</Text>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{r.attendances}</Text>
+                        </VStack>
+                      </HStack>
+                    </VStack>
+                  );
+                })}
+              </VStack>
+            )}
+          </>
         )}
       </VStack>
     </ScrollView>

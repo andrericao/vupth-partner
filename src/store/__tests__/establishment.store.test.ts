@@ -403,6 +403,28 @@ describe("establishment.store", () => {
     });
   });
 
+  describe("fetchReport", () => {
+    it("GET /establishment/{id}/reports com dateFrom/dateTo", async () => {
+      const report = {
+        totalAttendances: 30,
+        totalRevenue: 1200,
+        avgDurationMinutes: 28,
+        topService: "CORTE_MAQUINA",
+        topProfessional: "Joao",
+        professionals: [{ id: "p1", name: "Joao", revenue: 800, attendances: 20 }],
+      };
+      mock.onGet("/establishment/estab-uuid-1/reports").reply(200, report);
+
+      const out = await useEstablishmentStore
+        .getState()
+        .fetchReport("estab-uuid-1", "2026-06-01", "2026-06-17");
+
+      expect(mock.history.get[0].url).toBe("/establishment/estab-uuid-1/reports");
+      expect(mock.history.get[0].params).toEqual({ dateFrom: "2026-06-01", dateTo: "2026-06-17" });
+      expect(out).toEqual(report);
+    });
+  });
+
   describe("inviteProfessional", () => {
     it("POST /establishment/{id}/affiliations { professionalId }", async () => {
       mock.onPost("/establishment/estab-uuid-1/affiliations").reply(201, {});

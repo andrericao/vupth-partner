@@ -22,6 +22,13 @@ type ServiceItem = {
   estimatedMinutes: number;
 };
 
+export type ProfessionalReport = {
+  totalAttendances: number;
+  totalRevenue: number;
+  avgDurationMinutes: number;
+  topService: string | null;
+};
+
 type ProfessionalState = {
   professional: Professional | null;
   myServices: ServiceItem[];
@@ -43,6 +50,7 @@ type ProfessionalState = {
   updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
   fetchMyServices: () => Promise<void>;
+  fetchMyReport: (dateFrom?: string, dateTo?: string) => Promise<ProfessionalReport>;
   fetchMe: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
   reset: () => void;
@@ -191,6 +199,14 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
 
     const { data } = await api.get(`/professional/${prof.id}/service-items`);
     set({ myServices: data });
+  },
+
+  fetchMyReport: async (dateFrom, dateTo) => {
+    const params: Record<string, string> = {};
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
+    const { data } = await api.get("/professional/me/reports", { params });
+    return data;
   },
 
   restoreProfessional: async () => {
