@@ -379,4 +379,50 @@ describe("establishment.store", () => {
       expect(est?.closing_time).toBe("18:00Z");
     });
   });
+
+  describe("searchProfessionals", () => {
+    it("GET /professional com name e specialty (omite vazios)", async () => {
+      const results = [
+        { id: "p1", name: "Joao", specialty: "BARBER", nickname: "Jo", is_available: true },
+      ];
+      mock.onGet("/professional").reply(200, results);
+
+      const out = await useEstablishmentStore
+        .getState()
+        .searchProfessionals("Joao", "");
+
+      expect(mock.history.get[0].url).toBe("/professional");
+      expect(mock.history.get[0].params).toEqual({ name: "Joao" });
+      expect(out).toEqual(results);
+    });
+
+    it("sem termos envia params vazio", async () => {
+      mock.onGet("/professional").reply(200, []);
+      await useEstablishmentStore.getState().searchProfessionals();
+      expect(mock.history.get[0].params).toEqual({});
+    });
+  });
+
+  describe("inviteProfessional", () => {
+    it("POST /establishment/{id}/affiliations { professionalId }", async () => {
+      mock.onPost("/establishment/estab-uuid-1/affiliations").reply(201, {});
+
+      await useEstablishmentStore
+        .getState()
+        .inviteProfessional("estab-uuid-1", "prof-uuid-9");
+
+      expect(mock.history.post[0].url).toBe("/establishment/estab-uuid-1/affiliations");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({ professionalId: "prof-uuid-9" });
+    });
+
+    it("rejeita em 409 (ja afiliado/pendente)", async () => {
+      mock
+        .onPost("/establishment/estab-uuid-1/affiliations")
+        .reply(409, { code: "AFFILIATION_ALREADY_PENDING" });
+
+      await expect(
+        useEstablishmentStore.getState().inviteProfessional("estab-uuid-1", "p1")
+      ).rejects.toThrow();
+    });
+  });
 });

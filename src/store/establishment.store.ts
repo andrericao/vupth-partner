@@ -38,6 +38,15 @@ export type EstablishmentSearchResult = {
   status: string;
 };
 
+// Item da busca de profissionais (#6) — GET /professional?name=&specialty=.
+export type ProfessionalSearchResult = {
+  id: string;
+  name: string | null;
+  specialty: string | null;
+  nickname: string | null;
+  is_available: boolean | null;
+};
+
 type ProfessionalResponse = {
   id: string;
   name: string;
@@ -110,6 +119,8 @@ type EstablishmentState = {
     }
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
+  searchProfessionals: (name?: string, specialty?: string) => Promise<ProfessionalSearchResult[]>;
+  inviteProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   updateGeneralInfos: (id: string, changes: GeneralInfosChanges) => Promise<void>;
   reset: () => void;
@@ -192,6 +203,20 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     const params = name.trim() ? { name } : {};
     const { data } = await api.get("/establishment", { params });
     return data;
+  },
+
+  searchProfessionals: async (name, specialty) => {
+    const params: Record<string, string> = {};
+    if (name?.trim()) params.name = name.trim();
+    if (specialty?.trim()) params.specialty = specialty.trim();
+    const { data } = await api.get("/professional", { params });
+    return data;
+  },
+
+  inviteProfessional: async (establishmentId, professionalId) => {
+    await api.post(`/establishment/${establishmentId}/affiliations`, {
+      professionalId,
+    });
   },
 
   removeProfessional: async (establishmentId, professionalId) => {
