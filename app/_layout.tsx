@@ -15,10 +15,22 @@ import {
   Inter_400Regular,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import {
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
 import { Loading } from "@components/Loading";
 
 export default function RootLayout() {
-  const [fontLoaded] = useFonts({ Inter_400Regular, Inter_700Bold });
+  // [new-design] Guia: Poppins p/ titulos/botoes, Inter p/ texto.
+  const [fontLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_700Bold,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
 
   useEffect(() => {
     if (Platform.OS === "android") {

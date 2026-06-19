@@ -542,7 +542,8 @@ export const gluestackUIConfig = createConfig({
       extraBlack: '950',
     },
     fonts: {
-      heading: "Inter_700Bold",
+      // [new-design] Guia de Design: Poppins p/ titulos/botoes, Inter p/ texto.
+      heading: "Poppins_700Bold",
       body: "Inter_400Regular",
       mono: undefined,
     },
