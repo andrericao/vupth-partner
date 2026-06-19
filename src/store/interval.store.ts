@@ -4,6 +4,18 @@ import { api } from "@lib/api";
 // Intervalos/refeicoes do profissional (#14). Contrato: PRD_BACKEND secao 18.
 // Base path tem o prefixo /api/v1 (unico endpoint da API com ele).
 
+// Humaniza a descricao da refeicao (o backend faz seed em ingles: "Lunch Break"
+// / "Dinner Break"). Mostra "Almoco"/"Janta" no app.
+export function mealName(description: string): string {
+  const map: Record<string, string> = {
+    "Lunch Break": "Almoco",
+    Lunch: "Almoco",
+    "Dinner Break": "Janta",
+    Dinner: "Janta",
+  };
+  return map[description] ?? description;
+}
+
 export type Interval = {
   intervalId: string;
   type: "RECURRENT" | "UNEXPECTED";

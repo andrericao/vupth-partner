@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { StatusBar, LogBox, Platform } from "react-native";
+import { LogBox, Platform } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { Slot } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@lib/queryClient";
@@ -30,10 +31,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider config={config}>
-          <StatusBar
-            barStyle="dark-content"
-            backgroundColor="#F7FAF8"
-          />
+          {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
+              style="dark" = icones escuros (visiveis sobre fundo claro). Aplica
+              em todas as telas (fundo do app e claro #F7FAF8). */}
+          <StatusBar style="dark" backgroundColor="#F7FAF8" />
           {fontLoaded ? <Slot /> : <Loading />}
         </GluestackUIProvider>
       </QueryClientProvider>

@@ -121,6 +121,16 @@ export default function OwnerMenuScreen() {
               />
 
               <MenuItem
+                label="Convidar Profissional"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/invite-professional",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+              />
+
+              <MenuItem
                 label="Solicitacoes de Vinculacao"
                 onPress={() =>
                   router.push({

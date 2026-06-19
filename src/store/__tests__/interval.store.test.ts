@@ -1,6 +1,16 @@
 import MockAdapter from "axios-mock-adapter";
 import { api } from "@lib/api";
-import { useIntervalStore, type Interval } from "../interval.store";
+import { useIntervalStore, mealName, type Interval } from "../interval.store";
+
+describe("mealName", () => {
+  it("humaniza Lunch/Dinner Break para Almoco/Janta", () => {
+    expect(mealName("Lunch Break")).toBe("Almoco");
+    expect(mealName("Dinner Break")).toBe("Janta");
+  });
+  it("mantem descricoes customizadas", () => {
+    expect(mealName("Cafe da tarde")).toBe("Cafe da tarde");
+  });
+});
 
 const mock = new MockAdapter(api);
 const PROF = "prof-uuid-1";
