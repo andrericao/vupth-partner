@@ -14,6 +14,20 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
+import { maskPhone, unmask } from "@lib/masks";
+
+function Field({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <>
+      <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$3">
+        {label}
+      </Text>
+      <Text fontFamily="$heading" fontWeight="$bold" color={value ? "$coolGray900" : "$coolGray400"} mt="$0.5">
+        {value || "—"}
+      </Text>
+    </>
+  );
+}
 
 export default function EstablishmentRegistrationScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -21,26 +35,35 @@ export default function EstablishmentRegistrationScreen() {
 
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
+  const [instagramValue, setInstagramValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const startEdit = () => {
     setNameValue(establishment?.name ?? "");
+    setPhoneValue(maskPhone(establishment?.phone ?? ""));
+    setInstagramValue(establishment?.instagram ?? "");
     setEditing(true);
   };
 
   const handleSave = async () => {
-    const value = nameValue.trim();
-    if (value.length < 2 || !establishment?.id) {
+    const name = nameValue.trim();
+    if (name.length < 2 || !establishment?.id) {
       Alert.alert("Nome invalido", "Informe um nome valido para o estabelecimento.");
       return;
     }
     setIsSaving(true);
     try {
-      await updateGeneralInfos(establishment.id, { name: value });
+      // phone/instagram em branco LIMPAM o campo no backend (vira null) — comportamento desejado.
+      await updateGeneralInfos(establishment.id, {
+        name,
+        phone: unmask(phoneValue),
+        instagram: instagramValue.trim(),
+      });
       setEditing(false);
-      Alert.alert("Nome atualizado", "O nome do estabelecimento foi alterado.");
+      Alert.alert("Dados atualizados", "Os dados cadastrais foram alterados.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar os dados."));
     } finally {
       setIsSaving(false);
     }
@@ -69,18 +92,32 @@ export default function EstablishmentRegistrationScreen() {
 
           <VStack mt="$6" space="md">
             <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                Nome do estabelecimento
-              </Text>
               {editing ? (
-                <FormControl mt="$2">
+                <FormControl>
                   <Input
-                    textLabel="Novo nome"
+                    textLabel="Nome do estabelecimento"
                     placeholder="Nome do estabelecimento"
                     messageError=""
                     value={nameValue}
                     onChangeText={setNameValue}
                     autoCapitalize="words"
+                  />
+                  <Input
+                    textLabel="Telefone (opcional)"
+                    placeholder="(11) 99999-0000"
+                    messageError=""
+                    value={phoneValue}
+                    onChangeText={(t) => setPhoneValue(maskPhone(t))}
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                  />
+                  <Input
+                    textLabel="Instagram (opcional)"
+                    placeholder="@seuestabelecimento"
+                    messageError=""
+                    value={instagramValue}
+                    onChangeText={setInstagramValue}
+                    autoCapitalize="none"
                   />
                   <HStack space="sm">
                     <Button
@@ -104,16 +141,16 @@ export default function EstablishmentRegistrationScreen() {
                 </FormControl>
               ) : (
                 <>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                    {establishment?.name ?? "—"}
-                  </Text>
+                  <Field label="Nome do estabelecimento" value={establishment?.name} />
+                  <Field label="Telefone" value={establishment?.phone ? maskPhone(establishment.phone) : null} />
+                  <Field label="Instagram" value={establishment?.instagram} />
                   <Button
                     title="Editar"
                     onPress={startEdit}
                     bg="$coolGray200"
                     textColor="$coolGray700"
                     h="$9"
-                    mt="$2"
+                    mt="$4"
                   />
                 </>
               )}
