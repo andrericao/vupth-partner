@@ -11,6 +11,9 @@ import {
   Input as GluestackInput,
   InputField,
   InputSlot,
+  InputIcon,
+  SearchIcon,
+  CloseIcon,
 } from "@gluestack-ui/themed";
 import { router } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
@@ -246,9 +249,10 @@ export default function ProfessionalOnboardingScreen() {
                 pr="$3"
                 onPress={searchQuery.trim() ? () => { setSearchQuery(""); setSearchResults([]); } : handleSearch}
               >
-                <Text fontSize="$lg" color={searchQuery.trim() ? "$red500" : "$coolGray400"}>
-                  {searchQuery.trim() ? "✕" : "🔍"}
-                </Text>
+                <InputIcon
+                  as={searchQuery.trim() ? CloseIcon : SearchIcon}
+                  color={searchQuery.trim() ? "$coolGray500" : "$green600"}
+                />
               </InputSlot>
             </GluestackInput>
 

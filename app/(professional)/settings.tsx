@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack, Heading, Text, ScrollView, Divider, FormControl } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
@@ -17,9 +17,54 @@ export default function ProfessionalSettingsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const leaveEstablishment = useProfessionalStore((s) => s.leaveEstablishment);
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
+  const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
+  const acceptAffiliation = useProfessionalStore((s) => s.acceptAffiliation);
+  const rejectAffiliation = useProfessionalStore((s) => s.rejectAffiliation);
   const user = useAuthStore((s) => s.user);
   const updateEmail = useAuthStore((s) => s.updateEmail);
   const updatePassword = useAuthStore((s) => s.updatePassword);
+
+  // Convites de vinculacao recebidos do owner (type INVITATION, PENDING).
+  const [invites, setInvites] = useState<any[]>([]);
+  const [resolvingInvite, setResolvingInvite] = useState<string | null>(null);
+
+  const loadInvites = useCallback(async () => {
+    try {
+      const all = await fetchMyAffiliations();
+      setInvites(
+        (all ?? []).filter((a: any) => a.status === "PENDING" && a.type === "INVITATION")
+      );
+    } catch {}
+  }, [fetchMyAffiliations]);
+
+  useEffect(() => {
+    loadInvites();
+  }, [loadInvites]);
+
+  const handleAcceptInvite = async (inv: any) => {
+    setResolvingInvite(inv.id);
+    try {
+      await acceptAffiliation(inv.id);
+      setInvites((prev) => prev.filter((i) => i.id !== inv.id));
+      Alert.alert("Vinculado", `Voce agora esta vinculado a ${inv.establishmentName ?? "este estabelecimento"}.`);
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel aceitar o convite."));
+    } finally {
+      setResolvingInvite(null);
+    }
+  };
+
+  const handleRejectInvite = async (inv: any) => {
+    setResolvingInvite(inv.id);
+    try {
+      await rejectAffiliation(inv.id);
+      setInvites((prev) => prev.filter((i) => i.id !== inv.id));
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel recusar o convite."));
+    } finally {
+      setResolvingInvite(null);
+    }
+  };
 
   const [isLeaving, setIsLeaving] = useState(false);
   const [editing, setEditing] = useState<Editing>(null);
@@ -151,6 +196,55 @@ export default function ProfessionalSettingsScreen() {
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Configuracoes
         </Heading>
+
+        {invites.length > 0 && (
+          <VStack
+            mt="$6"
+            bg="$green50"
+            p="$4"
+            borderRadius="$lg"
+            borderWidth="$1"
+            borderColor="$green200"
+            space="sm"
+          >
+            <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+              Convites de vinculacao
+            </Text>
+            {invites.map((inv) => (
+              <VStack key={inv.id} bg="$white" p="$3" borderRadius="$md" borderWidth="$1" borderColor="$coolGray200">
+                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+                  Convite de
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
+                  {inv.establishmentName ?? "Estabelecimento"}
+                </Text>
+                <HStack space="sm">
+                  <Button
+                    title="Recusar"
+                    onPress={() => handleRejectInvite(inv)}
+                    isLoading={resolvingInvite === inv.id}
+                    bg="transparent"
+                    $active-bg="$red50"
+                    borderWidth="$1"
+                    borderColor="$red500"
+                    textColor="$red500"
+                    h="$9"
+                    flex={1}
+                  />
+                  <Button
+                    title="Aceitar"
+                    onPress={() => handleAcceptInvite(inv)}
+                    isLoading={resolvingInvite === inv.id}
+                    bg="$green500"
+                    $active-bg="$green600"
+                    h="$9"
+                    flex={1}
+                  />
+                </HStack>
+              </VStack>
+            ))}
+          </VStack>
+        )}
 
         <VStack mt="$6" space="md">
           <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">

@@ -187,6 +187,43 @@ describe("professional.store", () => {
     });
   });
 
+  describe("fetchMyAffiliations", () => {
+    it("GET /professional/me/affiliations retorna a lista", async () => {
+      const affs = [
+        { id: "aff-1", type: "INVITATION", status: "PENDING", establishmentName: "Barbearia X" },
+      ];
+      mock.onGet("/professional/me/affiliations").reply(200, affs);
+
+      const out = await useProfessionalStore.getState().fetchMyAffiliations();
+
+      expect(mock.history.get[0].url).toBe("/professional/me/affiliations");
+      expect(out).toEqual(affs);
+    });
+  });
+
+  describe("acceptAffiliation", () => {
+    it("PATCH /affiliations/{id}/accept e atualiza via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: REGISTER_RESPONSE });
+      mock.onPatch("/affiliations/aff-1/accept").reply(200, {});
+      mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);
+
+      await useProfessionalStore.getState().acceptAffiliation("aff-1");
+
+      expect(mock.history.patch[0].url).toBe("/affiliations/aff-1/accept");
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-1");
+    });
+  });
+
+  describe("rejectAffiliation", () => {
+    it("PATCH /affiliations/{id}/reject", async () => {
+      mock.onPatch("/affiliations/aff-1/reject").reply(200, {});
+
+      await useProfessionalStore.getState().rejectAffiliation("aff-1");
+
+      expect(mock.history.patch[0].url).toBe("/affiliations/aff-1/reject");
+    });
+  });
+
   describe("fetchMe", () => {
     it("calls GET /professional/me and updates the professional", async () => {
       mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);

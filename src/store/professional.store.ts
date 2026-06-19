@@ -34,6 +34,9 @@ type ProfessionalState = {
   leaveEstablishment: () => Promise<void>;
   requestAffiliation: (establishmentId: string) => Promise<void>;
   cancelAffiliation: (affiliationId: string) => Promise<void>;
+  fetchMyAffiliations: () => Promise<any[]>;
+  acceptAffiliation: (affiliationId: string) => Promise<void>;
+  rejectAffiliation: (affiliationId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
@@ -122,6 +125,21 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
 
   cancelAffiliation: async (affiliationId) => {
     await api.delete(`/affiliations/${affiliationId}`);
+  },
+
+  fetchMyAffiliations: async () => {
+    const { data } = await api.get("/professional/me/affiliations");
+    return data;
+  },
+
+  acceptAffiliation: async (affiliationId) => {
+    // Convite do owner (type INVITATION) — aceitar vincula o profissional.
+    await api.patch(`/affiliations/${affiliationId}/accept`);
+    await get().fetchMe();
+  },
+
+  rejectAffiliation: async (affiliationId) => {
+    await api.patch(`/affiliations/${affiliationId}/reject`);
   },
 
   addMyServiceItem: async (serviceItemType, customName, price) => {

@@ -60,7 +60,15 @@ export default function InviteProfessionalScreen() {
       setInvitedIds((prev) => [...prev, p.id]);
       Alert.alert("Convite enviado", `${p.name ?? "Profissional"} recebera a solicitacao de vinculacao.`);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar o convite."));
+      const code = error?.response?.data?.code;
+      // Mensagem no contexto do OWNER (o map padrao fala "voce ja esta vinculado").
+      const message =
+        code === "PROFESSIONAL_ALREADY_AFFILIATED"
+          ? `${p.name ?? "Esse profissional"} ja esta vinculado a um estabelecimento.`
+          : code === "AFFILIATION_ALREADY_PENDING"
+          ? `Ja existe uma solicitacao pendente com ${p.name ?? "esse profissional"}.`
+          : getApiErrorMessage(error, "Nao foi possivel enviar o convite.");
+      Alert.alert("Nao foi possivel convidar", message);
     } finally {
       setInvitingId(null);
     }
