@@ -17,7 +17,7 @@ import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
-import { useIntervalStore, type Interval } from "@store/interval.store";
+import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
@@ -185,10 +185,10 @@ export default function ProfessionalQueueScreen() {
     nudgedRef.current.add(due.intervalId);
     const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
     Alert.alert(
-      `Hora do ${due.description}`,
+      `Hora do ${mealName(due.description)}`,
       count > 0
         ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
-        : `Iniciar ${due.description} agora (${due.durationMinutes}min)?`,
+        : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
       [
         { text: "Agora nao", style: "cancel" },
         { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
@@ -331,7 +331,7 @@ export default function ProfessionalQueueScreen() {
                 >
                   <VStack flex={1}>
                     <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                      {m.description}
+                      {mealName(m.description)}
                     </Text>
                     <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
                       {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min

@@ -41,7 +41,7 @@ export default function ProfessionalSettingsScreen() {
     loadInvites();
   }, [loadInvites]);
 
-  const handleAcceptInvite = async (inv: any) => {
+  const doAcceptInvite = async (inv: any) => {
     setResolvingInvite(inv.id);
     try {
       await acceptAffiliation(inv.id);
@@ -54,7 +54,7 @@ export default function ProfessionalSettingsScreen() {
     }
   };
 
-  const handleRejectInvite = async (inv: any) => {
+  const doRejectInvite = async (inv: any) => {
     setResolvingInvite(inv.id);
     try {
       await rejectAffiliation(inv.id);
@@ -64,6 +64,31 @@ export default function ProfessionalSettingsScreen() {
     } finally {
       setResolvingInvite(null);
     }
+  };
+
+  // R3: confirmacao antes de decidir a vinculacao.
+  const handleAcceptInvite = (inv: any) => {
+    const nome = inv.establishmentName ?? "este estabelecimento";
+    Alert.alert(
+      "Aceitar vinculacao",
+      `Deseja se vincular a ${nome}? Voce passara a atender por este estabelecimento.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Aceitar", onPress: () => doAcceptInvite(inv) },
+      ]
+    );
+  };
+
+  const handleRejectInvite = (inv: any) => {
+    const nome = inv.establishmentName ?? "este estabelecimento";
+    Alert.alert(
+      "Recusar convite",
+      `Deseja recusar o convite de ${nome}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Recusar", style: "destructive", onPress: () => doRejectInvite(inv) },
+      ]
+    );
   };
 
   const [isLeaving, setIsLeaving] = useState(false);

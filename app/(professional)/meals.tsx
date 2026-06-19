@@ -15,7 +15,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
-import { useIntervalStore, type Interval } from "@store/interval.store";
+import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
 
@@ -104,7 +104,7 @@ export default function MealsScreen() {
   const handleRemove = (m: Interval) => {
     Alert.alert(
       "Remover refeicao",
-      `Deseja remover "${m.description}"? Voce pode recria-la depois.`,
+      `Deseja remover "${mealName(m.description)}"? Voce pode recria-la depois.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -192,7 +192,7 @@ export default function MealsScreen() {
                   borderColor="$green400"
                 >
                   <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
-                    {m.description}
+                    {mealName(m.description)}
                   </Text>
                   <FormControl>
                     <HStack space="md">
@@ -251,7 +251,7 @@ export default function MealsScreen() {
                 >
                   <VStack flex={1}>
                     <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                      {m.description}
+                      {mealName(m.description)}
                     </Text>
                     <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
                       {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min •{" "}
