@@ -6,6 +6,7 @@ import {
   Text,
   Badge,
   BadgeText,
+  Pressable,
   ScrollView,
   Spinner,
 } from "@gluestack-ui/themed";
@@ -25,6 +26,15 @@ import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
 const MEAL_NUDGE_WINDOW_MIN = 45;
+
+// [new-design] Sombra suave para os cards (RN style, cross-platform).
+const cardShadow = {
+  shadowColor: "#1B4332",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.14,
+  shadowRadius: 10,
+  elevation: 3,
+};
 
 function hhmmToMinutes(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number);
@@ -255,6 +265,18 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
+  // Editar refeicao: confirmacao para nao abrir por toque acidental.
+  const handleEditMeal = (m: Interval) => {
+    Alert.alert(
+      "Editar refeicao",
+      `Abrir a edicao de "${mealName(m.description)}" (horario/duracao)?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Editar", onPress: () => router.push("/(professional)/meals" as any) },
+      ]
+    );
+  };
+
   if (!establishmentId) {
     return (
       <VStack flex={1} py="$12" px="$6">
@@ -301,16 +323,31 @@ export default function ProfessionalQueueScreen() {
       <VStack flex={1} py="$12" px="$6">
         <Header />
 
-        <HStack mt="$4" justifyContent="space-between" alignItems="center">
-          <Heading size="2xl" fontFamily="$heading">
-            Minha Fila
-          </Heading>
-          {myProfessional && (
-            <Badge action="success" variant="solid" borderRadius="$md">
-              <BadgeText>{myProfessional.queue_count} na fila</BadgeText>
-            </Badge>
-          )}
-        </HStack>
+        <Heading size="2xl" fontFamily="$heading" mt="$4">
+          Minha fila
+        </Heading>
+
+        {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
+        {myProfessional && (
+          <HStack space="md" mt="$4">
+            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <Text fontFamily="$body" fontSize="$xs" color="$green50">
+                pessoas na fila
+              </Text>
+              <Text fontFamily="$heading" fontSize="$4xl" color="$white" mt="$1">
+                {myProfessional.queue_count}
+              </Text>
+            </VStack>
+            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <Text fontFamily="$body" fontSize="$xs" color="$green50">
+                tempo de espera
+              </Text>
+              <Text fontFamily="$heading" fontSize="$3xl" color="$white" mt="$1">
+                {myProfessional.estimated_wait_minutes} min
+              </Text>
+            </VStack>
+          </HStack>
+        )}
 
         {isLoading && !data && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
@@ -366,24 +403,29 @@ export default function ProfessionalQueueScreen() {
               return (
                 <HStack
                   key={m.intervalId}
-                  bg={active ? "$amber50" : "$white"}
+                  bg={active ? "$amber100" : "$amber50"}
                   p="$3"
                   mb="$2"
-                  borderRadius="$md"
+                  borderRadius="$2xl"
                   borderWidth="$1"
-                  borderColor={active ? "$amber300" : "$coolGray200"}
-                  justifyContent="space-between"
+                  borderColor={active ? "$amber300" : "$amber200"}
                   alignItems="center"
+                  space="sm"
                 >
+                  <Text fontSize="$md">🍽️</Text>
                   <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                      {mealName(m.description)}
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+                      {mealName(m.description)} {parseApiTime(m.fixedStartTime) ?? "--:--"}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                      {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min
-                      {active ? " • em andamento" : ""}
+                    <Text fontFamily="$body" fontSize="$xs" color="$amber600">
+                      {m.durationMinutes}min{active ? " • em andamento" : " • previsto"}
                     </Text>
                   </VStack>
+                  {!active && (
+                    <Pressable onPress={() => handleEditMeal(m)} px="$2" py="$1">
+                      <Text fontSize="$lg" color="$amber700">✎</Text>
+                    </Pressable>
+                  )}
                   {active ? (
                     <Button
                       title="Encerrar"
@@ -391,14 +433,16 @@ export default function ProfessionalQueueScreen() {
                       bg="$amber500"
                       $active-bg="$amber600"
                       h="$9"
+                      mt="$0"
                     />
                   ) : (
                     <Button
                       title="Iniciar"
                       onPress={() => handleStartMeal(m)}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
+                      bg="$green500"
+                      $active-bg="$green600"
                       h="$9"
+                      mt="$0"
                     />
                   )}
                 </HStack>
