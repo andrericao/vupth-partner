@@ -22,19 +22,11 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
+import { cardShadow } from "@lib/styles";
 import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
 const MEAL_NUDGE_WINDOW_MIN = 45;
-
-// [new-design] Sombra suave para os cards (RN style, cross-platform).
-const cardShadow = {
-  shadowColor: "#1B4332",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.14,
-  shadowRadius: 10,
-  elevation: 3,
-};
 
 function hhmmToMinutes(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number);
@@ -76,9 +68,10 @@ function AttendanceCard({
     <VStack
       bg="$white"
       p="$4"
-      borderRadius="$lg"
-      borderWidth="$1"
-      borderColor={isActive ? "$green300" : "$coolGray200"}
+      borderRadius="$2xl"
+      borderWidth={isActive ? "$2" : "$0"}
+      borderColor="$green400"
+      style={cardShadow}
       mb="$3"
     >
       <HStack justifyContent="space-between" alignItems="center">

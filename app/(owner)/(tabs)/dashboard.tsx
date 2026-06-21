@@ -18,6 +18,7 @@ import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { getApiErrorMessage } from "@lib/api";
+import { cardShadow } from "@lib/styles";
 import type { ProfessionalWithQueue } from "@lib/types";
 
 export default function OwnerDashboardScreen() {
@@ -153,15 +154,15 @@ export default function OwnerDashboardScreen() {
         </Text>
 
         <HStack mt="$4" space="md">
-          <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
-            <Text fontFamily="$body" fontSize="$xs" color="$green700">Na fila</Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+          <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <Text fontFamily="$body" fontSize="$xs" color="$green50">na fila</Text>
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
               {totalInQueue}
             </Text>
           </VStack>
-          <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
-            <Text fontFamily="$body" fontSize="$xs" color="$blue700">Profissionais</Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
+          <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <Text fontFamily="$body" fontSize="$xs" color="$green50">profissionais ativos</Text>
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
               {queueData?.available_professionals ?? 0}
             </Text>
           </VStack>
@@ -266,11 +267,10 @@ export default function OwnerDashboardScreen() {
                   } as any)
                 }
                 bg="$white"
-                py="$3"
+                py="$4"
                 px="$4"
-                borderRadius="$lg"
-                borderWidth="$1"
-                borderColor="$coolGray200"
+                borderRadius="$2xl"
+                style={cardShadow}
                 $active-bg="$coolGray50"
               >
                 <HStack justifyContent="space-between" alignItems="center">
