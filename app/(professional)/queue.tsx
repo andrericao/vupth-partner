@@ -20,12 +20,15 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { parseApiTime } from "@lib/time";
+import { parseApiTime, isoDate } from "@lib/time";
+import * as SecureStore from "expo-secure-store";
 
-/** "HH:MM" do relogio local agora. */
-function nowHHMM(): string {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+// Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
+const MEAL_NUDGE_WINDOW_MIN = 45;
+
+function hhmmToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
 }
 
 function AttendanceCard({
@@ -172,28 +175,53 @@ export default function ProfessionalQueueScreen() {
     [profId, startInterval]
   );
 
-  // Nudge: no horario previsto, avisa o profissional (uma vez por refeicao/sessao).
+  // Nudge do almoco/janta: so avisa DENTRO de uma janela curta apos o horario
+  // previsto (nao o dia inteiro) e no maximo UMA vez por refeicao/dia
+  // (persistido em SecureStore — antes reaparecia a cada abertura do app).
   useEffect(() => {
     if (!profId) return;
-    const now = nowHHMM();
-    const due = meals.find((m) => {
-      if (m.status !== "SCHEDULED") return false;
-      const t = parseApiTime(m.fixedStartTime);
-      return t !== null && now >= t && !nudgedRef.current.has(m.intervalId);
-    });
-    if (!due) return;
-    nudgedRef.current.add(due.intervalId);
-    const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
-    Alert.alert(
-      `Hora do ${mealName(due.description)}`,
-      count > 0
-        ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
-        : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
-      [
-        { text: "Agora nao", style: "cancel" },
-        { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
-      ]
-    );
+    let cancelled = false;
+
+    (async () => {
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const today = isoDate(now);
+
+      const due = meals.find((m) => {
+        if (m.status !== "SCHEDULED") return false;
+        const t = parseApiTime(m.fixedStartTime);
+        if (!t) return false;
+        const tMin = hhmmToMinutes(t);
+        return (
+          nowMin >= tMin &&
+          nowMin <= tMin + MEAL_NUDGE_WINDOW_MIN &&
+          !nudgedRef.current.has(m.intervalId)
+        );
+      });
+      if (!due) return;
+
+      nudgedRef.current.add(due.intervalId);
+      const key = `meal_nudge_${due.intervalId}`;
+      const last = await SecureStore.getItemAsync(key);
+      if (cancelled || last === today) return; // ja avisou hoje
+      await SecureStore.setItemAsync(key, today);
+
+      const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
+      Alert.alert(
+        `Hora do ${mealName(due.description)}`,
+        count > 0
+          ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
+          : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
+        [
+          { text: "Agora nao", style: "cancel" },
+          { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
+        ]
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [meals, profId, data, handleStartMeal]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
