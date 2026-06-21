@@ -774,6 +774,35 @@ Adicionar ao relatorio do profissional e do owner:
 
 **Backend (opcional, melhora precisao):** incluir um `computed_at`/timestamp no snapshot da fila para o cliente saber exatamente quanto descontar (sem isso usa-se a hora de recebimento — funciona, so um pouco menos preciso). Sem isso, **da para fazer 100% no front**.
 
+### Curadoria/ordenacao manual da fila antes de abrir — "playlist" (pedido 2026-06-17)
+
+**Ideia:** o profissional ve as **solicitacoes de entrar na fila ANTES de abrir o estabelecimento** e **organiza a ordem do seu jeito**, arrastando o card do cliente para cima/baixo (igual reordenar uma playlist). So depois ele "abre"/publica a fila.
+
+**Dependencias (backend-first):**
+1. **Pre-fila / solicitacoes com a loja fechada:** hoje o cliente entra na fila quando a loja esta OPEN; para "ver antes de abrir" o backend precisa permitir **solicitacao de entrada enquanto fechado** (uma fila em rascunho/`PENDING`) que o profissional revisa.
+2. **Ordem explicita da fila:** hoje a ordem e por **chegada** (sem campo de posicao). Reordenar exige o backend guardar **posicao explicita** + endpoint para persistir a nova ordem (ex.: `PATCH /professional-queue/{profId}/order { attendanceIds: [...] }`). **Isto e o mesmo pre-requisito do Item 38 (encaixe) do PRD_BACKEND** — alinhar.
+
+**Front (quando o backend suportar):** lista arrastavel (drag-and-drop) — usar `react-native-draggable-flatlist` (ou `react-native-reanimated` + gesture-handler, que ja temos). Segura o card → reordena → "Publicar/Abrir fila" persiste a ordem. Antes de abrir, a reordenacao e local; ao abrir, manda a ordem ao backend.
+
+**Obs de produto:** reordenar manualmente quem chegou antes pode gerar percepcao de injustica (alguem "fura fila"); o backend ja discute suavizacao disso no Item 38. Definir regra (so antes de abrir? sempre? com limite?).
+
+### Relacao abertura do estabelecimento x presenca/atendimento do profissional (pedido 2026-06-17)
+
+**Como esta hoje (verificado no codigo 2026-06-17):**
+- Abertura e **manual e exclusiva do dono** (`PATCH /establishment/{id}/open-status` OPEN/CLOSED/TEMPORARILY_CLOSED). Gates: **#31** (existir ≥1 profissional com ≥1 servico **cadastrado**, nao presente) + **#11g2** (horario definido). **Nao** ha relacao com presenca/atendimento.
+- `Professional.isAvailable` existe (default `true`) mas **nao ha endpoint** para o profissional alternar (o `PATCH /professional/me` so muda nome/especialidade). Na pratica fica sempre `true`.
+- "Atendendo" e implicito: ter um atendimento `IN_PROGRESS`. Nao existe status de **presenca** que o profissional declare.
+- Resultado: um estabelecimento pode estar OPEN sem ninguem presente, e ter 3 clientes na fila sem nenhum profissional de fato la — exatamente o problema levantado.
+
+**Proposta (ideia do usuario: primeiro a chegar abre / ultimo a sair fecha):**
+1. **Status de presenca do profissional** — novo enum (ex.: `AVAILABLE` / `ATTENDING` / `AWAY`/`OFF`). `ATTENDING` deriva de ter `IN_PROGRESS`; `AVAILABLE`/`AWAY` o profissional declara (check-in/check-out, "Cheguei"/"Sai"). Backend: endpoint `PATCH /professional/me/availability { isAvailable }` (ou `/status`) — **nao existe hoje**.
+2. **Abertura dirigida por presenca:** quando o **primeiro** profissional faz check-in (fica AVAILABLE) e os gates passam, o estabelecimento **auto-abre**; quando o **ultimo** sai (todos AWAY/OFF), **auto-fecha** (ou vai para TEMPORARILY_CLOSED). Manter o toggle manual do dono como override.
+3. **Gate adicional opcional:** abrir exige ≥1 profissional **presente** (nao so cadastrado) — fortalece o #31.
+
+**Boas praticas:** softwares de salao/POS usam **clock-in/clock-out** de equipe; a loja conta como "aberta" quando ha staff logado, e status busy/available/away por profissional e padrao. A ideia "primeiro abre / ultimo fecha" e exatamente isso.
+
+**Faseamento sugerido:** (Fase 1) endpoint de disponibilidade + toggle "Estou disponivel/ausente" no app do profissional + badge de status na lista do dono; (Fase 2) auto-open/close dirigido por presenca. Tudo **backend-first**.
+
 ## 13. Proposta de Redesign (avaliacao 2026-06-17) — branch `new-design`, NAO implementar agora
 
 > Mockups recebidos da equipe de design (13 PNGs do app cliente + parceiro). **Decisao: nao implementar agora; quando for, em branch `new-design`.** Avaliacao de usabilidade feita com pesquisa (NN/g, Material, Apple HIG, Journal of Service Research 2025). Falta avaliar um **PDF** que nao foi anexado (so vieram as imagens) — pedir o caminho do arquivo.
