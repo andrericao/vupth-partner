@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { BackHandler } from "react-native";
 import { router, useSegments } from "expo-router";
-import { HStack, Center, Heading } from "@gluestack-ui/themed";
+import { HStack, Heading } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ButtonGoBack } from "@components/ButtonGoBack";
 import { RoleIcon } from "@components/RoleIcon";
@@ -47,27 +47,21 @@ export function Header({ showBackButton = false, onBack }: Props) {
   }, [showBackButton, onBack]);
 
   return (
-    // [new-design] Barra superior verde-escuro full-bleed: escapa o padding
-    // padrao das telas (py="$12"=48 / px="$6"=24) com margens negativas e
-    // adiciona seu proprio padding (status bar + respiro). Texto/icones claros.
+    // [new-design] Cabecalho clean: marca "VUPTH" a esquerda (verde escuro,
+    // Poppins) e a figurinha do papel/tipo a direita. O titulo da tela
+    // ("Minha fila" etc.) e renderizado por cada tela logo abaixo.
     <HStack
-      bg="$green700"
       alignItems="center"
-      px="$6"
-      pb="$4"
-      style={{ marginTop: -48, marginHorizontal: -24, paddingTop: insets.top + 16 }}
+      justifyContent="space-between"
+      style={{ paddingTop: insets.top }}
     >
-      {showBackButton && <ButtonGoBack onPress={handleBack} />}
-      <Center flex={1}>
-        <Heading size="xl" fontFamily="$heading" color="$white">
+      <HStack alignItems="center" space="sm">
+        {showBackButton && <ButtonGoBack onPress={handleBack} />}
+        <Heading size="lg" fontFamily="$heading" color="$green700" letterSpacing="$lg">
           VUPTH
         </Heading>
-      </Center>
-      {role && (
-        <HStack alignItems="center">
-          <RoleIcon role={role} color="#F7FAF8" />
-        </HStack>
-      )}
+      </HStack>
+      {role && <RoleIcon role={role} />}
     </HStack>
   );
 }
