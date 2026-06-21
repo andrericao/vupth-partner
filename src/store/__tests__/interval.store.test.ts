@@ -112,4 +112,15 @@ describe("interval.store", () => {
       expect(mock.history.patch[1].url).toBe(`${BASE}/int-1/finish`);
     });
   });
+
+  describe("skipInterval", () => {
+    it("PATCH .../skip ('Nao almocar' do dia) e refaz o fetch", async () => {
+      mock.onPatch(`${BASE}/int-1/skip`).reply(200, {});
+      mock.onGet(BASE).reply(200, []);
+
+      await useIntervalStore.getState().skipInterval(PROF, "int-1");
+
+      expect(mock.history.patch[0].url).toBe(`${BASE}/int-1/skip`);
+    });
+  });
 });

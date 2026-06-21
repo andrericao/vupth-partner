@@ -149,6 +149,7 @@ export default function ProfessionalQueueScreen() {
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
   const startInterval = useIntervalStore((s) => s.startInterval);
   const finishInterval = useIntervalStore((s) => s.finishInterval);
+  const skipInterval = useIntervalStore((s) => s.skipInterval);
   const meals = intervals.filter((i) => i.type === "RECURRENT");
 
   // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
@@ -183,6 +184,19 @@ export default function ProfessionalQueueScreen() {
       }
     },
     [profId, startInterval]
+  );
+
+  // "Nao almocar" do dia: pula a refeicao e derruba do ETA dos clientes (#17/#41).
+  const handleSkipMeal = useCallback(
+    async (m: Interval) => {
+      if (!profId) return;
+      try {
+        await skipInterval(profId, m.intervalId);
+      } catch (error: any) {
+        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel pular a refeicao."));
+      }
+    },
+    [profId, skipInterval]
   );
 
   // Nudge do almoco/janta: so avisa DENTRO de uma janela curta apos o horario
@@ -224,6 +238,7 @@ export default function ProfessionalQueueScreen() {
           : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
         [
           { text: "Agora nao", style: "cancel" },
+          { text: "Nao almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
           { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
         ]
       );
@@ -232,7 +247,7 @@ export default function ProfessionalQueueScreen() {
     return () => {
       cancelled = true;
     };
-  }, [meals, profId, data, handleStartMeal]);
+  }, [meals, profId, data, handleStartMeal, handleSkipMeal]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
