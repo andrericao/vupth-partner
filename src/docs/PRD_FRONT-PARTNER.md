@@ -809,9 +809,14 @@ Adicionar ao relatorio do profissional e do owner:
 
 **Faseamento sugerido:** (Fase 1) endpoint de disponibilidade + toggle "Estou disponivel/ausente" no app do profissional + badge de status na lista do dono; (Fase 2) auto-open/close dirigido por presenca. Tudo **backend-first**.
 
-## 13. Proposta de Redesign (avaliacao 2026-06-17) — branch `new-design`, NAO implementar agora
+## 13. Redesign — EM IMPLEMENTACAO na `dev` (consolidado 2026-06-17)
 
-> Mockups recebidos da equipe de design (13 PNGs do app cliente + parceiro). **Decisao: nao implementar agora; quando for, em branch `new-design`.** Avaliacao de usabilidade feita com pesquisa (NN/g, Material, Apple HIG, Journal of Service Research 2025). Falta avaliar um **PDF** que nao foi anexado (so vieram as imagens) — pedir o caminho do arquivo.
+> ✅ **STATUS (2026-06-17):** direcao escolhida e em implementacao **direto na `dev`** (a branch `new-design` foi consolidada via merge e **deletada** — trabalhamos so na `dev`). **Direcao A "Verde Imersivo" refinada** (validada pelo usuario em SVG + no celular): cabecalho clean (VUPTH + titulo da tela abaixo + figurinha do papel; sem barra escura), **fundo off-white global** #F7FAF8, **botoes pilula** com sombra (Poppins), **cards verdes** de metrica (sem "~"), **cards brancos com sombra** ($2xl), **faixa de almoco amarela compacta** com ✎ editar. Mockups de referencia em `design/` (SVG/HTML). **Processo combinado: mostrar mockup (SVG/HTML) ANTES de codar; so implementar apos o usuario escolher.**
+> **Tokens (config/gluestack-ui.config.ts):** escala `green`→marca, amber500=#FFB703, red500=#E63946; fontes Poppins (titulos) + Inter (texto). `lib/styles.ts` exporta `cardShadow` reutilizavel.
+> **Aplicado ate agora:** componentes compartilhados (Header/Button/_layout) + fila (profissional) + dashboard (dono). **Falta aplicar:** menu do dono, relatorios, meus servicos, atendimentos, telas de cadastro/config, tab bars, Skeleton (R4).
+> Abaixo: a avaliacao original dos mockups (mantida como referencia).
+
+> Mockups recebidos da equipe de design (13 PNGs do app cliente + parceiro) + PDF "Guia de Design" (paleta/fontes/acessibilidade — ver 13.1). Avaliacao de usabilidade feita com pesquisa (NN/g, Material, Apple HIG, Journal of Service Research 2025).
 
 ### Ressalva critica (metodologia)
 Os mockups sao **gerados por IA**: todo o texto esta truncado/sem sentido ("Enterer na fila", "QUONB", "Reponts", "Notioffications"), os dados sao falsos e ha **4+ variacoes diferentes da mesma tela de fila** (rings, cores e layouts inconsistentes). → Servem como **mood board / direcao visual**, **nao como spec**. Implementar pixel-a-pixel cravaria os erros. O caminho e **extrair um design system** (tokens, card, botao, tab, componente de fila) e validar caso a caso.
