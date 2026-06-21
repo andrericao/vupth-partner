@@ -12,12 +12,24 @@ type ButtonProps = ComponentProps<typeof GlueStackButton> & {
   textColor?: string;
 };
 
+// [new-design] Botao com presenca: pilula (rounded full), sombra suave e texto
+// Poppins. Sombra via style RN (confiavel cross-platform).
+const btnShadow = {
+  shadowColor: "#1B4332",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.18,
+  shadowRadius: 10,
+  elevation: 4,
+};
+
 export function Button(props: ButtonProps) {
   return (
     <GlueStackButton
       bg="$green500"
-      h="$12"
+      h={54}
       mt="$9"
+      rounded="$full"
+      style={btnShadow}
       $active-bg="$green600"
       disabled={props.isLoading}
       {...props}
@@ -25,8 +37,9 @@ export function Button(props: ButtonProps) {
       {props.isLoading ? (
         <ButtonSpinner color="$white" />
       ) : (
-        <ButtonText fontFamily="$body" color={props.textColor ?? "$white"} mr="$3">{props.title}</ButtonText>
-        
+        <ButtonText fontFamily="$heading" fontSize="$md" color={props.textColor ?? "$white"}>
+          {props.title}
+        </ButtonText>
       )}
     </GlueStackButton>
   );

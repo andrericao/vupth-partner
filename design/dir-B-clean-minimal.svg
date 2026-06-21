@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="560" viewBox="0 0 380 560" font-family="'Poppins','Inter',Segoe UI,sans-serif">
+  <rect width="380" height="560" fill="#F7FAF8"/>
+
+  <text x="20" y="30" font-size="15" font-weight="700" fill="#1B4332">B — Clean Minimal</text>
+
+  <!-- topo simples (sem barra cheia) -->
+  <text x="20" y="74" font-size="18" font-weight="700" fill="#1B4332">VUPTH</text>
+  <circle cx="352" cy="68" r="13" fill="#EAF2EE"/><text x="352" y="73" font-size="12" text-anchor="middle" fill="#1B4332">✂</text>
+
+  <text x="20" y="118" font-size="24" font-weight="700" fill="#111827">Minha fila</text>
+
+  <!-- dois stats com borda fina -->
+  <rect x="20" y="134" width="166" height="78" rx="16" fill="#FFFFFF" stroke="#ECECEC"/>
+  <text x="36" y="170" font-size="28" font-weight="700" fill="#1B4332">8</text>
+  <text x="36" y="192" font-size="12" fill="#6B7280">na fila</text>
+  <rect x="194" y="134" width="166" height="78" rx="16" fill="#FFFFFF" stroke="#ECECEC"/>
+  <text x="210" y="170" font-size="28" font-weight="700" fill="#1B4332">~35</text>
+  <text x="210" y="192" font-size="12" fill="#6B7280">min de espera</text>
+
+  <!-- refeicao: filete verde -->
+  <rect x="20" y="226" width="3" height="20" fill="#52B788"/>
+  <text x="34" y="241" font-size="12.5" fill="#6B7280">Almoço previsto 12:00</text>
+
+  <!-- cards com hairline (sem sombra) -->
+  <rect x="20" y="262" width="340" height="78" rx="16" fill="#FFFFFF" stroke="#EDEDED"/>
+  <text x="38" y="290" font-size="15" font-weight="600" fill="#111827">João Pereira</text>
+  <text x="344" y="290" font-size="12" font-weight="600" fill="#00B37E" text-anchor="end">Atendendo</text>
+  <text x="38" y="312" font-size="12.5" fill="#6B7280">Corte + Barba · R$ 65 · 06:12</text>
+
+  <rect x="20" y="350" width="340" height="64" rx="16" fill="#FFFFFF" stroke="#EDEDED"/>
+  <text x="38" y="378" font-size="15" font-weight="600" fill="#111827">Marina Souza</text>
+  <text x="344" y="378" font-size="12" fill="#9CA3AF" text-anchor="end">#2</text>
+  <text x="38" y="400" font-size="12.5" fill="#6B7280">Escova · R$ 40</text>
+
+  <!-- botao solido + outline -->
+  <rect x="20" y="430" width="340" height="48" rx="14" fill="#00B37E"/>
+  <text x="190" y="460" font-size="14.5" font-weight="600" fill="#FFFFFF" text-anchor="middle">Chamar próximo</text>
+  <rect x="20" y="486" width="340" height="44" rx="14" fill="#FFFFFF" stroke="#00B37E" stroke-width="1.5"/>
+  <text x="190" y="514" font-size="14" font-weight="600" fill="#00B37E" text-anchor="middle">Adicionar cliente</text>
+</svg>

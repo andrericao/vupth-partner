@@ -1,4 +1,22 @@
-import { maskTime, isValidTime, parseApiTime, toApiTime } from "../time";
+import { maskTime, isValidTime, parseApiTime, toApiTime, isoDate, periodRange } from "../time";
+
+describe("isoDate", () => {
+  it("formata como YYYY-MM-DD com zero-pad", () => {
+    expect(isoDate(new Date(2026, 5, 7))).toBe("2026-06-07");
+    expect(isoDate(new Date(2026, 11, 31))).toBe("2026-12-31");
+  });
+});
+
+describe("periodRange", () => {
+  it("day: dateFrom === dateTo (hoje)", () => {
+    const r = periodRange("day");
+    expect(r.dateFrom).toBe(r.dateTo);
+  });
+  it("week e month: dateFrom <= dateTo", () => {
+    expect(periodRange("week").dateFrom <= periodRange("week").dateTo).toBe(true);
+    expect(periodRange("month").dateFrom <= periodRange("month").dateTo).toBe(true);
+  });
+});
 
 describe("maskTime", () => {
   it("formats digits as HH:MM", () => {

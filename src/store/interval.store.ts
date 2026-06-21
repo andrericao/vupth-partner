@@ -4,6 +4,18 @@ import { api } from "@lib/api";
 // Intervalos/refeicoes do profissional (#14). Contrato: PRD_BACKEND secao 18.
 // Base path tem o prefixo /api/v1 (unico endpoint da API com ele).
 
+// Humaniza a descricao da refeicao (o backend faz seed em ingles: "Lunch Break"
+// / "Dinner Break"). Mostra "Almoco"/"Janta" no app.
+export function mealName(description: string): string {
+  const map: Record<string, string> = {
+    "Lunch Break": "Almoco",
+    Lunch: "Almoco",
+    "Dinner Break": "Janta",
+    Dinner: "Janta",
+  };
+  return map[description] ?? description;
+}
+
 export type Interval = {
   intervalId: string;
   type: "RECURRENT" | "UNEXPECTED";
@@ -39,6 +51,7 @@ type IntervalState = {
   deleteInterval: (professionalId: string, intervalId: string) => Promise<void>;
   startInterval: (professionalId: string, intervalId: string) => Promise<void>;
   finishInterval: (professionalId: string, intervalId: string) => Promise<void>;
+  skipInterval: (professionalId: string, intervalId: string) => Promise<void>;
   reset: () => void;
 };
 
@@ -84,6 +97,13 @@ export const useIntervalStore = create<IntervalState>((set, get) => ({
 
   finishInterval: async (professionalId, intervalId) => {
     await api.patch(`${basePath(professionalId)}/${intervalId}/finish`);
+    await get().fetchIntervals(professionalId);
+  },
+
+  // "Nao almocar" do dia (#17/#41): pula a refeicao recorrente so hoje,
+  // derrubando-a do ETA. A recorrencia segue nos proximos dias. date default = hoje.
+  skipInterval: async (professionalId, intervalId) => {
+    await api.patch(`${basePath(professionalId)}/${intervalId}/skip`);
     await get().fetchIntervals(professionalId);
   },
 

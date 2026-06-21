@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="560" viewBox="0 0 380 560" font-family="'Poppins','Inter',Segoe UI,sans-serif">
+  <defs>
+    <linearGradient id="heroC" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#13241C"/><stop offset="1" stop-color="#1F4A37"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="380" height="560" fill="#0F1A15"/>
+
+  <text x="20" y="30" font-size="15" font-weight="700" fill="#3FD6A3">C — Premium Escuro</text>
+
+  <text x="20" y="74" font-size="18" font-weight="800" fill="#FFFFFF" letter-spacing="1">VUPTH</text>
+  <circle cx="352" cy="68" r="13" fill="#1F4A37"/><text x="352" y="73" font-size="12" text-anchor="middle" fill="#BFE9D6">✂</text>
+
+  <!-- hero card escuro -->
+  <rect x="20" y="92" width="340" height="100" rx="22" fill="url(#heroC)" stroke="#2C5E46"/>
+  <text x="40" y="124" font-size="12" fill="#7F9A8C">Sua fila agora</text>
+  <text x="38" y="170" font-size="46" font-weight="800" fill="#FFFFFF">8</text>
+  <text x="94" y="160" font-size="14" fill="#CFE9DD">na fila</text>
+  <text x="94" y="180" font-size="14" font-weight="700" fill="#FFB703">~35 min de espera</text>
+
+  <!-- chip refeicao -->
+  <rect x="20" y="204" width="340" height="38" rx="13" fill="#1A2A22" stroke="#2C5E46"/>
+  <text x="38" y="228" font-size="12.5" fill="#BFE9D6">🍽  Almoço previsto 12:00</text>
+
+  <!-- cards escuros -->
+  <rect x="20" y="256" width="340" height="80" rx="16" fill="#14211B" stroke="#25382E"/>
+  <text x="38" y="284" font-size="15" font-weight="600" fill="#FFFFFF">João Pereira</text>
+  <rect x="250" y="268" width="94" height="22" rx="11" fill="#0C2E22"/>
+  <text x="297" y="283" font-size="10.5" font-weight="600" fill="#3FD6A3" text-anchor="middle">ATENDENDO</text>
+  <text x="38" y="308" font-size="12.5" fill="#7F9A8C">Corte + Barba · R$ 65 · 06:12</text>
+
+  <rect x="20" y="346" width="340" height="64" rx="16" fill="#14211B" stroke="#25382E"/>
+  <text x="38" y="374" font-size="15" font-weight="600" fill="#FFFFFF">Marina Souza</text>
+  <text x="344" y="374" font-size="12" fill="#7F9A8C" text-anchor="end">#2</text>
+  <text x="38" y="396" font-size="12.5" fill="#7F9A8C">Escova · R$ 40</text>
+
+  <!-- CTA ambar -->
+  <rect x="20" y="430" width="340" height="52" rx="26" fill="#FFB703"/>
+  <text x="190" y="462" font-size="15" font-weight="700" fill="#23180A" text-anchor="middle">Chamar próximo</text>
+
+  <text x="20" y="512" font-size="11.5" fill="#7F9A8C">Modo escuro · superfícies verde-escuro · número grande</text>
+  <text x="20" y="530" font-size="11.5" fill="#7F9A8C">CTA âmbar contrastante · identidade forte.</text>
+</svg>

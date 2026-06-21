@@ -6,6 +6,7 @@ import {
   Text,
   Badge,
   BadgeText,
+  Pressable,
   ScrollView,
   Spinner,
 } from "@gluestack-ui/themed";
@@ -17,15 +18,19 @@ import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
-import { useIntervalStore, type Interval } from "@store/interval.store";
+import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { parseApiTime } from "@lib/time";
+import { parseApiTime, isoDate } from "@lib/time";
+import { cardShadow } from "@lib/styles";
+import * as SecureStore from "expo-secure-store";
 
-/** "HH:MM" do relogio local agora. */
-function nowHHMM(): string {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+// Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
+const MEAL_NUDGE_WINDOW_MIN = 45;
+
+function hhmmToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
 }
 
 function AttendanceCard({
@@ -63,9 +68,10 @@ function AttendanceCard({
     <VStack
       bg="$white"
       p="$4"
-      borderRadius="$lg"
-      borderWidth="$1"
-      borderColor={isActive ? "$green300" : "$coolGray200"}
+      borderRadius="$2xl"
+      borderWidth={isActive ? "$2" : "$0"}
+      borderColor="$green400"
+      style={cardShadow}
       mb="$3"
     >
       <HStack justifyContent="space-between" alignItems="center">
@@ -136,6 +142,7 @@ export default function ProfessionalQueueScreen() {
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
   const startInterval = useIntervalStore((s) => s.startInterval);
   const finishInterval = useIntervalStore((s) => s.finishInterval);
+  const skipInterval = useIntervalStore((s) => s.skipInterval);
   const meals = intervals.filter((i) => i.type === "RECURRENT");
 
   // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
@@ -172,29 +179,68 @@ export default function ProfessionalQueueScreen() {
     [profId, startInterval]
   );
 
-  // Nudge: no horario previsto, avisa o profissional (uma vez por refeicao/sessao).
+  // "Nao almocar" do dia: pula a refeicao e derruba do ETA dos clientes (#17/#41).
+  const handleSkipMeal = useCallback(
+    async (m: Interval) => {
+      if (!profId) return;
+      try {
+        await skipInterval(profId, m.intervalId);
+      } catch (error: any) {
+        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel pular a refeicao."));
+      }
+    },
+    [profId, skipInterval]
+  );
+
+  // Nudge do almoco/janta: so avisa DENTRO de uma janela curta apos o horario
+  // previsto (nao o dia inteiro) e no maximo UMA vez por refeicao/dia
+  // (persistido em SecureStore — antes reaparecia a cada abertura do app).
   useEffect(() => {
     if (!profId) return;
-    const now = nowHHMM();
-    const due = meals.find((m) => {
-      if (m.status !== "SCHEDULED") return false;
-      const t = parseApiTime(m.fixedStartTime);
-      return t !== null && now >= t && !nudgedRef.current.has(m.intervalId);
-    });
-    if (!due) return;
-    nudgedRef.current.add(due.intervalId);
-    const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
-    Alert.alert(
-      `Hora do ${due.description}`,
-      count > 0
-        ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
-        : `Iniciar ${due.description} agora (${due.durationMinutes}min)?`,
-      [
-        { text: "Agora nao", style: "cancel" },
-        { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
-      ]
-    );
-  }, [meals, profId, data, handleStartMeal]);
+    let cancelled = false;
+
+    (async () => {
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const today = isoDate(now);
+
+      const due = meals.find((m) => {
+        if (m.status !== "SCHEDULED") return false;
+        const t = parseApiTime(m.fixedStartTime);
+        if (!t) return false;
+        const tMin = hhmmToMinutes(t);
+        return (
+          nowMin >= tMin &&
+          nowMin <= tMin + MEAL_NUDGE_WINDOW_MIN &&
+          !nudgedRef.current.has(m.intervalId)
+        );
+      });
+      if (!due) return;
+
+      nudgedRef.current.add(due.intervalId);
+      const key = `meal_nudge_${due.intervalId}`;
+      const last = await SecureStore.getItemAsync(key);
+      if (cancelled || last === today) return; // ja avisou hoje
+      await SecureStore.setItemAsync(key, today);
+
+      const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
+      Alert.alert(
+        `Hora do ${mealName(due.description)}`,
+        count > 0
+          ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
+          : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
+        [
+          { text: "Agora nao", style: "cancel" },
+          { text: "Nao almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
+          { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
+        ]
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [meals, profId, data, handleStartMeal, handleSkipMeal]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
@@ -227,20 +273,50 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
+  // Editar refeicao: confirmacao para nao abrir por toque acidental.
+  const handleEditMeal = (m: Interval) => {
+    Alert.alert(
+      "Editar refeicao",
+      `Abrir a edicao de "${mealName(m.description)}" (horario/duracao)?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Editar", onPress: () => router.push("/(professional)/meals" as any) },
+      ]
+    );
+  };
+
   if (!establishmentId) {
     return (
-      <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
+      <VStack flex={1} py="$12" px="$6">
         <Header />
-        <Text fontFamily="$body" color="$coolGray500" textAlign="center" mt="$12">
-          Voce nao esta vinculado a nenhum estabelecimento.
-        </Text>
-        <Button
-          title="Buscar Estabelecimento"
-          onPress={() => router.push("/(professional)/find-establishment" as any)}
-          bg="$green500"
-          $active-bg="$green600"
-          mt="$4"
-        />
+        <Heading mt="$8" size="2xl" fontFamily="$heading">
+          Minha Fila
+        </Heading>
+        <VStack
+          mt="$8"
+          bg="$amber50"
+          p="$5"
+          borderRadius="$lg"
+          borderWidth="$1"
+          borderColor="$amber200"
+          space="sm"
+        >
+          <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+            Voce ainda nao tem fila
+          </Text>
+          <Text fontFamily="$body" color="$amber700">
+            Para receber clientes, voce precisa estar vinculado a um
+            estabelecimento. Busque um estabelecimento e solicite a vinculacao —
+            o dono confirma e voce passa a aparecer na fila.
+          </Text>
+          <Button
+            title="Buscar Estabelecimento"
+            onPress={() => router.push("/(professional)/find-establishment" as any)}
+            bg="$green500"
+            $active-bg="$green600"
+            mt="$2"
+          />
+        </VStack>
       </VStack>
     );
   }
@@ -255,16 +331,31 @@ export default function ProfessionalQueueScreen() {
       <VStack flex={1} py="$12" px="$6">
         <Header />
 
-        <HStack mt="$4" justifyContent="space-between" alignItems="center">
-          <Heading size="2xl" fontFamily="$heading">
-            Minha Fila
-          </Heading>
-          {myProfessional && (
-            <Badge action="success" variant="solid" borderRadius="$md">
-              <BadgeText>{myProfessional.queue_count} na fila</BadgeText>
-            </Badge>
-          )}
-        </HStack>
+        <Heading size="2xl" fontFamily="$heading" mt="$4">
+          Minha fila
+        </Heading>
+
+        {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
+        {myProfessional && (
+          <HStack space="md" mt="$4">
+            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <Text fontFamily="$body" fontSize="$xs" color="$green50">
+                pessoas na fila
+              </Text>
+              <Text fontFamily="$heading" fontSize="$4xl" color="$white" mt="$1">
+                {myProfessional.queue_count}
+              </Text>
+            </VStack>
+            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <Text fontFamily="$body" fontSize="$xs" color="$green50">
+                tempo de espera
+              </Text>
+              <Text fontFamily="$heading" fontSize="$3xl" color="$white" mt="$1">
+                {myProfessional.estimated_wait_minutes} min
+              </Text>
+            </VStack>
+          </HStack>
+        )}
 
         {isLoading && !data && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
@@ -320,24 +411,29 @@ export default function ProfessionalQueueScreen() {
               return (
                 <HStack
                   key={m.intervalId}
-                  bg={active ? "$amber50" : "$white"}
+                  bg={active ? "$amber100" : "$amber50"}
                   p="$3"
                   mb="$2"
-                  borderRadius="$md"
+                  borderRadius="$2xl"
                   borderWidth="$1"
-                  borderColor={active ? "$amber300" : "$coolGray200"}
-                  justifyContent="space-between"
+                  borderColor={active ? "$amber300" : "$amber200"}
                   alignItems="center"
+                  space="sm"
                 >
+                  <Text fontSize="$md">🍽️</Text>
                   <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                      {m.description}
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+                      {mealName(m.description)} {parseApiTime(m.fixedStartTime) ?? "--:--"}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                      {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min
-                      {active ? " • em andamento" : ""}
+                    <Text fontFamily="$body" fontSize="$xs" color="$amber600">
+                      {m.durationMinutes}min{active ? " • em andamento" : " • previsto"}
                     </Text>
                   </VStack>
+                  {!active && (
+                    <Pressable onPress={() => handleEditMeal(m)} px="$2" py="$1">
+                      <Text fontSize="$lg" color="$amber700">✎</Text>
+                    </Pressable>
+                  )}
                   {active ? (
                     <Button
                       title="Encerrar"
@@ -345,14 +441,16 @@ export default function ProfessionalQueueScreen() {
                       bg="$amber500"
                       $active-bg="$amber600"
                       h="$9"
+                      mt="$0"
                     />
                   ) : (
                     <Button
                       title="Iniciar"
                       onPress={() => handleStartMeal(m)}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
+                      bg="$green500"
+                      $active-bg="$green600"
                       h="$9"
+                      mt="$0"
                     />
                   )}
                 </HStack>
@@ -379,6 +477,35 @@ export default function ProfessionalQueueScreen() {
             <Text fontFamily="$body" color="$coolGray300" textAlign="center" mt="$2">
               Novos clientes aparecerao automaticamente
             </Text>
+          </VStack>
+        )}
+
+        {/* Vinculado, mas o backend nao o lista na fila por nao ter servico:
+            sem isto a tela ficava em branco. Damos a acao de adicionar servico. */}
+        {!isLoading && data && !myProfessional && (
+          <VStack
+            mt="$8"
+            bg="$amber50"
+            p="$5"
+            borderRadius="$lg"
+            borderWidth="$1"
+            borderColor="$amber200"
+            space="sm"
+          >
+            <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+              Voce ainda nao aparece para os clientes
+            </Text>
+            <Text fontFamily="$body" color="$amber700">
+              Voce esta vinculado, mas precisa de pelo menos um servico cadastrado
+              para entrar na fila e receber clientes.
+            </Text>
+            <Button
+              title="Adicionar Servico"
+              onPress={() => router.push("/(professional)/my-services" as any)}
+              bg="$green500"
+              $active-bg="$green600"
+              mt="$2"
+            />
           </VStack>
         )}
       </VStack>

@@ -35,3 +35,20 @@ export function toApiTime(value: string): string | null {
   if (!isValidTime(value)) return null;
   return `${value}:00Z`;
 }
+
+/** Data local como "YYYY-MM-DD" (ISO) para os params dateFrom/dateTo da API. */
+export function isoDate(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/** Janela de datas (inclusiva) para o periodo dos relatorios. */
+export function periodRange(
+  period: "day" | "week" | "month"
+): { dateFrom: string; dateTo: string } {
+  const to = new Date();
+  const from = new Date();
+  if (period === "week") from.setDate(from.getDate() - 6);
+  else if (period === "month") from.setDate(from.getDate() - 29);
+  return { dateFrom: isoDate(from), dateTo: isoDate(to) };
+}

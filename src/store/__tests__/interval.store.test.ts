@@ -1,6 +1,16 @@
 import MockAdapter from "axios-mock-adapter";
 import { api } from "@lib/api";
-import { useIntervalStore, type Interval } from "../interval.store";
+import { useIntervalStore, mealName, type Interval } from "../interval.store";
+
+describe("mealName", () => {
+  it("humaniza Lunch/Dinner Break para Almoco/Janta", () => {
+    expect(mealName("Lunch Break")).toBe("Almoco");
+    expect(mealName("Dinner Break")).toBe("Janta");
+  });
+  it("mantem descricoes customizadas", () => {
+    expect(mealName("Cafe da tarde")).toBe("Cafe da tarde");
+  });
+});
 
 const mock = new MockAdapter(api);
 const PROF = "prof-uuid-1";
@@ -100,6 +110,17 @@ describe("interval.store", () => {
 
       await useIntervalStore.getState().finishInterval(PROF, "int-1");
       expect(mock.history.patch[1].url).toBe(`${BASE}/int-1/finish`);
+    });
+  });
+
+  describe("skipInterval", () => {
+    it("PATCH .../skip ('Nao almocar' do dia) e refaz o fetch", async () => {
+      mock.onPatch(`${BASE}/int-1/skip`).reply(200, {});
+      mock.onGet(BASE).reply(200, []);
+
+      await useIntervalStore.getState().skipInterval(PROF, "int-1");
+
+      expect(mock.history.patch[0].url).toBe(`${BASE}/int-1/skip`);
     });
   });
 });

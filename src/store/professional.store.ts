@@ -22,6 +22,13 @@ type ServiceItem = {
   estimatedMinutes: number;
 };
 
+export type ProfessionalReport = {
+  totalAttendances: number;
+  totalRevenue: number;
+  avgDurationMinutes: number;
+  topService: string | null;
+};
+
 type ProfessionalState = {
   professional: Professional | null;
   myServices: ServiceItem[];
@@ -34,12 +41,16 @@ type ProfessionalState = {
   leaveEstablishment: () => Promise<void>;
   requestAffiliation: (establishmentId: string) => Promise<void>;
   cancelAffiliation: (affiliationId: string) => Promise<void>;
+  fetchMyAffiliations: () => Promise<any[]>;
+  acceptAffiliation: (affiliationId: string) => Promise<void>;
+  rejectAffiliation: (affiliationId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
   updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
   fetchMyServices: () => Promise<void>;
+  fetchMyReport: (dateFrom?: string, dateTo?: string) => Promise<ProfessionalReport>;
   fetchMe: () => Promise<void>;
   restoreProfessional: () => Promise<void>;
   reset: () => void;
@@ -124,6 +135,21 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     await api.delete(`/affiliations/${affiliationId}`);
   },
 
+  fetchMyAffiliations: async () => {
+    const { data } = await api.get("/professional/me/affiliations");
+    return data;
+  },
+
+  acceptAffiliation: async (affiliationId) => {
+    // Convite do owner (type INVITATION) — aceitar vincula o profissional.
+    await api.patch(`/affiliations/${affiliationId}/accept`);
+    await get().fetchMe();
+  },
+
+  rejectAffiliation: async (affiliationId) => {
+    await api.patch(`/affiliations/${affiliationId}/reject`);
+  },
+
   addMyServiceItem: async (serviceItemType, customName, price) => {
     const prof = get().professional;
     if (!prof) throw new Error("Professional not found");
@@ -173,6 +199,14 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
 
     const { data } = await api.get(`/professional/${prof.id}/service-items`);
     set({ myServices: data });
+  },
+
+  fetchMyReport: async (dateFrom, dateTo) => {
+    const params: Record<string, string> = {};
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
+    const { data } = await api.get("/professional/me/reports", { params });
+    return data;
   },
 
   restoreProfessional: async () => {
