@@ -34,7 +34,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync("#FFFFFF");
+      // Com edge-to-edge, setBackgroundColorAsync nao e suportado (vira no-op e
+      // emite warning) — a cor da barra fica por conta do sistema. Mantemos so
+      // o estilo dos botoes (icones escuros).
       NavigationBar.setButtonStyleAsync("dark");
     }
   }, []);
