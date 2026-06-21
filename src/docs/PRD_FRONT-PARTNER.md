@@ -774,17 +774,23 @@ Adicionar ao relatorio do profissional e do owner:
 
 **Backend (opcional, melhora precisao):** incluir um `computed_at`/timestamp no snapshot da fila para o cliente saber exatamente quanto descontar (sem isso usa-se a hora de recebimento — funciona, so um pouco menos preciso). Sem isso, **da para fazer 100% no front**.
 
-### Curadoria/ordenacao manual da fila antes de abrir — "playlist" (pedido 2026-06-17)
+### Solicitacao antecipada (fila de uma abertura FUTURA) + curadoria "playlist" (pedido 2026-06-17, refinado)
 
-**Ideia:** o profissional ve as **solicitacoes de entrar na fila ANTES de abrir o estabelecimento** e **organiza a ordem do seu jeito**, arrastando o card do cliente para cima/baixo (igual reordenar uma playlist). So depois ele "abre"/publica a fila.
+**Semantica exata (definida pelo usuario):**
+- **So vale para aberturas que ainda VAO acontecer.** Se o estabelecimento **ja esta aberto**, nao existe "solicitacao" — o cliente **entra direto na fila**.
+- **Solicitacao antecipada:** ex.: e domingo e o cliente quer cortar segunda → ele **deixa uma solicitacao** para a proxima abertura; recebe **confirmacao** e a solicitacao **fica registrada** (nao e atendimento na fila ainda).
+- **No dia, ANTES de abrir a fila / iniciar atendimentos:** o profissional ve as solicitacoes **em ordem de chegada do PEDIDO**, e pode **reorganizar** arrastando os cards (playlist).
+- **A reorganizacao o cliente NAO ve.** O cliente so passa a ver a fila (e sua posicao) **depois que o profissional disponibiliza/publica**. Antes disso, e rascunho privado do profissional.
+
+→ Modelo: **fila DRAFT (solicitacoes antecipadas, ordenavel pelo profissional) → PUBLISHED (vira a fila real, visivel ao cliente)**. Conecta com o que ja estava no PRD secao 12 (calendario / "solicitacao de corte dia X" / DRAFT→PUBLISHED).
 
 **Dependencias (backend-first):**
-1. **Pre-fila / solicitacoes com a loja fechada:** hoje o cliente entra na fila quando a loja esta OPEN; para "ver antes de abrir" o backend precisa permitir **solicitacao de entrada enquanto fechado** (uma fila em rascunho/`PENDING`) que o profissional revisa.
-2. **Ordem explicita da fila:** hoje a ordem e por **chegada** (sem campo de posicao). Reordenar exige o backend guardar **posicao explicita** + endpoint para persistir a nova ordem (ex.: `PATCH /professional-queue/{profId}/order { attendanceIds: [...] }`). **Isto e o mesmo pre-requisito do Item 38 (encaixe) do PRD_BACKEND** — alinhar.
+1. **Solicitacao antecipada com a loja fechada:** entidade/estado de "pedido para a proxima abertura" (distinto de attendance na fila), com confirmacao ao cliente; vinculado a um dia/abertura futura.
+2. **Ordem explicita + DRAFT/PUBLISHED:** a ordem inicial = chegada do pedido, mas o profissional regrava a ordem; visivel ao cliente so apos publicar. Exige **posicao explicita** na fila + endpoint de reordenar (ex.: `PATCH /professional-queue/{profId}/order { attendanceIds: [...] }`) e um flag de publicacao. **Mesmo pre-requisito de ordem explicita do Item 38 (encaixe)** — alinhar.
 
-**Front (quando o backend suportar):** lista arrastavel (drag-and-drop) — usar `react-native-draggable-flatlist` (ou `react-native-reanimated` + gesture-handler, que ja temos). Segura o card → reordena → "Publicar/Abrir fila" persiste a ordem. Antes de abrir, a reordenacao e local; ao abrir, manda a ordem ao backend.
+**Front (quando o backend suportar):** tela de "Solicitacoes da proxima abertura" (so do profissional) com lista **arrastavel** (drag-and-drop: `react-native-draggable-flatlist` ou reanimated+gesture-handler, que ja temos); botao **"Abrir fila / Publicar"** persiste a ordem e torna visivel ao cliente. Enquanto rascunho, reordenacao e local/privada.
 
-**Obs de produto:** reordenar manualmente quem chegou antes pode gerar percepcao de injustica (alguem "fura fila"); o backend ja discute suavizacao disso no Item 38. Definir regra (so antes de abrir? sempre? com limite?).
+**Obs de produto:** como a reordenacao e privada e feita ANTES de publicar (ninguem ainda "estava na fila"), nao gera o problema de "furar fila" do Item 38 (que e reordenar com a fila ja publica/rodando). Sao casos diferentes.
 
 ### Relacao abertura do estabelecimento x presenca/atendimento do profissional (pedido 2026-06-17)
 
