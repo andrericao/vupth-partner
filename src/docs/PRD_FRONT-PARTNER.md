@@ -757,6 +757,23 @@ Adicionar ao relatorio do profissional e do owner:
 - Breakdown por tipo de servico
 - Comparativo semanal/mensal
 
+### Contagem de tempo offline / interpolacao local do ETA (BAIXA PRIORIDADE, pedido 2026-06-17)
+
+**Ideia:** em vez de exibir o tempo estimado de espera como um numero estatico (que congela quando cai a internet), o app pega o ultimo `estimated_wait_minutes` conhecido e **conta para baixo localmente** usando o relogio do celular. Enquanto offline o usuario continua vendo o tempo "andando" (nao fica cego); quando a conexao volta, o valor do servidor reconcilia e a aferição melhora.
+
+**Por que vale (boas praticas):** e o padrao de **ETA otimista/interpolado** de Uber/99/iFood/Rappi e de sistemas de fila (Qmatic/Waitwhile) — o numero raramente fica congelado; conta no cliente entre updates do servidor. Reduz a incerteza percebida (NN/g; J. Service Research 2025), que e o que mais faz desistir da fila. O app ja tem a semente: `useElapsedTime` (cronometro local do atendimento em andamento).
+
+**Beneficiario principal:** o **app cliente** (quem espera). No partner e secundario, mas o mesmo hook serve.
+
+**Implementacao sugerida (client-side, sem bloquear no backend):**
+1. A cada snapshot da fila (WebSocket/poll) guardar `{ estimateMinutes, receivedAt: Date.now() }`.
+2. Timer local (~30s) calcula `restante = max(0, estimateMinutes - minutosDesde(receivedAt))` e exibe o valor andando.
+3. Snapshot novo do servidor = fonte da verdade: substitui e **suaviza o salto** (damping/rate-limit — mesma familia do Item 38).
+4. Offline: segue contando do ultimo snapshot + selo discreto "sem conexao • atualizado ha Xmin".
+5. Cuidados: nao contar abaixo de 0; usar **tempo decorrido (delta)**, nao hora absoluta (relogio do celular pode estar errado); evitar salto brusco ao reconectar.
+
+**Backend (opcional, melhora precisao):** incluir um `computed_at`/timestamp no snapshot da fila para o cliente saber exatamente quanto descontar (sem isso usa-se a hora de recebimento — funciona, so um pouco menos preciso). Sem isso, **da para fazer 100% no front**.
+
 ## 13. Proposta de Redesign (avaliacao 2026-06-17) — branch `new-design`, NAO implementar agora
 
 > Mockups recebidos da equipe de design (13 PNGs do app cliente + parceiro). **Decisao: nao implementar agora; quando for, em branch `new-design`.** Avaliacao de usabilidade feita com pesquisa (NN/g, Material, Apple HIG, Journal of Service Research 2025). Falta avaliar um **PDF** que nao foi anexado (so vieram as imagens) — pedir o caminho do arquivo.
