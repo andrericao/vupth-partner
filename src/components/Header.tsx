@@ -47,16 +47,25 @@ export function Header({ showBackButton = false, onBack }: Props) {
   }, [showBackButton, onBack]);
 
   return (
-    <HStack alignItems="center" style={{ paddingTop: insets.top }}>
+    // [new-design] Barra superior verde-escuro full-bleed: escapa o padding
+    // padrao das telas (py="$12"=48 / px="$6"=24) com margens negativas e
+    // adiciona seu proprio padding (status bar + respiro). Texto/icones claros.
+    <HStack
+      bg="$green700"
+      alignItems="center"
+      px="$6"
+      pb="$4"
+      style={{ marginTop: -48, marginHorizontal: -24, paddingTop: insets.top + 16 }}
+    >
       {showBackButton && <ButtonGoBack onPress={handleBack} />}
-      <Center>
-        <Heading size="xl" fontFamily="$heading" color="$green700">
+      <Center flex={1}>
+        <Heading size="xl" fontFamily="$heading" color="$white">
           VUPTH
         </Heading>
       </Center>
       {role && (
-        <HStack ml="auto" alignItems="center">
-          <RoleIcon role={role} />
+        <HStack alignItems="center">
+          <RoleIcon role={role} color="#F7FAF8" />
         </HStack>
       )}
     </HStack>
