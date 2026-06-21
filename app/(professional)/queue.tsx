@@ -229,18 +229,36 @@ export default function ProfessionalQueueScreen() {
 
   if (!establishmentId) {
     return (
-      <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
+      <VStack flex={1} py="$12" px="$6">
         <Header />
-        <Text fontFamily="$body" color="$coolGray500" textAlign="center" mt="$12">
-          Voce nao esta vinculado a nenhum estabelecimento.
-        </Text>
-        <Button
-          title="Buscar Estabelecimento"
-          onPress={() => router.push("/(professional)/find-establishment" as any)}
-          bg="$green500"
-          $active-bg="$green600"
-          mt="$4"
-        />
+        <Heading mt="$8" size="2xl" fontFamily="$heading">
+          Minha Fila
+        </Heading>
+        <VStack
+          mt="$8"
+          bg="$amber50"
+          p="$5"
+          borderRadius="$lg"
+          borderWidth="$1"
+          borderColor="$amber200"
+          space="sm"
+        >
+          <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+            Voce ainda nao tem fila
+          </Text>
+          <Text fontFamily="$body" color="$amber700">
+            Para receber clientes, voce precisa estar vinculado a um
+            estabelecimento. Busque um estabelecimento e solicite a vinculacao —
+            o dono confirma e voce passa a aparecer na fila.
+          </Text>
+          <Button
+            title="Buscar Estabelecimento"
+            onPress={() => router.push("/(professional)/find-establishment" as any)}
+            bg="$green500"
+            $active-bg="$green600"
+            mt="$2"
+          />
+        </VStack>
       </VStack>
     );
   }
@@ -379,6 +397,35 @@ export default function ProfessionalQueueScreen() {
             <Text fontFamily="$body" color="$coolGray300" textAlign="center" mt="$2">
               Novos clientes aparecerao automaticamente
             </Text>
+          </VStack>
+        )}
+
+        {/* Vinculado, mas o backend nao o lista na fila por nao ter servico:
+            sem isto a tela ficava em branco. Damos a acao de adicionar servico. */}
+        {!isLoading && data && !myProfessional && (
+          <VStack
+            mt="$8"
+            bg="$amber50"
+            p="$5"
+            borderRadius="$lg"
+            borderWidth="$1"
+            borderColor="$amber200"
+            space="sm"
+          >
+            <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+              Voce ainda nao aparece para os clientes
+            </Text>
+            <Text fontFamily="$body" color="$amber700">
+              Voce esta vinculado, mas precisa de pelo menos um servico cadastrado
+              para entrar na fila e receber clientes.
+            </Text>
+            <Button
+              title="Adicionar Servico"
+              onPress={() => router.push("/(professional)/my-services" as any)}
+              bg="$green500"
+              $active-bg="$green600"
+              mt="$2"
+            />
           </VStack>
         )}
       </VStack>
