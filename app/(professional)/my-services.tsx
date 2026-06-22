@@ -16,6 +16,7 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
+import { cardShadow } from "@lib/styles";
 
 import {
   calculatePricing,
@@ -305,10 +306,9 @@ export default function MyServicesScreen() {
                 <HStack
                   key={svc.id}
                   bg="$white"
-                  p="$3"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor="$coolGray200"
+                  p="$4"
+                  borderRadius="$2xl"
+                  style={cardShadow}
                   justifyContent="space-between"
                   alignItems="center"
                 >
