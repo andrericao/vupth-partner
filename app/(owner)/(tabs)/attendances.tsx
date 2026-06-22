@@ -16,6 +16,7 @@ import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useAttendanceStore } from "@store/attendance.store";
+import { cardShadow } from "@lib/styles";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
@@ -37,9 +38,8 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
     <VStack
       bg="$white"
       p="$4"
-      borderRadius="$lg"
-      borderWidth="$1"
-      borderColor="$coolGray200"
+      borderRadius="$2xl"
+      style={cardShadow}
       mb="$3"
     >
       <HStack justifyContent="space-between" alignItems="center">
