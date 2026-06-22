@@ -515,6 +515,13 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ## 10. Pendente de Implementacao
 
+### Feedback de teste manual (2026-06-22) — A FAZER (front, sem codar ainda)
+
+1. **"Meus servicos" — texto do vinculo:** hoje mostra **"Vinculado a {nome do estabelecimento}"**; o usuario quer **so o nome** (remover o "Vinculado a"). Arquivo: `my-services.tsx` (e checar `queue.tsx`/`settings.tsx` se repetem o padrao). Mudanca trivial de texto.
+2. **Apelido (nickname) nas Configuracoes do profissional:** o profissional deve poder ver/editar o **apelido** — ajuda na busca. **Liga ao backend #16** (nickname ja existe no `ProfessionalSearchResponse`; falta o `/profile/general-infos` aceitar nickname e a UI). Mostrar o apelido tambem no resultado da busca.
+3. **Card de estabelecimento CLICAVEL com detalhes (find-establishment):** ao buscar estabelecimento, o card deve ser **tocavel** e abrir uma **tela de detalhes** com **foto, endereco, etc.** para o profissional confirmar que e o estabelecimento certo antes de solicitar vinculacao. Backend ja tem: `url_image`, endereco (address), `phone`/`instagram`, `opening_time`/`closing_time` no establishment — montar um `GET` de detalhe (ou reusar `GET /establishment/id/{id}`) + tela. **Feature nova** (front + confirmar contrato de detalhe no backend).
+4. **Regra de atendimento na fila (queue.tsx) — so atende o PRIMEIRO:** o botao "Iniciar" so pode existir para o **1o cliente da fila (indice 0)**. Excecao: pode **adiantar o 2o (indice 1)** caso o 1o desista/atrase — ao confirmar atender o 2o, uma funcao chama a outra em **cascata**: o 1o (indice 0) **troca de lugar** com o 2o (indice 1) e so entao inicia o atendimento — ou seja, **sempre se atende o indice 0**. **NUNCA** mostrar botao de atender do **3o cliente em diante** (seria erro). O 2o exige **confirmacao** antes do swap. ⚠️ Avaliar se o "trocar de lugar" precisa de **ordem explicita no backend** (mesmo pre-req do Item 38 / solicitacao antecipada secao 12) ou se da pra resolver so no front chamando `start` do cliente certo. **Definir com o backend.**
+
 ### Bugs reportados — Teste manual (2026-06-05)
 
 | # | Bug | Status | Detalhe |
