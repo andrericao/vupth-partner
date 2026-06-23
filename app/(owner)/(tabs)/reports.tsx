@@ -15,6 +15,7 @@ import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
+import { cardShadow } from "@lib/styles";
 import { periodRange } from "@lib/time";
 
 type Period = "day" | "week" | "month";
@@ -33,7 +34,7 @@ function StatCard({
   border: string;
 }) {
   return (
-    <VStack flex={1} bg={bg} p="$3" borderRadius="$lg" borderWidth="$1" borderColor={border}>
+    <VStack flex={1} bg={bg} p="$4" borderRadius="$2xl" style={cardShadow}>
       <Text fontFamily="$body" fontSize="$xs" color={color}>
         {label}
       </Text>
@@ -168,7 +169,7 @@ export default function OwnerReportsScreen() {
 
             <HStack space="md" mt="$3">
               <StatCard label="Duracao media" value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
-              <VStack flex={1} bg="$white" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
                   Destaque
                 </Text>
@@ -193,7 +194,7 @@ export default function OwnerReportsScreen() {
                 {liveProfs.map((p) => {
                   const r = revById[p.id] ?? { revenue: 0, attendances: 0 };
                   return (
-                    <VStack key={p.id} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+                    <VStack key={p.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                       <HStack justifyContent="space-between" alignItems="center">
                         <VStack flex={1}>
                           <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">

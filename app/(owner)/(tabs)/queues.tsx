@@ -16,6 +16,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
+import { cardShadow } from "@lib/styles";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
 
 function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
@@ -69,7 +70,8 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
   ];
 
   return (
-    <VStack bg="$white" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200" mb="$3" overflow="hidden">
+    <VStack bg="$white" borderRadius="$2xl"
+      style={cardShadow} mb="$3" overflow="hidden">
       <Pressable onPress={() => setExpanded(!expanded)} py="$3" px="$4">
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>

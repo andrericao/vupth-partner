@@ -14,6 +14,7 @@ import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useProfessionalStore, type ProfessionalReport } from "@store/professional.store";
 import { periodRange } from "@lib/time";
+import { cardShadow } from "@lib/styles";
 
 type Period = "day" | "week" | "month";
 
@@ -101,7 +102,7 @@ export default function ProfessionalReportsScreen() {
 
         {period === "day" && (
           <HStack space="md" mb="$4">
-            <VStack flex={1} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+            <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Na fila agora
               </Text>
@@ -109,7 +110,7 @@ export default function ProfessionalReportsScreen() {
                 {queueCount}
               </Text>
             </VStack>
-            <VStack flex={1} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+            <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Espera estimada
               </Text>
@@ -127,7 +128,7 @@ export default function ProfessionalReportsScreen() {
         ) : (
           <VStack space="md">
             <HStack space="md">
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Atendimentos
                 </Text>
@@ -135,7 +136,7 @@ export default function ProfessionalReportsScreen() {
                   {report?.totalAttendances ?? 0}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$green50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
+              <VStack flex={1} bg="$green50" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$green700">
                   Receita
                 </Text>
@@ -146,7 +147,7 @@ export default function ProfessionalReportsScreen() {
             </HStack>
 
             <HStack space="md">
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Duracao media
                 </Text>
@@ -154,7 +155,7 @@ export default function ProfessionalReportsScreen() {
                   {Math.round(report?.avgDurationMinutes ?? 0)} min
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Servico mais feito
                 </Text>

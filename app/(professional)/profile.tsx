@@ -10,6 +10,7 @@ import {
 import { Alert } from "react-native";
 import { router } from "expo-router";
 import { useAuthStore } from "@store/auth.store";
+import { cardShadow } from "@lib/styles";
 import { useProfessionalStore } from "@store/professional.store";
 import { Header } from "@components/Header";
 
@@ -24,14 +25,13 @@ function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
     <Pressable
       onPress={onPress}
       py="$4"
-      px="$4"
+      px="$5"
       bg="$white"
-      borderRadius="$md"
-      borderWidth="$1"
-      borderColor="$coolGray200"
+      borderRadius="$2xl"
+      style={cardShadow}
       $active-bg="$coolGray50"
     >
-      <Text fontFamily="$body" fontSize="$md" color={color}>
+      <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color={color}>
         {label}
       </Text>
     </Pressable>

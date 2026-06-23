@@ -8,6 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -67,6 +68,30 @@
       "^@assets/(.*)$": "<rootDir>/src/assets/$1",
       "^@theme/(.*)$": "<rootDir>/src/theme/$1",
       "^@utils/(.*)$": "<rootDir>/src/utils/$1"
+    },
+    "collectCoverageFrom": [
+      "src/lib/**/*.{ts,tsx}",
+      "src/store/**/*.{ts,tsx}",
+      "src/utils/**/*.{ts,tsx}",
+      "!src/**/__tests__/**",
+      "!src/**/*.d.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "__tests__"
+    ],
+    "coverageReporters": [
+      "text-summary",
+      "text",
+      "lcov"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 82,
+        "branches": 68,
+        "functions": 88,
+        "lines": 82
+      }
     }
   },
   "private": true
