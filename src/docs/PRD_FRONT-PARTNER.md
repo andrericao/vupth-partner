@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-23 (v5 — secao 14: EAS Build, migracao CNG, rede anti-quebra e rollback)
+> **Ultima atualizacao:** 2026-06-23 (v6 — OTA configurado e validado; secao 14.6 atualizada; pendencia C5 do front-client)
 
 ---
 
@@ -964,9 +964,36 @@ o jest nao pega — foi a classe de erro do CNG).
   reverte os usuarios na hora.
 - Procedimento detalhado tambem em [`docs/ROLLBACK.md`](../../docs/ROLLBACK.md).
 
-### 14.6 CD futuro — EAS Update (OTA) — DECIDIDO, NAO INICIADO
+### 14.6 CD — EAS Update (OTA) — CONFIGURADO E FUNCIONANDO (2026-06-23)
 
-Atualizar a camada JavaScript (telas/logica/fixes) pela internet, sem rebuild de loja.
-Plano: `eas update:configure` + workflow `eas-update.yml` (push `dev` -> canal
-`preview`; push `main` -> canal `production`); secret `EXPO_TOKEN` no GitHub Actions.
-Nao atualiza camada nativa (lib nativa nova/permissao/icone/SDK = exige novo build).
+Atualiza a camada **JavaScript** (telas/logica/fixes) pela internet, sem rebuild de loja.
+**Nao** atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK mudam o
+`runtimeVersion` e exigem um **build novo**.
+
+**Configuracao (feita):**
+- `expo-updates` instalado; `eas update:configure` gravou no `app.json`:
+  `updates.url = https://u.expo.dev/<projectId>` e `runtimeVersion {policy: appVersion}`.
+- `eas.json`: cada perfil de build amarrado a um canal (`development`/`preview`/`production`).
+- Workflow `.github/workflows/eas-update.yml`: a cada push publica OTA — push `dev` ->
+  `eas update --branch preview`; push `main` -> `eas update --branch production` — via
+  `expo/expo-github-action@v8` + secret `EXPO_TOKEN`. Runner em **Node 22**.
+- `EXPO_TOKEN` = **Personal Access Token da conta dona do projeto** (`andrericao`), criado em
+  expo.dev/settings/access-tokens e guardado como **secret do GitHub no repo** (nao e env do
+  EAS). Um token por repo e boa pratica (revoga/rotaciona isolado).
+- **Validado 2026-06-23:** push na `dev` -> workflow publicou OTA no canal `preview`
+  (branch `preview` no EAS, runtime 1.0.0). CD vivo: editar JS + push = OTA automatico.
+
+**⚠️ Licao critica — o APK precisa ter o `expo-updates` embutido:**
+um APK so recebe OTA se foi buildado **depois** de o `expo-updates` entrar no projeto. O
+primeiro APK do partner (build de um commit anterior ao `expo-updates`) NAO recebia OTA; foi
+preciso **rebuildar** (`eas build -p android --profile preview`) e reinstalar. Conferir com
+`eas build:list`: o build tem que ser do commit em que o `expo-updates` ja existe.
+
+**⚠️ Ferramentas exigem Node >= 20.19.4** (SDK 54): em Node mais antigo o `expo-doctor`
+crasha (`util.parseEnv is not a function`) e o gate do pre-push deixa de validar de verdade.
+Usar Node 22 (nvm) e **reinstalar o `eas-cli` global apos trocar de Node** (`npm i -g eas-cli`,
+porque os globais sao por versao do nvm).
+
+**Front-client deve seguir esta mesma referencia (secao 14 inteira).** Ele ja tem EAS
+Build/Update + anti-quebra configurados, mas **falta o workflow de auto-publish** — ver
+pendencia **C5** na secao 11.1 (com o detalhe critico do `EXPO_PUBLIC_API_ENV` por branch).
