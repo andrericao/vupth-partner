@@ -10,7 +10,11 @@
       "expo-secure-store"
     ],
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.vupth.partner"
+    },
     "android": {
+      "package": "com.vupth.partner",
       "softwareKeyboardLayoutMode": "pan"
     },
     "androidNavigationBar": {
@@ -20,6 +24,12 @@
     "androidStatusBar": {
       "barStyle": "dark-content",
       "backgroundColor": "#F7FAF8"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b33bdfbe-e533-4b86-a24c-423a62bc07f5"
+      }
+    },
+    "owner": "andrericao"
   }
 }
