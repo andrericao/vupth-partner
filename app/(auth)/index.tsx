@@ -10,7 +10,7 @@ export default function RoleChoiceScreen() {
 
       <VStack flex={1} mt="$48" w="$full" space="xl">
         <Heading size="3xl" fontFamily="$heading" textAlign="center">
-          Como deseja usar o VUPTH?
+          Como deseja usar o VUPTH? (OTA ✅)
         </Heading>
 
         <Text fontFamily="$body" textAlign="center" mt="$4" color="$coolGray500">

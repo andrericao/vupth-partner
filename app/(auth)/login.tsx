@@ -78,7 +78,7 @@ export default function LoginScreen() {
         <Header showBackButton />
         <VStack flex={1} mt="$48" w="$full">
           <Heading mb="$12" size="3xl" fontFamily="$heading">
-            Login (OTA ✅)
+            Login
           </Heading>
           <FormControl isInvalid={isEmailInvalid}>
             <Input
