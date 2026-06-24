@@ -587,6 +587,15 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > Itens que o frontend partner precisa do backend.
 > Marcados com **PRIORIDADE** os que serao implementados em breve.
 
+**DevOps (descoberto 2026-06-24, fora do escopo de edicao do partner):** o APK de demo
+(`--profile preview`) aponta para o **backend de staging no Render** (dev), nao para o de
+producao (Railway). Logo, a demo dos usuarios depende do Render — e a rede anti-quebra do
+frontend (OTA + auto-rollback) **nao cobre** um deploy ruim do backend. **Pendencia do repo
+backend:** auto-rollback de deploy no Render (workflow que reverte o deploy se o health
+check/CI ficar vermelho), usando os secrets `RENDER_API_KEY` (Render → Account Settings →
+API Keys) e `RENDER_SERVICE_ID` (`srv-...`, na URL do dashboard). Fecha a rede de seguranca
+ponta a ponta da demo (equivalente backend do `auto-rollback.yml` do frontend).
+
 | # | Item | Descricao | Justificativa |
 |---|------|-----------|---------------|
 | 1 | ~~**Endpoint de historico de atendimentos**~~ | `GET /attendances?establishmentId=X&professionalId=Y&status=FINISHED` | ✅ **IMPLEMENTADO** no backend (2026-06-09). Acesso: OWNER ou PROFESSIONAL. Query params: establishmentId, professionalId, dateFrom, dateTo, status. Bugs de SecurityConfig e ownership corrigidos |
