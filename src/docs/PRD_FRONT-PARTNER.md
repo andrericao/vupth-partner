@@ -1001,6 +1001,13 @@ crasha (`util.parseEnv is not a function`) e o gate do pre-push deixa de validar
 Usar Node 22 (nvm) e **reinstalar o `eas-cli` global apos trocar de Node** (`npm i -g eas-cli`,
 porque os globais sao por versao do nvm).
 
+**⚠️ Licao — mensagem do commit por env var (bug corrigido 2026-06-24):** no step do
+`eas update`, passar a mensagem via `env: { MSG: ${{ github.event.head_commit.message }} }`
++ `--message "$MSG"`. **Nunca** interpolar `--message "${{ github.event.head_commit.message }}"`
+direto no `run:` — mensagem de commit **multi-linha ou com aspas** quebra o comando
+(`Unexpected arguments: ...`). O front-client provavelmente tem o mesmo bug e deve aplicar o
+mesmo fix.
+
 **Front-client deve seguir esta mesma referencia (secao 14 inteira).** Ele ja tem EAS
 Build/Update + anti-quebra configurados, mas **falta o workflow de auto-publish** — ver
 pendencia **C5** na secao 11.1 (com o detalhe critico do `EXPO_PUBLIC_API_ENV` por branch).

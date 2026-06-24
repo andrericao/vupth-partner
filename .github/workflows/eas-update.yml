@@ -28,10 +28,16 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # A mensagem do commit vai por env var (nao interpolada direto no shell):
+      # mensagens multi-linha / com aspas quebram o `--message "${{ ... }}"`.
       - name: Publish OTA (dev -> preview)
         if: github.ref == 'refs/heads/dev'
-        run: eas update --branch preview --message "${{ github.event.head_commit.message }}" --non-interactive
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: eas update --branch preview --message "$MSG" --non-interactive
 
       - name: Publish OTA (main -> production)
         if: github.ref == 'refs/heads/main'
-        run: eas update --branch production --message "${{ github.event.head_commit.message }}" --non-interactive
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: eas update --branch production --message "$MSG" --non-interactive
