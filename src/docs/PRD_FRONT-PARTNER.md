@@ -954,12 +954,12 @@ o jest nao pega — foi a classe de erro do CNG).
   *Require status checks to pass* -> **CI / lint-and-test**. Assim codigo quebrado
   nao consegue ser mergeado no `main`. `main` = linha de producao sempre verde.
 
-**TODO (pendencia do partner, recomendada pelo front-client 2026-06-24):** portar o
-`auto-rollback.yml` que o front-client tem para o partner. Ele cobre um caso que o
-pre-push nao pega: se um push entrar com `--no-verify` ou de outra maquina e o **CI ficar
-vermelho**, um workflow (`on: workflow_run` do CI concluido) **reverte automaticamente** o
-commit que quebrou, voltando ao ultimo estado verde. Hoje o partner so tem rollback
-manual (14.5). Referencia: `.github/workflows/auto-rollback.yml` no repo `vupth/`.
+- **Auto-rollback** (`.github/workflows/auto-rollback.yml`) — ✅ portado do front-client
+  (2026-06-24). Cobre o caso que o pre-push nao pega: se um push entrar com `--no-verify`
+  ou de outra maquina e o **CI ficar vermelho**, este workflow (`on: workflow_run` do CI
+  concluido) **reverte automaticamente** o commit que quebrou, voltando ao ultimo estado
+  verde. Guards: so age em push (nao PR), so se o commit ruim ainda for o HEAD, e nao
+  reverte um revert nem `[skip-rollback]` (evita loop). Complementa o rollback manual (14.5).
 
 ### 14.5 Rollback
 
