@@ -15,7 +15,10 @@
     },
     "android": {
       "package": "com.vupth.partner",
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "androidNavigationBar": {
       "backgroundColor": "#FFFFFF",
@@ -30,6 +33,9 @@
         "projectId": "b33bdfbe-e533-4b86-a24c-423a62bc07f5"
       }
     },
-    "owner": "andrericao"
+    "owner": "andrericao",
+    "updates": {
+      "url": "https://u.expo.dev/b33bdfbe-e533-4b86-a24c-423a62bc07f5"
+    }
   }
 }
