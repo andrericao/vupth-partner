@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-12 (v4 — fluxo afiliar-primeiro, autoCapitalize nos inputs)
+> **Ultima atualizacao:** 2026-06-23 (v5 — secao 14: EAS Build, migracao CNG, rede anti-quebra e rollback)
 
 ---
 
@@ -26,6 +26,8 @@
 10. [Pendente de Implementacao](#10-pendente-de-implementacao)
 11. [Pendencias futuras para o Backend](#11-pendencias-futuras-para-o-backend-escrito-pelo-front-partner)
 12. [Features Futuras (Planejamento)](#12-features-futuras-planejamento)
+13. [Redesign — EM IMPLEMENTACAO na dev](#13-redesign--em-implementacao-na-dev-consolidado-2026-06-17)
+14. [Build, Distribuicao e Anti-quebra (DevOps)](#14-build-distribuicao-e-anti-quebra-devops--configurado-2026-06-23)
 
 ---
 
@@ -880,3 +882,90 @@ Direcao visual e um **upgrade real** e coerente com o que ja construimos (tempo 
 3. **Card do cliente cita "distancia" e "avaliacao"** — dependem de geolocalizacao (#11/#2) e rating (roadmap #6 backend): features novas, nao so visual.
 
 **Acao (branch new-design, NAO agora):** (1) aplicar paleta+tipografia no `config/gluestack-ui.config.ts` (escala `green` + fontes Poppins/Inter via expo-font); (2) extrair componentes (card, botao, tab, tracker de fila com texto explicito de posicao/ETA — sem depender do ring); (3) aplicar tela a tela comecando pela fila em tempo real. Resolve as pendencias antigas do PRD "paleta/fontes COM O DESIGN".
+
+---
+
+## 14. Build, Distribuicao e Anti-quebra (DevOps) — configurado 2026-06-23
+
+> Como o app vira binario instalavel, como e distribuido, e a rede de protecao
+> que impede codigo quebrado de "subir" (e como reverter se subir).
+
+### 14.1 Workflow nativo: CNG (Continuous Native Generation)
+
+O projeto **nao versiona** as pastas `android/` e `ios/` — elas estao no `.gitignore`
+(`/android`, `/ios`). O `expo prebuild` **gera os projetos nativos do zero** a cada
+build, a partir do `app.json` + config plugins, sempre coerentes com a SDK 54.
+
+- **Fonte da verdade** das configuracoes nativas = `app.json` (package, bundleId,
+  plugins, permissoes, status bar). Nada de editar `android/ios` na mao.
+- **Historico:** ate 2026-06-23 o projeto tinha `android/ios` commitados (saida stock
+  do primeiro `prebuild`, em SDK antiga). Isso quebrava o EAS Build na SDK 54 com
+  erro de compilacao Kotlin (`:expo-module-gradle-plugin:compileKotlin` / "Could not
+  receive a message from the daemon"). Migrar para CNG (remover as pastas) resolveu.
+- Para dev local nativo (`expo run:android`), o prebuild roda on-demand; o dia a dia
+  e via Expo Go + `expo start`.
+
+### 14.2 EAS Build — perfis e identificadores
+
+- Conta EAS: **andrericao**; projeto `@andrericao/vupth-partner`
+  (`extra.eas.projectId` em `app.json`, gravado por `eas init`).
+- Identificadores (em `app.json`): `android.package` e `ios.bundleIdentifier` =
+  **`com.vupth.partner`** (permanente apos publicar na loja).
+- `eas.json` (perfis):
+
+| Perfil | Formato | Distribuicao | Uso |
+|--------|---------|--------------|-----|
+| `development` | apk (dev client) | internal | debug com dev client |
+| `preview` | **apk** | internal | teste fora da loja (instala direto no celular) |
+| `production` | **aab** + autoIncrement | store | publicacao na Play Store |
+
+### 14.3 Fluxo de build e instalacao (APK preview)
+
+Setup inicial (1x, exige login interativo do usuario):
+```bash
+eas login          # sessao fica salva; login tambem via "Continue with GitHub"
+eas init           # cria o projeto na conta + grava projectId no app.json
+```
+Gerar o APK de teste:
+```bash
+eas build --platform android --profile preview
+```
+- Roda **na nuvem da Expo** (pode fechar o terminal); ~10-20 min; consome 1 build da
+  cota grátis mensal (sem cobranca por memoria; so `resourceClass: large` seria pago).
+- No fim, abrir a **URL do build no navegador do celular** -> Install -> instala o APK.
+- **Google Play Protect bloqueia APK fora da loja** (normal, nao e virus):
+  toque "Mais detalhes" -> "Instalar mesmo assim"; se nao aparecer, desligar
+  temporariamente Play Store -> Play Protect -> Configuracoes -> "Verificar apps".
+
+### 14.4 Rede anti-quebra (gate antes de subir)
+
+Defesa em profundidade: o codigo so "sobe" se passar nos checks
+**typecheck -> jest -> expo-doctor** (esse ultimo pega quebras de config/nativo que
+o jest nao pega — foi a classe de erro do CNG).
+
+- **Local — pre-push hook** (`.githooks/pre-push`): roda antes de cada `git push` e
+  **aborta** se algo falhar. Ativado por `core.hooksPath=.githooks`, religado
+  automaticamente no `npm install` (script `prepare` no `package.json`).
+  Bypass de emergencia: `git push --no-verify`.
+- **Servidor — CI** (`.github/workflows/ci.yml`): typecheck + jest + cobertura (gate
+  de threshold) + **expo-doctor**, em push (`dev`/`main`) e PR para `main`.
+- **Branch protection no `main`** (acao manual no GitHub -> Settings -> Branches):
+  *Require status checks to pass* -> **CI / lint-and-test**. Assim codigo quebrado
+  nao consegue ser mergeado no `main`. `main` = linha de producao sempre verde.
+
+### 14.5 Rollback
+
+- **Tag de fallback** `last-ci-green` aponta para o ultimo commit verde (mover para
+  frente a cada release verde): `git tag -f last-ci-green <commit> && git push -f origin last-ci-green`.
+- **Desfazer commit ruim** mantendo historico (preferido): `git revert --no-edit <commit>`.
+- **Voltar a branch** para o ultimo verde: `git reset --hard last-ci-green`.
+- **App ja publicado** (quando EAS Update/OTA estiver ligado): `eas update:rollback`
+  reverte os usuarios na hora.
+- Procedimento detalhado tambem em [`docs/ROLLBACK.md`](../../docs/ROLLBACK.md).
+
+### 14.6 CD futuro — EAS Update (OTA) — DECIDIDO, NAO INICIADO
+
+Atualizar a camada JavaScript (telas/logica/fixes) pela internet, sem rebuild de loja.
+Plano: `eas update:configure` + workflow `eas-update.yml` (push `dev` -> canal
+`preview`; push `main` -> canal `production`); secret `EXPO_TOKEN` no GitHub Actions.
+Nao atualiza camada nativa (lib nativa nova/permissao/icone/SDK = exige novo build).
