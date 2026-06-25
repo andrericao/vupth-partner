@@ -22,3 +22,6 @@ jobs:
       - run: npx tsc --noEmit
 
       - run: npm test -- --ci --coverage --passWithNoTests
+
+      - name: Config / native sanity (expo-doctor)
+        run: npx expo-doctor

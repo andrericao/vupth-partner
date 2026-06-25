@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-12 (v4 — fluxo afiliar-primeiro, autoCapitalize nos inputs)
+> **Ultima atualizacao:** 2026-06-24 (v7 — C5 concluida pelo front-client; TODO portar auto-rollback do client p/ o partner)
 
 ---
 
@@ -26,6 +26,8 @@
 10. [Pendente de Implementacao](#10-pendente-de-implementacao)
 11. [Pendencias futuras para o Backend](#11-pendencias-futuras-para-o-backend-escrito-pelo-front-partner)
 12. [Features Futuras (Planejamento)](#12-features-futuras-planejamento)
+13. [Redesign — EM IMPLEMENTACAO na dev](#13-redesign--em-implementacao-na-dev-consolidado-2026-06-17)
+14. [Build, Distribuicao e Anti-quebra (DevOps)](#14-build-distribuicao-e-anti-quebra-devops--configurado-2026-06-23)
 
 ---
 
@@ -585,6 +587,15 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > Itens que o frontend partner precisa do backend.
 > Marcados com **PRIORIDADE** os que serao implementados em breve.
 
+**DevOps (descoberto 2026-06-24, fora do escopo de edicao do partner):** o APK de demo
+(`--profile preview`) aponta para o **backend de staging no Render** (dev), nao para o de
+producao (Railway). Logo, a demo dos usuarios depende do Render — e a rede anti-quebra do
+frontend (OTA + auto-rollback) **nao cobre** um deploy ruim do backend. **Pendencia do repo
+backend:** auto-rollback de deploy no Render (workflow que reverte o deploy se o health
+check/CI ficar vermelho), usando os secrets `RENDER_API_KEY` (Render → Account Settings →
+API Keys) e `RENDER_SERVICE_ID` (`srv-...`, na URL do dashboard). Fecha a rede de seguranca
+ponta a ponta da demo (equivalente backend do `auto-rollback.yml` do frontend).
+
 | # | Item | Descricao | Justificativa |
 |---|------|-----------|---------------|
 | 1 | ~~**Endpoint de historico de atendimentos**~~ | `GET /attendances?establishmentId=X&professionalId=Y&status=FINISHED` | ✅ **IMPLEMENTADO** no backend (2026-06-09). Acesso: OWNER ou PROFESSIONAL. Query params: establishmentId, professionalId, dateFrom, dateTo, status. Bugs de SecurityConfig e ownership corrigidos |
@@ -658,6 +669,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | C2 | **Atualizar o Gluestack no front-client** | Assim como foi feito no front-partner (2026-06-14: `@gluestack-ui/themed` 1.1.54 → 1.1.73, ultima da linha v1), o app cliente (`vupth/`) deve atualizar o Gluestack para a ultima v1 e, depois, avaliar a migracao v1 → v2 (refactor grande, base nativewind). Manter as duas bases alinhadas na mesma versao. **Atencao:** o bump 1.1.73 passa a puxar `@gluestack-ui/tooltip → react-aria → react-dom`; foi preciso adicionar `react-dom` (mesma versao do React, ex.: 19.1.0) so para o Metro resolver o import, e reiniciar o bundler com cache limpo (`expo start -c`). | Pedido do usuario (2026-06-14). O front-client esta atras no `package.json` (ex.: `@gluestack-ui/themed` ^1.1.34, `@gluestack-ui/config` ^1.1.19). Implementar no repo `vupth/` quando o usuario autorizar. |
 | C3 | **Tempo real via WebSocket (STOMP) — fila + notificacoes pessoais** | O backend entregou o tempo real (2026-06-14, commit 9bf858f; contrato em PRD_BACKEND secao 18b). O **front-client** deve: **(1)** instalar `@stomp/stompjs`; **(2)** derivar a URL do socket do BASE_URL (`http→ws`, `https→wss`, sufixo `/ws`); **(3)** conectar com `connectHeaders: { Authorization: "Bearer <access_token>" }` no frame CONNECT (necessario para receber notificacoes pessoais; sem token recebe so topicos publicos); **(4)** SUBSCRIBE `/topic/establishment/{id}/queue` — snapshot COMPLETO da fila (igual ao `GET /establishment/id/{id}/professionals-with-queue`), reenviado a cada mudanca → usar para atualizar a tela de fila do cliente em tempo real e **substituir o polling**, mantendo um refetch como fallback; **(5)** SUBSCRIBE `/user/queue/notifications` (autenticado) — notificacao pessoal do cliente: `ATTENDANCE_STARTED` (mensagem "E a sua vez! ...") e `ATTENDANCE_FINISHED` ("Seu atendimento foi concluido."). Payload: `{ type, attendanceId, establishmentId, message, timestamp }`. Exibir como alerta/toast in-app no minimo; push real (app em background) depende do backend #3 (device token) — fora deste escopo. **Modelo de referencia:** o front-partner ja implementou o lado do `/topic/.../queue` em `src/hooks/useQueueSocket.ts` (embutido em `useQueuePolling`/`useProfessionalQueue`); o client pode espelhar o mesmo padrao e adicionar a subscription de `/user/queue/notifications`. | Backend concluido (roadmap #1). O cliente e o maior beneficiario das notificacoes pessoais ("e a sua vez"). Implementar no repo `vupth/` quando o usuario autorizar. |
 | C4 | **Nao exibir profissional sem servico** | O backend (2026-06-14, commit d2ea594, #31) ja filtra profissionais sem servico em `GET /establishment/id/{id}/professionals-with-queue` e so abre a loja com >=1 profissional com >=1 servico. **Acao do client:** majoritariamente automatico (o backend nao retorna esses profissionais); apenas garantir que a UI nao assume profissionais "fantasma" e que listas vazias sao tratadas. | Backend concluido (#31). So validar no front-client. |
+| C5 | **Workflow de auto-publish do OTA (EAS Update)** — ✅ CONCLUIDO no client (2026-06-24) | O client (`vupth/`) ja tem EAS Build + EAS Update **configurados** (expo-updates, eas.json com canais development/preview/production, projectId, runtimeVersion) + anti-quebra (pre-push + CI + `auto-rollback.yml`), **mas NAO tem o workflow que publica o OTA automaticamente no push** — so existe `ci.yml` e `auto-rollback.yml`. Por isso o OTA so sai rodando `eas update` **na mao** (que trava no export do Metro local). **Acao:** criar `.github/workflows/eas-update.yml` espelhando o do front-partner (push `dev` → `eas update --branch preview`; push `main` → `eas update --branch production`; via `expo/expo-github-action@v8` + secret `EXPO_TOKEN`, que ja existe no repo do client). **⚠️ DETALHE CRITICO do client:** os perfis do `eas.json` setam `EXPO_PUBLIC_API_ENV` (dev/prod) que so vale para *build*, **nao** para `eas update`. No step de update e preciso setar a env explicitamente por branch: `EXPO_PUBLIC_API_ENV=dev eas update --branch preview` e `EXPO_PUBLIC_API_ENV=prod eas update --branch production` — senao o bundle do OTA sai apontando para a API errada. Node 22 no runner. | Descoberto pelo front-partner (2026-06-23) ao configurar o proprio CD/OTA. Implementado pelo front-client (2026-06-24). Bonus inverso: o `auto-rollback.yml` do client e melhor que o do partner — **portar para o partner** (pendencia propria do partner, ver 14.4). |
 
 ---
 
@@ -880,3 +892,131 @@ Direcao visual e um **upgrade real** e coerente com o que ja construimos (tempo 
 3. **Card do cliente cita "distancia" e "avaliacao"** — dependem de geolocalizacao (#11/#2) e rating (roadmap #6 backend): features novas, nao so visual.
 
 **Acao (branch new-design, NAO agora):** (1) aplicar paleta+tipografia no `config/gluestack-ui.config.ts` (escala `green` + fontes Poppins/Inter via expo-font); (2) extrair componentes (card, botao, tab, tracker de fila com texto explicito de posicao/ETA — sem depender do ring); (3) aplicar tela a tela comecando pela fila em tempo real. Resolve as pendencias antigas do PRD "paleta/fontes COM O DESIGN".
+
+---
+
+## 14. Build, Distribuicao e Anti-quebra (DevOps) — configurado 2026-06-23
+
+> Como o app vira binario instalavel, como e distribuido, e a rede de protecao
+> que impede codigo quebrado de "subir" (e como reverter se subir).
+
+### 14.1 Workflow nativo: CNG (Continuous Native Generation)
+
+O projeto **nao versiona** as pastas `android/` e `ios/` — elas estao no `.gitignore`
+(`/android`, `/ios`). O `expo prebuild` **gera os projetos nativos do zero** a cada
+build, a partir do `app.json` + config plugins, sempre coerentes com a SDK 54.
+
+- **Fonte da verdade** das configuracoes nativas = `app.json` (package, bundleId,
+  plugins, permissoes, status bar). Nada de editar `android/ios` na mao.
+- **Historico:** ate 2026-06-23 o projeto tinha `android/ios` commitados (saida stock
+  do primeiro `prebuild`, em SDK antiga). Isso quebrava o EAS Build na SDK 54 com
+  erro de compilacao Kotlin (`:expo-module-gradle-plugin:compileKotlin` / "Could not
+  receive a message from the daemon"). Migrar para CNG (remover as pastas) resolveu.
+- Para dev local nativo (`expo run:android`), o prebuild roda on-demand; o dia a dia
+  e via Expo Go + `expo start`.
+
+### 14.2 EAS Build — perfis e identificadores
+
+- Conta EAS: **andrericao**; projeto `@andrericao/vupth-partner`
+  (`extra.eas.projectId` em `app.json`, gravado por `eas init`).
+- Identificadores (em `app.json`): `android.package` e `ios.bundleIdentifier` =
+  **`com.vupth.partner`** (permanente apos publicar na loja).
+- `eas.json` (perfis):
+
+| Perfil | Formato | Distribuicao | Uso |
+|--------|---------|--------------|-----|
+| `development` | apk (dev client) | internal | debug com dev client |
+| `preview` | **apk** | internal | teste fora da loja (instala direto no celular) |
+| `production` | **aab** + autoIncrement | store | publicacao na Play Store |
+
+### 14.3 Fluxo de build e instalacao (APK preview)
+
+Setup inicial (1x, exige login interativo do usuario):
+```bash
+eas login          # sessao fica salva; login tambem via "Continue with GitHub"
+eas init           # cria o projeto na conta + grava projectId no app.json
+```
+Gerar o APK de teste:
+```bash
+eas build --platform android --profile preview
+```
+- Roda **na nuvem da Expo** (pode fechar o terminal); ~10-20 min; consome 1 build da
+  cota grátis mensal (sem cobranca por memoria; so `resourceClass: large` seria pago).
+- No fim, abrir a **URL do build no navegador do celular** -> Install -> instala o APK.
+- **Google Play Protect bloqueia APK fora da loja** (normal, nao e virus):
+  toque "Mais detalhes" -> "Instalar mesmo assim"; se nao aparecer, desligar
+  temporariamente Play Store -> Play Protect -> Configuracoes -> "Verificar apps".
+
+### 14.4 Rede anti-quebra (gate antes de subir)
+
+Defesa em profundidade: o codigo so "sobe" se passar nos checks
+**typecheck -> jest -> expo-doctor** (esse ultimo pega quebras de config/nativo que
+o jest nao pega — foi a classe de erro do CNG).
+
+- **Local — pre-push hook** (`.githooks/pre-push`): roda antes de cada `git push` e
+  **aborta** se algo falhar. Ativado por `core.hooksPath=.githooks`, religado
+  automaticamente no `npm install` (script `prepare` no `package.json`).
+  Bypass de emergencia: `git push --no-verify`.
+- **Servidor — CI** (`.github/workflows/ci.yml`): typecheck + jest + cobertura (gate
+  de threshold) + **expo-doctor**, em push (`dev`/`main`) e PR para `main`.
+- **Branch protection no `main`** (acao manual no GitHub -> Settings -> Branches):
+  *Require status checks to pass* -> **CI / lint-and-test**. Assim codigo quebrado
+  nao consegue ser mergeado no `main`. `main` = linha de producao sempre verde.
+
+- **Auto-rollback** (`.github/workflows/auto-rollback.yml`) — ✅ portado do front-client
+  (2026-06-24). Cobre o caso que o pre-push nao pega: se um push entrar com `--no-verify`
+  ou de outra maquina e o **CI ficar vermelho**, este workflow (`on: workflow_run` do CI
+  concluido) **reverte automaticamente** o commit que quebrou, voltando ao ultimo estado
+  verde. Guards: so age em push (nao PR), so se o commit ruim ainda for o HEAD, e nao
+  reverte um revert nem `[skip-rollback]` (evita loop). Complementa o rollback manual (14.5).
+
+### 14.5 Rollback
+
+- **Tag de fallback** `last-ci-green` aponta para o ultimo commit verde (mover para
+  frente a cada release verde): `git tag -f last-ci-green <commit> && git push -f origin last-ci-green`.
+- **Desfazer commit ruim** mantendo historico (preferido): `git revert --no-edit <commit>`.
+- **Voltar a branch** para o ultimo verde: `git reset --hard last-ci-green`.
+- **App ja publicado** (quando EAS Update/OTA estiver ligado): `eas update:rollback`
+  reverte os usuarios na hora.
+- Procedimento detalhado tambem em [`docs/ROLLBACK.md`](../../docs/ROLLBACK.md).
+
+### 14.6 CD — EAS Update (OTA) — CONFIGURADO E FUNCIONANDO (2026-06-23)
+
+Atualiza a camada **JavaScript** (telas/logica/fixes) pela internet, sem rebuild de loja.
+**Nao** atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK mudam o
+`runtimeVersion` e exigem um **build novo**.
+
+**Configuracao (feita):**
+- `expo-updates` instalado; `eas update:configure` gravou no `app.json`:
+  `updates.url = https://u.expo.dev/<projectId>` e `runtimeVersion {policy: appVersion}`.
+- `eas.json`: cada perfil de build amarrado a um canal (`development`/`preview`/`production`).
+- Workflow `.github/workflows/eas-update.yml`: a cada push publica OTA — push `dev` ->
+  `eas update --branch preview`; push `main` -> `eas update --branch production` — via
+  `expo/expo-github-action@v8` + secret `EXPO_TOKEN`. Runner em **Node 22**.
+- `EXPO_TOKEN` = **Personal Access Token da conta dona do projeto** (`andrericao`), criado em
+  expo.dev/settings/access-tokens e guardado como **secret do GitHub no repo** (nao e env do
+  EAS). Um token por repo e boa pratica (revoga/rotaciona isolado).
+- **Validado 2026-06-23:** push na `dev` -> workflow publicou OTA no canal `preview`
+  (branch `preview` no EAS, runtime 1.0.0). CD vivo: editar JS + push = OTA automatico.
+
+**⚠️ Licao critica — o APK precisa ter o `expo-updates` embutido:**
+um APK so recebe OTA se foi buildado **depois** de o `expo-updates` entrar no projeto. O
+primeiro APK do partner (build de um commit anterior ao `expo-updates`) NAO recebia OTA; foi
+preciso **rebuildar** (`eas build -p android --profile preview`) e reinstalar. Conferir com
+`eas build:list`: o build tem que ser do commit em que o `expo-updates` ja existe.
+
+**⚠️ Ferramentas exigem Node >= 20.19.4** (SDK 54): em Node mais antigo o `expo-doctor`
+crasha (`util.parseEnv is not a function`) e o gate do pre-push deixa de validar de verdade.
+Usar Node 22 (nvm) e **reinstalar o `eas-cli` global apos trocar de Node** (`npm i -g eas-cli`,
+porque os globais sao por versao do nvm).
+
+**⚠️ Licao — mensagem do commit por env var (bug corrigido 2026-06-24):** no step do
+`eas update`, passar a mensagem via `env: { MSG: ${{ github.event.head_commit.message }} }`
++ `--message "$MSG"`. **Nunca** interpolar `--message "${{ github.event.head_commit.message }}"`
+direto no `run:` — mensagem de commit **multi-linha ou com aspas** quebra o comando
+(`Unexpected arguments: ...`). O front-client provavelmente tem o mesmo bug e deve aplicar o
+mesmo fix.
+
+**Front-client deve seguir esta mesma referencia (secao 14 inteira).** Ele ja tem EAS
+Build/Update + anti-quebra configurados, mas **falta o workflow de auto-publish** — ver
+pendencia **C5** na secao 11.1 (com o detalhe critico do `EXPO_PUBLIC_API_ENV` por branch).
