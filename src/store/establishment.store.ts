@@ -38,6 +38,31 @@ export type EstablishmentSearchResult = {
   status: string;
 };
 
+export type EstablishmentAddress = {
+  street: string | null;
+  number: string | null;
+  complement: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+};
+
+// Detalhe rico do estabelecimento (GET /establishment/id/{id}) — usado na tela
+// de detalhe que o profissional ve antes de solicitar vinculacao (feedback #3).
+export type EstablishmentDetail = {
+  id: string;
+  name: string;
+  service_type: string;
+  open_status: string;
+  url_image: string | null;
+  phone: string | null;
+  instagram: string | null;
+  opening_time: string | null;
+  closing_time: string | null;
+  address: EstablishmentAddress | null;
+};
+
 // Item da busca de profissionais (#6) — GET /professional?name=&specialty=.
 export type ProfessionalSearchResult = {
   id: string;
@@ -92,6 +117,34 @@ function normalizeEstablishment(data: any): Establishment {
   };
 }
 
+function normalizeAddress(a: any): EstablishmentAddress | null {
+  if (!a) return null;
+  return {
+    street: a.street ?? null,
+    number: a.number ?? null,
+    complement: a.complement ?? null,
+    neighborhood: a.neighborhood ?? null,
+    city: a.city ?? null,
+    state: a.state ?? null,
+    zipCode: a.zipCode ?? a.zip_code ?? null,
+  };
+}
+
+function normalizeEstablishmentDetail(data: any): EstablishmentDetail {
+  return {
+    id: data.id,
+    name: data.name,
+    service_type: data.service_type ?? data.serviceType ?? "",
+    open_status: data.open_status ?? data.openStatus ?? "CLOSED",
+    url_image: data.url_image ?? data.urlImage ?? null,
+    phone: data.phone ?? null,
+    instagram: data.instagram ?? null,
+    opening_time: data.opening_time ?? data.openingTime ?? null,
+    closing_time: data.closing_time ?? data.closingTime ?? null,
+    address: normalizeAddress(data.address),
+  };
+}
+
 async function persistEstablishment(establishment: Establishment) {
   await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(establishment));
 }
@@ -129,6 +182,7 @@ type EstablishmentState = {
     }
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
+  fetchEstablishmentById: (id: string) => Promise<EstablishmentDetail>;
   searchProfessionals: (name?: string, specialty?: string) => Promise<ProfessionalSearchResult[]>;
   inviteProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   fetchReport: (id: string, dateFrom?: string, dateTo?: string) => Promise<EstablishmentReport>;
@@ -214,6 +268,11 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     const params = name.trim() ? { name } : {};
     const { data } = await api.get("/establishment", { params });
     return data;
+  },
+
+  fetchEstablishmentById: async (id) => {
+    const { data } = await api.get(`/establishment/id/${id}`);
+    return normalizeEstablishmentDetail(data);
   },
 
   searchProfessionals: async (name, specialty) => {

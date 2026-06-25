@@ -76,6 +76,10 @@ export default function ProfessionalLayout() {
         options={{ href: null }}
       />
       <Tabs.Screen
+        name="establishment-detail"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
         name="meals"
         options={{ href: null }}
       />
