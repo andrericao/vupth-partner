@@ -229,7 +229,7 @@ export default function MyServicesScreen() {
 
         {professional?.establishment_id && professional?.establishment_name ? (
           <Text fontFamily="$body" fontSize="$sm" color="$green600" mt="$1">
-            Vinculado a {professional.establishment_name}
+            {professional.establishment_name}
           </Text>
         ) : null}
 
