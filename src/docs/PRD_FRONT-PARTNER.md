@@ -537,14 +537,14 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > Itens que o frontend partner precisa do backend.
 > Marcados com **PRIORIDADE** os que serao implementados em breve.
 
-**DevOps — ✅ resolvido no backend (PRD_BACKEND 18d, 2026-06-25):** o APK de demo
-(`--profile preview`) aponta para o **backend de staging no Render** (dev), nao prod (Railway).
-O backend **ja tem o auto-rollback** no `ci.yml` (tags `homolog-last-good`/`prod-last-good`;
-se o Newman pos-deploy falha, redeploy automatico do ultimo commit bom — Render via API,
-Railway via `railway up`) + `rollback.yml` manual. **Pendente so para Andre:** adicionar 2
-secrets no GitHub Actions do backend — `RENDER_API_KEY` (Render → Account Settings → API Keys)
-e `RENDER_SERVICE_ID` (`srv-...`, na URL do dashboard) — sem eles o rollback de **homolog**
-(o que protege o APK!) nao roda sozinho (sai com `::warning::`); o de prod ja funciona.
+**DevOps — ✅ COMPLETO (backend, 2026-06-26):** o APK de demo (`--profile preview`) aponta
+para o **backend de staging no Render** (dev), nao prod (Railway). O backend tem o
+auto-rollback no `ci.yml` (tags `homolog-last-good`/`prod-last-good`; se o Newman pos-deploy
+falha, redeploy automatico do ultimo commit bom — Render via API, Railway via `railway up`) +
+`rollback.yml` manual. Os secrets `RENDER_API_KEY` e `RENDER_SERVICE_ID` **ja foram adicionados**
+no GitHub Actions do backend → o rollback de **homolog** (o que protege o APK de demo) agora
+roda sozinho. **Rede de seguranca ponta a ponta da demo fechada** (frontend OTA/auto-rollback +
+backend auto-rollback homolog/prod).
 
 > **Alinhado com PRD_BACKEND de 2026-06-25.** Os 2 itens que faltavam foram **ENTREGUES** no backend e **saem desta lista** (desbloqueiam o partner — ver secao 10):
 > - ✅ **#16 apelido** — `PATCH /profile/general-infos { nickname }` (max 50; vazio limpa; null ignora); nickname projetado nos GETs de papel e em `GET /profile/me`. Testes `ProfileNicknameIntegrationTest`. → **desbloqueia partner #3.**
