@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-24 (v8 — pendencias reorganizadas: removidos concluidos, lista do partner renumerada 1..6 por prioridade; backend so #16/#19; client so C1-C4)
+> **Ultima atualizacao:** 2026-06-26 (v9 — alinhado com PRD_BACKEND 2026-06-25: #16 apelido e #19 LATE/encaixe ENTREGUES → desbloqueiam partner #2 e #3; auto-rollback do backend ja existe, falta so secrets do Render)
 
 ---
 
@@ -522,8 +522,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > Renumeradas 1..N por prioridade; itens concluidos saem da lista (o git history preserva). Dependencias de backend/client ficam na secao 11. Regra de gestao: ao concluir, remover e renumerar.
 
 1. **Testar a #4 (card → tela de detalhe) no celular e pushar** (`1d109f1`, em andamento). ⚠️ Se os campos de detalhe vierem "Nao informado", confirmar com o backend se `GET /establishment/id/{id}` retorna address/phone/instagram/horario/url_image para profissional nao-dono.
-2. **Regra atende-primeiro na fila (queue.tsx):** botao "Iniciar" so no indice 0; excecao = adiantar o indice 1 (se o 1o desiste/atrasa) → confirmacao → swap em cascata 0↔1 → atende sempre o indice 0; **nunca** botao de atender do 3o em diante. ⚠️ Definir com o backend se o swap exige **ordem explicita** (mesmo pre-req da solicitacao antecipada, secao 12) ou resolve so no front.
-3. **Apelido (nickname) nas Configuracoes do profissional:** ver/editar o apelido (ajuda na busca) + mostrar no resultado da busca. **Bloqueado pelo backend** (nome/sobrenome/apelido — secao 11).
+2. **Regra atende-primeiro na fila (queue.tsx):** botao "Iniciar" so no indice 0; **nunca** botao de atender do 2o em diante diretamente. ✅ **DESBLOQUEADO (backend 2026-06-25):** o "swap" e o status **LATE** — `PATCH /attendances/{id}/late` faz o cliente que nao chegou **cair 1 posicao** (continua na fila), e ai atende o proximo (`/start`); `/undo-late` volta. Tambem ha `/fit-in?aheadCount=N` (encaixe) e `/undo-fit`. Front: acao "Cliente nao chegou" no item indice 0 → `/late` → o 2o vira 1o e o "Iniciar" aparece nele; badge "Atrasado" no LATE. (Mesma feature do antigo backend #19.)
+3. **Apelido (nickname) nas Configuracoes do profissional:** ver/editar o apelido (ajuda na busca) + mostrar no resultado da busca. ✅ **DESBLOQUEADO (backend 2026-06-25):** escrita por `PATCH /profile/general-infos { nickname }` (max 50; string vazia limpa; null ignorado); leitura projetada nos GETs de papel (e `GET /profile/me`). Implementar editor + exibir o apelido na busca.
 4. **Redesign das telas restantes:** formularios, tab bars, Skeleton R4; aplicar paleta + fontes (Poppins/Inter) do Guia de Design (secao 13.1) no `config/gluestack-ui.config.ts`.
 5. **QA — Maestro E2E** (`seed_complete.yaml`), nunca rodado.
 6. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19).
@@ -537,21 +537,27 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > Itens que o frontend partner precisa do backend.
 > Marcados com **PRIORIDADE** os que serao implementados em breve.
 
-**DevOps (descoberto 2026-06-24, fora do escopo de edicao do partner):** o APK de demo
-(`--profile preview`) aponta para o **backend de staging no Render** (dev), nao para o de
-producao (Railway). Logo, a demo dos usuarios depende do Render — e a rede anti-quebra do
-frontend (OTA + auto-rollback) **nao cobre** um deploy ruim do backend. **Pendencia do repo
-backend:** auto-rollback de deploy no Render (workflow que reverte o deploy se o health
-check/CI ficar vermelho), usando os secrets `RENDER_API_KEY` (Render → Account Settings →
-API Keys) e `RENDER_SERVICE_ID` (`srv-...`, na URL do dashboard). Fecha a rede de seguranca
-ponta a ponta da demo (equivalente backend do `auto-rollback.yml` do frontend).
+**DevOps — ✅ resolvido no backend (PRD_BACKEND 18d, 2026-06-25):** o APK de demo
+(`--profile preview`) aponta para o **backend de staging no Render** (dev), nao prod (Railway).
+O backend **ja tem o auto-rollback** no `ci.yml` (tags `homolog-last-good`/`prod-last-good`;
+se o Newman pos-deploy falha, redeploy automatico do ultimo commit bom — Render via API,
+Railway via `railway up`) + `rollback.yml` manual. **Pendente so para Andre:** adicionar 2
+secrets no GitHub Actions do backend — `RENDER_API_KEY` (Render → Account Settings → API Keys)
+e `RENDER_SERVICE_ID` (`srv-...`, na URL do dashboard) — sem eles o rollback de **homolog**
+(o que protege o APK!) nao roda sozinho (sai com `::warning::`); o de prod ja funciona.
 
-> **Numeracao preservada** (cross-project com o roadmap backend — NAO renumerada). Itens concluidos foram removidos (historico no git). Confirmar deploy no **staging** de #3, #4, #6, #12, #13 (entregues no backend dev). Abertas abaixo:
+> **Alinhado com PRD_BACKEND de 2026-06-25.** Os 2 itens que faltavam foram **ENTREGUES** no backend e **saem desta lista** (desbloqueiam o partner — ver secao 10):
+> - ✅ **#16 apelido** — `PATCH /profile/general-infos { nickname }` (max 50; vazio limpa; null ignora); nickname projetado nos GETs de papel e em `GET /profile/me`. Testes `ProfileNicknameIntegrationTest`. → **desbloqueia partner #3.**
+> - ✅ **#19 LATE + #38 encaixe** — `PATCH /attendances/{id}/late` (no-show cai 1 posicao, fica na fila), `/undo-late`, `/fit-in?aheadCount=N`, `/undo-fit`. → **desbloqueia partner #2** (o "swap" = `/late`).
+>
+> Numeracao preservada (cross-project). Confirmar deploy no **staging** de #3/#4/#6/#12/#13.
 
-| # | Item | Descricao | Justificativa |
-|---|------|-----------|---------------|
-| 16 | **Nome, sobrenome e apelido do usuario (identidade compartilhada)** | `BaseUser` tem `firstName`+`lastName` mas **NAO tem `nickname`**. **Delta:** (a) coluna `nickname` (opcional) em `BaseUser`; (b) `nickname` no `UserProfileGeneralInfosRequest`/`Response` — **`PATCH /profile/general-infos` = UNICO ponto de escrita** de nome/sobrenome/apelido; (c) projetar first/last/nickname nos GETs de papel; (d, recomendado) `GET /profile/me` canonico p/ pre-preencher. | **Bloqueia a pendencia #3 do partner (apelido nas Config).** Identidade do usuario e compartilhada entre roles → 1 caminho de escrita (consolidar; deixar `PATCH /professional/me` so p/ `specialty`). Leitura projetada por papel. |
-| 19 | **Status LATE para cliente atrasado (no-show) + interacao com refeicao** | Profissional pode pular/trocar o cliente que nao chegou; ele recebe status **`LATE`** (em vez de sair da fila). Se o horario do LATE coincidir com a refeicao, fica **para depois** do intervalo. Hoje so existe SCHEDULED/IN_PROGRESS/FINISHED/CANCELLED/PAUSED. **Proposta:** status `LATE` + `PATCH /attendances/{id}/late` + regra na projecao de espera. | Backend-first (relacionado ao Item 39/no-show do PRD_BACKEND). Front (quando existir): acao "Cliente nao chegou" na queue.tsx + badge "Atrasado". |
+**Abertas (relevantes ao partner):**
+
+| # | Item | Descricao |
+|---|------|-----------|
+| S1 | **Profissional afiliado adiciona servico ao establishment** | Hoje so o owner adiciona ServiceItem (`POST /establishment/{id}/service-items`). PRD_BACKEND lista como pendencia Media (permissao p/ funcionario da mesma loja). Quando liberado: permitir o profissional adicionar servico na loja onde trabalha. |
+| B1 | **`GET /establishment/{id}/affiliations` → 500** | Bug reportado pelo front-partner (PRD_BACKEND, "Bugs 2026-06-09", ALTA: SecurityContext nulo). Confirmar se ainda ocorre no staging atual. |
 
 ### 11.2 Refeicoes/intervalos + horario de funcionamento — ✅ BACKEND ENTREGUE (handoff 2026-06-16)
 
