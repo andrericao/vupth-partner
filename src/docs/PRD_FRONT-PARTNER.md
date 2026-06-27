@@ -521,10 +521,9 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 > Renumeradas 1..N por prioridade; itens concluidos saem da lista (o git history preserva). Dependencias de backend/client ficam na secao 11. Regra de gestao: ao concluir, remover e renumerar.
 
-1. **Apelido (nickname) nas Configuracoes do profissional:** ver/editar o apelido (ajuda na busca) + mostrar no resultado da busca. ✅ Backend pronto: escrita por `PATCH /profile/general-infos { nickname }` (max 50; string vazia limpa; null ignorado); leitura projetada nos GETs de papel (e `GET /profile/me`). Implementar editor + exibir o apelido na busca.
-2. **Redesign das telas restantes:** formularios, tab bars, Skeleton R4; aplicar paleta + fontes (Poppins/Inter) do Guia de Design (secao 13.1) no `config/gluestack-ui.config.ts`.
-3. **QA no celular:** validar via OTA as features entregues — **#4** (card → tela de detalhe) e **atende-primeiro/LATE** (Iniciar so no indice 0; "Nao chegou" derruba; badge "Atrasado") — + rodar **Maestro E2E** (`seed_complete.yaml`, nunca rodado).
-4. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19).
+1. **Redesign das telas restantes:** formularios, tab bars, Skeleton R4; aplicar paleta + fontes (Poppins/Inter) do Guia de Design (secao 13.1) no `config/gluestack-ui.config.ts`.
+2. **QA no celular:** validar via OTA as features entregues — **#4** (card → tela de detalhe), **atende-primeiro/LATE** (Iniciar so no indice 0; "Nao chegou" derruba; badge "Atrasado") e **apelido** (editar nas Config + aparece na busca do owner) — + rodar **Maestro E2E** (`seed_complete.yaml`, nunca rodado).
+3. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19).
 
 > **Concluidos** (bugs do teste 2026-06-05 e itens Alta/Media/Baixa prioridade ja entregues) foram **removidos desta lista** para nao acumular — o historico esta no git. Itens que dependem do backend estao na secao 11.
 

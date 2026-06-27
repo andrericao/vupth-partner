@@ -7,6 +7,9 @@ const STORAGE_KEY = "vupth_professional";
 type Professional = {
   id: string;
   name: string;
+  // opcional no tipo (respostas cruas podem nao trazer); normalizeProfessional
+  // sempre popula (null se ausente), entao em runtime esta sempre presente.
+  nickname?: string | null;
   specialty: string | null;
   establishment_id: string | null;
   establishment_name: string | null;
@@ -47,6 +50,7 @@ type ProfessionalState = {
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
+  updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
   fetchMyServices: () => Promise<void>;
@@ -60,6 +64,7 @@ function normalizeProfessional(data: any): Professional {
   return {
     id: data.id,
     name: data.name,
+    nickname: data.nickname ?? null,
     specialty: data.specialty ?? null,
     establishment_id: data.establishment_id ?? data.establishmentId ?? null,
     establishment_name: data.establishment_name ?? data.establishmentName ?? null,
@@ -164,6 +169,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   updateMyProfile: async (changes) => {
     // PATCH /professional/me — name (=firstName) e/ou specialty, ambos opcionais.
     await api.patch("/professional/me", changes);
+    await get().fetchMe();
+  },
+
+  updateNickname: async (nickname) => {
+    // Apelido e identidade do usuario (BaseUser), escrito so via /profile/general-infos
+    // (#16). String vazia limpa o apelido; backend projeta o nickname em /professional/me.
+    await api.patch("/profile/general-infos", { nickname });
     await get().fetchMe();
   },
 
