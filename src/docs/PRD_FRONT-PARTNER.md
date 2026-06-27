@@ -521,9 +521,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 > Renumeradas 1..N por prioridade; itens concluidos saem da lista (o git history preserva). Dependencias de backend/client ficam na secao 11. Regra de gestao: ao concluir, remover e renumerar.
 
-1. **Redesign das telas restantes:** formularios, tab bars, Skeleton R4; aplicar paleta + fontes (Poppins/Inter) do Guia de Design (secao 13.1) no `config/gluestack-ui.config.ts`.
-2. **QA no celular:** validar via OTA as features entregues — **#4** (card → tela de detalhe), **atende-primeiro/LATE** (Iniciar so no indice 0; "Nao chegou" derruba; badge "Atrasado") e **apelido** (editar nas Config + aparece na busca do owner) — + rodar **Maestro E2E** (`seed_complete.yaml`, nunca rodado).
-3. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19).
+1. **QA no celular:** validar via OTA as features entregues — **#4** (card → tela de detalhe), **atende-primeiro/LATE** (Iniciar so no indice 0; "Nao chegou" derruba; badge "Atrasado"), **apelido** (editar nas Config + aparece na busca do owner) e o **redesign** (Skeleton no lugar dos spinners; tab bar com pilula verde na aba ativa; inputs arredondados/foco verde) — + rodar **Maestro E2E** (`seed_complete.yaml`, nunca rodado).
+2. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19). Animacao de ABERTURA do app (sequencia de icones, ver secao 12 / Skeleton).
 
 > **Concluidos** (bugs do teste 2026-06-05 e itens Alta/Media/Baixa prioridade ja entregues) foram **removidos desta lista** para nao acumular — o historico esta no git. Itens que dependem do backend estao na secao 11.
 
@@ -773,7 +772,7 @@ Adicionar ao relatorio do profissional e do owner:
 
 > ✅ **STATUS (2026-06-17):** direcao escolhida e em implementacao **direto na `dev`** (a branch `new-design` foi consolidada via merge e **deletada** — trabalhamos so na `dev`). **Direcao A "Verde Imersivo" refinada** (validada pelo usuario em SVG + no celular): cabecalho clean (VUPTH + titulo da tela abaixo + figurinha do papel; sem barra escura), **fundo off-white global** #F7FAF8, **botoes pilula** com sombra (Poppins), **cards verdes** de metrica (sem "~"), **cards brancos com sombra** ($2xl), **faixa de almoco amarela compacta** com ✎ editar. Mockups de referencia em `design/` (SVG/HTML). **Processo combinado: mostrar mockup (SVG/HTML) ANTES de codar; so implementar apos o usuario escolher.**
 > **Tokens (config/gluestack-ui.config.ts):** escala `green`→marca, amber500=#FFB703, red500=#E63946; fontes Poppins (titulos) + Inter (texto). `lib/styles.ts` exporta `cardShadow` reutilizavel.
-> **Aplicado ate agora:** componentes compartilhados (Header/Button/_layout) + fila (profissional) + dashboard (dono). **Falta aplicar:** menu do dono, relatorios, meus servicos, atendimentos, telas de cadastro/config, tab bars, Skeleton (R4).
+> **Aplicado:** componentes compartilhados (Header/Button/Input/_layout/TabPill) + fila + dashboard + menu + relatorios + meus servicos + atendimentos + perfil + queues. **Skeleton R4** (2026-06-26): `src/components/Skeleton.tsx` (SkeletonCard/List) no lugar dos spinners em 9 telas. **Tab bar** (2026-06-26): `TabPill` com pilula verde na aba ativa + sombra superior, nos 2 layouts. **Formularios** (2026-06-26): `Input` arredondado ($xl) com borda cinza/foco verde; `Button` ja pilula+sombra. **Redesign de telas restantes concluido.**
 > Abaixo: a avaliacao original dos mockups (mantida como referencia).
 
 > Mockups recebidos da equipe de design (13 PNGs do app cliente + parceiro) + PDF "Guia de Design" (paleta/fontes/acessibilidade — ver 13.1). Avaliacao de usabilidade feita com pesquisa (NN/g, Material, Apple HIG, Journal of Service Research 2025).
