@@ -381,4 +381,32 @@ describe("attendance.store", () => {
       expect(state.error).toBeNull();
     });
   });
+
+  describe("markLate / undoLate", () => {
+    it("calls PATCH /attendances/{id}/late", async () => {
+      mock.onPatch("/attendances/att-uuid-1/late").reply(200);
+
+      await useAttendanceStore.getState().markLate("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/late");
+    });
+
+    it("calls PATCH /attendances/{id}/undo-late", async () => {
+      mock.onPatch("/attendances/att-uuid-1/undo-late").reply(200);
+
+      await useAttendanceStore.getState().undoLate("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/undo-late");
+    });
+
+    it("rejects on 400 invalid status for late", async () => {
+      mock.onPatch("/attendances/att-uuid-1/late").reply(400, {
+        message: "Invalid status",
+      });
+
+      await expect(
+        useAttendanceStore.getState().markLate("att-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
 });

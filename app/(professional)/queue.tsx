@@ -40,7 +40,10 @@ function AttendanceCard({
   onPause,
   onResume,
   onRemove,
+  onLate,
+  onUndoLate,
   isActive,
+  isFirst,
 }: {
   attendance: AttendanceInQueue;
   onStart?: () => void;
@@ -48,10 +51,14 @@ function AttendanceCard({
   onPause?: () => void;
   onResume?: () => void;
   onRemove?: () => void;
+  onLate?: () => void;
+  onUndoLate?: () => void;
   isActive: boolean;
+  isFirst: boolean;
 }) {
   const isInProgress = attendance.status === "IN_PROGRESS";
   const isPaused = attendance.status === "PAUSED";
+  const isLate = attendance.status === "LATE";
 
   const { formatted } = useElapsedTime(
     isInProgress || isPaused ? (attendance as any).startTime ?? null : null,
@@ -62,7 +69,9 @@ function AttendanceCard({
     ? "EM ATENDIMENTO"
     : isPaused
       ? "PAUSADO"
-      : "AGUARDANDO";
+      : isLate
+        ? "ATRASADO"
+        : "AGUARDANDO";
 
   return (
     <VStack
@@ -79,7 +88,7 @@ function AttendanceCard({
           {attendance.clientName}
         </Text>
         <Badge
-          action={isInProgress ? "success" : isPaused ? "warning" : "info"}
+          action={isInProgress ? "success" : isPaused ? "warning" : isLate ? "error" : "info"}
           variant="solid"
           borderRadius="$md"
         >
@@ -120,11 +129,25 @@ function AttendanceCard({
         </HStack>
       )}
 
-      {!isActive && attendance.status === "SCHEDULED" && (
-        <HStack mt="$3" space="sm">
-          <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
-          <Button title="Remover" onPress={onRemove} bg="$red400" $active-bg="$red500" h="$10" flex={1} />
-        </HStack>
+      {/* So o 1o da fila (indice 0) pode ser iniciado. Se nao chegou, "Nao chegou"
+          (/late) o faz cair 1 posicao e o proximo vira o 1o. Nunca iniciar o 2o+. */}
+      {!isActive && (attendance.status === "SCHEDULED" || isLate) && (
+        isFirst ? (
+          <VStack mt="$3" space="sm">
+            <HStack space="sm">
+              <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
+              <Button title="Nao chegou" onPress={onLate} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
+            </HStack>
+            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
+          </VStack>
+        ) : (
+          <HStack mt="$3" space="sm">
+            {isLate && (
+              <Button title="Voltar a fila" onPress={onUndoLate} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
+            )}
+            <Button title="Remover" onPress={onRemove} bg="$red400" $active-bg="$red500" h="$10" flex={1} />
+          </HStack>
+        )
       )}
     </VStack>
   );
@@ -135,7 +158,7 @@ export default function ProfessionalQueueScreen() {
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
-  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, removeFromQueue } =
+  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, undoLate, removeFromQueue } =
     useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -372,6 +395,7 @@ export default function ProfessionalQueueScreen() {
             <AttendanceCard
               attendance={currentAttendance}
               isActive
+              isFirst={false}
               onFinish={() => handleAction(() => finishAttendance(currentAttendance.id))}
               onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
               onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
@@ -384,12 +408,24 @@ export default function ProfessionalQueueScreen() {
             <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
               Lista de Espera ({waitingList.length})
             </Text>
-            {waitingList.map((att) => (
+            {waitingList.map((att, idx) => (
               <AttendanceCard
                 key={att.id}
                 attendance={att}
                 isActive={false}
+                isFirst={idx === 0}
                 onStart={() => handleAction(() => startAttendance(att.id))}
+                onLate={() =>
+                  Alert.alert(
+                    "Cliente nao chegou",
+                    `${att.clientName} cai uma posicao e o proximo passa a ser o primeiro. Continuar?`,
+                    [
+                      { text: "Cancelar" },
+                      { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
+                    ]
+                  )
+                }
+                onUndoLate={() => handleAction(() => undoLate(att.id))}
                 onRemove={() =>
                   Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
                     { text: "Cancelar" },

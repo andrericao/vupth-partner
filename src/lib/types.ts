@@ -3,7 +3,8 @@ export type AttendanceStatus =
   | "IN_PROGRESS"
   | "PAUSED"
   | "FINISHED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "LATE";
 
 export type AttendanceServiceItem = {
   id: string;

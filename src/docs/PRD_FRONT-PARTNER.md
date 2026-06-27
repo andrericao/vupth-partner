@@ -521,12 +521,10 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 > Renumeradas 1..N por prioridade; itens concluidos saem da lista (o git history preserva). Dependencias de backend/client ficam na secao 11. Regra de gestao: ao concluir, remover e renumerar.
 
-1. **Testar a #4 (card → tela de detalhe) no celular e pushar** (`1d109f1`, em andamento). ⚠️ Se os campos de detalhe vierem "Nao informado", confirmar com o backend se `GET /establishment/id/{id}` retorna address/phone/instagram/horario/url_image para profissional nao-dono.
-2. **Regra atende-primeiro na fila (queue.tsx):** botao "Iniciar" so no indice 0; **nunca** botao de atender do 2o em diante diretamente. ✅ **DESBLOQUEADO (backend 2026-06-25):** o "swap" e o status **LATE** — `PATCH /attendances/{id}/late` faz o cliente que nao chegou **cair 1 posicao** (continua na fila), e ai atende o proximo (`/start`); `/undo-late` volta. Tambem ha `/fit-in?aheadCount=N` (encaixe) e `/undo-fit`. Front: acao "Cliente nao chegou" no item indice 0 → `/late` → o 2o vira 1o e o "Iniciar" aparece nele; badge "Atrasado" no LATE. (Mesma feature do antigo backend #19.)
-3. **Apelido (nickname) nas Configuracoes do profissional:** ver/editar o apelido (ajuda na busca) + mostrar no resultado da busca. ✅ **DESBLOQUEADO (backend 2026-06-25):** escrita por `PATCH /profile/general-infos { nickname }` (max 50; string vazia limpa; null ignorado); leitura projetada nos GETs de papel (e `GET /profile/me`). Implementar editor + exibir o apelido na busca.
-4. **Redesign das telas restantes:** formularios, tab bars, Skeleton R4; aplicar paleta + fontes (Poppins/Inter) do Guia de Design (secao 13.1) no `config/gluestack-ui.config.ts`.
-5. **QA — Maestro E2E** (`seed_complete.yaml`), nunca rodado.
-6. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19).
+1. **Apelido (nickname) nas Configuracoes do profissional:** ver/editar o apelido (ajuda na busca) + mostrar no resultado da busca. ✅ Backend pronto: escrita por `PATCH /profile/general-infos { nickname }` (max 50; string vazia limpa; null ignorado); leitura projetada nos GETs de papel (e `GET /profile/me`). Implementar editor + exibir o apelido na busca.
+2. **Redesign das telas restantes:** formularios, tab bars, Skeleton R4; aplicar paleta + fontes (Poppins/Inter) do Guia de Design (secao 13.1) no `config/gluestack-ui.config.ts`.
+3. **QA no celular:** validar via OTA as features entregues — **#4** (card → tela de detalhe) e **atende-primeiro/LATE** (Iniciar so no indice 0; "Nao chegou" derruba; badge "Atrasado") — + rodar **Maestro E2E** (`seed_complete.yaml`, nunca rodado).
+4. **Pos-MVP:** pagamento real / split de taxas (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`); migrar Gluestack v1→v2 (tech debt, warnings React 19).
 
 > **Concluidos** (bugs do teste 2026-06-05 e itens Alta/Media/Baixa prioridade ja entregues) foram **removidos desta lista** para nao acumular — o historico esta no git. Itens que dependem do backend estao na secao 11.
 

@@ -23,6 +23,8 @@ type AttendanceState = {
   finishAttendance: (attendanceId: string) => Promise<void>;
   pauseAttendance: (attendanceId: string) => Promise<void>;
   resumeAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
+  markLate: (attendanceId: string) => Promise<void>;
+  undoLate: (attendanceId: string) => Promise<void>;
   removeFromQueue: (attendanceId: string) => Promise<void>;
   reset: () => void;
 };
@@ -88,6 +90,16 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
   resumeAttendance: async (attendanceId) => {
     const { data } = await api.patch(`/attendances/${attendanceId}/resume`);
     return data;
+  },
+
+  // Cliente nao chegou a tempo (#19): SCHEDULED -> LATE, cai 1 posicao mas
+  // continua na fila. Repetir derruba mais; undoLate volta a SCHEDULED.
+  markLate: async (attendanceId) => {
+    await api.patch(`/attendances/${attendanceId}/late`);
+  },
+
+  undoLate: async (attendanceId) => {
+    await api.patch(`/attendances/${attendanceId}/undo-late`);
   },
 
   removeFromQueue: async (attendanceId) => {
