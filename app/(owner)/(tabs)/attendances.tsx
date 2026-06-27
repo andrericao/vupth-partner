@@ -8,10 +8,10 @@ import {
   Badge,
   BadgeText,
   ScrollView,
-  Spinner,
   Pressable,
   Divider,
 } from "@gluestack-ui/themed";
+import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
@@ -169,9 +169,8 @@ export default function OwnerAttendancesScreen() {
         </HStack>
 
         {isLoading && (
-          <VStack alignItems="center" mt="$12">
-            <Spinner color="$green500" size="large" />
-            <Text fontFamily="$body" color="$coolGray500" mt="$4">Carregando...</Text>
+          <VStack mt="$6">
+            <SkeletonList count={3} />
           </VStack>
         )}
 

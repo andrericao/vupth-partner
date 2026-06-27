@@ -19,6 +19,7 @@ import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { SkeletonList } from "@components/Skeleton";
 import { api, getApiErrorMessage } from "@lib/api";
 import { useProfessionalStore } from "@store/professional.store";
 
@@ -265,8 +266,8 @@ export default function FindEstablishmentScreen() {
           </GluestackInput>
 
           {isSearching && (
-            <VStack alignItems="center" mt="$8">
-              <Spinner color="$green500" size="large" />
+            <VStack mt="$4">
+              <SkeletonList count={3} />
             </VStack>
           )}
 

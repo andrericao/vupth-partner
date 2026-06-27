@@ -5,7 +5,6 @@ import {
   Heading,
   Text,
   ScrollView,
-  Spinner,
   Input as GluestackInput,
   InputField,
   InputSlot,
@@ -13,6 +12,7 @@ import {
   SearchIcon,
   CloseIcon,
 } from "@gluestack-ui/themed";
+import { SkeletonList } from "@components/Skeleton";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
@@ -130,8 +130,8 @@ export default function InviteProfessionalScreen() {
           </GluestackInput>
 
           {isSearching && (
-            <VStack alignItems="center" mt="$8">
-              <Spinner color="$green500" size="large" />
+            <VStack mt="$4">
+              <SkeletonList count={3} />
             </VStack>
           )}
 

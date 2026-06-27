@@ -7,8 +7,8 @@ import {
   Pressable,
   ScrollView,
   Divider,
-  Spinner,
 } from "@gluestack-ui/themed";
+import { SkeletonList } from "@components/Skeleton";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -122,8 +122,8 @@ export default function ProfessionalReportsScreen() {
         )}
 
         {isLoading ? (
-          <VStack alignItems="center" mt="$8">
-            <Spinner color="$green500" size="large" />
+          <VStack mt="$6">
+            <SkeletonList count={2} />
           </VStack>
         ) : (
           <VStack space="md">

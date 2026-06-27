@@ -8,12 +8,12 @@ import {
   BadgeText,
   Pressable,
   ScrollView,
-  Spinner,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl, BackHandler } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { SkeletonList } from "@components/Skeleton";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -381,9 +381,8 @@ export default function ProfessionalQueueScreen() {
         )}
 
         {isLoading && !data && (
-          <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Spinner color="$green500" size="large" />
-            <Text fontFamily="$body" color="$coolGray500" mt="$4">Carregando fila...</Text>
+          <VStack mt="$6">
+            <SkeletonList count={3} />
           </VStack>
         )}
 
