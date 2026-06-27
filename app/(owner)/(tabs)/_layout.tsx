@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { Text } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TabPill, tabBarShadow } from "@components/TabPill";
 
 export default function OwnerTabsLayout() {
   const insets = useSafeAreaInsets();
@@ -12,8 +13,10 @@ export default function OwnerTabsLayout() {
         tabBarActiveTintColor: "#00B37E",
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
+          ...tabBarShadow,
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E5E7EB",
+          borderTopWidth: 0,
           height: 60 + insets.bottom,
           paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
@@ -28,8 +31,10 @@ export default function OwnerTabsLayout() {
         name="dashboard"
         options={{
           title: "Inicio",
-          tabBarIcon: ({ color }) => (
-            <Text fontSize="$xl" color={color}>&#8962;</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <TabPill focused={focused}>
+              <Text fontSize="$xl" color={color}>&#8962;</Text>
+            </TabPill>
           ),
         }}
       />
@@ -37,8 +42,10 @@ export default function OwnerTabsLayout() {
         name="menu"
         options={{
           title: "Menu",
-          tabBarIcon: ({ color }) => (
-            <Text fontSize="$xl" color={color}>&#9776;</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <TabPill focused={focused}>
+              <Text fontSize="$xl" color={color}>&#9776;</Text>
+            </TabPill>
           ),
         }}
       />
