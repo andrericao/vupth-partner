@@ -10,6 +10,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
+import { OtaUpdateButton } from "@components/OtaUpdateButton";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -492,6 +493,8 @@ export default function ProfessionalSettingsScreen() {
               />
             )}
           </VStack>
+
+          <OtaUpdateButton />
         </VStack>
       </VStack>
     </ScrollView>

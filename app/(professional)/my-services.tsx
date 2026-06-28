@@ -183,7 +183,16 @@ export default function MyServicesScreen() {
     const priceBad = isNaN(priceNum) || priceNum <= 0;
     setNameInvalid(nameBad);
     setPriceInvalid(priceBad);
-    if (nameBad || priceBad) return;
+    if (nameBad || priceBad) {
+      const faltam = [
+        nameBad && "o nome do serviço",
+        priceBad && "um preço válido (ex: R$ 35,00)",
+      ]
+        .filter(Boolean)
+        .join(" e ");
+      Alert.alert("Faltou preencher", `Informe ${faltam}.`);
+      return;
+    }
     if (!serviceItemType) {
       Alert.alert("Selecione o tipo", "Escolha o tipo de serviço antes de adicionar.");
       return;

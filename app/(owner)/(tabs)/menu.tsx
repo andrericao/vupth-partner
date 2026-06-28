@@ -13,6 +13,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { cardShadow } from "@lib/styles";
+import { OtaUpdateButton } from "@components/OtaUpdateButton";
 
 type MenuItemProps = {
   label: string;
@@ -104,6 +105,19 @@ export default function OwnerMenuScreen() {
         </VStack>
 
         <Divider mb="$4" />
+
+        {/* Seletor de papel: quem acumula OWNER + PROFESSIONAL alterna para a
+            sua area de profissional (e gerencia servicos por "Meus Servicos").
+            Owner-so-dono nao ve o botao. Decisao de produto 2026-06-28. */}
+        {isProfessional && (
+          <VStack mb="$4">
+            <MenuItem
+              label="Atender como profissional"
+              onPress={() => router.replace("/(professional)/queue" as any)}
+              color="$green600"
+            />
+          </VStack>
+        )}
 
         <VStack space="sm">
           {establishment?.id && (
@@ -216,6 +230,8 @@ export default function OwnerMenuScreen() {
             color="$red500"
           />
         </VStack>
+
+        <OtaUpdateButton />
       </VStack>
     </ScrollView>
   );

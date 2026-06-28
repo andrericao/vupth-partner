@@ -174,13 +174,13 @@ export default function ProfessionalAttendancesScreen() {
           </VStack>
         )}
 
-        {loaded && !errorMsg && history.length === 0 && (
+        {!isLoading && loaded && !errorMsg && history.length === 0 && (
           <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$12">
             Nenhum atendimento encontrado
           </Text>
         )}
 
-        {loaded && !errorMsg && history.length > 0 && (
+        {!isLoading && loaded && !errorMsg && history.length > 0 && (
           <VStack mt="$2">
             <Divider mb="$4" />
             {history.map((item) => (

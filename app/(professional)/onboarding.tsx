@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   VStack,
   FormControl,
@@ -87,6 +87,13 @@ export default function ProfessionalOnboardingScreen() {
       setIsLoading(false);
     }
   };
+
+  // Ao entrar no passo de busca, ja carrega a lista (query vazia = todos), pra
+  // o profissional ver os estabelecimentos sem precisar tocar em "Buscar".
+  useEffect(() => {
+    if (step === "search") handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const handleSearch = async () => {
     setIsSearching(true);
