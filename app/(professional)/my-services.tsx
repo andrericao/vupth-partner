@@ -89,7 +89,8 @@ export default function MyServicesScreen() {
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
   const [absorption, setAbsorption] = useState(0);
-  const [isInvalid, setIsInvalid] = useState(false);
+  const [nameInvalid, setNameInvalid] = useState(false);
+  const [priceInvalid, setPriceInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -177,12 +178,12 @@ export default function MyServicesScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!customName.trim() || isNaN(priceNum) || priceNum <= 0 || !serviceItemType) {
-      setIsInvalid(true);
-      return;
-    }
+    const nameBad = !customName.trim();
+    const priceBad = isNaN(priceNum) || priceNum <= 0;
+    setNameInvalid(nameBad);
+    setPriceInvalid(priceBad);
+    if (nameBad || priceBad || !serviceItemType) return;
 
-    setIsInvalid(false);
     setIsLoading(true);
 
     // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
@@ -357,7 +358,7 @@ export default function MyServicesScreen() {
           <VStack mt="$6">
             <Divider mb="$4" />
 
-            <FormControl isInvalid={isInvalid}>
+            <VStack>
               <Heading size="lg" fontFamily="$heading" mb="$4">
                 Novo Servico
               </Heading>
@@ -373,7 +374,10 @@ export default function MyServicesScreen() {
                       key={s.value}
                       onPress={() => {
                         setServiceItemType(s.value);
-                        if (!customName.trim()) setCustomName(s.label);
+                        if (!customName.trim()) {
+                          setCustomName(s.label);
+                          setNameInvalid(false);
+                        }
                       }}
                       bg={isSelected ? "$green500" : "$coolGray100"}
                       py="$2"
@@ -395,22 +399,32 @@ export default function MyServicesScreen() {
                 })}
               </VStack>
 
-              <Input
-                textLabel="Nome personalizado"
-                placeholder="Ex: Corte Social"
-                messageError="Nome obrigatorio"
-                value={customName}
-                onChangeText={setCustomName}
-              />
+              <FormControl isInvalid={nameInvalid}>
+                <Input
+                  textLabel="Nome personalizado"
+                  placeholder="Ex: Corte Social"
+                  messageError="Digite um nome para o serviço"
+                  value={customName}
+                  onChangeText={(t) => {
+                    setCustomName(t);
+                    if (nameInvalid) setNameInvalid(false);
+                  }}
+                />
+              </FormControl>
 
-              <Input
-                textLabel="Seu preco (R$) — voce recebe"
-                placeholder="35.00"
-                messageError="Preco invalido"
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="decimal-pad"
-              />
+              <FormControl isInvalid={priceInvalid}>
+                <Input
+                  textLabel="Seu preço (R$) — você recebe"
+                  placeholder="35,00"
+                  messageError="Digite um preço válido — ex: 35,00"
+                  value={price}
+                  onChangeText={(t) => {
+                    setPrice(t);
+                    if (priceInvalid) setPriceInvalid(false);
+                  }}
+                  keyboardType="decimal-pad"
+                />
+              </FormControl>
 
               {pricing && (
                 <VStack
@@ -506,7 +520,7 @@ export default function MyServicesScreen() {
                 borderColor="$red500"
                 textColor="$red500"
               />
-            </FormControl>
+            </VStack>
           </VStack>
         ) : null}
       </VStack>
