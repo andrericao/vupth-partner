@@ -19,7 +19,16 @@ export default function RootIndex() {
 
   const warmUp = useCallback(async () => {
     setPhase("warming");
+    // Mesmo com o backend ja quente, garantimos pelo menos UM ciclo completo da
+    // animacao de abertura (4 icones x ~0.8s) — e a "marca" do app (estilo
+    // splash da Netflix/Mercado Livre). Ver ServerWarmup/WarmupAnimation.
+    const MIN_SPLASH_MS = 3400;
+    const started = Date.now();
     const ok = await waitForBackend();
+    const elapsed = Date.now() - started;
+    if (elapsed < MIN_SPLASH_MS) {
+      await new Promise((r) => setTimeout(r, MIN_SPLASH_MS - elapsed));
+    }
     setPhase(ok ? "ready" : "failed");
   }, []);
 
