@@ -17,6 +17,7 @@ import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
+import { maskMoney, unmaskMoney } from "@lib/masks";
 
 import {
   calculatePricing,
@@ -89,7 +90,8 @@ export default function MyServicesScreen() {
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
   const [absorption, setAbsorption] = useState(0);
-  const [isInvalid, setIsInvalid] = useState(false);
+  const [nameInvalid, setNameInvalid] = useState(false);
+  const [priceInvalid, setPriceInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -98,7 +100,7 @@ export default function MyServicesScreen() {
     (t) => t.specialties.includes(mySpecialty) || t.specialties.length === 0
   );
 
-  const priceNum = parseFloat((price || "0").replace(",", "."));
+  const priceNum = unmaskMoney(price);
   const absorptionOptions = getAbsorptionOptions(priceNum);
   const pricing = priceNum > 0 ? calculatePricing(priceNum, absorption) : null;
 
@@ -127,7 +129,7 @@ export default function MyServicesScreen() {
     setShowForm(false);
     setEditingId(svc.id);
     setEditName(svc.customName);
-    setEditPrice(String(svc.price));
+    setEditPrice(maskMoney(String(Math.round(svc.price * 100))));
   };
 
   const cancelEditItem = () => {
@@ -138,7 +140,7 @@ export default function MyServicesScreen() {
 
   const handleSaveEdit = async (itemId: string) => {
     const trimmed = editName.trim();
-    const newPrice = parseFloat((editPrice || "0").replace(",", "."));
+    const newPrice = unmaskMoney(editPrice);
     if (!trimmed || isNaN(newPrice) || newPrice <= 0) {
       Alert.alert("Dados invalidos", "Informe um nome e um preco maior que zero.");
       return;
@@ -177,12 +179,16 @@ export default function MyServicesScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!customName.trim() || isNaN(priceNum) || priceNum <= 0 || !serviceItemType) {
-      setIsInvalid(true);
+    const nameBad = !customName.trim();
+    const priceBad = isNaN(priceNum) || priceNum <= 0;
+    setNameInvalid(nameBad);
+    setPriceInvalid(priceBad);
+    if (nameBad || priceBad) return;
+    if (!serviceItemType) {
+      Alert.alert("Selecione o tipo", "Escolha o tipo de serviço antes de adicionar.");
       return;
     }
 
-    setIsInvalid(false);
     setIsLoading(true);
 
     // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
@@ -274,12 +280,12 @@ export default function MyServicesScreen() {
                       onChangeText={setEditName}
                     />
                     <Input
-                      textLabel="Preco total (R$)"
-                      placeholder="35.00"
+                      textLabel="Preço total"
+                      placeholder="R$ 35,00"
                       messageError=""
                       value={editPrice}
-                      onChangeText={setEditPrice}
-                      keyboardType="decimal-pad"
+                      onChangeText={(t) => setEditPrice(maskMoney(t))}
+                      keyboardType="number-pad"
                     />
                   </FormControl>
                   <HStack space="sm" mt="$1">
@@ -350,14 +356,19 @@ export default function MyServicesScreen() {
         {!showForm && professional?.establishment_id ? (
           <Button
             title="Adicionar Servico"
-            onPress={() => setShowForm(true)}
+            onPress={() => {
+              const first = filteredTypes[0];
+              setServiceItemType(first?.value ?? "");
+              if (first && !customName.trim()) setCustomName(first.label);
+              setShowForm(true);
+            }}
             mt="$6"
           />
         ) : showForm ? (
           <VStack mt="$6">
             <Divider mb="$4" />
 
-            <FormControl isInvalid={isInvalid}>
+            <VStack>
               <Heading size="lg" fontFamily="$heading" mb="$4">
                 Novo Servico
               </Heading>
@@ -373,7 +384,10 @@ export default function MyServicesScreen() {
                       key={s.value}
                       onPress={() => {
                         setServiceItemType(s.value);
-                        if (!customName.trim()) setCustomName(s.label);
+                        if (!customName.trim()) {
+                          setCustomName(s.label);
+                          setNameInvalid(false);
+                        }
                       }}
                       bg={isSelected ? "$green500" : "$coolGray100"}
                       py="$2"
@@ -395,22 +409,32 @@ export default function MyServicesScreen() {
                 })}
               </VStack>
 
-              <Input
-                textLabel="Nome personalizado"
-                placeholder="Ex: Corte Social"
-                messageError="Nome obrigatorio"
-                value={customName}
-                onChangeText={setCustomName}
-              />
+              <FormControl isInvalid={nameInvalid}>
+                <Input
+                  textLabel="Nome personalizado"
+                  placeholder="Ex: Corte Social"
+                  messageError="Digite um nome para o serviço"
+                  value={customName}
+                  onChangeText={(t) => {
+                    setCustomName(t);
+                    if (nameInvalid) setNameInvalid(false);
+                  }}
+                />
+              </FormControl>
 
-              <Input
-                textLabel="Seu preco (R$) — voce recebe"
-                placeholder="35.00"
-                messageError="Preco invalido"
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="decimal-pad"
-              />
+              <FormControl isInvalid={priceInvalid}>
+                <Input
+                  textLabel="Seu preço — você recebe"
+                  placeholder="R$ 35,00"
+                  messageError="Digite um preço válido — ex: R$ 35,00"
+                  value={price}
+                  onChangeText={(t) => {
+                    setPrice(maskMoney(t));
+                    if (priceInvalid) setPriceInvalid(false);
+                  }}
+                  keyboardType="number-pad"
+                />
+              </FormControl>
 
               {pricing && (
                 <VStack
@@ -506,7 +530,7 @@ export default function MyServicesScreen() {
                 borderColor="$red500"
                 textColor="$red500"
               />
-            </FormControl>
+            </VStack>
           </VStack>
         ) : null}
       </VStack>

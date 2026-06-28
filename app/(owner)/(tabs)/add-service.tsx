@@ -15,6 +15,7 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
+import { maskMoney, unmaskMoney } from "@lib/masks";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
@@ -78,7 +79,8 @@ export default function AddServiceScreen() {
   const [price, setPrice] = useState("");
   const [absorption, setAbsorption] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
-  const [isInvalid, setIsInvalid] = useState(false);
+  const [nameInvalid, setNameInvalid] = useState(false);
+  const [priceInvalid, setPriceInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const addServiceItem = useEstablishmentStore((s) => s.addServiceItem);
@@ -92,13 +94,13 @@ export default function AddServiceScreen() {
   };
 
   const handleSubmit = async () => {
-    const priceNum = parseFloat(price.replace(",", "."));
-    if (!customName.trim() || isNaN(priceNum) || priceNum <= 0) {
-      setIsInvalid(true);
-      return;
-    }
+    const priceNum = unmaskMoney(price);
+    const nameBad = !customName.trim();
+    const priceBad = isNaN(priceNum) || priceNum <= 0;
+    setNameInvalid(nameBad);
+    setPriceInvalid(priceBad);
+    if (nameBad || priceBad) return;
 
-    setIsInvalid(false);
     setIsLoading(true);
 
     // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
@@ -144,7 +146,7 @@ export default function AddServiceScreen() {
       <VStack flex={1} py="$12" px="$6">
         <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
-        <FormControl flex={1} mt="$12" isInvalid={isInvalid}>
+        <VStack flex={1} mt="$12">
           <Heading mb="$6" size="3xl" fontFamily="$heading">
             Novo Serviço
           </Heading>
@@ -189,7 +191,10 @@ export default function AddServiceScreen() {
                 title={s.label}
                 onPress={() => {
                   setServiceItemType(s.value);
-                  if (!customName.trim()) setCustomName(s.label);
+                  if (!customName.trim()) {
+                    setCustomName(s.label);
+                    setNameInvalid(false);
+                  }
                 }}
                 bg={serviceItemType === s.value ? "$green500" : "$coolGray200"}
                 textColor={serviceItemType === s.value ? "$white" : "$coolGray700"}
@@ -200,23 +205,33 @@ export default function AddServiceScreen() {
             ))}
           </VStack>
 
-          <Input
-            textLabel="Nome personalizado"
-            placeholder="Ex: Corte Social"
-            messageError="Nome obrigatório"
-            value={customName}
-            onChangeText={setCustomName}
-            testID="service-custom-name"
-          />
+          <FormControl isInvalid={nameInvalid}>
+            <Input
+              textLabel="Nome personalizado"
+              placeholder="Ex: Corte Social"
+              messageError="Digite um nome para o serviço"
+              value={customName}
+              onChangeText={(t) => {
+                setCustomName(t);
+                if (nameInvalid) setNameInvalid(false);
+              }}
+              testID="service-custom-name"
+            />
+          </FormControl>
 
-          <Input
-            textLabel="Preco (R$)"
-            placeholder="35.00"
-            messageError="Preco invalido"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="decimal-pad"
-          />
+          <FormControl isInvalid={priceInvalid}>
+            <Input
+              textLabel="Preço"
+              placeholder="R$ 35,00"
+              messageError="Digite um preço válido — ex: R$ 35,00"
+              value={price}
+              onChangeText={(t) => {
+                setPrice(maskMoney(t));
+                if (priceInvalid) setPriceInvalid(false);
+              }}
+              keyboardType="number-pad"
+            />
+          </FormControl>
 
           <Pressable
             onPress={() => setShowPricing(!showPricing)}
@@ -235,8 +250,8 @@ export default function AddServiceScreen() {
             </Text>
           </Pressable>
 
-          {showPricing && price && !isNaN(parseFloat(price.replace(",", "."))) && parseFloat(price.replace(",", ".")) > 0 && (() => {
-            const priceNum = parseFloat(price.replace(",", "."));
+          {showPricing && unmaskMoney(price) > 0 && (() => {
+            const priceNum = unmaskMoney(price);
             const options = getAbsorptionOptions(priceNum);
             const pricing = calculatePricing(priceNum, absorption);
             const labels: Record<number, string> = {
@@ -300,7 +315,7 @@ export default function AddServiceScreen() {
             onPress={handleSubmit}
             isLoading={isLoading}
           />
-        </FormControl>
+        </VStack>
       </VStack>
     </ScrollView>
     </KeyboardAvoidingView>

@@ -32,6 +32,27 @@ export function maskDate(value: string): string {
   return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
 }
 
+/**
+ * R$ 0.000,00 — constrói o valor "dos centavos para cima": cada dígito digitado
+ * empurra o valor para a esquerda (3 -> R$ 0,03; 3500 -> R$ 35,00). Use no
+ * onChangeText; recupere o número com unmaskMoney.
+ */
+export function maskMoney(value: string): string {
+  const d = onlyDigits(value);
+  if (d.length === 0) return "";
+  const reais = (parseInt(d, 10) / 100).toFixed(2);
+  const [intPart, decPart] = reais.split(".");
+  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `R$ ${grouped},${decPart}`;
+}
+
+/** Converte o texto mascarado de dinheiro no número em reais (R$ 35,00 -> 35). */
+export function unmaskMoney(value: string): number {
+  const d = onlyDigits(value);
+  if (d.length === 0) return 0;
+  return parseInt(d, 10) / 100;
+}
+
 /** Remove a máscara, deixando só dígitos (para enviar ao backend). */
 export function unmask(value: string): string {
   return onlyDigits(value);
