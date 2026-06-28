@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
-import { Text } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TabPill, tabBarShadow } from "@components/TabPill";
+import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
 
 export default function ProfessionalLayout() {
   const insets = useSafeAreaInsets();
@@ -31,33 +30,21 @@ export default function ProfessionalLayout() {
         name="queue"
         options={{
           title: "Fila",
-          tabBarIcon: ({ color, focused }) => (
-            <TabPill focused={focused}>
-              <Text fontSize="$xl" color={color}>&#9776;</Text>
-            </TabPill>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="people" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="my-services"
         options={{
           title: "Servicos",
-          tabBarIcon: ({ color, focused }) => (
-            <TabPill focused={focused}>
-              <Text fontSize="$xl" color={color}>&#9733;</Text>
-            </TabPill>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="cut" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Perfil",
-          tabBarIcon: ({ color, focused }) => (
-            <TabPill focused={focused}>
-              <Text fontSize="$xl" color={color}>&#9881;</Text>
-            </TabPill>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="person" focused={focused} />,
         }}
       />
       <Tabs.Screen

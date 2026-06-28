@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
-import { Text } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TabPill, tabBarShadow } from "@components/TabPill";
+import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
 
 export default function OwnerTabsLayout() {
   const insets = useSafeAreaInsets();
@@ -31,22 +30,14 @@ export default function OwnerTabsLayout() {
         name="dashboard"
         options={{
           title: "Inicio",
-          tabBarIcon: ({ color, focused }) => (
-            <TabPill focused={focused}>
-              <Text fontSize="$xl" color={color}>&#8962;</Text>
-            </TabPill>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="home" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="menu"
         options={{
           title: "Menu",
-          tabBarIcon: ({ color, focused }) => (
-            <TabPill focused={focused}>
-              <Text fontSize="$xl" color={color}>&#9776;</Text>
-            </TabPill>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="apps" focused={focused} />,
         }}
       />
       <Tabs.Screen name="add-professional" options={{ href: null }} />
