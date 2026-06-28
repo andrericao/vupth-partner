@@ -15,6 +15,7 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
+import { maskMoney, unmaskMoney } from "@lib/masks";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
@@ -93,7 +94,7 @@ export default function AddServiceScreen() {
   };
 
   const handleSubmit = async () => {
-    const priceNum = parseFloat(price.replace(",", "."));
+    const priceNum = unmaskMoney(price);
     const nameBad = !customName.trim();
     const priceBad = isNaN(priceNum) || priceNum <= 0;
     setNameInvalid(nameBad);
@@ -220,15 +221,15 @@ export default function AddServiceScreen() {
 
           <FormControl isInvalid={priceInvalid}>
             <Input
-              textLabel="Preço (R$)"
-              placeholder="35,00"
-              messageError="Digite um preço válido — ex: 35,00"
+              textLabel="Preço"
+              placeholder="R$ 35,00"
+              messageError="Digite um preço válido — ex: R$ 35,00"
               value={price}
               onChangeText={(t) => {
-                setPrice(t);
+                setPrice(maskMoney(t));
                 if (priceInvalid) setPriceInvalid(false);
               }}
-              keyboardType="decimal-pad"
+              keyboardType="number-pad"
             />
           </FormControl>
 
@@ -249,8 +250,8 @@ export default function AddServiceScreen() {
             </Text>
           </Pressable>
 
-          {showPricing && price && !isNaN(parseFloat(price.replace(",", "."))) && parseFloat(price.replace(",", ".")) > 0 && (() => {
-            const priceNum = parseFloat(price.replace(",", "."));
+          {showPricing && unmaskMoney(price) > 0 && (() => {
+            const priceNum = unmaskMoney(price);
             const options = getAbsorptionOptions(priceNum);
             const pricing = calculatePricing(priceNum, absorption);
             const labels: Record<number, string> = {

@@ -1,4 +1,4 @@
-import { maskCEP, maskPhone, maskDate, unmask } from "../masks";
+import { maskCEP, maskPhone, maskDate, maskMoney, unmaskMoney, unmask } from "../masks";
 
 describe("maskCEP", () => {
   it("formats 8 digits as 00000-000", () => {
@@ -33,6 +33,37 @@ describe("maskDate", () => {
   it("handles partial input", () => {
     expect(maskDate("31")).toBe("31");
     expect(maskDate("3112")).toBe("31/12");
+  });
+});
+
+describe("maskMoney", () => {
+  it("builds value from the cents up", () => {
+    expect(maskMoney("3")).toBe("R$ 0,03");
+    expect(maskMoney("35")).toBe("R$ 0,35");
+    expect(maskMoney("3500")).toBe("R$ 35,00");
+  });
+  it("groups thousands with a dot", () => {
+    expect(maskMoney("150000")).toBe("R$ 1.500,00");
+    expect(maskMoney("1234567")).toBe("R$ 12.345,67");
+  });
+  it("ignores non-digits (re-masking is idempotent)", () => {
+    expect(maskMoney("R$ 35,00")).toBe("R$ 35,00");
+  });
+  it("returns empty string when there are no digits", () => {
+    expect(maskMoney("")).toBe("");
+    expect(maskMoney("R$ ")).toBe("");
+  });
+});
+
+describe("unmaskMoney", () => {
+  it("returns the numeric value in reais", () => {
+    expect(unmaskMoney("R$ 35,00")).toBe(35);
+    expect(unmaskMoney("R$ 1.500,90")).toBe(1500.9);
+    expect(unmaskMoney("R$ 0,03")).toBe(0.03);
+  });
+  it("returns 0 when there are no digits", () => {
+    expect(unmaskMoney("")).toBe(0);
+    expect(unmaskMoney("R$ ")).toBe(0);
   });
 });
 

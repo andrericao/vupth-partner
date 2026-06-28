@@ -17,6 +17,7 @@ import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
+import { maskMoney, unmaskMoney } from "@lib/masks";
 
 import {
   calculatePricing,
@@ -99,7 +100,7 @@ export default function MyServicesScreen() {
     (t) => t.specialties.includes(mySpecialty) || t.specialties.length === 0
   );
 
-  const priceNum = parseFloat((price || "0").replace(",", "."));
+  const priceNum = unmaskMoney(price);
   const absorptionOptions = getAbsorptionOptions(priceNum);
   const pricing = priceNum > 0 ? calculatePricing(priceNum, absorption) : null;
 
@@ -128,7 +129,7 @@ export default function MyServicesScreen() {
     setShowForm(false);
     setEditingId(svc.id);
     setEditName(svc.customName);
-    setEditPrice(String(svc.price));
+    setEditPrice(maskMoney(String(Math.round(svc.price * 100))));
   };
 
   const cancelEditItem = () => {
@@ -139,7 +140,7 @@ export default function MyServicesScreen() {
 
   const handleSaveEdit = async (itemId: string) => {
     const trimmed = editName.trim();
-    const newPrice = parseFloat((editPrice || "0").replace(",", "."));
+    const newPrice = unmaskMoney(editPrice);
     if (!trimmed || isNaN(newPrice) || newPrice <= 0) {
       Alert.alert("Dados invalidos", "Informe um nome e um preco maior que zero.");
       return;
@@ -275,12 +276,12 @@ export default function MyServicesScreen() {
                       onChangeText={setEditName}
                     />
                     <Input
-                      textLabel="Preco total (R$)"
-                      placeholder="35.00"
+                      textLabel="Preço total"
+                      placeholder="R$ 35,00"
                       messageError=""
                       value={editPrice}
-                      onChangeText={setEditPrice}
-                      keyboardType="decimal-pad"
+                      onChangeText={(t) => setEditPrice(maskMoney(t))}
+                      keyboardType="number-pad"
                     />
                   </FormControl>
                   <HStack space="sm" mt="$1">
@@ -414,15 +415,15 @@ export default function MyServicesScreen() {
 
               <FormControl isInvalid={priceInvalid}>
                 <Input
-                  textLabel="Seu preço (R$) — você recebe"
-                  placeholder="35,00"
-                  messageError="Digite um preço válido — ex: 35,00"
+                  textLabel="Seu preço — você recebe"
+                  placeholder="R$ 35,00"
+                  messageError="Digite um preço válido — ex: R$ 35,00"
                   value={price}
                   onChangeText={(t) => {
-                    setPrice(t);
+                    setPrice(maskMoney(t));
                     if (priceInvalid) setPriceInvalid(false);
                   }}
-                  keyboardType="decimal-pad"
+                  keyboardType="number-pad"
                 />
               </FormControl>
 
