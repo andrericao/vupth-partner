@@ -183,7 +183,11 @@ export default function MyServicesScreen() {
     const priceBad = isNaN(priceNum) || priceNum <= 0;
     setNameInvalid(nameBad);
     setPriceInvalid(priceBad);
-    if (nameBad || priceBad || !serviceItemType) return;
+    if (nameBad || priceBad) return;
+    if (!serviceItemType) {
+      Alert.alert("Selecione o tipo", "Escolha o tipo de serviço antes de adicionar.");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -352,7 +356,12 @@ export default function MyServicesScreen() {
         {!showForm && professional?.establishment_id ? (
           <Button
             title="Adicionar Servico"
-            onPress={() => setShowForm(true)}
+            onPress={() => {
+              const first = filteredTypes[0];
+              setServiceItemType(first?.value ?? "");
+              if (first && !customName.trim()) setCustomName(first.label);
+              setShowForm(true);
+            }}
             mt="$6"
           />
         ) : showForm ? (
