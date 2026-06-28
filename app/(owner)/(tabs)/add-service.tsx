@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   VStack,
   HStack,
@@ -14,6 +14,7 @@ import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
+import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 
@@ -65,6 +66,14 @@ const SERVICE_ITEM_TYPES = [
 
 export default function AddServiceScreen() {
   const { establishmentId } = useLocalSearchParams<{ establishmentId: string }>();
+  // Servico e capacidade do PROFISSIONAL: o owner so adiciona se tambem acumular
+  // o papel PROFESSIONAL. Guard defensivo (a tela ja some do menu nesse caso).
+  // Decisao de produto 2026-06-28.
+  const isProfessional = useAuthStore((s) => s.user?.roles?.includes("PROFESSIONAL"));
+  useEffect(() => {
+    if (!isProfessional) router.replace("/(owner)/menu" as any);
+  }, [isProfessional]);
+
   const establishment = useEstablishmentStore((s) => s.establishment);
   const estServiceType = establishment?.service_type ?? (establishment as any)?.serviceType;
   const defaultSpecialty = SERVICE_TYPE_TO_SPECIALTY[estServiceType] ?? "BARBER";

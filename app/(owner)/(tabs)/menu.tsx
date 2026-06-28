@@ -140,15 +140,20 @@ export default function OwnerMenuScreen() {
                 }
               />
 
-              <MenuItem
-                label="Adicionar Servico"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(owner)/add-service",
-                    params: { establishmentId: establishment.id },
-                  } as any)
-                }
-              />
+              {/* Servico e capacidade do PROFISSIONAL: o owner so adiciona se
+                  tambem acumular o papel PROFESSIONAL (senao gerencia via "Meus
+                  Servicos"). Decisao de produto 2026-06-28. */}
+              {isProfessional && (
+                <MenuItem
+                  label="Adicionar Servico"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(owner)/add-service",
+                      params: { establishmentId: establishment.id },
+                    } as any)
+                  }
+                />
+              )}
 
               <MenuItem
                 label="Ver Filas"
