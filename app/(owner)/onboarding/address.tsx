@@ -43,8 +43,16 @@ export default function AddressScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!street.trim() || !number.trim() || !neighborhood.trim() || !city.trim() || !state.trim()) {
+    const missing = [
+      !street.trim() && "rua",
+      !number.trim() && "número",
+      !neighborhood.trim() && "bairro",
+      !city.trim() && "cidade",
+      !state.trim() && "estado (UF)",
+    ].filter(Boolean);
+    if (missing.length) {
       setIsInvalid(true);
+      Alert.alert("Endereço incompleto", `Preencha: ${missing.join(", ")}.`);
       return;
     }
 
