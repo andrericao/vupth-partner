@@ -41,6 +41,7 @@ function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
 export default function ProfessionalProfileScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const logout = useAuthStore((s) => s.logout);
+  const hasOwner = useAuthStore((s) => s.user?.roles?.includes("OWNER"));
 
   const handleLogout = () => {
     Alert.alert("Sair", "Tem certeza que deseja sair?", [
@@ -80,6 +81,18 @@ export default function ProfessionalProfileScreen() {
         </VStack>
 
         <Divider mb="$4" />
+
+        {/* Seletor de papel: quem acumula PROFESSIONAL + OWNER volta para a
+            area do dono. Profissional-so nao ve o botao. Decisao 2026-06-28. */}
+        {hasOwner && (
+          <VStack mb="$4">
+            <MenuItem
+              label="Area do dono"
+              onPress={() => router.replace("/(owner)/dashboard" as any)}
+              color="$green600"
+            />
+          </VStack>
+        )}
 
         <VStack space="sm">
           <MenuItem

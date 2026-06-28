@@ -105,6 +105,19 @@ export default function OwnerMenuScreen() {
 
         <Divider mb="$4" />
 
+        {/* Seletor de papel: quem acumula OWNER + PROFESSIONAL alterna para a
+            sua area de profissional (e gerencia servicos por "Meus Servicos").
+            Owner-so-dono nao ve o botao. Decisao de produto 2026-06-28. */}
+        {isProfessional && (
+          <VStack mb="$4">
+            <MenuItem
+              label="Atender como profissional"
+              onPress={() => router.replace("/(professional)/queue" as any)}
+              color="$green600"
+            />
+          </VStack>
+        )}
+
         <VStack space="sm">
           {establishment?.id && (
             <>
