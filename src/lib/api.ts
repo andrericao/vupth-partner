@@ -16,6 +16,10 @@ const BASE_URL = API_URLS[env] ?? API_URLS.staging;
 // GET /ws cai no handler SockJS (HTTP 200) e o upgrade nativo falha (socket fecha).
 export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws/websocket`;
 
+// Endpoint PUBLICO de readiness (raiz do servidor, fora de /api/v1) — usado pelo
+// portao de cold start do Render (ver src/lib/readiness.ts + PRD_BACKEND 18c).
+export const READINESS_URL = `${BASE_URL}/actuator/health/readiness`;
+
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },

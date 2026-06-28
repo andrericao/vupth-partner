@@ -1,20 +1,39 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { router } from "expo-router";
 import { Loading } from "@components/Loading";
+import { ServerWarmup } from "@components/ServerWarmup";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
+import { waitForBackend } from "@lib/readiness";
+
+type WarmupPhase = "warming" | "failed" | "ready";
 
 export default function RootIndex() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
 
+  // Portao de cold start: so liberamos login/cadastro depois que o backend
+  // responde readiness UP (ver src/lib/readiness.ts + CLAUDE.md / PRD_BACKEND 18c).
+  const [phase, setPhase] = useState<WarmupPhase>("warming");
+
+  const warmUp = useCallback(async () => {
+    setPhase("warming");
+    const ok = await waitForBackend();
+    setPhase(ok ? "ready" : "failed");
+  }, []);
+
+  useEffect(() => {
+    warmUp();
+  }, [warmUp]);
+
+  // Tokens locais (SecureStore) carregam em paralelo; nao dependem do backend.
   useEffect(() => {
     useAuthStore.getState().loadStoredTokens();
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (phase !== "ready" || isLoading) return;
 
     const roles = user?.roles ?? [];
     if (isAuthenticated && roles.length > 0) {
@@ -23,7 +42,9 @@ export default function RootIndex() {
     } else {
       router.replace("/(auth)" as any);
     }
-  }, [isLoading, isAuthenticated, user]);
+  }, [phase, isLoading, isAuthenticated, user]);
 
+  if (phase === "warming") return <ServerWarmup />;
+  if (phase === "failed") return <ServerWarmup failed onRetry={warmUp} />;
   return <Loading />;
 }
