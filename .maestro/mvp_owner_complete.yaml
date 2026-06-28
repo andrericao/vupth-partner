@@ -6,8 +6,17 @@ appId: host.exp.exponent
 
 - evalScript: ${output.EMAIL = 'mvp-owner-' + Date.now() + '@test.dev'}
 
+# ⚠️ DESALINHADO (decisao 2026-06-28): a secao 5 (ADD SERVICE) usa o
+# "Adicionar Servico" do OWNER, que agora so aparece se o owner tambem for
+# PROFISSIONAL. Servico passou a ser capacidade do profissional (fluxo "Meus
+# Servicos"). Ajustar a estrategia de seed antes de rodar esta parte.
+
 # ---- 1. REGISTER ----
-- assertVisible: "Como deseja usar o VUPTH?"
+# Portao de cold start (readiness): "Preparando servidor..." ate o backend
+# acordar (~50s). Espera estendida ate a tela de papeis.
+- extendedWaitUntil:
+    visible: "Como deseja usar o VUPTH?"
+    timeout: 90000
 - tapOn: "Sou dono de estabelecimento"
 - assertVisible: "Cadastrar"
 - tapOn:

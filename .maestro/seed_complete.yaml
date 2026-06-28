@@ -15,7 +15,17 @@ appId: host.exp.exponent
 - evalScript: ${output.EST1 = 'Corte Real ' + output.TAG}
 - evalScript: ${output.P1 = 'Carlos ' + output.TAG}
 
-- assertVisible: "Como deseja usar o VUPTH?"
+# ⚠️ DESALINHADO (decisao 2026-06-28): este seed cria servicos pelo OWNER
+# ("Adicionar Servico" no menu do dono), que agora so aparece se o owner for
+# tambem PROFISSIONAL. Servico virou capacidade do profissional ("Meus
+# Servicos"). + Mascara R$: o placeholder agora e "R$ 35,00" e digitar centavos
+# (R$30 => "3000"). Precisa redesenho de estrategia de seed (ver pergunta no PRD).
+
+# Portao de cold start (readiness): "Preparando servidor..." ate o backend
+# acordar (~50s). Espera estendida ate a tela de papeis.
+- extendedWaitUntil:
+    visible: "Como deseja usar o VUPTH?"
+    timeout: 90000
 - tapOn: "Sou dono de estabelecimento"
 - assertVisible: "Cadastrar"
 - tapOn:

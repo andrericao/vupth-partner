@@ -14,7 +14,11 @@ appId: host.exp.exponent
 - evalScript: ${output.P5 = 'Ricardo ' + output.TAG}
 
 # 1. Register
-- assertVisible: "Como deseja usar o VUPTH?"
+# Portao de cold start (readiness): o app mostra "Preparando servidor..." ate o
+# backend acordar (~50s no Render). Espera estendida ate a tela de papeis.
+- extendedWaitUntil:
+    visible: "Como deseja usar o VUPTH?"
+    timeout: 90000
 - tapOn: "Sou profissional"
 - assertVisible: "Cadastrar"
 - tapOn:
