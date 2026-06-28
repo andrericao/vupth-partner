@@ -13,6 +13,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { cardShadow } from "@lib/styles";
+import { OtaUpdateButton } from "@components/OtaUpdateButton";
 
 type MenuItemProps = {
   label: string;
@@ -229,6 +230,8 @@ export default function OwnerMenuScreen() {
             color="$red500"
           />
         </VStack>
+
+        <OtaUpdateButton />
       </VStack>
     </ScrollView>
   );
