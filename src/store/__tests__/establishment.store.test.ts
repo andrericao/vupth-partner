@@ -447,4 +447,74 @@ describe("establishment.store", () => {
       ).rejects.toThrow();
     });
   });
+
+  describe("fetchEstablishmentById", () => {
+    it("calls GET /establishment/id/{id} and returns normalized detail", async () => {
+      mock.onGet("/establishment/id/estab-uuid-1").reply(200, {
+        id: "estab-uuid-1",
+        name: "Barbearia Teste",
+        serviceType: "BARBER",
+        openStatus: "OPEN",
+        urlImage: "https://img/x.png",
+        phone: "11999998888",
+        instagram: "@barbearia",
+        openingTime: "09:00Z",
+        closingTime: "18:00Z",
+        address: {
+          street: "Rua A",
+          number: "10",
+          complement: "sala 2",
+          neighborhood: "Centro",
+          city: "Sao Paulo",
+          state: "SP",
+          zipCode: "01000-000",
+        },
+      });
+
+      const detail = await useEstablishmentStore
+        .getState()
+        .fetchEstablishmentById("estab-uuid-1");
+
+      expect(mock.history.get[0].url).toBe("/establishment/id/estab-uuid-1");
+      expect(detail).toEqual({
+        id: "estab-uuid-1",
+        name: "Barbearia Teste",
+        service_type: "BARBER",
+        open_status: "OPEN",
+        url_image: "https://img/x.png",
+        phone: "11999998888",
+        instagram: "@barbearia",
+        opening_time: "09:00Z",
+        closing_time: "18:00Z",
+        address: {
+          street: "Rua A",
+          number: "10",
+          complement: "sala 2",
+          neighborhood: "Centro",
+          city: "Sao Paulo",
+          state: "SP",
+          zipCode: "01000-000",
+        },
+      });
+    });
+
+    it("defaults missing optional fields and absent address to null", async () => {
+      mock.onGet("/establishment/id/estab-uuid-2").reply(200, {
+        id: "estab-uuid-2",
+        name: "Sem Detalhes",
+        service_type: "BARBER",
+        open_status: "CLOSED",
+      });
+
+      const detail = await useEstablishmentStore
+        .getState()
+        .fetchEstablishmentById("estab-uuid-2");
+
+      expect(detail.url_image).toBeNull();
+      expect(detail.phone).toBeNull();
+      expect(detail.instagram).toBeNull();
+      expect(detail.opening_time).toBeNull();
+      expect(detail.address).toBeNull();
+    });
+  });
 });

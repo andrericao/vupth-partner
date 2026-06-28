@@ -13,11 +13,13 @@ import {
   InputIcon,
   SearchIcon,
   CloseIcon,
+  ChevronRightIcon,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { SkeletonList } from "@components/Skeleton";
 import { api, getApiErrorMessage } from "@lib/api";
 import { useProfessionalStore } from "@store/professional.store";
 
@@ -38,7 +40,6 @@ export default function FindEstablishmentScreen() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<EstablishmentResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [isRequesting, setIsRequesting] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [gate, setGate] = useState<Gate>("loading");
   const [blockedName, setBlockedName] = useState<string | null>(null);
@@ -104,22 +105,16 @@ export default function FindEstablishmentScreen() {
     }
   };
 
-  const handleRequestAffiliation = async (establishment: EstablishmentResult) => {
-    setIsRequesting(true);
-    try {
-      await api.post("/professional/me/affiliations", {
-        establishmentId: establishment.id,
-      });
-      Alert.alert(
-        "Solicitacao enviada",
-        `Sua solicitacao para ${establishment.name} foi enviada. Aguarde a aprovacao do proprietario.`,
-        [{ text: "OK", onPress: () => router.back() }]
-      );
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao."));
-    } finally {
-      setIsRequesting(false);
-    }
+  const openDetail = (establishment: EstablishmentResult) => {
+    router.push({
+      pathname: "/(professional)/establishment-detail",
+      params: {
+        id: establishment.id,
+        name: establishment.name,
+        serviceType: establishment.serviceType,
+        openStatus: establishment.openStatus,
+      },
+    });
   };
 
   const handleCancelAffiliation = () => {
@@ -271,8 +266,8 @@ export default function FindEstablishmentScreen() {
           </GluestackInput>
 
           {isSearching && (
-            <VStack alignItems="center" mt="$8">
-              <Spinner color="$green500" size="large" />
+            <VStack mt="$4">
+              <SkeletonList count={3} />
             </VStack>
           )}
 
@@ -287,8 +282,7 @@ export default function FindEstablishmentScreen() {
           {results.map((est) => (
             <Pressable
               key={est.id}
-              onPress={() => handleRequestAffiliation(est)}
-              disabled={isRequesting}
+              onPress={() => openDetail(est)}
               py="$4"
               px="$4"
               bg="$white"
@@ -307,13 +301,16 @@ export default function FindEstablishmentScreen() {
                     {est.serviceType}
                   </Text>
                 </VStack>
-                <Text
-                  fontFamily="$body"
-                  fontSize="$xs"
-                  color={est.openStatus === "OPEN" ? "$green600" : "$coolGray400"}
-                >
-                  {est.openStatus === "OPEN" ? "Aberto" : "Fechado"}
-                </Text>
+                <HStack alignItems="center" space="sm">
+                  <Text
+                    fontFamily="$body"
+                    fontSize="$xs"
+                    color={est.openStatus === "OPEN" ? "$green600" : "$coolGray400"}
+                  >
+                    {est.openStatus === "OPEN" ? "Aberto" : "Fechado"}
+                  </Text>
+                  <ChevronRightIcon color="$coolGray400" />
+                </HStack>
               </HStack>
             </Pressable>
           ))}

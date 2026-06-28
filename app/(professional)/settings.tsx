@@ -11,12 +11,13 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
 
-type Editing = null | "name" | "email" | "password";
+type Editing = null | "name" | "nickname" | "email" | "password";
 
 export default function ProfessionalSettingsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const leaveEstablishment = useProfessionalStore((s) => s.leaveEstablishment);
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
+  const updateNickname = useProfessionalStore((s) => s.updateNickname);
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
   const acceptAffiliation = useProfessionalStore((s) => s.acceptAffiliation);
   const rejectAffiliation = useProfessionalStore((s) => s.rejectAffiliation);
@@ -96,6 +97,7 @@ export default function ProfessionalSettingsScreen() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -104,6 +106,7 @@ export default function ProfessionalSettingsScreen() {
   const startEdit = (field: Editing) => {
     setFieldError(null);
     setName(field === "name" ? professional?.name ?? "" : "");
+    setNickname(field === "nickname" ? professional?.nickname ?? "" : "");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
@@ -124,6 +127,29 @@ export default function ProfessionalSettingsScreen() {
       Alert.alert("Nome atualizado", "Seu nome foi alterado com sucesso.");
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveNickname = async () => {
+    const value = nickname.trim();
+    if (value.length > 50) {
+      setFieldError("O apelido deve ter no maximo 50 caracteres.");
+      return;
+    }
+    setFieldError(null);
+    setIsSaving(true);
+    try {
+      // String vazia limpa o apelido no backend.
+      await updateNickname(value);
+      setEditing(null);
+      Alert.alert(
+        "Apelido atualizado",
+        value ? "Seu apelido foi salvo." : "Seu apelido foi removido."
+      );
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o apelido."));
     } finally {
       setIsSaving(false);
     }
@@ -302,6 +328,41 @@ export default function ProfessionalSettingsScreen() {
                   {professional?.name ?? "—"}
                 </Text>
                 <Button title="Editar" onPress={() => startEdit("name")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
+              </>
+            )}
+          </VStack>
+
+          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              Apelido
+            </Text>
+            {editing === "nickname" ? (
+              <FormControl mt="$2">
+                <Input
+                  textLabel="Apelido (ajuda os clientes a te achar na busca)"
+                  placeholder="Ex.: Dedeco"
+                  messageError=""
+                  value={nickname}
+                  onChangeText={setNickname}
+                  autoCapitalize="words"
+                  maxLength={50}
+                />
+                {fieldError && (
+                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
+                    {fieldError}
+                  </Text>
+                )}
+                <HStack space="sm">
+                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
+                  <Button title="Salvar" onPress={handleSaveNickname} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
+                </HStack>
+              </FormControl>
+            ) : (
+              <>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
+                  {professional?.nickname || "—"}
+                </Text>
+                <Button title="Editar" onPress={() => startEdit("nickname")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
               </>
             )}
           </VStack>

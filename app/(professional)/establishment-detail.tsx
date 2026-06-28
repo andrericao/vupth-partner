@@ -1,0 +1,213 @@
+import { useEffect, useState } from "react";
+import {
+  VStack,
+  HStack,
+  Heading,
+  Text,
+  ScrollView,
+  Spinner,
+  Box,
+} from "@gluestack-ui/themed";
+import { Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { Header } from "@components/Header";
+import { Button } from "@components/Button";
+import { api, getApiErrorMessage } from "@lib/api";
+import {
+  useEstablishmentStore,
+  EstablishmentDetail,
+} from "@store/establishment.store";
+import { parseApiTime } from "@lib/time";
+import { maskPhone } from "@lib/masks";
+
+function formatAddress(a: EstablishmentDetail["address"]): string | null {
+  if (!a) return null;
+  const line1 = [a.street, a.number].filter(Boolean).join(", ");
+  const cityState = [a.city, a.state].filter(Boolean).join(" - ");
+  const parts = [
+    line1,
+    a.complement,
+    a.neighborhood,
+    cityState,
+    a.zipCode ? `CEP ${a.zipCode}` : null,
+  ].filter((p): p is string => !!p && p.length > 0);
+  return parts.length ? parts.join(" · ") : null;
+}
+
+function formatHours(open: string | null, close: string | null): string | null {
+  const o = parseApiTime(open);
+  const c = parseApiTime(close);
+  if (!o && !c) return null;
+  return `${o ?? "--:--"} às ${c ?? "--:--"}`;
+}
+
+function DetailRow({ label, value }: { label: string; value: string | null }) {
+  return (
+    <VStack>
+      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray700">
+        {label}
+      </Text>
+      <Text
+        fontFamily="$body"
+        color={value ? "$coolGray600" : "$coolGray400"}
+        mt="$1"
+      >
+        {value ?? "Nao informado"}
+      </Text>
+    </VStack>
+  );
+}
+
+export default function EstablishmentDetailScreen() {
+  const params = useLocalSearchParams<{
+    id: string;
+    name?: string;
+    serviceType?: string;
+    openStatus?: string;
+  }>();
+  const id = params.id;
+
+  const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRequesting, setIsRequesting] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const data = await useEstablishmentStore
+          .getState()
+          .fetchEstablishmentById(id);
+        if (active) setDetail(data);
+      } catch {
+        // mantem os dados basicos vindos por params
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const name = detail?.name ?? params.name ?? "Estabelecimento";
+  const serviceType = detail?.service_type ?? params.serviceType ?? "";
+  const openStatus = detail?.open_status ?? params.openStatus ?? "";
+  const isOpen = openStatus === "OPEN";
+  const address = formatAddress(detail?.address ?? null);
+  const hours = formatHours(
+    detail?.opening_time ?? null,
+    detail?.closing_time ?? null
+  );
+  const phone = detail?.phone ? maskPhone(detail.phone) : null;
+  const instagram = detail?.instagram ?? null;
+
+  const handleRequestAffiliation = async () => {
+    setIsRequesting(true);
+    try {
+      await api.post("/professional/me/affiliations", { establishmentId: id });
+      Alert.alert(
+        "Solicitacao enviada",
+        `Sua solicitacao para ${name} foi enviada. Aguarde a aprovacao do proprietario.`,
+        [
+          {
+            text: "OK",
+            onPress: () => router.navigate("/(professional)/profile" as any),
+          },
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert(
+        "Erro",
+        getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao.")
+      );
+    } finally {
+      setIsRequesting(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <VStack flex={1} py="$12" px="$6">
+          <Header showBackButton onBack={() => router.back()} />
+
+          {detail?.url_image ? (
+            <Image
+              source={{ uri: detail.url_image }}
+              style={{
+                width: "100%",
+                height: 192,
+                borderRadius: 12,
+                marginTop: 16,
+              }}
+              resizeMode="cover"
+            />
+          ) : (
+            <Box
+              mt="$4"
+              h="$48"
+              borderRadius="$xl"
+              bg="$coolGray100"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontFamily="$body" color="$coolGray400">
+                Sem foto
+              </Text>
+            </Box>
+          )}
+
+          <HStack mt="$6" alignItems="center" justifyContent="space-between">
+            <Heading size="2xl" fontFamily="$heading" flex={1}>
+              {name}
+            </Heading>
+            <Text
+              fontFamily="$body"
+              fontSize="$sm"
+              color={isOpen ? "$green600" : "$coolGray400"}
+            >
+              {isOpen ? "Aberto" : "Fechado"}
+            </Text>
+          </HStack>
+
+          {serviceType ? (
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$1">
+              {serviceType}
+            </Text>
+          ) : null}
+
+          {isLoading ? (
+            <VStack alignItems="center" mt="$8">
+              <Spinner color="$green500" size="large" />
+            </VStack>
+          ) : (
+            <VStack mt="$6" space="md">
+              <DetailRow label="Endereco" value={address} />
+              <DetailRow label="Horario" value={hours} />
+              <DetailRow label="Telefone" value={phone} />
+              <DetailRow label="Instagram" value={instagram} />
+            </VStack>
+          )}
+
+          <Box flex={1} />
+
+          <Button
+            title="Solicitar vinculacao"
+            onPress={handleRequestAffiliation}
+            isLoading={isRequesting}
+            mt="$8"
+            bg="$green500"
+            $active-bg="$green600"
+          />
+        </VStack>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}

@@ -5,10 +5,10 @@ import {
   Heading,
   Text,
   ScrollView,
-  Spinner,
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
+import { SkeletonList } from "@components/Skeleton";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
@@ -104,8 +104,8 @@ export default function OwnerAffiliationsScreen() {
         </Text>
 
         {isLoading && (
-          <VStack alignItems="center" mt="$12">
-            <Spinner color="$green500" size="large" />
+          <VStack mt="$6">
+            <SkeletonList count={3} />
           </VStack>
         )}
 

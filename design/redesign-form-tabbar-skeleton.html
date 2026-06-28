@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VUPTH Partner — Redesign: Formulários · Tab bar · Skeleton</title>
+<style>
+  :root {
+    --bg: #F7FAF8;            /* off-white global */
+    --green-vibrant: #00B37E; /* CTA */
+    --green-medium: #52B788;  /* destaque */
+    --green-dark: #1B4332;    /* títulos / nav */
+    --amber: #FFB703;
+    --red: #E63946;
+    --gray-100: #ECEFED;
+    --gray-200: #E5E5E5;
+    --gray-400: #9CA3AF;
+    --gray-600: #5B655F;
+    --gray-900: #1F2A24;
+    --card-shadow: 0 6px 14px rgba(27,67,50,.14);
+  }
+  * { box-sizing: border-box; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { background: #dfe7e3; margin: 0; padding: 32px; color: var(--gray-900); }
+  h1 { font-size: 20px; color: var(--green-dark); }
+  .note { color: var(--gray-600); font-size: 13px; max-width: 760px; line-height: 1.5; }
+  .row { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; margin-top: 24px; }
+  .col h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--gray-600); margin: 0 0 10px; }
+
+  /* phone frame */
+  .phone { width: 300px; background: var(--bg); border-radius: 34px; padding: 16px 14px 0; box-shadow: var(--card-shadow); border: 1px solid #d7e0db; overflow: hidden; }
+  .screen { height: 540px; position: relative; display: flex; flex-direction: column; }
+
+  /* header clean (já existente) */
+  .header { display:flex; align-items:center; justify-content:space-between; padding: 8px 6px 14px; }
+  .brand { font-weight: 800; color: var(--green-dark); letter-spacing: .02em; }
+  .brand small { display:block; font-weight:600; font-size:11px; color: var(--gray-600); }
+  .role { width:30px;height:30px;border-radius:9px;background:var(--green-medium); }
+
+  /* ---------- FORM ---------- */
+  .title { font-size: 22px; font-weight: 800; color: var(--green-dark); margin: 2px 6px 16px; }
+  .field { margin: 0 6px 14px; }
+  .label { font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
+  .input {
+    background: #fff; border: 1.5px solid var(--gray-200); border-radius: 14px;
+    padding: 13px 14px; font-size: 15px; color: var(--gray-900); box-shadow: 0 1px 2px rgba(27,67,50,.04);
+  }
+  .input.focus { border-color: var(--green-vibrant); box-shadow: 0 0 0 3px rgba(0,179,126,.12); }
+  .input.placeholder { color: var(--gray-400); }
+  .hint { font-size: 11px; color: var(--gray-400); margin-top: 5px; }
+  .pill {
+    margin: 18px 6px 0; text-align:center; padding: 15px; border-radius: 999px;
+    background: var(--green-vibrant); color:#fff; font-weight: 700; font-size: 15px;
+    box-shadow: 0 8px 16px rgba(0,179,126,.32);
+  }
+  .pill.ghost { background: #fff; color: var(--green-dark); border:1.5px solid var(--gray-200); box-shadow:none; }
+
+  /* ---------- TAB BAR ---------- */
+  .body-fill { flex: 1; padding: 4px 6px; }
+  .placeholder-card { background:#fff; border-radius: 18px; box-shadow: var(--card-shadow); height: 64px; margin-bottom: 12px; }
+  .tabbar {
+    margin: 0 -14px; background:#fff; border-top: 1px solid var(--gray-100);
+    display:flex; justify-content: space-around; align-items:center; padding: 10px 8px 18px;
+    box-shadow: 0 -4px 14px rgba(27,67,50,.06);
+  }
+  .tab { display:flex; flex-direction:column; align-items:center; gap:4px; color: var(--gray-400); font-size: 11px; font-weight:600; }
+  .tab .ic { width: 24px; height: 24px; border-radius: 7px; background: currentColor; opacity:.85; }
+  .tab.active { color: var(--green-vibrant); }
+  .tab.active .pill-bg {
+    background: rgba(0,179,126,.12); padding: 7px 16px; border-radius: 999px; margin-bottom: 2px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tab.active .ic { opacity: 1; }
+
+  /* ---------- SKELETON ---------- */
+  .sk {
+    background: linear-gradient(100deg, #eef3f1 30%, #f7faf8 50%, #eef3f1 70%);
+    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px;
+  }
+  @keyframes shimmer { 0%{background-position: 200% 0} 100%{background-position: -200% 0} }
+  .sk-card { background:#fff; border-radius: 18px; box-shadow: var(--card-shadow); padding: 16px; margin: 0 6px 12px; }
+  .sk-line { height: 12px; margin-bottom: 10px; }
+  .sk-badge { width: 64px; height: 22px; border-radius: 999px; }
+  .sk-row { display:flex; justify-content:space-between; align-items:center; }
+  .legend { font-size:11px; color:var(--gray-400); text-align:center; margin-top:6px; }
+</style>
+</head>
+<body>
+  <h1>VUPTH Partner — Redesign (linguagem "Verde Imersivo" já escolhida)</h1>
+  <p class="note">
+    Aplicação da linguagem nas 3 peças que faltavam. Mesmos tokens do app
+    (off-white <b>#F7FAF8</b>, verde CTA <b>#00B37E</b>, verde escuro <b>#1B4332</b>,
+    cantos arredondados, <code>cardShadow</code>, botões pílula com sombra). Nada de
+    token solto — as mudanças são <b>estruturais</b> (cantos, sombras, formas, pílulas).
+  </p>
+
+  <div class="row">
+    <!-- FORM -->
+    <div class="col">
+      <h2>1 · Formulários</h2>
+      <div class="phone"><div class="screen">
+        <div class="header"><div class="brand">VUPTH<small>Adicionar serviço</small></div><div class="role"></div></div>
+        <div class="title">Novo serviço</div>
+        <div class="field"><div class="label">Nome do serviço</div><div class="input">Corte degradê</div></div>
+        <div class="field"><div class="label">Preço (R$)</div><div class="input focus">45,00</div>
+          <div class="hint">Você recebe R$ 42,30 · Taxas Vupth R$ 2,70</div></div>
+        <div class="field"><div class="label">Tempo estimado</div><div class="input placeholder">30 min</div></div>
+        <div class="pill">Salvar serviço</div>
+        <div class="pill ghost">Cancelar</div>
+      </div></div>
+      <div class="legend">inputs arredondados (14px) · foco verde · botão pílula com sombra</div>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="col">
+      <h2>2 · Tab bar</h2>
+      <div class="phone"><div class="screen">
+        <div class="header"><div class="brand">VUPTH<small>Minha fila</small></div><div class="role"></div></div>
+        <div class="body-fill">
+          <div class="placeholder-card"></div>
+          <div class="placeholder-card"></div>
+          <div class="placeholder-card"></div>
+          <div class="placeholder-card"></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><div class="pill-bg"><div class="ic"></div></div>Fila</div>
+          <div class="tab"><div class="ic"></div>Serviços</div>
+          <div class="tab"><div class="ic"></div>Perfil</div>
+        </div>
+      </div></div>
+      <div class="legend">aba ativa = pílula verde-clara + ícone/label verde · sombra superior</div>
+    </div>
+
+    <!-- SKELETON -->
+    <div class="col">
+      <h2>3 · Skeleton (R4)</h2>
+      <div class="phone"><div class="screen">
+        <div class="header"><div class="brand">VUPTH<small>Minha fila</small></div><div class="role"></div></div>
+        <div class="body-fill">
+          <div class="sk-card">
+            <div class="sk-row"><div class="sk sk-line" style="width:45%"></div><div class="sk sk-badge"></div></div>
+            <div class="sk sk-line" style="width:70%"></div>
+            <div class="sk sk-line" style="width:35%;margin-bottom:0"></div>
+          </div>
+          <div class="sk-card">
+            <div class="sk-row"><div class="sk sk-line" style="width:50%"></div><div class="sk sk-badge"></div></div>
+            <div class="sk sk-line" style="width:60%"></div>
+            <div class="sk sk-line" style="width:40%;margin-bottom:0"></div>
+          </div>
+          <div class="sk-card">
+            <div class="sk-row"><div class="sk sk-line" style="width:40%"></div><div class="sk sk-badge"></div></div>
+            <div class="sk sk-line" style="width:65%;margin-bottom:0"></div>
+          </div>
+        </div>
+        <div class="legend" style="margin-bottom:12px">cards "fantasma" com shimmer no lugar do spinner</div>
+      </div></div>
+      <div class="legend">mesma forma dos cards reais (cantos + sombra) — sem "pulo" ao carregar</div>
+    </div>
+  </div>
+</body>
+</html>

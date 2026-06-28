@@ -13,6 +13,7 @@ const mock = new MockAdapter(api);
 const REGISTER_RESPONSE = {
   id: "prof-uuid-1",
   name: "Joao Silva",
+  nickname: null,
   specialty: "Corte masculino",
   establishment_id: null,
   establishment_name: null,
@@ -23,6 +24,7 @@ const REGISTER_RESPONSE = {
 const AFFILIATE_RESPONSE = {
   id: "prof-uuid-1",
   name: "Joao Silva",
+  nickname: null,
   specialty: "Corte masculino",
   establishment_id: "estab-uuid-1",
   establishment_name: "Barbearia do Andre",
@@ -317,6 +319,31 @@ describe("professional.store", () => {
 
       await expect(
         useProfessionalStore.getState().updateMyProfile({ name: "x" })
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("updateNickname", () => {
+    it("calls PATCH /profile/general-infos with the nickname and refreshes via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/profile/general-infos").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, nickname: "Dedeco" });
+
+      await useProfessionalStore.getState().updateNickname("Dedeco");
+
+      expect(mock.history.patch[0].url).toBe("/profile/general-infos");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ nickname: "Dedeco" });
+      expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
+    });
+
+    it("rejects when the PATCH fails", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/profile/general-infos").reply(422, { message: "nickname too long" });
+
+      await expect(
+        useProfessionalStore.getState().updateNickname("x".repeat(51))
       ).rejects.toThrow();
     });
   });

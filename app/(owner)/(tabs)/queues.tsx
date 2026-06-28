@@ -9,8 +9,8 @@ import {
   ScrollView,
   Pressable,
   Divider,
-  Spinner,
 } from "@gluestack-ui/themed";
+import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
@@ -187,9 +187,8 @@ export default function OwnerQueuesScreen() {
         <Divider mb="$4" />
 
         {isLoading && !data && (
-          <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Spinner color="$green500" size="large" />
-            <Text fontFamily="$body" color="$coolGray500" mt="$4">Carregando filas...</Text>
+          <VStack mt="$6">
+            <SkeletonList count={3} />
           </VStack>
         )}
 

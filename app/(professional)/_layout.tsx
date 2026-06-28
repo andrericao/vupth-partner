@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
-import { Text } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
 
 export default function ProfessionalLayout() {
   const insets = useSafeAreaInsets();
@@ -12,8 +12,10 @@ export default function ProfessionalLayout() {
         tabBarActiveTintColor: "#00B37E",
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
+          ...tabBarShadow,
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E5E7EB",
+          borderTopWidth: 0,
           height: 60 + insets.bottom,
           paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
@@ -28,27 +30,21 @@ export default function ProfessionalLayout() {
         name="queue"
         options={{
           title: "Fila",
-          tabBarIcon: ({ color }) => (
-            <Text fontSize="$xl" color={color}>&#9776;</Text>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="people" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="my-services"
         options={{
           title: "Servicos",
-          tabBarIcon: ({ color }) => (
-            <Text fontSize="$xl" color={color}>&#9733;</Text>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="cut" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Perfil",
-          tabBarIcon: ({ color }) => (
-            <Text fontSize="$xl" color={color}>&#9881;</Text>
-          ),
+          tabBarIcon: ({ focused }) => <TabBarIcon name="person" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -73,6 +69,10 @@ export default function ProfessionalLayout() {
       />
       <Tabs.Screen
         name="find-establishment"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="establishment-detail"
         options={{ href: null }}
       />
       <Tabs.Screen
