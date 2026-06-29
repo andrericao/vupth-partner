@@ -15,7 +15,7 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { useElapsedTime } from "@hooks/useElapsedTime";
+import { useElapsedTime, clearAttendanceStart } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
@@ -61,7 +61,8 @@ function AttendanceCard({
   const isLate = attendance.status === "LATE";
 
   const { formatted } = useElapsedTime(
-    isInProgress || isPaused ? (attendance as any).startTime ?? null : null,
+    isInProgress || isPaused ? attendance.id : null,
+    (attendance as any).startTime ?? null,
     isPaused
   );
 
@@ -395,7 +396,12 @@ export default function ProfessionalQueueScreen() {
               attendance={currentAttendance}
               isActive
               isFirst={false}
-              onFinish={() => handleAction(() => finishAttendance(currentAttendance.id))}
+              onFinish={() =>
+                handleAction(async () => {
+                  await finishAttendance(currentAttendance.id);
+                  clearAttendanceStart(currentAttendance.id);
+                })
+              }
               onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
               onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
             />

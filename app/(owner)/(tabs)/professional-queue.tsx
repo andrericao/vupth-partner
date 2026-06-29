@@ -68,6 +68,7 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
 
 function CurrentAttendanceCard({ attendance }: { attendance: any }) {
   const { formatted } = useElapsedTime(
+    attendance.id ?? null,
     attendance.startTime ?? null,
     attendance.isPaused ?? false
   );
