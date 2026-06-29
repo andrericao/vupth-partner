@@ -3,10 +3,7 @@ import {
   VStack,
   FormControl,
   Heading,
-  HStack,
   Text,
-  Link,
-  LinkText,
   ScrollView,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
@@ -165,12 +162,21 @@ export default function RegisterScreen() {
           />
         </VStack>
 
-        <HStack mt="$12" space="xs" flex={1}>
-          <Text fontFamily="$body">Já é cadastrado? </Text>
-          <Link onPress={() => router.push(`/(auth)/login?role=${role ?? ""}`)}>
-            <LinkText fontFamily="$body">Login</LinkText>
-          </Link>
-        </HStack>
+        <VStack mt="$12" space="sm" flex={1} w="$full">
+          <Text fontFamily="$body" textAlign="center" color="$coolGray500">
+            Já é cadastrado?
+          </Text>
+          <Button
+            title="Fazer login"
+            onPress={() => router.push(`/(auth)/login?role=${role ?? ""}`)}
+            mt="$2"
+            bg="$white"
+            borderWidth="$1"
+            borderColor="$green500"
+            $active-bg="$coolGray100"
+            textColor="$green500"
+          />
+        </VStack>
       </VStack>
     </ScrollView>
     </KeyboardAvoidingView>
