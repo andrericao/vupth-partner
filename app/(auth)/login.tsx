@@ -30,6 +30,7 @@ export default function LoginScreen() {
   const login = useAuthStore((s) => s.login);
 
   const handleSubmit = async () => {
+    if (isLoading) return;
     const emailInvalid = email.length < 6 || !email.includes("@");
     const passwordInvalid = password.length < 6;
     setIsEmailInvalid(emailInvalid);
@@ -103,10 +104,11 @@ export default function LoginScreen() {
             />
           </FormControl>
 
+          {/* [igual front-client] mostra "Entrando..." em texto no lugar do
+              spinner enquanto autentica. handleSubmit ja guarda duplo-clique. */}
           <Button
-            title="Entrar"
+            title={isLoading ? "Entrando..." : "Entrar"}
             onPress={handleSubmit}
-            isLoading={isLoading}
           />
         </VStack>
 

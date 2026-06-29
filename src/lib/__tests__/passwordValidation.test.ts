@@ -1,4 +1,20 @@
-import { validatePassword } from "../passwordValidation";
+import { validatePassword, getPasswordRules } from "../passwordValidation";
+
+describe("getPasswordRules", () => {
+  it("marks all rules passed for a strong password", () => {
+    const rules = getPasswordRules("Abc12345!");
+    expect(rules.every((r) => r.passed)).toBe(true);
+    expect(rules).toHaveLength(4);
+  });
+
+  it("flags only the failing rules", () => {
+    const rules = getPasswordRules("abcdefgh"); // sem numero e sem especial
+    const failed = rules.filter((r) => !r.passed).map((r) => r.label);
+    expect(failed).toContain("Pelo menos um número");
+    expect(failed).toContain("Pelo menos um caractere especial");
+    expect(failed).not.toContain("Pelo menos uma letra");
+  });
+});
 
 describe("validatePassword", () => {
   it("accepts a strong password", () => {
