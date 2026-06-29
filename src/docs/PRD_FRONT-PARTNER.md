@@ -538,6 +538,22 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 > **Concluidos** (bugs do teste 2026-06-05 e itens Alta/Media/Baixa prioridade ja entregues) foram **removidos desta lista** para nao acumular — o historico esta no git. Itens que dependem do backend estao na secao 11.
 
+### Teste manual 2026-06-28 (12 feedbacks) — status
+
+**✅ Entregue e validado pelo usuario via OTA:** skeleton de Atendimentos nao convive mais com cards antigos; animacao de abertura com 1 ciclo minimo (`WarmupAnimation`/`MIN_SPLASH_MS`); busca de estabelecimento auto-carrega no onboarding; **"Verificar atualizacao"** (OTA) — `OtaUpdateButton.tsx` (checkForUpdate→fetch→reload, espelhado do client) no Config do profissional + menu do dono; adicao de servico OK (o **feedback explicito** no lugar do return silencioso resolveu — preco vazio era a causa); **validacao de cadastro AO VIVO** (`getPasswordRules` + `PasswordRules.tsx`: checklist de senha + "Senhas conferem", espelhado do client).
+
+**🔒 Backend:** #6 profissional abrir/fechar — `PATCH /establishment/{id}/open-status` e **OWNER-only** (ver secao 11); precisa o backend liberar ou o modelo presenca×abertura (secao 12).
+
+**⬜ ABERTOS (do teste 2026-06-28):**
+1. **Endereco do establishment NAO persiste** — `POST /establishments/{id}/addresses` retorna sucesso ("Endereco salvo") mas **nao aparece ao reabrir**; ja horario/telefone/instagram (via `general-infos`) **salvam e aparecem**. Frontend correto (endpoint+payload batem o contrato). **Suspeita: BACKEND** (nao persiste, ou o GET do establishment nao retorna o address) — confirmar se o GET retorna address p/ habilitar read-back/pre-preenchimento; senao, pendencia backend. Ver secao 11.
+2. **Botao de login (#9 refazer)** — o pedido NAO era o "Entrando..." (ja feito); e que o **atalho de login e um `<Link>` de texto** ("Login"/"Criar Conta") e o usuario quer um **`<Button variant=outline>` estilizado** como no front-client. Trocar Link→Button em login/register/(auth).
+3. **Sugestao de tipo nao substitui o nome** — ao incluir +1 servico, tocar numa sugestao de tipo so preenche o "Nome personalizado" se estiver vazio (`if (!customName.trim())`). Mudar para **substituir** ao tocar (add-service + my-services).
+4. **Tempo corrido do atendimento — front-only + cache** — implementar contagem no front com cache local (sem backend). **Consultar `PRD_FRONT-CLIENT.md`** (como o client faz). O hook `useElapsedTime` ja existe; alinhar a estrategia de cache.
+5. **"Tratar a questao do almoco"** — feedback vago do usuario; **esclarecer** o que exatamente (nudge/skip/janela?) antes de codar.
+6. **#10 nome do cliente como link p/ infos (avaliacao)** — depende de **rating** (backend roadmap #3, nao entregue).
+7. **#11 tela de "tipo de servico" (visual pobre)** — design; **mockup antes de codar** (processo do usuario).
+8. **#12 migrar Gluestack v1→v2** — refactor grande, por ultimo.
+
 ---
 
 ## 11. Pendencias futuras para o Backend (escrito pelo front-partner)
@@ -569,6 +585,7 @@ backend auto-rollback homolog/prod).
 | S2 | **Editar/deletar ServiceItem do establishment** ~~(bloqueava o dono editar/remover)~~ | ⬇️ **REBAIXADO — nao necessario p/ MVP** apos a decisao de produto 2026-06-28 (servico = capacidade do profissional; todo o CRUD vive no fluxo do profissional, `professional-queue/.../service-items`, que ja edita/remove). `PUT/DELETE /establishment/{id}/service-items/{itemId}` (backend #5) so seria preciso se um dia o owner-nao-profissional gerenciar o catalogo da loja — fora do escopo atual. |
 | BUG2 | **`POST /establishment/{id}/service-items` falha (lado OWNER)** | PRD_BACKEND "Bugs 2026-06-09" (ALTA): "Nao foi possivel adicionar o servico". O lado do **profissional** ja foi validado (2026-06-28, OK); confirmar no staging se ainda ocorre quando o **owner** adiciona. |
 | BUG3 | **`GET /attendances?establishmentId=X&status=Y` nao carrega** | PRD_BACKEND "Bugs 2026-06-09" (ALTA): "Carregar atendimento" nao funciona. Afeta relatorios/atendimentos do partner — confirmar no staging. |
+| BUG4 | **Endereco do establishment nao persiste/retorna** | `POST /establishments/{id}/addresses` retorna 201 ("Endereco salvo") mas o endereco **nao aparece ao reabrir** (teste 2026-06-28). Em contraste, `general-infos` (nome/telefone/instagram/horario) salva e retorna OK. Frontend correto (endpoint+payload conferem o contrato sec.17). **Confirmar:** o address e persistido? o `GET /establishment/id/{id}` (ou `/mine`) **retorna o address**? Se sim, front faz read-back/pre-preenchimento; se nao, e bug de persistencia/serializacao do backend. |
 | S3 | **Solicitacao de troca de posicao ENTRE CLIENTES (marketplace)** | Mecanismo **cliente↔cliente** — o profissional **nao participa nem precisa saber**. Um cliente manifesta **intencao de troca**: (a) vai se atrasar → quer ir para **mais tarde**; ou (b) esta muito para o fim → quer **adiantar**. A solicitacao fica **ABERTA** (igual a de afiliacao) e aparece **apenas para os clientes dentro da janela de horario** alvo, calculada pelo **tempo estimado de atendimento de cada um** — quem esta fora da janela nao ve. **Primeiro que aceitar** → troca efetivada e a solicitacao **some**; se ninguem aceita, **nada acontece**. Regra-chave: **sem mudanca brusca de tempo na fila** (so troca entre janelas compativeis). Backend a fazer: entidade de solicitacao de troca (open + horario desejado), calculo da janela por ETA, endpoints criar-intencao + aceitar, broadcast WS so para os clientes na janela. **Distinto do encaixe** (C5/`/fit-in`, que e cliente→profissional). |
 
 ### 11.2 Refeicoes/intervalos + horario de funcionamento — ✅ BACKEND ENTREGUE (handoff 2026-06-16)
