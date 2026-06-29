@@ -392,11 +392,11 @@ export default function MyServicesScreen() {
                     <Pressable
                       key={s.value}
                       onPress={() => {
+                        // Tocar na sugestao de tipo SUBSTITUI o nome no form
+                        // (antes so preenchia se vazio — nao trocava no 2o servico).
                         setServiceItemType(s.value);
-                        if (!customName.trim()) {
-                          setCustomName(s.label);
-                          setNameInvalid(false);
-                        }
+                        setCustomName(s.label);
+                        setNameInvalid(false);
                       }}
                       bg={isSelected ? "$green500" : "$coolGray100"}
                       py="$2"

@@ -208,11 +208,11 @@ export default function AddServiceScreen() {
                 key={s.value}
                 title={s.label}
                 onPress={() => {
+                  // Tocar numa sugestao de tipo SUBSTITUI o nome no formulario
+                  // (antes so preenchia se vazio — nao trocava no 2o servico).
                   setServiceItemType(s.value);
-                  if (!customName.trim()) {
-                    setCustomName(s.label);
-                    setNameInvalid(false);
-                  }
+                  setCustomName(s.label);
+                  setNameInvalid(false);
                 }}
                 bg={serviceItemType === s.value ? "$green500" : "$coolGray200"}
                 textColor={serviceItemType === s.value ? "$white" : "$coolGray700"}
