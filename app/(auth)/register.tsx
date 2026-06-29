@@ -18,7 +18,8 @@ import { Button } from "@components/Button";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
-import { validatePassword } from "@lib/passwordValidation";
+import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
+import { PasswordRules } from "@components/PasswordRules";
 
 export default function RegisterScreen() {
   const { role } = useLocalSearchParams<{ role: string }>();
@@ -32,6 +33,11 @@ export default function RegisterScreen() {
 
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
+
+  // Validacao AO VIVO (espelhada do front-client): checklist de senha + confirma
+  // em tempo real enquanto digita.
+  const passwordRules = getPasswordRules(password);
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
 
   const handleSubmit = async () => {
     const emailInvalid = email.length < 6 || !email.includes("@");
@@ -101,7 +107,10 @@ export default function RegisterScreen() {
               textLabel="E-mail"
               messageError="E-mail inválido"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(t) => {
+                setEmail(t);
+                if (isEmailInvalid) setIsEmailInvalid(false);
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
               testID="register-email"
@@ -114,14 +123,15 @@ export default function RegisterScreen() {
               textLabel="Senha"
               messageError={passwordErrors[0] ?? "Senha inválida"}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(t) => {
+                setPassword(t);
+                if (passwordErrors.length) setPasswordErrors([]);
+              }}
               testID="register-password"
             />
           </FormControl>
 
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$3" mt="-$1">
-            Use no mínimo 8 caracteres, com letra, número e caractere especial.
-          </Text>
+          {password.length > 0 && <PasswordRules rules={passwordRules} />}
 
           <FormControl isInvalid={!!confirmError}>
             <InputPassword
@@ -129,10 +139,24 @@ export default function RegisterScreen() {
               textLabel="Confirmar senha"
               messageError={confirmError ?? "As senhas não coincidem"}
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={(t) => {
+                setConfirmPassword(t);
+                if (confirmError) setConfirmError(null);
+              }}
               testID="register-confirm-password"
             />
           </FormControl>
+
+          {confirmPassword.length > 0 && (
+            <Text
+              fontFamily="$body"
+              fontSize="$xs"
+              mb="$3"
+              color={passwordsMatch ? "$green600" : "$red500"}
+            >
+              {passwordsMatch ? "Senhas conferem" : "Senhas não conferem"}
+            </Text>
+          )}
 
           <Button
             title="Criar Conta"
