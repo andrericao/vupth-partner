@@ -549,7 +549,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 2. **Botao de login (#9 refazer)** — o pedido NAO era o "Entrando..." (ja feito); e que o **atalho de login e um `<Link>` de texto** ("Login"/"Criar Conta") e o usuario quer um **`<Button variant=outline>` estilizado** como no front-client. Trocar Link→Button em login/register/(auth).
 3. **Sugestao de tipo nao substitui o nome** — ao incluir +1 servico, tocar numa sugestao de tipo so preenche o "Nome personalizado" se estiver vazio (`if (!customName.trim())`). Mudar para **substituir** ao tocar (add-service + my-services).
 4. **Tempo corrido do atendimento — front-only + cache** — implementar contagem no front com cache local (sem backend). **Consultar `PRD_FRONT-CLIENT.md`** (como o client faz). O hook `useElapsedTime` ja existe; alinhar a estrategia de cache.
-5. **"Tratar a questao do almoco"** — feedback vago do usuario; **esclarecer** o que exatamente (nudge/skip/janela?) antes de codar.
+5. **Refeicoes — Modelo B (janela flexivel)** — ✅ **spec escrita** (secao 11.2, "Refeicoes — MODELO B"). Usuario escolheu janela flexivel (encaixa sozinho em buracos; so pergunta adiantar/adiar em fila continua; supressao por janela 3h/fechamento). **A fazer:** grosso e **backend** (placement + auto-supressao no ETA meal-aware — ver secao 11); front faz popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime` ja exposto). Skip #41 e edicao ja existem.
 6. **#10 nome do cliente como link p/ infos (avaliacao)** — depende de **rating** (backend roadmap #3, nao entregue).
 7. **#11 tela de "tipo de servico" (visual pobre)** — design; **mockup antes de codar** (processo do usuario).
 8. **#12 migrar Gluestack v1→v2** — refactor grande, por ultimo.
@@ -586,6 +586,7 @@ backend auto-rollback homolog/prod).
 | BUG2 | **`POST /establishment/{id}/service-items` falha (lado OWNER)** | PRD_BACKEND "Bugs 2026-06-09" (ALTA): "Nao foi possivel adicionar o servico". O lado do **profissional** ja foi validado (2026-06-28, OK); confirmar no staging se ainda ocorre quando o **owner** adiciona. |
 | BUG3 | **`GET /attendances?establishmentId=X&status=Y` nao carrega** | PRD_BACKEND "Bugs 2026-06-09" (ALTA): "Carregar atendimento" nao funciona. Afeta relatorios/atendimentos do partner — confirmar no staging. |
 | BUG4 | **Endereco do establishment nao persiste/retorna** | `POST /establishments/{id}/addresses` retorna 201 ("Endereco salvo") mas o endereco **nao aparece ao reabrir** (teste 2026-06-28). Em contraste, `general-infos` (nome/telefone/instagram/horario) salva e retorna OK. Frontend correto (endpoint+payload conferem o contrato sec.17). **Confirmar:** o address e persistido? o `GET /establishment/id/{id}` (ou `/mine`) **retorna o address**? Se sim, front faz read-back/pre-preenchimento; se nao, e bug de persistencia/serializacao do backend. |
+| S4 | **Refeicoes Modelo B: placement por janela + auto-supressao no ETA** | Do spec "Refeicoes — MODELO B" (sec. 11.2, decisao 2026-06-28): o backend deve (a) **encaixar a refeicao no 1o buraco** da fila dentro da janela `[alvo−adiant, min(proxRefeicao−3h, fechamento−dur)]`; (b) **auto-suprimir** a refeicao quando passa do `inicioMax` (3h da proxima OU bateria no fechamento), derrubando-a do ETA meal-aware na hora; (c) **"iniciar refeicao" = iniciar a proxima NAO suprimida**. Hoje ha `skip` (#41) e ETA meal-aware, mas o placement/auto-supressao por janela sao novos. Sem isso, o ETA do cliente diverge do popup do partner. |
 | S3 | **Solicitacao de troca de posicao ENTRE CLIENTES (marketplace)** | Mecanismo **cliente↔cliente** — o profissional **nao participa nem precisa saber**. Um cliente manifesta **intencao de troca**: (a) vai se atrasar → quer ir para **mais tarde**; ou (b) esta muito para o fim → quer **adiantar**. A solicitacao fica **ABERTA** (igual a de afiliacao) e aparece **apenas para os clientes dentro da janela de horario** alvo, calculada pelo **tempo estimado de atendimento de cada um** — quem esta fora da janela nao ve. **Primeiro que aceitar** → troca efetivada e a solicitacao **some**; se ninguem aceita, **nada acontece**. Regra-chave: **sem mudanca brusca de tempo na fila** (so troca entre janelas compativeis). Backend a fazer: entidade de solicitacao de troca (open + horario desejado), calculo da janela por ETA, endpoints criar-intencao + aceitar, broadcast WS so para os clientes na janela. **Distinto do encaixe** (C5/`/fit-in`, que e cliente→profissional). |
 
 ### 11.2 Refeicoes/intervalos + horario de funcionamento — ✅ BACKEND ENTREGUE (handoff 2026-06-16)
@@ -619,6 +620,30 @@ backend auto-rollback homolog/prod).
 
 **Popup/nudge de inicio (decisao 2026-06-16, computavel com `GET intervals` + fila, sem backend novo):** no horario previsto, mostrar aviso ao profissional ("N clientes na fila; iniciar agora adia o proximo em ~Xmin") com **2 acoes**: (1) **"Iniciar almoco"** → `PATCH .../start`; (2) **"Nao almocar"** → pular explicito (derruba a refeicao do calculo na hora). Detalhes (timing, nao interromper atendimento ativo, anti-nag) ficam neste PRD. Popup com app em background depende de push (#3).
 > ⚠️ A definir com o backend: "Nao almocar" precisa de qual acao? (DELETE da refeicao do dia? endpoint de "skip"? ou so o lock local do front?). O start tem endpoint; o "skip" nao esta explicito no contrato.
+
+### Refeicoes — MODELO B (janela flexivel) — SPEC 2026-06-28 (decisao do usuario)
+
+> **Atualizacao de estado:** o **skip "Nao almocar" JA EXISTE** no backend (**#41**) e o front **ja chama** `skipInterval` na fila — a "decisao provisoria" da Fase C abaixo esta **superada**. E o **`actualStartTime` agora E exposto** pelo backend (`PATCH .../start` marca) — da pra mostrar "almoco iniciado as HH:MM" (o "Gap" citado na serializacao acima esta desatualizado).
+
+**Decisao (2026-06-28):** modelar cada refeicao como **JANELA FLEXIVEL**, nao horario cravado. Menos popup (so pergunta quando a fila e continua) e supressao/placement principistas. Padrao de sistemas de fila (Waitwhile/Qless).
+
+**Modelo:** refeicao = `{ alvo (fixedStartTime, ex. 12:00), duracao (60min), janela [inicioMin, inicioMax] }`.
+- `inicioMin = alvo − adiantamentoMax` (permite comecar um pouco antes p/ evitar cruzamento; sugestao: 1 atendimento ou 15min).
+- `inicioMax = min(proximaRefeicao.alvo − folgaMin, fechamento − duracao)`. **folgaMin = 3h** (derivavel: `max(duracao + buffer, 3h)`). Ex.: almoco com janta 18:00 → `inicioMax = 15:00`; e ≤ `fechamento − 60min`.
+
+**Placement (projetando a fila a partir de agora, cada atendimento +duracao):**
+1. Ha **buraco natural** ≥ duracao dentro de `[inicioMin, inicioMax]` → **encaixa sozinho, sem popup**.
+2. Fila **continua** (sem buraco) e um atendimento cruzaria o alvo → **popup adiantar/adiar**: **adiantar** = refeicao antes desse atendimento (se ≥ inicioMin); **adiar** = depois dele (se ≤ inicioMax). Ex.: fila ate 11:45, proximo 11:45–12:15 cruza 12:00 → adiantar (11:45–12:45) ou adiar (12:15–13:15).
+3. Nem adiantar nem adiar cabem na janela → **suprime**.
+
+**Supressao (unifica 3h + fechamento):** passou de `inicioMax` sem iniciar → refeicao **some no dia** (sai do ETA). Como `inicioMax ≤ fechamento − duracao`, uma refeicao que bateria no fechamento **e naturalmente suprimida** (decisao do usuario 2026-06-28: bate no fechamento → suprime, atende normal; sem popup de "estender horario"). **"Iniciar refeicao"** inicia sempre a **proxima refeicao NAO suprimida** (almoco suprimido + toca iniciar 17:30 → comeca a **janta**).
+
+**Anti-sobreposicao (na edicao):** ao editar horario/duracao, exigir **≥ folgaMin (3h)** da outra refeicao e dentro de `[abertura, fechamento]`; senao rejeitar (reusa `409 INTERVAL_CONFLICT` do backend + checagem de 3h no front).
+
+**Split de responsabilidade:**
+- 🔵 **Backend (fonte da verdade do ETA):** projecao + **auto-placement da refeicao no ETA meal-aware**, **supressao por janela (3h/fechamento)**, e **"iniciar = proxima nao suprimida"**. Hoje o backend tem `skip` (#41) e meal-aware, mas **o placement por janela + auto-supressao provavelmente sao NOVOS** → **pendencia backend** (registrar handoff). Sem isso no backend, o ETA do cliente diverge do que o partner mostra.
+- 🟢 **Front-partner:** **popup adiantar/adiar** (detecta o cruzamento pela fila+refeicao, chama `start` ou deixa empurrar), **lapis de edicao** no card, **"almoco iniciado as HH:MM"** (`actualStartTime`), nudge. O placement automatico do front e so **espelho visual** do que o backend calcula.
+- ⏭️ **v2:** o Modelo A (horario cravado + popup sempre) foi descartado; se o placement por janela do backend demorar, o front pode rodar um espelho do Modelo A como fallback visual.
 
 **Itens pos-MVP (spec, NAO implementar agora):** #37 lock da estimativa (estabilizar ETA travada por cliente), #38 encaixe com equalizacao de tempo, #39 multa/aviso de cancelamento tardio.
 
