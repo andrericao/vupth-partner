@@ -561,6 +561,26 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > Itens que o frontend partner precisa do backend.
 > Marcados com **PRIORIDADE** os que serao implementados em breve.
 
+### 📤 HANDOFF 2026-06-28 (do front-partner) — para BACKEND e CLIENT
+
+**PARA O BACKEND — pendencias abertas (detalhe nas tabelas/secoes abaixo):**
+- **BUG4 — endereco do establishment nao volta.** `EstablishmentResponse` (GET `/establishment/id/{id}`, `/mine`) **nao tem campo `address`** e **nao ha** `GET /establishments/{id}/addresses`. O `POST /establishments/{id}/addresses` persiste, mas **nada devolve** o endereco → o partner nao tem de onde exibir. **Acao:** incluir `address` no `EstablishmentResponse` **ou** criar `GET .../addresses`. (Front ja tem o read-back pronto — liga sozinho.)
+- **BUG5 — status ABERTO fora do horario.** `open_status` e flag **manual**; o backend **nao auto-fecha** no `closing_time`. **Acao:** auto-fechar no `closing_time` **ou** retornar `is_open` efetivo (`OPEN && agora ∈ [opening,closing]`) **e incluir `opening/closing` na listagem** (`EstablishmentSearchResult` nao traz hoje).
+- **S4 — refeicoes Modelo B (janela flexivel).** Placement da refeicao no 1o buraco da fila dentro de `[alvo−adiant, min(proxRefeicao−3h, fechamento−dur)]` + **auto-supressao** (3h/fechamento) no ETA meal-aware + **"iniciar = proxima nao suprimida"**. (Ja existem: `skip` #41, ETA meal-aware, e "atender encerra a refeicao ativa" = e1 `ATTEND_NEXT_CLIENT`.)
+- **S5 — "esqueci minha senha".** Fluxo publico `POST /auth/forgot-password {email}` + `POST /auth/reset-password {token,newPassword}`. **Depende de S6.**
+- **S6 — e-mail/SMTP.** Infra de envio (SendGrid/SES) — hoje so ha notificacao via WebSocket. Habilita o S5 e avisos por e-mail.
+- **BUG2** (`POST /establishment/{id}/service-items` lado owner) e **BUG3** (`GET /attendances?establishmentId&status`): confirmar no staging.
+- Confirmar deploy no **staging** de #3/#4/#6/#12/#13.
+
+**PARA O FRONT-CLIENT (cross-project, ver tambem secao 11.1):**
+- **BUG5 afeta o client:** a lista de lojas mostra ABERTO fora do horario. Depende do backend (`is_open` efetivo + horarios na listagem); quando vier, o client exibe "fechado (fora do horario)".
+- **Refeicoes Modelo B (S4):** o ETA *meal-aware* do client deve refletir o placement/supressao por janela do backend — **nao recalcular por fora**.
+- **C1–C6** mantidos; destaque **C6** (marketplace de troca entre clientes, depende do backend **S3**).
+
+> **Estado do front-partner:** tudo commitado/pushado; jest verde. Os itens FRONT desta leva (2026-06-28) ja foram entregues via OTA — ver secao 10, bloco "Teste manual 2026-06-28".
+
+---
+
 **DevOps — ✅ COMPLETO (backend, 2026-06-26):** o APK de demo (`--profile preview`) aponta
 para o **backend de staging no Render** (dev), nao prod (Railway). O backend tem o
 auto-rollback no `ci.yml` (tags `homolog-last-good`/`prod-last-good`; se o Newman pos-deploy
