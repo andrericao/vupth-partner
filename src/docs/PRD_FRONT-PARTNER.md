@@ -542,17 +542,21 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 **✅ Entregue e validado pelo usuario via OTA:** skeleton de Atendimentos nao convive mais com cards antigos; animacao de abertura com 1 ciclo minimo (`WarmupAnimation`/`MIN_SPLASH_MS`); busca de estabelecimento auto-carrega no onboarding; **"Verificar atualizacao"** (OTA) — `OtaUpdateButton.tsx` (checkForUpdate→fetch→reload, espelhado do client) no Config do profissional + menu do dono; adicao de servico OK (o **feedback explicito** no lugar do return silencioso resolveu — preco vazio era a causa); **validacao de cadastro AO VIVO** (`getPasswordRules` + `PasswordRules.tsx`: checklist de senha + "Senhas conferem", espelhado do client).
 
+**✅ Entregue em codigo (commits pos-`5e6ef9e`, pushados, aguardando QA no celular via OTA):**
+- **#2 atalho de login/cadastro vira Button** (`7de7afd`): o `<Link>` de texto ("Login"/"Criar Conta") virou **`<Button variant=outline>` estilizado** (= front-client) em login/register/(auth); tambem o "Entrando..." no submit.
+- **#3 sugestao de tipo SUBSTITUI o nome** (`9a99fdc`): tocar numa sugestao de tipo agora **sobrescreve** o "Nome personalizado" (antes so preenchia se vazio), em add-service + my-services.
+- **#4 tempo corrido do atendimento** (`7833d72`): contagem **100% no front via inicio cacheado localmente** (sem backend), alinhado ao front-client.
+- **#7/#11 tela de "tipo de servico" em grade de chips** (`f555c8e`): novo `src/components/ServiceTypeGrid.tsx` (grade de chips com icone) substitui o seletor pobre, em add-service + my-services.
+- **#1 read-back do endereco** (`882b368`): a tela ja **le de volta** o endereco salvo (`fetchEstablishmentById` → `data.address`); **mas depende do backend expor o campo** — hoje `EstablishmentResponse` nao tem `address` (BUG4, secao 11). Front pronto, liga sozinho quando o backend devolver.
+- **Card ATRASADO sem "Voltar a fila"** (`3d18f27`): removido o botao `undo-late` do card (o retorno a fila passa a ser via **promover** — S7 backend).
+
 **🔒 Backend:** #6 profissional abrir/fechar — `PATCH /establishment/{id}/open-status` e **OWNER-only** (ver secao 11); precisa o backend liberar ou o modelo presenca×abertura (secao 12).
 
 **⬜ ABERTOS (do teste 2026-06-28):**
-1. **Endereco do establishment NAO persiste** — `POST /establishments/{id}/addresses` retorna sucesso ("Endereco salvo") mas **nao aparece ao reabrir**; ja horario/telefone/instagram (via `general-infos`) **salvam e aparecem**. Frontend correto (endpoint+payload batem o contrato). **Suspeita: BACKEND** (nao persiste, ou o GET do establishment nao retorna o address) — confirmar se o GET retorna address p/ habilitar read-back/pre-preenchimento; senao, pendencia backend. Ver secao 11.
-2. **Botao de login (#9 refazer)** — o pedido NAO era o "Entrando..." (ja feito); e que o **atalho de login e um `<Link>` de texto** ("Login"/"Criar Conta") e o usuario quer um **`<Button variant=outline>` estilizado** como no front-client. Trocar Link→Button em login/register/(auth).
-3. **Sugestao de tipo nao substitui o nome** — ao incluir +1 servico, tocar numa sugestao de tipo so preenche o "Nome personalizado" se estiver vazio (`if (!customName.trim())`). Mudar para **substituir** ao tocar (add-service + my-services).
-4. **Tempo corrido do atendimento — front-only + cache** — implementar contagem no front com cache local (sem backend). **Consultar `PRD_FRONT-CLIENT.md`** (como o client faz). O hook `useElapsedTime` ja existe; alinhar a estrategia de cache.
-5. **Refeicoes — Modelo B (janela flexivel)** — ✅ **spec escrita** (secao 11.2, "Refeicoes — MODELO B"). Usuario escolheu janela flexivel (encaixa sozinho em buracos; so pergunta adiantar/adiar em fila continua; supressao por janela 3h/fechamento). **A fazer:** grosso e **backend** (placement + auto-supressao no ETA meal-aware — ver secao 11); front faz popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime` ja exposto). Skip #41 e edicao ja existem.
-6. **#10 nome do cliente como link p/ infos (avaliacao)** — depende de **rating** (backend roadmap #3, nao entregue).
-7. **#11 tela de "tipo de servico" (visual pobre)** — design; **mockup antes de codar** (processo do usuario).
-8. **#12 migrar Gluestack v1→v2** — refactor grande, por ultimo.
+1. **Endereco do establishment** — **front pronto** (read-back, `882b368`), **BLOQUEADO no backend**: `EstablishmentResponse` nao expoe `address` (BUG4, secao 11). Liga sozinho quando o backend devolver o campo.
+2. **Refeicoes — Modelo B (janela flexivel)** — ✅ **spec escrita** (secao 11.2, "Refeicoes — MODELO B"). Usuario escolheu janela flexivel (encaixa sozinho em buracos; so pergunta adiantar/adiar em fila continua; supressao por janela 3h/fechamento). **A fazer:** grosso e **backend** (placement + auto-supressao no ETA meal-aware — ver secao 11 S4); front faz popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime` ja exposto). Skip #41 e edicao ja existem.
+3. **#10 nome do cliente como link p/ infos (avaliacao)** — depende de **rating** (backend roadmap #3, nao entregue).
+4. **#12 migrar Gluestack v1→v2** — ⏸️ **ADIADO** (tech-debt pos-MVP, decisao 2026-06-28; ver secao 10 lista principal #4).
 
 ### Feedback 2026-06-28 (parte 2)
 
