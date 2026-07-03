@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
@@ -385,38 +386,17 @@ export default function MyServicesScreen() {
               <Text fontFamily="$body" mb="$2" color="$coolGray600">
                 Tipo de servico
               </Text>
-              <VStack space="xs" mb="$4">
-                {filteredTypes.map((s) => {
-                  const isSelected = serviceItemType === s.value;
-                  return (
-                    <Pressable
-                      key={s.value}
-                      onPress={() => {
-                        // Tocar na sugestao de tipo SUBSTITUI o nome no form
-                        // (antes so preenchia se vazio — nao trocava no 2o servico).
-                        setServiceItemType(s.value);
-                        setCustomName(s.label);
-                        setNameInvalid(false);
-                      }}
-                      bg={isSelected ? "$green500" : "$coolGray100"}
-                      py="$2"
-                      px="$4"
-                      borderRadius="$md"
-                      borderWidth="$1"
-                      borderColor={isSelected ? "$green600" : "$coolGray200"}
-                    >
-                      <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$white" : "$coolGray700"}
-                        textAlign="center"
-                        fontSize="$sm"
-                      >
-                        {s.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </VStack>
+              {/* [#11] grade de chips com icone (substitui a lista de pilulas).
+                  Tocar substitui o nome no formulario. */}
+              <ServiceTypeGrid
+                items={filteredTypes}
+                selected={serviceItemType}
+                onSelect={(it) => {
+                  setServiceItemType(it.value);
+                  setCustomName(it.label);
+                  setNameInvalid(false);
+                }}
+              />
 
               <FormControl isInvalid={nameInvalid}>
                 <Input
