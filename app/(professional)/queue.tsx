@@ -41,7 +41,6 @@ function AttendanceCard({
   onResume,
   onRemove,
   onLate,
-  onUndoLate,
   isActive,
   isFirst,
 }: {
@@ -52,7 +51,6 @@ function AttendanceCard({
   onResume?: () => void;
   onRemove?: () => void;
   onLate?: () => void;
-  onUndoLate?: () => void;
   isActive: boolean;
   isFirst: boolean;
 }) {
@@ -143,9 +141,6 @@ function AttendanceCard({
           </VStack>
         ) : (
           <HStack mt="$3" space="sm">
-            {isLate && (
-              <Button title="Voltar a fila" onPress={onUndoLate} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
-            )}
             <Button title="Remover" onPress={onRemove} bg="$red400" $active-bg="$red500" h="$10" flex={1} />
           </HStack>
         )
@@ -159,7 +154,7 @@ export default function ProfessionalQueueScreen() {
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
-  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, undoLate, removeFromQueue } =
+  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, removeFromQueue } =
     useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -430,7 +425,6 @@ export default function ProfessionalQueueScreen() {
                     ]
                   )
                 }
-                onUndoLate={() => handleAction(() => undoLate(att.id))}
                 onRemove={() =>
                   Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
                     { text: "Cancelar" },
