@@ -3,7 +3,23 @@ import {
   roundTo90,
   ceilTo90,
   getAbsorptionOptions,
+  estimateDesiredFromClient,
 } from "../pricing";
+
+describe("estimateDesiredFromClient", () => {
+  // Usado ao EDITAR um servico ja criado: so guardamos o clientPrice; a partir
+  // dele reconstruimos o preco-base para reexibir o preview (a 0% de absorcao).
+  it("reproduz o clientPrice salvo quando reprocessado a 0% (round-trip)", () => {
+    for (const client of [9.9, 29.9, 36.9, 50.9, 100.9]) {
+      const base = estimateDesiredFromClient(client);
+      expect(calculatePricing(base, 0).clientPrice).toBe(client);
+    }
+  });
+  it("retorna 0 para entradas nao positivas", () => {
+    expect(estimateDesiredFromClient(0)).toBe(0);
+    expect(estimateDesiredFromClient(-5)).toBe(0);
+  });
+});
 
 describe("roundTo90", () => {
   it("rounds 31.91 to 31.90", () => {

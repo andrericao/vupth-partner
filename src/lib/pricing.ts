@@ -27,6 +27,14 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+// Ao editar um servico ja criado so temos o clientPrice salvo (o preco-base e a
+// absorcao nao sao persistidos). Reconstruimos um preco-base que, reprocessado a
+// 0% de absorcao, reproduz o mesmo clientPrice — para reexibir o preview na edicao.
+export function estimateDesiredFromClient(clientPrice: number): number {
+  if (!(clientPrice > 0)) return 0;
+  return round2(clientPrice * (1 - FEE_RATE));
+}
+
 export function calculatePricing(
   desiredPrice: number,
   proAbsorptionPercent: number
