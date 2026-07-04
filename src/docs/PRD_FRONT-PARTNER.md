@@ -1039,7 +1039,25 @@ preciso **rebuildar** (`eas build -p android --profile preview`) e reinstalar. C
 **⚠️ Licao critica — modulo NATIVO novo ⇒ OTA nao entrega, e um OTA novo pode "reverter" um APK velho (2026-07-04):**
 o push notifications (`d751529`) adicionou `expo-notifications` + `expo-device` (**modulos nativos**) + plugin no `app.json`. **OTA so entrega JavaScript, nao codigo nativo.** Como o `runtimeVersion` e `policy: appVersion` e o `version` nao mudou (1.0.0), o OTA novo (que ja tem o codigo de push) foi publicado para o **mesmo** runtime do APK antigo — que **nao tem** os modulos nativos. Ao carregar o bundle novo, a chamada nativa lancava e o app fazia **rollback pro bundle embutido velho** → parecia que apelido/botao-OTA/pilula/adiantar tinham "sumido" (estavam no codigo, mas o aparelho rodava a versao velha). **Dois aprendizados + fix:**
 1. **Resiliencia (feito):** todo toque em modulo nativo opcional deve ser **guardado com try/catch** para o bundle JS **rodar mesmo sem o modulo** (degradando a feature, nao derrubando o app). Aplicado em `src/hooks/usePushRegistration.ts` (`setNotificationHandler` no topo, `setNotificationChannelAsync`, `addNotificationResponseReceivedListener`). Assim o OTA volta a entregar as features JS mesmo num APK sem push.
-2. **Build (acao do usuario):** para o push notifications **funcionar** (e para o runtime ficar coerente), e preciso **rebuildar** o APK com os modulos nativos: `eas build -p android --profile preview` + reinstalar. Com `appVersionSource: remote` no `eas.json`, o EAS gerencia a versao/runtime — nao adianta bumpar `version` no `app.json` (e ignorado).
+2. **Build (acao do usuario):** para o push notifications **funcionar** (e para o runtime ficar coerente), e preciso **rebuildar** o APK com os modulos nativos: `eas build -p android --profile preview` + reinstalar.
+
+### 14.7 Esquema de versionamento (decidido 2026-07-04) — CORRIGE a raiz do problema de OTA
+
+**Diagnostico:** o `version` ficou travado em **1.0.0** e o `runtimeVersion` e `policy: appVersion` → **todo build e todo OTA sao runtime "1.0.0"**. Quando entrou lib nativa (push), o runtime **nao mudou**, entao o OTA "com push" caiu nos APKs 1.0.0 **sem** push → crash + rollback. **A falta de numeracao E a causa-raiz.** (Alem disso, com `appVersionSource: remote` o `version` do `app.json` era ignorado — parte da confusao.)
+
+**Regra (Andre 2026-07-04) — numeracao MANUAL, semver:**
+- `eas.json`: **`appVersionSource: "local"`** (o `app.json` passa a ser a fonte da versao).
+- **Bump de `version`** (`app.json`) a cada release significativo **e — OBRIGATORIO — sempre que entra/muda algo NATIVO** (lib nativa, permissao, plugin, bump de SDK). Como `runtimeVersion` e `policy: appVersion`, bumpar `version` **muda o runtime junto** → OTAs da versao nova **nao** caem nos builds antigos (sem crash).
+- `android.versionCode` incrementa junto (build novo tem que ter code maior).
+
+**Config-alvo (aplicar NO PROXIMO BUILD — nao retroativo):**
+- `eas.json` → `cli.appVersionSource: "local"`.
+- `app.json` → `version: "1.1.0"` (adicionamos push = feature nativa nova), `android.versionCode: 2`, mantendo `runtimeVersion { policy: "appVersion" }` (vira **1.1.0**, numero legivel).
+- Buildar 1.1.0: `eas build -p android --profile preview` — esse APK ja embute TUDO do dev atual e fica no trilho **1.1.0** (separado dos builds 1.0.0 quebrados).
+
+**Sequencia (importante):** o bump **nao** vai junto com o push do OTA de teste (senao o OTA sairia em 1.1.0 e o build 1.0.0 nao pegaria). Primeiro confirma o OTA no trilho 1.0.0 (build `57d9299f`); a numeracao entra quando for buildar a proxima versao.
+
+**Alternativa futura (se cansar de lembrar do bump):** `runtimeVersion { policy: "fingerprint" }` — o runtime vira um hash do nativo e muda **sozinho** quando o nativo muda (separa builds automaticamente). Custo: o runtime deixa de ser um numero legivel (mostrar o `version` nas Config em vez do runtime).
 
 **⚠️ Ferramentas exigem Node >= 20.19.4** (SDK 54): em Node mais antigo o `expo-doctor`
 crasha (`util.parseEnv is not a function`) e o gate do pre-push deixa de validar de verdade.
