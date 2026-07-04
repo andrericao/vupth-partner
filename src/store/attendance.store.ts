@@ -25,6 +25,7 @@ type AttendanceState = {
   resumeAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
   markLate: (attendanceId: string) => Promise<void>;
   undoLate: (attendanceId: string) => Promise<void>;
+  noShow: (attendanceId: string) => Promise<void>;
   removeFromQueue: (attendanceId: string) => Promise<void>;
   reset: () => void;
 };
@@ -100,6 +101,13 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   undoLate: async (attendanceId) => {
     await api.patch(`/attendances/${attendanceId}/undo-late`);
+  },
+
+  // Escalada do no-show (#39): cliente que ja esta LATE e nao compareceu de novo
+  // ao ser chamado sai da fila (-> CANCELLED) e leva um strike. So vale se estiver
+  // LATE (senao 400) — por isso o botao so aparece em card ATRASADO.
+  noShow: async (attendanceId) => {
+    await api.patch(`/attendances/${attendanceId}/no-show`);
   },
 
   removeFromQueue: async (attendanceId) => {
