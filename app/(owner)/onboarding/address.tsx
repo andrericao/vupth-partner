@@ -49,6 +49,8 @@ export default function AddressScreen() {
     return () => {
       active = false;
     };
+    // re-busca so quando muda o estabelecimento; fetchEstablishmentById e estavel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [establishment?.id]);
 
   const handleCepChange = async (text: string) => {

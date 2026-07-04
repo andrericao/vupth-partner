@@ -40,6 +40,8 @@ export default function ProfessionalSettingsScreen() {
   }, [fetchMyAffiliations]);
 
   useEffect(() => {
+    // carrega convites on-mount; setInvites e o efeito desejado do fetch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadInvites();
   }, [loadInvites]);
 

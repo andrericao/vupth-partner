@@ -1,4 +1,4 @@
-import { VStack, Heading, Text, Center } from "@gluestack-ui/themed";
+import { VStack, Heading, Text } from "@gluestack-ui/themed";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";

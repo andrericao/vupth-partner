@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Animated } from "react-native";
 import { VStack, HStack } from "@gluestack-ui/themed";
 import { cardShadow } from "@lib/styles";
@@ -9,7 +9,7 @@ import { cardShadow } from "@lib/styles";
 const BASE = "#E2E9E5";
 
 function usePulse() {
-  const v = useRef(new Animated.Value(0.45)).current;
+  const [v] = useState(() => new Animated.Value(0.45));
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([

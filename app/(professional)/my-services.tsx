@@ -119,6 +119,8 @@ export default function MyServicesScreen() {
     } else {
       fetchMe().catch(() => {});
     }
+    // fetchMe/fetchMyServices sao estaveis (Zustand); reage so ao vinculo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professional?.establishment_id]);
 
   const onRefresh = useCallback(async () => {

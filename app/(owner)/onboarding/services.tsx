@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
 import { KeyboardAvoidingView, Platform } from "react-native";
-import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 
 export default function ServicesScreen() {
-  const [isInvalid, setIsInvalid] = useState(false);
+  const [isInvalid] = useState(false);
 
   const handleFinish = () => {
     // TODO: chamar API para criar serviços, depois redirecionar ao dashboard

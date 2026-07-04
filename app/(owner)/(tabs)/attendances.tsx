@@ -91,6 +91,7 @@ export default function OwnerAttendancesScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const loadHistory = useCallback(async () => {
     if (!establishment?.id) return;
     setIsLoading(true);
@@ -109,6 +110,9 @@ export default function OwnerAttendancesScreen() {
   }, [establishment?.id, filter, fetchHistory]);
 
   useEffect(() => {
+    // loadHistory faz fetch on-mount/filtro e sinaliza isLoading — padrao
+    // intencional de carregamento (nao e cascata de render).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
   }, [loadHistory]);
 

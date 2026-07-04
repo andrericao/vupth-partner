@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 #
 # Anti-quebra (pre-push): bloqueia o push se algo estiver quebrado.
-# Gate, na ordem: typecheck -> testes (jest) -> config (expo-doctor).
+# Gate, na ordem: lint -> typecheck -> testes (jest) -> config (expo-doctor).
 # Se qualquer passo falhar, o push e' ABORTADO.
 #
 # Bypass de emergencia (use com consciencia): git push --no-verify
@@ -9,17 +9,22 @@
 set -e
 
 echo "──────────────────────────────────────────────"
-echo "[pre-push] 1/3  typecheck (tsc --noEmit)"
+echo "[pre-push] 1/4  lint (eslint --max-warnings 0)"
+echo "──────────────────────────────────────────────"
+npm run --silent lint
+
+echo "──────────────────────────────────────────────"
+echo "[pre-push] 2/4  typecheck (tsc --noEmit)"
 echo "──────────────────────────────────────────────"
 npm run --silent typecheck
 
 echo "──────────────────────────────────────────────"
-echo "[pre-push] 2/3  testes (jest)"
+echo "[pre-push] 3/4  testes (jest)"
 echo "──────────────────────────────────────────────"
 npm test -- --ci
 
 echo "──────────────────────────────────────────────"
-echo "[pre-push] 3/3  config (expo-doctor)"
+echo "[pre-push] 4/4  config (expo-doctor)"
 echo "──────────────────────────────────────────────"
 npx expo-doctor
 

@@ -711,7 +711,10 @@ export const componentsConfig = createComponents(componentsTheme);
 
 export type { UIConfig, UIComponents } from '@gluestack-ui/themed';
 
+// Pontos de extensao do gluestack (module augmentation abaixo); vazios de proposito.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IConfig {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IComponents {}
 
 declare module '@gluestack-ui/themed' {

@@ -48,6 +48,8 @@ export default function OwnerAffiliationsScreen() {
   }, [establishmentId]);
 
   useEffect(() => {
+    // fetch on-mount; sinaliza isLoading (padrao de carregamento).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAffiliations();
   }, [fetchAffiliations]);
 

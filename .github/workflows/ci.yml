@@ -36,6 +36,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Lint (eslint --max-warnings 0)
+        run: npx eslint . --max-warnings 0
+
       - run: npx tsc --noEmit
 
       # --bail: falha rapido no 1o teste quebrado (nao roda a suite inteira a toa).

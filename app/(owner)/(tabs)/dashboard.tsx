@@ -32,6 +32,8 @@ export default function OwnerDashboardScreen() {
     if (!establishment) {
       fetchMine().catch(() => {});
     }
+    // carga on-mount unica; fetchMine e estavel (Zustand).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

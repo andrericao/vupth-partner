@@ -3,7 +3,6 @@ import {
   Heading,
   Text,
   Pressable,
-  HStack,
   Divider,
   ScrollView,
 } from "@gluestack-ui/themed";

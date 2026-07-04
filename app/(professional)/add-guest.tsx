@@ -17,14 +17,6 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { getApiErrorMessage } from "@lib/api";
 
-type ServiceItem = {
-  id: string;
-  serviceItemType: string;
-  customName: string;
-  price: number;
-  estimatedMinutes: number;
-};
-
 export default function AddGuestScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
@@ -38,6 +30,8 @@ export default function AddGuestScreen() {
 
   useEffect(() => {
     fetchMyServices();
+    // carga on-mount unica; fetchMyServices e estavel (Zustand).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleService = (serviceId: string) => {

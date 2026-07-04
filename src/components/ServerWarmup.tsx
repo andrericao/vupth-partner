@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Center, Text, VStack } from "@gluestack-ui/themed";
@@ -28,9 +28,9 @@ function WarmupAnimation() {
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.6)).current;
-  const shiftX = useRef(new Animated.Value(-6)).current;
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [scale] = useState(() => new Animated.Value(0.6));
+  const [shiftX] = useState(() => new Animated.Value(-6));
 
   // Preferencia de reduce-motion (acessibilidade).
   useEffect(() => {
@@ -59,6 +59,8 @@ function WarmupAnimation() {
       cancelled = true;
       clearInterval(id);
     };
+    // opacity/scale sao Animated.Value estaveis (useState) — re-rodar so em reduceMotion.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduceMotion]);
 
   // Entrada do icone atual (fade + scale + micro-deslocamento "avancar").
@@ -82,6 +84,8 @@ function WarmupAnimation() {
         useNativeDriver: true,
       }),
     ]).start();
+    // opacity/scale/shiftX sao Animated.Value estaveis (useState).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, reduceMotion]);
 
   return (

@@ -6,8 +6,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@lib/queryClient";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as NavigationBar from "expo-navigation-bar";
-
-LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "../config/gluestack-ui.config";
 import {
@@ -22,6 +20,8 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
+
+LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
 export default function RootLayout() {
   // [new-design] Guia: Poppins p/ titulos/botoes, Inter p/ texto.

@@ -20,6 +20,8 @@ export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws/websocket`;
 // portao de cold start do Render (ver src/lib/readiness.ts + PRD_BACKEND 18c).
 export const READINESS_URL = `${BASE_URL}/actuator/health/readiness`;
 
+// axios.create e o uso idiomatico (metodo do default export), nao um named export.
+// eslint-disable-next-line import/no-named-as-default-member
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },

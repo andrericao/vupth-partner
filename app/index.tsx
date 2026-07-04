@@ -33,6 +33,8 @@ export default function RootIndex() {
   }, []);
 
   useEffect(() => {
+    // portao de readiness on-mount; setPhase e o efeito desejado.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     warmUp();
   }, [warmUp]);
 

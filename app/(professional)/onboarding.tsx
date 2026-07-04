@@ -88,13 +88,6 @@ export default function ProfessionalOnboardingScreen() {
     }
   };
 
-  // Ao entrar no passo de busca, ja carrega a lista (query vazia = todos), pra
-  // o profissional ver os estabelecimentos sem precisar tocar em "Buscar".
-  useEffect(() => {
-    if (step === "search") handleSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
-
   const handleSearch = async () => {
     setIsSearching(true);
     try {
@@ -106,6 +99,15 @@ export default function ProfessionalOnboardingScreen() {
       setIsSearching(false);
     }
   };
+
+  // Ao entrar no passo de busca, ja carrega a lista (query vazia = todos), pra
+  // o profissional ver os estabelecimentos sem precisar tocar em "Buscar".
+  useEffect(() => {
+    // busca automatica ao entrar no passo; handleSearch sinaliza isSearching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (step === "search") handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const handleSelectEstablishment = (establishment: EstablishmentSearchResult) => {
     setSelectedEstablishment(establishment);
