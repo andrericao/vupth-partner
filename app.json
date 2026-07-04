@@ -7,7 +7,8 @@
     "plugins": [
       "expo-font",
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-notifications"
     ],
     "userInterfaceStyle": "automatic",
     "ios": {

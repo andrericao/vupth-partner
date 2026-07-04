@@ -5,6 +5,7 @@ import { getRolesFromToken } from "@lib/jwt";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
+import { unregisterDevice } from "@lib/push";
 
 type User = {
   id: string;
@@ -108,6 +109,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
+    // Desregistra o device do push antes de derrubar a sessao (best-effort).
+    try {
+      const pushToken = await SecureStore.getItemAsync("vupth_push_token");
+      if (pushToken) {
+        await unregisterDevice(pushToken);
+        await SecureStore.deleteItemAsync("vupth_push_token");
+      }
+    } catch {}
+
     try {
       await api.post("/auth/logout");
     } catch {}
