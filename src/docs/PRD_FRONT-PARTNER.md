@@ -1036,6 +1036,11 @@ primeiro APK do partner (build de um commit anterior ao `expo-updates`) NAO rece
 preciso **rebuildar** (`eas build -p android --profile preview`) e reinstalar. Conferir com
 `eas build:list`: o build tem que ser do commit em que o `expo-updates` ja existe.
 
+**⚠️ Licao critica — modulo NATIVO novo ⇒ OTA nao entrega, e um OTA novo pode "reverter" um APK velho (2026-07-04):**
+o push notifications (`d751529`) adicionou `expo-notifications` + `expo-device` (**modulos nativos**) + plugin no `app.json`. **OTA so entrega JavaScript, nao codigo nativo.** Como o `runtimeVersion` e `policy: appVersion` e o `version` nao mudou (1.0.0), o OTA novo (que ja tem o codigo de push) foi publicado para o **mesmo** runtime do APK antigo — que **nao tem** os modulos nativos. Ao carregar o bundle novo, a chamada nativa lancava e o app fazia **rollback pro bundle embutido velho** → parecia que apelido/botao-OTA/pilula/adiantar tinham "sumido" (estavam no codigo, mas o aparelho rodava a versao velha). **Dois aprendizados + fix:**
+1. **Resiliencia (feito):** todo toque em modulo nativo opcional deve ser **guardado com try/catch** para o bundle JS **rodar mesmo sem o modulo** (degradando a feature, nao derrubando o app). Aplicado em `src/hooks/usePushRegistration.ts` (`setNotificationHandler` no topo, `setNotificationChannelAsync`, `addNotificationResponseReceivedListener`). Assim o OTA volta a entregar as features JS mesmo num APK sem push.
+2. **Build (acao do usuario):** para o push notifications **funcionar** (e para o runtime ficar coerente), e preciso **rebuildar** o APK com os modulos nativos: `eas build -p android --profile preview` + reinstalar. Com `appVersionSource: remote` no `eas.json`, o EAS gerencia a versao/runtime — nao adianta bumpar `version` no `app.json` (e ignorado).
+
 **⚠️ Ferramentas exigem Node >= 20.19.4** (SDK 54): em Node mais antigo o `expo-doctor`
 crasha (`util.parseEnv is not a function`) e o gate do pre-push deixa de validar de verdade.
 Usar Node 22 (nvm) e **reinstalar o `eas-cli` global apos trocar de Node** (`npm i -g eas-cli`,
