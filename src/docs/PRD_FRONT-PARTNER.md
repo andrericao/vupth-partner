@@ -565,8 +565,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 **🗂️ ORDEM DE EXECUCAO ACORDADA (Andre 2026-07-04):**
 1. ✅ **Push notifications** — feito e pushado (commit `d751529`); falta EAS Build + FCM + teste no aparelho.
-2. **Botao "no-show"** no cliente ATRASADO (LATE) → `PATCH /attendances/{id}/no-show`. OTA-puro.
-3. **Atender fora de ordem** via `PATCH /attendances/{id}/start` direto. OTA-puro.
+2. ✅ **Botao "no-show"** no cliente ATRASADO (LATE) → `PATCH /attendances/{id}/no-show` — **FEITO** (commit `60c5835`, OTA-puro; +teste de store). Botao "Nao compareceu" no card do cliente ATRASADO, com confirmacao.
+3. ✅ **Atender fora de ordem** ("Adiantar") via `PATCH /attendances/{id}/start` direto — **FEITO** (commit `2489299`, OTA-puro). Cards fora do 1o lugar ganham botao **"Adiantar"** → confirmacao "tem certeza?" → inicia o atendimento na frente da fila. **Decisao 2026-07-04:** start **direto** (nao reordena os demais) satisfaz o "adiantar"; o **promover-ao-topo/reordenar** (S7) segue como versao futura (item 8), nao bloqueia.
 4. **Exibir rating recebido** no card do profissional (agregados ja vem prontos). OTA-puro.
 5. **Read-back do endereco** (era 🟡, subiu na ordem) — front pronto; espera **BUG4** (backend).
 6. **Fechar loja com confirmacao + gate** — espera **BUG5/BUG6** (backend). **Inclui a regra nova (2026-07-04):** apos o `closing_time` das configuracoes a loja **nao recebe cliente nem mostra "aberto"**; querer continuar => **confirmacao que leva a alterar o horario nas configuracoes** (o horario e a fonte da verdade).
@@ -578,7 +578,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ### Feedback 2026-06-28 (parte 2)
 
 - **Fechamento com confirmacao + NAO auto-fechar (BUG5/BUG6, refinado por Andre 2026-07-04).** ❌ **NAO auto-fechar** o estabelecimento no `closing_time`. Fechar e **sempre acao MANUAL com CONFIRMACAO** (owner ou profissional). Modelo desejado: (a) ao chegar o `closing_time` (ou quando o owner/pro decide parar), **bloquear NOVAS entradas na fila** — o cliente **nao entra sozinho**; (b) a **fila existente continua sendo atendida** ate esvaziar (nunca remover clientes silenciosamente); (c) mesmo bloqueado para novos, o cliente **ainda pode "solicitar corte"** (envia um pedido que o profissional aceita/recusa — nao e entrada automatica); (d) o **CLOSED total** so acontece por confirmacao e, se houver fila/`IN_PROGRESS`, o app **avisa** ("ainda ha N na fila; serao atendidos, mas ninguem novo entra"). É **backend** (gate de ENTRADA na fila + fluxo de solicitacao de corte) + **front** (confirmacao no toggle, tratar o gate). Ver secao 11 (BUG5/BUG6).
-- **Atender fora de ordem = PROMOVER o cliente ao 1o lugar + os demais descem (BACKEND, S7).** Refinamento do usuario 2026-06-28: **nao** e atender direto — o profissional escolhe um cliente, ele **vira o 1o da fila e os demais sao realocados** (o inverso do mecanismo de atraso), e so entao atende. Caso: o da vez e o 2o nao chegaram, o 3o esta ali; promove o 3o (os outros descem) e atende. **Por que precisa de backend:** `PATCH /attendances/{id}/start` inicia qualquer id **SEM reordenar** (l.2924) e o `/late` so desce o da vez (cicla se aplicado em cadeia) — nenhum reordena "para o topo". O proprio PRD_BACKEND (l.2924) marca "promover um escolhido ao indice 0" como **adicao pequena a fazer sob demanda**. → **Backend (S7):** endpoint de promover/reordenar (`PATCH /attendances/{id}/promote` → move ao indice 0, empurra os demais). **Front (depois):** botao "Atender este" em qualquer card → promove → inicia. Isso **reavalia a regra "atende-primeiro"** (2026-06-26).
+- **Atender fora de ordem — "Adiantar" (start direto) FEITO; promover/reordenar (S7) segue futuro.** O refinamento 2026-06-28 pedia **promover** o cliente ao 1o lugar (os demais descem). A decisao **2026-07-04** (roadmap #3, confirmada em teste) foi mais simples: o botao **"Adiantar"** (cards fora do 1o lugar) inicia o atendimento **direto** via `PATCH /attendances/{id}/start`, **com confirmacao** — atende o escolhido na frente **sem reordenar** os demais. Isso ja resolve o caso "o da vez nao chegou, atende o 3o". ✅ **Feito** (commit `2489299`). **O que ainda seria mais bonito (S7, backend, item 8, NAO bloqueia):** `PATCH /attendances/{id}/promote` que move ao indice 0 e empurra os demais (para a fila refletir a nova ordem apos promover). `start` sozinho nao reordena (PRD_BACKEND l.2924, "promover ao indice 0" = adicao pequena sob demanda).
 - **Preco: "cliente paga tudo" (0%) → profissional recebe EXATAMENTE o digitado — ✅ FEITO (2026-06-28).** `calculatePricing` reescrito: `proReceives = round2(digitado − absorvido)` (piso desacoplado do arredondamento) — em **0% absorcao `proReceives === digitado`** (antes recebia centavos a menos, ex.: R$100→R$99,55). A **absorcao continua** (recebe menos so por escolha). `clientPrice` em X,90 (com `ceilTo90` de seguranca p/ nao ficar abaixo do piso em precos baixos); taxa = `clientPrice − proReceives`. Testes reescritos (garantia `0% => digitado`). **Unificado:** `src/utils/pricing.ts` (morto, so o teste usava) **removido**; fonte unica = `src/lib/pricing.ts`.
 
 ---
@@ -586,7 +586,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 ## 11. Handoffs + alinhamento com o backend
 
 > **Handoffs consolidados em arquivos dedicados** (padrao do front-client — nao espalhar pelo corpo do PRD):
-> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG2–BUG6, S3–S9), em tabela consolidada + detalhes.
+> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG2–BUG8, S3–S9), em tabela consolidada + detalhes.
 > - 📄 **[`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** — itens cujo frontend pertence ao **app cliente** (C1–C7).
 >
 > Esta secao guarda so o **resumo de alinhamento** (o que o backend ja entregou e desbloqueou o partner). A lista de afazeres do proprio partner esta na **secao 10**. A referencia S2 (rebaixada) e a 11.2 (contrato de refeicoes ja entregue) seguem abaixo.
@@ -601,7 +601,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 > - ✅ **Escalada de no-show (#39)** — `PATCH /attendances/{id}/no-show` (exige LATE). Front-partner: botao "no-show" no cliente ATRASADO.
 > - ✅ **Troca de posicao por consentimento mutuo (#42, DIRECIONADA)** — `POST /swap-requests` etc. **É cliente↔cliente (o profissional nao participa)** → afazer do **front-client**, nao do partner. O modelo desejado (oferta ABERTA, S3) ainda nao existe no backend — ver [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) (S3) e client 10b.
 >
-> **Ainda abertas no backend, MAS AINDA NAO na lista oficial de pendencias do backend** (PRD_BACKEND secao "Pendencias abertas do BACKEND — FONTE UNICA"): **BUG4** (address read-back), **BUG5/BUG6** (fechamento com confirmacao + gate de entrada fora do horario + solicitar corte; NAO auto-fechar), **S3** (oferta aberta de troca), **S4** (refeicoes Modelo B), **S5/S6** (esqueci senha + SMTP), **S7** (promover ao 1o lugar), **S8** (profissional abrir/fechar), **S9** (expediente inicio/fim nos relatorios). ⚠️ **Estes handoffs precisam ser incorporados pelo backend na lista dele** — hoje so vivem aqui. **O backend (2026-07-04) confirmou todos como gaps reais** e se ofereceu p/ reconciliar BUG4/BUG6/S7 (e o que priorizarmos) na FONTE UNICA dele — **combinado: reconciliar.** ✅ **Rating (#6) NAO e mais gap** — agregados ja vem no `professionals-with-queue` (confirmado pelo backend, ver acima).
+> **Ainda abertas no backend, MAS AINDA NAO na lista oficial de pendencias do backend** (PRD_BACKEND secao "Pendencias abertas do BACKEND — FONTE UNICA"): **BUG4** (address read-back), **BUG5/BUG6** (fechamento com confirmacao + gate de entrada fora do horario + solicitar corte; NAO auto-fechar), **BUG7** (pausar torna o atendimento orfao — some de `professionals-with-queue`), **BUG8** (cliente na fila nao aparece pro profissional em `professionals-with-queue`), **S3** (oferta aberta de troca), **S4** (refeicoes Modelo B), **S5/S6** (esqueci senha + SMTP), **S7** (promover ao 1o lugar), **S8** (profissional abrir/fechar), **S9** (expediente inicio/fim nos relatorios). **BUG7/BUG8 sao novos (teste manual 2026-07-04, a confirmar/reproduzir).** ⚠️ **Estes handoffs precisam ser incorporados pelo backend na lista dele** — hoje so vivem aqui. **O backend (2026-07-04) confirmou todos como gaps reais** e se ofereceu p/ reconciliar BUG4/BUG6/S7 (e o que priorizarmos) na FONTE UNICA dele — **combinado: reconciliar.** ✅ **Rating (#6) NAO e mais gap** — agregados ja vem no `professionals-with-queue` (confirmado pelo backend, ver acima).
 
 > 📄 **Detalhe e acoes de cada item de backend: [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md).** Cross-project (client): [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md).
 
@@ -977,15 +977,19 @@ eas build --platform android --profile preview
 ### 14.4 Rede anti-quebra (gate antes de subir)
 
 Defesa em profundidade: o codigo so "sobe" se passar nos checks
-**typecheck -> jest -> expo-doctor** (esse ultimo pega quebras de config/nativo que
-o jest nao pega — foi a classe de erro do CNG).
+**lint -> typecheck -> jest -> expo-doctor** (esse ultimo pega quebras de config/nativo
+que o jest nao pega — foi a classe de erro do CNG).
 
+- **Lint (ESLint, 2026-07-04)** — `eslint` + `eslint-config-expo` (flat config,
+  identico ao front-client); script `npm run lint` = `eslint . --max-warnings 0`.
+  Baseline zerado (Animated.Value via `useState`, disables pontuais das regras do
+  React Compiler nos fetch-on-mount intencionais, imports mortos removidos).
 - **Local — pre-push hook** (`.githooks/pre-push`): roda antes de cada `git push` e
-  **aborta** se algo falhar. Ativado por `core.hooksPath=.githooks`, religado
-  automaticamente no `npm install` (script `prepare` no `package.json`).
-  Bypass de emergencia: `git push --no-verify`.
-- **Servidor — CI** (`.github/workflows/ci.yml`): typecheck + jest + cobertura (gate
-  de threshold) + **expo-doctor**, em push (`dev`/`main`) e PR para `main`.
+  **aborta** se algo falhar. Ordem: **lint -> typecheck -> jest -> expo-doctor**.
+  Ativado por `core.hooksPath=.githooks`, religado automaticamente no `npm install`
+  (script `prepare` no `package.json`). Bypass de emergencia: `git push --no-verify`.
+- **Servidor — CI** (`.github/workflows/ci.yml`): **lint** + typecheck + jest + cobertura
+  (gate de threshold) + **expo-doctor**, em push (`dev`/`main`) e PR para `main`.
 - **Branch protection no `main`** (acao manual no GitHub -> Settings -> Branches):
   *Require status checks to pass* -> **CI / lint-and-test**. Assim codigo quebrado
   nao consegue ser mergeado no `main`. `main` = linha de producao sempre verde.
