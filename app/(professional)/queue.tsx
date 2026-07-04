@@ -42,6 +42,7 @@ function AttendanceCard({
   onRemove,
   onLate,
   onNoShow,
+  onAdvance,
   isActive,
   isFirst,
 }: {
@@ -53,6 +54,7 @@ function AttendanceCard({
   onRemove?: () => void;
   onLate?: () => void;
   onNoShow?: () => void;
+  onAdvance?: () => void;
   isActive: boolean;
   isFirst: boolean;
 }) {
@@ -130,10 +132,12 @@ function AttendanceCard({
         </HStack>
       )}
 
-      {/* So o 1o da fila (indice 0) pode ser iniciado. Se nao chegou, "Nao chegou"
-          (/late) o faz cair 1 posicao e o proximo vira o 1o. Nunca iniciar o 2o+.
-          Ja em ATRASADO, se nao compareceu de novo, "Nao compareceu" (/no-show)
-          tira da fila com strike (#39). "Remover" tira sem penalidade. */}
+      {/* O 1o da fila (indice 0) inicia direto. Se nao chegou, "Nao chegou"
+          (/late) o faz cair 1 posicao e o proximo vira o 1o.
+          Fora do 1o lugar da pra ADIANTAR (atender fora de ordem) — com
+          confirmacao, pois pula quem esta na frente (/start aceita qualquer
+          posicao). Ja em ATRASADO, "Nao compareceu" (/no-show) tira da fila com
+          strike (#39). "Remover" tira sem penalidade. */}
       {!isActive && (attendance.status === "SCHEDULED" || isLate) && (
         isFirst ? (
           <VStack mt="$3" space="sm">
@@ -148,10 +152,11 @@ function AttendanceCard({
           </VStack>
         ) : (
           <VStack mt="$3" space="sm">
+            <Button title="Adiantar" onPress={onAdvance} bg="$green500" $active-bg="$green600" h="$10" />
             {isLate && (
               <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
             )}
-            <Button title="Remover" onPress={onRemove} bg="$red400" $active-bg="$red500" h="$10" />
+            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
           </VStack>
         )
       )}
@@ -425,6 +430,16 @@ export default function ProfessionalQueueScreen() {
                 isActive={false}
                 isFirst={idx === 0}
                 onStart={() => handleAction(() => startAttendance(att.id))}
+                onAdvance={() =>
+                  Alert.alert(
+                    "Adiantar cliente",
+                    `${att.clientName} sera atendido agora, na frente de quem esta na fila. Tem certeza?`,
+                    [
+                      { text: "Cancelar" },
+                      { text: "Adiantar", onPress: () => handleAction(() => startAttendance(att.id)) },
+                    ]
+                  )
+                }
                 onLate={() =>
                   Alert.alert(
                     "Cliente nao chegou",
