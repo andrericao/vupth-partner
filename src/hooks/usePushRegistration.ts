@@ -19,14 +19,25 @@ export const PUSH_TOKEN_KEY = "vupth_push_token";
 
 // Push em foreground: mostrar banner/lista/som (o WS ja cuida da UI in-app, mas
 // o banner reforca o aviso). Registrado uma vez no modulo.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+//
+// IMPORTANTE (resiliencia OTA): este arquivo pode carregar num binario SEM o
+// modulo nativo de notificacoes — ex.: um OTA novo (que ja tem o codigo de push)
+// rodando sobre um APK antigo, buildado antes de `expo-notifications`. Sem guarda,
+// a chamada nativa lanca no eval do modulo e o app inteiro cai (rollback pro
+// bundle embutido velho). O try/catch deixa o resto do app (JS) rodar normal;
+// push simplesmente nao funciona ate existir um build com o modulo nativo.
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+} catch {
+  // binario sem o modulo nativo de push — segue sem handler.
+}
 
 // Registra o device para push quando o usuario esta autenticado e trata o toque
 // na notificacao. Best-effort: nenhuma falha de push quebra o app.
@@ -37,10 +48,16 @@ export function usePushRegistration() {
   // Android exige um canal para exibir notificacoes.
   useEffect(() => {
     if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.DEFAULT,
-      }).catch(() => {});
+      // try/catch pega o throw SINCRONO (modulo nativo ausente); o .catch pega a
+      // rejeicao da promise. Sem os dois, um binario velho quebraria aqui.
+      try {
+        Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.DEFAULT,
+        }).catch(() => {});
+      } catch {
+        // binario sem o modulo nativo de push.
+      }
     }
   }, []);
 
@@ -84,13 +101,19 @@ export function usePushRegistration() {
 
   // Toque na notificacao -> navega conforme o data.type.
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data;
-        const route = notificationRoute(data);
-        if (route) router.push(route as any);
-      }
-    );
-    return () => sub.remove();
+    // addNotification... toca o modulo nativo: guardado p/ nao quebrar num binario
+    // sem `expo-notifications` (OTA novo sobre APK velho).
+    try {
+      const sub = Notifications.addNotificationResponseReceivedListener(
+        (response) => {
+          const data = response.notification.request.content.data;
+          const route = notificationRoute(data);
+          if (route) router.push(route as any);
+        }
+      );
+      return () => sub.remove();
+    } catch {
+      // binario sem o modulo nativo de push — sem listener de toque.
+    }
   }, []);
 }
