@@ -4,6 +4,7 @@
     "slug": "vupth-partner",
     "version": "1.0.0",
     "scheme": "vupth-partner",
+    "icon": "./assets/icon.png",
     "plugins": [
       "expo-font",
       "expo-router",
@@ -17,6 +18,10 @@
     "android": {
       "package": "com.vupth.partner",
       "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
       "runtimeVersion": {
         "policy": "appVersion"
       }
