@@ -298,6 +298,37 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
+  // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
+  // finalizado antes (o profissional optou por pular pro proximo — ou por atender
+  // alguem fora de ordem). `advance` = o escolhido nao e o 1o da fila.
+  // (A realocacao da fila quando se atende fora de ordem e do backend — o `start`
+  // ja aceita qualquer posicao; o "promover/reordenar" e o S7.)
+  const startClient = (att: AttendanceInQueue, advance: boolean) => {
+    const runningName = currentAttendance?.clientName;
+    const doStart = () =>
+      handleAction(async () => {
+        if (currentAttendance) {
+          await finishAttendance(currentAttendance.id);
+          clearAttendanceStart(currentAttendance.id);
+        }
+        await startAttendance(att.id);
+      });
+
+    // Inicio direto (sem confirmacao) so quando e o 1o da fila E ninguem esta em
+    // atendimento. Nos demais casos confirma (vai finalizar o atual e/ou furar a fila).
+    if (!runningName && !advance) {
+      doStart();
+      return;
+    }
+    const msg = runningName
+      ? `Isso finaliza o atendimento de ${runningName} e ${advance ? `atende ${att.clientName} na frente da fila` : `inicia ${att.clientName}`}. Continuar?`
+      : `${att.clientName} sera atendido agora, na frente da fila. Tem certeza?`;
+    Alert.alert(advance ? "Adiantar cliente" : "Iniciar atendimento", msg, [
+      { text: "Cancelar" },
+      { text: advance ? "Adiantar" : "Iniciar", onPress: doStart },
+    ]);
+  };
+
   const handleFinishMeal = async (m: Interval) => {
     if (!profId) return;
     try {
@@ -429,17 +460,8 @@ export default function ProfessionalQueueScreen() {
                 attendance={att}
                 isActive={false}
                 isFirst={idx === 0}
-                onStart={() => handleAction(() => startAttendance(att.id))}
-                onAdvance={() =>
-                  Alert.alert(
-                    "Adiantar cliente",
-                    `${att.clientName} sera atendido agora, na frente de quem esta na fila. Tem certeza?`,
-                    [
-                      { text: "Cancelar" },
-                      { text: "Adiantar", onPress: () => handleAction(() => startAttendance(att.id)) },
-                    ]
-                  )
-                }
+                onStart={() => startClient(att, false)}
+                onAdvance={() => startClient(att, true)}
                 onLate={() =>
                   Alert.alert(
                     "Cliente nao chegou",
