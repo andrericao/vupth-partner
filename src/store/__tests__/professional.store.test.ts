@@ -338,6 +338,18 @@ describe("professional.store", () => {
       expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
     });
 
+    it("keeps the saved nickname locally even if GET /professional/me omits it (BUG10)", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/profile/general-infos").reply(200, {});
+      // /professional/me NAO projeta o nickname (gap de backend) — sem o merge
+      // local o valor recem-salvo "sumiria" logo apos o alerta de sucesso.
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, nickname: null });
+
+      await useProfessionalStore.getState().updateNickname("Dedeco");
+
+      expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
+    });
+
     it("rejects when the PATCH fails", async () => {
       useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
       mock.onPatch("/profile/general-infos").reply(422, { message: "nickname too long" });

@@ -64,7 +64,8 @@ function normalizeProfessional(data: any): Professional {
   return {
     id: data.id,
     name: data.name,
-    nickname: data.nickname ?? null,
+    // tolera variacoes de nome do campo vindas do backend (nickname/nickName/nick_name)
+    nickname: data.nickname ?? data.nickName ?? data.nick_name ?? null,
     specialty: data.specialty ?? null,
     establishment_id: data.establishment_id ?? data.establishmentId ?? null,
     establishment_name: data.establishment_name ?? data.establishmentName ?? null,
@@ -174,9 +175,19 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
 
   updateNickname: async (nickname) => {
     // Apelido e identidade do usuario (BaseUser), escrito so via /profile/general-infos
-    // (#16). String vazia limpa o apelido; backend projeta o nickname em /professional/me.
+    // (#16). String vazia limpa o apelido.
     await api.patch("/profile/general-infos", { nickname });
     await get().fetchMe();
+    // O PATCH gravou (200), mas o GET /professional/me pode NAO projetar o nickname
+    // (gap de backend — ver HANDOFF_BACKEND BUG10). Sem isto, o fetchMe acima
+    // sobrescreve com null e o apelido "some" logo apos o alerta de sucesso.
+    // Reflete o valor recem-salvo no estado local + SecureStore.
+    const current = get().professional;
+    if (current) {
+      const updated = { ...current, nickname: nickname.trim() || null };
+      await persistProfessional(updated);
+      set({ professional: updated });
+    }
   },
 
   updateMyServiceItem: async (itemId, changes) => {
