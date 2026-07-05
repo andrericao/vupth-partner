@@ -48,10 +48,7 @@ export default function RootLayout() {
   return (
     // [new-design] Fundo off-white do guia (#F7FAF8) em todo o app — telas sem
     // bg proprio herdam, e os cards brancos passam a "saltar" sobre ele.
-    // [DIAGNOSTICO OTA — TEMPORARIO] fundo verde-menta no lugar do off-white
-    // #F7FAF8 pra confirmar visualmente que o bundle novo chegou pelo OTA.
-    // REVERTER para "#F7FAF8" assim que confirmado.
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#C7F0DB" }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#F7FAF8" }}>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider config={config}>
           {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
