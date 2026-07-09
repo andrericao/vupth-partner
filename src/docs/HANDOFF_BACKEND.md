@@ -121,9 +121,13 @@ Requisito novo (Andre 2026-07-09): com o profissional em `indisponivel`, o clien
 - Recalcular o agregado **atomicamente** na transacao; emitir evento (WS `/topic/establishment/{id}/queue` + push) **na transicao** de abertura/fechamento e de aceita-novos.
 - No boot/restart, o agregado se recompoe do banco (e projecao, nao ha timer a reconstruir).
 
-### Front-partner depois
-- Trocar o card "Abrir/Fechar" (toggle bruto entregue) por **seletor de status** (trabalhando/intervalo/indisponivel); `open_status` da loja **so exibido, nunca escrito**.
-- Botao **"fechar fila"** (aceitandoNovos=false) + botao **"indisponivel"** **desabilitado com aviso inline** enquanto houver atendimento/fila (ver "UX" acima).
+### Estado do front (2026-07-09)
+- ✅ **Ja feito (OTA-puro, lado OWNER):** no dashboard do dono o botao **"Fechar Estabelecimento"** fica **desabilitado com aviso inline** quando ha cliente em atendimento/fila (o caminho vira "Fechar Temporariamente" p/ drenar), e trata o `409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES`. Isso ja aplica a regra de UX ("prevenir o clique") no que **nao** depende do backend novo.
+- ⬜ **Aguardando o backend (o resto do S1):** o toggle bruto do PROFISSIONAL (entregue em `7819914`) **nao** foi evoluido ainda — o seletor de status + "fechar fila" + auto-`indisponivel` + rotulo do cliente **so entram quando o backend expuser os endpoints abaixo**.
+
+### Front-partner depois (quando o backend entregar)
+- Trocar o toggle bruto do profissional por **seletor de status** (trabalhando/intervalo/indisponivel); `open_status` da loja **so exibido, nunca escrito**.
+- Botao **"fechar fila"** (aceitandoNovos=false) + botao **"indisponivel"** **desabilitado com aviso inline** enquanto houver atendimento/fila (mesma regra ja aplicada ao dono).
 - O "agendar no card" (profissional indisponivel) entra junto com o S2/calendario (client tambem).
 
 ---
