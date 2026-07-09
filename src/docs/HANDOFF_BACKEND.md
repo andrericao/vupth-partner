@@ -22,7 +22,7 @@ Ultima atualizacao: 2026-07-09 · branch `dev` do front-partner.
 
 | # | Item | Status backend | O que o backend precisa fazer | O que o front faz depois |
 |---|------|----------------|-------------------------------|--------------------------|
-| S1 | **Status do profissional → `open_status` derivado** (modelo acordado 2026-07-09) | ⬜ **novo — precisa de backend** (ver "Detalhe — S1" abaixo) | Profissional passa a mudar o **proprio** status (`trabalhando`/`intervalo`/`indisponivel`); `open_status` da loja vira **derivado/read-only** = `∃ profissional com status ∈ {trabalhando, intervalo}`. Novo `PATCH /professional/me/status`; recalculo atomico do agregado + evento na transicao. | Trocar o toggle por seletor de status; `open_status` so exibido. Agendar no card do profissional `indisponivel` liga ao S2/calendario. |
+| S1 | **Status do profissional → `open_status` derivado** (modelo acordado 2026-07-09) | ⬜ **novo — precisa de backend** (ver "Detalhe — S1" abaixo) | Profissional muda o **proprio** status (`trabalhando`/`intervalo`/`indisponivel`); `open_status` **derivado/read-only** = `∃ prof ∈ {trabalhando, intervalo}`. + flag **`aceitandoNovos`** ("fechar fila": drena e **auto-`indisponivel`** no fim). + **rotulo do cliente** derivado (DISPONIVEL/ENCERRANDO/INDISPONIVEL). `PATCH /professional/me/status`; recalculo atomico + evento. | Seletor de status + "fechar fila"; `open_status` so exibido; botao "indisponivel" desabilitado com aviso quando ha fila. Agendar no card do `indisponivel` liga ao S2/calendario. |
 | S2 | **Intencao de atendimento → promocao automatica a fila** | ⬜ aberto — **spec desenhada 2026-07-05** (ver "Detalhe — S2" abaixo) | Novo status **INTENTION**: atendimento criado com um `desiredTime` que fica **fora da fila** ("solto") e e **promovido a `SCHEDULED`** quando falta **≤15min** pro horario. Ponto unico de entrada (create/edit passam pelo algoritmo), promocao **event-driven** (timer, nao polling), invariante dos 15min. Ver detalhe. | Client: UI de manifestar intencao/agendar. Partner: reflete quando a INTENTION vira `SCHEDULED` na fila (ja consome `professionals-with-queue`). |
 | S3 | Refeicoes Modelo B (janela flexivel) | ⬜ aberto | Placement da refeicao no 1o buraco dentro de `[alvo−adiant, min(proxRefeicao−3h, fechamento−dur)]` + **auto-supressao** (3h/fechamento) no ETA meal-aware + "iniciar = proxima nao suprimida". Ja existem: `skip` (#41), ETA meal-aware, "atender encerra a refeicao ativa". | Popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime`). |
 | S4 | Promover cliente ao 1o lugar (reordenar a fila) | ⬜ aberto (gap real, confirmado 2026-07-04) | `PATCH /attendances/{id}/promote` (move ao indice 0, empurra os demais). Obs.: `start` ja atende **qualquer** id SCHEDULED/LATE fora de ordem; falta so o "promover ao topo sem atender". | Botao "Atender este" em qualquer card → promove → inicia. (Enquanto nao vem, usa `start` direto.) |
@@ -78,6 +78,30 @@ Decisao Andre (2026-07-09). **Substitui** o toggle bruto de `open_status` (entre
 - `trabalhando → indisponivel`: se era o **ultimo** (`1→0`) ⇒ **fecha**; **registra fim de expediente** (S5).
 - `trabalhando ↔ intervalo`: **nao** muda o `open_status` (intervalo conta).
 
+### Fila fechada / drenar (`aceitandoNovos`) + auto-`indisponivel`
+Resolve o "e se clientes seguem entrando, o profissional nunca sai?". O profissional **para de aceitar novos** mas continua atendendo quem ja esta, ate esvaziar (padrao **drenar**).
+- **Flag `aceitandoNovos`** sobre o `trabalhando`. `false` = **fila fechada/encerrando**: nenhum cliente novo entra; os que ja estao continuam. **Ainda conta como loja aberta** (ele esta servindo).
+- **Dois gatilhos p/ `aceitandoNovos=false`:** (a) **manual** — botao "fechar fila" (imediato); (b) **automatico** — passou do **`closing_time` das configuracoes** ("mudar o horario final" = mudar esse `closing_time`, **nao** um horario avulso do dia).
+- **Auto-`indisponivel`:** com `aceitandoNovos=false`, ao **finalizar o ULTIMO** atendimento (`waiting_list` vazia + `current_attendance` null) o profissional **transiciona sozinho para `indisponivel`** (na MESMA transacao do finish). Se ao fechar a fila ela **ja estiver vazia** → vai **direto** a `indisponivel`. O profissional nao precisa "lembrar de sair".
+- Se ele for o **ultimo**, a auto-transicao fecha a loja (open_status derivado) — tudo event-driven.
+- Mesmo com fila fechada, o cliente ainda pode **"solicitar corte"** (pedido sob aprovacao — ver BUG1); fechar a fila nao impede o pro de encaixar manualmente.
+
+### Rotulo do cliente (projecao derivada — NAO expor o estado interno cru)
+O cliente **nunca** ve `trabalhando`/`aceitandoNovos`. Ve um rotulo derivado que comunica **se da pra entrar**:
+| Cliente ve | Deriva de | Entra? |
+|---|---|---|
+| **DISPONIVEL** | `trabalhando` aceitandoNovos=true **ou** `intervalo` | ✅ sim |
+| **ENCERRANDO** | `trabalhando` aceitandoNovos=false (fila fechada/drenando) | ❌ nao |
+| **INDISPONIVEL** | `indisponivel` | ❌ nao |
+
+- **`intervalo` projeta como DISPONIVEL** — pro cliente na espera so importa o **tempo de espera**, que **ja embute** o intervalo (ETA meal-aware, #14). Nao ha rotulo "EM INTERVALO" pro cliente.
+- O intervalo so se manifesta pro **cliente EM PROGRESSO**: quando o profissional inicia um intervalo durante um atendimento `IN_PROGRESS`, o **timer do atendimento PAUSA** e o **timer do intervalo comeca**; ao `finish` do intervalo, o atendimento **retoma**. (Depende de `pause` manter o atendimento **exposto e retomavel** — ver BUG2.)
+- **CHEIO** (fila no limite de capacidade) fica como **evolucao futura** — so entra se criarmos teto de fila; seria mais um rotulo derivado (`fila ≥ limite`, temporario, reabre ao drenar), distinto de ENCERRANDO (terminal no dia).
+
+### UX — prevenir o clique (botao desabilitado + aviso inline), nao so o erro
+- O botao **"indisponivel"** (sair) fica **desabilitado** enquanto o profissional tem `current_attendance` **ou** `waiting_list` nao-vazia — com **aviso inline visivel** ("Nao e possivel ficar indisponivel com cliente em atendimento ou na fila"). Com fila, o caminho e **"fechar fila"** (drena e sai sozinho).
+- **Manter o gate no servidor** (`409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES`) como **rede de seguranca** — o disable e UX, o 409 e correcao (cache velho, outro aparelho, corrida). No mobile o motivo tem que ser **texto fixo** (botao desabilitado nao recebe toque p/ explicar).
+
 ### Por que e a prova de corrida
 Cada profissional escreve **so o proprio** status (idempotente e comutativo por profissional). O `open_status` e `COUNT(status ∈ {trabalhando, intervalo}) ≥ 1`. Dois entrando em `trabalhando` ao mesmo tempo ⇒ conjunto com 2 ⇒ **aberto** — nao ha booleano disputado nem "ultimo a escrever vence".
 
@@ -90,13 +114,17 @@ Requisito novo (Andre 2026-07-09): com o profissional em `indisponivel`, o clien
 - **(b) Endpoint de agendamento futuro** — que e o proprio modelo **S2 (INTENTION → promocao)** com `desiredTime` num dia futuro da agenda liberada. Ou seja: "indisponivel + agendar" = criar uma **INTENTION** para um dia liberado.
 
 ### Contrato sugerido
-- `PATCH /professional/me/status { status: "trabalhando" | "intervalo" | "indisponivel" }` (substitui o uso **profissional** do `open-status`).
-- `open_status` do estabelecimento **read-only derivado** em todos os GETs.
-- Recalcular o agregado **atomicamente** na transacao; emitir evento (WS `/topic/establishment/{id}/queue` + push) **na transicao** de abertura/fechamento.
+- `PATCH /professional/me/status { status: "trabalhando" | "intervalo" | "indisponivel" }` (substitui o uso **profissional** do `open-status`). Bloquear `→ indisponivel` com `409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES` se houver `current_attendance`/`waiting_list` (o app tambem desabilita o botao).
+- **`aceitandoNovos`** (fechar fila): `PATCH /professional/me/accepting-new { value: false|true }` **ou** embutido no status endpoint. `false` **e** apos o `closing_time` ⇒ `POST /attendances` (novo cliente) rejeita p/ esse profissional. **Auto-`indisponivel`** no `finish` do ultimo com `aceitandoNovos=false` (server-side, atomico).
+- **`open_status`** do estabelecimento **read-only derivado** em todos os GETs.
+- **Rotulo do cliente por profissional** projetado nos GETs do **client** (ex.: `professional_client_status: DISPONIVEL | ENCERRANDO | INDISPONIVEL`) — deriva do estado interno (intervalo→DISPONIVEL). **Nao** expor `aceitandoNovos`/`trabalhando` cru pro cliente.
+- Recalcular o agregado **atomicamente** na transacao; emitir evento (WS `/topic/establishment/{id}/queue` + push) **na transicao** de abertura/fechamento e de aceita-novos.
 - No boot/restart, o agregado se recompoe do banco (e projecao, nao ha timer a reconstruir).
 
 ### Front-partner depois
-Trocar o card "Abrir/Fechar" (toggle bruto entregue) por **seletor de status** (trabalhando/intervalo/indisponivel); `open_status` da loja **so exibido, nunca escrito**. O "agendar no card" entra junto com o S2/calendario (client tambem).
+- Trocar o card "Abrir/Fechar" (toggle bruto entregue) por **seletor de status** (trabalhando/intervalo/indisponivel); `open_status` da loja **so exibido, nunca escrito**.
+- Botao **"fechar fila"** (aceitandoNovos=false) + botao **"indisponivel"** **desabilitado com aviso inline** enquanto houver atendimento/fila (ver "UX" acima).
+- O "agendar no card" (profissional indisponivel) entra junto com o S2/calendario (client tambem).
 
 ---
 
