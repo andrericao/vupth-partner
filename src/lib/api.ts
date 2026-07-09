@@ -41,6 +41,8 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
     "O estabelecimento precisa de pelo menos um profissional com servico cadastrado para abrir.",
   ESTABLISHMENT_HOURS_REQUIRED:
     "Defina o horario de funcionamento do estabelecimento antes de abrir.",
+  ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:
+    "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
   INTERVAL_INVALID_TIME:
     "Horario da refeicao fora do horario de funcionamento do estabelecimento.",
   INTERVAL_CONFLICT:

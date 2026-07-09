@@ -47,6 +47,11 @@ export default function OwnerDashboardScreen() {
   const { data: queueData, refetch } = useQueuePolling(establishment?.id ?? null);
   const totalInQueue = queueData?.total_in_queue ?? 0;
   const professionals: ProfessionalWithQueue[] = queueData?.professionals ?? [];
+  // Ha cliente em atendimento ou na fila? Nesse caso o fechamento TOTAL fica
+  // bloqueado (o caminho e "Fechar Temporariamente" p/ nao receber novos e
+  // terminar a fila). Previne o clique; o backend ainda barra por 409.
+  const hasActiveWork =
+    totalInQueue > 0 || professionals.some((p) => !!p.current_attendance);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -99,6 +104,14 @@ export default function OwnerDashboardScreen() {
               onPress: () => router.push("/(owner)/establishment-hours" as any),
             },
           ]
+        );
+      } else if (code === "ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES") {
+        Alert.alert(
+          "Ha atendimentos em andamento",
+          getApiErrorMessage(
+            error,
+            "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar."
+          )
         );
       } else {
         Alert.alert(
@@ -181,13 +194,23 @@ export default function OwnerDashboardScreen() {
             $active-bg="$green600"
           />
         ) : (
-          <Button
-            title="Fechar Estabelecimento"
-            onPress={() => setStatus("CLOSED")}
-            isLoading={isToggling}
-            bg="$red500"
-            $active-bg="$red600"
-          />
+          <VStack space="xs">
+            <Button
+              title="Fechar Estabelecimento"
+              onPress={() => {
+                if (!hasActiveWork) setStatus("CLOSED");
+              }}
+              isLoading={isToggling}
+              isDisabled={hasActiveWork}
+              bg="$red500"
+              $active-bg="$red600"
+            />
+            {hasActiveWork && (
+              <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" textAlign="center">
+                Nao e possivel fechar com cliente em atendimento ou na fila. Use Fechar Temporariamente para nao receber novos e terminar a fila.
+              </Text>
+            )}
+          </VStack>
         )}
 
         {status !== "TEMPORARILY_CLOSED" ? (
