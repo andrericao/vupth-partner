@@ -16,16 +16,21 @@ import { useIsFocused } from "@react-navigation/native";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
+import type { EstablishmentDetail } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
+import { ownerCompletion } from "@lib/completion";
+import { CompletionCard } from "@components/CompletionCard";
 import type { ProfessionalWithQueue } from "@lib/types";
 
 export default function OwnerDashboardScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
   const fetchMine = useEstablishmentStore((s) => s.fetchMine);
+  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
   const [isToggling, setIsToggling] = useState(false);
+  const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -44,7 +49,16 @@ export default function OwnerDashboardScreen() {
 
   const status = establishment?.open_status ?? "CLOSED";
   const isOpen = status === "OPEN";
-  const { data: queueData, refetch } = useQueuePolling(establishment?.id ?? null);
+  const establishmentId = establishment?.id;
+
+  // Detalhe (endereco/telefone/instagram) p/ o checklist de prontidao — recarrega
+  // ao focar a tela (o usuario pode ter acabado de editar num submenu).
+  useEffect(() => {
+    if (!establishmentId || !isFocused) return;
+    fetchEstablishmentById(establishmentId).then(setDetail).catch(() => {});
+  }, [establishmentId, isFocused, fetchEstablishmentById]);
+
+  const { data: queueData, refetch } = useQueuePolling(establishmentId ?? null);
   const totalInQueue = queueData?.total_in_queue ?? 0;
   const professionals: ProfessionalWithQueue[] = queueData?.professionals ?? [];
   // Ha cliente em atendimento ou na fila? Nesse caso o fechamento TOTAL fica
@@ -53,6 +67,30 @@ export default function OwnerDashboardScreen() {
   const hasActiveWork =
     totalInQueue > 0 || professionals.some((p) => !!p.current_attendance);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
+  const completion = ownerCompletion({
+    hasName: !!establishment?.name,
+    hasServiceType: !!establishment?.service_type,
+    hasAddress: !!detail?.address?.neighborhood,
+    hasHours: !!establishment?.opening_time && !!establishment?.closing_time,
+    hasProfessionalWithService: professionals.length > 0,
+    isOpen: status === "OPEN",
+    hasPhone: !!detail?.phone,
+    hasInstagram: !!detail?.instagram,
+  });
+  const ownerRouteFor = (key: string): string | undefined => {
+    const map: Record<string, string> = {
+      name: "/(owner)/establishment-registration",
+      serviceType: "/(owner)/establishment-registration",
+      address: "/(owner)/establishment-data",
+      hours: "/(owner)/establishment-hours",
+      professionalWithService: `/(owner)/add-professional?establishmentId=${establishmentId ?? ""}`,
+      phone: "/(owner)/establishment-registration",
+      instagram: "/(owner)/establishment-registration",
+    };
+    return map[key];
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -167,6 +205,12 @@ export default function OwnerDashboardScreen() {
         <Text fontFamily="$body" color="$coolGray500" mt="$2">
           {establishment.service_type}
         </Text>
+
+        <CompletionCard
+          completion={completion}
+          doneBanner="Você já aparece para clientes!"
+          routeFor={ownerRouteFor}
+        />
 
         <HStack mt="$4" space="md">
           <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>

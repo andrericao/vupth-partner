@@ -23,6 +23,8 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
+import { professionalCompletion } from "@lib/completion";
+import { CompletionCard } from "@components/CompletionCard";
 import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
@@ -179,6 +181,9 @@ export default function ProfessionalQueueScreen() {
   const skipInterval = useIntervalStore((s) => s.skipInterval);
   const meals = intervals.filter((i) => i.type === "RECURRENT");
 
+  const myServices = useProfessionalStore((s) => s.myServices);
+  const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
+
   // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
   const nudgedRef = useRef<Set<string>>(new Set());
 
@@ -194,6 +199,11 @@ export default function ProfessionalQueueScreen() {
       useProfessionalStore.getState().fetchMe().catch(() => {});
     }
   }, [establishmentId]);
+
+  // Servicos do profissional — p/ o checklist de prontidao (2 completes).
+  useEffect(() => {
+    if (establishmentId) fetchMyServices().catch(() => {});
+  }, [establishmentId, fetchMyServices]);
 
   // Carrega as refeicoes do dia ao montar (e quando o profissional muda).
   const profId = professional?.id;
@@ -279,6 +289,24 @@ export default function ProfessionalQueueScreen() {
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
+
+  // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
+  const completion = professionalCompletion({
+    isAffiliated: !!establishmentId,
+    hasService: myServices.length > 0,
+    establishmentReady: (data?.open_status ?? "") === "OPEN",
+    hasNickname: !!professional?.nickname,
+    hasSpecialty: !!professional?.specialty,
+  });
+  const proRouteFor = (key: string): string | undefined => {
+    const map: Record<string, string> = {
+      affiliated: "/(professional)/find-establishment",
+      service: "/(professional)/my-services",
+      nickname: "/(professional)/settings",
+      specialty: "/(professional)/settings",
+    };
+    return map[key];
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -399,6 +427,12 @@ export default function ProfessionalQueueScreen() {
         <Heading size="2xl" fontFamily="$heading" mt="$4">
           Minha fila
         </Heading>
+
+        <CompletionCard
+          completion={completion}
+          doneBanner="Você já aparece para clientes!"
+          routeFor={proRouteFor}
+        />
 
         {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
         {myProfessional && (
