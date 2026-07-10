@@ -581,12 +581,29 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 - **Atender fora de ordem — "Adiantar" (start direto) FEITO; promover/reordenar (S4) segue futuro.** O refinamento 2026-06-28 pedia **promover** o cliente ao 1o lugar (os demais descem). A decisao **2026-07-04** (roadmap #3, confirmada em teste) foi mais simples: o botao **"Adiantar"** (cards fora do 1o lugar) inicia o atendimento **direto** via `PATCH /attendances/{id}/start`, **com confirmacao** — atende o escolhido na frente **sem reordenar** os demais. Isso ja resolve o caso "o da vez nao chegou, atende o 3o". ✅ **Feito** (commit `2489299`). **O que ainda seria mais bonito (S4, backend, item 8, NAO bloqueia):** `PATCH /attendances/{id}/promote` que move ao indice 0 e empurra os demais (para a fila refletir a nova ordem apos promover). `start` sozinho nao reordena (PRD_BACKEND l.2924, "promover ao indice 0" = adicao pequena sob demanda).
 - **Preco: "cliente paga tudo" (0%) → profissional recebe EXATAMENTE o digitado — ✅ FEITO (2026-06-28).** `calculatePricing` reescrito: `proReceives = round2(digitado − absorvido)` (piso desacoplado do arredondamento) — em **0% absorcao `proReceives === digitado`** (antes recebia centavos a menos, ex.: R$100→R$99,55). A **absorcao continua** (recebe menos so por escolha). `clientPrice` em X,90 (com `ceilTo90` de seguranca p/ nao ficar abaixo do piso em precos baixos); taxa = `clientPrice − proReceives`. Testes reescritos (garantia `0% => digitado`). **Unificado:** `src/utils/pricing.ts` (morto, so o teste usava) **removido**; fonte unica = `src/lib/pricing.ts`.
 
+### Feedback 2026-07-09 — Checklists de prontidao (2 "completes") · 🆕 FRONT, mockup primeiro
+
+Motivacao: o usuario **se perdeu no teste** — nao sabia o que faltava p/ o estabelecimento/profissional aparecer ao cliente. Solucao: **dois medidores** por perfil (dono e profissional), calculados **no front** (dados que ja temos; nao depende de backend).
+
+- **A) "Pronto para atender" (o basico)** — portao FUNCIONAL (bate com os gates do backend #31). 100% aqui = **ja da pra atender / aparece ao cliente**.
+  - **Dono:** nome · tipo de servico · endereco/bairro · horario de funcionamento · ≥1 profissional vinculado · ≥1 profissional com servico · aberto.
+  - **Profissional:** vinculado a um estabelecimento · ≥1 servico cadastrado · (estabelecimento pronto e aberto — do dono).
+- **B) "Perfil completo" (100%)** — regra MACIA (nao bloqueia atender; melhora a apresentacao/confianca). Inclui o basico **+** extras.
+  - **Dono:** + telefone · Instagram · foto do estabelecimento (`url_image`).
+  - **Profissional:** + apelido (nickname) · especialidade · (foto de perfil — quando o backend expuser, roadmap #7).
+
+**UI:** card com **2 barras** — "Pronto para atender" em destaque (verde + "Voce ja aparece para clientes! 🎉" ao fechar) e "Perfil completo" discreta abaixo. Cada item pendente e **clicavel** → tela de completar. O card some (ou colapsa) quando o basico fecha. Fica no **topo do dashboard do dono** e na **tela do profissional**.
+
+**Dado que pode faltar (nota):** p/ distinguir "tem profissional SEM servico" de "nao tem profissional", o front pode precisar da **lista completa de profissionais** do estabelecimento (o `professionals-with-queue` esconde os sem servico, #31). Se faltar, vira item de backend pequeno; MVP pode aproximar.
+
+**Processo:** mockup (HTML/SVG em `design/`) **antes de codar** — `design/readiness-checklists.html`. Front-computavel, nao bloqueado por backend.
+
 ---
 
 ## 11. Handoffs + alinhamento com o backend
 
 > **Handoffs consolidados em arquivos dedicados** (padrao do front-client — nao espalhar pelo corpo do PRD):
-> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG1–BUG3, S1–S8), em tabela consolidada + detalhes.
+> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG1–BUG4, S1–S8), em tabela consolidada + detalhes.
 > - 📄 **[`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** — itens cujo frontend pertence ao **app cliente** (C1–C9).
 >
 > Esta secao guarda so o **resumo de alinhamento** (o que o backend ja entregou e desbloqueou o partner). A lista de afazeres do proprio partner esta na **secao 10**. A referencia S2 (rebaixada) e a 11.2 (contrato de refeicoes ja entregue) seguem abaixo.
