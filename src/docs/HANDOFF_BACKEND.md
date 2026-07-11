@@ -8,25 +8,16 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 >
 > **Numeracao:** BUGs e pendencias (S) sao sempre numerados **a partir de 1**. Quando um item e **resolvido**, sai da lista e os demais **sao renumerados** (sem acumular riscados). A ordem **nao** reflete prioridade — se houver prioridade, vem sinalizada no proprio item.
 
-> **Alinhamento backend↔partner (feedback do backend, 2026-07-11 — 2 rodadas).** O backend confirmou que o **PRD-Partner esta coerente**. Mapeamento dos abertos ao roadmap/backlog do backend (numeracao ja renumerada apos remocoes):
+> **Alinhamento backend↔partner (autoritativo — backend 2026-07-11).** PRD-Partner **coerente**. **REGRA (fonte de verdade = backend): nao chavear por numero — os numeros do backlog do backend sao volateis** (renumeram a cada item fechado/inserido; ex.: os "#5/#7" da 1a rodada ja viraram "#4/#6" quando o BUG9 fechou). **Chavear por NOME + endpoints.** O backend registrou os aliases no PRD dele (commit `e098aff`).
 >
-> | Partner (novo #) | Backend |
-> |---|---|
-> | BUG1 | #2 |
-> | BUG2 (apelido no `/me`, era BUG3) | backlog #12 |
-> | S1 | #10 |
-> | S2 | backlog #5 |
-> | S3 | #5 |
-> | S4 | #4 |
-> | S5 | #7 |
-> | S6 | backlog #11 |
-> | S7 | backlog #7 |
-> | S8 | #7 (sub-tarefa de infra do S7) |
-> | S9 | #13 |
+> **NAO havia colisao** — o que parecia "S2/S3=#5" e "S5/S7/S8=#7" era so a **numeracao S do Partner mudando entre rodadas** cruzada com o backlog volatil: intencao→promocao foi **S3 (1a rodada) → S2 (2a)**; esqueci-senha foi **S5 → S7**; SMTP foi **S6 → S8**. Sao os mesmos itens.
 >
-> **⚠️ Conferir com o backend — numeros colidem entre as 2 rodadas:** **S2 e S3** ambos "#5"; **S5, S7 e S8** todos "#7". Provavel numeracoes diferentes (roadmap x backlog) ou erro — disambiguar.
+> Ancoras estaveis por nome (numero so informativo, volatil):
+> - **Intencao → promocao** (S2) = `POST/PATCH/DELETE /attendances/intentions` — backend #4 hoje.
+> - **Esqueci senha + SMTP** (S7 + S8, agrupados de proposito: o SMTP habilita o reset) = `POST /auth/forgot-password` + `POST /auth/reset-password` — backend #6 hoje.
+> - Demais itens: chavear pelo **nome/endpoint da propria linha** (os numeros vivem no PRD do backend).
 >
-> **Resolvidos nesta rodada (sairam da lista):**
+> **Resolvidos na rodada anterior (sairam da lista):**
 > - **BUG2 antigo** (pausar atendimento → orfao) = **backend BUG7, commit `d3ce7a2`** (dev). Ja implementado; falta **QA do front** (o card ja trata PAUSED/Retomar).
 > - **BUG4 antigo** (estabelecimento vazio some da busca) = **NAO era backend** (efeito do filtro do BUG5: `GET /establishment` so devolve OPEN). **Front aplicou `includeAll=true`** na `find-establishment`. (Andre pode pedir endpoint de afiliacao dedicado se preferir.)
 
@@ -36,22 +27,22 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 
 | # | Item | Status backend | O que o backend precisa fazer | O que o front faz depois |
 |---|------|----------------|-------------------------------|--------------------------|
-| BUG1 | Fechamento com confirmacao + gate de entrada fora do horario — **NAO auto-fechar** | 🧪 **sera testado** (2026-07-09) · **backend #2** | Ver **"Detalhe — BUG1"** abaixo. Resumo: (1) NAO auto-mudar `open_status`; (2) bloquear NOVAS entradas na fila fora do horario/apos "parar novos"; (3) fluxo de **"solicitar corte"** (pedido sob aprovacao); (4) `is_open` efetivo + `opening/closing` na listagem. | Confirmacao no toggle de fechar; tratar o gate; dashboard mostra "fechado p/ novos". |
-| BUG2 | **Apelido (nickname) nao volta no `GET /professional/me`** | ⬜ aberto · **backlog #12** (confirmado 2026-07-11) | O `PATCH /profile/general-infos { nickname }` retorna **200** (salva), mas ao reabrir as Configuracoes o apelido **some**. Backend confirmou: `/professional/me` devolve `ProfessionalQuickCreateResponse` **sem nickname** (o campo vive no `BaseUser`, setado via `PATCH /profile/general-infos`). **Fix = projetar `nickname` no `/me`.** | **Mitigado no front:** apos salvar, o partner reflete o valor localmente (+persist) e o `normalize` tolera `nickname`/`nickName`/`nick_name`. Fica 100% quando o `/me` projetar o campo. |
+| BUG1 | Fechamento com confirmacao + gate de entrada fora do horario — **NAO auto-fechar** | 🧪 **sera testado** (2026-07-09) | Ver **"Detalhe — BUG1"** abaixo. Resumo: (1) NAO auto-mudar `open_status`; (2) bloquear NOVAS entradas na fila fora do horario/apos "parar novos"; (3) fluxo de **"solicitar corte"** (pedido sob aprovacao); (4) `is_open` efetivo + `opening/closing` na listagem. | Confirmacao no toggle de fechar; tratar o gate; dashboard mostra "fechado p/ novos". |
+| BUG2 | **Apelido (nickname) nao volta no `GET /professional/me`** | ⬜ aberto (confirmado 2026-07-11) | O `PATCH /profile/general-infos { nickname }` retorna **200** (salva), mas ao reabrir as Configuracoes o apelido **some**. Backend confirmou: `/professional/me` devolve `ProfessionalQuickCreateResponse` **sem nickname** (o campo vive no `BaseUser`, setado via `PATCH /profile/general-infos`). **Fix = projetar `nickname` no `/me`.** | **Mitigado no front:** apos salvar, o partner reflete o valor localmente (+persist) e o `normalize` tolera `nickname`/`nickName`/`nick_name`. Fica 100% quando o `/me` projetar o campo. |
 
 ## Pendencias / features (S — abertas)
 
 | # | Item | Status backend | O que o backend precisa fazer | O que o front faz depois |
 |---|------|----------------|-------------------------------|--------------------------|
-| S1 | **Status do profissional → `open_status` derivado** (modelo acordado 2026-07-09) | ⬜ **novo — precisa de backend** (ver "Detalhe — S1" abaixo) · **backend #10** | Profissional muda o **proprio** status (`trabalhando`/`intervalo`/`indisponivel`); `open_status` **derivado/read-only** = `∃ prof ∈ {trabalhando, intervalo}`. + flag **`aceitandoNovos`** ("fechar fila": drena e **auto-`indisponivel`** no fim). + **rotulo do cliente** derivado (DISPONIVEL/ENCERRANDO/INDISPONIVEL). `PATCH /professional/me/status`; recalculo atomico + evento. | Seletor de status + "fechar fila"; `open_status` so exibido; botao "indisponivel" desabilitado com aviso quando ha fila. Agendar no card do `indisponivel` liga ao S2/calendario. |
-| S2 | **Intencao de atendimento → promocao automatica a fila** | ⬜ aberto — **spec desenhada 2026-07-05** (ver "Detalhe — S2" abaixo) · **backlog #5** | Novo status **INTENTION**: atendimento criado com um `desiredTime` que fica **fora da fila** ("solto") e e **promovido a `SCHEDULED`** quando falta **≤15min** pro horario. Ponto unico de entrada (create/edit passam pelo algoritmo), promocao **event-driven** (timer, nao polling), invariante dos 15min. Ver detalhe. | Client: UI de manifestar intencao/agendar. Partner: reflete quando a INTENTION vira `SCHEDULED` na fila (ja consome `professionals-with-queue`). |
-| S3 | Refeicoes Modelo B (janela flexivel) | ⬜ aberto · **backend #5** | Placement da refeicao no 1o buraco dentro de `[alvo−adiant, min(proxRefeicao−3h, fechamento−dur)]` + **auto-supressao** (3h/fechamento) no ETA meal-aware + "iniciar = proxima nao suprimida". Ja existem: `skip` (#41), ETA meal-aware, "atender encerra a refeicao ativa". | Popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime`). |
-| S4 | Promover cliente ao 1o lugar (reordenar a fila) | ⬜ aberto (gap real, confirmado 2026-07-04) · **backend #4** | `PATCH /attendances/{id}/promote` (move ao indice 0, empurra os demais). Obs.: `start` ja atende **qualquer** id SCHEDULED/LATE fora de ordem; falta so o "promover ao topo sem atender". | Botao "Atender este" em qualquer card → promove → inicia. (Enquanto nao vem, usa `start` direto.) |
-| S5 | Expediente (inicio/fim) nos relatorios | ⬜ aberto · **backend #7** | Registrar eventos reais de abrir/fechar (timestamp) ou expor a janela `opening/closing` + eventos num endpoint de relatorio. Ligado ao BUG1 e ao S1 (o 1o `trabalhando` / ultimo `indisponivel` marcam inicio/fim). | Exibir "Expediente: HH:MM–HH:MM" nos relatorios (owner e profissional). |
-| S6 | **Cliente adiciona servico a um attendance ja na fila** | ⬜ aberto (pedido 2026-07-04) · **backlog #11** | Endpoint para **acrescentar** service item(s) a um attendance **existente** (cliente ja na fila decide somar servico) que **recalcula** duracao estimada + total e reflete na fila do profissional. Ex.: `PATCH /attendances/{id}/service-items` (add). | Lado client (HANDOFF_CLIENT): botao "adicionar servico" na tela do atendimento em fila. Partner: o card da fila ja mostra os servicos — reflete sozinho o recalculo. |
-| S7 | "Esqueci minha senha" (reset por e-mail) | ⬜ aberto (depende S8) · **backlog #7** | Fluxo publico `POST /auth/forgot-password {email}` + `POST /auth/reset-password {token,newPassword}`. | Link "Esqueci minha senha" no login + telas de pedir e-mail / nova senha. |
-| S8 | Notificacao por e-mail / infra SMTP | ⬜ aberto · **#7 (infra do S7)** | Integrar provedor (SMTP/SendGrid/SES) — infra nova. Habilita o S7 e avisos por e-mail. | Consome quando existir. |
-| S9 | **Listar TODOS os profissionais do estabelecimento (incl. sem servico)** | ⬜ aberto (pedido 2026-07-09) · **backend #13** | Hoje so existe `professionals-with-queue`, que **esconde** profissional sem servico (#31). Falta um `GET /establishment/{id}/professionals` (ou count) que retorne **todos os vinculados**, com flag/contagem de servicos. | Desbloqueia o checklist de prontidao a **separar** "1+ profissional vinculado" de "1+ com servico" (hoje colapsados num item) e o owner ver o profissional recem-vinculado que ainda nao cadastrou servico. |
+| S1 | **Status do profissional → `open_status` derivado** (modelo acordado 2026-07-09) | ⬜ **novo — precisa de backend** (ver "Detalhe — S1" abaixo) | Profissional muda o **proprio** status (`trabalhando`/`intervalo`/`indisponivel`); `open_status` **derivado/read-only** = `∃ prof ∈ {trabalhando, intervalo}`. + flag **`aceitandoNovos`** ("fechar fila": drena e **auto-`indisponivel`** no fim). + **rotulo do cliente** derivado (DISPONIVEL/ENCERRANDO/INDISPONIVEL). `PATCH /professional/me/status`; recalculo atomico + evento. | Seletor de status + "fechar fila"; `open_status` so exibido; botao "indisponivel" desabilitado com aviso quando ha fila. Agendar no card do `indisponivel` liga ao S2/calendario. |
+| S2 | **Intencao de atendimento → promocao automatica a fila** | ⬜ aberto — **spec desenhada 2026-07-05** (ver "Detalhe — S2" abaixo) | Novo status **INTENTION**: atendimento criado com um `desiredTime` que fica **fora da fila** ("solto") e e **promovido a `SCHEDULED`** quando falta **≤15min** pro horario. Ponto unico de entrada (create/edit passam pelo algoritmo), promocao **event-driven** (timer, nao polling), invariante dos 15min. Ver detalhe. | Client: UI de manifestar intencao/agendar. Partner: reflete quando a INTENTION vira `SCHEDULED` na fila (ja consome `professionals-with-queue`). |
+| S3 | Refeicoes Modelo B (janela flexivel) | ⬜ aberto | Placement da refeicao no 1o buraco dentro de `[alvo−adiant, min(proxRefeicao−3h, fechamento−dur)]` + **auto-supressao** (3h/fechamento) no ETA meal-aware + "iniciar = proxima nao suprimida". Ja existem: `skip` (#41), ETA meal-aware, "atender encerra a refeicao ativa". | Popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime`). |
+| S4 | Promover cliente ao 1o lugar (reordenar a fila) | ⬜ aberto (gap real, confirmado 2026-07-04) | `PATCH /attendances/{id}/promote` (move ao indice 0, empurra os demais). Obs.: `start` ja atende **qualquer** id SCHEDULED/LATE fora de ordem; falta so o "promover ao topo sem atender". | Botao "Atender este" em qualquer card → promove → inicia. (Enquanto nao vem, usa `start` direto.) |
+| S5 | Expediente (inicio/fim) nos relatorios | ⬜ aberto | Registrar eventos reais de abrir/fechar (timestamp) ou expor a janela `opening/closing` + eventos num endpoint de relatorio. Ligado ao BUG1 e ao S1 (o 1o `trabalhando` / ultimo `indisponivel` marcam inicio/fim). | Exibir "Expediente: HH:MM–HH:MM" nos relatorios (owner e profissional). |
+| S6 | **Cliente adiciona servico a um attendance ja na fila** | ⬜ aberto (pedido 2026-07-04) | Endpoint para **acrescentar** service item(s) a um attendance **existente** (cliente ja na fila decide somar servico) que **recalcula** duracao estimada + total e reflete na fila do profissional. Ex.: `PATCH /attendances/{id}/service-items` (add). | Lado client (HANDOFF_CLIENT): botao "adicionar servico" na tela do atendimento em fila. Partner: o card da fila ja mostra os servicos — reflete sozinho o recalculo. |
+| S7 | "Esqueci minha senha" (reset por e-mail) | ⬜ aberto (depende S8) | Fluxo publico `POST /auth/forgot-password {email}` + `POST /auth/reset-password {token,newPassword}`. | Link "Esqueci minha senha" no login + telas de pedir e-mail / nova senha. |
+| S8 | Notificacao por e-mail / infra SMTP | ⬜ aberto (infra que habilita o S7) | Integrar provedor (SMTP/SendGrid/SES) — infra nova. Habilita o S7 e avisos por e-mail. | Consome quando existir. |
+| S9 | **Listar TODOS os profissionais do estabelecimento (incl. sem servico)** | ⬜ aberto (pedido 2026-07-09) | Hoje so existe `professionals-with-queue`, que **esconde** profissional sem servico (#31). Falta um `GET /establishment/{id}/professionals` (ou count) que retorne **todos os vinculados**, com flag/contagem de servicos. | Desbloqueia o checklist de prontidao a **separar** "1+ profissional vinculado" de "1+ com servico" (hoje colapsados num item) e o owner ver o profissional recem-vinculado que ainda nao cadastrou servico. |
 
 > ✅ **Resolvidos/entregues 2026-07-09 (sairam da lista, numeracao renumerada):**
 > - **Endereco no `EstablishmentResponse`** (backend `a58704f`) — front ja lia `data.address`, liga sozinho.
@@ -63,7 +54,7 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 > - **Adicionar servico pelo OWNER** — **nao era bug**: por regra, so o **profissional** salva servico (owner nao adiciona).
 > Front consumiu os itens de contrato; falta QA no celular.
 >
-> ✅ **Reconciliacao 2026-07-11:** o backend mapeou os itens ao roadmap/backlog dele (ver tabela de alinhamento no topo). **S1** (status do profissional → `open_status` derivado) = **backend #10**, modelo acordado 2026-07-09. Colisao de numeros (S2/S3=#5; S5/S7/S8=#7) a disambiguar com o backend.
+> ✅ **Reconciliacao 2026-07-11:** o backend confirmou os itens como gaps reais e chaveia por **nome + endpoints** (numeros do backlog sao volateis — ver nota de alinhamento no topo). Nao havia colisao de numeros. **S1** = status do profissional → `open_status` derivado, modelo acordado 2026-07-09.
 
 ---
 
