@@ -27,7 +27,7 @@ function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
           height: "100%",
           width: `${percent}%`,
           borderRadius: 99,
-          backgroundColor: muted ? "#8FD3B6" : "#00B37E",
+          backgroundColor: muted ? "#8bbd8d" : "#3b7a3f",
         }}
       />
     </View>
@@ -53,7 +53,7 @@ function Row({
           borderRadius: 11,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: done ? "#00B37E" : "#FFFFFF",
+          backgroundColor: done ? "#3b7a3f" : "#FFFFFF",
           borderWidth: done ? 0 : 2,
           borderColor: "#E0E7E3",
         }}

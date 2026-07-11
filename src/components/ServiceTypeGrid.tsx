@@ -52,7 +52,7 @@ export function ServiceTypeGrid({
           >
             {isSel && (
               <Box position="absolute" top="$1.5" right="$1.5">
-                <Ionicons name="checkmark-circle" size={16} color="#00B37E" />
+                <Ionicons name="checkmark-circle" size={16} color="#3b7a3f" />
               </Box>
             )}
             <HStack space="sm" alignItems="center">
@@ -64,7 +64,7 @@ export function ServiceTypeGrid({
                 justifyContent="center"
                 bg={isSel ? "$green500" : "$coolGray100"}
               >
-                <Ionicons name={iconFor(it.value)} size={18} color={isSel ? "#FFFFFF" : "#009E6F"} />
+                <Ionicons name={iconFor(it.value)} size={18} color={isSel ? "#FFFFFF" : "#316635"} />
               </VStack>
               <Text
                 flex={1}

@@ -13,7 +13,7 @@ export function PasswordRules({ rules }: { rules: PasswordRule[] }) {
           <Ionicons
             name={rule.passed ? "checkmark-circle" : "close-circle"}
             size={14}
-            color={rule.passed ? "#00B37E" : "#E63946"}
+            color={rule.passed ? "#3b7a3f" : "#E63946"}
           />
           <Text
             fontFamily="$body"

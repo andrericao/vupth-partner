@@ -9,7 +9,7 @@ export default function ProfessionalLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#00B37E",
+        tabBarActiveTintColor: "#3b7a3f",
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
           ...tabBarShadow,

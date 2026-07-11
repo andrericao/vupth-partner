@@ -913,6 +913,8 @@ Direcao visual e um **upgrade real** e coerente com o que ja construimos (tempo 
 
 > Recebido o PDF "Guia de Design e Prototipo..." (5 paginas). **Diferente dos PNGs (renderizacoes por IA, texto embaralhado, so referencia visual solta), o PDF e um guia real e implementavel.** Use o PDF como **fonte da verdade dos tokens** no branch `new-design`; os PNGs so como inspiracao.
 
+> 🎨 **ATUALIZACAO 2026-07-09 — paleta alinhada ao front-client ("Verde Marca / folha vivo").** A escala `green` do partner foi **re-ancorada no `#3B7A3F`** (mesma do client, ver PRD_FRONT-CLIENT "Verde Marca"), substituindo o teal `#00B37E`. Novos valores em `config/gluestack-ui.config.ts` (**fonte da verdade**): 50 `#eef5ee` / 100 `#d9ead9` / 200 `#b5d5b6` / 300 `#8bbd8d` / 400 `#5c9c60` / **500 `#3b7a3f`** / 600 `#316635` / 700 `#26522a` / 800 `#1c3d1f` / 900 `#142c17`. Sombra dos cards/botoes = `#1A281A` (do client). amber `#FFB703` e red `#E63946` **mantidos**. Fundo claro **mantido**. Hexes hardcoded nos componentes (Tab bar, RoleIcon, ServiceTypeGrid, CompletionCard, etc.) migrados junto. A tabela abaixo e **historica** (paleta antiga teal).
+
 **Paleta completa (estende as 4 ancoras do PRD — resolve o "COM O DESIGN" da escala de cores):**
 | Cor | Hex | Uso |
 |-----|-----|-----|
