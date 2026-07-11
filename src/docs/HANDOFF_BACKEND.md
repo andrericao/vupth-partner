@@ -6,7 +6,7 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 
 > **Fonte unica dos handoffs do partner.** Nao espalhar handoff pelo corpo do PRD — registrar aqui. O backend edita o proprio PRD; estes itens sao para o backend consumir e refletir na lista dele.
 >
-> **Numeracao:** BUGs e pendencias (S) sao sempre numerados **a partir de 1**. Quando um item e **resolvido**, sai da lista e os demais **sao renumerados** (sem acumular riscados). A ordem **nao** reflete prioridade — se houver prioridade, vem sinalizada no proprio item.
+> **Numeracao (DINAMICA, por PRIORIDADE — espelha o backend).** BUGs e pendencias (S) sao numerados **1..N por prioridade**: **#1 = prioridade maxima**. Ao **resolver** um item, ele sai e a lista **renumera 1..N** (sem acumular riscados). Ao **repriorizar**, o item promovido assume a nova posicao (ex.: o antigo #7 vira **#1**) e todos os demais sao **empurrados para baixo** — renumeracao total, eternamente. **O numero e so a posicao de prioridade: VOLATIL.** A **chave estavel de cada item e o NOME** (igual ao backend — cross-references e commits citam o NOME, nunca o numero).
 
 > **Alinhamento backend↔partner (autoritativo — backend 2026-07-11).** PRD-Partner **coerente**. **REGRA (fonte de verdade = backend): nao chavear por numero — os numeros do backlog do backend sao volateis** (renumeram a cada item fechado/inserido; ex.: os "#5/#7" da 1a rodada ja viraram "#4/#6" quando o BUG9 fechou). **Chavear por NOME + endpoints.** O backend registrou os aliases no PRD dele (commit `e098aff`).
 >
