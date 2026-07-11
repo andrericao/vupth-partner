@@ -2,11 +2,24 @@
 
 Pendencias do app **partner** (profissional/owner) que dependem do backend. O front ja esta pronto (ou pronto para consumir) na maioria dos casos. Detalhe completo nos callouts do `PRD_FRONT-PARTNER.md`.
 
-Ultima atualizacao: 2026-07-09 · branch `dev` do front-partner.
+Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 
 > **Fonte unica dos handoffs do partner.** Nao espalhar handoff pelo corpo do PRD — registrar aqui. O backend edita o proprio PRD; estes itens sao para o backend consumir e refletir na lista dele.
 >
 > **Numeracao:** BUGs e pendencias (S) sao sempre numerados **a partir de 1**. Quando um item e **resolvido**, sai da lista e os demais **sao renumerados** (sem acumular riscados). A ordem **nao** reflete prioridade — se houver prioridade, vem sinalizada no proprio item.
+
+> **Alinhamento backend↔partner (feedback do backend, 2026-07-11).** O backend confirmou que o **PRD-Partner esta coerente** e mapeou os handoffs abertos aos numeros do roadmap dele:
+>
+> | Partner | Backend |
+> |---|---|
+> | BUG1 | #2 |
+> | S1 | #10 |
+> | S3 | #5 |
+> | S4 | #4 |
+> | S5 | #7 |
+> | S9 | #13 |
+>
+> **Ainda SEM correspondencia do backend — confirmar status:** BUG2, BUG3, BUG4, S2, S6, S7, S8. (O backend so mapeou 6 dos 13 abertos; estes 7 nao entraram no mapeamento — checar se foram resolvidos, absorvidos ou ainda nao entraram no roadmap dele.)
 
 ---
 
