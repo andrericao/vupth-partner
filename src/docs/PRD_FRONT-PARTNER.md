@@ -24,7 +24,7 @@
 8. [Enums da API](#8-enums-da-api)
 9. [Testes E2E — Maestro](#9-testes-e2e--maestro)
 10. [Pendente de Implementacao](#10-pendente-de-implementacao)
-11. [Pendencias futuras para o Backend](#11-pendencias-futuras-para-o-backend-escrito-pelo-front-partner)
+11. [Handoffs + alinhamento com o backend](#11-handoffs--alinhamento-com-o-backend) · handoffs em [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) e [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)
 12. [Features Futuras (Planejamento)](#12-features-futuras-planejamento)
 13. [Redesign — EM IMPLEMENTACAO na dev](#13-redesign--em-implementacao-na-dev-consolidado-2026-06-17)
 14. [Build, Distribuicao e Anti-quebra (DevOps)](#14-build-distribuicao-e-anti-quebra-devops--configurado-2026-06-23)
@@ -183,7 +183,7 @@ PATCH /establishment/{id}/open-status { openStatus: "OPEN" }
    - Step 2: Buscar establishment → `GET /establishment?name=X`
    - Step 3: Selecionar da lista → `POST /professional/me/affiliations { establishmentId }` (solicitacao pendente, requer aprovacao do owner)
 4. **(professional)/_layout.tsx** — Tab navigation: Fila | Servicos | Perfil
-5. **(professional)/queue.tsx** — Gerenciamento de fila: atendimento atual + lista de espera, start/pause/resume/finish/remove, **fila em tempo real via WebSocket (`useQueueSocket`); polling 30s fallback** (#15), pull-to-refresh, botao "Adicionar Cliente". **Atende-primeiro / LATE (2026-06-26):** so o 1o da fila (indice 0) tem "Iniciar"; no da vez ha tambem "Nao chegou" → `PATCH /attendances/{id}/late` (ele vira **ATRASADO** e cai 1 posicao, **continua na fila**) e o proximo vira o da vez; item LATE tem badge "Atrasado" + "Voltar a fila" (`/undo-late`). **Regra:** o **LATE so e aplicado quando o PROFISSIONAL pula o da vez (mecanismo #1)** — recai sempre sobre o **indice 0**. A **troca entre clientes (mecanismo #3, S3/C6) NAO marca LATE** (e consensual). Encaixe (#2) e outra coisa (cliente→pro, `/fit-in`). **Secao "Refeicoes" (#14 Fase C):** Iniciar/Encerrar refeicao + popup de nudge no horario previsto (ver 11.2). Botao "Buscar Estabelecimento" quando nao afiliado
+5. **(professional)/queue.tsx** — Gerenciamento de fila: atendimento atual + lista de espera, start/pause/resume/finish/remove, **fila em tempo real via WebSocket (`useQueueSocket`); polling 30s fallback** (#15), pull-to-refresh, botao "Adicionar Cliente". **Atende-primeiro / LATE (2026-06-26):** so o 1o da fila (indice 0) tem "Iniciar"; no da vez ha tambem "Nao chegou" → `PATCH /attendances/{id}/late` (ele vira **ATRASADO** e cai 1 posicao, **continua na fila**) e o proximo vira o da vez; item LATE tem badge "Atrasado" + "Voltar a fila" (`/undo-late`). **Regra:** o **LATE so e aplicado quando o PROFISSIONAL pula o da vez (mecanismo #1)** — recai sempre sobre o **indice 0**. A **troca entre clientes (mecanismo #3, S2/C6) NAO marca LATE** (e consensual). Encaixe (#2) e outra coisa (cliente→pro, `/fit-in`). **Secao "Refeicoes" (#14 Fase C):** Iniciar/Encerrar refeicao + popup de nudge no horario previsto (ver 11.2). Botao "Buscar Estabelecimento" quando nao afiliado
 6. **(professional)/add-guest.tsx** — Adicionar cliente walk-in: nome + selecao multipla de servicos + total → `POST /professional-queue/add-quest-attendance`
 7. **(professional)/my-services.tsx** — Lista servicos + formulario com filtro por especialidade + pricing preview com absorcao. Guard: se profissional nao tem `establishment_id`, exibe aviso e botao para buscar estabelecimento (bloqueia adicao de servico); nesse estado faz `fetchMe()` no mount e no pull-to-refresh para detectar afiliacao aceita pelo owner (queue.tsx faz o mesmo no mount). Quando afiliado, mostra so o nome do estabelecimento (`establishment_name`, sem o prefixo "Vinculado a" — feedback 2026-06-22). Usa `POST /professional-queue/{profId}/add-service-items`. **Preco salvo = total pago pelo cliente** (`clientPrice`: digitado + taxas conforme absorcao), nao o valor digitado (decisao 2026-06-12). Lista mostra o tipo de servico humanizado (humanizeServiceType, sem underline). ✅ **Editar/remover servico (2026-06-15):** cada item tem acoes "Editar" (nome+preco inline, dentro de FormControl) via `updateMyServiceItem` → `PATCH /professional-queue/{profId}/service-items/{itemId}` e "Remover" (com confirmacao) via `removeMyServiceItem` → `DELETE ...` (backend #10/#15 concluido)
 8. **(professional)/find-establishment.tsx** — Gate no mount via `fetchMe` + `GET /professional/me/affiliations`: se ja afiliado mostra "Voce ja esta vinculado" (link Configuracoes); se tem solicitacao PENDING mostra "Solicitacao em andamento" (so 1 estabelecimento por vez); senao libera a busca. Auto-load `GET /establishment` (lista todos), busca por nome (`GET /establishment?name=X`), solicitar vinculacao (`POST /professional/me/affiliations { establishmentId }`). Nao exige servicos — ordem: afiliar primeiro, servicos depois. Busca por bairro/proximidade ordenada por fila pendente — ver pendencia backend #11
@@ -530,7 +530,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 1. **Readiness gate `waitForBackend()` (cold start do Render) — ✅ IMPLEMENTADO (2026-06-28), aguardando teste OTA:** `src/lib/readiness.ts` (`waitForBackend`: cutuca `GET {API}/actuator/health/readiness` via `READINESS_URL` da api.ts — raiz do servidor, fora de /api/v1 — com retry+backoff, teto 90s, timeout/tentativa 60s, AbortController; +5 testes jest com relogio injetavel). `src/components/ServerWarmup.tsx` (tela "preparando servidor…" + estado de falha com "Tentar de novo"). `app/index.tsx` segura o roteamento em `phase: warming|failed|ready` — so navega pra `(auth)`/pos-login apos UP (tokens locais carregam em paralelo). **PENDENTE:** validar no celular via OTA (cold start real do Render) + **avisar o backend** p/ revisar alinhamento (sec. 18c). Tambem (Andre/backend): Health Check Path = `/actuator/health/readiness` no painel do Render.
 2. **Animacao de ABERTURA do app** (sec. 12) — ✅ VERSAO BRANDED IMPLEMENTADA (2026-06-28), aguardando teste OTA: em `ServerWarmup.tsx` (`WarmupAnimation`), sequencia de 4 icones Ionicons verdes (#00B37E) amarrada ao readiness gate (#1): `phone-portrait` (abrir app) → `storefront` (chegar na loja) → `cut` (na cadeira) → `walk` (pronto, sem fila), ~0.8s cada, entrada fade+scale+micro-deslocamento e saida encolhendo (Animated nativo). **Respeita reduce-motion** (troca simples sem movimento). **Futuro:** trocar por **Lottie** quando o design entregar o JSON/icones proprios.
 3. **Maestro E2E** (`/.maestro`): readiness wait (`extendedWaitUntil` 90s) aplicado nos 4 flows; **`test_affiliate` e `test_professional_screens` runnable**. **Pendente:** redesenhar `seed_complete` e `mvp_owner_complete` — criavam servico **pelo owner** (removido na decisao 2026-06-28) e usam o preco antigo (mascara R$ agora = centavos, placeholder "R$ 35,00"). **Plano:** o seed cria um owner que **tambem e profissional**, usa o **seletor de papel** ("Atender como profissional") e cadastra os servicos por "Meus Servicos" (owner-so-admin nao cadastra). Rodar o E2E (nunca rodado).
-4. **Migrar Gluestack v1→v2** (tech debt; remove warnings React 19): refactor grande, por ultimo (maior risco). Aplicar tokens/paleta do Guia (sec. 13.1) no caminho.
+4. **Migrar Gluestack v1→v2 — ⏸️ ADIADO (decisao do usuario 2026-06-28): TECH-DEBT POS-MVP.** Escopo real medido: **49 arquivos** usam `@gluestack-ui/themed`, **~974 props `$token`**, NativeWind/Tailwind **nem instalado**; e **troca de arquitetura** (v2 = NativeWind/`className`), nao bump. Alto risco por baixo ganho de MVP — o app roda bem no React 19 com o v1 (warnings sao cosmeticos). **Revisitar pos-MVP**, preferencialmente **faseado** (NativeWind ao lado do v1, tela por tela). Nao fazer big-bang.
 
 > **QA no celular (continuo):** validar cada entrega acima via OTA. _(Validado 2026-06-28: criar/editar/remover servico do **profissional** OK; mascara R$ OK; tab bar nova OK; menu do owner-nao-profissional sem "Adicionar Servico".)_
 >
@@ -538,12 +538,97 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 > **Concluidos** (bugs do teste 2026-06-05 e itens Alta/Media/Baixa prioridade ja entregues) foram **removidos desta lista** para nao acumular — o historico esta no git. Itens que dependem do backend estao na secao 11.
 
+### Teste manual 2026-06-28 (12 feedbacks) — status
+
+**✅ Entregue e validado pelo usuario via OTA:** skeleton de Atendimentos nao convive mais com cards antigos; animacao de abertura com 1 ciclo minimo (`WarmupAnimation`/`MIN_SPLASH_MS`); busca de estabelecimento auto-carrega no onboarding; **"Verificar atualizacao"** (OTA) — `OtaUpdateButton.tsx` (checkForUpdate→fetch→reload, espelhado do client) no Config do profissional + menu do dono; adicao de servico OK (o **feedback explicito** no lugar do return silencioso resolveu — preco vazio era a causa); **validacao de cadastro AO VIVO** (`getPasswordRules` + `PasswordRules.tsx`: checklist de senha + "Senhas conferem", espelhado do client).
+
+**✅ Entregue em codigo (commits pos-`5e6ef9e`, pushados, aguardando QA no celular via OTA):**
+- **#2 atalho de login/cadastro vira Button** (`7de7afd`): o `<Link>` de texto ("Login"/"Criar Conta") virou **`<Button variant=outline>` estilizado** (= front-client) em login/register/(auth); tambem o "Entrando..." no submit.
+- **#3 sugestao de tipo SUBSTITUI o nome** (`9a99fdc`): tocar numa sugestao de tipo agora **sobrescreve** o "Nome personalizado" (antes so preenchia se vazio), em add-service + my-services.
+- **#4 tempo corrido do atendimento** (`7833d72`): contagem **100% no front via inicio cacheado localmente** (sem backend), alinhado ao front-client.
+- **#7/#11 tela de "tipo de servico" em grade de chips** (`f555c8e`): novo `src/components/ServiceTypeGrid.tsx` (grade de chips com icone) substitui o seletor pobre, em add-service + my-services.
+- **#1 read-back do endereco** (`882b368`): a tela **le de volta** o endereco salvo (`fetchEstablishmentById` → `data.address`). ✅ **DESBLOQUEADO** — backend passou a expor `EstablishmentResponse.address` (`a58704f`, 2026-07-09); liga sozinho. Falta QA no celular.
+- **Card ATRASADO sem "Voltar a fila"** (`3d18f27`): removido o botao `undo-late` do card (o retorno a fila passa a ser via **promover** — S4 backend).
+
+**#6 profissional abrir/fechar — toggle bruto ENTREGUE, evoluindo p/ S1 (2026-07-09).** O **toggle bruto** (backend `7819914` + front `setOpenStatus`): `PATCH /establishment/{id}/open-status` liberado ao `PROFESSIONAL` afiliado; card **Abrir/Fechar** na "Minha fila". Funciona, mas e um booleano compartilhado. **Modelo acordado (Andre, 2026-07-09) = S1:** o profissional muda o **proprio status** (`trabalhando`/`intervalo`/`indisponivel`) e o `open_status` da loja vira **derivado/read-only** (`aberto ⇔ ∃ profissional trabalhando ou em intervalo`; so fecha quando **todos** ficam `indisponivel`). No status `indisponivel` o **cliente pode agendar** no card do profissional (dias da agenda liberada → liga ao S2/calendario secao 12). **Spec completa em [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) — "Detalhe — S1".** Front-partner depois: trocar o card por seletor de status; `open_status` so exibido.
+
+**⬜ ABERTOS (do teste 2026-06-28):**
+1. **Endereco do establishment** — ✅ **DESBLOQUEADO** (backend `a58704f`, 2026-07-09): `EstablishmentResponse.address` embutido; front ja lia o campo (read-back, `882b368`). Falta QA no celular.
+2. **Refeicoes — Modelo B (janela flexivel)** — ✅ **spec escrita** (secao 11.2, "Refeicoes — MODELO B"). Usuario escolheu janela flexivel (encaixa sozinho em buracos; so pergunta adiantar/adiar em fila continua; supressao por janela 3h/fechamento). **A fazer:** grosso e **backend** (placement + auto-supressao no ETA meal-aware — ver secao 11 S3); front faz popup adiantar/adiar + lapis + "almoco iniciado as HH:MM" (`actualStartTime` ja exposto). Skip #41 e edicao ja existem.
+3. **#10 exibir avaliacoes recebidas (rating)** — 🟢 **DESBLOQUEADO (confirmado pelo backend 2026-07-04): os agregados JA vem prontos.** `POST /attendances/{id}/rating` existe (#6; client envia a nota) **e** `GET /establishment/id/{id}/professionals-with-queue` **ja popula** `rating_average`/`rating_count` **por profissional** (`ProfessionalWithQueueResponse.fromEntity`) **e por service item** (itens aninhados). **Front-partner (da pra fazer agora):** exibir media/contagem no card do profissional (e opcionalmente por servico). **NAO ha pendencia de backend aqui.** (O "nome do cliente clicavel p/ infos" segue dependendo de perfil publico do cliente, que ainda nao existe.)
+4. **#12 migrar Gluestack v1→v2** — ⏸️ **ADIADO** (tech-debt pos-MVP, decisao 2026-06-28; ver secao 10 lista principal #4).
+
+**🟢 DESBLOQUEADO pelo backend (alinhamento 2026-07-03) — novos afazeres front-partner:**
+- **Notificacoes push** — ✅ backend CONCLUIDO (device token + disparo Expo). **Front-partner:** apos o portao de readiness, pedir permissao, obter Expo Push Token, `POST /devices {token, platform}`; no logout `DELETE /devices/${encodeURIComponent(token)}`; tratar `data.type` (`QUEUE_NEXT_IN_LINE`, `ATTENDANCE_STARTED`, `ATTENDANCE_FINISHED`, `SWAP_*`). WS segue para foreground; push cobre background/fechado. (Mesmo handoff do client.)
+- **Marcar no-show do cliente LATE** — ✅ backend CONCLUIDO `PATCH /attendances/{id}/no-show` (#39 escalada; exige o atendimento em `LATE`, senao `400`; sucesso → `CANCELLED` + strike). **Front-partner:** botao "marcar no-show" no card do cliente **ATRASADO** (LATE). Complementa o fluxo LATE (#19) que ja existe.
+- **Exibir rating recebido** — ✅ backend COMPLETO (endpoint + agregados ja no `professionals-with-queue`, confirmado 2026-07-04). Front-partner: mostrar media/contagem no card do profissional. Sem dependencia de backend.
+
+**🗂️ ORDEM DE EXECUCAO ACORDADA (Andre 2026-07-04):**
+1. ✅ **Push notifications** — feito e pushado (commit `d751529`); falta EAS Build + FCM + teste no aparelho.
+2. ✅ **Botao "no-show"** no cliente ATRASADO (LATE) → `PATCH /attendances/{id}/no-show` — **FEITO** (commit `60c5835`, OTA-puro; +teste de store). Botao "Nao compareceu" no card do cliente ATRASADO, com confirmacao.
+3. ✅ **Atender fora de ordem** ("Adiantar") via `PATCH /attendances/{id}/start` direto — **FEITO** (commit `2489299`, OTA-puro). Cards fora do 1o lugar ganham botao **"Adiantar"** → confirmacao "tem certeza?" → inicia o atendimento na frente da fila. **Decisao 2026-07-04:** start **direto** (nao reordena os demais) satisfaz o "adiantar"; o **promover-ao-topo/reordenar** (S4) segue como versao futura (item 8), nao bloqueia.
+4. **Exibir rating recebido** no card do profissional (agregados ja vem prontos). OTA-puro.
+5. ✅ **Read-back do endereco** — **DESBLOQUEADO** (backend `a58704f`, 2026-07-09): `EstablishmentResponse.address` embutido; front ja lia `data.address` → **liga sozinho**. Falta QA no celular.
+6. **Fechar loja com confirmacao + gate** — ✅ **gate 409 FEITO** (backend `0b63678` `ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES` + front trata no dashboard e na fila, 2026-07-09). **BUG1 ainda aberto** (NAO auto-fechar + bloquear novas entradas + `is_open` efetivo + solicitar corte). **Regra (2026-07-04):** apos o `closing_time` a loja **nao recebe cliente nem mostra "aberto"**; querer continuar => **confirmacao que leva a alterar o horario nas configuracoes** (o horario e a fonte da verdade).
+7. **Expediente (inicio/fim) nos relatorios** — 🆕 (2026-07-04) exibir "Expediente: HH:MM–HH:MM" nos relatorios do owner e do profissional; espera **S5** (backend registrar/expor abrir-fechar). Ligado ao item 6.
+8. **Promover ao topo (botao)** — espera **S4**. · **Refeicoes Modelo B popup** — espera **S3**. · **Abrir/fechar na area do profissional** — ✅ **toggle bruto FEITO** (`7819914` + front card Abrir/Fechar na "Minha fila", 2026-07-09), **evoluindo p/ S1** (status do profissional → `open_status` derivado; espera backend — ver HANDOFF_BACKEND "Detalhe — S1").
+9. **Maestro E2E** — **POR ULTIMO** (o usuario esta testando manualmente por ora): redesenhar seeds + rodar.
+> Itens 5-8 dependem de backend; a ordem e de PRIORIDADE (o front adianta o que der: UI, tratamento de erro, telas). Pagamento/split e Gluestack v2 seguem **adiados** (pos-MVP).
+
+### Feedback 2026-06-28 (parte 2)
+
+- **Fechamento com confirmacao + NAO auto-fechar (BUG1; o gate 409 ao fechar com fila ja foi entregue 2026-07-09).** ❌ **NAO auto-fechar** o estabelecimento no `closing_time`. Fechar e **sempre acao MANUAL com CONFIRMACAO** (owner ou profissional). Modelo desejado: (a) ao chegar o `closing_time` (ou quando o owner/pro decide parar), **bloquear NOVAS entradas na fila** — o cliente **nao entra sozinho**; (b) a **fila existente continua sendo atendida** ate esvaziar (nunca remover clientes silenciosamente); (c) mesmo bloqueado para novos, o cliente **ainda pode "solicitar corte"** (envia um pedido que o profissional aceita/recusa — nao e entrada automatica); (d) o **CLOSED total** so acontece por confirmacao e, se houver fila/`IN_PROGRESS`, o app **avisa** ("ainda ha N na fila; serao atendidos, mas ninguem novo entra"). É **backend** (gate de ENTRADA na fila + fluxo de solicitacao de corte) + **front** (confirmacao no toggle, tratar o gate). Ver secao 11 (BUG1 — o gate 409 ao fechar com fila ja foi entregue).
+- **Atender fora de ordem — "Adiantar" (start direto) FEITO; promover/reordenar (S4) segue futuro.** O refinamento 2026-06-28 pedia **promover** o cliente ao 1o lugar (os demais descem). A decisao **2026-07-04** (roadmap #3, confirmada em teste) foi mais simples: o botao **"Adiantar"** (cards fora do 1o lugar) inicia o atendimento **direto** via `PATCH /attendances/{id}/start`, **com confirmacao** — atende o escolhido na frente **sem reordenar** os demais. Isso ja resolve o caso "o da vez nao chegou, atende o 3o". ✅ **Feito** (commit `2489299`). **O que ainda seria mais bonito (S4, backend, item 8, NAO bloqueia):** `PATCH /attendances/{id}/promote` que move ao indice 0 e empurra os demais (para a fila refletir a nova ordem apos promover). `start` sozinho nao reordena (PRD_BACKEND l.2924, "promover ao indice 0" = adicao pequena sob demanda).
+- **Preco: "cliente paga tudo" (0%) → profissional recebe EXATAMENTE o digitado — ✅ FEITO (2026-06-28).** `calculatePricing` reescrito: `proReceives = round2(digitado − absorvido)` (piso desacoplado do arredondamento) — em **0% absorcao `proReceives === digitado`** (antes recebia centavos a menos, ex.: R$100→R$99,55). A **absorcao continua** (recebe menos so por escolha). `clientPrice` em X,90 (com `ceilTo90` de seguranca p/ nao ficar abaixo do piso em precos baixos); taxa = `clientPrice − proReceives`. Testes reescritos (garantia `0% => digitado`). **Unificado:** `src/utils/pricing.ts` (morto, so o teste usava) **removido**; fonte unica = `src/lib/pricing.ts`.
+
+### Feedback 2026-07-09 — Checklists de prontidao (2 "completes") · ✅ IMPLEMENTADO (mockup aprovado)
+
+Motivacao: o usuario **se perdeu no teste** — nao sabia o que faltava p/ o estabelecimento/profissional aparecer ao cliente. Solucao: **dois medidores** por perfil (dono e profissional), calculados **no front** (dados que ja temos; nao depende de backend).
+
+- **A) "Pronto para atender" (o basico)** — portao FUNCIONAL (bate com os gates do backend #31). 100% aqui = **ja da pra atender / aparece ao cliente**.
+  - **Dono:** nome · tipo de servico · endereco/bairro · horario de funcionamento · ≥1 profissional vinculado · ≥1 profissional com servico · aberto.
+  - **Profissional:** vinculado a um estabelecimento · ≥1 servico cadastrado · (estabelecimento pronto e aberto — do dono).
+- **B) "Perfil completo" (100%)** — regra MACIA (nao bloqueia atender; melhora a apresentacao/confianca). Inclui o basico **+** extras.
+  - **Dono:** + telefone · Instagram · foto do estabelecimento (`url_image`).
+  - **Profissional:** + apelido (nickname) · especialidade · (foto de perfil — quando o backend expuser, roadmap #7).
+
+**UI:** card com **2 barras** — "Pronto para atender" em destaque (verde + "Voce ja aparece para clientes! 🎉" ao fechar) e "Perfil completo" discreta abaixo. Cada item pendente e **clicavel** → tela de completar. O card some (ou colapsa) quando o basico fecha. Fica no **topo do dashboard do dono** e na **tela do profissional**.
+
+**Dado que falta (registrado como backend S9):** p/ distinguir "tem profissional SEM servico" de "nao tem profissional", o front precisa da **lista completa de profissionais** do estabelecimento (o `professionals-with-queue` esconde os sem servico, #31). Enquanto nao vem, o MVP **colapsa** os dois itens num so. Ver HANDOFF_BACKEND **S9**.
+
+**Processo:** mockup (`design/readiness-checklists.html`) **aprovado** pelo usuario antes de codar. Front-computavel, nao bloqueado por backend.
+
+**✅ Estado do codigo (commit `02e8449`) — o que foi entregue vs. o design acima:** `src/lib/completion.ts` (logica pura `ownerCompletion`/`professionalCompletion` +testes), `src/components/CompletionCard.tsx` (2 barras + itens clicaveis + banner verde), ligado no dashboard do dono (busca detalhe endereco/telefone/instagram) e na fila do profissional (`fetchMyServices`). **Deltas do MVP** vs. a lista acima:
+- **Dono, basico:** os itens "≥1 vinculado" e "≥1 com servico" **colapsaram em UM** ("1+ profissional com servico") — sem a lista completa de profissionais nao da p/ distinguir (ver nota abaixo). Ficaram **6 itens** (nao 7).
+- **Perfil (B):** **foto ficou de fora** (dono e profissional) — nao ha tela de upload de imagem ainda. Dono B = telefone + instagram; profissional B = apelido + especialidade.
+
 ---
 
-## 11. Pendencias futuras para o Backend (escrito pelo front-partner)
+## 11. Handoffs + alinhamento com o backend
 
-> Itens que o frontend partner precisa do backend.
-> Marcados com **PRIORIDADE** os que serao implementados em breve.
+> **Handoffs consolidados em arquivos dedicados** (padrao do front-client — nao espalhar pelo corpo do PRD):
+> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG1–BUG4, S1–S8), em tabela consolidada + detalhes.
+> - 📄 **[`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** — itens cujo frontend pertence ao **app cliente** (C1–C9).
+>
+> Esta secao guarda so o **resumo de alinhamento** (o que o backend ja entregou e desbloqueou o partner). A lista de afazeres do proprio partner esta na **secao 10**. A referencia S2 (rebaixada) e a 11.2 (contrato de refeicoes ja entregue) seguem abaixo.
+
+### ✅ Alinhamento 2026-07-03/04 (reconciliado com PRD_BACKEND e PRD_FRONT-CLIENT)
+
+> Auditoria cruzada com **PRD_BACKEND** (fonte da verdade do backend) e **PRD_FRONT-CLIENT**, ambos atualizados em 2026-07-03. Resumo do que mudou para o partner:
+>
+> **Entregue pelo backend (desbloqueia ou vira afazer front-partner — ver secao 10, bloco "DESBLOQUEADO"):**
+> - ✅ **Rating (#6)** — COMPLETO no backend (confirmado 2026-07-04): `POST /attendances/{id}/rating` (client envia) **e** os agregados `rating_average`/`rating_count` **ja vem** no `professionals-with-queue` (por profissional e por service item). **Sem pendencia de backend** — front-partner so exibe.
+> - ✅ **Notificacoes push** — device token (`POST`/`DELETE /devices`) + disparo Expo. Front-partner registra token + trata `data.type`.
+> - ✅ **Escalada de no-show (#39)** — `PATCH /attendances/{id}/no-show` (exige LATE). Front-partner: botao "no-show" no cliente ATRASADO.
+> - ✅ **Troca de posicao por consentimento mutuo (#42, DIRECIONADA)** — `POST /swap-requests` etc. **É cliente↔cliente (o profissional nao participa)** → afazer do **front-client**, nao do partner. O modelo desejado (intencao→promocao, S2) ainda nao existe no backend — ver [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) (S2) e client 10b.
+>
+> ✅ **Entregues/resolvidos 2026-07-09 (sairam da lista; BUGs e S renumerados de 1):** address no `EstablishmentResponse` (`a58704f`), open-status ao profissional afiliado — toggle bruto (`7819914`), gate 409 ao fechar com fila (`0b63678`), `GET /attendances` que nao carregava, cliente na fila invisivel, remover-da-fila nao refletia pro cliente. **Adicionar servico pelo owner** = nao-bug (so o profissional salva). Front ja consumiu os itens de contrato; falta QA no celular. **O toggle bruto sera substituido pelo S1** (status do profissional → `open_status` derivado).
+>
+> **Ainda abertas no backend, MAS AINDA NAO na lista oficial de pendencias do backend** (PRD_BACKEND secao "Pendencias abertas do BACKEND — FONTE UNICA"): **BUG1** (NAO auto-fechar + bloquear novas entradas + `is_open` efetivo + solicitar corte — 🧪 sera testado), **BUG2** (pausar torna o atendimento orfao — 🧪 sera testado), **BUG3** (apelido nao volta no `/me`); **S1** (status do profissional → `open_status` derivado), **S2** (intencao→promocao/agendar), **S3** (refeicoes Modelo B), **S4** (promover ao 1o lugar), **S5** (expediente nos relatorios), **S6** (cliente adiciona servico em atendimento na fila), **S7/S8** (esqueci senha + SMTP). ⚠️ **Estes handoffs precisam ser incorporados pelo backend na lista dele** — hoje so vivem aqui. **O backend confirmou-os como gaps reais** e se ofereceu p/ reconciliar na FONTE UNICA dele — **combinado: reconciliar.** ✅ **Rating (#6) NAO e mais gap** — agregados ja vem no `professionals-with-queue` (confirmado pelo backend, ver acima).
+
+> 📄 **Detalhe e acoes de cada item de backend: [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md).** Cross-project (client): [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md).
+
+---
 
 **DevOps — ✅ COMPLETO (backend, 2026-06-26):** o APK de demo (`--profile preview`) aponta
 para o **backend de staging no Render** (dev), nao prod (Railway). O backend tem o
@@ -560,16 +645,11 @@ backend auto-rollback homolog/prod).
 >
 > Numeracao preservada (cross-project). Confirmar deploy no **staging** de #3/#4/#6/#12/#13.
 
-**Abertas (relevantes ao partner):**
+**Abertas (relevantes ao partner):** → **BUG1–BUG3, S1–S8 movidos para [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** (tabela consolidada + detalhe do fechamento pelo horario e do status do profissional). Aqui ficam so as notas historicas:
 
-> ✅ **Saidos desta lista (alinhado com PRD_BACKEND 2026-06-26):** **S1** (afiliado adiciona servico ao establishment) — backend **CONCLUIDO** (`POST service-items` aceita owner OU afiliado) → virou afazer de FRONT (secao 10 #2). **B1** (`GET /establishment/{id}/affiliations` → 500) — **RESOLVIDO / nao reproduz** (JOIN FETCH desde 2026-05-23; coberto por integracao Order 13 + Postman 03e + Newman).
-
-| # | Item | Descricao |
-|---|------|-----------|
-| S2 | **Editar/deletar ServiceItem do establishment** ~~(bloqueava o dono editar/remover)~~ | ⬇️ **REBAIXADO — nao necessario p/ MVP** apos a decisao de produto 2026-06-28 (servico = capacidade do profissional; todo o CRUD vive no fluxo do profissional, `professional-queue/.../service-items`, que ja edita/remove). `PUT/DELETE /establishment/{id}/service-items/{itemId}` (backend #5) so seria preciso se um dia o owner-nao-profissional gerenciar o catalogo da loja — fora do escopo atual. |
-| BUG2 | **`POST /establishment/{id}/service-items` falha (lado OWNER)** | PRD_BACKEND "Bugs 2026-06-09" (ALTA): "Nao foi possivel adicionar o servico". O lado do **profissional** ja foi validado (2026-06-28, OK); confirmar no staging se ainda ocorre quando o **owner** adiciona. |
-| BUG3 | **`GET /attendances?establishmentId=X&status=Y` nao carrega** | PRD_BACKEND "Bugs 2026-06-09" (ALTA): "Carregar atendimento" nao funciona. Afeta relatorios/atendimentos do partner — confirmar no staging. |
-| S3 | **Solicitacao de troca de posicao ENTRE CLIENTES (marketplace)** | Mecanismo **cliente↔cliente** — o profissional **nao participa nem precisa saber**. Um cliente manifesta **intencao de troca**: (a) vai se atrasar → quer ir para **mais tarde**; ou (b) esta muito para o fim → quer **adiantar**. A solicitacao fica **ABERTA** (igual a de afiliacao) e aparece **apenas para os clientes dentro da janela de horario** alvo, calculada pelo **tempo estimado de atendimento de cada um** — quem esta fora da janela nao ve. **Primeiro que aceitar** → troca efetivada e a solicitacao **some**; se ninguem aceita, **nada acontece**. Regra-chave: **sem mudanca brusca de tempo na fila** (so troca entre janelas compativeis). Backend a fazer: entidade de solicitacao de troca (open + horario desejado), calculo da janela por ETA, endpoints criar-intencao + aceitar, broadcast WS so para os clientes na janela. **Distinto do encaixe** (C5/`/fit-in`, que e cliente→profissional). |
+> ✅ **Saidos da lista (alinhado com PRD_BACKEND 2026-06-26):** **S1** (afiliado adiciona servico ao establishment) — backend **CONCLUIDO** (`POST service-items` aceita owner OU afiliado) → virou afazer de FRONT (secao 10). **B1** (`GET /establishment/{id}/affiliations` → 500) — **RESOLVIDO / nao reproduz** (JOIN FETCH desde 2026-05-23; coberto por integracao Order 13 + Postman 03e + Newman).
+>
+> ⬇️ **S2 (rebaixado — nao necessario p/ MVP):** editar/deletar ServiceItem do **establishment** (`PUT/DELETE /establishment/{id}/service-items/{itemId}`, backend #5). Apos a decisao 2026-06-28 (servico = capacidade do profissional; todo o CRUD vive no fluxo do profissional), so voltaria se o owner-nao-profissional gerenciar o catalogo da loja — fora do escopo atual.
 
 ### 11.2 Refeicoes/intervalos + horario de funcionamento — ✅ BACKEND ENTREGUE (handoff 2026-06-16)
 
@@ -603,6 +683,30 @@ backend auto-rollback homolog/prod).
 **Popup/nudge de inicio (decisao 2026-06-16, computavel com `GET intervals` + fila, sem backend novo):** no horario previsto, mostrar aviso ao profissional ("N clientes na fila; iniciar agora adia o proximo em ~Xmin") com **2 acoes**: (1) **"Iniciar almoco"** → `PATCH .../start`; (2) **"Nao almocar"** → pular explicito (derruba a refeicao do calculo na hora). Detalhes (timing, nao interromper atendimento ativo, anti-nag) ficam neste PRD. Popup com app em background depende de push (#3).
 > ⚠️ A definir com o backend: "Nao almocar" precisa de qual acao? (DELETE da refeicao do dia? endpoint de "skip"? ou so o lock local do front?). O start tem endpoint; o "skip" nao esta explicito no contrato.
 
+### Refeicoes — MODELO B (janela flexivel) — SPEC 2026-06-28 (decisao do usuario)
+
+> **Atualizacao de estado:** o **skip "Nao almocar" JA EXISTE** no backend (**#41**) e o front **ja chama** `skipInterval` na fila — a "decisao provisoria" da Fase C abaixo esta **superada**. E o **`actualStartTime` agora E exposto** pelo backend (`PATCH .../start` marca) — da pra mostrar "almoco iniciado as HH:MM" (o "Gap" citado na serializacao acima esta desatualizado).
+
+**Decisao (2026-06-28):** modelar cada refeicao como **JANELA FLEXIVEL**, nao horario cravado. Menos popup (so pergunta quando a fila e continua) e supressao/placement principistas. Padrao de sistemas de fila (Waitwhile/Qless).
+
+**Modelo:** refeicao = `{ alvo (fixedStartTime, ex. 12:00), duracao (60min), janela [inicioMin, inicioMax] }`.
+- `inicioMin = alvo − adiantamentoMax` (permite comecar um pouco antes p/ evitar cruzamento; sugestao: 1 atendimento ou 15min).
+- `inicioMax = min(proximaRefeicao.alvo − folgaMin, fechamento − duracao)`. **folgaMin = 3h** (derivavel: `max(duracao + buffer, 3h)`). Ex.: almoco com janta 18:00 → `inicioMax = 15:00`; e ≤ `fechamento − 60min`.
+
+**Placement (projetando a fila a partir de agora, cada atendimento +duracao):**
+1. Ha **buraco natural** ≥ duracao dentro de `[inicioMin, inicioMax]` → **encaixa sozinho, sem popup**.
+2. Fila **continua** (sem buraco) e um atendimento cruzaria o alvo → **popup adiantar/adiar**: **adiantar** = refeicao antes desse atendimento (se ≥ inicioMin); **adiar** = depois dele (se ≤ inicioMax). Ex.: fila ate 11:45, proximo 11:45–12:15 cruza 12:00 → adiantar (11:45–12:45) ou adiar (12:15–13:15).
+3. Nem adiantar nem adiar cabem na janela → **suprime**.
+
+**Supressao (unifica 3h + fechamento):** passou de `inicioMax` sem iniciar → refeicao **some no dia** (sai do ETA). Como `inicioMax ≤ fechamento − duracao`, uma refeicao que bateria no fechamento **e naturalmente suprimida** (decisao do usuario 2026-06-28: bate no fechamento → suprime, atende normal; sem popup de "estender horario"). **"Iniciar refeicao"** inicia sempre a **proxima refeicao NAO suprimida** (almoco suprimido + toca iniciar 17:30 → comeca a **janta**).
+
+**Anti-sobreposicao (na edicao):** ao editar horario/duracao, exigir **≥ folgaMin (3h)** da outra refeicao e dentro de `[abertura, fechamento]`; senao rejeitar (reusa `409 INTERVAL_CONFLICT` do backend + checagem de 3h no front).
+
+**Split de responsabilidade:**
+- 🔵 **Backend (fonte da verdade do ETA):** projecao + **auto-placement da refeicao no ETA meal-aware**, **supressao por janela (3h/fechamento)**, e **"iniciar = proxima nao suprimida"**. Hoje o backend tem `skip` (#41) e meal-aware, mas **o placement por janela + auto-supressao provavelmente sao NOVOS** → **pendencia backend** (registrar handoff). Sem isso no backend, o ETA do cliente diverge do que o partner mostra.
+- 🟢 **Front-partner:** **popup adiantar/adiar** (detecta o cruzamento pela fila+refeicao, chama `start` ou deixa empurrar), **lapis de edicao** no card, **"almoco iniciado as HH:MM"** (`actualStartTime`), nudge. O placement automatico do front e so **espelho visual** do que o backend calcula.
+- ⏭️ **v2:** o Modelo A (horario cravado + popup sempre) foi descartado; se o placement por janela do backend demorar, o front pode rodar um espelho do Modelo A como fallback visual.
+
 **Itens pos-MVP (spec, NAO implementar agora):** #37 lock da estimativa (estabilizar ETA travada por cliente), #38 encaixe com equalizacao de tempo, #39 multa/aviso de cancelamento tardio.
 
 **Plano do front (integrar contra STAGING ja — backend confirmou que nao precisa esperar a main):**
@@ -611,19 +715,9 @@ backend auto-rollback homolog/prod).
 - **Fase C — Fila (queue.tsx):** ✅ **FEITO (2026-06-17).** Secao "Refeicoes" na fila: botao "Iniciar" (`PATCH .../start`) e, quando ACTIVE, "Encerrar" (`PATCH .../finish`); iniciar um atendimento ja encerra a refeicao ativa no backend (refetch reflete). Popup de nudge no horario previsto (`now >= fixedStartTime` e status SCHEDULED), uma vez por refeicao/sessao (anti-nag via ref), com contagem da fila: acoes **"Iniciar agora"** (start) e **"Agora nao"**. ⚠️ **DECISAO PROVISORIA:** "Agora nao" hoje so **dispensa o popup** (a refeicao prevista segue sendo empurrada pelos atendimentos, regra "some na proxima"). O **"Nao almocar (pular hoje, derrubando do ETA de TODOS na hora)"** do spec precisa de um **endpoint de skip por dia no backend** (nao existe; `finish` so encerra refeicao ATIVA, `delete` e permanente) — pendencia backend a definir.
 - Tests-first em toda logica de store/parse (ex.: parser do `fixedStartTime` com segundos opcionais).
 
-### 11.1 Pendencias que pertencem ao FRONT-CLIENT (registradas aqui pelo front-partner)
+### 11.1 Pendencias que pertencem ao FRONT-CLIENT
 
-> Itens descobertos no front-partner mas cujo **frontend pertence ao app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto). Registrados aqui para alinhamento: quando o usuario precisar, ele manda o front-client ler estas pendencias e implementar.
-
-| # | Item | Descricao | Justificativa |
-|---|------|-----------|---------------|
-| C1 | **Busca de estabelecimento por bairro ordenada por menor fila** | A busca em que o **cliente** escolhe a barbearia pelo bairro (e depois por GPS, fase 2) **ordenada pela menor fila** e uma feature do **app cliente**, nao do partner. O partner so tem busca de afiliacao (profissional procura establishment para se vincular, sem ordenacao por fila). Depende do mesmo endpoint backend #2 (`GET /establishment?neighborhood=X` + tempo de espera agregado + ordenacao). | Esclarecimento do usuario (2026-06-14): o #2 (bairro/menor fila) e do front-client. Implementar no repo `vupth/` quando o backend #2 entregar. |
-| C2 | **Atualizar o Gluestack no front-client** | Assim como foi feito no front-partner (2026-06-14: `@gluestack-ui/themed` 1.1.54 → 1.1.73, ultima da linha v1), o app cliente (`vupth/`) deve atualizar o Gluestack para a ultima v1 e, depois, avaliar a migracao v1 → v2 (refactor grande, base nativewind). Manter as duas bases alinhadas na mesma versao. **Atencao:** o bump 1.1.73 passa a puxar `@gluestack-ui/tooltip → react-aria → react-dom`; foi preciso adicionar `react-dom` (mesma versao do React, ex.: 19.1.0) so para o Metro resolver o import, e reiniciar o bundler com cache limpo (`expo start -c`). | Pedido do usuario (2026-06-14). O front-client esta atras no `package.json` (ex.: `@gluestack-ui/themed` ^1.1.34, `@gluestack-ui/config` ^1.1.19). Implementar no repo `vupth/` quando o usuario autorizar. |
-| C3 | **Tempo real via WebSocket (STOMP) — fila + notificacoes pessoais** | O backend entregou o tempo real (2026-06-14, commit 9bf858f; contrato em PRD_BACKEND secao 18b). O **front-client** deve: **(1)** instalar `@stomp/stompjs`; **(2)** derivar a URL do socket do BASE_URL (`http→ws`, `https→wss`, sufixo `/ws`); **(3)** conectar com `connectHeaders: { Authorization: "Bearer <access_token>" }` no frame CONNECT (necessario para receber notificacoes pessoais; sem token recebe so topicos publicos); **(4)** SUBSCRIBE `/topic/establishment/{id}/queue` — snapshot COMPLETO da fila (igual ao `GET /establishment/id/{id}/professionals-with-queue`), reenviado a cada mudanca → usar para atualizar a tela de fila do cliente em tempo real e **substituir o polling**, mantendo um refetch como fallback; **(5)** SUBSCRIBE `/user/queue/notifications` (autenticado) — notificacao pessoal do cliente: `ATTENDANCE_STARTED` (mensagem "E a sua vez! ...") e `ATTENDANCE_FINISHED` ("Seu atendimento foi concluido."). Payload: `{ type, attendanceId, establishmentId, message, timestamp }`. Exibir como alerta/toast in-app no minimo; push real (app em background) depende do backend #3 (device token) — fora deste escopo. **Modelo de referencia:** o front-partner ja implementou o lado do `/topic/.../queue` em `src/hooks/useQueueSocket.ts` (embutido em `useQueuePolling`/`useProfessionalQueue`); o client pode espelhar o mesmo padrao e adicionar a subscription de `/user/queue/notifications`. | Backend concluido (roadmap #1). O cliente e o maior beneficiario das notificacoes pessoais ("e a sua vez"). Implementar no repo `vupth/` quando o usuario autorizar. |
-| C4 | **Nao exibir profissional sem servico** | O backend (2026-06-14, commit d2ea594, #31) ja filtra profissionais sem servico em `GET /establishment/id/{id}/professionals-with-queue` e so abre a loja com >=1 profissional com >=1 servico. **Acao do client:** majoritariamente automatico (o backend nao retorna esses profissionais); apenas garantir que a UI nao assume profissionais "fantasma" e que listas vazias sao tratadas. | Backend concluido (#31). So validar no front-client. |
-| C5 | **Encaixe — cliente pede atendimento antecipado (cliente→profissional)** | Mecanismo em que o **cliente pede ao profissional** para ser atendido antes; o **profissional decide**. Backend ja tem `PATCH /attendances/{id}/fit-in?aheadCount=N` (+ `/undo-fit`) — porem `/fit-in` e endpoint do **PROFESSIONAL**, entao o fluxo real e: cliente solicita (front-client) → o profissional ve/aprova e ai o app chama o `/fit-in`. **A definir:** se a aprovacao do pro entra no front-partner (provavel pequena peca partner) ou se o backend cria um endpoint de "pedido de encaixe" que o pro confirma. **Distinto da troca entre clientes (C6).** | Backend (fit-in) pronto. UI do pedido no `vupth/`; confirmar o lado da aprovacao. |
-| C6 | **Troca de posicao entre clientes (marketplace) — UI do cliente** | Lado client da pendencia backend **S3**. UI: (1) o cliente **manifesta intencao de troca** (adiantar OU atrasar) escolhendo o **horario desejado**; (2) a solicitacao **aberta** aparece **so para os clientes dentro daquela janela** (pelo ETA de cada um) — modelo igual ao da solicitacao de afiliacao (open, mutua); (3) **primeiro que aceita** efetiva a troca e a solicitacao **some**; ninguem aceita → nada. **Sem solavanco de tempo.** O profissional **nao participa**. Depende do backend **S3** (entidade + janela + aceite + broadcast). | Feature nova. Implementar no `vupth/` quando o backend S3 entregar. |
-| C7 | **Alinhamento de design "Verde Imersivo" com o front-partner** | Aplicar no front-client a mesma linguagem que o partner fechou (2026-06-26). **Tokens** (`gluestack-ui.config.ts`): off-white **#F7FAF8**; verde 400 #52B788 / 500 #00B37E (CTA) / 600 #009E6F / 700 #1B4332; amber 500 #FFB703; red 500 #E63946; fontes **Poppins** (titulos/botoes) + **Inter** (texto). **Componentes a espelhar** (1:1 com o partner): `cardShadow` (`src/lib/styles.ts`) em cards cantos $2xl sem borda; **Button** pilula (`rounded $full`)+sombra+Poppins; **Input** `borderRadius $xl`, fundo branco, borda cinza ($coolGray300)→verde no foco ($green500, borda 2); **Skeleton** (`Skeleton.tsx`: SkeletonCard/List, shimmer pulso 0.45↔1 base #E2E9E5, forma dos cards reais) no lugar dos Spinner; **Tab bar** `TabBarIcon` (icone outline quando inativo / preenchido verde quando ativo — **sem pilula**, o preenchimento e o indicador da aba; sombra superior offset {0,-4}; active #00B37E, inactive #9CA3AF). **Fonte da verdade da paleta/fontes:** PRD secao **13.1** (Guia de Design PDF). **Referencias no repo partner:** `design/redesign-form-tabbar-skeleton.html` (mockup aprovado), `src/components/{Button,Input,Skeleton,TabBarIcon}.tsx`, `src/lib/styles.ts`. | Pedido do usuario (2026-06-26): consistencia visual entre os apps. Implementar no `vupth/`; facilita se atualizar o Gluestack antes (ver **C2**). |
+> **Movidas para [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** (C1–C7, tabela consolidada). Sao itens descobertos no front-partner cujo frontend pertence ao **app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto) — registrados la para alinhamento cross-project.
 
 ---
 
@@ -784,6 +878,8 @@ Adicionar ao relatorio do profissional e do owner:
 
 **Faseamento sugerido:** (Fase 1) endpoint de disponibilidade + toggle "Estou disponivel/ausente" no app do profissional + badge de status na lista do dono; (Fase 2) auto-open/close dirigido por presenca. Tudo **backend-first**.
 
+> ✅ **DECISAO FECHADA (Andre, 2026-07-09) = S1.** Esta proposta virou o modelo definitivo. Enum do profissional: **`trabalhando` / `intervalo` / `indisponivel`**. **`intervalo` conta como aberto** (loja nao fecha no almoco); so fecha quando **todos** ficam `indisponivel`. `open_status` da loja e **derivado/read-only** (`aberto ⇔ ∃ profissional trabalhando ou em intervalo`). No `indisponivel` o **cliente pode agendar** no card do profissional (dias da agenda liberada → S2/calendario). Substitui o toggle bruto entregue. **Spec completa em [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) — "Detalhe — S1".**
+
 ## 13. Redesign — EM IMPLEMENTACAO na `dev` (consolidado 2026-06-17)
 
 > ✅ **STATUS (2026-06-17):** direcao escolhida e em implementacao **direto na `dev`** (a branch `new-design` foi consolidada via merge e **deletada** — trabalhamos so na `dev`). **Direcao A "Verde Imersivo" refinada** (validada pelo usuario em SVG + no celular): cabecalho clean (VUPTH + titulo da tela abaixo + figurinha do papel; sem barra escura), **fundo off-white global** #F7FAF8, **botoes pilula** com sombra (Poppins), **cards verdes** de metrica (sem "~"), **cards brancos com sombra** ($2xl), **faixa de almoco amarela compacta** com ✎ editar. Mockups de referencia em `design/` (SVG/HTML). **Processo combinado: mostrar mockup (SVG/HTML) ANTES de codar; so implementar apos o usuario escolher.**
@@ -820,6 +916,8 @@ Direcao visual e um **upgrade real** e coerente com o que ja construimos (tempo 
 ### 13.1 Guia de Design (PDF) — design system implementavel (fonte da verdade do redesign)
 
 > Recebido o PDF "Guia de Design e Prototipo..." (5 paginas). **Diferente dos PNGs (renderizacoes por IA, texto embaralhado, so referencia visual solta), o PDF e um guia real e implementavel.** Use o PDF como **fonte da verdade dos tokens** no branch `new-design`; os PNGs so como inspiracao.
+
+> 🎨 **ATUALIZACAO 2026-07-09 — paleta alinhada ao front-client ("Verde Marca / folha vivo").** A escala `green` do partner foi **re-ancorada no `#3B7A3F`** (mesma do client, ver PRD_FRONT-CLIENT "Verde Marca"), substituindo o teal `#00B37E`. Novos valores em `config/gluestack-ui.config.ts` (**fonte da verdade**): 50 `#eef5ee` / 100 `#d9ead9` / 200 `#b5d5b6` / 300 `#8bbd8d` / 400 `#5c9c60` / **500 `#3b7a3f`** / 600 `#316635` / 700 `#26522a` / 800 `#1c3d1f` / 900 `#142c17`. Sombra dos cards/botoes = `#1A281A` (do client). amber `#FFB703` e red `#E63946` **mantidos**. Fundo claro **mantido**. Hexes hardcoded nos componentes (Tab bar, RoleIcon, ServiceTypeGrid, CompletionCard, etc.) migrados junto. A tabela abaixo e **historica** (paleta antiga teal).
 
 **Paleta completa (estende as 4 ancoras do PRD — resolve o "COM O DESIGN" da escala de cores):**
 | Cor | Hex | Uso |
@@ -906,15 +1004,19 @@ eas build --platform android --profile preview
 ### 14.4 Rede anti-quebra (gate antes de subir)
 
 Defesa em profundidade: o codigo so "sobe" se passar nos checks
-**typecheck -> jest -> expo-doctor** (esse ultimo pega quebras de config/nativo que
-o jest nao pega — foi a classe de erro do CNG).
+**lint -> typecheck -> jest -> expo-doctor** (esse ultimo pega quebras de config/nativo
+que o jest nao pega — foi a classe de erro do CNG).
 
+- **Lint (ESLint, 2026-07-04)** — `eslint` + `eslint-config-expo` (flat config,
+  identico ao front-client); script `npm run lint` = `eslint . --max-warnings 0`.
+  Baseline zerado (Animated.Value via `useState`, disables pontuais das regras do
+  React Compiler nos fetch-on-mount intencionais, imports mortos removidos).
 - **Local — pre-push hook** (`.githooks/pre-push`): roda antes de cada `git push` e
-  **aborta** se algo falhar. Ativado por `core.hooksPath=.githooks`, religado
-  automaticamente no `npm install` (script `prepare` no `package.json`).
-  Bypass de emergencia: `git push --no-verify`.
-- **Servidor — CI** (`.github/workflows/ci.yml`): typecheck + jest + cobertura (gate
-  de threshold) + **expo-doctor**, em push (`dev`/`main`) e PR para `main`.
+  **aborta** se algo falhar. Ordem: **lint -> typecheck -> jest -> expo-doctor**.
+  Ativado por `core.hooksPath=.githooks`, religado automaticamente no `npm install`
+  (script `prepare` no `package.json`). Bypass de emergencia: `git push --no-verify`.
+- **Servidor — CI** (`.github/workflows/ci.yml`): **lint** + typecheck + jest + cobertura
+  (gate de threshold) + **expo-doctor**, em push (`dev`/`main`) e PR para `main`.
 - **Branch protection no `main`** (acao manual no GitHub -> Settings -> Branches):
   *Require status checks to pass* -> **CI / lint-and-test**. Assim codigo quebrado
   nao consegue ser mergeado no `main`. `main` = linha de producao sempre verde.
@@ -960,6 +1062,29 @@ um APK so recebe OTA se foi buildado **depois** de o `expo-updates` entrar no pr
 primeiro APK do partner (build de um commit anterior ao `expo-updates`) NAO recebia OTA; foi
 preciso **rebuildar** (`eas build -p android --profile preview`) e reinstalar. Conferir com
 `eas build:list`: o build tem que ser do commit em que o `expo-updates` ja existe.
+
+**⚠️ Licao critica — modulo NATIVO novo ⇒ OTA nao entrega, e um OTA novo pode "reverter" um APK velho (2026-07-04):**
+o push notifications (`d751529`) adicionou `expo-notifications` + `expo-device` (**modulos nativos**) + plugin no `app.json`. **OTA so entrega JavaScript, nao codigo nativo.** Como o `runtimeVersion` e `policy: appVersion` e o `version` nao mudou (1.0.0), o OTA novo (que ja tem o codigo de push) foi publicado para o **mesmo** runtime do APK antigo — que **nao tem** os modulos nativos. Ao carregar o bundle novo, a chamada nativa lancava e o app fazia **rollback pro bundle embutido velho** → parecia que apelido/botao-OTA/pilula/adiantar tinham "sumido" (estavam no codigo, mas o aparelho rodava a versao velha). **Dois aprendizados + fix:**
+1. **Resiliencia (feito):** todo toque em modulo nativo opcional deve ser **guardado com try/catch** para o bundle JS **rodar mesmo sem o modulo** (degradando a feature, nao derrubando o app). Aplicado em `src/hooks/usePushRegistration.ts` (`setNotificationHandler` no topo, `setNotificationChannelAsync`, `addNotificationResponseReceivedListener`). Assim o OTA volta a entregar as features JS mesmo num APK sem push.
+2. **Build (acao do usuario):** para o push notifications **funcionar** (e para o runtime ficar coerente), e preciso **rebuildar** o APK com os modulos nativos: `eas build -p android --profile preview` + reinstalar.
+
+### 14.7 Esquema de versionamento (decidido 2026-07-04) — CORRIGE a raiz do problema de OTA
+
+**Diagnostico:** o `version` ficou travado em **1.0.0** e o `runtimeVersion` e `policy: appVersion` → **todo build e todo OTA sao runtime "1.0.0"**. Quando entrou lib nativa (push), o runtime **nao mudou**, entao o OTA "com push" caiu nos APKs 1.0.0 **sem** push → crash + rollback. **A falta de numeracao E a causa-raiz.** (Alem disso, com `appVersionSource: remote` o `version` do `app.json` era ignorado — parte da confusao.)
+
+**Regra (Andre 2026-07-04) — numeracao MANUAL, semver:**
+- `eas.json`: **`appVersionSource: "local"`** (o `app.json` passa a ser a fonte da versao).
+- **Bump de `version`** (`app.json`) a cada release significativo **e — OBRIGATORIO — sempre que entra/muda algo NATIVO** (lib nativa, permissao, plugin, bump de SDK). Como `runtimeVersion` e `policy: appVersion`, bumpar `version` **muda o runtime junto** → OTAs da versao nova **nao** caem nos builds antigos (sem crash).
+- `android.versionCode` incrementa junto (build novo tem que ter code maior).
+
+**Config-alvo (aplicar NO PROXIMO BUILD — nao retroativo):**
+- `eas.json` → `cli.appVersionSource: "local"`.
+- `app.json` → `version: "1.1.0"` (adicionamos push = feature nativa nova), `android.versionCode: 2`, mantendo `runtimeVersion { policy: "appVersion" }` (vira **1.1.0**, numero legivel).
+- Buildar 1.1.0: `eas build -p android --profile preview` — esse APK ja embute TUDO do dev atual e fica no trilho **1.1.0** (separado dos builds 1.0.0 quebrados).
+
+**Sequencia (importante):** o bump **nao** vai junto com o push do OTA de teste (senao o OTA sairia em 1.1.0 e o build 1.0.0 nao pegaria). Primeiro confirma o OTA no trilho 1.0.0 (build `57d9299f`); a numeracao entra quando for buildar a proxima versao.
+
+**Alternativa futura (se cansar de lembrar do bump):** `runtimeVersion { policy: "fingerprint" }` — o runtime vira um hash do nativo e muda **sozinho** quando o nativo muda (separa builds automaticamente). Custo: o runtime deixa de ser um numero legivel (mostrar o `version` nas Config em vez do runtime).
 
 **⚠️ Ferramentas exigem Node >= 20.19.4** (SDK 54): em Node mais antigo o `expo-doctor`
 crasha (`util.parseEnv is not a function`) e o gate do pre-push deixa de validar de verdade.

@@ -3,7 +3,6 @@ import {
   Button as GlueStackButton,
   ButtonText,
   ButtonSpinner,
-  ArrowRightIcon,
 } from "@gluestack-ui/themed";
 
 type ButtonProps = ComponentProps<typeof GlueStackButton> & {
@@ -15,7 +14,7 @@ type ButtonProps = ComponentProps<typeof GlueStackButton> & {
 // [new-design] Botao com presenca: pilula (rounded full), sombra suave e texto
 // Poppins. Sombra via style RN (confiavel cross-platform).
 const btnShadow = {
-  shadowColor: "#1B4332",
+  shadowColor: "#1A281A",
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.18,
   shadowRadius: 10,

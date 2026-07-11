@@ -13,12 +13,26 @@ export type PricingResult = {
   platformFee: number;
 };
 
+/** X,90 mais proximo. */
 export function roundTo90(value: number): number {
-  return Math.round(value - 0.90) + 0.90;
+  return round2(Math.round(value - 0.90) + 0.90);
+}
+
+/** Menor X,90 >= value (arredonda pra cima). */
+export function ceilTo90(value: number): number {
+  return round2(Math.ceil(value - 0.90) + 0.90);
 }
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+// Ao editar um servico ja criado so temos o clientPrice salvo (o preco-base e a
+// absorcao nao sao persistidos). Reconstruimos um preco-base que, reprocessado a
+// 0% de absorcao, reproduz o mesmo clientPrice — para reexibir o preview na edicao.
+export function estimateDesiredFromClient(clientPrice: number): number {
+  if (!(clientPrice > 0)) return 0;
+  return round2(clientPrice * (1 - FEE_RATE));
 }
 
 export function calculatePricing(
@@ -27,13 +41,19 @@ export function calculatePricing(
 ): PricingResult {
   const fullMarkupPrice = desiredPrice / (1 - FEE_RATE);
   const totalFee = fullMarkupPrice - desiredPrice;
-
   const proAbsorbs = totalFee * (proAbsorptionPercent / 100);
-  const rawClientPrice = fullMarkupPrice - proAbsorbs;
 
-  const clientPrice = roundTo90(rawClientPrice);
-  const platformFee = round2(clientPrice * FEE_RATE);
-  const proReceives = round2(clientPrice - platformFee);
+  // "Voce recebe" = piso. O profissional recebe EXATAMENTE o que digitou menos
+  // o que ELE optou por absorver (0% = cliente paga tudo = recebe o digitado,
+  // sem perder centavos pro arredondamento). A absorcao segue reduzindo o que
+  // ele recebe, mas so por escolha dele.
+  const proReceives = round2(desiredPrice - proAbsorbs);
+
+  // Preco do cliente em X,90; a taxa e tudo que fica ACIMA do que o pro recebe.
+  // Garante cobrir o piso do profissional (fee >= 0), inclusive em precos baixos.
+  let clientPrice = roundTo90(fullMarkupPrice - proAbsorbs);
+  if (clientPrice < proReceives) clientPrice = ceilTo90(proReceives);
+  const platformFee = round2(clientPrice - proReceives);
 
   return { clientPrice, proReceives, platformFee };
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VStack, FormControl, Heading, ScrollView, HStack, Spinner, Text } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
@@ -13,6 +13,7 @@ import { lookupCep } from "@lib/cep";
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const addAddress = useEstablishmentStore((s) => s.addAddress);
+  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
 
   const [zipCode, setZipCode] = useState("");
   const [street, setStreet] = useState("");
@@ -24,6 +25,33 @@ export default function AddressScreen() {
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+
+  // Read-back: ao abrir, busca o endereco ja salvo (GET /establishment/id/{id},
+  // que retorna `address`) e pre-preenche o form — assim o endereco "aparece"
+  // ao reabrir. Se vier vazio mesmo apos salvar, o problema esta no backend
+  // (nao persiste/retorna o address) — ver PRD BUG4.
+  useEffect(() => {
+    if (!establishment?.id) return;
+    let active = true;
+    fetchEstablishmentById(establishment.id)
+      .then((detail) => {
+        const a = detail?.address;
+        if (!active || !a) return;
+        if (a.street) setStreet(a.street);
+        if (a.number) setNumber(a.number);
+        if (a.complement) setComplement(a.complement);
+        if (a.neighborhood) setNeighborhood(a.neighborhood);
+        if (a.city) setCity(a.city);
+        if (a.state) setState(a.state);
+        if (a.zipCode) setZipCode(maskCEP(a.zipCode));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+    // re-busca so quando muda o estabelecimento; fetchEstablishmentById e estavel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [establishment?.id]);
 
   const handleCepChange = async (text: string) => {
     const masked = maskCEP(text);

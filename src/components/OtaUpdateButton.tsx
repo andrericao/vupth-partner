@@ -35,8 +35,14 @@ export function OtaUpdateButton() {
     }
   }
 
+  // Mostra o id do OTA + data/hora em que ele foi publicado (Updates.createdAt) =
+  // o "horario do ultimo push". Espelhado do front-client (Settings.tsx).
   const otaInfo = Updates.updateId
-    ? `OTA ${Updates.updateId.slice(0, 8)}`
+    ? `OTA ${Updates.updateId.slice(0, 8)}${
+        Updates.createdAt
+          ? ` · ${Updates.createdAt.toLocaleDateString()} ${Updates.createdAt.toLocaleTimeString()}`
+          : ""
+      }`
     : "bundle embutido (nenhum OTA aplicado)";
 
   return (

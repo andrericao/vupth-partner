@@ -13,6 +13,7 @@ import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
@@ -202,26 +203,17 @@ export default function AddServiceScreen() {
           <Text fontFamily="$body" mb="$2" color="$coolGray600">
             Tipo de serviço
           </Text>
-          <VStack space="xs" mb="$4">
-            {filteredTypes.map((s) => (
-              <Button
-                key={s.value}
-                title={s.label}
-                onPress={() => {
-                  setServiceItemType(s.value);
-                  if (!customName.trim()) {
-                    setCustomName(s.label);
-                    setNameInvalid(false);
-                  }
-                }}
-                bg={serviceItemType === s.value ? "$green500" : "$coolGray200"}
-                textColor={serviceItemType === s.value ? "$white" : "$coolGray700"}
-                $active-bg={serviceItemType === s.value ? "$green600" : "$coolGray300"}
-                h="$10"
-                mt="$1"
-              />
-            ))}
-          </VStack>
+          {/* [#11] grade de chips com icone (substitui a lista de pilulas).
+              Tocar substitui o nome no formulario. */}
+          <ServiceTypeGrid
+            items={filteredTypes}
+            selected={serviceItemType}
+            onSelect={(it) => {
+              setServiceItemType(it.value);
+              setCustomName(it.label);
+              setNameInvalid(false);
+            }}
+          />
 
           <FormControl isInvalid={nameInvalid}>
             <Input

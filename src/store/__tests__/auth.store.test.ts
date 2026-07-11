@@ -351,6 +351,10 @@ describe("auth.store", () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(true);
       expect(state.user?.roles).toEqual(["CLIENT", "OWNER"]);
+      // Cold start restaura id + email do JWT (antes vinham vazios -> e-mail em
+      // branco nas Configuracoes apos reabrir o app).
+      expect(state.user?.id).toBe("uuid-1");
+      expect(state.user?.email).toBe("owner@test.com");
       expect(state.isLoading).toBe(false);
     });
 

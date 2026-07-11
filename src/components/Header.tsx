@@ -44,6 +44,8 @@ export function Header({ showBackButton = false, onBack }: Props) {
       return true;
     });
     return () => sub.remove();
+    // handleBack so depende de onBack (ja listado); router e estavel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showBackButton, onBack]);
 
   return (

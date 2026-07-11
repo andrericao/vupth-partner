@@ -15,7 +15,7 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { useElapsedTime } from "@hooks/useElapsedTime";
+import { useElapsedTime, clearAttendanceStart } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
@@ -23,6 +23,8 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
+import { professionalCompletion } from "@lib/completion";
+import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
@@ -41,7 +43,8 @@ function AttendanceCard({
   onResume,
   onRemove,
   onLate,
-  onUndoLate,
+  onNoShow,
+  onAdvance,
   isActive,
   isFirst,
 }: {
@@ -52,7 +55,8 @@ function AttendanceCard({
   onResume?: () => void;
   onRemove?: () => void;
   onLate?: () => void;
-  onUndoLate?: () => void;
+  onNoShow?: () => void;
+  onAdvance?: () => void;
   isActive: boolean;
   isFirst: boolean;
 }) {
@@ -61,7 +65,8 @@ function AttendanceCard({
   const isLate = attendance.status === "LATE";
 
   const { formatted } = useElapsedTime(
-    isInProgress || isPaused ? (attendance as any).startTime ?? null : null,
+    isInProgress || isPaused ? attendance.id : null,
+    (attendance as any).startTime ?? null,
     isPaused
   );
 
@@ -129,8 +134,12 @@ function AttendanceCard({
         </HStack>
       )}
 
-      {/* So o 1o da fila (indice 0) pode ser iniciado. Se nao chegou, "Nao chegou"
-          (/late) o faz cair 1 posicao e o proximo vira o 1o. Nunca iniciar o 2o+. */}
+      {/* O 1o da fila (indice 0) inicia direto. Se nao chegou, "Nao chegou"
+          (/late) o faz cair 1 posicao e o proximo vira o 1o.
+          Fora do 1o lugar da pra ADIANTAR (atender fora de ordem) — com
+          confirmacao, pois pula quem esta na frente (/start aceita qualquer
+          posicao). Ja em ATRASADO, "Nao compareceu" (/no-show) tira da fila com
+          strike (#39). "Remover" tira sem penalidade. */}
       {!isActive && (attendance.status === "SCHEDULED" || isLate) && (
         isFirst ? (
           <VStack mt="$3" space="sm">
@@ -138,15 +147,19 @@ function AttendanceCard({
               <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
               <Button title="Nao chegou" onPress={onLate} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
             </HStack>
+            {isLate && (
+              <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
+            )}
             <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
           </VStack>
         ) : (
-          <HStack mt="$3" space="sm">
+          <VStack mt="$3" space="sm">
+            <Button title="Adiantar" onPress={onAdvance} bg="$green500" $active-bg="$green600" h="$10" />
             {isLate && (
-              <Button title="Voltar a fila" onPress={onUndoLate} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
+              <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
             )}
-            <Button title="Remover" onPress={onRemove} bg="$red400" $active-bg="$red500" h="$10" flex={1} />
-          </HStack>
+            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
+          </VStack>
         )
       )}
     </VStack>
@@ -158,7 +171,7 @@ export default function ProfessionalQueueScreen() {
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
-  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, undoLate, removeFromQueue } =
+  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, noShow, removeFromQueue } =
     useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -167,6 +180,9 @@ export default function ProfessionalQueueScreen() {
   const finishInterval = useIntervalStore((s) => s.finishInterval);
   const skipInterval = useIntervalStore((s) => s.skipInterval);
   const meals = intervals.filter((i) => i.type === "RECURRENT");
+
+  const myServices = useProfessionalStore((s) => s.myServices);
+  const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
 
   // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
   const nudgedRef = useRef<Set<string>>(new Set());
@@ -183,6 +199,11 @@ export default function ProfessionalQueueScreen() {
       useProfessionalStore.getState().fetchMe().catch(() => {});
     }
   }, [establishmentId]);
+
+  // Servicos do profissional — p/ o checklist de prontidao (2 completes).
+  useEffect(() => {
+    if (establishmentId) fetchMyServices().catch(() => {});
+  }, [establishmentId, fetchMyServices]);
 
   // Carrega as refeicoes do dia ao montar (e quando o profissional muda).
   const profId = professional?.id;
@@ -269,6 +290,14 @@ export default function ProfessionalQueueScreen() {
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
 
+  // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
+  const completion = professionalCompletion({
+    isAffiliated: !!establishmentId,
+    hasService: myServices.length > 0,
+    establishmentReady: (data?.open_status ?? "") === "OPEN",
+    hasNickname: !!professional?.nickname,
+    hasSpecialty: !!professional?.specialty,
+  });
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
@@ -285,6 +314,37 @@ export default function ProfessionalQueueScreen() {
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar acao."));
     }
+  };
+
+  // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
+  // finalizado antes (o profissional optou por pular pro proximo — ou por atender
+  // alguem fora de ordem). `advance` = o escolhido nao e o 1o da fila.
+  // (A realocacao da fila quando se atende fora de ordem e do backend — o `start`
+  // ja aceita qualquer posicao; o "promover/reordenar" e o S7.)
+  const startClient = (att: AttendanceInQueue, advance: boolean) => {
+    const runningName = currentAttendance?.clientName;
+    const doStart = () =>
+      handleAction(async () => {
+        if (currentAttendance) {
+          await finishAttendance(currentAttendance.id);
+          clearAttendanceStart(currentAttendance.id);
+        }
+        await startAttendance(att.id);
+      });
+
+    // Inicio direto (sem confirmacao) so quando e o 1o da fila E ninguem esta em
+    // atendimento. Nos demais casos confirma (vai finalizar o atual e/ou furar a fila).
+    if (!runningName && !advance) {
+      doStart();
+      return;
+    }
+    const msg = runningName
+      ? `Isso finaliza o atendimento de ${runningName} e ${advance ? `atende ${att.clientName} na frente da fila` : `inicia ${att.clientName}`}. Continuar?`
+      : `${att.clientName} sera atendido agora, na frente da fila. Tem certeza?`;
+    Alert.alert(advance ? "Adiantar cliente" : "Iniciar atendimento", msg, [
+      { text: "Cancelar" },
+      { text: advance ? "Adiantar" : "Iniciar", onPress: doStart },
+    ]);
   };
 
   const handleFinishMeal = async (m: Interval) => {
@@ -358,6 +418,12 @@ export default function ProfessionalQueueScreen() {
           Minha fila
         </Heading>
 
+        <ReadinessFaixa
+          completion={completion}
+          targetRoute="/(professional)/settings"
+          goalNoun="atender clientes"
+        />
+
         {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
         {myProfessional && (
           <HStack space="md" mt="$4">
@@ -395,7 +461,12 @@ export default function ProfessionalQueueScreen() {
               attendance={currentAttendance}
               isActive
               isFirst={false}
-              onFinish={() => handleAction(() => finishAttendance(currentAttendance.id))}
+              onFinish={() =>
+                handleAction(async () => {
+                  await finishAttendance(currentAttendance.id);
+                  clearAttendanceStart(currentAttendance.id);
+                })
+              }
               onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
               onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
             />
@@ -413,7 +484,8 @@ export default function ProfessionalQueueScreen() {
                 attendance={att}
                 isActive={false}
                 isFirst={idx === 0}
-                onStart={() => handleAction(() => startAttendance(att.id))}
+                onStart={() => startClient(att, false)}
+                onAdvance={() => startClient(att, true)}
                 onLate={() =>
                   Alert.alert(
                     "Cliente nao chegou",
@@ -424,7 +496,16 @@ export default function ProfessionalQueueScreen() {
                     ]
                   )
                 }
-                onUndoLate={() => handleAction(() => undoLate(att.id))}
+                onNoShow={() =>
+                  Alert.alert(
+                    "Cliente nao compareceu",
+                    `${att.clientName} sai da fila com uma marca de falta (no-show). Continuar?`,
+                    [
+                      { text: "Cancelar" },
+                      { text: "Confirmar", style: "destructive", onPress: () => handleAction(() => noShow(att.id)) },
+                    ]
+                  )
+                }
                 onRemove={() =>
                   Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
                     { text: "Cancelar" },

@@ -49,7 +49,13 @@ export default function FindEstablishmentScreen() {
   const loadAll = async () => {
     setIsSearching(true);
     try {
-      const { data } = await api.get("/establishment");
+      // includeAll=true: a busca de AFILIACAO deve listar TODOS os estabelecimentos,
+      // inclusive os CLOSED/vazios (loja recem-criada nasce fechada). Sem isso, o
+      // GET /establishment so devolve OPEN e um dono novo nunca e achado. O filtro
+      // de prontidao (OPEN/bairro) e so da busca do CLIENTE. (Backend, 2026-07-11.)
+      const { data } = await api.get("/establishment", {
+        params: { includeAll: true },
+      });
       setResults(data);
       setHasSearched(true);
     } catch {} finally {
@@ -95,7 +101,7 @@ export default function FindEstablishmentScreen() {
     setHasSearched(true);
     try {
       const { data } = await api.get("/establishment", {
-        params: { name: search.trim() },
+        params: { name: search.trim(), includeAll: true },
       });
       setResults(data);
     } catch (error: any) {

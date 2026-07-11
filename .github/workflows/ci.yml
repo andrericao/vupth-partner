@@ -3,12 +3,29 @@ name: CI
 on:
   push:
     branches: [dev, main]
+    # Economia de minutos: mudancas so de doc/spec/E2E-yaml nao mexem no app,
+    # entao nao rodam o CI. (No PR para main o CI sempre roda — required check.)
+    paths-ignore:
+      - "**.md"
+      - "src/docs/**"
+      - "design/**"
+      - ".maestro/**"
+      - ".gitignore"
+      - "docs/**"
+      - "LICENSE"
   pull_request:
     branches: [main]
+
+# Pushes em sequencia cancelam os runs anteriores da mesma branch (evita gastar
+# minutos com builds que ja seriam descartados). So o run mais novo sobrevive.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -19,9 +36,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Lint (eslint --max-warnings 0)
+        run: npx eslint . --max-warnings 0
+
       - run: npx tsc --noEmit
 
-      - run: npm test -- --ci --coverage --passWithNoTests
+      # --bail: falha rapido no 1o teste quebrado (nao roda a suite inteira a toa).
+      - run: npm test -- --ci --coverage --bail --passWithNoTests
 
       - name: Config / native sanity (expo-doctor)
         run: npx expo-doctor

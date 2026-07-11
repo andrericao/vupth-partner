@@ -60,6 +60,8 @@ export default function AlsoProfessionalScreen() {
     };
 
     ensureAffiliation();
+    // refreshToken e estavel (Zustand); roda so ao entrar com esses params.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alreadyProfessional, establishmentId]);
 
   useEffect(() => {

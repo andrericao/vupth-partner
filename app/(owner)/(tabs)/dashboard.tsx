@@ -17,8 +17,10 @@ import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
+import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
+import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
 
 export default function OwnerDashboardScreen() {
@@ -28,10 +30,16 @@ export default function OwnerDashboardScreen() {
   const [isToggling, setIsToggling] = useState(false);
   const isFocused = useIsFocused();
 
+  // Completude (faixa de prontidao). Fonte unica compartilhada com o checklist
+  // (Dados do Estabelecimento) e o dot (menu). Ver useOwnerCompletion.
+  const { completion } = useOwnerCompletion();
+
   useEffect(() => {
     if (!establishment) {
       fetchMine().catch(() => {});
     }
+    // carga on-mount unica; fetchMine e estavel (Zustand).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -42,9 +50,16 @@ export default function OwnerDashboardScreen() {
 
   const status = establishment?.open_status ?? "CLOSED";
   const isOpen = status === "OPEN";
-  const { data: queueData, refetch } = useQueuePolling(establishment?.id ?? null);
+  const establishmentId = establishment?.id;
+
+  const { data: queueData, refetch } = useQueuePolling(establishmentId ?? null);
   const totalInQueue = queueData?.total_in_queue ?? 0;
   const professionals: ProfessionalWithQueue[] = queueData?.professionals ?? [];
+  // Ha cliente em atendimento ou na fila? Nesse caso o fechamento TOTAL fica
+  // bloqueado (o caminho e "Fechar Temporariamente" p/ nao receber novos e
+  // terminar a fila). Previne o clique; o backend ainda barra por 409.
+  const hasActiveWork =
+    totalInQueue > 0 || professionals.some((p) => !!p.current_attendance);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -97,6 +112,14 @@ export default function OwnerDashboardScreen() {
               onPress: () => router.push("/(owner)/establishment-hours" as any),
             },
           ]
+        );
+      } else if (code === "ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES") {
+        Alert.alert(
+          "Ha atendimentos em andamento",
+          getApiErrorMessage(
+            error,
+            "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar."
+          )
         );
       } else {
         Alert.alert(
@@ -153,6 +176,12 @@ export default function OwnerDashboardScreen() {
           {establishment.service_type}
         </Text>
 
+        <ReadinessFaixa
+          completion={completion}
+          targetRoute={`/(owner)/establishment-data?establishmentId=${establishmentId ?? ""}`}
+          goalNoun="aparecer aos clientes"
+        />
+
         <HStack mt="$4" space="md">
           <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$xs" color="$green50">na fila</Text>
@@ -179,13 +208,23 @@ export default function OwnerDashboardScreen() {
             $active-bg="$green600"
           />
         ) : (
-          <Button
-            title="Fechar Estabelecimento"
-            onPress={() => setStatus("CLOSED")}
-            isLoading={isToggling}
-            bg="$red500"
-            $active-bg="$red600"
-          />
+          <VStack space="xs">
+            <Button
+              title="Fechar Estabelecimento"
+              onPress={() => {
+                if (!hasActiveWork) setStatus("CLOSED");
+              }}
+              isLoading={isToggling}
+              isDisabled={hasActiveWork}
+              bg="$red500"
+              $active-bg="$red600"
+            />
+            {hasActiveWork && (
+              <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" textAlign="center">
+                Nao e possivel fechar com cliente em atendimento ou na fila. Use Fechar Temporariamente para nao receber novos e terminar a fila.
+              </Text>
+            )}
+          </VStack>
         )}
 
         {status !== "TEMPORARILY_CLOSED" ? (

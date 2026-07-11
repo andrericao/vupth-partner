@@ -152,16 +152,17 @@ export const gluestackUIConfig = createConfig({
       // 500=#00B37E (verde vibrante — CTAs), 600=pressed (~10% mais escuro),
       // 700=#1B4332 (verde escuro — titulos/nav). Como o app usa $green500/600/700
       // em quase tudo, o remap propaga a identidade a todas as telas.
-      green50: '#ECF8F2',
-      green100: '#D2EFE0',
-      green200: '#A8E0C6',
-      green300: '#79CFA8',
-      green400: '#52B788',
-      green500: '#00B37E',
-      green600: '#009E6F',
-      green700: '#1B4332',
-      green800: '#143728',
-      green900: '#0E2A1E',
+      // [verde-imersivo] paleta alinhada com o front-client (fonte da verdade da marca)
+      green50: '#eef5ee',
+      green100: '#d9ead9',
+      green200: '#b5d5b6',
+      green300: '#8bbd8d',
+      green400: '#5c9c60',
+      green500: '#3b7a3f',
+      green600: '#316635',
+      green700: '#26522a',
+      green800: '#1c3d1f',
+      green900: '#142c17',
       lime50: '#f7fee7',
       lime100: '#ecfccb',
       lime200: '#d9f99d',
@@ -187,8 +188,8 @@ export const gluestackUIConfig = createConfig({
       amber200: '#fde68a',
       amber300: '#fcd34d',
       amber400: '#fbbf24',
-      amber500: '#FFB703', // [new-design] Laranja Suave do guia — alertas moderados
-      amber600: '#E0A000',
+      amber500: '#FFB703', // [verde-imersivo] alertas moderados (alinhado ao client)
+      amber600: '#d97706',
       amber700: '#b45309',
       amber800: '#92400e',
       amber900: '#78350f',
@@ -207,8 +208,8 @@ export const gluestackUIConfig = createConfig({
       red200: '#fecaca',
       red300: '#fca5a5',
       red400: '#f87171',
-      red500: '#E63946', // [new-design] Vermelho Suave do guia — erros, cancelamentos
-      red600: '#CF2B38',
+      red500: '#E63946', // [verde-imersivo] erros/cancelamentos (alinhado ao client)
+      red600: '#dc2626',
       red700: '#b91c1c',
       red800: '#991b1b',
       red900: '#7f1d1d',
@@ -711,7 +712,10 @@ export const componentsConfig = createComponents(componentsTheme);
 
 export type { UIConfig, UIComponents } from '@gluestack-ui/themed';
 
+// Pontos de extensao do gluestack (module augmentation abaixo); vazios de proposito.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IConfig {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IComponents {}
 
 declare module '@gluestack-ui/themed' {

@@ -11,7 +11,7 @@ import {
   Divider,
 } from "@gluestack-ui/themed";
 import { SkeletonList } from "@components/Skeleton";
-import { Alert, RefreshControl } from "react-native";
+import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -85,6 +85,7 @@ export default function ProfessionalAttendancesScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const loadHistory = useCallback(async () => {
     if (!professional?.id) return;
     setIsLoading(true);
@@ -103,6 +104,8 @@ export default function ProfessionalAttendancesScreen() {
   }, [professional?.id, filter, fetchHistory]);
 
   useEffect(() => {
+    // fetch on-mount/filtro; sinaliza isLoading (padrao de carregamento).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
   }, [loadHistory]);
 

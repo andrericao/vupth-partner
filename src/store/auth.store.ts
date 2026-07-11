@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
-import { getRolesFromToken } from "@lib/jwt";
+import { getRolesFromToken, decodeToken } from "@lib/jwt";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
+import { unregisterDevice } from "@lib/push";
 
 type User = {
   id: string;
@@ -108,6 +109,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
+    // Desregistra o device do push antes de derrubar a sessao (best-effort).
+    try {
+      const pushToken = await SecureStore.getItemAsync("vupth_push_token");
+      if (pushToken) {
+        await unregisterDevice(pushToken);
+        await SecureStore.deleteItemAsync("vupth_push_token");
+      }
+    } catch {}
+
     try {
       await api.post("/auth/logout");
     } catch {}
@@ -129,7 +139,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
-    const roles = getRolesFromToken(token);
+    // O JWT ja carrega sub (id), email e roles — restaura os 3 no cold start.
+    // Antes so pegava os roles e deixava id/email vazios, entao apos reabrir o
+    // app as Configuracoes mostravam e-mail em branco.
+    const payload = decodeToken(token);
 
     await Promise.all([
       useEstablishmentStore.getState().restoreEstablishment(),
@@ -137,7 +150,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     ]);
 
     set({
-      user: { id: "", email: "", roles },
+      user: {
+        id: payload?.sub ?? "",
+        email: payload?.email ?? "",
+        roles: payload?.roles ?? [],
+      },
       isAuthenticated: true,
       isLoading: false,
     });

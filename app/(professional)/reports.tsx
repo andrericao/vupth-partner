@@ -53,6 +53,8 @@ export default function ProfessionalReportsScreen() {
   }, [period, fetchMyReport]);
 
   useEffect(() => {
+    // fetch on-mount/periodo; sinaliza isLoading (padrao de carregamento).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReport();
   }, [loadReport]);
 

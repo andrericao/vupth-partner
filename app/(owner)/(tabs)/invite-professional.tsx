@@ -49,6 +49,8 @@ export default function InviteProfessionalScreen() {
   );
 
   useEffect(() => {
+    // busca inicial (query vazia = todos); sinaliza isSearching.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     runSearch("");
   }, [runSearch]);
 

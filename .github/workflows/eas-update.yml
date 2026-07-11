@@ -9,10 +9,25 @@ name: EAS Update (OTA)
 on:
   push:
     branches: [dev, main]
+    # Doc/spec/E2E-yaml nao mudam o bundle JS — nao republica OTA (economia).
+    paths-ignore:
+      - "**.md"
+      - "src/docs/**"
+      - "design/**"
+      - ".maestro/**"
+      - ".gitignore"
+      - "docs/**"
+      - "LICENSE"
+
+# Pushes em sequencia cancelam o OTA anterior da mesma branch — so publica o mais novo.
+concurrency:
+  group: eas-update-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 

@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 // [new-design] Icone da tab bar: contorno (outline) quando inativo e
 // PREENCHIDO + verde quando ativo. O preenchimento e o indicador da aba atual
 // (sem pilula). `name` = nome base do Ionicons (ex.: "home").
-const ACTIVE = "#00B37E";
+const ACTIVE = "#3b7a3f";
 const INACTIVE = "#9CA3AF";
 
 export function TabBarIcon({ name, focused }: { name: string; focused: boolean }) {
@@ -13,7 +13,7 @@ export function TabBarIcon({ name, focused }: { name: string; focused: boolean }
 
 // [new-design] Sombra superior sutil da tab bar (mesclar no tabBarStyle).
 export const tabBarShadow = {
-  shadowColor: "#1B4332",
+  shadowColor: "#1A281A",
   shadowOffset: { width: 0, height: -4 },
   shadowOpacity: 0.06,
   shadowRadius: 14,

@@ -56,6 +56,7 @@ export default function OwnerReportsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const loadReport = useCallback(async () => {
     if (!establishment?.id) return;
     setIsLoading(true);
@@ -72,6 +73,8 @@ export default function OwnerReportsScreen() {
   }, [establishment?.id, period, fetchReport]);
 
   useEffect(() => {
+    // fetch on-mount/periodo; sinaliza isLoading (padrao de carregamento).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReport();
   }, [loadReport]);
 

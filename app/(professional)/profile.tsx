@@ -1,9 +1,9 @@
 import {
   VStack,
+  HStack,
   Heading,
   Text,
   Pressable,
-  HStack,
   Divider,
   ScrollView,
 } from "@gluestack-ui/themed";
@@ -13,14 +13,18 @@ import { useAuthStore } from "@store/auth.store";
 import { cardShadow } from "@lib/styles";
 import { useProfessionalStore } from "@store/professional.store";
 import { Header } from "@components/Header";
+import { PendingDot } from "@components/PendingDot";
+import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
+import { hasAnyPending } from "@lib/completion";
 
 type MenuItemProps = {
   label: string;
   onPress: () => void;
   color?: string;
+  dot?: boolean;
 };
 
-function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
+function MenuItem({ label, onPress, color = "$coolGray900", dot = false }: MenuItemProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -31,9 +35,12 @@ function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
       style={cardShadow}
       $active-bg="$coolGray50"
     >
-      <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color={color}>
-        {label}
-      </Text>
+      <HStack alignItems="center" space="sm">
+        <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color={color}>
+          {label}
+        </Text>
+        {dot && <PendingDot />}
+      </HStack>
     </Pressable>
   );
 }
@@ -42,6 +49,8 @@ export default function ProfessionalProfileScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const logout = useAuthStore((s) => s.logout);
   const hasOwner = useAuthStore((s) => s.user?.roles?.includes("OWNER"));
+  const { completion } = useProfessionalCompletion();
+  const hasPending = hasAnyPending(completion);
 
   const handleLogout = () => {
     Alert.alert("Sair", "Tem certeza que deseja sair?", [
@@ -109,6 +118,7 @@ export default function ProfessionalProfileScreen() {
           />
           <MenuItem
             label="Configuracoes"
+            dot={hasPending}
             onPress={() => router.push("/(professional)/settings" as any)}
           />
         </VStack>

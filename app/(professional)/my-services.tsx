@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
@@ -22,6 +23,7 @@ import { maskMoney, unmaskMoney } from "@lib/masks";
 import {
   calculatePricing,
   getAbsorptionOptions,
+  estimateDesiredFromClient,
 } from "@lib/pricing";
 
 const SERVICE_ITEM_TYPES = [
@@ -83,6 +85,7 @@ export default function MyServicesScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editAbsorption, setEditAbsorption] = useState(0);
   const [isEditSaving, setIsEditSaving] = useState(false);
 
   const [showForm, setShowForm] = useState(false);
@@ -104,12 +107,20 @@ export default function MyServicesScreen() {
   const absorptionOptions = getAbsorptionOptions(priceNum);
   const pricing = priceNum > 0 ? calculatePricing(priceNum, absorption) : null;
 
+  // Edicao: mesmo modelo de preco do cadastro (preview da formula + ,90).
+  const editPriceNum = unmaskMoney(editPrice);
+  const editAbsorptionOptions = getAbsorptionOptions(editPriceNum);
+  const editPricing =
+    editPriceNum > 0 ? calculatePricing(editPriceNum, editAbsorption) : null;
+
   useEffect(() => {
     if (professional?.establishment_id) {
       fetchMyServices();
     } else {
       fetchMe().catch(() => {});
     }
+    // fetchMe/fetchMyServices sao estaveis (Zustand); reage so ao vinculo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professional?.establishment_id]);
 
   const onRefresh = useCallback(async () => {
@@ -129,22 +140,29 @@ export default function MyServicesScreen() {
     setShowForm(false);
     setEditingId(svc.id);
     setEditName(svc.customName);
-    setEditPrice(maskMoney(String(Math.round(svc.price * 100))));
+    // svc.price = clientPrice salvo. Reconstruimos o preco-base (a 0% absorcao)
+    // para o input "voce recebe" e o preview reaparecerem coerentes.
+    const base = estimateDesiredFromClient(svc.price);
+    setEditPrice(maskMoney(String(Math.round(base * 100))));
+    setEditAbsorption(0);
   };
 
   const cancelEditItem = () => {
     setEditingId(null);
     setEditName("");
     setEditPrice("");
+    setEditAbsorption(0);
   };
 
   const handleSaveEdit = async (itemId: string) => {
     const trimmed = editName.trim();
-    const newPrice = unmaskMoney(editPrice);
-    if (!trimmed || isNaN(newPrice) || newPrice <= 0) {
+    if (!trimmed || isNaN(editPriceNum) || editPriceNum <= 0) {
       Alert.alert("Dados invalidos", "Informe um nome e um preco maior que zero.");
       return;
     }
+    // Preco salvo = total que o cliente paga (digitado + taxas conforme absorcao),
+    // com a estetica X,90 — igual ao cadastro.
+    const newPrice = editPricing ? editPricing.clientPrice : editPriceNum;
     setIsEditSaving(true);
     try {
       await updateMyServiceItem(itemId, { customName: trimmed, price: newPrice });
@@ -289,7 +307,7 @@ export default function MyServicesScreen() {
                       onChangeText={setEditName}
                     />
                     <Input
-                      textLabel="Preço total"
+                      textLabel="Seu preço — você recebe"
                       placeholder="R$ 35,00"
                       messageError=""
                       value={editPrice}
@@ -297,6 +315,87 @@ export default function MyServicesScreen() {
                       keyboardType="number-pad"
                     />
                   </FormControl>
+
+                  {editPricing && (
+                    <VStack
+                      bg="$coolGray50"
+                      p="$4"
+                      borderRadius="$lg"
+                      borderWidth="$1"
+                      borderColor="$coolGray200"
+                      mt="$3"
+                      mb="$2"
+                    >
+                      <Text fontFamily="$heading" fontWeight="$bold" mb="$3" color="$coolGray700">
+                        Politica de preco (preview)
+                      </Text>
+
+                      <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
+                        Quem absorve as Taxas Vupth (6%)?
+                      </Text>
+
+                      <HStack space="xs" mb="$3" flexWrap="wrap">
+                        {editAbsorptionOptions.map((pct) => {
+                          const isSelected = editAbsorption === pct;
+                          return (
+                            <Pressable
+                              key={pct}
+                              onPress={() => setEditAbsorption(pct)}
+                              bg={isSelected ? "$green500" : "$white"}
+                              py="$1.5"
+                              px="$3"
+                              borderRadius="$full"
+                              borderWidth="$1"
+                              borderColor={isSelected ? "$green600" : "$coolGray300"}
+                              mb="$1"
+                            >
+                              <Text
+                                fontFamily="$body"
+                                fontSize="$xs"
+                                color={isSelected ? "$white" : "$coolGray600"}
+                              >
+                                {ABSORPTION_LABELS[pct] ?? `${pct}%`}
+                              </Text>
+                            </Pressable>
+                          );
+                        })}
+                      </HStack>
+
+                      <Divider mb="$3" />
+
+                      <HStack justifyContent="space-between" mb="$1">
+                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                          Cliente paga:
+                        </Text>
+                        <Text fontFamily="$heading" fontWeight="$bold" color="$green700" fontSize="$lg">
+                          R$ {editPricing.clientPrice.toFixed(2)}
+                        </Text>
+                      </HStack>
+
+                      <HStack justifyContent="space-between" mb="$1">
+                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                          Voce recebe:
+                        </Text>
+                        <Text fontFamily="$heading" fontWeight="$bold" color="$blue600">
+                          R$ {editPricing.proReceives.toFixed(2)}
+                        </Text>
+                      </HStack>
+
+                      <HStack justifyContent="space-between">
+                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                          Taxas Vupth:
+                        </Text>
+                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
+                          R$ {editPricing.platformFee.toFixed(2)}
+                        </Text>
+                      </HStack>
+
+                      <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
+                        * O preco salvo do servico e o total pago pelo cliente
+                      </Text>
+                    </VStack>
+                  )}
+
                   <HStack space="sm" mt="$1">
                     <Button
                       title="Cancelar"
@@ -385,38 +484,17 @@ export default function MyServicesScreen() {
               <Text fontFamily="$body" mb="$2" color="$coolGray600">
                 Tipo de servico
               </Text>
-              <VStack space="xs" mb="$4">
-                {filteredTypes.map((s) => {
-                  const isSelected = serviceItemType === s.value;
-                  return (
-                    <Pressable
-                      key={s.value}
-                      onPress={() => {
-                        setServiceItemType(s.value);
-                        if (!customName.trim()) {
-                          setCustomName(s.label);
-                          setNameInvalid(false);
-                        }
-                      }}
-                      bg={isSelected ? "$green500" : "$coolGray100"}
-                      py="$2"
-                      px="$4"
-                      borderRadius="$md"
-                      borderWidth="$1"
-                      borderColor={isSelected ? "$green600" : "$coolGray200"}
-                    >
-                      <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$white" : "$coolGray700"}
-                        textAlign="center"
-                        fontSize="$sm"
-                      >
-                        {s.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </VStack>
+              {/* [#11] grade de chips com icone (substitui a lista de pilulas).
+                  Tocar substitui o nome no formulario. */}
+              <ServiceTypeGrid
+                items={filteredTypes}
+                selected={serviceItemType}
+                onSelect={(it) => {
+                  setServiceItemType(it.value);
+                  setCustomName(it.label);
+                  setNameInvalid(false);
+                }}
+              />
 
               <FormControl isInvalid={nameInvalid}>
                 <Input

@@ -20,6 +20,8 @@ export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws/websocket`;
 // portao de cold start do Render (ver src/lib/readiness.ts + PRD_BACKEND 18c).
 export const READINESS_URL = `${BASE_URL}/actuator/health/readiness`;
 
+// axios.create e o uso idiomatico (metodo do default export), nao um named export.
+// eslint-disable-next-line import/no-named-as-default-member
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
@@ -39,6 +41,8 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
     "O estabelecimento precisa de pelo menos um profissional com servico cadastrado para abrir.",
   ESTABLISHMENT_HOURS_REQUIRED:
     "Defina o horario de funcionamento do estabelecimento antes de abrir.",
+  ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:
+    "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
   INTERVAL_INVALID_TIME:
     "Horario da refeicao fora do horario de funcionamento do estabelecimento.",
   INTERVAL_CONFLICT:

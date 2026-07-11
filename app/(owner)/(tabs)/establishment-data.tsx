@@ -1,5 +1,6 @@
 import {
   VStack,
+  HStack,
   Heading,
   Text,
   Pressable,
@@ -7,6 +8,9 @@ import {
 } from "@gluestack-ui/themed";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
+import { CompletionCard } from "@components/CompletionCard";
+import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
+import { cardShadow } from "@lib/styles";
 
 type MenuItemProps = {
   label: string;
@@ -37,6 +41,10 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
 }
 
 export default function EstablishmentDataScreen() {
+  // Checklist de prontidao (2 completes) mora aqui, nas Configuracoes — a Home
+  // so mostra a faixa. Ver useOwnerCompletion / CompletionCard.
+  const { completion, professionalsCount, routeFor } = useOwnerCompletion();
+
   return (
     <ScrollView
       w="$full"
@@ -49,6 +57,12 @@ export default function EstablishmentDataScreen() {
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Dados do Estabelecimento
         </Heading>
+
+        <CompletionCard
+          completion={completion}
+          doneBanner="Você já aparece para clientes!"
+          routeFor={routeFor}
+        />
 
         <VStack mt="$6" space="sm">
           <MenuItem
@@ -67,6 +81,26 @@ export default function EstablishmentDataScreen() {
             onPress={() => router.push("/(owner)/onboarding/address" as any)}
           />
         </VStack>
+
+        <HStack
+          mt="$4"
+          bg="$white"
+          borderRadius="$md"
+          borderWidth="$1"
+          borderColor="$coolGray200"
+          px="$4"
+          py="$4"
+          justifyContent="space-between"
+          alignItems="center"
+          style={cardShadow}
+        >
+          <Text fontFamily="$body" fontSize="$md" color="$coolGray700">
+            Profissionais vinculados
+          </Text>
+          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$green700">
+            {professionalsCount}
+          </Text>
+        </HStack>
       </VStack>
     </ScrollView>
   );
