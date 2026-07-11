@@ -1,6 +1,8 @@
 import {
   ownerCompletion,
   professionalCompletion,
+  hasBasicPending,
+  hasAnyPending,
   OwnerCompletionInput,
   ProfessionalCompletionInput,
 } from "../completion";
@@ -109,5 +111,55 @@ describe("professionalCompletion", () => {
   it("apelido + especialidade => perfil 100%", () => {
     const c = professionalCompletion({ ...proAllFalse, hasNickname: true, hasSpecialty: true });
     expect(c.profile.percent).toBe(100);
+  });
+});
+
+describe("hasBasicPending (faixa)", () => {
+  it("ha pendencia basica => true", () => {
+    expect(hasBasicPending(ownerCompletion(ownerAllFalse))).toBe(true);
+  });
+
+  it("basico 100% => false, mesmo com perfil pendente", () => {
+    const c = ownerCompletion({
+      ...ownerAllFalse,
+      hasName: true,
+      hasServiceType: true,
+      hasAddress: true,
+      hasHours: true,
+      hasProfessionalWithService: true,
+      isOpen: true,
+      // perfil segue pendente (phone/instagram = false)
+    });
+    expect(c.basic.percent).toBe(100);
+    expect(c.profile.pending).toBe(2);
+    expect(hasBasicPending(c)).toBe(false);
+  });
+});
+
+describe("hasAnyPending (dot)", () => {
+  it("tudo pendente => true", () => {
+    expect(hasAnyPending(professionalCompletion(proAllFalse))).toBe(true);
+  });
+
+  it("basico completo mas perfil pendente => true (o dot cobre perfil)", () => {
+    const c = professionalCompletion({
+      ...proAllFalse,
+      isAffiliated: true,
+      hasService: true,
+      establishmentReady: true,
+    });
+    expect(c.basic.pending).toBe(0);
+    expect(hasAnyPending(c)).toBe(true);
+  });
+
+  it("tudo completo => false", () => {
+    const c = professionalCompletion({
+      isAffiliated: true,
+      hasService: true,
+      establishmentReady: true,
+      hasNickname: true,
+      hasSpecialty: true,
+    });
+    expect(hasAnyPending(c)).toBe(false);
   });
 });

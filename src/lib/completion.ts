@@ -24,6 +24,23 @@ export type Completion = {
   profile: CompletionTracker;
 };
 
+/**
+ * A faixa (aviso na Home) so existe enquanto ha pendencia de "Pronto para
+ * atender" (o que impede de aparecer aos clientes). Pendencia so de perfil
+ * NAO gera faixa — so o dot. (Decisao Andre 2026-07-11.)
+ */
+export function hasBasicPending(c: Completion): boolean {
+  return c.basic.pending > 0;
+}
+
+/**
+ * O dot (nas Configuracoes) alerta enquanto ha QUALQUER pendencia — tanto de
+ * "Pronto para atender" quanto de "Perfil completo".
+ */
+export function hasAnyPending(c: Completion): boolean {
+  return c.basic.pending > 0 || c.profile.pending > 0;
+}
+
 function tracker(items: CompletionItem[]): CompletionTracker {
   const total = items.length;
   const done = items.filter((i) => i.done).length;

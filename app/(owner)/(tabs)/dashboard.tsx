@@ -16,22 +16,23 @@ import { useIsFocused } from "@react-navigation/native";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
-import type { EstablishmentDetail } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
+import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
-import { ownerCompletion } from "@lib/completion";
-import { CompletionCard } from "@components/CompletionCard";
+import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
 
 export default function OwnerDashboardScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
   const fetchMine = useEstablishmentStore((s) => s.fetchMine);
-  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
   const [isToggling, setIsToggling] = useState(false);
-  const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
   const isFocused = useIsFocused();
+
+  // Completude (faixa de prontidao). Fonte unica compartilhada com o checklist
+  // (Dados do Estabelecimento) e o dot (menu). Ver useOwnerCompletion.
+  const { completion } = useOwnerCompletion();
 
   useEffect(() => {
     if (!establishment) {
@@ -51,13 +52,6 @@ export default function OwnerDashboardScreen() {
   const isOpen = status === "OPEN";
   const establishmentId = establishment?.id;
 
-  // Detalhe (endereco/telefone/instagram) p/ o checklist de prontidao — recarrega
-  // ao focar a tela (o usuario pode ter acabado de editar num submenu).
-  useEffect(() => {
-    if (!establishmentId || !isFocused) return;
-    fetchEstablishmentById(establishmentId).then(setDetail).catch(() => {});
-  }, [establishmentId, isFocused, fetchEstablishmentById]);
-
   const { data: queueData, refetch } = useQueuePolling(establishmentId ?? null);
   const totalInQueue = queueData?.total_in_queue ?? 0;
   const professionals: ProfessionalWithQueue[] = queueData?.professionals ?? [];
@@ -67,30 +61,6 @@ export default function OwnerDashboardScreen() {
   const hasActiveWork =
     totalInQueue > 0 || professionals.some((p) => !!p.current_attendance);
   const [refreshing, setRefreshing] = useState(false);
-
-  // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
-  const completion = ownerCompletion({
-    hasName: !!establishment?.name,
-    hasServiceType: !!establishment?.service_type,
-    hasAddress: !!detail?.address?.neighborhood,
-    hasHours: !!establishment?.opening_time && !!establishment?.closing_time,
-    hasProfessionalWithService: professionals.length > 0,
-    isOpen: status === "OPEN",
-    hasPhone: !!detail?.phone,
-    hasInstagram: !!detail?.instagram,
-  });
-  const ownerRouteFor = (key: string): string | undefined => {
-    const map: Record<string, string> = {
-      name: "/(owner)/establishment-registration",
-      serviceType: "/(owner)/establishment-registration",
-      address: "/(owner)/establishment-data",
-      hours: "/(owner)/establishment-hours",
-      professionalWithService: `/(owner)/add-professional?establishmentId=${establishmentId ?? ""}`,
-      phone: "/(owner)/establishment-registration",
-      instagram: "/(owner)/establishment-registration",
-    };
-    return map[key];
-  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -206,10 +176,10 @@ export default function OwnerDashboardScreen() {
           {establishment.service_type}
         </Text>
 
-        <CompletionCard
+        <ReadinessFaixa
           completion={completion}
-          doneBanner="Você já aparece para clientes!"
-          routeFor={ownerRouteFor}
+          targetRoute={`/(owner)/establishment-data?establishmentId=${establishmentId ?? ""}`}
+          goalNoun="aparecer aos clientes"
         />
 
         <HStack mt="$4" space="md">

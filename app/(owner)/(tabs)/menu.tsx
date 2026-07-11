@@ -1,5 +1,6 @@
 import {
   VStack,
+  HStack,
   Heading,
   Text,
   Pressable,
@@ -14,14 +15,18 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { cardShadow } from "@lib/styles";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
+import { PendingDot } from "@components/PendingDot";
+import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
+import { hasAnyPending } from "@lib/completion";
 
 type MenuItemProps = {
   label: string;
   onPress: () => void;
   color?: string;
+  dot?: boolean;
 };
 
-function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
+function MenuItem({ label, onPress, color = "$coolGray900", dot = false }: MenuItemProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -32,9 +37,12 @@ function MenuItem({ label, onPress, color = "$coolGray900" }: MenuItemProps) {
       style={cardShadow}
       $active-bg="$coolGray50"
     >
-      <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color={color}>
-        {label}
-      </Text>
+      <HStack alignItems="center" space="sm">
+        <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color={color}>
+          {label}
+        </Text>
+        {dot && <PendingDot />}
+      </HStack>
     </Pressable>
   );
 }
@@ -45,6 +53,8 @@ export default function OwnerMenuScreen() {
   const resetProfessional = useProfessionalStore((s) => s.reset);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const { completion } = useOwnerCompletion();
+  const hasPending = hasAnyPending(completion);
 
   const isProfessional = user?.roles?.includes("PROFESSIONAL");
 
@@ -194,6 +204,7 @@ export default function OwnerMenuScreen() {
           {establishment?.id && (
             <MenuItem
               label="Dados do Estabelecimento"
+              dot={hasPending}
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/establishment-data",

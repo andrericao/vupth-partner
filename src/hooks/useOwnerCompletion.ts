@@ -1,0 +1,57 @@
+import { useEffect, useState } from "react";
+import { useIsFocused } from "@react-navigation/native";
+import { useEstablishmentStore } from "@store/establishment.store";
+import type { EstablishmentDetail } from "@store/establishment.store";
+import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
+import { ownerCompletion } from "@lib/completion";
+import type { Completion } from "@lib/completion";
+
+// Fonte unica da completude do DONO — usada pela faixa (Home/dashboard), pelo
+// checklist (Dados do Estabelecimento) e pelo dot (menu). Evita duplicar o
+// mapeamento de flags. A query da fila e deduplicada pelo React Query (mesma
+// queryKey), entao chamar em varias telas nao multiplica requisicoes.
+export function useOwnerCompletion(): {
+  completion: Completion;
+  professionalsCount: number;
+  routeFor: (key: string) => string | undefined;
+} {
+  const establishment = useEstablishmentStore((s) => s.establishment);
+  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
+  const establishmentId = establishment?.id ?? null;
+  const isFocused = useIsFocused();
+  const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
+
+  const { data: queueData } = useProfessionalsWithQueueQuery(establishmentId);
+  const professionals = queueData?.professionals ?? [];
+
+  useEffect(() => {
+    if (!establishmentId || !isFocused) return;
+    fetchEstablishmentById(establishmentId).then(setDetail).catch(() => {});
+  }, [establishmentId, isFocused, fetchEstablishmentById]);
+
+  const completion = ownerCompletion({
+    hasName: !!establishment?.name,
+    hasServiceType: !!establishment?.service_type,
+    hasAddress: !!detail?.address?.neighborhood,
+    hasHours: !!establishment?.opening_time && !!establishment?.closing_time,
+    hasProfessionalWithService: professionals.length > 0,
+    isOpen: (establishment?.open_status ?? "CLOSED") === "OPEN",
+    hasPhone: !!detail?.phone,
+    hasInstagram: !!detail?.instagram,
+  });
+
+  const routeFor = (key: string): string | undefined => {
+    const map: Record<string, string> = {
+      name: "/(owner)/establishment-registration",
+      serviceType: "/(owner)/establishment-registration",
+      address: "/(owner)/onboarding/address",
+      hours: "/(owner)/establishment-hours",
+      professionalWithService: `/(owner)/add-professional?establishmentId=${establishmentId ?? ""}`,
+      phone: "/(owner)/establishment-registration",
+      instagram: "/(owner)/establishment-registration",
+    };
+    return map[key];
+  };
+
+  return { completion, professionalsCount: professionals.length, routeFor };
+}

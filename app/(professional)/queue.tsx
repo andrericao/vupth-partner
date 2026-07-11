@@ -24,7 +24,7 @@ import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
-import { CompletionCard } from "@components/CompletionCard";
+import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
@@ -298,16 +298,6 @@ export default function ProfessionalQueueScreen() {
     hasNickname: !!professional?.nickname,
     hasSpecialty: !!professional?.specialty,
   });
-  const proRouteFor = (key: string): string | undefined => {
-    const map: Record<string, string> = {
-      affiliated: "/(professional)/find-establishment",
-      service: "/(professional)/my-services",
-      nickname: "/(professional)/settings",
-      specialty: "/(professional)/settings",
-    };
-    return map[key];
-  };
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
@@ -428,10 +418,10 @@ export default function ProfessionalQueueScreen() {
           Minha fila
         </Heading>
 
-        <CompletionCard
+        <ReadinessFaixa
           completion={completion}
-          doneBanner="Você já aparece para clientes!"
-          routeFor={proRouteFor}
+          targetRoute="/(professional)/settings"
+          goalNoun="atender clientes"
         />
 
         {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}

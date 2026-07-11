@@ -11,6 +11,8 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
+import { CompletionCard } from "@components/CompletionCard";
+import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -25,6 +27,7 @@ export default function ProfessionalSettingsScreen() {
   const user = useAuthStore((s) => s.user);
   const updateEmail = useAuthStore((s) => s.updateEmail);
   const updatePassword = useAuthStore((s) => s.updatePassword);
+  const { completion, routeFor } = useProfessionalCompletion();
 
   // Convites de vinculacao recebidos do owner (type INVITATION, PENDING).
   const [invites, setInvites] = useState<any[]>([]);
@@ -250,6 +253,14 @@ export default function ProfessionalSettingsScreen() {
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Configuracoes
         </Heading>
+
+        {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
+            faixa. Encaminha para buscar estabelecimento / adicionar servico. */}
+        <CompletionCard
+          completion={completion}
+          doneBanner="Você já aparece para clientes!"
+          routeFor={routeFor}
+        />
 
         {invites.length > 0 && (
           <VStack
