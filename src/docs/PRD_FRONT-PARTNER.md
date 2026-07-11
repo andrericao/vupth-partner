@@ -581,7 +581,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 - **Atender fora de ordem — "Adiantar" (start direto) FEITO; promover/reordenar (S4) segue futuro.** O refinamento 2026-06-28 pedia **promover** o cliente ao 1o lugar (os demais descem). A decisao **2026-07-04** (roadmap #3, confirmada em teste) foi mais simples: o botao **"Adiantar"** (cards fora do 1o lugar) inicia o atendimento **direto** via `PATCH /attendances/{id}/start`, **com confirmacao** — atende o escolhido na frente **sem reordenar** os demais. Isso ja resolve o caso "o da vez nao chegou, atende o 3o". ✅ **Feito** (commit `2489299`). **O que ainda seria mais bonito (S4, backend, item 8, NAO bloqueia):** `PATCH /attendances/{id}/promote` que move ao indice 0 e empurra os demais (para a fila refletir a nova ordem apos promover). `start` sozinho nao reordena (PRD_BACKEND l.2924, "promover ao indice 0" = adicao pequena sob demanda).
 - **Preco: "cliente paga tudo" (0%) → profissional recebe EXATAMENTE o digitado — ✅ FEITO (2026-06-28).** `calculatePricing` reescrito: `proReceives = round2(digitado − absorvido)` (piso desacoplado do arredondamento) — em **0% absorcao `proReceives === digitado`** (antes recebia centavos a menos, ex.: R$100→R$99,55). A **absorcao continua** (recebe menos so por escolha). `clientPrice` em X,90 (com `ceilTo90` de seguranca p/ nao ficar abaixo do piso em precos baixos); taxa = `clientPrice − proReceives`. Testes reescritos (garantia `0% => digitado`). **Unificado:** `src/utils/pricing.ts` (morto, so o teste usava) **removido**; fonte unica = `src/lib/pricing.ts`.
 
-### Feedback 2026-07-09 — Checklists de prontidao (2 "completes") · 🆕 FRONT, mockup primeiro
+### Feedback 2026-07-09 — Checklists de prontidao (2 "completes") · ✅ IMPLEMENTADO (mockup aprovado)
 
 Motivacao: o usuario **se perdeu no teste** — nao sabia o que faltava p/ o estabelecimento/profissional aparecer ao cliente. Solucao: **dois medidores** por perfil (dono e profissional), calculados **no front** (dados que ja temos; nao depende de backend).
 
@@ -594,9 +594,13 @@ Motivacao: o usuario **se perdeu no teste** — nao sabia o que faltava p/ o est
 
 **UI:** card com **2 barras** — "Pronto para atender" em destaque (verde + "Voce ja aparece para clientes! 🎉" ao fechar) e "Perfil completo" discreta abaixo. Cada item pendente e **clicavel** → tela de completar. O card some (ou colapsa) quando o basico fecha. Fica no **topo do dashboard do dono** e na **tela do profissional**.
 
-**Dado que pode faltar (nota):** p/ distinguir "tem profissional SEM servico" de "nao tem profissional", o front pode precisar da **lista completa de profissionais** do estabelecimento (o `professionals-with-queue` esconde os sem servico, #31). Se faltar, vira item de backend pequeno; MVP pode aproximar.
+**Dado que falta (registrado como backend S9):** p/ distinguir "tem profissional SEM servico" de "nao tem profissional", o front precisa da **lista completa de profissionais** do estabelecimento (o `professionals-with-queue` esconde os sem servico, #31). Enquanto nao vem, o MVP **colapsa** os dois itens num so. Ver HANDOFF_BACKEND **S9**.
 
-**Processo:** mockup (HTML/SVG em `design/`) **antes de codar** — `design/readiness-checklists.html`. Front-computavel, nao bloqueado por backend.
+**Processo:** mockup (`design/readiness-checklists.html`) **aprovado** pelo usuario antes de codar. Front-computavel, nao bloqueado por backend.
+
+**✅ Estado do codigo (commit `02e8449`) — o que foi entregue vs. o design acima:** `src/lib/completion.ts` (logica pura `ownerCompletion`/`professionalCompletion` +testes), `src/components/CompletionCard.tsx` (2 barras + itens clicaveis + banner verde), ligado no dashboard do dono (busca detalhe endereco/telefone/instagram) e na fila do profissional (`fetchMyServices`). **Deltas do MVP** vs. a lista acima:
+- **Dono, basico:** os itens "≥1 vinculado" e "≥1 com servico" **colapsaram em UM** ("1+ profissional com servico") — sem a lista completa de profissionais nao da p/ distinguir (ver nota abaixo). Ficaram **6 itens** (nao 7).
+- **Perfil (B):** **foto ficou de fora** (dono e profissional) — nao ha tela de upload de imagem ainda. Dono B = telefone + instagram; profissional B = apelido + especialidade.
 
 ---
 
