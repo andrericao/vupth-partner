@@ -83,7 +83,11 @@
       "src/store/**/*.{ts,tsx}",
       "src/utils/**/*.{ts,tsx}",
       "!src/**/__tests__/**",
-      "!src/**/*.d.ts"
+      "!src/**/*.d.ts",
+      "!src/lib/types.ts",
+      "!src/lib/styles.ts",
+      "!src/lib/queryClient.ts",
+      "!src/utils/productDatas.ts"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",

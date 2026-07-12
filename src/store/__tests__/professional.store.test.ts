@@ -1,4 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
+import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import { useProfessionalStore } from "../professional.store";
 
@@ -404,6 +405,101 @@ describe("professional.store", () => {
         "/professional-queue/prof-uuid-1/service-items/svc-1"
       );
       expect(useProfessionalStore.getState().myServices).toEqual([]);
+    });
+  });
+
+  describe("setProfessional", () => {
+    it("normaliza, persiste no SecureStore e seta o estado", async () => {
+      await useProfessionalStore.getState().setProfessional(AFFILIATE_RESPONSE as any);
+
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        "vupth_professional",
+        expect.any(String)
+      );
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-1");
+    });
+  });
+
+  describe("switchEstablishment", () => {
+    it("DELETE do estabelecimento atual + POST affiliate no novo", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onDelete("/professional/me/establishment").reply(204);
+      mock.onPost("/professional/affiliate").reply(200, {
+        ...AFFILIATE_RESPONSE,
+        establishment_id: "estab-uuid-2",
+        establishment_name: "Outra Barbearia",
+      });
+
+      await useProfessionalStore.getState().switchEstablishment("estab-uuid-2");
+
+      expect(mock.history.delete[0].url).toBe("/professional/me/establishment");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({ establishmentId: "estab-uuid-2" });
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-2");
+    });
+  });
+
+  describe("addMyServiceItem", () => {
+    it("lanca quando nao ha professional carregado", async () => {
+      useProfessionalStore.setState({ professional: null });
+
+      await expect(
+        useProfessionalStore.getState().addMyServiceItem("CORTE_MAQUINA", "Corte", 40)
+      ).rejects.toThrow("Professional not found");
+    });
+
+    it("POST /professional-queue/{id}/add-service-items e retorna o item criado", async () => {
+      useProfessionalStore.setState({ professional: REGISTER_RESPONSE });
+      const created = { id: "svc-9", serviceItemType: "CORTE_MAQUINA", customName: "Corte", price: 40 };
+      mock.onPost("/professional-queue/prof-uuid-1/add-service-items").reply(201, created);
+
+      const out = await useProfessionalStore
+        .getState()
+        .addMyServiceItem("CORTE_MAQUINA", "Corte", 40);
+
+      expect(mock.history.post[0].url).toBe("/professional-queue/prof-uuid-1/add-service-items");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({
+        serviceItemType: "CORTE_MAQUINA",
+        customName: "Corte",
+        price: 40,
+      });
+      expect(out).toEqual(created);
+    });
+  });
+
+  describe("restoreProfessional", () => {
+    it("restaura do SecureStore quando ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify(AFFILIATE_RESPONSE)
+      );
+
+      await useProfessionalStore.getState().restoreProfessional();
+
+      expect(SecureStore.getItemAsync).toHaveBeenCalledWith("vupth_professional");
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-1");
+    });
+
+    it("nao altera o estado quando nao ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
+
+      await useProfessionalStore.getState().restoreProfessional();
+
+      expect(useProfessionalStore.getState().professional).toBeNull();
+    });
+  });
+
+  describe("reset", () => {
+    it("limpa o estado e apaga o SecureStore", () => {
+      useProfessionalStore.setState({
+        professional: AFFILIATE_RESPONSE,
+        myServices: [{ id: "svc-1" }] as any,
+      });
+
+      useProfessionalStore.getState().reset();
+
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_professional");
+      const s = useProfessionalStore.getState();
+      expect(s.professional).toBeNull();
+      expect(s.myServices).toEqual([]);
     });
   });
 });
