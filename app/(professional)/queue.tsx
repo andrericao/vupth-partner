@@ -25,6 +25,7 @@ import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { ProfessionalStatusControl } from "@components/ProfessionalStatusControl";
 import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
@@ -421,6 +422,11 @@ export default function ProfessionalQueueScreen() {
           completion={completion}
           targetRoute="/(professional)/settings"
           goalNoun="atender clientes"
+        />
+
+        {/* S1 — controle de status do profissional (stub; backend #10). */}
+        <ProfessionalStatusControl
+          hasQueue={waitingList.length > 0 || !!currentAttendance}
         />
 
         {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
