@@ -4,6 +4,7 @@ import {
   FormControl,
   Heading,
   Text,
+  Pressable,
   ScrollView,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
@@ -12,6 +13,7 @@ import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { InputPassword } from "@components/InputPassWord";
+import { comingSoon } from "@components/comingSoon";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
@@ -107,6 +109,14 @@ export default function LoginScreen() {
             title={isLoading ? "Entrando..." : "Entrar"}
             onPress={handleSubmit}
           />
+
+          {/* S7 (stub; backend #6) — recuperacao de senha. Ao ligar: navegar
+              p/ a tela de pedir e-mail (POST /auth/forgot-password). */}
+          <Pressable onPress={() => comingSoon("A recuperação de senha")} mt="$4" alignSelf="center">
+            <Text fontFamily="$body" fontSize="$sm" color="$green600" fontWeight="$medium">
+              Esqueci minha senha
+            </Text>
+          </Pressable>
         </VStack>
 
         <VStack mt="$12" space="sm" flex={1} w="$full">
