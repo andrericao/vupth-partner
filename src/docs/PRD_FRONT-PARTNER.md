@@ -586,21 +586,23 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 Motivacao: o usuario **se perdeu no teste** — nao sabia o que faltava p/ o estabelecimento/profissional aparecer ao cliente. Solucao: **dois medidores** por perfil (dono e profissional), calculados **no front** (dados que ja temos; nao depende de backend).
 
 - **A) "Pronto para atender" (o basico)** — portao FUNCIONAL (bate com os gates do backend #31). 100% aqui = **ja da pra atender / aparece ao cliente**.
-  - **Dono:** nome · tipo de servico · endereco/bairro · horario de funcionamento · ≥1 profissional vinculado · ≥1 profissional com servico · aberto.
-  - **Profissional:** vinculado a um estabelecimento · ≥1 servico cadastrado · (estabelecimento pronto e aberto — do dono).
+  - **Dono:** nome · tipo de servico · endereco/bairro · horario de funcionamento · ≥1 profissional com servico. **NAO inclui "abrir a loja"** — abrir/fechar e cotidiano, nao cadastro (ver nota 2026-07-12).
+  - **Profissional:** vinculado a um estabelecimento · ≥1 servico cadastrado. **NAO inclui "loja aberta"** (cotidiano do dono).
 - **B) "Perfil completo" (100%)** — regra MACIA (nao bloqueia atender; melhora a apresentacao/confianca). Inclui o basico **+** extras.
   - **Dono:** + telefone · Instagram · foto do estabelecimento (`url_image`).
   - **Profissional:** + apelido (nickname) · especialidade · (foto de perfil — quando o backend expuser, roadmap #7).
 
-**UI:** card com **2 barras** — "Pronto para atender" em destaque (verde + "Voce ja aparece para clientes! 🎉" ao fechar) e "Perfil completo" discreta abaixo. Cada item pendente e **clicavel** → tela de completar. O card some (ou colapsa) quando o basico fecha. Fica no **topo do dashboard do dono** e na **tela do profissional**.
+**UI:** card com **2 barras** — "Pronto para atender" em destaque (verde + banner "Cadastro completo — ja pode abrir/atender 🎉" ao fechar) e "Perfil completo" discreta abaixo. Cada item pendente e **clicavel** → tela de completar. **(Posicao atualizada 2026-07-11:** o card vive nas **Configuracoes**; a **Home** mostra so a faixa ambar — ver evolucao abaixo.)**
 
 **Dado que falta (registrado como backend S9):** p/ distinguir "tem profissional SEM servico" de "nao tem profissional", o front precisa da **lista completa de profissionais** do estabelecimento (o `professionals-with-queue` esconde os sem servico, #31). Enquanto nao vem, o MVP **colapsa** os dois itens num so. Ver HANDOFF_BACKEND **S9**.
 
 **Processo:** mockup (`design/readiness-checklists.html`) **aprovado** pelo usuario antes de codar. Front-computavel, nao bloqueado por backend.
 
 **✅ Estado do codigo (commit `02e8449`) — o que foi entregue vs. o design acima:** `src/lib/completion.ts` (logica pura `ownerCompletion`/`professionalCompletion` +testes), `src/components/CompletionCard.tsx` (2 barras + itens clicaveis + banner verde), ligado no dashboard do dono (busca detalhe endereco/telefone/instagram) e na fila do profissional (`fetchMyServices`). **Deltas do MVP** vs. a lista acima:
-- **Dono, basico:** os itens "≥1 vinculado" e "≥1 com servico" **colapsaram em UM** ("1+ profissional com servico") — sem a lista completa de profissionais nao da p/ distinguir (ver nota abaixo). Ficaram **6 itens** (nao 7).
+- **Dono, basico:** os itens "≥1 vinculado" e "≥1 com servico" **colapsaram em UM** ("1+ profissional com servico") — sem a lista completa de profissionais nao da p/ distinguir (ver nota abaixo).
 - **Perfil (B):** **foto ficou de fora** (dono e profissional) — nao ha tela de upload de imagem ainda. Dono B = telefone + instagram; profissional B = apelido + especialidade.
+
+> 🐛 **FIX 2026-07-12 — "abrir estabelecimento" NAO e pendencia (commit `138c14d`).** O item "abrir estabelecimento" (dono) e "estabelecimento aberto" (profissional) **sairam** do checklist basico. Era circular (nao dava p/ concluir sem abrir) e re-disparava a faixa **toda vez que a loja fechasse** — mas abrir/fechar e **cotidiano**, nao etapa de cadastro. Agora o basico so mede o **setup unico**: **dono = 5 itens** (nome, tipo, endereco, horario, 1+ profissional com servico); **profissional = 2 itens** (vinculado, 1+ servico). Ao fechar em 100%, o banner **notifica** "Cadastro completo — ja pode abrir/atender". O gate real de abertura segue no backend (422 `ESTABLISHMENT_NOT_READY`, tratado no dashboard).
 
 > 🔄 **EVOLUCAO 2026-07-11 — o card virou faixa + dot (mockup `design/readiness-faixa.html` aprovado; commit `08216c0`).** A Home nao tem mais o cartao-checklist fixo. No lugar:
 > - **`ReadinessFaixa.tsx`** (faixa **ambar** dispensavel, mesma forma da faixa "Em fila" do client): aparece **a cada abertura do app** enquanto houver pendencia de **"Pronto para atender"** (`hasBasicPending`); o **✕** fecha na sessao (dismissal em memoria, `ui.store.ts`, reseta no launch); tocar encaminha para as **Configuracoes** (dono → Dados do Estabelecimento; profissional → settings). Pendencia **so de perfil NAO gera faixa**.
