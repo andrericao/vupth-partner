@@ -1,4 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
+import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import { useEstablishmentStore } from "../establishment.store";
 import { useAuthStore } from "../auth.store";
@@ -515,6 +516,62 @@ describe("establishment.store", () => {
       expect(detail.instagram).toBeNull();
       expect(detail.opening_time).toBeNull();
       expect(detail.address).toBeNull();
+    });
+  });
+
+  describe("addAddress", () => {
+    it("POST /establishments/{id}/addresses e retorna o endereco criado", async () => {
+      const addr = {
+        street: "Rua A",
+        number: "10",
+        neighborhood: "Centro",
+        city: "Sao Paulo",
+        state: "SP",
+        zipCode: "01001000",
+      };
+      mock
+        .onPost("/establishments/estab-uuid-1/addresses")
+        .reply(201, { id: "addr-1", ...addr });
+
+      const out = await useEstablishmentStore
+        .getState()
+        .addAddress("estab-uuid-1", addr as any);
+
+      expect(mock.history.post[0].url).toBe("/establishments/estab-uuid-1/addresses");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual(addr);
+      expect(out).toMatchObject({ id: "addr-1", neighborhood: "Centro" });
+    });
+  });
+
+  describe("restoreEstablishment", () => {
+    it("restaura do SecureStore quando ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify(ESTABLISHMENT_RESPONSE)
+      );
+
+      await useEstablishmentStore.getState().restoreEstablishment();
+
+      expect(SecureStore.getItemAsync).toHaveBeenCalledWith("vupth_establishment");
+      expect(useEstablishmentStore.getState().establishment?.id).toBe("estab-uuid-1");
+    });
+
+    it("nao altera o estado quando nao ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
+
+      await useEstablishmentStore.getState().restoreEstablishment();
+
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
+    });
+  });
+
+  describe("reset", () => {
+    it("limpa o estado e apaga o SecureStore", () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE as any });
+
+      useEstablishmentStore.getState().reset();
+
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_establishment");
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
     });
   });
 });
