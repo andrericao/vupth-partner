@@ -18,6 +18,7 @@ import {
 import { router } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
+import { cardShadow } from "@lib/styles";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
@@ -277,9 +278,8 @@ export default function ProfessionalOnboardingScreen() {
                   bg="$white"
                   py="$3"
                   px="$4"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor="$coolGray200"
+                  borderRadius="$2xl"
+                  style={cardShadow}
                 >
                   <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
                     {estab.name}
@@ -330,9 +330,8 @@ export default function ProfessionalOnboardingScreen() {
           <VStack
             bg="$white"
             p="$6"
-            borderRadius="$lg"
-            borderWidth="$1"
-            borderColor="$coolGray200"
+            borderRadius="$2xl"
+            style={cardShadow}
             w="$full"
             mb="$6"
           >

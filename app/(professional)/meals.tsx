@@ -12,6 +12,7 @@ import {
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
+import { cardShadow } from "@lib/styles";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
@@ -243,9 +244,8 @@ export default function MealsScreen() {
                   key={m.intervalId}
                   bg="$white"
                   p="$3"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor="$coolGray200"
+                  borderRadius="$2xl"
+                  style={cardShadow}
                   justifyContent="space-between"
                   alignItems="center"
                 >
