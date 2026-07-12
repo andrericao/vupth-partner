@@ -11,6 +11,7 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
+import { ExpedienteCard } from "@components/ExpedienteCard";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useProfessionalStore, type ProfessionalReport } from "@store/professional.store";
 import { periodRange } from "@lib/time";
@@ -99,6 +100,8 @@ export default function ProfessionalReportsScreen() {
             </Pressable>
           ))}
         </HStack>
+
+        <ExpedienteCard />
 
         <Divider my="$6" />
 
