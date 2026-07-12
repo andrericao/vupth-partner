@@ -555,9 +555,17 @@ export default function ProfessionalQueueScreen() {
                     </Text>
                   </VStack>
                   {!active && (
-                    <Pressable onPress={() => handleEditMeal(m)} px="$2" py="$1">
-                      <Text fontSize="$lg" color="$amber700">✎</Text>
-                    </Pressable>
+                    <>
+                      {/* S3 (stub; backend "refeicoes Modelo B") — adiantar/adiar
+                          a refeicao na janela flexivel. Ao ligar: mover o
+                          placement no backend. */}
+                      <Pressable onPress={() => comingSoon("Adiantar ou adiar a refeição")} px="$2" py="$1">
+                        <Text fontSize="$lg" color="$amber700">⏱</Text>
+                      </Pressable>
+                      <Pressable onPress={() => handleEditMeal(m)} px="$2" py="$1">
+                        <Text fontSize="$lg" color="$amber700">✎</Text>
+                      </Pressable>
+                    </>
                   )}
                   {active ? (
                     <Button
