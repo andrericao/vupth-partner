@@ -15,6 +15,7 @@ import { Button } from "@components/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskPhone, unmask } from "@lib/masks";
+import { cardShadow } from "@lib/styles";
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -91,7 +92,7 @@ export default function EstablishmentRegistrationScreen() {
           </Heading>
 
           <VStack mt="$6" space="md">
-            <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+            <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
               {editing ? (
                 <FormControl>
                   <Input

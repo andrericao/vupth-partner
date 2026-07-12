@@ -13,6 +13,7 @@ import { validatePassword } from "@lib/passwordValidation";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
+import { cardShadow } from "@lib/styles";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -312,7 +313,7 @@ export default function ProfessionalSettingsScreen() {
         )}
 
         <VStack mt="$6" space="md">
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Nome
             </Text>
@@ -346,7 +347,7 @@ export default function ProfessionalSettingsScreen() {
             )}
           </VStack>
 
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Apelido
             </Text>
@@ -381,7 +382,7 @@ export default function ProfessionalSettingsScreen() {
             )}
           </VStack>
 
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               E-mail
             </Text>
@@ -416,7 +417,7 @@ export default function ProfessionalSettingsScreen() {
             )}
           </VStack>
 
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Senha
             </Text>
@@ -458,7 +459,7 @@ export default function ProfessionalSettingsScreen() {
 
           <Divider my="$2" />
 
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Refeicoes (almoco/janta)
             </Text>
