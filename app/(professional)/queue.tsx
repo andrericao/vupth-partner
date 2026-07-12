@@ -26,6 +26,7 @@ import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalStatusControl } from "@components/ProfessionalStatusControl";
+import { comingSoon } from "@components/comingSoon";
 import * as SecureStore from "expo-secure-store";
 
 // Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
@@ -156,6 +157,9 @@ function AttendanceCard({
         ) : (
           <VStack mt="$3" space="sm">
             <Button title="Adiantar" onPress={onAdvance} bg="$green500" $active-bg="$green600" h="$10" />
+            {/* S4 (stub; backend #4) — promover ao TOPO sem atender (reordena a
+                fila). Ao ligar: PATCH /attendances/{id}/promote. */}
+            <Button title="Promover ao topo" onPress={() => comingSoon("Promover ao topo da fila")} bg="transparent" borderWidth="$1" borderColor="$green400" textColor="$green600" $active-bg="$green50" h="$10" />
             {isLate && (
               <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
             )}
