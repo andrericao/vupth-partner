@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-06-26 (v9 — alinhado com PRD_BACKEND 2026-06-25: #16 apelido e #19 LATE/encaixe ENTREGUES → desbloqueiam partner #2 e #3; auto-rollback do backend ja existe, falta so secrets do Render)
+> **Ultima atualizacao:** 2026-07-11 (v10 — prontidao virou **faixa ambar dispensavel na Home + checklist nas Configuracoes + dot** (sec. abaixo); **redesign** dos formularios/cards restantes concluido (cardShadow + $2xl); **BUG4** resolvido no front (`includeAll=true` na busca de afiliacao); **cobertura de testes** 85→94% stmts / 72→82% branches (224 testes) + ratchet do threshold p/ 93/80/94/94; handoff reconciliado com o backend — numeracao dinamica por prioridade, chave = NOME)
 
 ---
 
@@ -602,12 +602,18 @@ Motivacao: o usuario **se perdeu no teste** — nao sabia o que faltava p/ o est
 - **Dono, basico:** os itens "≥1 vinculado" e "≥1 com servico" **colapsaram em UM** ("1+ profissional com servico") — sem a lista completa de profissionais nao da p/ distinguir (ver nota abaixo). Ficaram **6 itens** (nao 7).
 - **Perfil (B):** **foto ficou de fora** (dono e profissional) — nao ha tela de upload de imagem ainda. Dono B = telefone + instagram; profissional B = apelido + especialidade.
 
+> 🔄 **EVOLUCAO 2026-07-11 — o card virou faixa + dot (mockup `design/readiness-faixa.html` aprovado; commit `08216c0`).** A Home nao tem mais o cartao-checklist fixo. No lugar:
+> - **`ReadinessFaixa.tsx`** (faixa **ambar** dispensavel, mesma forma da faixa "Em fila" do client): aparece **a cada abertura do app** enquanto houver pendencia de **"Pronto para atender"** (`hasBasicPending`); o **✕** fecha na sessao (dismissal em memoria, `ui.store.ts`, reseta no launch); tocar encaminha para as **Configuracoes** (dono → Dados do Estabelecimento; profissional → settings). Pendencia **so de perfil NAO gera faixa**.
+> - **`CompletionCard.tsx` migrou para as Configuracoes** — dono em `establishment-data.tsx` (+ campo "Profissionais vinculados"); profissional em `settings.tsx`. Passo a passo completo (2 barras) vive la.
+> - **`PendingDot.tsx`** (dot ambar) no item de Configuracoes (menu do dono / perfil do profissional) enquanto houver **qualquer** pendencia (`hasAnyPending`).
+> - Fonte unica da completude: hooks `useOwnerCompletion` / `useProfessionalCompletion` (query sem socket p/ nao abrir 2o STOMP). +testes de `hasBasicPending`/`hasAnyPending` e `ui.store`.
+
 ---
 
 ## 11. Handoffs + alinhamento com o backend
 
 > **Handoffs consolidados em arquivos dedicados** (padrao do front-client — nao espalhar pelo corpo do PRD):
-> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG1–BUG4, S1–S8), em tabela consolidada + detalhes.
+> - 📄 **[`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md)** — tudo que o front-partner precisa do **backend** (BUG1–BUG2, S1–S9; numeracao dinamica por prioridade, chave = NOME), em tabela consolidada + detalhes.
 > - 📄 **[`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** — itens cujo frontend pertence ao **app cliente** (C1–C9).
 >
 > Esta secao guarda so o **resumo de alinhamento** (o que o backend ja entregou e desbloqueou o partner). A lista de afazeres do proprio partner esta na **secao 10**. A referencia S2 (rebaixada) e a 11.2 (contrato de refeicoes ja entregue) seguem abaixo.
