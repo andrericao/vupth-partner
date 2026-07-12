@@ -294,7 +294,6 @@ export default function ProfessionalQueueScreen() {
   const completion = professionalCompletion({
     isAffiliated: !!establishmentId,
     hasService: myServices.length > 0,
-    establishmentReady: (data?.open_status ?? "") === "OPEN",
     hasNickname: !!professional?.nickname,
     hasSpecialty: !!professional?.specialty,
   });

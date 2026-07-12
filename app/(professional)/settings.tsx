@@ -259,7 +259,7 @@ export default function ProfessionalSettingsScreen() {
             faixa. Encaminha para buscar estabelecimento / adicionar servico. */}
         <CompletionCard
           completion={completion}
-          doneBanner="Você já aparece para clientes!"
+          doneBanner="Cadastro completo — já pode atender!"
           routeFor={routeFor}
         />
 

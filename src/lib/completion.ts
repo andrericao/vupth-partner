@@ -56,13 +56,15 @@ export type OwnerCompletionInput = {
   hasAddress: boolean;
   hasHours: boolean;
   hasProfessionalWithService: boolean;
-  isOpen: boolean;
   // extras (perfil):
   hasPhone: boolean;
   hasInstagram: boolean;
 };
 
 export function ownerCompletion(i: OwnerCompletionInput): Completion {
+  // So ETAPAS DE CADASTRO (setup unico). ABRIR/FECHAR a loja NAO entra aqui —
+  // e acao COTIDIANA, nao pendencia (senao fechar a loja re-dispararia a faixa).
+  // 100% aqui = cadastro pronto => notifica "ja pode abrir e atender".
   const basic = tracker([
     { key: "name", label: "Nome", done: i.hasName },
     { key: "serviceType", label: "Tipo de serviço", done: i.hasServiceType },
@@ -72,7 +74,6 @@ export function ownerCompletion(i: OwnerCompletionInput): Completion {
     // colapsam num item so (ver HANDOFF_BACKEND — falta GET de todos os
     // profissionais, incl. os sem servico, que o professionals-with-queue esconde).
     { key: "professionalWithService", label: "1+ profissional com serviço", done: i.hasProfessionalWithService },
-    { key: "open", label: "Abrir estabelecimento", done: i.isOpen },
   ]);
   const profile = tracker([
     { key: "phone", label: "Telefone", done: i.hasPhone },
@@ -84,17 +85,18 @@ export function ownerCompletion(i: OwnerCompletionInput): Completion {
 export type ProfessionalCompletionInput = {
   isAffiliated: boolean;
   hasService: boolean;
-  establishmentReady: boolean;
   // extras (perfil):
   hasNickname: boolean;
   hasSpecialty: boolean;
 };
 
 export function professionalCompletion(i: ProfessionalCompletionInput): Completion {
+  // So o setup do PROFISSIONAL (vincular + cadastrar servico). Se a loja esta
+  // ABERTA e cotidiano do dono — nao e pendencia do profissional (senao o
+  // profissional veria a faixa toda vez que o dono fechasse a loja).
   const basic = tracker([
     { key: "affiliated", label: "Vinculado a um estabelecimento", done: i.isAffiliated },
     { key: "service", label: "1+ serviço cadastrado", done: i.hasService },
-    { key: "establishmentReady", label: "Estabelecimento pronto e aberto", done: i.establishmentReady },
   ]);
   const profile = tracker([
     { key: "nickname", label: "Apelido", done: i.hasNickname },

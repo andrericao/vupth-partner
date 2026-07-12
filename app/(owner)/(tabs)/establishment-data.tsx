@@ -59,7 +59,7 @@ export default function EstablishmentDataScreen() {
 
         <CompletionCard
           completion={completion}
-          doneBanner="Você já aparece para clientes!"
+          doneBanner="Cadastro completo — já pode abrir a loja e atender!"
           routeFor={routeFor}
         />
 

@@ -13,7 +13,6 @@ const ownerAllFalse: OwnerCompletionInput = {
   hasAddress: false,
   hasHours: false,
   hasProfessionalWithService: false,
-  isOpen: false,
   hasPhone: false,
   hasInstagram: false,
 };
@@ -21,34 +20,37 @@ const ownerAllFalse: OwnerCompletionInput = {
 const proAllFalse: ProfessionalCompletionInput = {
   isAffiliated: false,
   hasService: false,
-  establishmentReady: false,
   hasNickname: false,
   hasSpecialty: false,
 };
 
 describe("ownerCompletion", () => {
-  it("basic tem 6 itens e profile tem 2", () => {
+  it("basic tem 5 itens (SEM 'abrir', que e cotidiano) e profile tem 2", () => {
     const c = ownerCompletion(ownerAllFalse);
-    expect(c.basic.total).toBe(6);
+    expect(c.basic.total).toBe(5);
     expect(c.profile.total).toBe(2);
+  });
+
+  it("'abrir estabelecimento' NAO e item do checklist", () => {
+    const keys = ownerCompletion(ownerAllFalse).basic.items.map((i) => i.key);
+    expect(keys).not.toContain("open");
   });
 
   it("tudo falso => 0% e pending = total", () => {
     const c = ownerCompletion(ownerAllFalse);
     expect(c.basic.percent).toBe(0);
     expect(c.basic.done).toBe(0);
-    expect(c.basic.pending).toBe(6);
+    expect(c.basic.pending).toBe(5);
     expect(c.profile.percent).toBe(0);
   });
 
-  it("tudo verdadeiro => 100% nos dois", () => {
+  it("cadastro todo preenchido => basico 100% (independe da loja estar aberta)", () => {
     const c = ownerCompletion({
       hasName: true,
       hasServiceType: true,
       hasAddress: true,
       hasHours: true,
       hasProfessionalWithService: true,
-      isOpen: true,
       hasPhone: true,
       hasInstagram: true,
     });
@@ -57,7 +59,7 @@ describe("ownerCompletion", () => {
     expect(c.profile.percent).toBe(100);
   });
 
-  it("arredonda o percentual (4 de 6 = 67%)", () => {
+  it("arredonda o percentual (4 de 5 = 80%)", () => {
     const c = ownerCompletion({
       ...ownerAllFalse,
       hasName: true,
@@ -66,7 +68,7 @@ describe("ownerCompletion", () => {
       hasHours: true,
     });
     expect(c.basic.done).toBe(4);
-    expect(c.basic.percent).toBe(67);
+    expect(c.basic.percent).toBe(80);
   });
 
   it("basic e profile sao independentes (profile pode adiantar o basico)", () => {
@@ -79,33 +81,37 @@ describe("ownerCompletion", () => {
     const c = ownerCompletion(ownerAllFalse);
     const keys = c.basic.items.map((i) => i.key);
     expect(keys).toContain("hours");
-    expect(keys).toContain("open");
+    expect(keys).toContain("professionalWithService");
     expect(c.basic.items[0]).toHaveProperty("label");
     expect(c.basic.items[0]).toHaveProperty("done", false);
   });
 });
 
 describe("professionalCompletion", () => {
-  it("basic tem 3 itens e profile tem 2", () => {
+  it("basic tem 2 itens (SEM 'loja aberta', que e cotidiano do dono) e profile tem 2", () => {
     const c = professionalCompletion(proAllFalse);
-    expect(c.basic.total).toBe(3);
+    expect(c.basic.total).toBe(2);
     expect(c.profile.total).toBe(2);
   });
 
-  it("vinculado + servico + estabelecimento pronto => basico 100%", () => {
+  it("'estabelecimento aberto' NAO e item do checklist", () => {
+    const keys = professionalCompletion(proAllFalse).basic.items.map((i) => i.key);
+    expect(keys).not.toContain("establishmentReady");
+  });
+
+  it("vinculado + servico => basico 100%", () => {
     const c = professionalCompletion({
       ...proAllFalse,
       isAffiliated: true,
       hasService: true,
-      establishmentReady: true,
     });
     expect(c.basic.percent).toBe(100);
   });
 
-  it("so vinculado => 33% (1 de 3)", () => {
+  it("so vinculado => 50% (1 de 2)", () => {
     const c = professionalCompletion({ ...proAllFalse, isAffiliated: true });
     expect(c.basic.done).toBe(1);
-    expect(c.basic.percent).toBe(33);
+    expect(c.basic.percent).toBe(50);
   });
 
   it("apelido + especialidade => perfil 100%", () => {
@@ -127,7 +133,6 @@ describe("hasBasicPending (faixa)", () => {
       hasAddress: true,
       hasHours: true,
       hasProfessionalWithService: true,
-      isOpen: true,
       // perfil segue pendente (phone/instagram = false)
     });
     expect(c.basic.percent).toBe(100);
@@ -146,7 +151,6 @@ describe("hasAnyPending (dot)", () => {
       ...proAllFalse,
       isAffiliated: true,
       hasService: true,
-      establishmentReady: true,
     });
     expect(c.basic.pending).toBe(0);
     expect(hasAnyPending(c)).toBe(true);
@@ -156,7 +160,6 @@ describe("hasAnyPending (dot)", () => {
     const c = professionalCompletion({
       isAffiliated: true,
       hasService: true,
-      establishmentReady: true,
       hasNickname: true,
       hasSpecialty: true,
     });

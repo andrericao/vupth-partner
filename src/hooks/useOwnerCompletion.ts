@@ -35,7 +35,6 @@ export function useOwnerCompletion(): {
     hasAddress: !!detail?.address?.neighborhood,
     hasHours: !!establishment?.opening_time && !!establishment?.closing_time,
     hasProfessionalWithService: professionals.length > 0,
-    isOpen: (establishment?.open_status ?? "CLOSED") === "OPEN",
     hasPhone: !!detail?.phone,
     hasInstagram: !!detail?.instagram,
   });
