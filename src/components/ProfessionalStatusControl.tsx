@@ -48,6 +48,8 @@ export function ProfessionalStatusControl({ hasQueue }: { hasQueue: boolean }) {
               key={o.key}
               flex={1}
               onPress={() => selectStatus(o.key)}
+              accessibilityRole="button"
+              accessibilityLabel={o.label}
               opacity={disabled ? 0.45 : 1}
               bg={active ? o.activeBg : "$coolGray100"}
               borderRadius="$full"
@@ -81,7 +83,13 @@ export function ProfessionalStatusControl({ hasQueue }: { hasQueue: boolean }) {
         </Text>
       )}
 
-      <Pressable onPress={() => comingSoon("Fechar fila")} mt="$3" alignSelf="flex-start">
+      <Pressable
+        onPress={() => comingSoon("Fechar fila")}
+        accessibilityRole="button"
+        accessibilityLabel="Fechar fila"
+        mt="$3"
+        alignSelf="flex-start"
+      >
         <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$green600">
           Fechar fila (parar de aceitar novos)
         </Text>
