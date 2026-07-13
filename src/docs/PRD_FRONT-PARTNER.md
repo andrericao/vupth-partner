@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-07-11 (v10 — prontidao virou **faixa ambar dispensavel na Home + checklist nas Configuracoes + dot** (sec. abaixo); **redesign** dos formularios/cards restantes concluido (cardShadow + $2xl); **BUG4** resolvido no front (`includeAll=true` na busca de afiliacao); **cobertura de testes** 85→94% stmts / 72→82% branches (224 testes) + ratchet do threshold p/ 93/80/94/94; handoff reconciliado com o backend — numeracao dinamica por prioridade, chave = NOME)
+> **Ultima atualizacao:** 2026-07-12 (v11 — **UI STUBS "em breve"** p/ features backend-pending com cara de front (S1 status do profissional, S7 esqueci-senha, S4 promover-ao-topo, S5 expediente, S3 adiantar/adiar refeicao): a tela ja fica pronta e o clique avisa "em breve"; ao backend entregar, so conectar — ver [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md), coluna "front faz depois" marcada 🟡. **Antes (v10, 2026-07-11):** prontidao virou faixa+checklist+dot; "abrir loja" saiu do checklist (cotidiano, nao pendencia); redesign de forms concluido; BUG4 `includeAll`; cobertura 85→97% stmts / 72→84% branches (234 testes) + threshold ratchet p/ 96/82/97/97)
 
 ---
 
