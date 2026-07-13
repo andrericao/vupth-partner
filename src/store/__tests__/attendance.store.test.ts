@@ -161,6 +161,17 @@ describe("attendance.store", () => {
         useAttendanceStore.getState().fetchQueue("invalid-uuid")
       ).rejects.toThrow();
     });
+
+    it("cai para [] quando a resposta nao traz o campo professionals", async () => {
+      mock
+        .onGet("/establishment/id/estab-sem-profs/professionals-with-queue")
+        .reply(200, { name: "Loja Sem Profs" });
+
+      await useAttendanceStore.getState().fetchQueue("estab-sem-profs");
+
+      expect(useAttendanceStore.getState().professionals).toEqual([]);
+      expect(useAttendanceStore.getState().establishmentData?.name).toBe("Loja Sem Profs");
+    });
   });
 
   describe("startAttendance", () => {

@@ -1,6 +1,7 @@
 import MockAdapter from "axios-mock-adapter";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+import { unregisterDevice } from "@lib/push";
 import { useAuthStore } from "../auth.store";
 
 jest.mock("expo-secure-store", () => ({
@@ -8,6 +9,8 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
+
+jest.mock("@lib/push", () => ({ unregisterDevice: jest.fn().mockResolvedValue(undefined) }));
 
 const mockEstablishmentReset = jest.fn();
 const mockRestoreEstablishment = jest.fn().mockResolvedValue(undefined);
@@ -366,6 +369,50 @@ describe("auth.store", () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
+    });
+  });
+
+  describe("logout", () => {
+    it("desregistra o push quando ha token salvo e encerra a sessao", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+        k === "vupth_push_token" ? "expo-push-abc" : null
+      );
+      mock.onPost("/auth/logout").reply(200);
+      useAuthStore.setState({
+        user: { id: "u1", email: "a@b.c", roles: ["OWNER"] } as any,
+        isAuthenticated: true,
+      });
+
+      await useAuthStore.getState().logout();
+
+      expect(unregisterDevice).toHaveBeenCalledWith("expo-push-abc");
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_push_token");
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_access_token");
+      expect(mockEstablishmentReset).toHaveBeenCalled();
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.isAuthenticated).toBe(false);
+    });
+
+    it("sem push token nao chama unregisterDevice, mas ainda encerra a sessao", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+      mock.onPost("/auth/logout").reply(200);
+      useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+      await useAuthStore.getState().logout();
+
+      expect(unregisterDevice).not.toHaveBeenCalled();
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    });
+
+    it("encerra a sessao mesmo se o POST /auth/logout falhar", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+      mock.onPost("/auth/logout").reply(500);
+      useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+      await useAuthStore.getState().logout();
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
     });
   });
 });
