@@ -26,6 +26,14 @@ describe("ProfessionalStatusControl", () => {
     expect(comingSoon).not.toHaveBeenCalled();
   });
 
+  it("sem fila: 'Indisponível' esta habilitado e dispara comingSoon", () => {
+    const { getByLabelText } = renderWithProvider(
+      <ProfessionalStatusControl hasQueue={false} />
+    );
+    fireEvent.press(getByLabelText("Indisponível"));
+    expect(comingSoon).toHaveBeenCalled();
+  });
+
   it("'Fechar fila' chama comingSoon", () => {
     const { getByLabelText } = renderWithProvider(
       <ProfessionalStatusControl hasQueue={false} />
