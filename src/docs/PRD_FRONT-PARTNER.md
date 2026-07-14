@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + Expo SecureStore
 > **Testes:** Jest 29 + axios-mock-adapter
 >
-> **Ultima atualizacao:** 2026-07-12 (v11 — **UI STUBS "em breve"** p/ features backend-pending com cara de front (S1 status do profissional, S7 esqueci-senha, S4 promover-ao-topo, S5 expediente, S3 adiantar/adiar refeicao): a tela ja fica pronta e o clique avisa "em breve"; ao backend entregar, so conectar — ver [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md), coluna "front faz depois" marcada 🟡. **Antes (v10, 2026-07-11):** prontidao virou faixa+checklist+dot; "abrir loja" saiu do checklist (cotidiano, nao pendencia); redesign de forms concluido; BUG4 `includeAll`; cobertura 85→97% stmts / 72→84% branches (234 testes) + threshold ratchet p/ 96/82/97/97)
+> **Ultima atualizacao:** 2026-07-14 (v12 — **sessao de design (seguranca de fechamento + fila + agendamento)**, ver "Feedback 2026-07-14" na secao 10: (a) **fechamento seguro** — BUG1 evoluiu, a loja NAO pode dormir aberta → prompt + auto-close 15min server-side (supersede "NAO auto-fechar"); (b) **agendamento fechado** = INTENÇÃO congelada em ordem de criacao + **barra de encaixe estilo particao** (secao 12 reescrita; slots descartados); (c) front-only prontos p/ codar: **card da fila enxuto** (Iniciar so no 1o, resto no ⋮) + **modal ⓘ "fechar fila"**; (d) handoffs com **S10 REMOVIDO**, **S11 ETA −10min**. Mockups em `design/` (`card-fila-enxuto`, `agendamento-barra`, `availability-options`). **Antes (v11, 2026-07-12):** UI STUBS "em breve" p/ features backend-pending; **(v10, 2026-07-11):** prontidao faixa+checklist+dot; cobertura 97/84 (234 testes))
 
 ---
 
@@ -569,11 +569,27 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 3. ✅ **Atender fora de ordem** ("Adiantar") via `PATCH /attendances/{id}/start` direto — **FEITO** (commit `2489299`, OTA-puro). Cards fora do 1o lugar ganham botao **"Adiantar"** → confirmacao "tem certeza?" → inicia o atendimento na frente da fila. **Decisao 2026-07-04:** start **direto** (nao reordena os demais) satisfaz o "adiantar"; o **promover-ao-topo/reordenar** (S4) segue como versao futura (item 8), nao bloqueia.
 4. **Exibir rating recebido** no card do profissional (agregados ja vem prontos). OTA-puro.
 5. ✅ **Read-back do endereco** — **DESBLOQUEADO** (backend `a58704f`, 2026-07-09): `EstablishmentResponse.address` embutido; front ja lia `data.address` → **liga sozinho**. Falta QA no celular.
-6. **Fechar loja com confirmacao + gate** — ✅ **gate 409 FEITO** (backend `0b63678` `ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES` + front trata no dashboard e na fila, 2026-07-09). **BUG1 ainda aberto** (NAO auto-fechar + bloquear novas entradas + `is_open` efetivo + solicitar corte). **Regra (2026-07-04):** apos o `closing_time` a loja **nao recebe cliente nem mostra "aberto"**; querer continuar => **confirmacao que leva a alterar o horario nas configuracoes** (o horario e a fonte da verdade).
+6. **Fechar loja com confirmacao + gate** — ✅ **gate 409 FEITO** (backend `0b63678` `ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES` + front trata no dashboard e na fila, 2026-07-09). **BUG1 ainda aberto** — e **EVOLUIU (Andre 2026-07-14): a loja NAO pode "dormir aberta".** Supersede o "NAO auto-fechar" de 2026-07-04: agora **HA auto-fechamento**, porem com **prompt + carencia de 15min** (timer **server-side** — o celular dorme). O profissional e chamado a **sinalizar** o fechamento (ao terminar atendimento apos o horario / ao passar do `closing_time`); se **nao sinaliza em 15min → auto-`indisponivel`**. Gate de "solicitar corte" fora do horario ganha **timeout → auto-nega**. Bloquear novas entradas + `is_open` efetivo permanecem. **Front so avisa/prompt**; a garantia (timer + gate) e do backend. **Spec: HANDOFF_BACKEND "Detalhe — BUG1" (nota 2026-07-14).**
 7. **Expediente (inicio/fim) nos relatorios** — 🆕 (2026-07-04) exibir "Expediente: HH:MM–HH:MM" nos relatorios do owner e do profissional; espera **S5** (backend registrar/expor abrir-fechar). Ligado ao item 6.
 8. **Promover ao topo (botao)** — espera **S4**. · **Refeicoes Modelo B popup** — espera **S3**. · **Abrir/fechar na area do profissional** — ✅ **toggle bruto FEITO** (`7819914` + front card Abrir/Fechar na "Minha fila", 2026-07-09), **evoluindo p/ S1** (status do profissional → `open_status` derivado; espera backend — ver HANDOFF_BACKEND "Detalhe — S1").
 9. **Maestro E2E** — **POR ULTIMO** (o usuario esta testando manualmente por ora): redesenhar seeds + rodar.
 > Itens 5-8 dependem de backend; a ordem e de PRIORIDADE (o front adianta o que der: UI, tratamento de erro, telas). Pagamento/split e Gluestack v2 seguem **adiados** (pos-MVP).
+
+### Feedback 2026-07-14 (seguranca de fechamento + fila + agendamento)
+
+Sessao de design (mockups em `design/`, abrir com `file:///`; handoffs atualizados). Itens:
+
+**Front-only (da pra fazer sem backend) — mockups prontos:**
+1. **Card da fila enxuto** — mockup `design/card-fila-enxuto.html`. Card menor com **nome, corte, preco, status**; botao **"Iniciar" so no 1o da vez** (reforca "atende o indice 0"); para os demais, as acoes vao pro **menu ⋮** (Adiantar, Voltar a fila, Nao compareceu, Remover da fila). O 1o card fica em destaque (borda+sombra+Iniciar); os outros viram linhas compactas.
+2. **Modal ⓘ "fechar fila"** — icone de info ao lado de "Fechar fila" abre modal explicando que o efeito e **so para o cliente** ("impede novos de entrar; quem ja esta continua; voce segue trabalhando"). Mockup no mesmo arquivo do card enxuto.
+
+**Backend-first (registrado nos handoffs):**
+3. **Fechamento seguro (auto-close 15min)** — BUG1 evoluido (ver item 6 da ordem de execucao acima + HANDOFF_BACKEND "Detalhe — BUG1").
+4. **Status REMOVIDO** (profissional retira da fila) distinto de CANCELADO (cliente desiste) — HANDOFF_BACKEND S10 (RECUSADO p/ negado fora do horario ainda a decidir). O card enxuto ja preve o rotulo no ⋮ ("Remover da fila").
+5. **ETA com buffer de −10min** (regra global; backend calcula, ambos os fronts so exibem) — HANDOFF_BACKEND S11.
+6. **Agendamento (INTENÇÃO congelada + barra de encaixe)** — modelo fechado; ver secao 12 "Agenda / Agendamento" (reescrita) + `design/agendamento-barra.html` + HANDOFF_BACKEND "Detalhe — S2".
+
+> Mockups de horas vagas (exploracao): `design/availability-options.html` (comparativo janela/slots/periodos/lista + cenario de dia fragmentado). Conclusao registrada: **slots descartados**, modelo final = barra de encaixe (item 6).
 
 ### Feedback 2026-06-28 (parte 2)
 
@@ -751,22 +767,25 @@ Popup solicitado pelo profissional quando um cliente quer atendimento sem estar 
 - `POST /professional-queue/add-encaixe-attendance` com campos: professionalId, establishmentId, serviceItemIds, clientName, encaixeMultiplier
 - Calculo do tempo estimado pode ser feito no frontend usando dados do QueueResponse
 
-### Agenda / Agendamento
+### Agenda / Agendamento — MODELO FECHADO 2026-07-14 (INTENÇÃO congelada + barra de encaixe)
 
-Sistema de intencoes semanais para clientes reservarem horario na fila:
+> Modelo fechado num vai-e-vem de design com o Andre (evoluiu de "janela unica" → "mapa de cinema" → **barra de encaixe estilo particao de disco**). **Substitui** o esboco antigo de check-in. Spec completa (contrato backend) em [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) — "Detalhe — S2 · Encaixe de agendamento". A UI de agendar em si e do **front-client** (ver HANDOFF_CLIENT C12); o partner so **reflete** a intencao quando ela promove e entra em `professionals-with-queue`.
 
-**Fluxo:**
-1. Profissional define horarios disponiveis por dia da semana (ex: seg-sex 9h-18h, sab 9h-13h)
-2. Cliente visualiza horarios e registra intencao de atendimento (nao e reserva fixa)
-3. No dia, cliente faz check-in para confirmar presenca → entra na fila
-4. Ordem da fila: check-in do dia ordena por horario agendado, depois por ordem de chegada
+**Agendar = criar uma INTENÇÃO estimada** (o cliente confirma ciente de que pode oscilar). Ciclo de vida:
+1. **Congela num estimado REALISTA no ato de criar** — o horario ja encaixa a **duracao do serviço escolhido** na linha do tempo das intencoes/agendados **que ja existem**. Ex.: cliente quer 17:00 mas ha um corte de 1h15 na frente → o estimado ja nasce 18:05.
+2. **Protegida por ORDEM DE CRIACAO** — quem congelou **primeiro** segura o horario; intencao criada depois **nao empurra** as anteriores (encaixa em volta ou depois). Ex.: o de 17:00 (entrou 1o) nao se mexe; o de 16:50 e que muda. **Isto capa o drift** e impede "17:00 virar 20:00".
+3. **Piso no horario escolhido** — nunca chamado antes do horario pedido, mesmo com fila vazia (`desiredTime >= projectedQueueEnd`).
+4. **Promocao → fila viva** — quando o **fim da fila cruza o horario**, vira `SCHEDULED`, entra na fila e passa a **oscilar de leve** (a fila viva tem preferencia; corte em andamento nunca e interrompido). **Sem notificacao de atraso** (o cliente ja consentiu na estimativa).
 
-**Backend necessario:**
-- `POST /professional/{id}/schedule` — definir disponibilidade semanal
-- `GET /professional/{id}/schedule` — consultar disponibilidade
-- `POST /professional-queue/schedule-intention` — cliente registra intencao
-- `POST /professional-queue/check-in` — cliente confirma presenca no dia
-- Novo status: INTENDED (antes do check-in), depois vira SCHEDULED
+**A UI (front-client) = barra de encaixe (particao de disco).** Mockup de referencia: `design/agendamento-barra.html`.
+- A barra mostra **so a faixa agendavel**: do **fim da fila viva** ao **`closing_time`** (nao da pra agendar dentro da fila que ja roda).
+- Agendamentos ja congelados = **blocos travados** (nao-clicaveis).
+- O cliente arrasta uma **"sombra" do tamanho do seu serviço** (soma das duracoes) e a solta num vao livre, **sem cruzar** ninguem — e o "ultimo inicio = proximo agendado − duracao" feito visualmente.
+
+**Backend necessario** (ver handoff S2):
+- Expor `projectedQueueEnd` + `closing_time` + a **lista de blocos ocupados** (`{start, duracaoEstimada}` por agendado — pode haver varios blocos/varios vaos).
+- `POST/PATCH /attendances/intentions` valida o **encaixe** (nao cruza bloco congelado, `desiredTime >= projectedQueueEnd`) e congela em **ordem de criacao** (nao desloca os anteriores). Erro dedicado se cruzar (ex.: `422 INTENTION_OVERLAP`).
+- Promocao **event-driven** quando o fim da fila alcanca o horario. **Slots fixos foram descartados** (quebram num modelo de fila).
 
 ### Horario de Funcionamento do Estabelecimento
 
