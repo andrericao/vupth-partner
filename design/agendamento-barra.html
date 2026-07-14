@@ -1,0 +1,174 @@
+<title>Agendar — encaixe estilo partição</title>
+<style>
+  :root {
+    --bg: #f4f7f4; --surface: #ffffff; --ink: #17251a; --muted: #5c6b60; --line: #dfe7e0;
+    --brand: #3b7a3f; --brand-ink: #1b4332; --brand-tint: #e9f2ea;
+    --free: #cfe6d2; --free-line: #8ec596;
+    --amber: #b7791f; --amber-tint: #f4e4c3; --amber-line: #e0b968;
+    --danger: #c0392b; --danger-tint: #f6dcd8; --danger-line: #e0897e;
+    --track: #eef2ee; --track-inset: #e2e9e3;
+    --shadow: 0 1px 2px rgba(23,37,26,.06), 0 8px 24px rgba(23,37,26,.08);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e130f; --surface: #171f18; --ink: #e6efe7; --muted: #9bab9f; --line: #29342b;
+      --brand: #6fbf74; --brand-ink: #bfe6c3; --brand-tint: #17301c;
+      --free: #244c2b; --free-line: #3f7a48;
+      --amber: #e3b357; --amber-tint: #33290f; --amber-line: #5c4a1e;
+      --danger: #e0897e; --danger-tint: #3a1f1a; --danger-line: #6b3129;
+      --track: #10160f; --track-inset: #1c261d;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e130f; --surface: #171f18; --ink: #e6efe7; --muted: #9bab9f; --line: #29342b;
+    --brand: #6fbf74; --brand-ink: #bfe6c3; --brand-tint: #17301c;
+    --free: #244c2b; --free-line: #3f7a48;
+    --amber: #e3b357; --amber-tint: #33290f; --amber-line: #5c4a1e;
+    --danger: #e0897e; --danger-tint: #3a1f1a; --danger-line: #6b3129;
+    --track: #10160f; --track-inset: #1c261d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45);
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f7f4; --surface: #ffffff; --ink: #17251a; --muted: #5c6b60; --line: #dfe7e0;
+    --brand: #3b7a3f; --brand-ink: #1b4332; --brand-tint: #e9f2ea;
+    --free: #cfe6d2; --free-line: #8ec596;
+    --amber: #b7791f; --amber-tint: #f4e4c3; --amber-line: #e0b968;
+    --danger: #c0392b; --danger-tint: #f6dcd8; --danger-line: #e0897e;
+    --track: #eef2ee; --track-inset: #e2e9e3;
+    --shadow: 0 1px 2px rgba(23,37,26,.06), 0 8px 24px rgba(23,37,26,.08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 72px; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); font-weight: 700; }
+  h1 { font-family: "Poppins", system-ui, sans-serif; font-weight: 700; font-size: clamp(24px, 4vw, 32px); line-height: 1.14; margin: 10px 0 10px; letter-spacing: -.01em; }
+  .lede { color: var(--muted); font-size: 15.5px; margin: 0 0 26px; max-width: 60ch; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 22px 26px; margin-bottom: 22px; }
+  .panel h2 { font-family: "Poppins", system-ui, sans-serif; font-size: 16px; margin: 0 0 3px; }
+  .panel .sub { font-size: 13px; color: var(--muted); margin: 0 0 20px; }
+  .ctx { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .ctx b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* partition track */
+  .track-wrap { padding-top: 26px; }
+  .track { position: relative; height: 66px; background: var(--track); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.06); overflow: hidden; }
+  .seg { position: absolute; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 600; text-align: center; overflow: hidden; padding: 0 4px; }
+  .seg small { font-weight: 500; opacity: .8; font-size: 10px; }
+  .seg-free { color: var(--brand); }
+  .seg-occ { background: var(--amber-tint); border-left: 1px solid var(--amber-line); border-right: 1px solid var(--amber-line); color: var(--amber);
+    background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgba(183,121,31,.10) 6px 12px); }
+  .seg-shadow { background: var(--free); border: 2px dashed var(--free-line); border-radius: 8px; color: var(--brand-ink);
+    top: 5px; bottom: 5px; font-variant-numeric: tabular-nums; }
+  .seg-shadow.bad { background: var(--danger-tint); border-color: var(--danger-line); color: var(--danger); }
+  .seg-shadow .handle { position: absolute; top: 50%; transform: translateY(-50%); width: 8px; height: 26px; border-radius: 3px; background: var(--free-line); }
+  .seg-shadow.bad .handle { background: var(--danger-line); }
+  .seg-shadow .handle.l { left: -1px; } .seg-shadow .handle.r { right: -1px; }
+  .seg-occ b { font-variant-numeric: tabular-nums; }
+
+  /* ruler */
+  .ruler { position: relative; height: 20px; margin-top: 6px; }
+  .tick { position: absolute; transform: translateX(-50%); font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tick::before { content: ""; position: absolute; top: -8px; left: 50%; width: 1px; height: 6px; background: var(--line); }
+  .edge { position: absolute; transform: translateX(-50%); top: -24px; font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .edge.l { transform: translateX(0); } .edge.r { transform: translateX(-100%); }
+
+  .callout { margin-top: 18px; font-size: 13.5px; padding: 12px 14px; border-radius: 10px; }
+  .callout.ok { background: var(--brand-tint); color: var(--brand-ink); }
+  .callout.no { background: var(--danger-tint); color: var(--danger); }
+  .callout b { font-family: "Poppins", system-ui, sans-serif; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; font-size: 12.5px; color: var(--muted); }
+  .legend i { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 6px; vertical-align: -2px; }
+  .rules { background: var(--brand-tint); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; font-size: 14px; }
+  .rules h2 { font-family: "Poppins", system-ui, sans-serif; font-size: 15px; margin: 0 0 10px; }
+  .rules ol { margin: 0; padding-left: 20px; }
+  .rules li { margin-bottom: 6px; }
+  .rules b { font-family: "Poppins", system-ui, sans-serif; }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">VUPTH · agendamento (intenção)</div>
+  <h1>Encaixe seu horário — estilo partição de disco</h1>
+  <p class="lede">A barra mostra só a faixa agendável: começa no <b>fim da fila viva</b> e vai até o <b>fechamento</b>. Os agendamentos já congelados são blocos ocupados. Você arrasta a <b>sombra</b> do tamanho do seu serviço para um vão livre — ela não cruza ninguém.</p>
+
+  <div class="panel">
+    <h2>✓ Encaixe válido</h2>
+    <p class="sub">Serviço de 1h15. Já existe um agendado às 17:00 (entrou primeiro → protegido).</p>
+    <div class="ctx"><span>fila viva até <b>15:30</b></span><span>agendado <b>17:00</b> (40min)</span><span>fecha <b>20:00</b></span></div>
+    <div class="track-wrap">
+      <div class="track">
+        <div class="edge l" style="left:0%">fim da fila</div>
+        <div class="edge r" style="left:100%">fechamento</div>
+        <!-- free sliver 15:30–15:45 -->
+        <div class="seg seg-free" style="left:0%; width:5.6%"></div>
+        <!-- shadow 15:45–17:00 -->
+        <div class="seg seg-shadow" style="left:5.6%; width:27.7%">
+          <span class="handle l"></span>
+          Você · 1h15
+          <small>15:45 – 17:00</small>
+          <span class="handle r"></span>
+        </div>
+        <!-- occupied 17:00–17:40 -->
+        <div class="seg seg-occ" style="left:33.3%; width:14.8%"><b>17:00</b><small>agendado</small></div>
+        <!-- free 17:40–20:00 -->
+        <div class="seg seg-free" style="left:48.1%; width:51.9%">livre</div>
+      </div>
+      <div class="ruler">
+        <span class="tick" style="left:0%">15:30</span>
+        <span class="tick" style="left:11.1%">16:00</span>
+        <span class="tick" style="left:33.3%">17:00</span>
+        <span class="tick" style="left:55.6%">18:00</span>
+        <span class="tick" style="left:77.8%">19:00</span>
+        <span class="tick" style="left:100%">20:00</span>
+      </div>
+    </div>
+    <div class="callout ok"><b>Cabe:</b> a sombra encosta exatamente nas 17:00 sem invadir o agendado. 15:45 é o <b>último início</b> que fecha antes dele — ou o cliente joga a sombra pro vão depois das 17:40.</div>
+    <div class="legend">
+      <span><i style="background:var(--free)"></i>livre (arrastável)</span>
+      <span><i style="background:var(--amber-tint);border:1px solid var(--amber-line)"></i>agendado (travado)</span>
+      <span><i style="background:var(--free);border:2px dashed var(--free-line)"></i>sua sombra (1h15)</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 style="color:var(--danger)">✗ Encaixe inválido — cruza o agendado</h2>
+    <p class="sub">O cliente tenta começar às 16:50. O serviço de 1h15 terminaria 18:05 e invade o agendado das 17:00.</p>
+    <div class="track-wrap">
+      <div class="track">
+        <div class="edge l" style="left:0%">fim da fila</div>
+        <div class="edge r" style="left:100%">fechamento</div>
+        <div class="seg seg-free" style="left:0%; width:29.6%"></div>
+        <!-- bad shadow 16:50–18:05 overlapping occ -->
+        <div class="seg seg-shadow bad" style="left:29.6%; width:27.8%">
+          <span class="handle l"></span>
+          16:50 – 18:05
+          <small>cruza!</small>
+          <span class="handle r"></span>
+        </div>
+        <div class="seg seg-occ" style="left:33.3%; width:14.8%; opacity:.55"><b>17:00</b></div>
+        <div class="seg seg-free" style="left:57.4%; width:42.6%">livre</div>
+      </div>
+      <div class="ruler">
+        <span class="tick" style="left:0%">15:30</span>
+        <span class="tick" style="left:33.3%">17:00</span>
+        <span class="tick" style="left:55.6%">18:00</span>
+        <span class="tick" style="left:100%">20:00</span>
+      </div>
+    </div>
+    <div class="callout no"><b>Não cabe:</b> “seu serviço de 1h15 cruza o agendado das 17:00 — encaixe até <b>15:45</b> ou depois das <b>17:40</b>.” O app nem deixa soltar a sombra em cima do bloco travado.</div>
+  </div>
+
+  <div class="rules">
+    <h2>As regras que a barra materializa</h2>
+    <ol>
+      <li><b>Faixa agendável</b> = do <b>fim da fila viva</b> ao <b>fechamento</b> (não dá pra agendar dentro da fila que já está rodando).</li>
+      <li><b>Quem congelou primeiro é protegido</b> — o agendado das 17:00 não se mexe; quem chega depois é que encaixa em volta.</li>
+      <li><b>A sombra = duração do serviço escolhido</b>; ela só pousa onde cabe inteira, sem cruzar bloco travado. É o cálculo “último início = próximo agendado − duração”.</li>
+      <li><b>É estimativa</b> — na promoção (quando o fim da fila cruza o horário) vira fila viva e oscila de leve, com piso no horário escolhido (nunca antes).</li>
+    </ol>
+  </div>
+</div>
