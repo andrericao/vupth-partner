@@ -2,7 +2,9 @@
 
 Pendencias do app **partner** (profissional/owner) que dependem do backend. O front ja esta pronto (ou pronto para consumir) na maioria dos casos. Detalhe completo nos callouts do `PRD_FRONT-PARTNER.md`.
 
-Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
+Ultima atualizacao: 2026-07-14 · branch `dev` do front-partner.
+
+> 🆕 **Lote de feedback Andre 2026-07-14 (seguranca de fechamento + fila).** (a) **BUG1 EVOLUIU** — a loja **nao pode "dormir aberta"**: agora **HA auto-fechamento**, porem com **carencia de 15min + prompt** (ver "Detalhe — BUG1", nota 2026-07-14 que **supersede** o "NAO auto-fechar" de 2026-07-04). (b) Gate de entrada fora do horario (BUG1) ganha **timeout de decisao → auto-nega** o cliente (prioridade = comportamento normal da loja). (c) Novo **S10 — status REMOVIDO** (profissional retira da fila, distinto de CANCELADO = cliente desiste). (d) Novo **S11 — ETA com buffer de −10min** (regra global, mesmo numero no client e no partner). (e) **Horas vagas ao cliente = JANELA** (nao slots) — ver nota no S2 e no HANDOFF_CLIENT.
 
 > **Fonte unica dos handoffs do partner.** Nao espalhar handoff pelo corpo do PRD — registrar aqui. O backend edita o proprio PRD; estes itens sao para o backend consumir e refletir na lista dele.
 >
@@ -29,7 +31,7 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 
 | # | Item | Status backend | O que o backend precisa fazer | O que o front faz depois |
 |---|------|----------------|-------------------------------|--------------------------|
-| BUG1 | Fechamento com confirmacao + gate de entrada fora do horario — **NAO auto-fechar** | 🧪 **sera testado** (2026-07-09) | Ver **"Detalhe — BUG1"** abaixo. Resumo: (1) NAO auto-mudar `open_status`; (2) bloquear NOVAS entradas na fila fora do horario/apos "parar novos"; (3) fluxo de **"solicitar corte"** (pedido sob aprovacao); (4) `is_open` efetivo + `opening/closing` na listagem. | Confirmacao no toggle de fechar; tratar o gate; dashboard mostra "fechado p/ novos". |
+| BUG1 | Fechamento seguro (prompt + carencia 15min → **auto-fecha**) + gate de entrada fora do horario | 🧪 sera testado + ⬜ **auto-fecha e novo** (2026-07-14) | Ver **"Detalhe — BUG1"** abaixo. Resumo: (1) **loja nao dorme aberta** — prompt "quer fechar?"; sem resposta em **15min** (timer **server-side**) ⇒ **auto-`indisponivel`**; (2) bloquear NOVAS entradas na fila fora do horario/apos "parar novos"; (3) **"solicitar corte"** fora do horario = pedido sob aprovacao **com timeout → auto-nega**; (4) `is_open` efetivo + `opening/closing` na listagem. | Prompt de fechar + countdown (consome o timer do backend); tratar o gate; dashboard mostra "fechado p/ novos". Front so **avisa/prompt** — a garantia (timer + gate) e do backend (celular dorme). |
 | BUG2 | **Apelido (nickname) nao volta no `GET /professional/me`** | ⬜ aberto (confirmado 2026-07-11) | O `PATCH /profile/general-infos { nickname }` retorna **200** (salva), mas ao reabrir as Configuracoes o apelido **some**. Backend confirmou: `/professional/me` devolve `ProfessionalQuickCreateResponse` **sem nickname** (o campo vive no `BaseUser`, setado via `PATCH /profile/general-infos`). **Fix = projetar `nickname` no `/me`.** | **Mitigado no front:** apos salvar, o partner reflete o valor localmente (+persist) e o `normalize` tolera `nickname`/`nickName`/`nick_name`. Fica 100% quando o `/me` projetar o campo. |
 
 ## Pendencias / features (S — abertas)
@@ -45,6 +47,8 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 | S7 | "Esqueci minha senha" (reset por e-mail) | ⬜ aberto (depende S8) | Fluxo publico `POST /auth/forgot-password {email}` + `POST /auth/reset-password {token,newPassword}`. | 🟡 **UI STUB PRONTA** ("em breve", `94c92ab`): link "Esqueci minha senha" no login. **Ao entregar:** navegar p/ tela de pedir e-mail (`POST /auth/forgot-password`) + tela de nova senha (`reset-password`). |
 | S8 | Notificacao por e-mail / infra SMTP | ⬜ aberto (infra que habilita o S7) | Integrar provedor (SMTP/SendGrid/SES) — infra nova. Habilita o S7 e avisos por e-mail. | Consome quando existir. |
 | S9 | **Listar TODOS os profissionais do estabelecimento (incl. sem servico)** | ⬜ aberto (pedido 2026-07-09) | Hoje so existe `professionals-with-queue`, que **esconde** profissional sem servico (#31). Falta um `GET /establishment/{id}/professionals` (ou count) que retorne **todos os vinculados**, com flag/contagem de servicos. | Desbloqueia o checklist de prontidao a **separar** "1+ profissional vinculado" de "1+ com servico" (hoje colapsados num item) e o owner ver o profissional recem-vinculado que ainda nao cadastrou servico. |
+| S10 | **Status REMOVIDO (profissional retira da fila) — distinto de CANCELADO (cliente desiste)** | ⬜ **novo — pedido 2026-07-14** | Hoje ha um caminho de remocao (`DELETE /professional-queue/{id}/remove`), mas o status resultante nao diferencia **quem** agiu. Andre quer **dois status distintos**: **`CANCELLED`** = o **proprio cliente** desistiu/cancelou; **`REMOVED`** (rotulo PT **REMOVIDO**) = o **profissional** tirou o cliente da fila. Alem disso, o **auto-nega** do gate fora do horario (BUG1) precisa de rotulo proprio: sugerido **`REFUSED`/RECUSADO** (cliente **nem entrou** — decidir se reusa REMOVED ou ganha status proprio; **Andre ainda vai bater o martelo**). Refletir o novo status nos read-models (partner + client) e no WS `/user/queue/notifications`. | Partner: mostrar o rotulo certo no card / historico. Client (HANDOFF_CLIENT C9): mensagem distinta "voce cancelou" vs "o estabelecimento removeu voce" vs "pedido recusado". |
+| S11 | **ETA com buffer de −10min (regra global)** | ⬜ **novo — pedido 2026-07-14** | O **tempo de espera exibido** deve ser o ETA calculado **menos 10min** (piso 0), para o cliente **chegar antes**. Andre decidiu que e **regra GLOBAL**: o **backend calcula** o ETA ja com o buffer e **client e partner exibem o mesmo numero** — nada de cada front subtrair por conta (evita divergencia). Definir se o buffer entra no valor exposto do read-model ou num campo separado (`display_wait` vs `raw_eta`). | Ambos os fronts so **exibem** o valor que vier do backend (partner e client). Sem logica de buffer no front. |
 
 > ✅ **Resolvidos/entregues 2026-07-09 (sairam da lista, numeracao renumerada):**
 > - **Endereco no `EstablishmentResponse`** (backend `a58704f`) — front ja lia `data.address`, liga sozinho.
@@ -62,7 +66,15 @@ Ultima atualizacao: 2026-07-11 · branch `dev` do front-partner.
 
 ## Detalhe — BUG1 (fechamento pelo horario)
 
-**Decisao Andre (2026-07-04): NAO auto-fechar.** Fechar e **sempre acao manual com CONFIRMACAO** (owner **ou** profissional, ver S1). Regras:
+> ⚠️ **UPDATE Andre 2026-07-14 — SUPERSEDE o "NAO auto-fechar" abaixo.** A loja **nao pode "dormir aberta"**. O modelo agora e **prompt + carencia, com auto-fechamento como backstop**:
+> 1. **O profissional deve SINALIZAR** se fecha ou nao. O caminho preferido continua **manual com confirmacao** (fecha na hora se ele confirmar).
+> 2. **Prompt "quer fechar?"** disparado em dois momentos: (a) ao **finalizar um atendimento** apos o `closing_time` (ex.: fecha 20:00, termina 20:15 → pergunta); (b) ao **passar do `closing_time`** com a loja ainda aberta.
+> 3. **Se ele NAO sinalizar** (ignora / sai da tela): **timer server-side de 15min** → **auto-`indisponivel`** (auto-fecha; se for o ultimo, `open_status` derivado cai p/ fechado). **O timer e do BACKEND** — nao pode ser `setTimeout` no app (o celular dorme e a loja ficaria aberta). O front so exibe o countdown e o prompt.
+> 4. **Gate fora do horario (nota 3 abaixo) ganha timeout:** o "solicitar corte" fora do horario espera a decisao do profissional por um tempo limitado; **se ele nao decidir (ou sair da tela), o pedido e AUTO-NEGADO** — prioridade = seguir o comportamento normal da loja (fechada p/ novos). O cliente so entra se o profissional der **aceite explicito (TRUE)** dentro da janela.
+>
+> O resto das regras abaixo (bloquear novos apos o horario, `is_open` efetivo, `closing_time` = fonte da verdade) **permanece**. A unica reversao e: **antes** "nunca auto-fecha"; **agora** "auto-fecha em 15min se o profissional nao sinalizar". Reaproveita a mecanica de **auto-`indisponivel`** ja descrita no S1 (so adiciona o **gatilho por horario + carencia**, alem do gatilho "fim do ultimo com `aceitandoNovos=false`").
+
+**Decisao Andre (2026-07-04, PARCIALMENTE SUPERSEDIDA — ver update acima): NAO auto-fechar.** Fechar era **sempre acao manual com CONFIRMACAO** (owner **ou** profissional, ver S1). Regras:
 
 1. O backend **NAO** muda `open_status` sozinho (nao auto-fecha no `closing_time`).
 2. Ao chegar o `closing_time` das **configuracoes** (ou apos "parar de aceitar novos"), **bloquear NOVAS entradas na fila** — `POST /attendances` rejeita (ex.: `422 QUEUE_CLOSED_FOR_NEW_ENTRIES`). A **fila existente segue sendo atendida ate esvaziar** — nunca remover clientes.
@@ -192,3 +204,10 @@ Nao se pode criar/editar uma INTENTION com `desiredTime` **menor que, ou a ≤15
 - Promocao e **interna** (job), nao endpoint. Cliente recebe via WS/push quando vira SCHEDULED.
 
 > ⚠️ Este desenho **substitui** o esboco anterior de `/swap-offers` para o S2 (a "manifestacao de intencao + horario" agora e o mecanismo de INTENTION → promocao). Se a **troca dirigida entre dois clientes** ainda for desejada em paralelo, tratar como item separado.
+
+### Janela livre (horas vagas) — apresentacao ao cliente (decisao 2026-07-14)
+
+Quando o cliente quer atendimento **mais tarde** (ex.: "cortar depois das 17:00, mas ha corte ate 18:30"), a UI mostra **UMA JANELA** ("disponivel a partir das 18:30 ate o fechamento"), **NAO slots fixos** (18:30/18:50/...). Motivo (pesquisa + decisao Andre): num modelo de **fila** a duracao de cada corte varia e um no-show empurra tudo — um slot vira promessa que a loja nao cumpre; a **janela** continua verdadeira enquanto a fila anda e reaproveita o ETA (com o buffer do S11). Slots so fariam sentido se virar **agendamento de verdade** (duracao fixa, agenda bloqueada) = outro produto.
+- **O que o backend precisa expor** (p/ o client renderizar a janela): o **inicio da janela livre** = fim projetado da fila comprometida (INTENTIONs/SCHEDULED ja aceitos) e o **fim** = `closing_time`. Provavel campo derivado tipo `free_window: { from, to }` por profissional, ou o client deriva de `queue_end_eta` + `closing_time`.
+- **UI de referencia (partner):** mockup comparativo em `design/availability-options.html` (janela vs slots vs periodos vs lista). **Recomendado: janela**; degrau seguinte (se quiser mais opcao) = **lista "proximos"** com "~" explicito.
+- Front do agendamento em si = **client** (C6/S2). Esta nota so fixa **como** as horas vagas aparecem.
