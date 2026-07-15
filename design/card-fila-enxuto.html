@@ -106,7 +106,7 @@
   <div class="intro">
     <div class="eyebrow">VUPTH Parceiros · fila do profissional</div>
     <h1>Card enxuto — Iniciar só no 1º, resto no menu</h1>
-    <p class="lede">O card fica menor e mostra o essencial: nome, corte, preço e status. O botão <b>Iniciar</b> aparece só no <b>1º da vez</b> (a regra "atende sempre o índice 0"). Para os demais, as ações vão pro menu <b>⋮</b> — sem tentação de atender fora de ordem.</p>
+    <p class="lede">O card fica menor e mostra o essencial: nome, corte, preço e status. O botão <b>Iniciar</b> aparece só no <b>1º da vez</b> (a regra "atende sempre o índice 0"). O menu <b>⋮</b> está em <b>todos os cards</b> — inclusive no 1º: se ele <b>faltar</b>, o profissional marca "Não chegou"/Remover ali. A diferença é só o Iniciar.</p>
   </div>
 
   <!-- PHONE -->
@@ -117,8 +117,8 @@
     </div>
     <div class="queue">
 
-      <!-- 1º da vez -->
-      <div class="c1">
+      <!-- 1º da vez — tem Iniciar E ⋮ (e se ele faltar?) -->
+      <div class="c1 menu-anchor">
         <div class="idx">1</div>
         <div class="body">
           <div class="name">João Silva</div>
@@ -126,6 +126,11 @@
           <div class="status">Próximo da vez</div>
         </div>
         <button class="btn-start">▶ Iniciar</button>
+        <div class="kebab" style="color:var(--brand)">⋮</div>
+        <div class="menu" style="top:64px">
+          <button><span class="ic">✕</span> Não chegou</button>
+          <button class="danger"><span class="ic">🗑</span> Remover da fila</button>
+        </div>
       </div>
 
       <!-- 2º -->
@@ -147,7 +152,6 @@
         </div>
         <div class="kebab" style="color:var(--brand)">⋮</div>
         <div class="menu">
-          <button><span class="ic">▲</span> Adiantar</button>
           <button><span class="ic">↩</span> Voltar à fila</button>
           <div class="sep"></div>
           <button class="danger"><span class="ic">✕</span> Não compareceu</button>
@@ -174,7 +178,8 @@
       <h2>O que mudou</h2>
       <ul>
         <li><b>Só o 1º tem "Iniciar".</b> Reforça atender o índice 0; nada de botão de atender no 3º.</li>
-        <li><b>Ações no ⋮</b> para os demais: <b>Adiantar</b> (puxa pra vez), <b>Voltar à fila</b> (desfaz atrasado), <b>Não compareceu</b>, <b>Remover da fila</b>.</li>
+        <li><b>O ⋮ está em TODOS, inclusive no 1º.</b> Se o 1º faltar, marca "Não chegou"/Remover ali mesmo — o Iniciar não some as opções de gestão.</li>
+        <li><b>O menu muda conforme o estado:</b> 1º (da vez) → <b>Não chegou</b>, <b>Remover</b>; demais → <b>Adiantar</b>, <b>Remover</b>; atrasado → <b>Voltar à fila</b>, <b>Não compareceu</b>, <b>Remover</b>.</li>
         <li><b>Densidade:</b> card do 1º com destaque (borda + sombra + Iniciar); os outros viram linhas compactas de uma olhada só.</li>
         <li><b>Mantém</b> nome, corte, preço e status em todos — só reorganiza o peso visual.</li>
       </ul>

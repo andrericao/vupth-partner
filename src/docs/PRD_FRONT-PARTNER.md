@@ -580,7 +580,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 Sessao de design (mockups em `design/`, abrir com `file:///`; handoffs atualizados). Itens:
 
 **Front-only (da pra fazer sem backend) — mockups prontos:**
-1. **Card da fila enxuto** — mockup `design/card-fila-enxuto.html`. Card menor com **nome, corte, preco, status**; botao **"Iniciar" so no 1o da vez** (reforca "atende o indice 0"); para os demais, as acoes vao pro **menu ⋮** (Adiantar, Voltar a fila, Nao compareceu, Remover da fila). O 1o card fica em destaque (borda+sombra+Iniciar); os outros viram linhas compactas.
+1. **Card da fila enxuto** — mockup `design/card-fila-enxuto.html`. Card menor com **nome, corte, preco, status**; botao **"Iniciar" so no 1o da vez** (reforca "atende o indice 0"). O **menu ⋮ fica em TODOS os cards, inclusive no 1o** — se o 1o **faltar**, marca "Nao chegou"/Remover ali mesmo (correcao Andre 2026-07-14: o Iniciar nao pode sumir as opcoes de gestao). **Menu por estado:** 1o da vez → Nao chegou, Remover; demais → Adiantar, Remover; atrasado (LATE) → Voltar a fila, Nao compareceu, Remover. O 1o card fica em destaque (borda+sombra+Iniciar); os outros viram linhas compactas.
 2. **Modal ⓘ "fechar fila"** — icone de info ao lado de "Fechar fila" abre modal explicando que o efeito e **so para o cliente** ("impede novos de entrar; quem ja esta continua; voce segue trabalhando"). Mockup no mesmo arquivo do card enxuto.
 
 **Backend-first (registrado nos handoffs):**
