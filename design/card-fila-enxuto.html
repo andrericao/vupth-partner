@@ -152,9 +152,8 @@
         </div>
         <div class="kebab" style="color:var(--brand)">⋮</div>
         <div class="menu">
-          <button><span class="ic">↩</span> Voltar à fila</button>
+          <button><span class="ic">▲</span> Adiantar</button>
           <div class="sep"></div>
-          <button class="danger"><span class="ic">✕</span> Não compareceu</button>
           <button class="danger"><span class="ic">🗑</span> Remover da fila</button>
         </div>
       </div>
@@ -179,7 +178,8 @@
       <ul>
         <li><b>Só o 1º tem "Iniciar".</b> Reforça atender o índice 0; nada de botão de atender no 3º.</li>
         <li><b>O ⋮ está em TODOS, inclusive no 1º.</b> Se o 1º faltar, marca "Não chegou"/Remover ali mesmo — o Iniciar não some as opções de gestão.</li>
-        <li><b>O menu muda conforme o estado:</b> 1º (da vez) → <b>Não chegou</b>, <b>Remover</b>; demais → <b>Adiantar</b>, <b>Remover</b>; atrasado → <b>Voltar à fila</b>, <b>Não compareceu</b>, <b>Remover</b>.</li>
+        <li><b>O menu segue a POSIÇÃO (não o estado):</b> 1º (da vez) → <b>Não chegou</b> (atrasa), <b>Remover</b>; demais → <b>Adiantar</b>, <b>Remover</b>. "Atrasado" é só um selo no card.</li>
+        <li><b>Sem regra de escalonamento:</b> atrasar é ilimitado (quantas vezes quiser) e Remover não tem pré-requisito (pode remover já no 1º atraso). Sem "Não compareceu"/no-show.</li>
         <li><b>Densidade:</b> card do 1º com destaque (borda + sombra + Iniciar); os outros viram linhas compactas de uma olhada só.</li>
         <li><b>Mantém</b> nome, corte, preço e status em todos — só reorganiza o peso visual.</li>
       </ul>
