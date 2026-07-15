@@ -9,7 +9,7 @@ import {
   Pressable,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl, BackHandler } from "react-native";
+import { Alert, RefreshControl, BackHandler, Modal } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
@@ -24,6 +24,7 @@ import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
+import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalStatusControl } from "@components/ProfessionalStatusControl";
 import { comingSoon } from "@components/comingSoon";
@@ -37,34 +38,20 @@ function hhmmToMinutes(hhmm: string): number {
   return h * 60 + m;
 }
 
+// Card do atendimento EM ANDAMENTO (atual) — Pausar/Finalizar/Retomar.
 function AttendanceCard({
   attendance,
-  onStart,
   onFinish,
   onPause,
   onResume,
-  onRemove,
-  onLate,
-  onNoShow,
-  onAdvance,
-  isActive,
-  isFirst,
 }: {
   attendance: AttendanceInQueue;
-  onStart?: () => void;
   onFinish?: () => void;
   onPause?: () => void;
   onResume?: () => void;
-  onRemove?: () => void;
-  onLate?: () => void;
-  onNoShow?: () => void;
-  onAdvance?: () => void;
-  isActive: boolean;
-  isFirst: boolean;
 }) {
   const isInProgress = attendance.status === "IN_PROGRESS";
   const isPaused = attendance.status === "PAUSED";
-  const isLate = attendance.status === "LATE";
 
   const { formatted } = useElapsedTime(
     isInProgress || isPaused ? attendance.id : null,
@@ -72,20 +59,12 @@ function AttendanceCard({
     isPaused
   );
 
-  const statusLabel = isInProgress
-    ? "EM ATENDIMENTO"
-    : isPaused
-      ? "PAUSADO"
-      : isLate
-        ? "ATRASADO"
-        : "AGUARDANDO";
-
   return (
     <VStack
       bg="$white"
       p="$4"
       borderRadius="$2xl"
-      borderWidth={isActive ? "$2" : "$0"}
+      borderWidth="$2"
       borderColor="$green400"
       style={cardShadow}
       mb="$3"
@@ -94,12 +73,8 @@ function AttendanceCard({
         <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$coolGray900">
           {attendance.clientName}
         </Text>
-        <Badge
-          action={isInProgress ? "success" : isPaused ? "warning" : isLate ? "error" : "info"}
-          variant="solid"
-          borderRadius="$md"
-        >
-          <BadgeText fontSize="$xs">{statusLabel}</BadgeText>
+        <Badge action={isInProgress ? "success" : "warning"} variant="solid" borderRadius="$md">
+          <BadgeText fontSize="$xs">{isInProgress ? "EM ATENDIMENTO" : "PAUSADO"}</BadgeText>
         </Badge>
       </HStack>
 
@@ -115,59 +90,117 @@ function AttendanceCard({
         <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
           R$ {attendance.totalValue.toFixed(2)}
         </Text>
-        {(isInProgress || isPaused) && (
-          <Text fontFamily="$body" fontSize="$sm" color={isInProgress ? "$green500" : "$amber500"}>
-            {formatted}
-          </Text>
-        )}
+        <Text fontFamily="$body" fontSize="$sm" color={isInProgress ? "$green500" : "$amber500"}>
+          {formatted}
+        </Text>
       </HStack>
 
-      {isActive && (isInProgress || isPaused) && (
-        <HStack mt="$3" space="sm">
-          {isInProgress && (
-            <>
-              <Button title="Pausar" onPress={onPause} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
-              <Button title="Finalizar" onPress={onFinish} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
-            </>
-          )}
-          {isPaused && (
-            <Button title="Retomar" onPress={onResume} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
-          )}
-        </HStack>
-      )}
-
-      {/* O 1o da fila (indice 0) inicia direto. Se nao chegou, "Nao chegou"
-          (/late) o faz cair 1 posicao e o proximo vira o 1o.
-          Fora do 1o lugar da pra ADIANTAR (atender fora de ordem) — com
-          confirmacao, pois pula quem esta na frente (/start aceita qualquer
-          posicao). Ja em ATRASADO, "Nao compareceu" (/no-show) tira da fila com
-          strike (#39). "Remover" tira sem penalidade. */}
-      {!isActive && (attendance.status === "SCHEDULED" || isLate) && (
-        isFirst ? (
-          <VStack mt="$3" space="sm">
-            <HStack space="sm">
-              <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
-              <Button title="Nao chegou" onPress={onLate} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
-            </HStack>
-            {isLate && (
-              <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
-            )}
-            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
-          </VStack>
-        ) : (
-          <VStack mt="$3" space="sm">
-            <Button title="Adiantar" onPress={onAdvance} bg="$green500" $active-bg="$green600" h="$10" />
-            {/* S4 (stub; backend #4) — promover ao TOPO sem atender (reordena a
-                fila). Ao ligar: PATCH /attendances/{id}/promote. */}
-            <Button title="Promover ao topo" onPress={() => comingSoon("Promover ao topo da fila")} bg="transparent" borderWidth="$1" borderColor="$green400" textColor="$green600" $active-bg="$green50" h="$10" />
-            {isLate && (
-              <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
-            )}
-            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
-          </VStack>
-        )
-      )}
+      <HStack mt="$3" space="sm">
+        {isInProgress && (
+          <>
+            <Button title="Pausar" onPress={onPause} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
+            <Button title="Finalizar" onPress={onFinish} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
+          </>
+        )}
+        {isPaused && (
+          <Button title="Retomar" onPress={onResume} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
+        )}
+      </HStack>
     </VStack>
+  );
+}
+
+// Linha ENXUTA da lista de espera. O 1o (indice 0) ganha destaque + botao
+// "Iniciar"; os demais viram linhas compactas. As acoes de gestao vao no menu
+// ⋮ (kebab), que segue a POSICAO (ver src/lib/queueCard.ts). "Atrasado" e so um
+// selo — a regra de atender/gerir e a mesma independente do status.
+function QueueRow({
+  attendance,
+  position,
+  isFirst,
+  onStart,
+  onMenu,
+}: {
+  attendance: AttendanceInQueue;
+  position: number;
+  isFirst: boolean;
+  onStart: () => void;
+  onMenu: () => void;
+}) {
+  const isLate = attendance.status === "LATE";
+  const services = formatServices(attendance.services);
+  const price = `R$ ${attendance.totalValue.toFixed(2)}`;
+
+  const kebab = (
+    <Pressable onPress={onMenu} px="$2" py="$2" hitSlop={8} accessibilityLabel="Mais acoes">
+      <Text fontSize="$xl" color="$coolGray500">⋮</Text>
+    </Pressable>
+  );
+
+  if (isFirst) {
+    return (
+      <HStack
+        bg="$white"
+        p="$4"
+        borderRadius="$2xl"
+        borderWidth="$1"
+        borderColor="$green200"
+        style={cardShadow}
+        mb="$3"
+        alignItems="center"
+        space="sm"
+      >
+        <VStack w="$6" h="$6" bg="$green500" borderRadius="$full" alignItems="center" justifyContent="center">
+          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$white">
+            {position}
+          </Text>
+        </VStack>
+        <VStack flex={1}>
+          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray900">
+            {attendance.clientName}
+          </Text>
+          <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+            {services} · {price}
+          </Text>
+          <Text fontFamily="$body" fontSize="$xs" color={isLate ? "$amber600" : "$green600"} mt="$0.5">
+            {isLate ? "Atrasado" : "Proximo da vez"}
+          </Text>
+        </VStack>
+        <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" px="$4" />
+        {kebab}
+      </HStack>
+    );
+  }
+
+  return (
+    <HStack
+      bg="$white"
+      p="$3"
+      pl="$4"
+      borderRadius="$xl"
+      style={cardShadow}
+      mb="$2"
+      alignItems="center"
+      space="sm"
+    >
+      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray500" w="$5" textAlign="center">
+        {position}
+      </Text>
+      <VStack flex={1}>
+        <HStack alignItems="center" space="sm">
+          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray900">
+            {attendance.clientName}
+          </Text>
+          <Badge action={isLate ? "warning" : "muted"} variant="solid" borderRadius="$md" size="sm">
+            <BadgeText fontSize="$xs">{isLate ? "atrasado" : "aguardando"}</BadgeText>
+          </Badge>
+        </HStack>
+        <Text fontFamily="$body" fontSize="$xs" color="$coolGray600">
+          {services} · {price}
+        </Text>
+      </VStack>
+      {kebab}
+    </HStack>
   );
 }
 
@@ -176,7 +209,7 @@ export default function ProfessionalQueueScreen() {
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
-  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, noShow, removeFromQueue } =
+  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, removeFromQueue } =
     useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -193,6 +226,8 @@ export default function ProfessionalQueueScreen() {
   const nudgedRef = useRef<Set<string>>(new Set());
 
   const [refreshing, setRefreshing] = useState(false);
+  // Cliente cujo menu ⋮ esta aberto (action sheet), ou null.
+  const [menuTarget, setMenuTarget] = useState<AttendanceInQueue | null>(null);
 
   useEffect(() => {
     const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
@@ -294,6 +329,7 @@ export default function ProfessionalQueueScreen() {
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
+  const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
   // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
   const completion = professionalCompletion({
@@ -323,8 +359,6 @@ export default function ProfessionalQueueScreen() {
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
   // finalizado antes (o profissional optou por pular pro proximo — ou por atender
   // alguem fora de ordem). `advance` = o escolhido nao e o 1o da fila.
-  // (A realocacao da fila quando se atende fora de ordem e do backend — o `start`
-  // ja aceita qualquer posicao; o "promover/reordenar" e o S7.)
   const startClient = (att: AttendanceInQueue, advance: boolean) => {
     const runningName = currentAttendance?.clientName;
     const doStart = () =>
@@ -349,6 +383,34 @@ export default function ProfessionalQueueScreen() {
       { text: "Cancelar" },
       { text: advance ? "Adiantar" : "Iniciar", onPress: doStart },
     ]);
+  };
+
+  // "Nao chegou": o cliente da vez cai uma posicao e vira ATRASADO (repetivel,
+  // sem teto). O proximo passa a ser o 1o.
+  const confirmLate = (att: AttendanceInQueue) => {
+    Alert.alert(
+      "Cliente nao chegou",
+      `${att.clientName} cai uma posicao e o proximo passa a ser o primeiro. Continuar?`,
+      [
+        { text: "Cancelar" },
+        { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
+      ]
+    );
+  };
+
+  // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
+  // remover a qualquer momento, inclusive no 1o atraso.
+  const confirmRemove = (att: AttendanceInQueue) => {
+    Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
+      { text: "Cancelar" },
+      { text: "Remover", style: "destructive", onPress: () => handleAction(() => removeFromQueue(att.id)) },
+    ]);
+  };
+
+  const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
+    if (action === "adiantar") startClient(att, true);
+    else if (action === "nao-chegou") confirmLate(att);
+    else if (action === "remover") confirmRemove(att);
   };
 
   const handleFinishMeal = async (m: Interval) => {
@@ -468,8 +530,6 @@ export default function ProfessionalQueueScreen() {
             </Text>
             <AttendanceCard
               attendance={currentAttendance}
-              isActive
-              isFirst={false}
               onFinish={() =>
                 handleAction(async () => {
                   await finishAttendance(currentAttendance.id);
@@ -488,39 +548,13 @@ export default function ProfessionalQueueScreen() {
               Lista de Espera ({waitingList.length})
             </Text>
             {waitingList.map((att, idx) => (
-              <AttendanceCard
+              <QueueRow
                 key={att.id}
                 attendance={att}
-                isActive={false}
+                position={idx + 1}
                 isFirst={idx === 0}
                 onStart={() => startClient(att, false)}
-                onAdvance={() => startClient(att, true)}
-                onLate={() =>
-                  Alert.alert(
-                    "Cliente nao chegou",
-                    `${att.clientName} cai uma posicao e o proximo passa a ser o primeiro. Continuar?`,
-                    [
-                      { text: "Cancelar" },
-                      { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
-                    ]
-                  )
-                }
-                onNoShow={() =>
-                  Alert.alert(
-                    "Cliente nao compareceu",
-                    `${att.clientName} sai da fila com uma marca de falta (no-show). Continuar?`,
-                    [
-                      { text: "Cancelar" },
-                      { text: "Confirmar", style: "destructive", onPress: () => handleAction(() => noShow(att.id)) },
-                    ]
-                  )
-                }
-                onRemove={() =>
-                  Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
-                    { text: "Cancelar" },
-                    { text: "Remover", style: "destructive", onPress: () => handleAction(() => removeFromQueue(att.id)) },
-                  ])
-                }
+                onMenu={() => setMenuTarget(att)}
               />
             ))}
           </VStack>
@@ -642,6 +676,55 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         )}
       </VStack>
+
+      {/* Menu ⋮ do card (action sheet). Acoes por posicao — ver queueMenuActions. */}
+      <Modal
+        visible={!!menuTarget}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setMenuTarget(null)}
+      >
+        <VStack flex={1} justifyContent="flex-end">
+          <Pressable
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
+            onPress={() => setMenuTarget(null)}
+            accessibilityLabel="Fechar menu"
+          />
+          <VStack bg="$white" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" p="$4" pb="$8" space="xs">
+            {menuTarget && (
+              <>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$1">
+                  {menuTarget.clientName}
+                </Text>
+                {queueMenuActions(menuIsFirst).map((action) => (
+                  <Pressable
+                    key={action}
+                    onPress={() => {
+                      const t = menuTarget;
+                      setMenuTarget(null);
+                      if (t) runMenuAction(action, t);
+                    }}
+                    py="$3"
+                  >
+                    <Text
+                      fontFamily="$body"
+                      fontSize="$md"
+                      color={action === "remover" ? "$red600" : "$coolGray900"}
+                    >
+                      {QUEUE_ACTION_LABEL[action]}
+                    </Text>
+                  </Pressable>
+                ))}
+                <Pressable onPress={() => setMenuTarget(null)} py="$3">
+                  <Text fontFamily="$body" fontSize="$md" color="$coolGray500">
+                    Cancelar
+                  </Text>
+                </Pressable>
+              </>
+            )}
+          </VStack>
+        </VStack>
+      </Modal>
     </ScrollView>
   );
 }
