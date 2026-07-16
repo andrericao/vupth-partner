@@ -787,6 +787,8 @@ Popup solicitado pelo profissional quando um cliente quer atendimento sem estar 
 - `POST/PATCH /attendances/intentions` valida o **encaixe** (nao cruza bloco congelado, `desiredTime >= projectedQueueEnd`) e congela em **ordem de criacao** (nao desloca os anteriores). Erro dedicado se cruzar (ex.: `422 INTENTION_OVERLAP`).
 - Promocao **event-driven** quando o fim da fila alcanca o horario. **Slots fixos foram descartados** (quebram num modelo de fila).
 
+> **⚠️ Agendar (INTENÇÃO) ≠ Trocar (Adiantar/Atrasar) — alinhado c/ PRD-Client 2026-07-15.** Sao **duas features distintas**: (1) **Agendar = INTENÇÃO** (esta secao / S2, `/attendances/intentions`) = horario que a fila **ainda nao alcancou**; (2) **Trocar de posicao = TROCA na fila viva** (`/swap-offers`, backend NOVO) = furar/ceder **dentro** da fila, troca 1-por-1 bidirecional, **nunca multa**, o **profissional nao participa** (o partner so **reflete** a fila pos-troca — nao marca LATE, nenhuma acao nova). A troca **nao e S2 nem S4** (S4 = o profissional promover ao topo). Spec da troca: PRD-Client + HANDOFF_CLIENT **C13**.
+
 ### Horario de Funcionamento do Estabelecimento
 
 Owner define o horario de funcionamento do estabelecimento, incluindo rotinas especiais:

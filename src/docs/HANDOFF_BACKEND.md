@@ -210,7 +210,10 @@ Nao se pode criar/editar uma INTENTION com `desiredTime` **anterior ao fim proje
 - `DELETE /attendances/intentions/{id}` → cancela (status → CANCELLED).
 - Promocao e **interna** (job), nao endpoint. Cliente recebe via WS/push quando vira SCHEDULED.
 
-> ⚠️ Este desenho **substitui** o esboco anterior de `/swap-offers` para o S2 (a "manifestacao de intencao + horario" agora e o mecanismo de INTENTION → promocao). Se a **troca dirigida entre dois clientes** ainda for desejada em paralelo, tratar como item separado.
+> ⚠️ **DUAS features DISTINTAS — nao confundir** (reconciliado com PRD-Client 2026-07-15, secao "Trocar de posicao (Adiantar/Atrasar) + Agendar (Intencao)"; o erro antigo foi tratar as duas como a mesma). **`/swap-offers` NAO e mais "esboco do S2" — virou o mecanismo da TROCA (abaixo).**
+> - **Agendar = INTENÇÃO (futuro)** = **ESTE S2** (`/attendances/intentions` + barra de encaixe). Horario que a fila **ainda nao alcancou** ("hoje mais tarde" / "outro dia"). Nao usa `/swap-offers`.
+> - **Trocar de posicao (Adiantar/Atrasar) = TROCA na FILA VIVA** = feature **SEPARADA**, contrato **`/swap-offers`** (backend **NOVO**; o `#42`/`/swap-requests` dirigido segue em paralelo, nao atende). Troca **1-por-1 bidirecional**; o solicitante pode estar **fora da fila** (entra na vaga de quem aceita; quem aceita vai pro fim); expira **so quando o solicitante e atendido**; **nunca multa**. **O profissional NAO participa** — o **partner so REFLETE** a fila pos-troca (ja via `professionals-with-queue`/WS; **nao marca LATE**). **NAO e S2 nem S4** (S4 = o PROFISSIONAL promover ao topo — outra origem, acao do partner). Spec no PRD-Client. Ver **C13** no HANDOFF_CLIENT.
+> - **Fronteira limpa:** horario que a fila ainda nao alcancou → **INTENÇÃO** (S2); furar/ceder **dentro da fila viva** → **TROCA** (`/swap-offers`).
 
 ### Encaixe de agendamento (horas vagas) — modelo fechado com Andre 2026-07-14
 
