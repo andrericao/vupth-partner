@@ -17,7 +17,6 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { cardShadow } from "@lib/styles";
-import { ratingLabel } from "@lib/rating";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
 
 function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
@@ -82,11 +81,6 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               {professional.specialty ?? ""}
             </Text>
-            {ratingLabel(professional.rating_average, professional.rating_count) && (
-              <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$0.5">
-                ★ {ratingLabel(professional.rating_average, professional.rating_count)}
-              </Text>
-            )}
           </VStack>
           <VStack alignItems="flex-end">
             <Badge

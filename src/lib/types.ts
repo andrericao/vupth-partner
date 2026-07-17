@@ -46,10 +46,6 @@ export type ProfessionalWithQueue = {
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;
-  // Avaliacao agregada (backend popula em professionals-with-queue, #6). Opcional
-  // por seguranca; o front so exibe quando ha avaliacoes (ver src/lib/rating.ts).
-  rating_average?: number | null;
-  rating_count?: number | null;
 };
 
 export type EstablishmentWithProfessionals = {
