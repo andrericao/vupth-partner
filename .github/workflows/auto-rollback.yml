@@ -1,15 +1,19 @@
-name: Auto-rollback on red
+name: Auto-rollback on red (DESLIGADO 2026-07-17)
 
-# Rede de seguranca: se o CI ficar VERMELHO num push direto para dev/main,
-# reverte automaticamente o commit que quebrou, voltando ao ultimo estado funcional.
-# (O hook pre-push ja barra a maioria dos casos; isto cobre push --no-verify ou
-#  pushes feitos fora desta maquina.) Portado do front-client (2026-06-24).
+# ⚠️ DESLIGADO em 2026-07-17.
+# Motivo: revertia CEGAMENTE o commit do TOPO do push que ficou vermelho no CI —
+# sem saber qual commit foi a causa — e ja reverteu o commit ERRADO 3x (docs,
+# patch do expo, rating), criando divergencia e loop de revert.
+#
+# A rede real e o hook pre-push (lint + typecheck + jest --coverage + expo-doctor),
+# que agora barra TUDO antes do push. A protecao de PRODUCAO correta (a fazer) e
+# condicionar o OTA (eas-update) ao CI verde + branch protection no main; e a
+# recuperacao de um OTA ruim e `eas update:republish` do ultimo bom (nao git revert).
+#
+# Mantido como referencia; so roda por acionamento MANUAL — nunca mais no automatico.
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
-    branches: [dev, main]
+  workflow_dispatch: {}
 
 permissions:
   contents: write
