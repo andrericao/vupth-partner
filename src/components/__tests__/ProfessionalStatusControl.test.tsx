@@ -1,3 +1,4 @@
+import { Modal } from "react-native";
 import { fireEvent } from "@testing-library/react-native";
 import { renderWithProvider } from "../../test-utils/renderWithProvider";
 import { ProfessionalStatusControl } from "../ProfessionalStatusControl";
@@ -40,5 +41,29 @@ describe("ProfessionalStatusControl", () => {
     );
     fireEvent.press(getByLabelText("Fechar fila"));
     expect(comingSoon).toHaveBeenCalledWith("Fechar fila");
+  });
+
+  it("modal (i): abre no icone e fecha pelo 'Entendi'", () => {
+    const { getByLabelText, getByText } = renderWithProvider(
+      <ProfessionalStatusControl hasQueue={false} />
+    );
+    fireEvent.press(getByLabelText("O que e fechar fila"));
+    expect(getByText(/continua sendo atendido/)).toBeTruthy();
+    fireEvent.press(getByText("Entendi"));
+  });
+
+  it("modal (i): tocar no card nao fecha; tocar no fundo fecha", () => {
+    const { getByLabelText, getByText } = renderWithProvider(
+      <ProfessionalStatusControl hasQueue={false} />
+    );
+    fireEvent.press(getByLabelText("O que e fechar fila"));
+    fireEvent.press(getByText("Fechar fila")); // titulo/card interno = no-op
+    fireEvent.press(getByLabelText("Fechar")); // backdrop fecha
+  });
+
+  it("modal (i): fecha pelo botao voltar do sistema (onRequestClose)", () => {
+    const view = renderWithProvider(<ProfessionalStatusControl hasQueue={false} />);
+    fireEvent.press(view.getByLabelText("O que e fechar fila"));
+    fireEvent(view.UNSAFE_getByType(Modal), "requestClose");
   });
 });
