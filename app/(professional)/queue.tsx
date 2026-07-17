@@ -25,6 +25,7 @@ import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
+import { ratingLabel } from "@lib/rating";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalStatusControl } from "@components/ProfessionalStatusControl";
 import { comingSoon } from "@components/comingSoon";
@@ -483,6 +484,12 @@ export default function ProfessionalQueueScreen() {
         <Heading size="2xl" fontFamily="$heading" mt="$4">
           Minha fila
         </Heading>
+
+        {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
+          <Text fontFamily="$body" fontSize="$sm" color="$amber600" mt="$1">
+            ★ {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
+          </Text>
+        )}
 
         <ReadinessFaixa
           completion={completion}
