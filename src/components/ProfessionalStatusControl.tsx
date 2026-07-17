@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { Modal } from "react-native";
 import { VStack, HStack, Text, Pressable, Badge, BadgeText } from "@gluestack-ui/themed";
+import { Button } from "@components/Button";
 import { cardShadow } from "@lib/styles";
 import { comingSoon } from "@components/comingSoon";
 
@@ -21,6 +24,7 @@ const OPTIONS: { key: StatusKey; label: string; activeBg: string }[] = [
 
 export function ProfessionalStatusControl({ hasQueue }: { hasQueue: boolean }) {
   const current: StatusKey = "trabalhando"; // placeholder ate o endpoint expor o real
+  const [showInfo, setShowInfo] = useState(false);
 
   const selectStatus = (next: StatusKey) => {
     // Parte FRONT-ONLY do S1 (nao precisa de backend): prevenir o clique.
@@ -83,17 +87,57 @@ export function ProfessionalStatusControl({ hasQueue }: { hasQueue: boolean }) {
         </Text>
       )}
 
-      <Pressable
-        onPress={() => comingSoon("Fechar fila")}
-        accessibilityRole="button"
-        accessibilityLabel="Fechar fila"
-        mt="$3"
-        alignSelf="flex-start"
-      >
-        <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$green600">
-          Fechar fila (parar de aceitar novos)
-        </Text>
-      </Pressable>
+      <HStack mt="$3" alignItems="center" space="xs" alignSelf="flex-start">
+        <Pressable
+          onPress={() => comingSoon("Fechar fila")}
+          accessibilityRole="button"
+          accessibilityLabel="Fechar fila"
+        >
+          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$green600">
+            Fechar fila (parar de aceitar novos)
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setShowInfo(true)}
+          accessibilityRole="button"
+          accessibilityLabel="O que e fechar fila"
+          hitSlop={8}
+        >
+          <VStack w="$5" h="$5" borderRadius="$full" borderWidth="$1" borderColor="$coolGray400" alignItems="center" justifyContent="center">
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$coolGray500" fontStyle="italic">i</Text>
+          </VStack>
+        </Pressable>
+      </HStack>
+
+      {/* Modal informativo: "fechar fila" e so para o cliente (pedido Andre). */}
+      <Modal visible={showInfo} transparent animationType="fade" onRequestClose={() => setShowInfo(false)}>
+        <Pressable
+          onPress={() => setShowInfo(false)}
+          accessibilityLabel="Fechar"
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)", alignItems: "center", justifyContent: "center", padding: 24 }}
+        >
+          <Pressable onPress={() => {}} style={{ width: "100%", maxWidth: 360 }}>
+            <VStack bg="$white" borderRadius="$2xl" p="$5" style={cardShadow}>
+              <HStack alignItems="center" space="sm" mb="$2">
+                <VStack w="$8" h="$8" borderRadius="$full" bg="$green100" alignItems="center" justifyContent="center">
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$green700" fontStyle="italic">i</Text>
+                </VStack>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray900">
+                  Fechar fila
+                </Text>
+              </HStack>
+              <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                “Fechar fila” impede{" "}
+                <Text fontFamily="$body" fontWeight="$bold" color="$coolGray800">novos</Text>
+                {" "}clientes de entrar. Quem ja esta na fila{" "}
+                <Text fontFamily="$body" fontWeight="$bold" color="$coolGray800">continua sendo atendido</Text>
+                {" "}ate o fim. Vale so para os clientes — voce segue trabalhando normalmente.
+              </Text>
+              <Button title="Entendi" onPress={() => setShowInfo(false)} bg="$green500" $active-bg="$green600" mt="$4" />
+            </VStack>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </VStack>
   );
 }
