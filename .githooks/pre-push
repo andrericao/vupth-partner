@@ -19,9 +19,12 @@ echo "────────────────────────�
 npm run --silent typecheck
 
 echo "──────────────────────────────────────────────"
-echo "[pre-push] 3/4  testes (jest)"
+echo "[pre-push] 3/4  testes + cobertura (jest --coverage)"
 echo "──────────────────────────────────────────────"
-npm test -- --ci
+# --coverage p/ aplicar o mesmo gate de cobertura que o CI (coverageThreshold no
+# package.json). Sem isso, uma regressao de cobertura passava aqui e so estourava
+# no CI, disparando o auto-rollback. (2026-07-17)
+npm test -- --ci --coverage
 
 echo "──────────────────────────────────────────────"
 echo "[pre-push] 4/4  config (expo-doctor)"
