@@ -94,7 +94,7 @@ export function ProfessionalStatusControl({ hasQueue }: { hasQueue: boolean }) {
           accessibilityLabel="Fechar fila"
         >
           <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$green600">
-            Fechar fila (parar de aceitar novos)
+            Fechar fila
           </Text>
         </Pressable>
         <Pressable

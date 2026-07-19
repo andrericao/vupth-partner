@@ -164,7 +164,7 @@ function QueueRow({
             {services} · {price}
           </Text>
           <Text fontFamily="$body" fontSize="$xs" color={isLate ? "$amber600" : "$green600"} mt="$0.5">
-            {isLate ? "Atrasado" : "Proximo da vez"}
+            {isLate ? "Atrasado" : "Proximo"}
           </Text>
         </VStack>
         <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" px="$4" />

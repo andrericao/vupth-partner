@@ -14,7 +14,7 @@ export function queueMenuActions(isFirst: boolean): QueueAction[] {
 export const QUEUE_ACTION_LABEL: Record<QueueAction, string> = {
   adiantar: "Adiantar",
   "nao-chegou": "Não chegou",
-  remover: "Remover da fila",
+  remover: "Remover",
 };
 
 /** Resumo dos servicos para o card (ex.: "Corte + Barba"). */
