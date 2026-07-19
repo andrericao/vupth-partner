@@ -440,4 +440,24 @@ describe("attendance.store", () => {
       ).rejects.toThrow();
     });
   });
+
+  describe("promoteAttendance", () => {
+    it("calls PATCH /attendances/{id}/promote", async () => {
+      mock.onPatch("/attendances/att-uuid-1/promote").reply(200);
+
+      await useAttendanceStore.getState().promoteAttendance("att-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/promote");
+    });
+
+    it("rejects on error", async () => {
+      mock.onPatch("/attendances/att-uuid-1/promote").reply(400, {
+        message: "Invalid status",
+      });
+
+      await expect(
+        useAttendanceStore.getState().promoteAttendance("att-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
 });

@@ -27,6 +27,7 @@ type AttendanceState = {
   undoLate: (attendanceId: string) => Promise<void>;
   noShow: (attendanceId: string) => Promise<void>;
   removeFromQueue: (attendanceId: string) => Promise<void>;
+  promoteAttendance: (attendanceId: string) => Promise<void>;
   reset: () => void;
 };
 
@@ -112,6 +113,13 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   removeFromQueue: async (attendanceId) => {
     await api.delete(`/professional-queue/${attendanceId}/remove`);
+  },
+
+  // S4 (backend 2026-07-18): move o atendimento ao indice 0 e empurra os demais,
+  // SEM inicia-lo (fica SCHEDULED). Diferente do "Adiantar", que inicia na hora
+  // via /start. No-op no backend se ja for o 1o; a fila ao vivo reflete via WS.
+  promoteAttendance: async (attendanceId) => {
+    await api.patch(`/attendances/${attendanceId}/promote`);
   },
 
   reset: () =>
