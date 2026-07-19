@@ -454,7 +454,7 @@ export default function ProfessionalQueueScreen() {
       <VStack flex={1} py="$12" px="$6">
         <Header />
         <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Minha Fila
+          Fila
         </Heading>
         <VStack
           mt="$8"
@@ -496,7 +496,7 @@ export default function ProfessionalQueueScreen() {
         <Header />
 
         <Heading size="2xl" fontFamily="$heading" mt="$4">
-          Minha fila
+          Fila
         </Heading>
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
