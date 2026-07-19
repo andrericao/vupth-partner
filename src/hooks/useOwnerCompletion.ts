@@ -29,14 +29,22 @@ export function useOwnerCompletion(): {
     fetchEstablishmentById(establishmentId).then(setDetail).catch(() => {});
   }, [establishmentId, isFocused, fetchEstablishmentById]);
 
+  // `detail` (GET /establishment/id/{id}) e a fonte FRESCA e completa — traz
+  // name/service_type/hours/address/phone/instagram do banco. A store
+  // `establishment` (SecureStore + projecao enxuta do /mine) pode NAO ter
+  // opening_time/closing_time, o que fazia horario/tipo aparecerem como
+  // pendencia na Home ate abrir "Dados Cadastrais" (que reescrevia a store).
+  // Por isso: assim que `detail` chega, ele manda; a store so cobre o 1o paint.
   const completion = ownerCompletion({
-    hasName: !!establishment?.name,
-    hasServiceType: !!establishment?.service_type,
+    hasName: !!(detail ? detail.name : establishment?.name),
+    hasServiceType: !!(detail ? detail.service_type : establishment?.service_type),
     hasAddress: !!detail?.address?.neighborhood,
-    hasHours: !!establishment?.opening_time && !!establishment?.closing_time,
+    hasHours: detail
+      ? !!detail.opening_time && !!detail.closing_time
+      : !!establishment?.opening_time && !!establishment?.closing_time,
     hasProfessionalWithService: professionals.length > 0,
-    hasPhone: !!detail?.phone,
-    hasInstagram: !!detail?.instagram,
+    hasPhone: !!(detail ? detail.phone : establishment?.phone),
+    hasInstagram: !!(detail ? detail.instagram : establishment?.instagram),
   });
 
   const routeFor = (key: string): string | undefined => {
