@@ -93,6 +93,22 @@ Confirmado pelo backend como gap real: `updateOpenStatus` nao checa fila/horario
 
 ---
 
+## Detalhe — C2 "solicitar corte" (fatia 2 entregue; UI do partner BLOQUEADA)
+
+Backend entregou (2026-07-18) as fatias 1-2: `POST /attendances/cut-requests` (cliente) + `PATCH /attendances/cut-requests/{id}/accept|refuse` (profissional dono). O partner ja tem a **camada de store** pronta e testada (`acceptCutRequest`/`refuseCutRequest`, `CutRequestResponse`, commit `a7895b6`).
+
+**⚠️ Blocker p/ a UI do pedido pendente (2 gaps de contrato — precisa do backend):**
+1. **O WS `CUT_REQUESTED` nao carrega o `cutRequestId`.** Ele e publicado no envelope **generico** `QueueNotification` (`{ type, attendanceId, establishmentId, message, timestamp }` — PRD_BACKEND 18b). Mas o cut-request e **entidade propria** (nao e Attendance), e o accept/refuse precisa do **id do cut-request** (`PATCH /attendances/cut-requests/{id}/...`). O envelope so tem `attendanceId` (N/A aqui). **Sem o `cutRequestId` no payload, o partner recebe o aviso mas nao sabe qual pedido aceitar/recusar.**
+2. **Nao ha GET de pendentes.** O `CutRequestResponse` (que tem o `id`) so volta ao **cliente** no `POST`; o profissional nunca o recebe. Sem um `GET /attendances/cut-requests?status=PENDING` (ou embutir no `professionals-with-queue`), o partner nao consegue: (a) reidratar pedidos ao abrir o app; (b) exibir nome do cliente / servicos (o envelope so tem `message` texto).
+
+**Pedido ao backend (qualquer um destravaria a UI):**
+- (a) **Estender o payload do `CUT_REQUESTED`** para incluir `cutRequestId` + `clientName` + `serviceNames` (ou o `CutRequestResponse` inteiro no campo `data`), **ou**
+- (b) **Expor um GET de pendentes** do profissional (`GET /attendances/cut-requests?professionalId=me&status=PENDING` devolvendo `CutRequestResponse[]` com nome/servicos), que o partner busca no `CUT_REQUESTED` e ao focar a fila.
+
+Enquanto isso: **store pronta**; falta so ligar a exibicao + botoes Aceitar/Recusar quando um dos itens acima existir. (Fatia 3 = auto-nega por timer 5min, ja e do backend.)
+
+---
+
 ## Detalhe — S1 (status do profissional → `open_status` derivado)
 
 Decisao Andre (2026-07-09). **Substitui** o toggle bruto de `open_status` (entregue em `7819914` — mantido so como base) por um modelo onde **o profissional muda o proprio status** e o `open_status` do estabelecimento e **derivado**, nunca escrito diretamente. Elimina o estado ilegal "aberto sem ninguem atendendo" e a corrida do booleano compartilhado.
