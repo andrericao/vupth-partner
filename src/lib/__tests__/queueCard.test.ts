@@ -4,8 +4,12 @@ describe("queueMenuActions", () => {
   it("1o da vez: nao chegou + remover (sem adiantar)", () => {
     expect(queueMenuActions(true)).toEqual(["nao-chegou", "remover"]);
   });
-  it("demais: adiantar + remover (sem nao chegou)", () => {
-    expect(queueMenuActions(false)).toEqual(["adiantar", "remover"]);
+  it("demais: adiantar + promover + remover (sem nao chegou)", () => {
+    expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
+  });
+  it("promover so aparece fora do 1o lugar (reordena sem iniciar)", () => {
+    expect(queueMenuActions(false)).toContain("promover");
+    expect(queueMenuActions(true)).not.toContain("promover");
   });
   it("Remover esta presente em qualquer posicao (pode remover a qualquer hora)", () => {
     expect(queueMenuActions(true)).toContain("remover");

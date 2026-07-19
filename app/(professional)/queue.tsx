@@ -210,7 +210,7 @@ export default function ProfessionalQueueScreen() {
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
-  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, removeFromQueue } =
+  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, removeFromQueue, promoteAttendance } =
     useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -408,8 +408,22 @@ export default function ProfessionalQueueScreen() {
     ]);
   };
 
+  // "Promover ao topo" (S4): reordena ao 1o lugar SEM iniciar — os demais descem
+  // e o cliente vira o proximo. Diferente de "Adiantar", que inicia na hora.
+  const confirmPromote = (att: AttendanceInQueue) => {
+    Alert.alert(
+      "Promover ao topo",
+      `${att.clientName} vai para o 1o lugar da fila, sem iniciar o atendimento. Continuar?`,
+      [
+        { text: "Cancelar" },
+        { text: "Promover", onPress: () => handleAction(() => promoteAttendance(att.id)) },
+      ]
+    );
+  };
+
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "adiantar") startClient(att, true);
+    else if (action === "promover") confirmPromote(att);
     else if (action === "nao-chegou") confirmLate(att);
     else if (action === "remover") confirmRemove(att);
   };
