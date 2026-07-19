@@ -460,4 +460,47 @@ describe("attendance.store", () => {
       ).rejects.toThrow();
     });
   });
+
+  describe("acceptCutRequest / refuseCutRequest", () => {
+    const CUT = {
+      id: "cut-uuid-1",
+      status: "ACCEPTED",
+      professional_id: "prof-uuid-1",
+      establishment_id: "estab-uuid-1",
+      client_id: "client-uuid-1",
+      service_item_ids: ["svc-1"],
+      expires_at: "2026-07-18T14:05:00Z",
+      created_at: "2026-07-18T14:00:00Z",
+      resulting_attendance_id: "att-uuid-9",
+    };
+
+    it("accept: PATCH /attendances/cut-requests/{id}/accept e devolve o response", async () => {
+      mock.onPatch("/attendances/cut-requests/cut-uuid-1/accept").reply(200, CUT);
+
+      const res = await useAttendanceStore.getState().acceptCutRequest("cut-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/cut-requests/cut-uuid-1/accept");
+      expect(res.status).toBe("ACCEPTED");
+      expect(res.resulting_attendance_id).toBe("att-uuid-9");
+    });
+
+    it("refuse: PATCH /attendances/cut-requests/{id}/refuse", async () => {
+      mock.onPatch("/attendances/cut-requests/cut-uuid-1/refuse").reply(200, { ...CUT, status: "REFUSED", resulting_attendance_id: null });
+
+      const res = await useAttendanceStore.getState().refuseCutRequest("cut-uuid-1");
+
+      expect(mock.history.patch[0].url).toBe("/attendances/cut-requests/cut-uuid-1/refuse");
+      expect(res.status).toBe("REFUSED");
+    });
+
+    it("rejeita no 409 (pedido ja decidido)", async () => {
+      mock.onPatch("/attendances/cut-requests/cut-uuid-1/accept").reply(409, {
+        message: "CUT_REQUEST_NOT_PENDING",
+      });
+
+      await expect(
+        useAttendanceStore.getState().acceptCutRequest("cut-uuid-1")
+      ).rejects.toThrow();
+    });
+  });
 });

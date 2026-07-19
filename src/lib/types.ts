@@ -12,6 +12,22 @@ export type AttendanceServiceItem = {
   estimatedMinutes: number;
 };
 
+// C2 "solicitar corte" (backend BUG5 C2). Entidade PROPRIA — nunca aparece em
+// read-model de fila. O profissional dono decide o pedido PENDING (accept ->
+// nasce Attendance SCHEDULED na cauda; refuse -> descartado). Ver HANDOFF_BACKEND.
+export type CutRequestStatus = "PENDING" | "ACCEPTED" | "REFUSED" | "EXPIRED";
+export type CutRequestResponse = {
+  id: string;
+  status: CutRequestStatus;
+  professional_id: string;
+  establishment_id: string;
+  client_id: string;
+  service_item_ids: string[];
+  expires_at: string;
+  created_at: string;
+  resulting_attendance_id: string | null;
+};
+
 export type AttendanceInQueue = {
   id: string;
   establishmentId: string;

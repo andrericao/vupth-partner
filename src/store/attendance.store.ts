@@ -3,6 +3,7 @@ import { api } from "@lib/api";
 import type {
   AttendanceInProgress,
   AttendanceHistoryItem,
+  CutRequestResponse,
   EstablishmentWithProfessionals,
   ProfessionalWithQueue,
   QueueResponse,
@@ -28,6 +29,8 @@ type AttendanceState = {
   noShow: (attendanceId: string) => Promise<void>;
   removeFromQueue: (attendanceId: string) => Promise<void>;
   promoteAttendance: (attendanceId: string) => Promise<void>;
+  acceptCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
+  refuseCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
   reset: () => void;
 };
 
@@ -120,6 +123,21 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
   // via /start. No-op no backend se ja for o 1o; a fila ao vivo reflete via WS.
   promoteAttendance: async (attendanceId) => {
     await api.patch(`/attendances/${attendanceId}/promote`);
+  },
+
+  // C2 fatia 2 (backend 2026-07-18): o profissional dono decide um pedido de
+  // corte PENDING. accept -> nasce Attendance SCHEDULED na cauda (a fila reflete
+  // via WS); refuse -> pedido descartado. Ambos 200 CutRequestResponse.
+  // NOTA: a UI do pedido pendente aguarda o backend expor o cutRequestId no
+  // payload do WS CUT_REQUESTED (ou um GET de pendentes) — ver HANDOFF_BACKEND.
+  acceptCutRequest: async (cutRequestId) => {
+    const { data } = await api.patch(`/attendances/cut-requests/${cutRequestId}/accept`);
+    return data;
+  },
+
+  refuseCutRequest: async (cutRequestId) => {
+    const { data } = await api.patch(`/attendances/cut-requests/${cutRequestId}/refuse`);
+    return data;
   },
 
   reset: () =>
