@@ -105,6 +105,24 @@ Backend entregou (2026-07-18) as fatias 1-2: `POST /attendances/cut-requests` (c
 - (a) **Estender o payload do `CUT_REQUESTED`** para incluir `cutRequestId` + `clientName` + `serviceNames` (ou o `CutRequestResponse` inteiro no campo `data`), **ou**
 - (b) **Expor um GET de pendentes** do profissional (`GET /attendances/cut-requests?professionalId=me&status=PENDING` devolvendo `CutRequestResponse[]` com nome/servicos), que o partner busca no `CUT_REQUESTED` e ao focar a fila.
 
+### ⭐ PROPOSTA PREFERIDA DO ANDRE (2026-07-20) — solicitacao NASCE como Attendance `INTENTION`
+
+> **"Toda solicitacao de atendimento deve gerar um atendimento, so que com status de INTENTION, isso ja gera um id."**
+
+Em vez de `CutRequest` ser entidade paralela invisivel, o pedido **nasce como um `Attendance`** em status `INTENTION` (ou equivalente "aguardando aprovacao"). **Resolve o gap na raiz e e melhor que (a) e (b):**
+- o pedido **ja tem `id` de atendimento** → cabe no **campo `attendanceId` que o envelope `QueueNotification` JA TEM** (nenhum campo novo no WS);
+- **`clientName` + `services` + `totalValue` vem de graca** (o Attendance ja os carrega) → da p/ montar o card sem inventar payload;
+- o partner **ja sabe ler/renderizar Attendance**; e a listagem pode sair do **`GET /attendances` que ja existe** (filtrando o status), dispensando endpoint novo;
+- aceitar/recusar viram transicoes de status do proprio atendimento (mesmo padrao de `start/finish/late/...`).
+
+**⚠️ Duas condicoes que o backend PRECISA garantir (senao vira bug):**
+1. **Nao colidir com a semantica atual de `INTENTION`.** Hoje `INTENTION` = intencao de agendamento (#40/S2), que o **`IntentionPromotionScheduler` PROMOVE SOZINHO** ~15min antes do `desiredTime`. Solicitacao de corte e o oposto: so entra com **aceite explicito do profissional** e **expira em 5min**. Sem distinguir os dois casos (sub-status, flag `requiresApproval`, ou um status proprio tipo `PENDING_APPROVAL`), o scheduler vai **promover sozinho um pedido nunca aprovado**.
+2. **Nao contar na fila viva enquanto pendente.** Nao pode entrar em `waiting_list`, `queue_count` nem no ETA — senao a fila "fechada p/ novos" enche de pedido nao aprovado. E a mesma razao pela qual o `cut_request` hoje fica fora dos read-models; a regra tem de continuar valendo (o backend ja faz isso p/ as intencoes #40).
+
+**Endpoint:** a definir com o backend (Andre: *"sobre o endpoint podemos pedir ao backend"*). O front nao tem preferencia forte — o que importa e o **id no evento** e o pedido **fora da fila viva**.
+
+**Impacto no front se adotado:** a store atual (`acceptCutRequest`/`refuseCutRequest`, commit `a7895b6`) troca de URL, mas a UI (card do pedido + Aceitar/Recusar + dot no ☰) passa a ser direta. Baixo retrabalho.
+
 Enquanto isso: **store pronta**; falta so ligar a exibicao + botoes Aceitar/Recusar quando um dos itens acima existir. (Fatia 3 = auto-nega por timer 5min, ja e do backend.)
 
 ---
