@@ -112,7 +112,7 @@ export default function EstablishmentDetailScreen() {
         [
           {
             text: "OK",
-            onPress: () => router.navigate("/(professional)/profile" as any),
+            onPress: () => router.navigate("/(professional)/queue" as any),
           },
         ]
       );

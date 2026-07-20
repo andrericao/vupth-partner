@@ -153,7 +153,7 @@ export default function ProfessionalOnboardingScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
+          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
           <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
             <Heading mb="$8" size="3xl" fontFamily="$heading">

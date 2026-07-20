@@ -164,7 +164,7 @@ export default function FindEstablishmentScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
+          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
           <Heading mt="$8" size="2xl" fontFamily="$heading">
             Buscar Estabelecimento
