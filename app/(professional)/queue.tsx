@@ -27,7 +27,7 @@ import { cardShadow } from "@lib/styles";
 import { professionalCompletion, hasAnyPending } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
-import { isMealDue, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
+import { mealPhase, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalMenu } from "@components/ProfessionalMenu";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -348,7 +348,9 @@ export default function ProfessionalQueueScreen() {
   // Dots do menu ☰ (design 2026-07-18): refeicao dentro da janela + pendencia
   // de cadastro. O 3o gatilho pedido (solicitacoes de corte com a fila fechada)
   // aguarda o backend — ver HANDOFF_BACKEND "Detalhe — C2".
-  const mealDot = isMealDue(meals, new Date().getHours() * 60 + new Date().getMinutes());
+  // "proxima" acende 30min ANTES do horario (pedido do Andre 2026-07-20): o
+  // profissional ve com antecedencia, toca e decide iniciar ou nao.
+  const currentMealPhase = mealPhase(meals, new Date().getHours() * 60 + new Date().getMinutes());
   const settingsDot = hasAnyPending(completion);
 
   // Refeicao EM ANDAMENTO fica na tela (Encerrar a um toque); o resto vai p/ o
@@ -537,7 +539,7 @@ export default function ProfessionalQueueScreen() {
             Fila
           </Heading>
           <ProfessionalMenu
-            mealDot={mealDot}
+            mealPhase={currentMealPhase}
             settingsDot={settingsDot}
             mealLabel={mealLabel}
             hasQueue={waitingList.length > 0 || !!currentAttendance}

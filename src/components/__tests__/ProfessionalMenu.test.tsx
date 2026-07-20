@@ -103,12 +103,27 @@ describe("ProfessionalMenu", () => {
       expect(view.queryByTestId("menu-dot")).toBeNull();
     });
 
-    it("refeicao perto: dot no gatilho e no item", () => {
-      const view = renderWithProvider(<ProfessionalMenu mealDot />);
+    // Andre 2026-07-20: o sinal acende 30min ANTES; o texto acompanha a fase.
+    it("refeicao 'proxima' (30min antes): dot aceso e texto de antecedencia", () => {
+      const view = renderWithProvider(<ProfessionalMenu mealPhase="proxima" />);
       expect(view.getByTestId("menu-dot")).toBeTruthy();
       open(view);
       expect(view.getByTestId("menu-dot-meals")).toBeTruthy();
+      expect(view.getByText(/comeca logo/)).toBeTruthy();
+    });
+
+    it("refeicao 'agora': dot aceso e texto de hora chegada", () => {
+      const view = renderWithProvider(<ProfessionalMenu mealPhase="agora" />);
+      expect(view.getByTestId("menu-dot")).toBeTruthy();
+      open(view);
       expect(view.getByText(/esta na hora/)).toBeTruthy();
+    });
+
+    it("sem fase, o item de refeicao fica neutro e sem dot", () => {
+      const view = renderWithProvider(<ProfessionalMenu />);
+      open(view);
+      expect(view.queryByTestId("menu-dot-meals")).toBeNull();
+      expect(view.getByText(/entram no ETA/)).toBeTruthy();
     });
 
     it("pendencia de cadastro: dot no gatilho e em Configuracoes", () => {

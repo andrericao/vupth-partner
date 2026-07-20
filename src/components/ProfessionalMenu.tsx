@@ -18,12 +18,18 @@ import { cardShadow } from "@lib/styles";
 // Gatilho = BANCO (espera/fila). "outra hora a gente muda" — trocar o icone e
 // so trocar <BenchIcon/> por outro componente SVG.
 //
-// DOT (vermelho) = ha algo a resolver atras do menu: refeicao na janela
-// (`mealDot`) ou pendencia de cadastro (`settingsDot`).
+// DOT (vermelho) = ha algo a resolver atras do menu: refeicao sinalizada
+// (`mealPhase`, que acende 30min ANTES), pendencia de cadastro (`settingsDot`)
+// ou solicitacoes de corte pendentes (`pendingRequests`).
 type StatusKey = "trabalhando" | "intervalo" | "indisponivel";
 
 type Props = {
-  mealDot?: boolean;
+  /**
+   * Fase do sinal de refeicao (ver src/lib/meals.ts). "proxima" = falta pouco
+   * (acende 30min ANTES, p/ dar tempo de decidir); "agora" = ja passou do
+   * horario. Qualquer uma acende o dot; o texto muda conforme a fase.
+   */
+  mealPhase?: "proxima" | "agora" | null;
   settingsDot?: boolean;
   /** Abrir/fechar o estabelecimento (backend aceita profissional afiliado). */
   establishment?: { isOpen: boolean; onToggle: () => void };
@@ -132,7 +138,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
 }
 
 export function ProfessionalMenu({
-  mealDot = false,
+  mealPhase = null,
   settingsDot = false,
   establishment,
   mealLabel,
@@ -172,7 +178,14 @@ export function ProfessionalMenu({
     ]);
   };
 
+  const mealDot = mealPhase != null;
   const showDot = mealDot || settingsDot || pendingRequests > 0;
+  const mealHint =
+    mealPhase === "agora"
+      ? "esta na hora — iniciar, adiar ou pular"
+      : mealPhase === "proxima"
+        ? "comeca logo — iniciar agora ou adiar"
+        : "almoco / janta — entram no ETA";
 
   return (
     <>
@@ -308,7 +321,7 @@ export function ProfessionalMenu({
               <Row
                 icon="🍽️"
                 label={mealLabel ?? "Refeicoes"}
-                hint={mealDot ? "esta na hora — iniciar, adiar ou pular" : "almoco / janta — entram no ETA"}
+                hint={mealHint}
                 dot={mealDot}
                 onPress={() => go("/(professional)/meals")}
               />
