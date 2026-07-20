@@ -29,10 +29,8 @@ import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction 
 import { ratingLabel } from "@lib/rating";
 import { isMealDue, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
-import { ProfessionalStatusControl } from "@components/ProfessionalStatusControl";
 import { ProfessionalMenu } from "@components/ProfessionalMenu";
 import { useEstablishmentStore } from "@store/establishment.store";
-import { comingSoon } from "@components/comingSoon";
 import * as SecureStore from "expo-secure-store";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
@@ -353,6 +351,14 @@ export default function ProfessionalQueueScreen() {
   const mealDot = isMealDue(meals, new Date().getHours() * 60 + new Date().getMinutes());
   const settingsDot = hasAnyPending(completion);
 
+  // Refeicao EM ANDAMENTO fica na tela (Encerrar a um toque); o resto vai p/ o
+  // menu, que mostra o horario da proxima no proprio rotulo.
+  const activeMeal = meals.find((m) => m.status === "ACTIVE") ?? null;
+  const nextMeal = meals.find((m) => m.status === "SCHEDULED") ?? null;
+  const mealLabel = nextMeal
+    ? `${mealName(nextMeal.description)} ${parseApiTime(nextMeal.fixedStartTime) ?? ""}`.trim()
+    : undefined;
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
@@ -474,18 +480,6 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
-  // Editar refeicao: confirmacao para nao abrir por toque acidental.
-  const handleEditMeal = (m: Interval) => {
-    Alert.alert(
-      "Editar refeicao",
-      `Abrir a edicao de "${mealName(m.description)}" (horario/duracao)?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Editar", onPress: () => router.push("/(professional)/meals" as any) },
-      ]
-    );
-  };
-
   if (!establishmentId) {
     return (
       <VStack flex={1} py="$12" px="$6">
@@ -545,6 +539,8 @@ export default function ProfessionalQueueScreen() {
           <ProfessionalMenu
             mealDot={mealDot}
             settingsDot={settingsDot}
+            mealLabel={mealLabel}
+            hasQueue={waitingList.length > 0 || !!currentAttendance}
             establishment={
               establishmentId
                 ? { isOpen: isEstablishmentOpen, onToggle: toggleEstablishment }
@@ -578,11 +574,6 @@ export default function ProfessionalQueueScreen() {
           completion={completion}
           targetRoute="/(professional)/settings"
           goalNoun="atender clientes"
-        />
-
-        {/* S1 — controle de status do profissional (stub; backend #10). */}
-        <ProfessionalStatusControl
-          hasQueue={waitingList.length > 0 || !!currentAttendance}
         />
 
         {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
@@ -627,80 +618,38 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         )}
 
-        {myProfessional && meals.length > 0 && (
-          <VStack mt="$6">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
-              Refeicoes
-            </Text>
-            {meals.map((m) => {
-              const active = m.status === "ACTIVE";
-              return (
-                <HStack
-                  key={m.intervalId}
-                  bg={active ? "$amber100" : "$amber50"}
-                  p="$3"
-                  mb="$2"
-                  borderRadius="$2xl"
-                  borderWidth="$1"
-                  borderColor={active ? "$amber300" : "$amber200"}
-                  alignItems="center"
-                  space="sm"
-                >
-                  <Text fontSize="$md">🍽️</Text>
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
-                      {mealName(m.description)} {parseApiTime(m.fixedStartTime) ?? "--:--"}
-                    </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$amber600">
-                      {m.durationMinutes}min{active ? " • em andamento" : " • previsto"}
-                    </Text>
-                  </VStack>
-                  {!active && (
-                    <>
-                      {/* S3 (stub; backend "refeicoes Modelo B") — adiantar/adiar
-                          a refeicao na janela flexivel. Ao ligar: mover o
-                          placement no backend. */}
-                      <Pressable onPress={() => comingSoon("Adiantar ou adiar a refeição")} px="$2" py="$1">
-                        <Text fontSize="$lg" color="$amber700">⏱</Text>
-                      </Pressable>
-                      <Pressable onPress={() => handleEditMeal(m)} px="$2" py="$1">
-                        <Text fontSize="$lg" color="$amber700">✎</Text>
-                      </Pressable>
-                    </>
-                  )}
-                  {active ? (
-                    <Button
-                      title="Encerrar"
-                      onPress={() => handleFinishMeal(m)}
-                      bg="$amber500"
-                      $active-bg="$amber600"
-                      h="$9"
-                      mt="$0"
-                    />
-                  ) : (
-                    <Button
-                      title="Iniciar"
-                      onPress={() => handleStartMeal(m)}
-                      bg="$green500"
-                      $active-bg="$green600"
-                      h="$9"
-                      mt="$0"
-                    />
-                  )}
-                </HStack>
-              );
-            })}
-          </VStack>
-        )}
-
-        {myProfessional && (
-          <Button
-            title="Adicionar Cliente"
-            onPress={() => router.push("/(professional)/add-guest" as any)}
-            bg="$amber500"
-            $active-bg="$amber600"
+        {/* Refeicoes sairam da tela (foram p/ o menu, design 2026-07-20). Fica
+            so a faixa da refeicao EM ANDAMENTO, porque "Encerrar" precisa estar
+            a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
+        {activeMeal && (
+          <HStack
             mt="$6"
-          />
+            bg="$amber100"
+            p="$3"
+            borderRadius="$2xl"
+            borderWidth="$1"
+            borderColor="$amber300"
+            alignItems="center"
+            space="sm"
+          >
+            <Text fontSize="$md">🍽️</Text>
+            <VStack flex={1}>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$amber700">
+                {mealName(activeMeal.description)} em andamento
+              </Text>
+              <Text fontFamily="$body" fontSize="$xs" color="$amber600">
+                {activeMeal.durationMinutes}min previstos
+              </Text>
+            </VStack>
+            <Button
+              title="Encerrar"
+              onPress={() => handleFinishMeal(activeMeal)}
+              bg="$amber500"
+              $active-bg="$amber600"
+              h="$9"
+              mt="$0"
+            />
+          </HStack>
         )}
 
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (

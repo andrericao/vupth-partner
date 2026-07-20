@@ -4,11 +4,13 @@ import { router } from "expo-router";
 import { renderWithProvider } from "../../test-utils/renderWithProvider";
 import { ProfessionalMenu } from "../ProfessionalMenu";
 import { useAuthStore } from "@store/auth.store";
+import { comingSoon } from "@components/comingSoon";
 
 jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn() } }));
+jest.mock("@components/comingSoon", () => ({ comingSoon: jest.fn() }));
 
 const open = (view: ReturnType<typeof renderWithProvider>) =>
-  fireEvent.press(view.getByLabelText("Menu"));
+  fireEvent.press(view.getByLabelText("Opcoes da fila"));
 
 describe("ProfessionalMenu", () => {
   beforeEach(() => {
@@ -17,13 +19,11 @@ describe("ProfessionalMenu", () => {
   });
 
   describe("navegacao", () => {
-    // Cada item do menu tem seu proprio onPress — exercitamos todos para o
-    // componente nao derrubar a cobertura de funcoes (allowlist do jest).
     it.each([
       ["Refeicoes", "/(professional)/meals"],
-      ["Meus servicos", "/(professional)/my-services"],
+      ["Adicionar cliente", "/(professional)/add-guest"],
+      ["Meu dia", "/(professional)/reports"],
       ["Atendimentos", "/(professional)/attendances"],
-      ["Relatorios", "/(professional)/reports"],
       ["Configuracoes", "/(professional)/settings"],
     ])("'%s' navega para %s", (label, route) => {
       const view = renderWithProvider(<ProfessionalMenu />);
@@ -44,6 +44,36 @@ describe("ProfessionalMenu", () => {
       open(view);
       fireEvent.press(view.getByLabelText("Area do dono"));
       expect(router.replace).toHaveBeenCalledWith("/(owner)/dashboard");
+    });
+  });
+
+  describe("status (stub do S1)", () => {
+    it("trocar de status cai no comingSoon", () => {
+      const view = renderWithProvider(<ProfessionalMenu />);
+      open(view);
+      fireEvent.press(view.getByLabelText("Intervalo"));
+      expect(comingSoon).toHaveBeenCalled();
+    });
+
+    it("com fila, 'Fora' NAO dispara (nao da p/ sumir com cliente esperando)", () => {
+      const view = renderWithProvider(<ProfessionalMenu hasQueue />);
+      open(view);
+      fireEvent.press(view.getByLabelText("Fora"));
+      expect(comingSoon).not.toHaveBeenCalled();
+    });
+
+    it("sem fila, 'Fora' dispara normalmente", () => {
+      const view = renderWithProvider(<ProfessionalMenu hasQueue={false} />);
+      open(view);
+      fireEvent.press(view.getByLabelText("Fora"));
+      expect(comingSoon).toHaveBeenCalled();
+    });
+
+    it("'Fechar fila' cai no comingSoon", () => {
+      const view = renderWithProvider(<ProfessionalMenu />);
+      open(view);
+      fireEvent.press(view.getByLabelText("Fechar fila"));
+      expect(comingSoon).toHaveBeenCalledWith("Fechar fila");
     });
   });
 
@@ -68,12 +98,12 @@ describe("ProfessionalMenu", () => {
   });
 
   describe("dot", () => {
-    it("sem sinal nenhum, o ☰ fica limpo", () => {
+    it("sem sinal nenhum, o gatilho fica limpo", () => {
       const view = renderWithProvider(<ProfessionalMenu />);
       expect(view.queryByTestId("menu-dot")).toBeNull();
     });
 
-    it("refeicao perto: dot no ☰ e no item Refeicoes", () => {
+    it("refeicao perto: dot no gatilho e no item", () => {
       const view = renderWithProvider(<ProfessionalMenu mealDot />);
       expect(view.getByTestId("menu-dot")).toBeTruthy();
       open(view);
@@ -81,11 +111,33 @@ describe("ProfessionalMenu", () => {
       expect(view.getByText(/esta na hora/)).toBeTruthy();
     });
 
-    it("pendencia de cadastro: dot no ☰ e no item Configuracoes", () => {
+    it("pendencia de cadastro: dot no gatilho e em Configuracoes", () => {
       const view = renderWithProvider(<ProfessionalMenu settingsDot />);
       expect(view.getByTestId("menu-dot")).toBeTruthy();
       open(view);
       expect(view.getByTestId("menu-dot-settings")).toBeTruthy();
+    });
+
+    it("usa o rotulo da proxima refeicao quando informado", () => {
+      const view = renderWithProvider(<ProfessionalMenu mealLabel="Almoco 12:00" />);
+      open(view);
+      expect(view.getByLabelText("Almoco 12:00")).toBeTruthy();
+    });
+  });
+
+  describe("solicitacoes de corte (C2)", () => {
+    it("sem pendentes o item NAO aparece (backend ainda nao informa)", () => {
+      const view = renderWithProvider(<ProfessionalMenu />);
+      open(view);
+      expect(view.queryByLabelText("Solicitacoes")).toBeNull();
+    });
+
+    it("com pendentes mostra o item, o contador e acende o dot", () => {
+      const view = renderWithProvider(<ProfessionalMenu pendingRequests={2} />);
+      expect(view.getByTestId("menu-dot")).toBeTruthy();
+      open(view);
+      expect(view.getByLabelText("Solicitacoes")).toBeTruthy();
+      expect(view.getByTestId("menu-badge-requests")).toBeTruthy();
     });
   });
 
@@ -121,11 +173,18 @@ describe("ProfessionalMenu", () => {
   });
 
   describe("fechar o menu", () => {
+    it("o '‹' do topo fecha (e distinto do 'Sair', que e logout)", () => {
+      const view = renderWithProvider(<ProfessionalMenu />);
+      open(view);
+      fireEvent.press(view.getByLabelText("Voltar"));
+      expect(view.queryByLabelText("Refeicoes")).toBeNull();
+    });
+
     it("tocar no card NAO fecha (no-op)", () => {
       const view = renderWithProvider(<ProfessionalMenu />);
       open(view);
       fireEvent.press(view.getByTestId("menu-sheet"));
-      expect(view.getByLabelText("Refeicoes")).toBeTruthy(); // segue aberto
+      expect(view.getByLabelText("Refeicoes")).toBeTruthy();
     });
 
     it("tocar no fundo fecha", () => {

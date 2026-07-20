@@ -3,47 +3,158 @@ import { Alert, Modal, View } from "react-native";
 import { router } from "expo-router";
 import { VStack, HStack, Text, Pressable } from "@gluestack-ui/themed";
 import { useAuthStore } from "@store/auth.store";
+import { BenchIcon } from "@components/BenchIcon";
+import { comingSoon } from "@components/comingSoon";
 import { cardShadow } from "@lib/styles";
 
-// Menu ☰ do profissional (design Andre 2026-07-18, mockup
-// design/queue-layout-combined.html). SUBSTITUI a tab bar do rodape: o rodape
-// fica livre para o botao fixo "Iniciar proximo" da fila. Fica no cabecalho,
-// ao lado do titulo da tela, e vale para toda a area do profissional.
+// Menu de OPCOES DA FILA (design Andre 2026-07-20, mockup
+// design/queue-menu-icon-options.html). Substitui a tab bar do rodape.
 //
-// DOT (vermelho) no ☰ = ha algo a resolver atras do menu:
-//   - `mealDot`     -> refeicao perto do horario (item Refeicoes);
-//   - `settingsDot` -> pendencia de cadastro (item Configuracoes).
-// Um 3o gatilho pedido — solicitacoes de corte com a fila fechada — depende do
-// backend expor o cutRequestId/GET de pendentes (ver HANDOFF_BACKEND "Detalhe — C2").
+// REGRA DE CONTEUDO (Andre): o menu e do DIA A DIA — status, abrir/fechar,
+// solicitacoes, refeicao, add cliente. O que e raro (nome, especialidade,
+// apelido, e-mail, senha, servicos) vive em Configuracoes, no RODAPE discreto.
+// "Acompanhar" fica no meio porque e consulta, nao acao.
+//
+// Gatilho = BANCO (espera/fila). "outra hora a gente muda" — trocar o icone e
+// so trocar <BenchIcon/> por outro componente SVG.
+//
+// DOT (vermelho) = ha algo a resolver atras do menu: refeicao na janela
+// (`mealDot`) ou pendencia de cadastro (`settingsDot`).
+type StatusKey = "trabalhando" | "intervalo" | "indisponivel";
+
 type Props = {
   mealDot?: boolean;
   settingsDot?: boolean;
-  /**
-   * Abrir/fechar o ESTABELECIMENTO pela area do profissional (o backend aceita
-   * OWNER ou profissional afiliado no PATCH /establishment/{id}/open-status).
-   * Omitido quando o profissional nao esta afiliado.
-   */
+  /** Abrir/fechar o estabelecimento (backend aceita profissional afiliado). */
   establishment?: { isOpen: boolean; onToggle: () => void };
+  /** Rotulo da refeicao em destaque, ex.: "Almoco 12:00". */
+  mealLabel?: string;
+  /** Ha atendimento/fila? Bloqueia "indisponivel" (mesma regra do S1). */
+  hasQueue?: boolean;
+  /**
+   * Solicitacoes de corte pendentes. So renderiza quando > 0 — hoje o backend
+   * nao tem como informar (ver HANDOFF_BACKEND "Detalhe — C2"), entao o item
+   * fica ausente ate o contrato existir. Nada de UI falsa.
+   */
+  pendingRequests?: number;
 };
 
-type Entry = {
-  key: string;
+const STATUS: { key: StatusKey; label: string }[] = [
+  { key: "trabalhando", label: "Trabalhando" },
+  { key: "intervalo", label: "Intervalo" },
+  { key: "indisponivel", label: "Fora" },
+];
+
+// Section/Row ficam no ESCOPO DO MODULO de proposito: definidos dentro do
+// componente, o React trataria cada render como um tipo novo e remontaria a
+// subarvore — e a inferencia dos props do gluestack, reavaliada a cada
+// instanciacao, estourava a pilha do tsc (segfault no typecheck).
+function Section({ title }: { title: string }) {
+  return (
+    <Text
+      fontFamily="$heading"
+      fontWeight="$bold"
+      fontSize="$2xs"
+      color="$coolGray400"
+      letterSpacing="$lg"
+      px="$4"
+      pt="$3"
+      pb="$1"
+      bg="$coolGray50"
+    >
+      {title.toUpperCase()}
+    </Text>
+  );
+}
+
+type RowProps = {
+  icon: string;
   label: string;
   hint?: string;
-  icon: string;
   dot?: boolean;
-  danger?: boolean;
-  onPress: () => void;
+  badge?: number;
+  onPress?: () => void;
+  children?: React.ReactNode;
 };
 
-export function ProfessionalMenu({ mealDot = false, settingsDot = false, establishment }: Props) {
+function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      px="$4"
+      py="$3"
+      borderTopWidth="$1"
+      borderColor="$coolGray100"
+      $active-bg="$coolGray50"
+    >
+      <HStack alignItems="center" space="md">
+        <Text fontSize="$md" w="$6" textAlign="center">
+          {icon}
+        </Text>
+        <VStack flex={1}>
+          <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color="$coolGray900">
+            {label}
+          </Text>
+          {hint && (
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
+              {hint}
+            </Text>
+          )}
+        </VStack>
+        {children}
+        {badge != null && badge > 0 && (
+          <VStack
+            testID="menu-badge-requests"
+            bg="$red600"
+            borderRadius="$full"
+            px="$2"
+            minWidth="$5"
+            h="$5"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
+              {badge}
+            </Text>
+          </VStack>
+        )}
+        {dot && (
+          <View
+            testID="menu-dot-meals"
+            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#E63946" }}
+          />
+        )}
+      </HStack>
+    </Pressable>
+  );
+}
+
+export function ProfessionalMenu({
+  mealDot = false,
+  settingsDot = false,
+  establishment,
+  mealLabel,
+  hasQueue = false,
+  pendingRequests = 0,
+}: Props) {
   const [open, setOpen] = useState(false);
   const logout = useAuthStore((s) => s.logout);
   const hasOwner = useAuthStore((s) => s.user?.roles?.includes("OWNER"));
 
+  // S1 ainda nao entregue: o status atual e fixo e qualquer troca cai no stub.
+  const currentStatus: StatusKey = "trabalhando";
+
   const go = (path: string) => {
     setOpen(false);
     router.push(path as any);
+  };
+
+  const selectStatus = (next: StatusKey) => {
+    // Parte front-only do S1: com fila, "Fora" nem chega a tentar.
+    if (next === "indisponivel" && hasQueue) return;
+    comingSoon("O controle de status (Trabalhando / Intervalo / Fora)");
   };
 
   const handleLogout = () => {
@@ -61,93 +172,14 @@ export function ProfessionalMenu({ mealDot = false, settingsDot = false, establi
     ]);
   };
 
-  const entries: Entry[] = [];
-
-  // Acao COTIDIANA mais importante do dia — fica no topo do menu, com o estado
-  // atual da loja no subtitulo (o profissional afiliado pode abrir/fechar).
-  if (establishment) {
-    entries.push({
-      key: "open-status",
-      label: establishment.isOpen ? "Fechar estabelecimento" : "Abrir estabelecimento",
-      hint: establishment.isOpen ? "a loja esta ABERTA agora" : "a loja esta FECHADA agora",
-      icon: establishment.isOpen ? "🟢" : "⚪",
-      onPress: () => {
-        setOpen(false);
-        establishment.onToggle();
-      },
-    });
-  }
-
-  entries.push(
-    {
-      key: "meals",
-      label: "Refeicoes",
-      hint: mealDot ? "esta na hora — inicie ou adie" : "almoco / janta — entram no ETA",
-      icon: "🍽️",
-      dot: mealDot,
-      onPress: () => go("/(professional)/meals"),
-    },
-    {
-      key: "services",
-      label: "Meus servicos",
-      hint: "precos e duracao",
-      icon: "✂️",
-      onPress: () => go("/(professional)/my-services"),
-    },
-    {
-      key: "attendances",
-      label: "Atendimentos",
-      hint: "historico",
-      icon: "📋",
-      onPress: () => go("/(professional)/attendances"),
-    },
-    {
-      key: "reports",
-      label: "Relatorios",
-      hint: "faturamento",
-      icon: "📊",
-      onPress: () => go("/(professional)/reports"),
-    },
-    {
-      key: "settings",
-      label: "Configuracoes",
-      hint: "status, apelido, especialidade",
-      icon: "⚙️",
-      dot: settingsDot,
-      onPress: () => go("/(professional)/settings"),
-    }
-  );
-
-  // Quem acumula PROFESSIONAL + OWNER volta para a area do dono (mesma regra
-  // que existia no profile.tsx). Profissional-so nao ve a opcao.
-  if (hasOwner) {
-    entries.push({
-      key: "owner",
-      label: "Area do dono",
-      icon: "🏢",
-      onPress: () => {
-        setOpen(false);
-        router.replace("/(owner)/dashboard" as any);
-      },
-    });
-  }
-
-  entries.push({
-    key: "logout",
-    label: "Sair",
-    icon: "↪",
-    danger: true,
-    onPress: handleLogout,
-  });
-
-  const showDot = mealDot || settingsDot;
+  const showDot = mealDot || settingsDot || pendingRequests > 0;
 
   return (
     <>
       <Pressable
         onPress={() => setOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel="Menu"
+        accessibilityLabel="Opcoes da fila"
         hitSlop={8}
         w="$10"
         h="$10"
@@ -158,11 +190,7 @@ export function ProfessionalMenu({ mealDot = false, settingsDot = false, establi
         style={cardShadow}
         $active-bg="$green50"
       >
-        <VStack space="xs" alignItems="center">
-          {[0, 1, 2].map((i) => (
-            <View key={i} style={{ width: 16, height: 2, borderRadius: 2, backgroundColor: "#2f6733" }} />
-          ))}
-        </VStack>
+        <BenchIcon />
         {showDot && (
           <View
             testID="menu-dot"
@@ -185,50 +213,183 @@ export function ProfessionalMenu({ mealDot = false, settingsDot = false, establi
         <Pressable
           onPress={() => setOpen(false)}
           accessibilityLabel="Fechar menu"
-          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.30)", justifyContent: "flex-start", padding: 16, paddingTop: 90 }}
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.30)", justifyContent: "flex-start", padding: 16, paddingTop: 80 }}
         >
           <Pressable testID="menu-sheet" onPress={() => {}} style={{ width: "100%" }}>
             <VStack bg="$white" borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-              {entries.map((e, idx) => (
+              {/* Topo com "voltar": fecha o menu. Distinto do "Sair" do rodape,
+                  que e LOGOUT (pedido do Andre p/ nao confundir os dois). */}
+              <HStack alignItems="center" space="sm" px="$3" py="$2.5" borderBottomWidth="$1" borderColor="$coolGray100">
                 <Pressable
-                  key={e.key}
-                  onPress={e.onPress}
+                  onPress={() => setOpen(false)}
                   accessibilityRole="button"
-                  accessibilityLabel={e.label}
-                  px="$4"
-                  py="$3.5"
-                  borderTopWidth={idx === 0 ? 0 : "$1"}
-                  borderColor="$coolGray100"
-                  $active-bg="$coolGray50"
+                  accessibilityLabel="Voltar"
+                  hitSlop={8}
+                  w="$8"
+                  h="$8"
+                  borderRadius="$lg"
+                  bg="$coolGray50"
+                  alignItems="center"
+                  justifyContent="center"
                 >
-                  <HStack alignItems="center" space="md">
-                    <Text fontSize="$md" w="$6" textAlign="center">
-                      {e.icon}
-                    </Text>
-                    <VStack flex={1}>
-                      <Text
-                        fontFamily="$body"
-                        fontSize="$md"
-                        fontWeight="$medium"
-                        color={e.danger ? "$red600" : "$coolGray900"}
+                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$green700">
+                    ‹
+                  </Text>
+                </Pressable>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray700">
+                  Opcoes da fila
+                </Text>
+              </HStack>
+
+              <Section title="Agora" />
+              <Row icon="🟢" label="Status">
+                <HStack space="xs">
+                  {STATUS.map((s) => {
+                    const active = s.key === currentStatus;
+                    const blocked = s.key === "indisponivel" && hasQueue;
+                    return (
+                      <Pressable
+                        key={s.key}
+                        onPress={() => selectStatus(s.key)}
+                        accessibilityRole="button"
+                        accessibilityLabel={s.label}
+                        opacity={blocked ? 0.45 : 1}
+                        bg={active ? "$green500" : "$coolGray100"}
+                        borderRadius="$full"
+                        px="$2.5"
+                        py="$1"
                       >
-                        {e.label}
-                      </Text>
-                      {e.hint && (
-                        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
-                          {e.hint}
+                        <Text
+                          fontFamily="$heading"
+                          fontWeight="$bold"
+                          fontSize="$2xs"
+                          color={active ? "$white" : "$coolGray600"}
+                        >
+                          {s.label}
                         </Text>
-                      )}
-                    </VStack>
-                    {e.dot && (
+                      </Pressable>
+                    );
+                  })}
+                </HStack>
+              </Row>
+
+              {establishment && (
+                <Row
+                  icon={establishment.isOpen ? "🏪" : "🔒"}
+                  label={establishment.isOpen ? "Fechar estabelecimento" : "Abrir estabelecimento"}
+                  hint={establishment.isOpen ? "a loja esta ABERTA agora" : "a loja esta FECHADA agora"}
+                  onPress={() => {
+                    setOpen(false);
+                    establishment.onToggle();
+                  }}
+                />
+              )}
+
+              <Row
+                icon="🚦"
+                label="Fechar fila"
+                hint="termina quem ja esta; ninguem novo entra"
+                onPress={() => {
+                  setOpen(false);
+                  comingSoon("Fechar fila");
+                }}
+              />
+
+              <Section title="Hoje" />
+              {pendingRequests > 0 && (
+                <Row
+                  icon="✋"
+                  label="Solicitacoes"
+                  hint="fila fechada — pedidos de corte"
+                  badge={pendingRequests}
+                  onPress={() => go("/(professional)/queue")}
+                />
+              )}
+              <Row
+                icon="🍽️"
+                label={mealLabel ?? "Refeicoes"}
+                hint={mealDot ? "esta na hora — iniciar, adiar ou pular" : "almoco / janta — entram no ETA"}
+                dot={mealDot}
+                onPress={() => go("/(professional)/meals")}
+              />
+              <Row
+                icon="➕"
+                label="Adicionar cliente"
+                hint="walk-in, sem app"
+                onPress={() => go("/(professional)/add-guest")}
+              />
+
+              <Section title="Acompanhar" />
+              <Row
+                icon="📊"
+                label="Meu dia"
+                hint="atendidos, faturamento, tempo medio"
+                onPress={() => go("/(professional)/reports")}
+              />
+              <Row
+                icon="📋"
+                label="Atendimentos"
+                hint="historico"
+                onPress={() => go("/(professional)/attendances")}
+              />
+
+              {hasOwner && (
+                <>
+                  <Section title="Papel" />
+                  <Row
+                    icon="🏢"
+                    label="Area do dono"
+                    onPress={() => {
+                      setOpen(false);
+                      router.replace("/(owner)/dashboard" as any);
+                    }}
+                  />
+                </>
+              )}
+
+              {/* Rodape discreto: o que NAO e do dia a dia. */}
+              <HStack borderTopWidth="$1" borderColor="$coolGray200" bg="$coolGray50">
+                <Pressable
+                  flex={1}
+                  onPress={() => go("/(professional)/settings")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Configuracoes"
+                  py="$3"
+                  alignItems="center"
+                  $active-bg="$coolGray100"
+                >
+                  <HStack alignItems="center" space="xs">
+                    <Text fontSize="$sm">⚙️</Text>
+                    <Text fontFamily="$body" fontSize="$sm" fontWeight="$medium" color="$coolGray600">
+                      Configuracoes
+                    </Text>
+                    {settingsDot && (
                       <View
-                        testID={`menu-dot-${e.key}`}
-                        style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#E63946" }}
+                        testID="menu-dot-settings"
+                        style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#E63946" }}
                       />
                     )}
                   </HStack>
                 </Pressable>
-              ))}
+                <Pressable
+                  flex={1}
+                  onPress={handleLogout}
+                  accessibilityRole="button"
+                  accessibilityLabel="Sair"
+                  py="$3"
+                  alignItems="center"
+                  borderLeftWidth="$1"
+                  borderColor="$coolGray200"
+                  $active-bg="$coolGray100"
+                >
+                  <HStack alignItems="center" space="xs">
+                    <Text fontSize="$sm">↪</Text>
+                    <Text fontFamily="$body" fontSize="$sm" fontWeight="$medium" color="$red600">
+                      Sair
+                    </Text>
+                  </HStack>
+                </Pressable>
+              </HStack>
             </VStack>
           </Pressable>
         </Pressable>

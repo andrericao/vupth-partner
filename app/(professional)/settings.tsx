@@ -459,6 +459,26 @@ export default function ProfessionalSettingsScreen() {
 
           <Divider my="$2" />
 
+          {/* Meus servicos e RARO (preco/duracao mudam de vez em quando), entao
+              mora aqui e nao no menu do dia a dia (criterio do Andre 2026-07-20).
+              Sem este link a tela ficaria orfa apos a saida da tab bar. */}
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              Meus servicos
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+              Precos e duracao do que voce oferece.
+            </Text>
+            <Button
+              title="Gerenciar Servicos"
+              onPress={() => router.push("/(professional)/my-services" as any)}
+              bg="$coolGray200"
+              textColor="$coolGray700"
+              h="$9"
+              mt="$2"
+            />
+          </VStack>
+
           <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
               Refeicoes (almoco/janta)
