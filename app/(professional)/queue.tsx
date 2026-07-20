@@ -35,8 +35,12 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { comingSoon } from "@components/comingSoon";
 import * as SecureStore from "expo-secure-store";
 
-// Card do atendimento EM ANDAMENTO (atual) — Pausar/Finalizar/Retomar.
-function AttendanceCard({
+// Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
+// design/queue-layout-combined.html). Fica no TOPO da tela e concentra as acoes
+// do atendimento em andamento — e a resposta a "como pauso/finalizo no meio do
+// atendimento", ja que o botao do rodape passou a ser so o 'Iniciar proximo'.
+// Pausado: o card fica ambar, ganha o selo e troca Pausar por Retomar.
+function ServingCard({
   attendance,
   onFinish,
   onPause,
@@ -47,61 +51,71 @@ function AttendanceCard({
   onPause?: () => void;
   onResume?: () => void;
 }) {
-  const isInProgress = attendance.status === "IN_PROGRESS";
   const isPaused = attendance.status === "PAUSED";
-
   const { formatted } = useElapsedTime(
-    isInProgress || isPaused ? attendance.id : null,
+    attendance.id,
     (attendance as any).startTime ?? null,
     isPaused
   );
 
   return (
     <VStack
-      bg="$white"
+      bg={isPaused ? "$amber500" : "$green500"}
       p="$4"
       borderRadius="$2xl"
-      borderWidth="$2"
-      borderColor="$green400"
       style={cardShadow}
-      mb="$3"
+      mt="$4"
     >
-      <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$coolGray900">
-          {attendance.clientName}
-        </Text>
-        <Badge action={isInProgress ? "success" : "warning"} variant="solid" borderRadius="$md">
-          <BadgeText fontSize="$xs">{isInProgress ? "EM ATENDIMENTO" : "PAUSADO"}</BadgeText>
-        </Badge>
-      </HStack>
-
-      <VStack mt="$2" space="xs">
-        {attendance.services.map((svc) => (
-          <Text key={svc.id} fontFamily="$body" fontSize="$sm" color="$coolGray600">
-            {svc.customName} ({svc.estimatedMinutes}min)
-          </Text>
-        ))}
-      </VStack>
-
-      <HStack mt="$3" justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
-          R$ {attendance.totalValue.toFixed(2)}
-        </Text>
-        <Text fontFamily="$body" fontSize="$sm" color={isInProgress ? "$green500" : "$amber500"}>
-          {formatted}
+      <HStack alignItems="center" space="xs">
+        <VStack w="$2" h="$2" borderRadius="$full" bg="$white" opacity={0.85} />
+        <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white" letterSpacing="$lg">
+          {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
         </Text>
       </HStack>
+
+      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$white" mt="$1">
+        {attendance.clientName}
+      </Text>
+      <Text fontFamily="$body" fontSize="$sm" color="$white" opacity={0.9}>
+        {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
+      </Text>
+      <Text fontFamily="$body" fontSize="$xs" color="$white" opacity={0.95} mt="$1.5">
+        ⏱ {formatted}
+      </Text>
 
       <HStack mt="$3" space="sm">
-        {isInProgress && (
-          <>
-            <Button title="Pausar" onPress={onPause} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
-            <Button title="Finalizar" onPress={onFinish} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
-          </>
+        {isPaused ? (
+          <Button
+            title="Retomar"
+            onPress={onResume}
+            bg="$white"
+            textColor="$amber700"
+            $active-bg="$coolGray100"
+            h="$10"
+            mt="$0"
+            flex={1}
+          />
+        ) : (
+          <Button
+            title="Pausar"
+            onPress={onPause}
+            bg="$green600"
+            $active-bg="$green700"
+            h="$10"
+            mt="$0"
+            flex={1}
+          />
         )}
-        {isPaused && (
-          <Button title="Retomar" onPress={onResume} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
-        )}
+        <Button
+          title="Finalizar"
+          onPress={onFinish}
+          bg="$white"
+          textColor={isPaused ? "$amber700" : "$green700"}
+          $active-bg="$coolGray100"
+          h="$10"
+          mt="$0"
+          flex={1}
+        />
       </HStack>
     </VStack>
   );
@@ -541,6 +555,21 @@ export default function ProfessionalQueueScreen() {
           </Text>
         )}
 
+        {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
+        {currentAttendance && (
+          <ServingCard
+            attendance={currentAttendance}
+            onFinish={() =>
+              handleAction(async () => {
+                await finishAttendance(currentAttendance.id);
+                clearAttendanceStart(currentAttendance.id);
+              })
+            }
+            onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
+            onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
+          />
+        )}
+
         <ReadinessFaixa
           completion={completion}
           targetRoute="/(professional)/settings"
@@ -574,25 +603,6 @@ export default function ProfessionalQueueScreen() {
         {isLoading && !data && (
           <VStack mt="$6">
             <SkeletonList count={3} />
-          </VStack>
-        )}
-
-        {currentAttendance && (
-          <VStack mt="$6">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
-              Atendimento Atual
-            </Text>
-            <AttendanceCard
-              attendance={currentAttendance}
-              onFinish={() =>
-                handleAction(async () => {
-                  await finishAttendance(currentAttendance.id);
-                  clearAttendanceStart(currentAttendance.id);
-                })
-              }
-              onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
-              onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
-            />
           </VStack>
         )}
 
