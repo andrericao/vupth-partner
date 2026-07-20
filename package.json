@@ -86,6 +86,7 @@
       "src/components/PendingDot.tsx",
       "src/components/ReadinessFaixa.tsx",
       "src/components/ProfessionalStatusControl.tsx",
+      "src/components/ProfessionalMenu.tsx",
       "!src/**/__tests__/**",
       "!src/**/*.d.ts",
       "!src/lib/types.ts",

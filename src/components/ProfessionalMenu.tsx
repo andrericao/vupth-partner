@@ -187,7 +187,7 @@ export function ProfessionalMenu({ mealDot = false, settingsDot = false, establi
           accessibilityLabel="Fechar menu"
           style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.30)", justifyContent: "flex-start", padding: 16, paddingTop: 90 }}
         >
-          <Pressable onPress={() => {}} style={{ width: "100%" }}>
+          <Pressable testID="menu-sheet" onPress={() => {}} style={{ width: "100%" }}>
             <VStack bg="$white" borderRadius="$2xl" overflow="hidden" style={cardShadow}>
               {entries.map((e, idx) => (
                 <Pressable

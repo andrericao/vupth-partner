@@ -57,7 +57,10 @@ describe("ProfessionalStatusControl", () => {
       <ProfessionalStatusControl hasQueue={false} />
     );
     fireEvent.press(getByLabelText("O que e fechar fila"));
-    fireEvent.press(getByText("Fechar fila")); // titulo/card interno = no-op
+    // Texto interno do card = no-op. NAO usar "Fechar fila": desde 2026-07-18 o
+    // link e o titulo do modal tem o mesmo texto (o "(parar de aceitar novos)"
+    // saiu), entao getByText acharia dois elementos.
+    fireEvent.press(getByText(/continua sendo atendido/));
     fireEvent.press(getByLabelText("Fechar")); // backdrop fecha
   });
 
