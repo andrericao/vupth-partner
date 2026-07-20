@@ -6,6 +6,7 @@ import { useAuthStore } from "@store/auth.store";
 import { BenchIcon } from "@components/BenchIcon";
 import { comingSoon } from "@components/comingSoon";
 import { cardShadow } from "@lib/styles";
+import type { MealSignal } from "@lib/meals";
 
 // Menu de OPCOES DA FILA (design Andre 2026-07-20, mockup
 // design/queue-menu-icon-options.html). Substitui a tab bar do rodape.
@@ -25,11 +26,11 @@ type StatusKey = "trabalhando" | "intervalo" | "indisponivel";
 
 type Props = {
   /**
-   * Fase do sinal de refeicao (ver src/lib/meals.ts). "proxima" = falta pouco
-   * (acende 30min ANTES, p/ dar tempo de decidir); "agora" = ja passou do
-   * horario. Qualquer uma acende o dot; o texto muda conforme a fase.
+   * Sinal da refeicao (ver src/lib/meals.ts). Acende o dot e alimenta a
+   * CONTAGEM REGRESSIVA no proprio item — e assim que o profissional fica
+   * sabendo, sem popup na tela (regra do Andre: "sem intromissao").
    */
-  mealPhase?: "proxima" | "agora" | null;
+  mealSignal?: MealSignal | null;
   settingsDot?: boolean;
   /** Abrir/fechar o estabelecimento (backend aceita profissional afiliado). */
   establishment?: { isOpen: boolean; onToggle: () => void };
@@ -138,7 +139,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
 }
 
 export function ProfessionalMenu({
-  mealPhase = null,
+  mealSignal = null,
   settingsDot = false,
   establishment,
   mealLabel,
@@ -178,14 +179,15 @@ export function ProfessionalMenu({
     ]);
   };
 
-  const mealDot = mealPhase != null;
+  const mealDot = mealSignal != null;
   const showDot = mealDot || settingsDot || pendingRequests > 0;
+  // Contagem regressiva no item: substitui o popup como forma de avisar.
   const mealHint =
-    mealPhase === "agora"
-      ? "esta na hora — iniciar, adiar ou pular"
-      : mealPhase === "proxima"
-        ? "comeca logo — iniciar agora ou adiar"
-        : "almoco / janta — entram no ETA";
+    mealSignal == null
+      ? "almoco / janta — entram no ETA"
+      : mealSignal.phase === "agora"
+        ? "esta na hora — iniciar, adiar ou pular"
+        : `em ${mealSignal.minutesUntil} min — iniciar agora ou adiar`;
 
   return (
     <>

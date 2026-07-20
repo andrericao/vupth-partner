@@ -27,7 +27,8 @@ import { cardShadow } from "@lib/styles";
 import { professionalCompletion, hasAnyPending } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
-import { mealPhase, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
+import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
+import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalMenu } from "@components/ProfessionalMenu";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -269,6 +270,16 @@ export default function ProfessionalQueueScreen() {
     [profId, startInterval]
   );
 
+  // "Nao ver mais": desliga o popup de vez. O aviso continua no menu (dot +
+  // contagem). Reversivel em Configuracoes > Refeicoes.
+  const disableMealNudge = useCallback(async () => {
+    try {
+      await setMealNudgeDisabled(true);
+    } catch {
+      // preferencia e best-effort; nao vale interromper o atendimento por isso
+    }
+  }, []);
+
   // "Nao almocar" do dia: pula a refeicao e derruba do ETA dos clientes (#17/#41).
   const handleSkipMeal = useCallback(
     async (m: Interval) => {
@@ -290,6 +301,10 @@ export default function ProfessionalQueueScreen() {
     let cancelled = false;
 
     (async () => {
+      // "Nao ver mais": o profissional desligou o popup — o aviso segue no
+      // menu (dot + contagem), sem intromissao na tela.
+      if (await isMealNudgeDisabled()) return;
+
       const now = new Date();
       const nowMin = now.getHours() * 60 + now.getMinutes();
       const today = isoDate(now);
@@ -321,6 +336,10 @@ export default function ProfessionalQueueScreen() {
           : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
         [
           { text: "Agora nao", style: "cancel" },
+          // "Nao ver mais" desliga o popup DE VEZ (Andre 2026-07-20: "sem
+          // intromissao na tela"). Depois disso o aviso fica so no menu — dot +
+          // contagem. Reversivel em Configuracoes > Refeicoes.
+          { text: "Nao ver mais", onPress: () => disableMealNudge() },
           { text: "Nao almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
           { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
         ]
@@ -350,7 +369,7 @@ export default function ProfessionalQueueScreen() {
   // aguarda o backend — ver HANDOFF_BACKEND "Detalhe — C2".
   // "proxima" acende 30min ANTES do horario (pedido do Andre 2026-07-20): o
   // profissional ve com antecedencia, toca e decide iniciar ou nao.
-  const currentMealPhase = mealPhase(meals, new Date().getHours() * 60 + new Date().getMinutes());
+  const currentMealSignal = mealSignal(meals, new Date().getHours() * 60 + new Date().getMinutes());
   const settingsDot = hasAnyPending(completion);
 
   // Refeicao EM ANDAMENTO fica na tela (Encerrar a um toque); o resto vai p/ o
@@ -539,7 +558,7 @@ export default function ProfessionalQueueScreen() {
             Fila
           </Heading>
           <ProfessionalMenu
-            mealPhase={currentMealPhase}
+            mealSignal={currentMealSignal}
             settingsDot={settingsDot}
             mealLabel={mealLabel}
             hasQueue={waitingList.length > 0 || !!currentAttendance}

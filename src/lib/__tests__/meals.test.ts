@@ -1,6 +1,6 @@
 import {
   isMealDue,
-  mealPhase,
+  mealSignal,
   hhmmToMinutes,
   MEAL_LEAD_MIN,
   MEAL_NUDGE_WINDOW_MIN,
@@ -17,54 +17,61 @@ describe("hhmmToMinutes", () => {
   });
 });
 
-describe("mealPhase", () => {
+describe("mealSignal", () => {
   const almoco = [meal("12:00Z")];
 
   it("null quando nao ha refeicao", () => {
-    expect(mealPhase([], at("12:00"))).toBeNull();
+    expect(mealSignal([], at("12:00"))).toBeNull();
   });
 
   it("null muito antes (fora da antecedencia)", () => {
-    expect(mealPhase(almoco, at("11:29"))).toBeNull();
+    expect(mealSignal(almoco, at("11:29"))).toBeNull();
   });
 
-  // Andre 2026-07-20: aparecer 30min ANTES para dar tempo de decidir.
-  it("'proxima' a partir de 30min antes", () => {
-    expect(mealPhase(almoco, at("11:30"))).toBe("proxima");
-    expect(mealPhase(almoco, at("11:59"))).toBe("proxima");
+  // Andre 2026-07-20: aparecer 30min ANTES, com contagem, para dar tempo de decidir.
+  it("'proxima' a partir de 30min antes, com os minutos restantes", () => {
+    expect(mealSignal(almoco, at("11:30"))).toEqual({ phase: "proxima", minutesUntil: 30 });
+    expect(mealSignal(almoco, at("11:45"))).toEqual({ phase: "proxima", minutesUntil: 15 });
+    expect(mealSignal(almoco, at("11:59"))).toEqual({ phase: "proxima", minutesUntil: 1 });
   });
 
   it("'agora' no horario exato e dentro da janela", () => {
-    expect(mealPhase(almoco, at("12:00"))).toBe("agora");
-    expect(mealPhase(almoco, at("12:30"))).toBe("agora");
+    expect(mealSignal(almoco, at("12:00"))).toEqual({ phase: "agora", minutesUntil: 0 });
+    expect(mealSignal(almoco, at("12:30"))).toEqual({ phase: "agora", minutesUntil: -30 });
   });
 
   it("'agora' no limite da janela e null depois", () => {
     const limite = at("12:00") + MEAL_NUDGE_WINDOW_MIN;
-    expect(mealPhase(almoco, limite)).toBe("agora");
-    expect(mealPhase(almoco, limite + 1)).toBeNull();
+    expect(mealSignal(almoco, limite)?.phase).toBe("agora");
+    expect(mealSignal(almoco, limite + 1)).toBeNull();
   });
 
   it("ignora refeicao que nao esta SCHEDULED (ja ativa nao e pendencia)", () => {
-    expect(mealPhase([meal("12:00Z", "ACTIVE")], at("12:10"))).toBeNull();
-    expect(mealPhase([meal("12:00Z", "ACTIVE")], at("11:40"))).toBeNull();
+    expect(mealSignal([meal("12:00Z", "ACTIVE")], at("12:10"))).toBeNull();
+    expect(mealSignal([meal("12:00Z", "ACTIVE")], at("11:40"))).toBeNull();
   });
 
   it("ignora horario ausente ou invalido", () => {
-    expect(mealPhase([meal(null)], at("12:10"))).toBeNull();
-    expect(mealPhase([meal("banana")], at("12:10"))).toBeNull();
+    expect(mealSignal([meal(null)], at("12:10"))).toBeNull();
+    expect(mealSignal([meal("banana")], at("12:10"))).toBeNull();
   });
 
-  it("'agora' vence 'proxima' quando ha duas na janela", () => {
-    // almoco ja passou (agora) e janta esta chegando (proxima) -> agora
-    expect(mealPhase([meal("18:00Z"), meal("12:00Z")], at("17:40"))).toBe("proxima");
-    expect(mealPhase([meal("18:00Z"), meal("12:20Z")], at("12:30"))).toBe("agora");
+  it("'agora' tem prioridade sobre 'proxima'", () => {
+    // almoco ja passou (agora) e janta se aproxima (proxima) -> agora vence
+    expect(mealSignal([meal("18:00Z"), meal("12:20Z")], at("12:30"))?.phase).toBe("agora");
+  });
+
+  it("havendo duas 'proxima', vence a mais perto", () => {
+    expect(mealSignal([meal("12:20Z"), meal("12:05Z")], at("12:00"))).toEqual({
+      phase: "proxima",
+      minutesUntil: 5,
+    });
   });
 
   it("aceita antecedencia e janela customizadas", () => {
-    expect(mealPhase(almoco, at("11:50"), 5)).toBeNull();
-    expect(mealPhase(almoco, at("11:57"), 5)).toBe("proxima");
-    expect(mealPhase(almoco, at("12:10"), MEAL_LEAD_MIN, 5)).toBeNull();
+    expect(mealSignal(almoco, at("11:50"), 5)).toBeNull();
+    expect(mealSignal(almoco, at("11:57"), 5)?.phase).toBe("proxima");
+    expect(mealSignal(almoco, at("12:10"), MEAL_LEAD_MIN, 5)).toBeNull();
   });
 });
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack, Heading, Text, ScrollView, Divider, FormControl } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
+import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
@@ -18,6 +19,21 @@ import { cardShadow } from "@lib/styles";
 type Editing = null | "name" | "nickname" | "email" | "password";
 
 export default function ProfessionalSettingsScreen() {
+  // Preferencia do popup de refeicao (ver src/lib/mealNudge.ts).
+  const [mealNudgeOff, setMealNudgeOff] = useState(false);
+  useEffect(() => {
+    isMealNudgeDisabled().then(setMealNudgeOff).catch(() => {});
+  }, []);
+  const toggleMealNudge = async () => {
+    const next = !mealNudgeOff;
+    setMealNudgeOff(next);
+    try {
+      await setMealNudgeDisabled(next);
+    } catch {
+      setMealNudgeOff(!next); // nao mentir na UI se a gravacao falhar
+    }
+  };
+
   const professional = useProfessionalStore((s) => s.professional);
   const leaveEstablishment = useProfessionalStore((s) => s.leaveEstablishment);
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
@@ -489,6 +505,27 @@ export default function ProfessionalSettingsScreen() {
             <Button
               title="Gerenciar Refeicoes"
               onPress={() => router.push("/(professional)/meals" as any)}
+              bg="$coolGray200"
+              textColor="$coolGray700"
+              h="$9"
+              mt="$2"
+            />
+
+            {/* Reversao do "Nao ver mais" do popup (Andre 2026-07-20). Sem isto,
+                desligar o aviso seria um beco sem saida. Com ele desligado, o
+                lembrete vive so no menu (dot + contagem regressiva). */}
+            <Divider my="$3" />
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
+              Aviso na hora da refeicao
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+              {mealNudgeOff
+                ? "Desligado — o lembrete aparece so no menu (bolinha + contagem)."
+                : "Ligado — um aviso aparece na tela no horario da refeicao."}
+            </Text>
+            <Button
+              title={mealNudgeOff ? "Ligar aviso" : "Desligar aviso"}
+              onPress={toggleMealNudge}
               bg="$coolGray200"
               textColor="$coolGray700"
               h="$9"
