@@ -1,84 +1,34 @@
 import { Tabs } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
+
+// Area do profissional SEM tab bar (design Andre 2026-07-18): a navegacao passa
+// pelo menu ☰ no cabecalho (src/components/ProfessionalMenu.tsx) e o rodape fica
+// livre para o botao fixo "Iniciar proximo" da fila.
+//
+// Mantemos o navigator `Tabs` (em vez de trocar por Stack) para NAO mexer no
+// roteamento ja existente — as telas seguem sendo rotas irmas e o
+// `router.navigate` explicito de cada tela continua valendo. Apenas escondemos
+// a barra e removemos os botoes (`href: null` em todas).
+const HIDDEN = { href: null } as const;
 
 export default function ProfessionalLayout() {
-  const insets = useSafeAreaInsets();
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#3b7a3f",
-        tabBarInactiveTintColor: "#9CA3AF",
-        tabBarStyle: {
-          ...tabBarShadow,
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#E5E7EB",
-          borderTopWidth: 0,
-          height: 60 + insets.bottom,
-          paddingBottom: 8 + insets.bottom,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontFamily: "Inter_400Regular",
-          fontSize: 12,
-        },
+        tabBarStyle: { display: "none" },
       }}
     >
-      <Tabs.Screen
-        name="queue"
-        options={{
-          title: "Fila",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="people" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="my-services"
-        options={{
-          title: "Servicos",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="cut" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="person" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="onboarding"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="attendances"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="reports"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="add-guest"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="find-establishment"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="establishment-detail"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="meals"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="queue" options={HIDDEN} />
+      <Tabs.Screen name="my-services" options={HIDDEN} />
+      <Tabs.Screen name="profile" options={HIDDEN} />
+      <Tabs.Screen name="onboarding" options={HIDDEN} />
+      <Tabs.Screen name="attendances" options={HIDDEN} />
+      <Tabs.Screen name="reports" options={HIDDEN} />
+      <Tabs.Screen name="settings" options={HIDDEN} />
+      <Tabs.Screen name="add-guest" options={HIDDEN} />
+      <Tabs.Screen name="find-establishment" options={HIDDEN} />
+      <Tabs.Screen name="establishment-detail" options={HIDDEN} />
+      <Tabs.Screen name="meals" options={HIDDEN} />
     </Tabs>
   );
 }
