@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fila — ícone do menu + menu reorganizado</title>
+<style>
+  :root{
+    --bg:#F7FAF8; --brand:#3b7a3f; --brand-600:#2f6733; --brand-100:#e7f0e7; --brand-200:#cfe0cf;
+    --ink-900:#1a281a; --ink-700:#3f4a3f; --ink-600:#5b6b5b; --ink-500:#7d8a7d; --ink-400:#9aa79a;
+    --amber:#FFB703; --red:#E63946; --line:#e6ece6; --shadow:0 6px 18px rgba(26,40,26,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;background:#eaefea;color:var(--ink-900);padding:30px 18px 60px}
+  h1{text-align:center;font-size:20px;font-weight:800}
+  .lede{text-align:center;color:var(--ink-600);font-size:13.5px;max-width:760px;margin:8px auto 0;line-height:1.5}
+  h2{font-size:15px;margin:34px auto 4px;max-width:1100px;font-weight:800}
+  .sub{font-size:12.5px;color:var(--ink-600);max-width:1100px;margin:0 auto 14px;line-height:1.5}
+  .row{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;align-items:flex-start;max-width:1100px;margin:0 auto}
+
+  .opt{width:250px;display:flex;flex-direction:column;gap:9px}
+  .optcap{display:flex;align-items:center;gap:7px}
+  .num{width:22px;height:22px;border-radius:6px;background:var(--brand);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .optcap b{font-size:13.5px}
+  .frame{background:var(--bg);border-radius:20px;border:1px solid #dde6dd;box-shadow:var(--shadow);padding:14px}
+  .brand{font-weight:800;color:var(--brand-600);letter-spacing:.08em;font-size:13px}
+  .hdrow{display:flex;align-items:center;justify-content:space-between}
+  .titlerow{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+  .ttl{font-weight:800;font-size:18px}
+  .trigger{position:relative;width:38px;height:38px;border-radius:11px;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center}
+  .trigger .dot{position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:var(--red);border:2px solid var(--bg)}
+  .chips{display:flex;gap:7px;margin-top:11px}
+  .chip{background:var(--brand-100);color:var(--brand-600);border-radius:999px;padding:4px 9px;font-size:11px;font-weight:700}
+  .note{font-size:12px;color:var(--ink-600);line-height:1.45;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .note b{color:var(--ink-900)}
+  .pro{color:var(--brand-600);font-weight:700}
+  .con{color:#b23b3b;font-weight:700}
+
+  /* sheet */
+  .sheetwrap{width:330px}
+  .phone{position:relative;background:var(--bg);border-radius:26px;border:1px solid #dde6dd;box-shadow:var(--shadow);padding:14px;height:560px;overflow:hidden}
+  .scrim{position:absolute;inset:0;background:rgba(0,0,0,.28);border-radius:26px}
+  .sheet{position:absolute;left:10px;right:10px;top:74px;background:#fff;border-radius:16px;box-shadow:0 16px 36px rgba(26,40,26,.28);overflow:hidden}
+  .sec{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-400);padding:11px 14px 5px;background:#fbfdfb}
+  .mi{display:flex;align-items:center;gap:11px;padding:11px 14px;font-size:14px;font-weight:600;color:var(--ink-700)}
+  .mi + .mi{border-top:1px solid #f4f7f4}
+  .mi .ic{width:20px;text-align:center;font-size:15px}
+  .mi small{display:block;font-size:10.5px;color:var(--ink-500);font-weight:500;margin-top:1px}
+  .mi .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;min-width:19px;height:19px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  .mi .mdot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--red)}
+  .seg{display:flex;gap:5px;margin-left:auto}
+  .pill{font-size:10px;font-weight:800;border-radius:999px;padding:3px 8px;background:#eef2ee;color:var(--ink-500)}
+  .pill.on{background:var(--brand);color:#fff}
+  .foot{display:flex;border-top:1px solid var(--line);background:#fbfdfb}
+  .foot div{flex:1;text-align:center;padding:11px 6px;font-size:12.5px;color:var(--ink-500);font-weight:600}
+  .foot div + div{border-left:1px solid var(--line)}
+</style>
+</head>
+<body>
+  <h1>Menu do profissional — ícone e conteúdo</h1>
+  <p class="lede">Duas decisões: <b>(1)</b> qual ícone dispara o menu — hoje há <b>dois ícones empilhados à direita</b> (o busto do <code>RoleIcon</code> no header + o ☰ abaixo); <b>(2)</b> o menu passa a ser de <b>uso diário</b> (status, abrir/fechar, solicitações, refeições, add cliente), com Configurações discretas no rodapé.</p>
+
+  <h2>1. Qual ícone dispara o menu</h2>
+  <p class="sub">Mesmo cabeçalho, quatro gatilhos. O dot vermelho (refeição na hora / solicitação pendente) aparece em todos.</p>
+  <div class="row">
+
+    <!-- 1 BUSTO -->
+    <div class="opt">
+      <div class="optcap"><span class="num">1</span><b>Busto do profissional</b></div>
+      <div class="frame">
+        <div class="hdrow"><span class="brand">VUPTH</span></div>
+        <div class="titlerow">
+          <span class="ttl">Fila</span>
+          <span class="trigger">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path fill="#3b7a3f" d="M4 21v-1.5C4 16 7.6 14.5 12 14.5s8 1.5 8 5V21z"/>
+              <circle cx="12" cy="10.2" r="3.4" fill="#3b7a3f"/>
+              <ellipse cx="12" cy="6.8" rx="7" ry="1.1" fill="#3b7a3f"/>
+              <path fill="#3b7a3f" d="M9 6.6c0-1.7 1.3-2.9 3-2.9s3 1.2 3 2.9z"/>
+            </svg>
+            <span class="dot"></span>
+          </span>
+        </div>
+        <div class="chips"><span class="chip">👥 3 na fila</span><span class="chip">⏱ ~40 min</span></div>
+      </div>
+      <div class="note"><span class="pro">A favor:</span> já existe no app, é a sua identidade e <b>elimina o ícone duplicado</b> (o busto sobe do header pra cá). <span class="con">Contra:</span> avatar costuma significar “minha conta/perfil”, e o menu é de <b>operação</b>, não de cadastro.</div>
+    </div>
+
+    <!-- 2 SLIDERS -->
+    <div class="opt">
+      <div class="optcap"><span class="num">2</span><b>Controles (sliders)</b></div>
+      <div class="frame">
+        <div class="hdrow"><span class="brand">VUPTH</span></div>
+        <div class="titlerow">
+          <span class="ttl">Fila</span>
+          <span class="trigger">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <rect x="3" y="6.2" width="18" height="1.8" rx=".9" fill="#3b7a3f"/>
+              <circle cx="9" cy="7.1" r="3" fill="#3b7a3f" stroke="#fff" stroke-width="1.6"/>
+              <rect x="3" y="16" width="18" height="1.8" rx=".9" fill="#3b7a3f"/>
+              <circle cx="15" cy="16.9" r="3" fill="#3b7a3f" stroke="#fff" stroke-width="1.6"/>
+            </svg>
+            <span class="dot"></span>
+          </span>
+        </div>
+        <div class="chips"><span class="chip">👥 3 na fila</span><span class="chip">⏱ ~40 min</span></div>
+      </div>
+      <div class="note"><span class="pro">A favor:</span> lê como <b>“ajustes rápidos”</b> — casa com status, fechar fila, adiar almoço. Não promete “configurações do sistema”. <span class="con">Contra:</span> alguns associam a <i>filtro</i> de lista.</div>
+    </div>
+
+    <!-- 3 FILA + ENGRENAGEM -->
+    <div class="opt">
+      <div class="optcap"><span class="num">3</span><b>Fila + engrenagem</b></div>
+      <div class="frame">
+        <div class="hdrow"><span class="brand">VUPTH</span></div>
+        <div class="titlerow">
+          <span class="ttl">Fila</span>
+          <span class="trigger">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <rect x="3" y="5" width="12" height="2" rx="1" fill="#3b7a3f"/>
+              <rect x="3" y="10" width="9" height="2" rx="1" fill="#3b7a3f"/>
+              <rect x="3" y="15" width="7" height="2" rx="1" fill="#3b7a3f"/>
+              <circle cx="17.5" cy="16.5" r="4.6" fill="#3b7a3f" stroke="#fff" stroke-width="1.5"/>
+              <circle cx="17.5" cy="16.5" r="1.6" fill="#fff"/>
+            </svg>
+            <span class="dot"></span>
+          </span>
+        </div>
+        <div class="chips"><span class="chip">👥 3 na fila</span><span class="chip">⏱ ~40 min</span></div>
+      </div>
+      <div class="note"><span class="pro">A favor:</span> o mais <b>literal</b> — “opções da fila”, exatamente o que você descreveu. <span class="con">Contra:</span> desenho mais “ocupado” em 24px; engrenagem puxa a leitura pra “configuração”.</div>
+    </div>
+
+    <!-- 4 RAIO -->
+    <div class="opt">
+      <div class="optcap"><span class="num">4</span><b>Raio (ações rápidas)</b></div>
+      <div class="frame">
+        <div class="hdrow"><span class="brand">VUPTH</span></div>
+        <div class="titlerow">
+          <span class="ttl">Fila</span>
+          <span class="trigger">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path fill="#3b7a3f" d="M13.2 2 4.5 13.4h5.6L8.9 22l8.7-11.4H12z"/>
+            </svg>
+            <span class="dot"></span>
+          </span>
+        </div>
+        <div class="chips"><span class="chip">👥 3 na fila</span><span class="chip">⏱ ~40 min</span></div>
+      </div>
+      <div class="note"><span class="pro">A favor:</span> o mais limpo em 24px e grita <b>“ação agora”</b>. <span class="con">Contra:</span> genérico — não diz <i>de que</i> são as ações; exige o usuário aprender uma vez.</div>
+    </div>
+  </div>
+
+  <h2>2. O menu por dentro — diário em cima, cadastro no rodapé</h2>
+  <p class="sub">Agrupado por <b>quando você usa</b>. “Configurações” e “Sair” saem da lista e viram um rodapé discreto — deixam de competir com o que é diário.</p>
+  <div class="row">
+    <div class="sheetwrap">
+      <div class="phone">
+        <div class="hdrow"><span class="brand">VUPTH</span></div>
+        <div class="titlerow">
+          <span class="ttl">Fila</span>
+          <span class="trigger" style="background:var(--brand-100)">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <rect x="3" y="6.2" width="18" height="1.8" rx=".9" fill="#3b7a3f"/>
+              <circle cx="9" cy="7.1" r="3" fill="#3b7a3f" stroke="#e7f0e7" stroke-width="1.6"/>
+              <rect x="3" y="16" width="18" height="1.8" rx=".9" fill="#3b7a3f"/>
+              <circle cx="15" cy="16.9" r="3" fill="#3b7a3f" stroke="#e7f0e7" stroke-width="1.6"/>
+            </svg>
+            <span class="dot"></span>
+          </span>
+        </div>
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="sec">Agora</div>
+          <div class="mi"><span class="ic">🟢</span><div>Meu status</div>
+            <span class="seg"><span class="pill on">Trabalhando</span><span class="pill">Intervalo</span><span class="pill">Fora</span></span>
+          </div>
+          <div class="mi"><span class="ic">🏪</span><div>Fechar estabelecimento<small>a loja está ABERTA agora</small></div></div>
+          <div class="mi"><span class="ic">🚦</span><div>Fechar fila<small>termina quem está, não entra novo</small></div></div>
+
+          <div class="sec">Hoje</div>
+          <div class="mi"><span class="ic">✋</span><div>Solicitações<small>fila fechada — pedidos de corte</small></div><span class="badge">2</span></div>
+          <div class="mi"><span class="ic">🍽️</span><div>Almoço 12:00<small>está na hora — iniciar, adiar ou pular</small></div><span class="mdot"></span></div>
+          <div class="mi"><span class="ic">➕</span><div>Adicionar cliente<small>walk-in, sem app</small></div></div>
+
+          <div class="sec">Acompanhar</div>
+          <div class="mi"><span class="ic">📊</span><div>Meu dia<small>atendidos, faturado, histórico</small></div></div>
+
+          <div class="foot">
+            <div>⚙️ Configurações</div>
+            <div>↪ Sair</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="opt" style="width:330px">
+      <div class="note" style="margin-top:34px">
+        <b>O que sai da tela da Fila</b> (e vai pro menu), deixando-a enxuta:<br>
+        • o card grande <b>“Meu status”</b> (com o selo EM BREVE)<br>
+        • a seção <b>“Refeições”</b><br>
+        • o botão <b>“Adicionar Cliente”</b><br><br>
+        Sobra na Fila: título + chips + <b>Atendendo agora</b> + lista + botão fixo. Nada mais.
+      </div>
+      <div class="note">
+        <b>Configurações</b> (rodapé) guarda o que é raro: nome, especialidade, apelido, e-mail, senha, meus serviços, desafiliar. Você não muda isso todo dia — por isso saiu da lista principal.
+      </div>
+      <div class="note">
+        <b>Pendências reais:</b> “Meu status” e “Fechar fila” ainda são <i>stub</i> (esperam o <b>S1</b> do backend) e “Solicitações” espera o contrato do <b>C2</b>. No menu eles já aparecem no lugar certo — ligam quando o backend entregar.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
