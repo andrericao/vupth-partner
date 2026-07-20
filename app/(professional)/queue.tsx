@@ -23,21 +23,16 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
-import { professionalCompletion } from "@lib/completion";
+import { professionalCompletion, hasAnyPending } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
+import { isMealDue, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalStatusControl } from "@components/ProfessionalStatusControl";
+import { ProfessionalMenu } from "@components/ProfessionalMenu";
+import { useEstablishmentStore } from "@store/establishment.store";
 import { comingSoon } from "@components/comingSoon";
 import * as SecureStore from "expo-secure-store";
-
-// Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
-const MEAL_NUDGE_WINDOW_MIN = 45;
-
-function hhmmToMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + m;
-}
 
 // Card do atendimento EM ANDAMENTO (atual) — Pausar/Finalizar/Retomar.
 function AttendanceCard({
@@ -212,6 +207,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, removeFromQueue, promoteAttendance } =
     useAttendanceStore();
+  const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
 
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
@@ -339,6 +335,13 @@ export default function ProfessionalQueueScreen() {
     hasNickname: !!professional?.nickname,
     hasSpecialty: !!professional?.specialty,
   });
+
+  // Dots do menu ☰ (design 2026-07-18): refeicao dentro da janela + pendencia
+  // de cadastro. O 3o gatilho pedido (solicitacoes de corte com a fila fechada)
+  // aguarda o backend — ver HANDOFF_BACKEND "Detalhe — C2".
+  const mealDot = isMealDue(meals, new Date().getHours() * 60 + new Date().getMinutes());
+  const settingsDot = hasAnyPending(completion);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
@@ -421,6 +424,29 @@ export default function ProfessionalQueueScreen() {
     );
   };
 
+  // Abrir/fechar o ESTABELECIMENTO pelo menu ☰ (pedido Andre 2026-07-18). O
+  // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
+  // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
+  // handleAction, que traduz a mensagem.
+  const isEstablishmentOpen = data?.open_status === "OPEN";
+  const toggleEstablishment = () => {
+    if (!establishmentId) return;
+    const next = isEstablishmentOpen ? "CLOSED" : "OPEN";
+    Alert.alert(
+      isEstablishmentOpen ? "Fechar estabelecimento" : "Abrir estabelecimento",
+      isEstablishmentOpen
+        ? "A loja para de aparecer para os clientes e ninguem novo entra na fila. Continuar?"
+        : "A loja passa a aparecer para os clientes e a receber novos na fila. Continuar?",
+      [
+        { text: "Cancelar" },
+        {
+          text: isEstablishmentOpen ? "Fechar" : "Abrir",
+          onPress: () => handleAction(() => updateOpenStatus(establishmentId, next)),
+        },
+      ]
+    );
+  };
+
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "adiantar") startClient(att, true);
     else if (action === "promover") confirmPromote(att);
@@ -495,9 +521,21 @@ export default function ProfessionalQueueScreen() {
       <VStack flex={1} py="$12" px="$6">
         <Header />
 
-        <Heading size="2xl" fontFamily="$heading" mt="$4">
-          Fila
-        </Heading>
+        {/* Titulo + menu ☰ lado a lado (a tab bar saiu do rodape). */}
+        <HStack mt="$4" alignItems="center" justifyContent="space-between">
+          <Heading size="2xl" fontFamily="$heading">
+            Fila
+          </Heading>
+          <ProfessionalMenu
+            mealDot={mealDot}
+            settingsDot={settingsDot}
+            establishment={
+              establishmentId
+                ? { isOpen: isEstablishmentOpen, onToggle: toggleEstablishment }
+                : undefined
+            }
+          />
+        </HStack>
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
           <Text fontFamily="$body" fontSize="$sm" color="$amber600" mt="$1">
@@ -516,25 +554,22 @@ export default function ProfessionalQueueScreen() {
           hasQueue={waitingList.length > 0 || !!currentAttendance}
         />
 
-        {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
+        {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
+            chips — liberam tela para a fila e para o botao fixo do rodape. */}
         {myProfessional && (
-          <HStack space="md" mt="$4">
-            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text fontFamily="$body" fontSize="$xs" color="$green50">
-                pessoas na fila
+          <HStack space="sm" mt="$4" alignItems="center">
+            <HStack bg="$green100" borderRadius="$full" px="$3" py="$1.5" alignItems="center" space="xs">
+              <Text fontSize="$xs">👥</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$green700">
+                {myProfessional.queue_count} na fila
               </Text>
-              <Text fontFamily="$heading" fontSize="$4xl" color="$white" mt="$1">
-                {myProfessional.queue_count}
-              </Text>
-            </VStack>
-            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text fontFamily="$body" fontSize="$xs" color="$green50">
-                tempo de espera
-              </Text>
-              <Text fontFamily="$heading" fontSize="$3xl" color="$white" mt="$1">
+            </HStack>
+            <HStack bg="$green100" borderRadius="$full" px="$3" py="$1.5" alignItems="center" space="xs">
+              <Text fontSize="$xs">⏱</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$green700">
                 {myProfessional.estimated_wait_minutes} min
               </Text>
-            </VStack>
+            </HStack>
           </HStack>
         )}
 
