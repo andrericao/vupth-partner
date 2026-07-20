@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl, BackHandler, Modal } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
@@ -106,101 +107,97 @@ function AttendanceCard({
   );
 }
 
-// Linha ENXUTA da lista de espera. O 1o (indice 0) ganha destaque + botao
-// "Iniciar"; os demais viram linhas compactas. As acoes de gestao vao no menu
-// ⋮ (kebab), que segue a POSICAO (ver src/lib/queueCard.ts). "Atrasado" e so um
-// selo — a regra de atender/gerir e a mesma independente do status.
+// Linha da lista de espera. O CARD INTEIRO e clicavel e abre o menu de acoes
+// (design Andre 2026-07-18) — o kebab ⋮ saiu, o que elimina o toque errado ao
+// lado do botao. "Iniciar" tambem saiu do card: virou o botao FIXO do rodape,
+// que sempre atende o 1o. O 1o segue em destaque com o selo "Proximo"
+// (redundancia proposital). "Atrasado" e so um selo; as acoes seguem a POSICAO
+// (ver src/lib/queueCard.ts).
 function QueueRow({
   attendance,
   position,
   isFirst,
-  onStart,
   onMenu,
 }: {
   attendance: AttendanceInQueue;
   position: number;
   isFirst: boolean;
-  onStart: () => void;
   onMenu: () => void;
 }) {
   const isLate = attendance.status === "LATE";
   const services = formatServices(attendance.services);
   const price = `R$ ${attendance.totalValue.toFixed(2)}`;
 
-  const kebab = (
-    <Pressable onPress={onMenu} px="$2" py="$2" hitSlop={8} accessibilityLabel="Mais acoes">
-      <Text fontSize="$xl" color="$coolGray500">⋮</Text>
-    </Pressable>
-  );
-
-  if (isFirst) {
-    return (
-      <HStack
-        bg="$white"
-        p="$4"
-        borderRadius="$2xl"
-        borderWidth="$1"
-        borderColor="$green200"
-        style={cardShadow}
-        mb="$3"
-        alignItems="center"
-        space="sm"
-      >
-        <VStack w="$6" h="$6" bg="$green500" borderRadius="$full" alignItems="center" justifyContent="center">
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$white">
+  return (
+    <Pressable
+      onPress={onMenu}
+      accessibilityRole="button"
+      accessibilityLabel={`Opcoes de ${attendance.clientName}`}
+      bg="$white"
+      p={isFirst ? "$4" : "$3"}
+      pl="$4"
+      borderRadius={isFirst ? "$2xl" : "$xl"}
+      borderWidth={isFirst ? "$1" : "$0"}
+      borderColor="$green200"
+      style={cardShadow}
+      mb={isFirst ? "$3" : "$2"}
+      $active-bg="$coolGray50"
+    >
+      <HStack alignItems="center" space="sm">
+        <VStack
+          w="$6"
+          h="$6"
+          bg={isFirst ? "$green500" : "$coolGray100"}
+          borderRadius="$full"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Text
+            fontFamily="$heading"
+            fontWeight="$bold"
+            fontSize="$xs"
+            color={isFirst ? "$white" : "$coolGray500"}
+          >
             {position}
           </Text>
         </VStack>
+
         <VStack flex={1}>
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray900">
-            {attendance.clientName}
-          </Text>
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+          <HStack alignItems="center" space="sm">
+            <Text
+              fontFamily="$heading"
+              fontWeight="$bold"
+              fontSize={isFirst ? "$md" : "$sm"}
+              color="$coolGray900"
+            >
+              {attendance.clientName}
+            </Text>
+            {!isFirst && (
+              <Badge action={isLate ? "warning" : "muted"} variant="solid" borderRadius="$md" size="sm">
+                <BadgeText fontSize="$xs">{isLate ? "atrasado" : "aguardando"}</BadgeText>
+              </Badge>
+            )}
+          </HStack>
+          <Text fontFamily="$body" fontSize={isFirst ? "$sm" : "$xs"} color="$coolGray600">
             {services} · {price}
           </Text>
-          <Text fontFamily="$body" fontSize="$xs" color={isLate ? "$amber600" : "$green600"} mt="$0.5">
-            {isLate ? "Atrasado" : "Proximo"}
-          </Text>
+          {isFirst && (
+            <Text fontFamily="$body" fontSize="$xs" color={isLate ? "$amber600" : "$green600"} mt="$0.5">
+              {isLate ? "Atrasado" : "Proximo"}
+            </Text>
+          )}
         </VStack>
-        <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" px="$4" />
-        {kebab}
-      </HStack>
-    );
-  }
 
-  return (
-    <HStack
-      bg="$white"
-      p="$3"
-      pl="$4"
-      borderRadius="$xl"
-      style={cardShadow}
-      mb="$2"
-      alignItems="center"
-      space="sm"
-    >
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray500" w="$5" textAlign="center">
-        {position}
-      </Text>
-      <VStack flex={1}>
-        <HStack alignItems="center" space="sm">
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray900">
-            {attendance.clientName}
-          </Text>
-          <Badge action={isLate ? "warning" : "muted"} variant="solid" borderRadius="$md" size="sm">
-            <BadgeText fontSize="$xs">{isLate ? "atrasado" : "aguardando"}</BadgeText>
-          </Badge>
-        </HStack>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray600">
-          {services} · {price}
+        <Text fontSize="$lg" color="$coolGray400" fontWeight="$bold">
+          ›
         </Text>
-      </VStack>
-      {kebab}
-    </HStack>
+      </HStack>
+    </Pressable>
   );
 }
 
 export default function ProfessionalQueueScreen() {
+  const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const establishmentId = professional?.establishment_id;
 
@@ -512,12 +509,13 @@ export default function ProfessionalQueueScreen() {
   }
 
   return (
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
+    <VStack flex={1}>
+      <ScrollView
+        w="$full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
       <VStack flex={1} py="$12" px="$6">
         <Header />
 
@@ -609,7 +607,6 @@ export default function ProfessionalQueueScreen() {
                 attendance={att}
                 position={idx + 1}
                 isFirst={idx === 0}
-                onStart={() => startClient(att, false)}
                 onMenu={() => setMenuTarget(att)}
               />
             ))}
@@ -732,8 +729,42 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         )}
       </VStack>
+      </ScrollView>
 
-      {/* Menu ⋮ do card (action sheet). Acoes por posicao — ver queueMenuActions. */}
+      {/* Botao FIXO do rodape (design 2026-07-18): o unico "start", e sempre
+          atende o 1o da fila. Com atendimento em andamento ele vira uma DICA —
+          finalize antes de iniciar o proximo (nao atende dois ao mesmo tempo). */}
+      {waitingList.length > 0 && (
+        <VStack
+          px="$6"
+          pt="$3"
+          style={{ paddingBottom: insets.bottom + 16, backgroundColor: "#F7FAF8" }}
+        >
+          {currentAttendance ? (
+            <VStack
+              bg="$white"
+              borderRadius="$full"
+              py="$3.5"
+              alignItems="center"
+              style={cardShadow}
+            >
+              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+                Finalize para iniciar o proximo · {waitingList[0].clientName}
+              </Text>
+            </VStack>
+          ) : (
+            <Button
+              title={`Iniciar proximo · ${waitingList[0].clientName}`}
+              onPress={() => startClient(waitingList[0], false)}
+              bg="$green500"
+              $active-bg="$green600"
+              mt="$0"
+            />
+          )}
+        </VStack>
+      )}
+
+      {/* Menu do card (action sheet). Acoes por posicao — ver queueMenuActions. */}
       <Modal
         visible={!!menuTarget}
         transparent
@@ -781,6 +812,6 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         </VStack>
       </Modal>
-    </ScrollView>
+    </VStack>
   );
 }
