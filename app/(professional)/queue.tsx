@@ -524,7 +524,11 @@ export default function ProfessionalQueueScreen() {
 
   return (
     <VStack flex={1}>
+      {/* flex={1} e obrigatorio aqui: como ScrollView virou FILHO (antes era a
+          raiz da tela), sem ele a lista cresceria com o conteudo e empurraria a
+          barra fixa do rodape para fora da tela. */}
       <ScrollView
+        flex={1}
         w="$full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
