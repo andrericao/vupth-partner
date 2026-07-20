@@ -154,6 +154,14 @@ describe("ProfessionalMenu", () => {
       expect(view.getByLabelText("Solicitacoes")).toBeTruthy();
       expect(view.getByTestId("menu-badge-requests")).toBeTruthy();
     });
+
+    it("tocar em Solicitacoes avisa 'em breve' (a tela depende do backend)", () => {
+      const view = renderWithProvider(<ProfessionalMenu pendingRequests={1} />);
+      open(view);
+      fireEvent.press(view.getByLabelText("Solicitacoes"));
+      expect(comingSoon).toHaveBeenCalled();
+      expect(router.push).not.toHaveBeenCalled();
+    });
   });
 
   describe("abrir/fechar estabelecimento", () => {

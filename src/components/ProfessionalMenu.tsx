@@ -315,7 +315,13 @@ export function ProfessionalMenu({
                   label="Solicitacoes"
                   hint="fila fechada — pedidos de corte"
                   badge={pendingRequests}
-                  onPress={() => go("/(professional)/queue")}
+                  // Aceitar/recusar ainda nao tem tela: o backend nao expoe o
+                  // id do pedido (HANDOFF "Detalhe — C2"). Navegar p/ a fila
+                  // seria ir p/ onde ja se esta — melhor dizer "em breve".
+                  onPress={() => {
+                    setOpen(false);
+                    comingSoon("Aceitar ou recusar solicitacoes de corte");
+                  }}
                 />
               )}
               <Row
