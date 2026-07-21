@@ -176,18 +176,12 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   updateNickname: async (nickname) => {
     // Apelido e identidade do usuario (BaseUser), escrito so via /profile/general-infos
     // (#16). String vazia limpa o apelido.
+    // O `fetchMe` sozinho ja basta desde 2026-07-20: o backend passou a projetar
+    // o nickname no GET /professional/me (BUG3/BUG10 fechado). A mitigacao que
+    // reescrevia o valor no estado local foi REMOVIDA a pedido deles — manter
+    // mascararia uma eventual regressao da projecao.
     await api.patch("/profile/general-infos", { nickname });
     await get().fetchMe();
-    // O PATCH gravou (200), mas o GET /professional/me pode NAO projetar o nickname
-    // (gap de backend — ver HANDOFF_BACKEND BUG10). Sem isto, o fetchMe acima
-    // sobrescreve com null e o apelido "some" logo apos o alerta de sucesso.
-    // Reflete o valor recem-salvo no estado local + SecureStore.
-    const current = get().professional;
-    if (current) {
-      const updated = { ...current, nickname: nickname.trim() || null };
-      await persistProfessional(updated);
-      set({ professional: updated });
-    }
   },
 
   updateMyServiceItem: async (itemId, changes) => {

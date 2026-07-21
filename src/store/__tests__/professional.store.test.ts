@@ -339,16 +339,20 @@ describe("professional.store", () => {
       expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
     });
 
-    it("keeps the saved nickname locally even if GET /professional/me omits it (BUG10)", async () => {
-      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+    // BUG3/BUG10 fechado no backend (2026-07-20): o GET /professional/me passou
+    // a projetar o nickname, entao a mitigacao que reescrevia o valor local foi
+    // REMOVIDA. O backend e a fonte da verdade — inclusive para limpar.
+    it("limpar o apelido: envia string vazia e reflete o que o backend devolver", async () => {
+      useProfessionalStore.setState({
+        professional: { ...AFFILIATE_RESPONSE, nickname: "Dedeco" } as any,
+      });
       mock.onPatch("/profile/general-infos").reply(200, {});
-      // /professional/me NAO projeta o nickname (gap de backend) — sem o merge
-      // local o valor recem-salvo "sumiria" logo apos o alerta de sucesso.
       mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, nickname: null });
 
-      await useProfessionalStore.getState().updateNickname("Dedeco");
+      await useProfessionalStore.getState().updateNickname("");
 
-      expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ nickname: "" });
+      expect(useProfessionalStore.getState().professional?.nickname).toBeNull();
     });
 
     it("rejects when the PATCH fails", async () => {
