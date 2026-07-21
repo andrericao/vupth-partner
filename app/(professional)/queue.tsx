@@ -349,7 +349,7 @@ export default function ProfessionalQueueScreen() {
     return () => {
       cancelled = true;
     };
-  }, [meals, profId, data, handleStartMeal, handleSkipMeal]);
+  }, [meals, profId, data, handleStartMeal, handleSkipMeal, disableMealNudge]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
