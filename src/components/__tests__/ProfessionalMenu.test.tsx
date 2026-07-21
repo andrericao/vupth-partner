@@ -180,7 +180,7 @@ describe("ProfessionalMenu", () => {
     it("loja fechada: oferece ABRIR e dispara o toggle", () => {
       const onToggle = jest.fn();
       const view = renderWithProvider(
-        <ProfessionalMenu establishment={{ isOpen: false, onToggle }} />
+        <ProfessionalMenu establishment={{ isOpen: false, isOpenNow: false, onToggle }} />
       );
       open(view);
       expect(view.getByText(/FECHADA agora/)).toBeTruthy();
@@ -188,15 +188,30 @@ describe("ProfessionalMenu", () => {
       expect(onToggle).toHaveBeenCalled();
     });
 
-    it("loja aberta: oferece FECHAR e dispara o toggle", () => {
+    it("loja aberta e dentro do horario: oferece FECHAR e dispara o toggle", () => {
       const onToggle = jest.fn();
       const view = renderWithProvider(
-        <ProfessionalMenu establishment={{ isOpen: true, onToggle }} />
+        <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: true, onToggle }} />
       );
       open(view);
       expect(view.getByText(/ABERTA agora/)).toBeTruthy();
       fireEvent.press(view.getByLabelText("Fechar estabelecimento"));
       expect(onToggle).toHaveBeenCalled();
+    });
+
+    // O caso que motivou usar o `is_open` do backend: a chave manual segue em
+    // OPEN, mas o horario ja venceu — o cliente ve fechado e o gate barra a
+    // entrada. Dizer "ABERTA agora" aqui seria mentir para o profissional.
+    it("aberta porem FORA DO HORARIO: avisa que clientes nao entram", () => {
+      const onToggle = jest.fn();
+      const view = renderWithProvider(
+        <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: false, onToggle }} />
+      );
+      open(view);
+      expect(view.getByText(/FORA DO HORARIO/)).toBeTruthy();
+      expect(view.queryByText(/ABERTA agora/)).toBeNull();
+      // continua sendo a acao de fechar (a chave manual esta em OPEN)
+      expect(view.getByLabelText("Fechar estabelecimento")).toBeTruthy();
     });
   });
 

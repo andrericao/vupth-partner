@@ -467,6 +467,10 @@ export default function ProfessionalQueueScreen() {
   // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
   // handleAction, que traduz a mensagem.
   const isEstablishmentOpen = data?.open_status === "OPEN";
+  // "Aberto agora" EFETIVO (backend `is_open`): a chave manual pode estar em
+  // OPEN com o horario ja vencido — nesse caso o cliente ve fechado e o gate
+  // barra a entrada. Fallback p/ a chave manual se o backend nao mandar o campo.
+  const isEstablishmentOpenNow = data?.is_open ?? isEstablishmentOpen;
   const toggleEstablishment = () => {
     if (!establishmentId) return;
     const next = isEstablishmentOpen ? "CLOSED" : "OPEN";
@@ -564,7 +568,11 @@ export default function ProfessionalQueueScreen() {
             hasQueue={waitingList.length > 0 || !!currentAttendance}
             establishment={
               establishmentId
-                ? { isOpen: isEstablishmentOpen, onToggle: toggleEstablishment }
+                ? {
+                    isOpen: isEstablishmentOpen,
+                    isOpenNow: isEstablishmentOpenNow,
+                    onToggle: toggleEstablishment,
+                  }
                 : undefined
             }
           />

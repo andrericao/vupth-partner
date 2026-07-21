@@ -74,7 +74,16 @@ export type EstablishmentWithProfessionals = {
   url_image: string | null;
   services: string[];
   owner_id: string;
+  /** Chave MANUAL persistida (OPEN/CLOSED/TEMPORARILY_CLOSED) — o que o toggle escreve. */
   open_status: string;
+  /**
+   * "Aberto agora" EFETIVO (backend BUG5 parte B): `open_status == OPEN` **E**
+   * horario atual dentro de `[opening_time, closing_time)`. Read-only, derivado.
+   * E o que o CLIENTE enxerga e o que o gate de entrada (409
+   * ESTABLISHMENT_NOT_OPEN) usa — por isso o partner nao pode dizer "aberta"
+   * so pelo `open_status`. Opcional por seguranca (deploy antigo do backend).
+   */
+  is_open?: boolean | null;
   total_in_queue: number;
   available_professionals: number;
   professionals: ProfessionalWithQueue[];
