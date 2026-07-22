@@ -29,7 +29,7 @@ import { professionalCompletion, hasAnyPending } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
-import { activeCutRequests, minutesToExpire, cutRequestServices } from "@lib/cutRequests";
+import { activeCutRequests, minutesToExpire, cutRequestTitle } from "@lib/cutRequests";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ProfessionalMenu } from "@components/ProfessionalMenu";
@@ -886,7 +886,7 @@ export default function ProfessionalQueueScreen() {
               pendingCutRequests.map((req) => (
                 <VStack key={req.id} bg="$coolGray50" borderRadius="$xl" p="$3" space="xs">
                   <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray900">
-                    Cliente quer: {cutRequestServices(req.service_item_ids, myServices)}
+                    {cutRequestTitle(req, myServices)}
                   </Text>
                   <Text fontFamily="$body" fontSize="$xs" color="$amber600">
                     expira em {minutesToExpire(req.expires_at, cutNowMs)} min — sem resposta, e negado sozinho

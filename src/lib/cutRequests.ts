@@ -42,6 +42,18 @@ export function cutRequestServices(
 }
 
 /**
+ * Titulo do card do pedido. Usa o `client_name` quando o backend enviar
+ * (nice-to-have ja cobrado); ate la, "Cliente" — o card nunca fica sem titulo.
+ */
+export function cutRequestTitle(
+  req: { client_name?: string | null; service_item_ids: string[] },
+  myServices: { id: string; customName: string }[]
+): string {
+  const who = req.client_name?.trim() || "Cliente";
+  return `${who} quer: ${cutRequestServices(req.service_item_ids, myServices)}`;
+}
+
+/**
  * Eventos do WS pessoal (`/user/queue/notifications`) que devem re-buscar a
  * lista de pedidos. Prefixo `CUT_` cobre CUT_REQUESTED (o unico dirigido ao
  * profissional hoje) e qualquer evento de corte futuro sem retocar o hook.

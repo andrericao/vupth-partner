@@ -112,7 +112,7 @@ Historico: fatias 1-3 entregues (criar / aceitar-recusar / auto-nega 5min) e a U
 
 ✅ **FRONT-PARTNER IMPLEMENTADO (2026-07-22, com TEMPO REAL):** `fetchCutRequests` no store (GET = fonte da verdade) + **WS pessoal ASSINADO** (`/user/queue/notifications` na mesma conexao STOMP da fila; evento `CUT_*` invalida a query e o GET refaz na hora — refetch 30s vira fallback p/ socket caido); item **"Solicitacoes"** do menu com badge = contagem real (`src/lib/cutRequests.ts`: filtro PENDING + validade LOCAL pelo `expires_at`, como o backend orientou); **modal na fila com Aceitar/Recusar** + countdown ("expira em Xmin"); servicos resolvidos contra os `myServices` (`cutRequestServices`). Dot do menu acende junto — o 3o gatilho pedido pelo Andre em 2026-07-20 esta LIGADO.
 
-**Gap remanescente (nice-to-have, NAO bloqueia):** o `CutRequestResponse` traz so `client_id` — **sem `clientName`**. O card sai como "Cliente quer: Corte + Barba (expira em 3min)" sem o nome. Pedido: incluir `client_name` no response.
+**Gap remanescente (nice-to-have, NAO bloqueia):** o `CutRequestResponse` traz so `client_id` — **sem `client_name`**. Pedido: incluir `client_name` no response. ✅ **O FRONT JA CONSOME (2026-07-22):** campo opcional no tipo + `cutRequestTitle` com fallback "Cliente" — no dia em que o backend adicionar o campo, o nome aparece no card **sem nenhuma mudanca no front**.
 
 ### ⭐ Proposta do Andre (2026-07-20) — solicitacao nasce como Attendance `INTENTION` · **SUPERADA (2026-07-22)**
 

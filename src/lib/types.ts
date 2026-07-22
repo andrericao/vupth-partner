@@ -38,6 +38,12 @@ export type CutRequestResponse = {
   professional_id: string;
   establishment_id: string;
   client_id: string;
+  /**
+   * Nice-to-have pedido ao backend (2026-07-22): o response ainda NAO traz o
+   * nome. Campo opcional de proposito — quando eles adicionarem, o card passa
+   * a mostrar o nome sem nenhuma mudanca no front (fallback: "Cliente").
+   */
+  client_name?: string | null;
   service_item_ids: string[];
   expires_at: string;
   created_at: string;

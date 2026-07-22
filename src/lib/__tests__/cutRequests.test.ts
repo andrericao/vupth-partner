@@ -1,4 +1,4 @@
-import { activeCutRequests, minutesToExpire, cutRequestServices, isCutRequestEvent } from "../cutRequests";
+import { activeCutRequests, minutesToExpire, cutRequestServices, cutRequestTitle, isCutRequestEvent } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
 const NOW = Date.parse("2026-07-22T12:00:00Z");
@@ -74,6 +74,32 @@ describe("cutRequestServices", () => {
   it("nada resolvido ganha rotulo generico (card nao fica em branco)", () => {
     expect(cutRequestServices(["svc-x"], myServices)).toBe("Servico nao identificado");
     expect(cutRequestServices([], myServices)).toBe("Servico nao identificado");
+  });
+});
+
+describe("cutRequestTitle", () => {
+  const myServices = [
+    { id: "svc-1", customName: "Corte" },
+    { id: "svc-2", customName: "Barba" },
+  ];
+
+  it("usa o client_name quando o backend enviar (campo futuro)", () => {
+    expect(
+      cutRequestTitle({ client_name: "Joao", service_item_ids: ["svc-1", "svc-2"] }, myServices)
+    ).toBe("Joao quer: Corte + Barba");
+  });
+
+  it("sem o campo (backend atual) cai no fallback 'Cliente'", () => {
+    expect(cutRequestTitle({ service_item_ids: ["svc-1"] }, myServices)).toBe("Cliente quer: Corte");
+    expect(
+      cutRequestTitle({ client_name: null, service_item_ids: ["svc-1"] }, myServices)
+    ).toBe("Cliente quer: Corte");
+  });
+
+  it("nome vazio/so espacos tambem cai no fallback", () => {
+    expect(
+      cutRequestTitle({ client_name: "   ", service_item_ids: ["svc-1"] }, myServices)
+    ).toBe("Cliente quer: Corte");
   });
 });
 
