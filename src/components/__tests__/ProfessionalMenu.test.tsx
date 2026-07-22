@@ -22,8 +22,7 @@ describe("ProfessionalMenu", () => {
     it.each([
       ["Refeicoes", "/(professional)/meals"],
       ["Adicionar cliente", "/(professional)/add-guest"],
-      ["Meu dia", "/(professional)/reports"],
-      ["Atendimentos", "/(professional)/attendances"],
+      ["Meu dia", "/(professional)/my-day"],
       ["Configuracoes", "/(professional)/settings"],
     ])("'%s' navega para %s", (label, route) => {
       const view = renderWithProvider(<ProfessionalMenu />);

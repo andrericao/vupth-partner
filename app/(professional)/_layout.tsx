@@ -21,8 +21,7 @@ export default function ProfessionalLayout() {
       <Tabs.Screen name="queue" options={HIDDEN} />
       <Tabs.Screen name="my-services" options={HIDDEN} />
       <Tabs.Screen name="onboarding" options={HIDDEN} />
-      <Tabs.Screen name="attendances" options={HIDDEN} />
-      <Tabs.Screen name="reports" options={HIDDEN} />
+      <Tabs.Screen name="my-day" options={HIDDEN} />
       <Tabs.Screen name="settings" options={HIDDEN} />
       <Tabs.Screen name="add-guest" options={HIDDEN} />
       <Tabs.Screen name="find-establishment" options={HIDDEN} />

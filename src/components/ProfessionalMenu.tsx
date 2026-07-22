@@ -368,17 +368,13 @@ export function ProfessionalMenu({
               />
 
               <Section title="Acompanhar" />
+              {/* Tela unificada (2026-07-22): resumo + historico juntos, como
+                  no mockup ("atendidos, faturado, historico" num item so). */}
               <Row
                 icon="📊"
                 label="Meu dia"
-                hint="atendidos, faturamento, tempo medio"
-                onPress={() => go("/(professional)/reports")}
-              />
-              <Row
-                icon="📋"
-                label="Atendimentos"
-                hint="historico"
-                onPress={() => go("/(professional)/attendances")}
+                hint="atendidos, faturamento, historico"
+                onPress={() => go("/(professional)/my-day")}
               />
 
               {hasOwner && (
