@@ -619,7 +619,7 @@ Correcao de rumo do proprio Andre sobre a v13: *"a ideia do menu era para coisa 
    - O item do menu mostra a **CONTAGEM REGRESSIVA** (`"em 25 min — iniciar agora ou adiar"`), que **substitui o popup** como forma de avisar; passado o horario vira `"esta na hora — iniciar, adiar ou pular"`.
    - O **popup ganhou "Nao ver mais"**, que o desliga **de vez** (`src/lib/mealNudge.ts`, preferencia persistida em SecureStore; o efeito checa antes de tudo). **Reversivel em Configuracoes > Refeicoes** — sem isso seria beco sem saida; se a gravacao falhar, a UI volta ao estado anterior em vez de mentir.
    - ⚠️ **Padrao continua LIGADO** (o pedido foi pela *opcao* de desligar, nao pela remocao). Se o Andre quiser o popup desligado de fabrica, e trocar o default de `isMealNudgeDisabled`.
-10. **"Solicitacoes" nao navega mais p/ a propria fila** — o `onPress` mandava para `/(professional)/queue`, ou seja, para onde o usuario ja esta. Como a tela de aceitar/recusar depende do backend (C2), virou aviso de **"em breve"**, que e honesto.
+10. **"Solicitacoes" nao navega mais p/ a propria fila** — o `onPress` mandava para `/(professional)/queue`, ou seja, para onde o usuario ja esta. Como a tela de aceitar/recusar dependia do backend (C2), virou aviso de "em breve". *(Nota historica — **superado em 2026-07-22**: o C2 foi desbloqueado e o toque agora abre o **modal real** de Aceitar/Recusar.)*
 
 ### Feedback 2026-07-14 (seguranca de fechamento + fila + agendamento)
 
