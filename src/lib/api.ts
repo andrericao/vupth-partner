@@ -48,6 +48,11 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   INTERVAL_CONFLICT:
     "Conflito de horario: a refeicao ja foi iniciada/encerrada hoje ou se sobrepoe a outra.",
   INTERVAL_NOT_FOUND: "Refeicao/intervalo nao encontrado.",
+  // S1 — status do profissional (fatia 1).
+  PROFESSIONAL_HAS_NO_SERVICE:
+    "Cadastre pelo menos um servico antes de entrar em expediente.",
+  PROFESSIONAL_HAS_ACTIVE_ATTENDANCES:
+    "Nao da para ficar indisponivel com cliente em atendimento ou na fila. Termine a fila primeiro.",
   // Esqueci minha senha (S7). O backend nao distingue "e-mail desconhecido" de
   // "codigo errado" de proposito (anti-enumeracao) — a mensagem cobre os dois.
   RESET_CODE_INVALID:

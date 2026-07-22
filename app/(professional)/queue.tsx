@@ -228,6 +228,7 @@ export default function ProfessionalQueueScreen() {
 
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
+  const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
 
   // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
   const nudgedRef = useRef<Set<string>>(new Set());
@@ -489,6 +490,18 @@ export default function ProfessionalQueueScreen() {
     );
   };
 
+  // S1 fatia 1 (ligada 2026-07-22): pills do menu <-> work_status do backend.
+  // O menu fala "trabalhando/intervalo/indisponivel"; a API fala WORKING/
+  // ON_BREAK/OFF. Erros 422 (sem servico) e 409 (fila ativa) ja saem traduzidos
+  // pelo handleAction/getApiErrorMessage.
+  const WORK_TO_KEY = { WORKING: "trabalhando", ON_BREAK: "intervalo", OFF: "indisponivel" } as const;
+  const KEY_TO_WORK = { trabalhando: "WORKING", intervalo: "ON_BREAK", indisponivel: "OFF" } as const;
+  const statusControl = {
+    current: professional?.work_status ? WORK_TO_KEY[professional.work_status] : null,
+    onSelect: (next: keyof typeof KEY_TO_WORK) =>
+      handleAction(() => updateMyStatus(KEY_TO_WORK[next])),
+  };
+
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "adiantar") startClient(att, true);
     else if (action === "promover") confirmPromote(att);
@@ -564,6 +577,7 @@ export default function ProfessionalQueueScreen() {
           <ProfessionalMenu
             mealSignal={currentMealSignal}
             settingsDot={settingsDot}
+            status={statusControl}
             mealLabel={mealLabel}
             hasQueue={waitingList.length > 0 || !!currentAttendance}
             establishment={

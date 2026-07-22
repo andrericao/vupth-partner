@@ -19,6 +19,7 @@ const REGISTER_RESPONSE = {
   establishment_id: null,
   establishment_name: null,
   is_available: true,
+  work_status: null,
   message: "Professional created! Your ID is permanent.",
 };
 
@@ -30,6 +31,7 @@ const AFFILIATE_RESPONSE = {
   establishment_id: "estab-uuid-1",
   establishment_name: "Barbearia do Andre",
   is_available: true,
+  work_status: null,
   message: "Affiliated successfully.",
 };
 
@@ -361,6 +363,40 @@ describe("professional.store", () => {
 
       await expect(
         useProfessionalStore.getState().updateNickname("x".repeat(51))
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("updateMyStatus (S1 fatia 1)", () => {
+    it("PATCHes /professional/me/status e refresca o work_status via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/status").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, work_status: "ON_BREAK" });
+
+      await useProfessionalStore.getState().updateMyStatus("ON_BREAK");
+
+      expect(mock.history.patch[0].url).toBe("/professional/me/status");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ status: "ON_BREAK" });
+      expect(useProfessionalStore.getState().professional?.work_status).toBe("ON_BREAK");
+    });
+
+    it("rejeita no 409 (ficar OFF com fila/atendimento)", async () => {
+      mock
+        .onPatch("/professional/me/status")
+        .reply(409, { message: "PROFESSIONAL_HAS_ACTIVE_ATTENDANCES" });
+
+      await expect(
+        useProfessionalStore.getState().updateMyStatus("OFF")
+      ).rejects.toThrow();
+    });
+
+    it("rejeita no 422 (entrar em expediente sem servico)", async () => {
+      mock
+        .onPatch("/professional/me/status")
+        .reply(422, { message: "PROFESSIONAL_HAS_NO_SERVICE" });
+
+      await expect(
+        useProfessionalStore.getState().updateMyStatus("WORKING")
       ).rejects.toThrow();
     });
   });

@@ -46,6 +46,13 @@ type Props = {
   /** Ha atendimento/fila? Bloqueia "indisponivel" (mesma regra do S1). */
   hasQueue?: boolean;
   /**
+   * S1 fatia 1 LIGADA (2026-07-22): o status atual vem do `work_status` do
+   * GET /professional/me e o toque chama PATCH /professional/me/status (via
+   * queue.tsx). Sem o prop (ex.: backend antigo sem o campo), as pills caem
+   * no comingSoon de antes.
+   */
+  status?: { current: StatusKey | null; onSelect: (next: StatusKey) => void };
+  /**
    * Solicitacoes de corte pendentes. So renderiza quando > 0 — hoje o backend
    * nao tem como informar (ver HANDOFF_BACKEND "Detalhe — C2"), entao o item
    * fica ausente ate o contrato existir. Nada de UI falsa.
@@ -152,13 +159,15 @@ export function ProfessionalMenu({
   mealLabel,
   hasQueue = false,
   pendingRequests = 0,
+  status,
 }: Props) {
   const [open, setOpen] = useState(false);
   const logout = useAuthStore((s) => s.logout);
   const hasOwner = useAuthStore((s) => s.user?.roles?.includes("OWNER"));
 
-  // S1 ainda nao entregue: o status atual e fixo e qualquer troca cai no stub.
-  const currentStatus: StatusKey = "trabalhando";
+  // S1 fatia 1: o status real vem do work_status do /me (via prop). Null =
+  // backend antigo/sem valor -> mostra "Trabalhando" como padrao visual.
+  const currentStatus: StatusKey = status?.current ?? "trabalhando";
 
   const go = (path: string) => {
     setOpen(false);
@@ -166,9 +175,12 @@ export function ProfessionalMenu({
   };
 
   const selectStatus = (next: StatusKey) => {
-    // Parte front-only do S1: com fila, "Fora" nem chega a tentar.
+    // Prevencao de clique (S1): com fila, "Fora" nem chega a tentar — o 409 do
+    // backend fica so como rede de seguranca.
     if (next === "indisponivel" && hasQueue) return;
-    comingSoon("O controle de status (Trabalhando / Intervalo / Fora)");
+    if (next === currentStatus) return; // ja esta nesse status, nada a fazer
+    if (status) status.onSelect(next);
+    else comingSoon("O controle de status (Trabalhando / Intervalo / Fora)");
   };
 
   const handleLogout = () => {

@@ -47,7 +47,52 @@ describe("ProfessionalMenu", () => {
     });
   });
 
-  describe("status (stub do S1)", () => {
+  // S1 fatia 1 LIGADA (2026-07-22): com a prop `status`, as pills refletem o
+  // work_status real e o toque dispara onSelect (queue.tsx chama o PATCH).
+  describe("status (S1 fatia 1 ligada)", () => {
+    it("toque numa pill diferente dispara onSelect com a chave certa", () => {
+      const onSelect = jest.fn();
+      const view = renderWithProvider(
+        <ProfessionalMenu status={{ current: "trabalhando", onSelect }} />
+      );
+      open(view);
+      fireEvent.press(view.getByLabelText("Intervalo"));
+      expect(onSelect).toHaveBeenCalledWith("intervalo");
+      expect(comingSoon).not.toHaveBeenCalled();
+    });
+
+    it("toque na pill JA ATIVA e no-op (nao repete o PATCH)", () => {
+      const onSelect = jest.fn();
+      const view = renderWithProvider(
+        <ProfessionalMenu status={{ current: "intervalo", onSelect }} />
+      );
+      open(view);
+      fireEvent.press(view.getByLabelText("Intervalo"));
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it("com fila, 'Fora' nao dispara nem com a prop ligada (prevencao de clique)", () => {
+      const onSelect = jest.fn();
+      const view = renderWithProvider(
+        <ProfessionalMenu hasQueue status={{ current: "trabalhando", onSelect }} />
+      );
+      open(view);
+      fireEvent.press(view.getByLabelText("Fora"));
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it("current=null (backend sem o campo) cai no default visual e ainda seleciona", () => {
+      const onSelect = jest.fn();
+      const view = renderWithProvider(
+        <ProfessionalMenu status={{ current: null, onSelect }} />
+      );
+      open(view);
+      fireEvent.press(view.getByLabelText("Fora"));
+      expect(onSelect).toHaveBeenCalledWith("indisponivel");
+    });
+  });
+
+  describe("status (fallback sem prop = stub)", () => {
     it("trocar de status cai no comingSoon", () => {
       const view = renderWithProvider(<ProfessionalMenu />);
       open(view);

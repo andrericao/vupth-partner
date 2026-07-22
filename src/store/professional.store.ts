@@ -14,6 +14,11 @@ type Professional = {
   establishment_id: string | null;
   establishment_name: string | null;
   is_available: boolean;
+  /**
+   * S1 fatia 1 (backend, verificado no codigo 2026-07-22): WORKING (trabalhando),
+   * ON_BREAK (intervalo) ou OFF (indisponivel). Vem no DTO do /me (`work_status`).
+   */
+  work_status?: "WORKING" | "ON_BREAK" | "OFF" | null;
   message: string;
 };
 
@@ -50,6 +55,7 @@ type ProfessionalState = {
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
+  updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
@@ -70,6 +76,7 @@ function normalizeProfessional(data: any): Professional {
     establishment_id: data.establishment_id ?? data.establishmentId ?? null,
     establishment_name: data.establishment_name ?? data.establishmentName ?? null,
     is_available: data.is_available ?? data.isAvailable ?? true,
+    work_status: data.work_status ?? data.workStatus ?? null,
     message: data.message ?? "",
   };
 }
@@ -170,6 +177,15 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   updateMyProfile: async (changes) => {
     // PATCH /professional/me — name (=firstName) e/ou specialty, ambos opcionais.
     await api.patch("/professional/me", changes);
+    await get().fetchMe();
+  },
+
+  // S1 fatia 1: o profissional muda o proprio status de trabalho. Gates do
+  // backend: 422 PROFESSIONAL_HAS_NO_SERVICE (entrar em expediente sem servico)
+  // e 409 PROFESSIONAL_HAS_ACTIVE_ATTENDANCES (ficar OFF com fila/atendimento).
+  // O fetchMe re-le o work_status do DTO do /me.
+  updateMyStatus: async (status) => {
+    await api.patch("/professional/me/status", { status });
     await get().fetchMe();
   },
 
