@@ -40,3 +40,12 @@ export function cutRequestServices(
     .filter((n): n is string => !!n);
   return names.length > 0 ? names.join(" + ") : "Servico nao identificado";
 }
+
+/**
+ * Eventos do WS pessoal (`/user/queue/notifications`) que devem re-buscar a
+ * lista de pedidos. Prefixo `CUT_` cobre CUT_REQUESTED (o unico dirigido ao
+ * profissional hoje) e qualquer evento de corte futuro sem retocar o hook.
+ */
+export function isCutRequestEvent(type: string | null | undefined): boolean {
+  return !!type && type.startsWith("CUT_");
+}

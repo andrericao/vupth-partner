@@ -16,6 +16,22 @@ export type AttendanceServiceItem = {
 // read-model de fila. O profissional dono decide o pedido PENDING (accept ->
 // nasce Attendance SCHEDULED na cauda; refuse -> descartado). Ver HANDOFF_BACKEND.
 export type CutRequestStatus = "PENDING" | "ACCEPTED" | "REFUSED" | "EXPIRED";
+
+/**
+ * Envelope do WS pessoal `/user/queue/notifications` (PRD_BACKEND 18b).
+ * `cutRequestId` e campo proprio desde o desbloqueio do C2 (2026-07-22): vem
+ * preenchido em todos os eventos CUT_* (no CUT_ACCEPTED junto do attendanceId
+ * do atendimento gerado) e null nos demais.
+ */
+export type QueueNotification = {
+  type: string;
+  attendanceId?: string | null;
+  establishmentId?: string | null;
+  cutRequestId?: string | null;
+  message?: string | null;
+  timestamp?: string | null;
+};
+
 export type CutRequestResponse = {
   id: string;
   status: CutRequestStatus;

@@ -509,9 +509,10 @@ export default function ProfessionalQueueScreen() {
       handleAction(() => updateMyStatus(KEY_TO_WORK[next])),
   };
 
-  // C2 (desbloqueado 2026-07-22): pendentes via GET (o partner NAO assina o
-  // topico pessoal do WS; a lista se mantem por refetch periodico + ao abrir).
-  // A validade e checada LOCALMENTE pelo expires_at (orientacao do backend) —
+  // C2 (desbloqueado 2026-07-22): pendentes via GET. TEMPO REAL: o WS pessoal
+  // (assinado no useQueueSocket, mesma conexao da fila) invalida esta query a
+  // cada evento CUT_* — o refetch de 30s vira fallback p/ socket caido. A
+  // validade e checada LOCALMENTE pelo expires_at (orientacao do backend) —
   // pedido vencido some sozinho no proximo render.
   // Relogio ancorado em estado (react-hooks/purity proibe Date.now() no
   // render). Atualiza nos CALLBACKS — a cada fetch da lista (30s) e ao abrir o

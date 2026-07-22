@@ -1,4 +1,4 @@
-import { activeCutRequests, minutesToExpire, cutRequestServices } from "../cutRequests";
+import { activeCutRequests, minutesToExpire, cutRequestServices, isCutRequestEvent } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
 const NOW = Date.parse("2026-07-22T12:00:00Z");
@@ -74,5 +74,20 @@ describe("cutRequestServices", () => {
   it("nada resolvido ganha rotulo generico (card nao fica em branco)", () => {
     expect(cutRequestServices(["svc-x"], myServices)).toBe("Servico nao identificado");
     expect(cutRequestServices([], myServices)).toBe("Servico nao identificado");
+  });
+});
+
+describe("isCutRequestEvent", () => {
+  it("true para qualquer evento de corte (prefixo CUT_)", () => {
+    expect(isCutRequestEvent("CUT_REQUESTED")).toBe(true);
+    expect(isCutRequestEvent("CUT_ACCEPTED")).toBe(true);
+    expect(isCutRequestEvent("CUT_EXPIRED")).toBe(true);
+  });
+
+  it("false para eventos de atendimento e lixo", () => {
+    expect(isCutRequestEvent("ATTENDANCE_STARTED")).toBe(false);
+    expect(isCutRequestEvent("")).toBe(false);
+    expect(isCutRequestEvent(null)).toBe(false);
+    expect(isCutRequestEvent(undefined)).toBe(false);
   });
 });

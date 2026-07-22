@@ -141,9 +141,9 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
   },
 
   // C2 (desbloqueio 2026-07-22): pendentes do profissional logado (JWT),
-  // createdAt ASC. E o caminho de recuperacao quando o WS CUT_REQUESTED foi
-  // perdido (app fechado) — o partner tambem NAO assina o topico pessoal, entao
-  // a lista vem daqui (fetch ao abrir a fila + refetch periodico).
+  // createdAt ASC. Fonte da verdade da lista: o WS pessoal (CUT_*) so INVALIDA
+  // a query e este GET refaz; o refetch de 30s e o fallback p/ socket caido e
+  // o fetch ao abrir recupera o que chegou com o app fechado.
   fetchCutRequests: async () => {
     const { data } = await api.get("/attendances/cut-requests");
     return data;
