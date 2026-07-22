@@ -48,6 +48,11 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   INTERVAL_CONFLICT:
     "Conflito de horario: a refeicao ja foi iniciada/encerrada hoje ou se sobrepoe a outra.",
   INTERVAL_NOT_FOUND: "Refeicao/intervalo nao encontrado.",
+  // Esqueci minha senha (S7). O backend nao distingue "e-mail desconhecido" de
+  // "codigo errado" de proposito (anti-enumeracao) — a mensagem cobre os dois.
+  RESET_CODE_INVALID:
+    "Codigo invalido. Confira o e-mail e o codigo digitado (apos 5 erros ou uso, peca um novo).",
+  RESET_CODE_EXPIRED: "Codigo expirado (vale 15 minutos). Peca um novo codigo.",
   VALIDATION_ERROR: "Verifique os dados informados e tente novamente.",
 };
 

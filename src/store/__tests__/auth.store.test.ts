@@ -264,6 +264,52 @@ describe("auth.store", () => {
     });
   });
 
+  // Esqueci minha senha (S7, fatia 1 do backend 2026-07-20): codigo de 6
+  // digitos por e-mail, validade 15min, uso unico. Endpoints PUBLICOS — nao
+  // mexem em token nem em estado de sessao.
+  describe("forgotPassword", () => {
+    it("POSTa /auth/forgot-password com o e-mail", async () => {
+      mock.onPost("/auth/forgot-password").reply(200);
+
+      await useAuthStore.getState().forgotPassword("prof@test.com");
+
+      expect(mock.history.post[0].url).toBe("/auth/forgot-password");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({ email: "prof@test.com" });
+    });
+
+    it("nao toca em token nem autentica", async () => {
+      mock.onPost("/auth/forgot-password").reply(200);
+
+      await useAuthStore.getState().forgotPassword("prof@test.com");
+
+      expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    });
+  });
+
+  describe("resetPassword", () => {
+    it("POSTa /auth/reset-password com email, code e new_password (snake)", async () => {
+      mock.onPost("/auth/reset-password").reply(200);
+
+      await useAuthStore.getState().resetPassword("prof@test.com", "123456", "NovaSenha@123");
+
+      expect(mock.history.post[0].url).toBe("/auth/reset-password");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({
+        email: "prof@test.com",
+        code: "123456",
+        new_password: "NovaSenha@123",
+      });
+    });
+
+    it("rejeita no 400 (codigo invalido/expirado)", async () => {
+      mock.onPost("/auth/reset-password").reply(400, { message: "RESET_CODE_INVALID" });
+
+      await expect(
+        useAuthStore.getState().resetPassword("prof@test.com", "000000", "NovaSenha@123")
+      ).rejects.toThrow();
+    });
+  });
+
   describe("refreshToken", () => {
     it("updates tokens and roles after gaining OWNER role", async () => {
       useAuthStore.setState({
