@@ -200,7 +200,7 @@ Requisito novo (Andre 2026-07-09): com o profissional em `indisponivel`, o clien
 
 ### Estado do front (2026-07-09)
 - ✅ **Ja feito (OTA-puro, lado OWNER):** no dashboard do dono o botao **"Fechar Estabelecimento"** fica **desabilitado com aviso inline** quando ha cliente em atendimento/fila (o caminho vira "Fechar Temporariamente" p/ drenar), e trata o `409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES`. Isso ja aplica a regra de UX ("prevenir o clique") no que **nao** depende do backend novo.
-- ⬜ **Aguardando o backend (o resto do S1):** o toggle bruto do PROFISSIONAL (entregue em `7819914`) **nao** foi evoluido ainda — o seletor de status + "fechar fila" + auto-`indisponivel` + rotulo do cliente **so entram quando o backend expuser os endpoints abaixo**.
+- ✅ **Atualizado 2026-07-22 — seletor de status LIGADO (fatia 1):** as pills do menu chamam `PATCH /professional/me/status` (WORKING/ON_BREAK/OFF) e leem o `work_status` do `/me`. ⬜ **Ainda aguardando backend:** fatia 2 (open_status derivado + status no `professionals-with-queue`), fatia 3 ("fechar fila" + auto-`indisponivel`) e o rotulo do cliente.
 
 ### Front-partner depois (quando o backend entregar)
 - Trocar o toggle bruto do profissional por **seletor de status** (trabalhando/intervalo/indisponivel); `open_status` da loja **so exibido, nunca escrito**.
