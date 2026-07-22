@@ -493,6 +493,22 @@ describe("attendance.store", () => {
       expect(res.status).toBe("REFUSED");
     });
 
+    it("fetchCutRequests: GET /attendances/cut-requests devolve a lista", async () => {
+      const list = [{ ...CUT, status: "PENDING", resulting_attendance_id: null }];
+      mock.onGet("/attendances/cut-requests").reply(200, list);
+
+      const out = await useAttendanceStore.getState().fetchCutRequests();
+
+      expect(mock.history.get[0].url).toBe("/attendances/cut-requests");
+      expect(out).toEqual(list);
+    });
+
+    it("fetchCutRequests: lista vazia quando nao ha pendentes", async () => {
+      mock.onGet("/attendances/cut-requests").reply(200, []);
+
+      await expect(useAttendanceStore.getState().fetchCutRequests()).resolves.toEqual([]);
+    });
+
     it("rejeita no 409 (pedido ja decidido)", async () => {
       mock.onPatch("/attendances/cut-requests/cut-uuid-1/accept").reply(409, {
         message: "CUT_REQUEST_NOT_PENDING",

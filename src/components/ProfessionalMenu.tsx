@@ -53,11 +53,13 @@ type Props = {
    */
   status?: { current: StatusKey | null; onSelect: (next: StatusKey) => void };
   /**
-   * Solicitacoes de corte pendentes. So renderiza quando > 0 — hoje o backend
-   * nao tem como informar (ver HANDOFF_BACKEND "Detalhe — C2"), entao o item
-   * fica ausente ate o contrato existir. Nada de UI falsa.
+   * Solicitacoes de corte pendentes (C2, desbloqueado 2026-07-22): a contagem
+   * vem do GET /attendances/cut-requests, filtrada pelo expires_at local. O
+   * item so renderiza quando > 0.
    */
   pendingRequests?: number;
+  /** Abre a lista de solicitacoes (modal na fila). Sem ele, cai no "em breve". */
+  onOpenRequests?: () => void;
 };
 
 const STATUS: { key: StatusKey; label: string }[] = [
@@ -160,6 +162,7 @@ export function ProfessionalMenu({
   hasQueue = false,
   pendingRequests = 0,
   status,
+  onOpenRequests,
 }: Props) {
   const [open, setOpen] = useState(false);
   const logout = useAuthStore((s) => s.logout);
@@ -342,12 +345,11 @@ export function ProfessionalMenu({
                   label="Solicitacoes"
                   hint="fila fechada — pedidos de corte"
                   badge={pendingRequests}
-                  // Aceitar/recusar ainda nao tem tela: o backend nao expoe o
-                  // id do pedido (HANDOFF "Detalhe — C2"). Navegar p/ a fila
-                  // seria ir p/ onde ja se esta — melhor dizer "em breve".
                   onPress={() => {
                     setOpen(false);
-                    comingSoon("Aceitar ou recusar solicitacoes de corte");
+                    // C2 desbloqueado (2026-07-22): abre o modal de decidir.
+                    if (onOpenRequests) onOpenRequests();
+                    else comingSoon("Aceitar ou recusar solicitacoes de corte");
                   }}
                 />
               )}

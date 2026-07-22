@@ -31,6 +31,7 @@ type AttendanceState = {
   promoteAttendance: (attendanceId: string) => Promise<void>;
   acceptCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
   refuseCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
+  fetchCutRequests: () => Promise<CutRequestResponse[]>;
   reset: () => void;
 };
 
@@ -128,8 +129,7 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
   // C2 fatia 2 (backend 2026-07-18): o profissional dono decide um pedido de
   // corte PENDING. accept -> nasce Attendance SCHEDULED na cauda (a fila reflete
   // via WS); refuse -> pedido descartado. Ambos 200 CutRequestResponse.
-  // NOTA: a UI do pedido pendente aguarda o backend expor o cutRequestId no
-  // payload do WS CUT_REQUESTED (ou um GET de pendentes) — ver HANDOFF_BACKEND.
+  // UI ligada em 2026-07-22 (modal na fila), apos o desbloqueio do GET.
   acceptCutRequest: async (cutRequestId) => {
     const { data } = await api.patch(`/attendances/cut-requests/${cutRequestId}/accept`);
     return data;
@@ -137,6 +137,15 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   refuseCutRequest: async (cutRequestId) => {
     const { data } = await api.patch(`/attendances/cut-requests/${cutRequestId}/refuse`);
+    return data;
+  },
+
+  // C2 (desbloqueio 2026-07-22): pendentes do profissional logado (JWT),
+  // createdAt ASC. E o caminho de recuperacao quando o WS CUT_REQUESTED foi
+  // perdido (app fechado) — o partner tambem NAO assina o topico pessoal, entao
+  // a lista vem daqui (fetch ao abrir a fila + refetch periodico).
+  fetchCutRequests: async () => {
+    const { data } = await api.get("/attendances/cut-requests");
     return data;
   },
 

@@ -205,7 +205,19 @@ describe("ProfessionalMenu", () => {
       expect(view.getByTestId("menu-badge-requests")).toBeTruthy();
     });
 
-    it("tocar em Solicitacoes avisa 'em breve' (a tela depende do backend)", () => {
+    // C2 desbloqueado (2026-07-22): com o handler, o toque abre o modal real.
+    it("com onOpenRequests, tocar em Solicitacoes abre o modal (nao e mais stub)", () => {
+      const onOpenRequests = jest.fn();
+      const view = renderWithProvider(
+        <ProfessionalMenu pendingRequests={2} onOpenRequests={onOpenRequests} />
+      );
+      open(view);
+      fireEvent.press(view.getByLabelText("Solicitacoes"));
+      expect(onOpenRequests).toHaveBeenCalled();
+      expect(comingSoon).not.toHaveBeenCalled();
+    });
+
+    it("sem o handler, cai no 'em breve' (fallback)", () => {
       const view = renderWithProvider(<ProfessionalMenu pendingRequests={1} />);
       open(view);
       fireEvent.press(view.getByLabelText("Solicitacoes"));
