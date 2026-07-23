@@ -479,20 +479,18 @@ export default function ProfessionalQueueScreen() {
   // OPEN com o horario ja vencido — nesse caso o cliente ve fechado e o gate
   // barra a entrada. Fallback p/ a chave manual se o backend nao mandar o campo.
   const isEstablishmentOpenNow = data?.is_open ?? isEstablishmentOpen;
-  const toggleEstablishment = () => {
-    if (!establishmentId) return;
-    const next = isEstablishmentOpen ? "CLOSED" : "OPEN";
+  // ABRIR apenas (decisao Andre 2026-07-23): o profissional pode abrir a loja
+  // fechada (nao estranda ninguem, ajuda todo mundo), mas NAO pode mais FECHAR
+  // — fechar mataria a fila dos OUTROS profissionais. Fechar fica com o dono
+  // ate o open_status virar DERIVADO (S1 fatia 2), quando o toggle manual some.
+  const openEstablishment = () => {
+    if (!establishmentId || isEstablishmentOpen) return;
     Alert.alert(
-      isEstablishmentOpen ? "Fechar estabelecimento" : "Abrir estabelecimento",
-      isEstablishmentOpen
-        ? "A loja para de aparecer para os clientes e ninguem novo entra na fila. Continuar?"
-        : "A loja passa a aparecer para os clientes e a receber novos na fila. Continuar?",
+      "Abrir estabelecimento",
+      "A loja passa a aparecer para os clientes e a receber novos na fila. Continuar?",
       [
         { text: "Cancelar" },
-        {
-          text: isEstablishmentOpen ? "Fechar" : "Abrir",
-          onPress: () => handleAction(() => updateOpenStatus(establishmentId, next)),
-        },
+        { text: "Abrir", onPress: () => handleAction(() => updateOpenStatus(establishmentId, "OPEN")) },
       ]
     );
   };
@@ -626,7 +624,7 @@ export default function ProfessionalQueueScreen() {
                 ? {
                     isOpen: isEstablishmentOpen,
                     isOpenNow: isEstablishmentOpenNow,
-                    onToggle: toggleEstablishment,
+                    onOpen: openEstablishment,
                   }
                 : undefined
             }

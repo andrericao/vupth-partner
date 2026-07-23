@@ -245,44 +245,43 @@ describe("ProfessionalMenu", () => {
       const view = renderWithProvider(<ProfessionalMenu />);
       open(view);
       expect(view.queryByLabelText("Abrir estabelecimento")).toBeNull();
-      expect(view.queryByLabelText("Fechar estabelecimento")).toBeNull();
+      expect(view.queryByLabelText("Estabelecimento")).toBeNull();
     });
 
-    it("loja fechada: oferece ABRIR e dispara o toggle", () => {
-      const onToggle = jest.fn();
+    it("loja fechada: oferece ABRIR e dispara", () => {
+      const onOpen = jest.fn();
       const view = renderWithProvider(
-        <ProfessionalMenu establishment={{ isOpen: false, isOpenNow: false, onToggle }} />
+        <ProfessionalMenu establishment={{ isOpen: false, isOpenNow: false, onOpen }} />
       );
       open(view);
       expect(view.getByText(/FECHADA agora/)).toBeTruthy();
       fireEvent.press(view.getByLabelText("Abrir estabelecimento"));
-      expect(onToggle).toHaveBeenCalled();
+      expect(onOpen).toHaveBeenCalled();
     });
 
-    it("loja aberta e dentro do horario: oferece FECHAR e dispara o toggle", () => {
-      const onToggle = jest.fn();
+    // Decisao Andre 2026-07-23: o profissional NAO fecha mais a loja (mataria a
+    // fila dos colegas). Aberta => linha meramente informativa, sem acao.
+    it("loja aberta: NAO ha acao de fechar, so o estado informativo", () => {
+      const onOpen = jest.fn();
       const view = renderWithProvider(
-        <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: true, onToggle }} />
+        <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: true, onOpen }} />
       );
       open(view);
       expect(view.getByText(/ABERTA agora/)).toBeTruthy();
-      fireEvent.press(view.getByLabelText("Fechar estabelecimento"));
-      expect(onToggle).toHaveBeenCalled();
+      expect(view.queryByLabelText("Fechar estabelecimento")).toBeNull();
+      fireEvent.press(view.getByLabelText("Estabelecimento"));
+      expect(onOpen).not.toHaveBeenCalled(); // linha info: toque nao dispara nada
     });
 
-    // O caso que motivou usar o `is_open` do backend: a chave manual segue em
-    // OPEN, mas o horario ja venceu — o cliente ve fechado e o gate barra a
-    // entrada. Dizer "ABERTA agora" aqui seria mentir para o profissional.
-    it("aberta porem FORA DO HORARIO: avisa que clientes nao entram", () => {
-      const onToggle = jest.fn();
+    it("aberta porem FORA DO HORARIO: avisa que clientes nao entram (sem acao)", () => {
+      const onOpen = jest.fn();
       const view = renderWithProvider(
-        <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: false, onToggle }} />
+        <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: false, onOpen }} />
       );
       open(view);
       expect(view.getByText(/FORA DO HORARIO/)).toBeTruthy();
       expect(view.queryByText(/ABERTA agora/)).toBeNull();
-      // continua sendo a acao de fechar (a chave manual esta em OPEN)
-      expect(view.getByLabelText("Fechar estabelecimento")).toBeTruthy();
+      expect(view.queryByLabelText("Fechar estabelecimento")).toBeNull();
     });
   });
 

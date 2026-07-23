@@ -33,14 +33,15 @@ type Props = {
   mealSignal?: MealSignal | null;
   settingsDot?: boolean;
   /**
-   * Abrir/fechar o estabelecimento (backend aceita profissional afiliado).
-   * `isOpen`    = chave MANUAL (`open_status == OPEN`) — e o que o toggle alterna.
-   * `isOpenNow` = EFETIVO (`is_open` do backend: aberta **e** dentro do horario).
-   * Os dois divergem quando passou do `closing_time` com a chave ainda em OPEN:
-   * o cliente ja ve fechado e o gate barra a entrada, entao dizer "ABERTA" aqui
-   * seria mentira.
+   * Estabelecimento na visao do PROFISSIONAL (decisao Andre 2026-07-23):
+   * ele pode **ABRIR** a loja fechada (ajuda todo mundo, nao estranda ninguem),
+   * mas **NAO pode mais FECHAR** — fechar mataria a fila dos OUTROS
+   * profissionais (mesmo argumento do S1: o open_status deve virar DERIVADO;
+   * ate la, fechar e so do dono). Loja aberta => linha meramente INFORMATIVA.
+   * `isOpen`    = chave MANUAL (`open_status == OPEN`).
+   * `isOpenNow` = EFETIVO (`is_open`: aberta **e** dentro do horario).
    */
-  establishment?: { isOpen: boolean; isOpenNow: boolean; onToggle: () => void };
+  establishment?: { isOpen: boolean; isOpenNow: boolean; onOpen: () => void };
   /** Rotulo da refeicao em destaque, ex.: "Almoco 12:00". */
   mealLabel?: string;
   /** Ha atendimento/fila? Bloqueia "indisponivel" (mesma regra do S1). */
@@ -312,21 +313,26 @@ export function ProfessionalMenu({
                 </HStack>
               </Row>
 
-              {establishment && (
+              {establishment && !establishment.isOpen && (
                 <Row
-                  icon={!establishment.isOpen ? "🔒" : establishment.isOpenNow ? "🏪" : "🌙"}
-                  label={establishment.isOpen ? "Fechar estabelecimento" : "Abrir estabelecimento"}
-                  hint={
-                    !establishment.isOpen
-                      ? "a loja esta FECHADA agora"
-                      : establishment.isOpenNow
-                        ? "a loja esta ABERTA agora"
-                        : "marcada como aberta, mas FORA DO HORARIO — clientes nao entram"
-                  }
+                  icon="🔒"
+                  label="Abrir estabelecimento"
+                  hint="a loja esta FECHADA agora"
                   onPress={() => {
                     setOpen(false);
-                    establishment.onToggle();
+                    establishment.onOpen();
                   }}
+                />
+              )}
+              {establishment && establishment.isOpen && (
+                <Row
+                  icon={establishment.isOpenNow ? "🏪" : "🌙"}
+                  label="Estabelecimento"
+                  hint={
+                    establishment.isOpenNow
+                      ? "ABERTA agora — fechar e so pelo dono (nao derruba a fila dos colegas)"
+                      : "marcada como aberta, mas FORA DO HORARIO — clientes nao entram"
+                  }
                 />
               )}
 
