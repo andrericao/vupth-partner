@@ -1,4 +1,4 @@
-import { maskTime, isValidTime, parseApiTime, toApiTime, isoDate, periodRange } from "../time";
+import { maskTime, isValidTime, parseApiTime, toApiTime, deviceOffsetSuffix, isoDate, periodRange } from "../time";
 
 describe("isoDate", () => {
   it("formata como YYYY-MM-DD com zero-pad", () => {
@@ -71,10 +71,41 @@ describe("parseApiTime", () => {
   });
 });
 
+// QA 2026-07-23 (bug do fuso): a hora digitada e LOCAL e precisa ir com o
+// offset REAL do aparelho — rotular como "Z" deslocava a janela em -3h no
+// Brasil (loja "aberta" as 6:30, cliente barrado as 18:30).
+describe("deviceOffsetSuffix", () => {
+  const withOffset = (min: number, fn: () => void) => {
+    const spy = jest.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(min);
+    try {
+      fn();
+    } finally {
+      spy.mockRestore();
+    }
+  };
+
+  it("Brasil (UTC-3, getTimezoneOffset=180) vira '-03:00'", () => {
+    withOffset(180, () => expect(deviceOffsetSuffix()).toBe("-03:00"));
+  });
+
+  it("leste de Greenwich (ex.: UTC+5:30, offset=-330) vira '+05:30'", () => {
+    withOffset(-330, () => expect(deviceOffsetSuffix()).toBe("+05:30"));
+  });
+
+  it("UTC exato vira 'Z'", () => {
+    withOffset(0, () => expect(deviceOffsetSuffix()).toBe("Z"));
+  });
+});
+
 describe("toApiTime", () => {
-  it("builds OffsetTime UTC from HH:MM", () => {
-    expect(toApiTime("09:00")).toBe("09:00:00Z");
-    expect(toApiTime("18:30")).toBe("18:30:00Z");
+  it("monta OffsetTime com o offset do aparelho (nao mais 'Z' fixo)", () => {
+    const spy = jest.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(180);
+    try {
+      expect(toApiTime("09:00")).toBe("09:00:00-03:00");
+      expect(toApiTime("18:30")).toBe("18:30:00-03:00");
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("returns null for invalid input", () => {

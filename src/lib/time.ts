@@ -30,10 +30,36 @@ export function parseApiTime(value: string | null | undefined): string | null {
   return isValidTime(hhmm) ? hhmm : null;
 }
 
-/** "HH:MM" -> OffsetTime UTC "HH:MM:00Z" para enviar a API. null se invalido. */
+/**
+ * Sufixo de offset do APARELHO no formato OffsetTime ("-03:00"; UTC vira "Z").
+ * `getTimezoneOffset()` devolve minutos a SOMAR na hora local p/ chegar em UTC
+ * (Brasil = +180), entao o sinal do sufixo e o INVERSO.
+ */
+export function deviceOffsetSuffix(now: Date = new Date()): string {
+  const min = now.getTimezoneOffset();
+  if (min === 0) return "Z";
+  const sign = min > 0 ? "-" : "+";
+  const abs = Math.abs(min);
+  const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mm = String(abs % 60).padStart(2, "0");
+  return `${sign}${hh}:${mm}`;
+}
+
+/**
+ * "HH:MM" -> OffsetTime "HH:MM:00±hh:mm" com o offset REAL do aparelho.
+ * null se invalido.
+ *
+ * ⚠️ QA 2026-07-23 (BUG do fuso): antes mandavamos a hora LOCAL rotulada como
+ * "Z" (UTC). O backend normaliza offsets e compara com o agora em UTC, entao a
+ * janela salva "08:00Z-18:00Z" valia, em hora LOCAL do Brasil (UTC-3),
+ * 05:00-15:00 — a loja aparecia aberta as 6:30 e barrava cliente as 18:30
+ * (era a raiz do BUG2). Mesmo veneno nas refeicoes (mesma funcao). Enviar o
+ * offset verdadeiro corrige; horarios JA SALVOS com "Z" continuam deslocados
+ * ate serem RE-SALVOS (ver HANDOFF).
+ */
 export function toApiTime(value: string): string | null {
   if (!isValidTime(value)) return null;
-  return `${value}:00Z`;
+  return `${value}:00${deviceOffsetSuffix()}`;
 }
 
 /** Data local como "YYYY-MM-DD" (ISO) para os params dateFrom/dateTo da API. */
