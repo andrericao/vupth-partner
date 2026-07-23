@@ -259,29 +259,28 @@ describe("ProfessionalMenu", () => {
       expect(onOpen).toHaveBeenCalled();
     });
 
-    // Decisao Andre 2026-07-23: o profissional NAO fecha mais a loja (mataria a
-    // fila dos colegas). Aberta => linha meramente informativa, sem acao.
-    it("loja aberta: NAO ha acao de fechar, so o estado informativo", () => {
+    // Decisao Andre 2026-07-23 (2 rodadas): o profissional NAO fecha a loja e,
+    // aberta dentro do horario, NADA aparece ("nao precisa aparecer").
+    it("loja aberta dentro do horario: NENHUMA linha de estabelecimento", () => {
       const onOpen = jest.fn();
       const view = renderWithProvider(
         <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: true, onOpen }} />
       );
       open(view);
-      expect(view.getByText(/ABERTA agora/)).toBeTruthy();
+      expect(view.queryByLabelText("Abrir estabelecimento")).toBeNull();
       expect(view.queryByLabelText("Fechar estabelecimento")).toBeNull();
-      fireEvent.press(view.getByLabelText("Estabelecimento"));
-      expect(onOpen).not.toHaveBeenCalled(); // linha info: toque nao dispara nada
+      expect(view.queryByLabelText("Fora do horario")).toBeNull();
     });
 
-    it("aberta porem FORA DO HORARIO: avisa que clientes nao entram (sem acao)", () => {
+    it("aberta porem FORA DO HORARIO: so o aviso (clientes nao entram), sem acao", () => {
       const onOpen = jest.fn();
       const view = renderWithProvider(
         <ProfessionalMenu establishment={{ isOpen: true, isOpenNow: false, onOpen }} />
       );
       open(view);
-      expect(view.getByText(/FORA DO HORARIO/)).toBeTruthy();
-      expect(view.queryByText(/ABERTA agora/)).toBeNull();
-      expect(view.queryByLabelText("Fechar estabelecimento")).toBeNull();
+      expect(view.getByText(/clientes nao entram/)).toBeTruthy();
+      fireEvent.press(view.getByLabelText("Fora do horario"));
+      expect(onOpen).not.toHaveBeenCalled();
     });
   });
 

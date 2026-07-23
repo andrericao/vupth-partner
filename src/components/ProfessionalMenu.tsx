@@ -324,15 +324,15 @@ export function ProfessionalMenu({
                   }}
                 />
               )}
-              {establishment && establishment.isOpen && (
+              {/* Loja aberta e dentro do horario: NADA aparece (Andre 2026-07-23
+                  — "nao precisa aparecer estabelecimento"). So resta o AVISO
+                  quando a chave esta aberta com o horario vencido, porque ai
+                  os clientes nao entram e o profissional precisa saber. */}
+              {establishment && establishment.isOpen && !establishment.isOpenNow && (
                 <Row
-                  icon={establishment.isOpenNow ? "🏪" : "🌙"}
-                  label="Estabelecimento"
-                  hint={
-                    establishment.isOpenNow
-                      ? "ABERTA agora — fechar e so pelo dono (nao derruba a fila dos colegas)"
-                      : "marcada como aberta, mas FORA DO HORARIO — clientes nao entram"
-                  }
+                  icon="🌙"
+                  label="Fora do horario"
+                  hint="clientes nao entram — confira o horario de funcionamento"
                 />
               )}
 
