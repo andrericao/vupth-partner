@@ -62,10 +62,12 @@ type Props = {
   onOpenRequests?: () => void;
 };
 
-const STATUS: { key: StatusKey; label: string }[] = [
-  { key: "trabalhando", label: "Trabalhando" },
-  { key: "intervalo", label: "Intervalo" },
-  { key: "indisponivel", label: "Fora" },
+// Cores por status (Andre 2026-07-23): semaforo — verde trabalhando, ambar
+// intervalo, vermelho fora. A pill ATIVA ganha a cor; inativas ficam neutras.
+const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }[] = [
+  { key: "trabalhando", label: "Trabalhando", activeBg: "$green500", emoji: "🟢" },
+  { key: "intervalo", label: "Intervalo", activeBg: "$amber500", emoji: "🟡" },
+  { key: "indisponivel", label: "Fora", activeBg: "$red500", emoji: "🔴" },
 ];
 
 // Section/Row ficam no ESCOPO DO MODULO de proposito: definidos dentro do
@@ -279,7 +281,7 @@ export function ProfessionalMenu({
               </HStack>
 
               <Section title="Agora" />
-              <Row icon="🟢" label="Status">
+              <Row icon={STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"} label="Status">
                 <HStack space="xs">
                   {STATUS.map((s) => {
                     const active = s.key === currentStatus;
@@ -291,7 +293,7 @@ export function ProfessionalMenu({
                         accessibilityRole="button"
                         accessibilityLabel={s.label}
                         opacity={blocked ? 0.45 : 1}
-                        bg={active ? "$green500" : "$coolGray100"}
+                        bg={active ? s.activeBg : "$coolGray100"}
                         borderRadius="$full"
                         px="$2.5"
                         py="$1"

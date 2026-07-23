@@ -80,6 +80,21 @@ describe("ProfessionalMenu", () => {
       expect(onSelect).not.toHaveBeenCalled();
     });
 
+    // Andre 2026-07-23: semaforo — o icone da linha Status acompanha a cor.
+    it.each([
+      ["trabalhando", "🟢"],
+      ["intervalo", "🟡"],
+      ["indisponivel", "🔴"],
+    ])("icone da linha Status reflete %s (%s)", (current, emoji) => {
+      const view = renderWithProvider(
+        <ProfessionalMenu
+          status={{ current: current as "trabalhando" | "intervalo" | "indisponivel", onSelect: jest.fn() }}
+        />
+      );
+      open(view);
+      expect(view.getByText(emoji)).toBeTruthy();
+    });
+
     it("current=null (backend sem o campo) cai no default visual e ainda seleciona", () => {
       const onSelect = jest.fn();
       const view = renderWithProvider(
