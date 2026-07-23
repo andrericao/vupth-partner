@@ -602,9 +602,10 @@ export default function ProfessionalQueueScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
       <VStack flex={1} py="$12" px="$6">
-        <Header />
+        {/* Um icone por tela (QA 2026-07-22): aqui quem manda e o banco do menu. */}
+        <Header showRoleIcon={false} />
 
-        {/* Titulo + menu ☰ lado a lado (a tab bar saiu do rodape). */}
+        {/* Titulo + menu lado a lado (a tab bar saiu do rodape). */}
         <HStack mt="$4" alignItems="center" justifyContent="space-between">
           <Heading size="2xl" fontFamily="$heading">
             Fila
