@@ -19,6 +19,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
+import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 
 const PATTERNS = [
   { label: "Dias uteis", value: "WEEKDAYS" },
@@ -31,6 +32,23 @@ function patternLabel(value: string | null): string {
 }
 
 export default function MealsScreen() {
+  // Aviso na hora da refeicao (nav v2: o liga/desliga mora AQUI, junto das
+  // refeicoes — antes ficava perdido em Configuracoes). Reversao do "Nao ver
+  // mais" do popup; sem isto seria beco sem saida.
+  const [mealNudgeOff, setMealNudgeOff] = useState(false);
+  useEffect(() => {
+    isMealNudgeDisabled().then(setMealNudgeOff).catch(() => {});
+  }, []);
+  const toggleMealNudge = async () => {
+    const next = !mealNudgeOff;
+    setMealNudgeOff(next);
+    try {
+      await setMealNudgeDisabled(next);
+    } catch {
+      setMealNudgeOff(!next); // nao mentir na UI se a gravacao falhar
+    }
+  };
+
   const professional = useProfessionalStore((s) => s.professional);
   const profId = professional?.id ?? "";
 
@@ -360,6 +378,25 @@ export default function MealsScreen() {
               />
             </VStack>
           )}
+
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mt="$4">
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
+              Aviso na hora da refeicao
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+              {mealNudgeOff
+                ? "Desligado — o lembrete aparece so nas Opcoes da fila (bolinha + contagem)."
+                : "Ligado — um aviso aparece na tela no horario da refeicao."}
+            </Text>
+            <Button
+              title={mealNudgeOff ? "Ligar aviso" : "Desligar aviso"}
+              onPress={toggleMealNudge}
+              bg="$coolGray200"
+              textColor="$coolGray700"
+              h="$9"
+              mt="$2"
+            />
+          </VStack>
         </VStack>
       </ScrollView>
     </KeyboardAvoidingView>

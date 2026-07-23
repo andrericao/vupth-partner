@@ -76,6 +76,8 @@ export default function ProfessionalLayout() {
         }}
       />
       <Tabs.Screen name="queue-options" options={HIDDEN} />
+      <Tabs.Screen name="settings-account" options={HIDDEN} />
+      <Tabs.Screen name="settings-vinculo" options={HIDDEN} />
       <Tabs.Screen name="my-services" options={HIDDEN} />
       <Tabs.Screen name="onboarding" options={HIDDEN} />
       <Tabs.Screen name="add-guest" options={HIDDEN} />
