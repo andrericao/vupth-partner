@@ -35,9 +35,13 @@ export default function OwnerDashboardScreen() {
   const { completion } = useOwnerCompletion();
 
   useEffect(() => {
-    if (!establishment) {
-      fetchMine().catch(() => {});
-    }
+    // SEMPRE re-sincroniza com o servidor (QA 2026-07-22): o restore do
+    // SecureStore pode estar VELHO — id morto apos reset do staging, endereco/
+    // horario desatualizados. Antes so buscava se a store estivesse vazia, e
+    // como o boot restaura, ela NUNCA estava — o app vivia do snapshot morto
+    // (era a causa do "endereco/profissional pendentes" fantasmas). Offline:
+    // o catch mantem o persistido como fallback.
+    fetchMine().catch(() => {});
     // carga on-mount unica; fetchMine e estavel (Zustand).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

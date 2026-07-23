@@ -38,7 +38,7 @@ export function useOwnerCompletion(): {
   const completion = ownerCompletion({
     hasName: !!(detail ? detail.name : establishment?.name),
     hasServiceType: !!(detail ? detail.service_type : establishment?.service_type),
-    hasAddress: !!detail?.address?.neighborhood,
+    hasAddress: !!(detail ? detail.address?.neighborhood : establishment?.address?.neighborhood),
     hasHours: detail
       ? !!detail.opening_time && !!detail.closing_time
       : !!establishment?.opening_time && !!establishment?.closing_time,

@@ -286,6 +286,37 @@ describe("establishment.store", () => {
       );
     });
 
+    // QA 2026-07-22: o /mine ja embute o address (backend BUG4) e a store
+    // dropava — o checklist ficava com "endereco pendente" fantasma quando o
+    // GET rico falhava. Agora o normalize captura.
+    it("captura o address embutido do /mine (fallback do checklist)", async () => {
+      mock.onGet("/establishment/mine").reply(200, [
+        {
+          ...ESTABLISHMENT_RESPONSE,
+          address: {
+            street: "Rua A",
+            number: "10",
+            neighborhood: "Centro",
+            city: "Natal",
+            state: "RN",
+            zipCode: "59.000-000",
+          },
+        },
+      ]);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      expect(useEstablishmentStore.getState().establishment?.address?.neighborhood).toBe("Centro");
+    });
+
+    it("sem address no /mine, o campo fica null (nao inventa endereco)", async () => {
+      mock.onGet("/establishment/mine").reply(200, [ESTABLISHMENT_RESPONSE]);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      expect(useEstablishmentStore.getState().establishment?.address).toBeNull();
+    });
+
     it("keeps state when owner has no establishments", async () => {
       mock.onGet("/establishment/mine").reply(200, []);
 
