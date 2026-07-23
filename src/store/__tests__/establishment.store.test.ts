@@ -23,6 +23,9 @@ const ESTABLISHMENT_RESPONSE = {
   instagram: null,
   opening_time: null,
   closing_time: null,
+  // normalizeEstablishment sempre popula (null sem endereco embutido) — sem
+  // isto o toEqual de objeto inteiro quebra.
+  address: null,
   created_at: "2026-05-17T10:00:00",
   message: "Establishment created!",
 };
