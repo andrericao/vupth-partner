@@ -9,8 +9,7 @@ import {
   Pressable,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl, BackHandler, Modal } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Alert, RefreshControl, BackHandler, Modal, View } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
@@ -29,11 +28,10 @@ import { professionalCompletion, hasAnyPending } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
-import { activeCutRequests, minutesToExpire, cutRequestTitle } from "@lib/cutRequests";
+import { activeCutRequests } from "@lib/cutRequests";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
-import { ProfessionalMenu } from "@components/ProfessionalMenu";
-import { useEstablishmentStore } from "@store/establishment.store";
+import { BenchIcon } from "@components/BenchIcon";
 import * as SecureStore from "expo-secure-store";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
@@ -212,17 +210,14 @@ function QueueRow({
 }
 
 export default function ProfessionalQueueScreen() {
-  const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, removeFromQueue, promoteAttendance,
-    acceptCutRequest, refuseCutRequest, fetchCutRequests,
+    markLate, removeFromQueue, promoteAttendance, fetchCutRequests,
   } = useAttendanceStore();
-  const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
 
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
@@ -233,7 +228,6 @@ export default function ProfessionalQueueScreen() {
 
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
-  const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
 
   // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
   const nudgedRef = useRef<Set<string>>(new Set());
@@ -241,8 +235,6 @@ export default function ProfessionalQueueScreen() {
   const [refreshing, setRefreshing] = useState(false);
   // Cliente cujo menu ⋮ esta aberto (action sheet), ou null.
   const [menuTarget, setMenuTarget] = useState<AttendanceInQueue | null>(null);
-  // Modal de solicitacoes de corte (C2) aberto?
-  const [showCutRequests, setShowCutRequests] = useState(false);
 
   useEffect(() => {
     const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
@@ -383,10 +375,6 @@ export default function ProfessionalQueueScreen() {
   // Refeicao EM ANDAMENTO fica na tela (Encerrar a um toque); o resto vai p/ o
   // menu, que mostra o horario da proxima no proprio rotulo.
   const activeMeal = meals.find((m) => m.status === "ACTIVE") ?? null;
-  const nextMeal = meals.find((m) => m.status === "SCHEDULED") ?? null;
-  const mealLabel = nextMeal
-    ? `${mealName(nextMeal.description)} ${parseApiTime(nextMeal.fixedStartTime) ?? ""}`.trim()
-    : undefined;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -474,39 +462,6 @@ export default function ProfessionalQueueScreen() {
   // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
   // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
   // handleAction, que traduz a mensagem.
-  const isEstablishmentOpen = data?.open_status === "OPEN";
-  // "Aberto agora" EFETIVO (backend `is_open`): a chave manual pode estar em
-  // OPEN com o horario ja vencido — nesse caso o cliente ve fechado e o gate
-  // barra a entrada. Fallback p/ a chave manual se o backend nao mandar o campo.
-  const isEstablishmentOpenNow = data?.is_open ?? isEstablishmentOpen;
-  // ABRIR apenas (decisao Andre 2026-07-23): o profissional pode abrir a loja
-  // fechada (nao estranda ninguem, ajuda todo mundo), mas NAO pode mais FECHAR
-  // — fechar mataria a fila dos OUTROS profissionais. Fechar fica com o dono
-  // ate o open_status virar DERIVADO (S1 fatia 2), quando o toggle manual some.
-  const openEstablishment = () => {
-    if (!establishmentId || isEstablishmentOpen) return;
-    Alert.alert(
-      "Abrir estabelecimento",
-      "A loja passa a aparecer para os clientes e a receber novos na fila. Continuar?",
-      [
-        { text: "Cancelar" },
-        { text: "Abrir", onPress: () => handleAction(() => updateOpenStatus(establishmentId, "OPEN")) },
-      ]
-    );
-  };
-
-  // S1 fatia 1 (ligada 2026-07-22): pills do menu <-> work_status do backend.
-  // O menu fala "trabalhando/intervalo/indisponivel"; a API fala WORKING/
-  // ON_BREAK/OFF. Erros 422 (sem servico) e 409 (fila ativa) ja saem traduzidos
-  // pelo handleAction/getApiErrorMessage.
-  const WORK_TO_KEY = { WORKING: "trabalhando", ON_BREAK: "intervalo", OFF: "indisponivel" } as const;
-  const KEY_TO_WORK = { trabalhando: "WORKING", intervalo: "ON_BREAK", indisponivel: "OFF" } as const;
-  const statusControl = {
-    current: professional?.work_status ? WORK_TO_KEY[professional.work_status] : null,
-    onSelect: (next: keyof typeof KEY_TO_WORK) =>
-      handleAction(() => updateMyStatus(KEY_TO_WORK[next])),
-  };
-
   // C2 (desbloqueado 2026-07-22): pendentes via GET. TEMPO REAL: o WS pessoal
   // (assinado no useQueueSocket, mesma conexao da fila) invalida esta query a
   // cada evento CUT_* — o refetch de 30s vira fallback p/ socket caido. A
@@ -516,7 +471,7 @@ export default function ProfessionalQueueScreen() {
   // render). Atualiza nos CALLBACKS — a cada fetch da lista (30s) e ao abrir o
   // modal — granularidade de sobra p/ um TTL de 5min.
   const [cutNowMs, setCutNowMs] = useState(() => Date.now());
-  const { data: cutRequestsData, refetch: refetchCutRequests } = useQuery({
+  const { data: cutRequestsData } = useQuery({
     queryKey: ["cut-requests", profId],
     queryFn: async () => {
       const list = await fetchCutRequests();
@@ -527,13 +482,6 @@ export default function ProfessionalQueueScreen() {
     refetchInterval: 30000,
   });
   const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
-
-  const decideCutRequest = (cutRequestId: string, accept: boolean) =>
-    handleAction(async () => {
-      if (accept) await acceptCutRequest(cutRequestId);
-      else await refuseCutRequest(cutRequestId);
-      await refetchCutRequests();
-    });
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "adiantar") startClient(att, true);
@@ -608,27 +556,41 @@ export default function ProfessionalQueueScreen() {
           <Heading size="2xl" fontFamily="$heading">
             Fila
           </Heading>
-          <ProfessionalMenu
-            mealSignal={currentMealSignal}
-            settingsDot={settingsDot}
-            status={statusControl}
-            pendingRequests={pendingCutRequests.length}
-            onOpenRequests={() => {
-              setCutNowMs(Date.now());
-              setShowCutRequests(true);
-            }}
-            mealLabel={mealLabel}
-            hasQueue={waitingList.length > 0 || !!currentAttendance}
-            establishment={
-              establishmentId
-                ? {
-                    isOpen: isEstablishmentOpen,
-                    isOpenNow: isEstablishmentOpenNow,
-                    onOpen: openEstablishment,
-                  }
-                : undefined
-            }
-          />
+          {/* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
+              modal — "mais amigavel a tela inteira"). Dot = refeicao na janela,
+              pendencia de cadastro ou solicitacao de corte. */}
+          <Pressable
+            onPress={() => router.push("/(professional)/queue-options" as any)}
+            accessibilityRole="button"
+            accessibilityLabel="Opcoes da fila"
+            hitSlop={8}
+            w="$10"
+            h="$10"
+            borderRadius="$xl"
+            bg="$white"
+            alignItems="center"
+            justifyContent="center"
+            style={cardShadow}
+            $active-bg="$green50"
+          >
+            <BenchIcon />
+            {(currentMealSignal != null || settingsDot || pendingCutRequests.length > 0) && (
+              <View
+                testID="menu-dot"
+                style={{
+                  position: "absolute",
+                  top: -3,
+                  right: -3,
+                  width: 12,
+                  height: 12,
+                  borderRadius: 6,
+                  backgroundColor: "#E63946",
+                  borderWidth: 2,
+                  borderColor: "#F7FAF8",
+                }}
+              />
+            )}
+          </Pressable>
         </HStack>
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
@@ -783,7 +745,7 @@ export default function ProfessionalQueueScreen() {
         <VStack
           px="$6"
           pt="$3"
-          style={{ paddingBottom: insets.bottom + 16, backgroundColor: "#F7FAF8" }}
+          style={{ paddingBottom: 12, backgroundColor: "#F7FAF8" }}
         >
           {currentAttendance ? (
             <VStack
@@ -858,75 +820,6 @@ export default function ProfessionalQueueScreen() {
         </VStack>
       </Modal>
 
-      {/* Solicitacoes de corte (C2, desbloqueado 2026-07-22): pedidos feitos com
-          a fila fechada, aguardando decisao. Sem clientName no response (gap
-          nice-to-have registrado) — o card mostra os servicos + validade. */}
-      <Modal
-        visible={showCutRequests}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowCutRequests(false)}
-      >
-        <VStack flex={1} justifyContent="flex-end">
-          <Pressable
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
-            onPress={() => setShowCutRequests(false)}
-            accessibilityLabel="Fechar solicitacoes"
-          />
-          <VStack bg="$white" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" p="$4" pb="$8" space="sm">
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$1">
-              Solicitacoes de corte
-            </Text>
-            {pendingCutRequests.length === 0 ? (
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                Nenhuma solicitacao pendente.
-              </Text>
-            ) : (
-              pendingCutRequests.map((req) => (
-                <VStack key={req.id} bg="$coolGray50" borderRadius="$xl" p="$3" space="xs">
-                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray900">
-                    {cutRequestTitle(req, myServices)}
-                  </Text>
-                  <Text fontFamily="$body" fontSize="$xs" color="$amber600">
-                    expira em {minutesToExpire(req.expires_at, cutNowMs)} min — sem resposta, e negado sozinho
-                  </Text>
-                  <HStack space="sm" mt="$1">
-                    <Button
-                      title="Recusar"
-                      onPress={() => {
-                        setShowCutRequests(false);
-                        decideCutRequest(req.id, false);
-                      }}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
-                      h="$9"
-                      mt="$0"
-                      flex={1}
-                    />
-                    <Button
-                      title="Aceitar"
-                      onPress={() => {
-                        setShowCutRequests(false);
-                        decideCutRequest(req.id, true);
-                      }}
-                      bg="$green500"
-                      $active-bg="$green600"
-                      h="$9"
-                      mt="$0"
-                      flex={1}
-                    />
-                  </HStack>
-                </VStack>
-              ))
-            )}
-            <Pressable onPress={() => setShowCutRequests(false)} py="$3" accessibilityRole="button" accessibilityLabel="Fechar lista de solicitacoes">
-              <Text fontFamily="$body" fontSize="$md" color="$coolGray500" textAlign="center">
-                Fechar
-              </Text>
-            </Pressable>
-          </VStack>
-        </VStack>
-      </Modal>
     </VStack>
   );
 }

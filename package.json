@@ -85,7 +85,7 @@
       "src/components/comingSoon.ts",
       "src/components/PendingDot.tsx",
       "src/components/ReadinessFaixa.tsx",
-      "src/components/ProfessionalMenu.tsx",
+      "src/components/QueueOptions.tsx",
       "src/components/BenchIcon.tsx",
       "!src/**/__tests__/**",
       "!src/**/*.d.ts",
