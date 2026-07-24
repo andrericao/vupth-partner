@@ -255,9 +255,13 @@ describe("auth.store", () => {
         },
       });
 
-      await useAuthStore.getState().updatePassword("NovaSenha@123");
+      await useAuthStore.getState().updatePassword("SenhaAtual@123", "NovaSenha@123");
 
-      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ password: "NovaSenha@123" });
+      // Breaking backend 2026-07-23: o corpo agora leva a senha ATUAL tambem.
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        current_password: "SenhaAtual@123",
+        password: "NovaSenha@123",
+      });
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_access_token", PROFESSIONAL_TOKEN);
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_refresh_token", "refresh-new-pwd");
       expect(useAuthStore.getState().isAuthenticated).toBe(true);

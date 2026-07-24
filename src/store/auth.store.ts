@@ -21,7 +21,7 @@ type AuthState = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   updateEmail: (email: string) => Promise<void>;
-  updatePassword: (password: string) => Promise<void>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   refreshToken: () => Promise<void>;
@@ -74,8 +74,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }));
   },
 
-  updatePassword: async (password) => {
-    const { data } = await api.patch("/profile/update-password/me", { password });
+  // Breaking backend 2026-07-23: exige a senha ATUAL (conferida com
+  // PasswordEncoder.matches). Errada => 401 CURRENT_PASSWORD_INVALID (erro de
+  // campo, tratado no interceptor sem refresh/logout); ausente => 422.
+  updatePassword: async (currentPassword, newPassword) => {
+    const { data } = await api.patch("/profile/update-password/me", {
+      current_password: currentPassword,
+      password: newPassword,
+    });
 
     await SecureStore.setItemAsync("vupth_access_token", data.tokens.access_token);
     await SecureStore.setItemAsync("vupth_refresh_token", data.tokens.refresh_token);

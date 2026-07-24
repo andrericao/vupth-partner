@@ -31,6 +31,7 @@ export default function SettingsAccountScreen() {
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -40,6 +41,7 @@ export default function SettingsAccountScreen() {
     setName(field === "name" ? professional?.name ?? "" : "");
     setNickname(field === "nickname" ? professional?.nickname ?? "" : "");
     setEmail("");
+    setCurrentPassword("");
     setPassword("");
     setConfirmPassword("");
     setEditing(field);
@@ -112,6 +114,10 @@ export default function SettingsAccountScreen() {
   };
 
   const handleSavePassword = async () => {
+    if (!currentPassword) {
+      setFieldError("Informe sua senha atual.");
+      return;
+    }
     const check = validatePassword(password);
     if (!check.valid) {
       setFieldError(check.errors.join("\n"));
@@ -124,7 +130,7 @@ export default function SettingsAccountScreen() {
     setFieldError(null);
     setIsSaving(true);
     try {
-      await updatePassword(password);
+      await updatePassword(currentPassword, password);
       setEditing(null);
       Alert.alert("Senha alterada", "Sua senha foi alterada com sucesso.");
     } catch (error: any) {
@@ -263,6 +269,13 @@ export default function SettingsAccountScreen() {
             </Text>
             {editing === "password" ? (
               <FormControl mt="$2">
+                <InputPassword
+                  textLabel="Senha atual"
+                  placeholder="Senha atual"
+                  messageError=""
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                />
                 <InputPassword
                   textLabel="Nova senha"
                   placeholder="Nova senha"

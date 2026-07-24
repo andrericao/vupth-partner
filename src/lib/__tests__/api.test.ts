@@ -22,6 +22,11 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/ja esta vinculado/);
   });
 
+  it("CURRENT_PASSWORD_INVALID => mensagem de senha atual incorreta", () => {
+    const err = { response: { data: { code: "CURRENT_PASSWORD_INVALID" } } };
+    expect(getApiErrorMessage(err, "fallback")).toMatch(/senha atual/i);
+  });
+
   it("codigo desconhecido, com fieldErrors => lista campo: msg (uma por linha)", () => {
     const err = {
       response: { data: { code: "SOMETHING_ELSE", fieldErrors: { email: "invalido", senha: "curta" } } },
@@ -98,6 +103,22 @@ describe("api — interceptor de refresh (401)", () => {
     await expect(api.get("/protected")).rejects.toBeTruthy();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_access_token");
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_refresh_token");
+  });
+
+  it("401 CURRENT_PASSWORD_INVALID => erro de campo, NAO renova nem desloga", async () => {
+    // Breaking do backend 2026-07-23: trocar senha exige current_password;
+    // senha atual errada volta 401 CURRENT_PASSWORD_INVALID. E erro de negocio,
+    // nao de sessao — o interceptor NAO pode disparar refresh/logout.
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_refresh_token" ? "refresh-1" : "access-1"
+    );
+    apiMock.onPatch("/profile/update-password/me").reply(401, { code: "CURRENT_PASSWORD_INVALID" });
+
+    await expect(api.patch("/profile/update-password/me", {})).rejects.toMatchObject({
+      response: { status: 401, data: { code: "CURRENT_PASSWORD_INVALID" } },
+    });
+    expect(rawMock.history.post.length).toBe(0);
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
   });
 
   it("erro != 401 apenas propaga (nao renova)", async () => {

@@ -58,6 +58,9 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   RESET_CODE_INVALID:
     "Codigo invalido. Confira o e-mail e o codigo digitado (apos 5 erros ou uso, peca um novo).",
   RESET_CODE_EXPIRED: "Codigo expirado (vale 15 minutos). Peca um novo codigo.",
+  // Trocar senha (breaking backend 2026-07-23): a senha ATUAL confere via
+  // PasswordEncoder.matches; errada volta 401 — erro de campo, nao de sessao.
+  CURRENT_PASSWORD_INVALID: "Senha atual incorreta.",
   VALIDATION_ERROR: "Verifique os dados informados e tente novamente.",
 };
 
@@ -96,7 +99,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // 401 de NEGOCIO, nao de sessao: senha atual incorreta na troca de senha
+    // (PATCH /profile/update-password/me). A tela trata como erro de campo —
+    // NAO pode disparar refresh/logout (senao o usuario cai fora ao errar a senha).
+    const errorCode = error.response?.data?.code;
+
+    if (
+      error.response?.status === 401 &&
+      errorCode !== "CURRENT_PASSWORD_INVALID" &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
