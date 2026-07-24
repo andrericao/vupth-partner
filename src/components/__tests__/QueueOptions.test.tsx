@@ -95,10 +95,32 @@ describe("QueueOptions", () => {
       expect(view.getByText(/Voce esta: Intervalo · toque para trocar/)).toBeTruthy();
     });
 
-    it("'Fechar fila' segue comingSoon (fatia 3 do backend)", () => {
+    it("sem a prop closeQueue, 'Fechar fila' cai no comingSoon (fallback)", () => {
       const view = renderWithProvider(<QueueOptions />);
       fireEvent.press(view.getByLabelText("Fechar fila"));
       expect(comingSoon).toHaveBeenCalledWith("Fechar fila");
+    });
+  });
+
+  describe("fechar / reabrir fila (S1 fatia 3)", () => {
+    it("aceitando novos: mostra 'Fechar fila' e dispara onToggle (sem comingSoon)", () => {
+      const onToggle = jest.fn();
+      const view = renderWithProvider(
+        <QueueOptions closeQueue={{ acceptingNew: true, onToggle }} />
+      );
+      fireEvent.press(view.getByLabelText("Fechar fila"));
+      expect(onToggle).toHaveBeenCalled();
+      expect(comingSoon).not.toHaveBeenCalled();
+    });
+
+    it("fila fechada (drenando): vira 'Reabrir fila' e dispara onToggle", () => {
+      const onToggle = jest.fn();
+      const view = renderWithProvider(
+        <QueueOptions closeQueue={{ acceptingNew: false, onToggle }} />
+      );
+      expect(view.queryByLabelText("Fechar fila")).toBeNull();
+      fireEvent.press(view.getByLabelText("Reabrir fila"));
+      expect(onToggle).toHaveBeenCalled();
     });
   });
 

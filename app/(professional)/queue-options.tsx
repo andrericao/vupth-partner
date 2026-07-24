@@ -22,6 +22,7 @@ import { cardShadow } from "@lib/styles";
 export default function QueueOptionsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
+  const setAcceptingNew = useProfessionalStore((s) => s.setAcceptingNew);
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
@@ -83,6 +84,37 @@ export default function QueueOptionsScreen() {
     onSelect: selectStatus,
   };
 
+  // ---- Fechar / reabrir fila (S1 fatia 3) ----
+  // accepting_new ausente => tratamos como aceitando (fila aberta).
+  const acceptingNew = professional?.accepting_new ?? true;
+  const runToggleQueue = async (value: boolean) => {
+    try {
+      await setAcceptingNew(value);
+      const fresh = await refetchQueue();
+      // Fechar a fila sendo o ultimo dispara auto-OFF => a loja fecha (derivado).
+      if (!value && fresh.data?.open_status !== "OPEN") {
+        Alert.alert("Loja fechada", "Voce era o ultimo — a fila e a loja foram fechadas para os clientes.");
+      }
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel atualizar a fila."));
+    }
+  };
+  const toggleQueue = () => {
+    if (acceptingNew) {
+      Alert.alert(
+        "Fechar fila",
+        "Ninguem novo entra na sua fila. Quem ja esta continua sendo atendido; ao terminar o ultimo voce fica indisponivel (e a loja fecha se voce for o ultimo). Continuar?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Fechar fila", style: "destructive", onPress: () => runToggleQueue(false) },
+        ]
+      );
+    } else {
+      // Reabrir e imediato, sem confirmar (acao inofensiva).
+      runToggleQueue(true);
+    }
+  };
+
   // ---- Refeicoes (sinal + rotulo) ----
   const meals = intervals.filter((i) => i.type === "RECURRENT");
   const currentMealSignal = mealSignal(meals, new Date().getHours() * 60 + new Date().getMinutes());
@@ -128,6 +160,7 @@ export default function QueueOptionsScreen() {
           mealLabel={mealLabel}
           hasQueue={hasQueue}
           status={statusControl}
+          closeQueue={{ acceptingNew, onToggle: toggleQueue }}
           pendingRequests={pendingCutRequests.length}
           onOpenRequests={() => {
             setCutNowMs(Date.now());

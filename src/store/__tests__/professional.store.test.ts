@@ -20,6 +20,7 @@ const REGISTER_RESPONSE = {
   establishment_name: null,
   is_available: true,
   work_status: null,
+  accepting_new: null,
   message: "Professional created! Your ID is permanent.",
 };
 
@@ -32,6 +33,7 @@ const AFFILIATE_RESPONSE = {
   establishment_name: "Barbearia do Andre",
   is_available: true,
   work_status: null,
+  accepting_new: null,
   message: "Affiliated successfully.",
 };
 
@@ -398,6 +400,35 @@ describe("professional.store", () => {
       await expect(
         useProfessionalStore.getState().updateMyStatus("WORKING")
       ).rejects.toThrow();
+    });
+  });
+
+  describe("setAcceptingNew (S1 fatia 3 — fechar/reabrir fila)", () => {
+    it("fechar fila: PATCH accepting-new {value:false} e re-le via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/accepting-new").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, accepting_new: false });
+
+      await useProfessionalStore.getState().setAcceptingNew(false);
+
+      expect(mock.history.patch[0].url).toBe("/professional/me/accepting-new");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ value: false });
+      expect(useProfessionalStore.getState().professional?.accepting_new).toBe(false);
+    });
+
+    it("reabrir fila: PATCH accepting-new {value:true}", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/accepting-new").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, accepting_new: true });
+
+      await useProfessionalStore.getState().setAcceptingNew(true);
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ value: true });
+      expect(useProfessionalStore.getState().professional?.accepting_new).toBe(true);
     });
   });
 

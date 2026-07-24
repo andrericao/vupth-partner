@@ -22,6 +22,12 @@ type Props = {
   mealLabel?: string;
   hasQueue?: boolean;
   status?: { current: StatusKey | null; onSelect: (next: StatusKey) => void };
+  /**
+   * S1 fatia 3 ("fechar fila", backend 2026-07-23). acceptingNew=false => a fila
+   * ja esta fechada (drenando), o item vira "Reabrir fila". Sem a prop, cai no
+   * comingSoon (defesa — nao deveria ocorrer com o backend no ar).
+   */
+  closeQueue?: { acceptingNew: boolean; onToggle: () => void };
   pendingRequests?: number;
   onOpenRequests?: () => void;
 };
@@ -129,6 +135,7 @@ export function QueueOptions({
   mealLabel,
   hasQueue = false,
   status,
+  closeQueue,
   pendingRequests = 0,
   onOpenRequests,
 }: Props) {
@@ -219,12 +226,21 @@ export function QueueOptions({
         </HStack>
       </VStack>
 
-      <Row
-        icon="🚦"
-        label="Fechar fila"
-        hint="termina quem ja esta; ninguem novo entra"
-        onPress={() => comingSoon("Fechar fila")}
-      />
+      {closeQueue && !closeQueue.acceptingNew ? (
+        <Row
+          icon="🔓"
+          label="Reabrir fila"
+          hint="fila fechada — quem esta segue; toque para voltar a aceitar novos"
+          onPress={closeQueue.onToggle}
+        />
+      ) : (
+        <Row
+          icon="🚦"
+          label="Fechar fila"
+          hint="termina quem ja esta; ninguem novo entra"
+          onPress={() => (closeQueue ? closeQueue.onToggle() : comingSoon("Fechar fila"))}
+        />
+      )}
 
       <Section title="Hoje" />
       {pendingRequests > 0 && (

@@ -19,6 +19,12 @@ type Professional = {
    * ON_BREAK (intervalo) ou OFF (indisponivel). Vem no DTO do /me (`work_status`).
    */
   work_status?: "WORKING" | "ON_BREAK" | "OFF" | null;
+  /**
+   * S1 fatia 3 (backend 2026-07-23): "fechar fila". false = fila fechada p/
+   * clientes novos (drenando — quem ja esta segue). Vem no DTO do /me
+   * (`accepting_new`). Ausente => tratamos como true (aceitando).
+   */
+  accepting_new?: boolean | null;
   message: string;
 };
 
@@ -56,6 +62,7 @@ type ProfessionalState = {
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
   updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
+  setAcceptingNew: (value: boolean) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
@@ -77,6 +84,7 @@ function normalizeProfessional(data: any): Professional {
     establishment_name: data.establishment_name ?? data.establishmentName ?? null,
     is_available: data.is_available ?? data.isAvailable ?? true,
     work_status: data.work_status ?? data.workStatus ?? null,
+    accepting_new: data.accepting_new ?? data.acceptingNew ?? null,
     message: data.message ?? "",
   };
 }
@@ -186,6 +194,14 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   // O fetchMe re-le o work_status do DTO do /me.
   updateMyStatus: async (status) => {
     await api.patch("/professional/me/status", { status });
+    await get().fetchMe();
+  },
+
+  // S1 fatia 3: "fechar fila" (value=false) / reabrir (value=true). Drena — quem
+  // ja esta segue; ao terminar o ultimo o backend poe OFF sozinho (e a loja
+  // fecha se for o ultimo). O fetchMe re-le accepting_new + work_status do /me.
+  setAcceptingNew: async (value) => {
+    await api.patch("/professional/me/accepting-new", { value });
     await get().fetchMe();
   },
 
