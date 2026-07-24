@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack, Heading, Text, ScrollView, Pressable } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { Alert, View } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useProfessionalStore } from "@store/professional.store";
@@ -19,13 +19,14 @@ type CardProps = {
   title: string;
   hint: string;
   badge?: number;
+  dot?: boolean;
   danger?: boolean;
   onPress: () => void;
 };
 
 // Escopo de MODULO (licao do segfault do tsc: componente definido dentro do
 // componente estoura a inferencia do gluestack e remonta a subarvore).
-function MenuCard({ title, hint, badge, danger, onPress }: CardProps) {
+function MenuCard({ title, hint, badge, dot, danger, onPress }: CardProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -39,9 +40,19 @@ function MenuCard({ title, hint, badge, danger, onPress }: CardProps) {
     >
       <HStack alignItems="center">
         <VStack flex={1}>
-          <Text fontFamily="$heading" fontWeight="$bold" color={danger ? "$red500" : "$coolGray900"}>
-            {title}
-          </Text>
+          <HStack alignItems="center" space="xs">
+            <Text fontFamily="$heading" fontWeight="$bold" color={danger ? "$red500" : "$coolGray900"}>
+              {title}
+            </Text>
+            {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendencia" mas nao
+                ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
+            {dot && (
+              <View
+                testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
+                style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#E63946" }}
+              />
+            )}
+          </HStack>
           <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
             {hint}
           </Text>
@@ -78,6 +89,17 @@ export default function ProfessionalSettingsScreen() {
   const { completion, routeFor } = useProfessionalCompletion();
 
   const isOwner = user?.roles?.includes("OWNER");
+
+  // Mapeia as pendencias do checklist para o CARD exato (feedback Andre
+  // 2026-07-24: a aba tinha dot, mas dentro nao dava pra saber O QUE faltava).
+  const pendingKeys = new Set(
+    [...completion.basic.items, ...completion.profile.items]
+      .filter((i) => !i.done)
+      .map((i) => i.key)
+  );
+  const dadosDot = pendingKeys.has("nickname") || pendingKeys.has("specialty");
+  const servicosDot = pendingKeys.has("service");
+  const vinculoDot = pendingKeys.has("affiliated");
 
   // Contagem de convites pendentes: o conteudo mora em settings-vinculo, mas o
   // badge aqui evita que um convite do owner fique enterrado um nivel abaixo.
@@ -142,11 +164,13 @@ export default function ProfessionalSettingsScreen() {
           <MenuCard
             title="Dados cadastrais"
             hint="nome, apelido, e-mail, senha"
+            dot={dadosDot}
             onPress={() => router.push("/(professional)/settings-account" as any)}
           />
           <MenuCard
             title="Meus servicos"
             hint="precos e duracao do que voce oferece"
+            dot={servicosDot}
             onPress={() => router.push("/(professional)/my-services" as any)}
           />
           <MenuCard
@@ -158,6 +182,7 @@ export default function ProfessionalSettingsScreen() {
             title="Vinculo"
             hint={professional?.establishment_name ?? "nao vinculado — buscar estabelecimento"}
             badge={pendingInvites}
+            dot={vinculoDot}
             onPress={() => router.push("/(professional)/settings-vinculo" as any)}
           />
           {isOwner && (

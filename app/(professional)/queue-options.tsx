@@ -8,7 +8,6 @@ import { Button } from "@components/Button";
 import { QueueOptions } from "@components/QueueOptions";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
-import { useEstablishmentStore } from "@store/establishment.store";
 import { useIntervalStore, mealName } from "@store/interval.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
 import { getApiErrorMessage } from "@lib/api";
@@ -23,7 +22,6 @@ import { cardShadow } from "@lib/styles";
 export default function QueueOptionsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
-  const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
@@ -47,29 +45,42 @@ export default function QueueOptionsScreen() {
     }
   };
 
-  // ---- Status (S1 fatia 1) ----
+  // ---- Status (S1) ----
   const WORK_TO_KEY = { WORKING: "trabalhando", ON_BREAK: "intervalo", OFF: "indisponivel" } as const;
   const KEY_TO_WORK = { trabalhando: "WORKING", intervalo: "ON_BREAK", indisponivel: "OFF" } as const;
   const myProfessional = data?.professionals?.find((p) => p.id === profId);
   const hasQueue = !!myProfessional?.current_attendance || (myProfessional?.waiting_list?.length ?? 0) > 0;
-  const statusControl = {
-    current: professional?.work_status ? WORK_TO_KEY[professional.work_status] : null,
-    onSelect: (next: keyof typeof KEY_TO_WORK) => handleAction(() => updateMyStatus(KEY_TO_WORK[next])),
+
+  // Decisao Andre 2026-07-24: o profissional NAO abre/fecha a loja na mao — ele
+  // so muda o proprio status. A loja e DERIVADA (backend S1 f2): ficar
+  // "Trabalhando" sendo o primeiro a abre; "Fora" sendo o ultimo a fecha. Aqui
+  // so AVISAMOS, comparando o open_status antes/depois (o resultado real do
+  // derivado, sem adivinhar quem e o ultimo).
+  const selectStatus = async (next: keyof typeof KEY_TO_WORK) => {
+    const wasOpen = data?.open_status === "OPEN";
+    try {
+      await updateMyStatus(KEY_TO_WORK[next]);
+      const fresh = await refetchQueue();
+      const nowOpen = fresh.data?.open_status === "OPEN";
+      if (!wasOpen && nowOpen && next === "trabalhando") {
+        Alert.alert(
+          "Loja aberta",
+          "Voce foi o primeiro a comecar — a loja agora aparece para os clientes e recebe a fila."
+        );
+      } else if (wasOpen && !nowOpen) {
+        Alert.alert(
+          "Loja fechada",
+          "Voce era o ultimo em atividade — a loja foi fechada para os clientes."
+        );
+      }
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel mudar o status."));
+    }
   };
 
-  // ---- Abrir estabelecimento (profissional NAO fecha — decisao 2026-07-23) ----
-  const isEstablishmentOpen = data?.open_status === "OPEN";
-  const isEstablishmentOpenNow = data?.is_open ?? isEstablishmentOpen;
-  const openEstablishment = () => {
-    if (!establishmentId || isEstablishmentOpen) return;
-    Alert.alert(
-      "Abrir estabelecimento",
-      "A loja passa a aparecer para os clientes e a receber novos na fila. Continuar?",
-      [
-        { text: "Cancelar" },
-        { text: "Abrir", onPress: () => handleAction(() => updateOpenStatus(establishmentId, "OPEN")) },
-      ]
-    );
+  const statusControl = {
+    current: professional?.work_status ? WORK_TO_KEY[professional.work_status] : null,
+    onSelect: selectStatus,
   };
 
   // ---- Refeicoes (sinal + rotulo) ----
@@ -117,11 +128,6 @@ export default function QueueOptionsScreen() {
           mealLabel={mealLabel}
           hasQueue={hasQueue}
           status={statusControl}
-          establishment={
-            establishmentId
-              ? { isOpen: isEstablishmentOpen, isOpenNow: isEstablishmentOpenNow, onOpen: openEstablishment }
-              : undefined
-          }
           pendingRequests={pendingCutRequests.length}
           onOpenRequests={() => {
             setCutNowMs(Date.now());

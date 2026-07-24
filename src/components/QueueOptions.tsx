@@ -8,8 +8,13 @@ import type { MealSignal } from "@lib/meals";
 // design/professional-nav-v2.html). Substitui o antigo menu-modal do banco:
 // agora e TELA CHEIA ("mais amigavel"), SEM duplicar o rodape (Fila/Meu dia/
 // Configuracoes vivem la; Sair/Area do dono vivem em Configuracoes).
-// So ACOES DO DIA: Status, Abrir estabelecimento, Fechar fila, Solicitacoes,
-// Refeicoes, Adicionar cliente.
+// So ACOES DO DIA: Status, Fechar fila, Solicitacoes, Refeicoes, Adicionar cliente.
+//
+// ⚠️ SEM "abrir/fechar estabelecimento" (decisao Andre 2026-07-24): o profissional
+// nao mexe na loja na mao — ele so muda o PROPRIO status. Ao ficar "Trabalhando"
+// sendo o primeiro, a loja abre sozinha (derivado, backend S1 f2); ao "Fechar
+// fila" sendo o ultimo, ela fecha. O aviso "voce e o primeiro/ultimo" vive na
+// tela (queue-options.tsx), que sabe o open_status.
 type StatusKey = "trabalhando" | "intervalo" | "indisponivel";
 
 type Props = {
@@ -17,12 +22,6 @@ type Props = {
   mealLabel?: string;
   hasQueue?: boolean;
   status?: { current: StatusKey | null; onSelect: (next: StatusKey) => void };
-  /**
-   * Decisao Andre 2026-07-23: profissional pode ABRIR a loja fechada, mas NAO
-   * fecha (mataria a fila dos colegas). Aberta no horario => nada aparece;
-   * aberta FORA do horario => so o aviso.
-   */
-  establishment?: { isOpen: boolean; isOpenNow: boolean; onOpen: () => void };
   pendingRequests?: number;
   onOpenRequests?: () => void;
 };
@@ -130,11 +129,11 @@ export function QueueOptions({
   mealLabel,
   hasQueue = false,
   status,
-  establishment,
   pendingRequests = 0,
   onOpenRequests,
 }: Props) {
   const currentStatus: StatusKey = status?.current ?? "trabalhando";
+  const currentLabel = STATUS.find((s) => s.key === currentStatus)?.label ?? "Trabalhando";
 
   const selectStatus = (next: StatusKey) => {
     // Prevencao de clique (S1): com fila, "Fora" nem chega a tentar — o 409 do
@@ -156,8 +155,39 @@ export function QueueOptions({
   return (
     <VStack>
       <Section title="Agora" />
-      <Row icon={STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"} label="Status">
-        <HStack space="xs">
+
+      {/* Status em bloco proprio, pills LARGAS embaixo (affordance — Andre
+          2026-07-24: "so melhora saber que da pra clicar ali e mudar o estado").
+          Nao ha mais botao de abrir/fechar loja: ficar "Trabalhando" abre sozinho
+          (derivado); a tela avisa "voce e o primeiro". */}
+      <VStack
+        bg="$white"
+        px="$4"
+        py="$3.5"
+        borderRadius="$2xl"
+        mb="$2"
+        style={{
+          shadowColor: "#1A281A",
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          elevation: 3,
+        }}
+      >
+        <HStack alignItems="center" space="md">
+          <Text fontSize="$md" w="$6" textAlign="center">
+            {STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"}
+          </Text>
+          <VStack flex={1}>
+            <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color="$coolGray900">
+              Status
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
+              Voce esta: {currentLabel} · toque para trocar
+            </Text>
+          </VStack>
+        </HStack>
+        <HStack space="sm" mt="$3">
           {STATUS.map((s) => {
             const active = s.key === currentStatus;
             const blocked = s.key === "indisponivel" && hasQueue;
@@ -167,16 +197,18 @@ export function QueueOptions({
                 onPress={() => selectStatus(s.key)}
                 accessibilityRole="button"
                 accessibilityLabel={s.label}
+                accessibilityState={{ selected: active, disabled: blocked }}
                 opacity={blocked ? 0.45 : 1}
+                flex={1}
                 bg={active ? s.activeBg : "$coolGray100"}
                 borderRadius="$full"
-                px="$2.5"
-                py="$1"
+                py="$2.5"
+                alignItems="center"
               >
                 <Text
                   fontFamily="$heading"
                   fontWeight="$bold"
-                  fontSize="$2xs"
+                  fontSize="$xs"
                   color={active ? "$white" : "$coolGray600"}
                 >
                   {s.label}
@@ -185,23 +217,7 @@ export function QueueOptions({
             );
           })}
         </HStack>
-      </Row>
-
-      {establishment && !establishment.isOpen && (
-        <Row
-          icon="🔒"
-          label="Abrir estabelecimento"
-          hint="a loja esta FECHADA agora"
-          onPress={establishment.onOpen}
-        />
-      )}
-      {establishment && establishment.isOpen && !establishment.isOpenNow && (
-        <Row
-          icon="🌙"
-          label="Fora do horario"
-          hint="clientes nao entram — confira o horario de funcionamento"
-        />
-      )}
+      </VStack>
 
       <Row
         icon="🚦"

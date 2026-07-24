@@ -87,6 +87,14 @@ describe("QueueOptions", () => {
       expect(comingSoon).toHaveBeenCalled();
     });
 
+    // Affordance (Andre 2026-07-24): a linha diz o estado atual e convida ao toque.
+    it("mostra o estado atual + convite 'toque para trocar'", () => {
+      const view = renderWithProvider(
+        <QueueOptions status={{ current: "intervalo", onSelect: jest.fn() }} />
+      );
+      expect(view.getByText(/Voce esta: Intervalo · toque para trocar/)).toBeTruthy();
+    });
+
     it("'Fechar fila' segue comingSoon (fatia 3 do backend)", () => {
       const view = renderWithProvider(<QueueOptions />);
       fireEvent.press(view.getByLabelText("Fechar fila"));
@@ -141,38 +149,16 @@ describe("QueueOptions", () => {
     });
   });
 
-  describe("estabelecimento (decisao 2026-07-23: so ABRIR)", () => {
-    it("sem afiliacao, nada aparece", () => {
-      const view = renderWithProvider(<QueueOptions />);
-      expect(view.queryByLabelText("Abrir estabelecimento")).toBeNull();
-      expect(view.queryByLabelText("Fora do horario")).toBeNull();
-    });
-
-    it("fechada: 'Abrir estabelecimento' dispara", () => {
-      const onOpen = jest.fn();
+  // Decisao Andre 2026-07-24: o profissional NAO abre/fecha a loja na mao — o
+  // botao saiu. A loja e derivada do status (Trabalhando abre; Fora fecha); o
+  // aviso "voce e o primeiro/ultimo" mora na tela, nao neste componente.
+  describe("estabelecimento (removido — so status)", () => {
+    it("nao ha mais botao de abrir/fechar estabelecimento", () => {
       const view = renderWithProvider(
-        <QueueOptions establishment={{ isOpen: false, isOpenNow: false, onOpen }} />
-      );
-      fireEvent.press(view.getByLabelText("Abrir estabelecimento"));
-      expect(onOpen).toHaveBeenCalled();
-    });
-
-    it("aberta DENTRO do horario: nenhuma linha de estabelecimento", () => {
-      const view = renderWithProvider(
-        <QueueOptions establishment={{ isOpen: true, isOpenNow: true, onOpen: jest.fn() }} />
+        <QueueOptions status={{ current: "indisponivel", onSelect: jest.fn() }} />
       );
       expect(view.queryByLabelText("Abrir estabelecimento")).toBeNull();
       expect(view.queryByLabelText("Fora do horario")).toBeNull();
-    });
-
-    it("aberta FORA do horario: so o aviso, sem acao", () => {
-      const onOpen = jest.fn();
-      const view = renderWithProvider(
-        <QueueOptions establishment={{ isOpen: true, isOpenNow: false, onOpen }} />
-      );
-      expect(view.getByText(/clientes nao entram/)).toBeTruthy();
-      fireEvent.press(view.getByLabelText("Fora do horario"));
-      expect(onOpen).not.toHaveBeenCalled();
     });
   });
 });
