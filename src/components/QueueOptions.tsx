@@ -6,7 +6,7 @@ import type { MealSignal } from "@lib/meals";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
 // design/professional-nav-v2.html). Substitui o antigo menu-modal do banco:
-// agora e TELA CHEIA ("mais amigavel"), SEM duplicar o rodape (Fila/Meu dia/
+// agora e TELA CHEIA ("mais amigavel"), SEM duplicar o rodape (Fila/Relatorios/
 // Configuracoes vivem la; Sair/Area do dono vivem em Configuracoes).
 // So ACOES DO DIA: Status, Fechar fila, Solicitacoes, Refeicoes, Adicionar cliente.
 //
@@ -230,7 +230,7 @@ export function QueueOptions({
         <Row
           icon="🔓"
           label="Reabrir fila"
-          hint="fila fechada — quem esta segue; toque para voltar a aceitar novos"
+          hint="fila fechada para proximos clientes"
           onPress={closeQueue.onToggle}
         />
       ) : (
@@ -260,7 +260,7 @@ export function QueueOptions({
         label={mealLabel ?? "Refeicoes"}
         hint={mealHint}
         dot={mealDot}
-        onPress={() => router.push("/(professional)/meals" as any)}
+        onPress={() => router.push("/(professional)/meals?from=queue-options" as any)}
       />
       <Row
         icon="➕"

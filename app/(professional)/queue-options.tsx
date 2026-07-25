@@ -18,7 +18,7 @@ import { cardShadow } from "@lib/styles";
 
 // Tela "OPCOES DA FILA" (nav v2, 2026-07-23): o banco no header da Fila NAVEGA
 // para ca (nada de modal — "mais amigavel a tela inteira"). So acoes do dia; o
-// rodape (Fila/Meu dia/Configuracoes) segue visivel na aba Fila.
+// rodape (Fila/Relatorios/Configuracoes) segue visivel na aba Fila.
 export default function QueueOptionsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);

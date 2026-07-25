@@ -171,12 +171,12 @@ export default function ProfessionalSettingsScreen() {
             title="Meus servicos"
             hint="precos e duracao do que voce oferece"
             dot={servicosDot}
-            onPress={() => router.push("/(professional)/my-services" as any)}
+            onPress={() => router.push("/(professional)/my-services?from=settings" as any)}
           />
           <MenuCard
             title="Refeicoes"
             hint="horarios + aviso na hora (ligar/desligar)"
-            onPress={() => router.push("/(professional)/meals" as any)}
+            onPress={() => router.push("/(professional)/meals?from=settings" as any)}
           />
           <MenuCard
             title="Vinculo"

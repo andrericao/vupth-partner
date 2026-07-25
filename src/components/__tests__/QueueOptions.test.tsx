@@ -14,7 +14,7 @@ describe("QueueOptions", () => {
 
   describe("navegacao (so o que NAO esta no rodape)", () => {
     it.each([
-      ["Refeicoes", "/(professional)/meals"],
+      ["Refeicoes", "/(professional)/meals?from=queue-options"],
       ["Adicionar cliente", "/(professional)/add-guest"],
     ])("'%s' navega para %s", (label, route) => {
       const view = renderWithProvider(<QueueOptions />);
@@ -22,9 +22,9 @@ describe("QueueOptions", () => {
       expect(router.push).toHaveBeenCalledWith(route);
     });
 
-    it("NAO ha itens duplicados do rodape (Meu dia/Configuracoes) nem Sair", () => {
+    it("NAO ha itens duplicados do rodape (Relatorios/Configuracoes) nem Sair", () => {
       const view = renderWithProvider(<QueueOptions />);
-      expect(view.queryByLabelText("Meu dia")).toBeNull();
+      expect(view.queryByLabelText("Relatorios")).toBeNull();
       expect(view.queryByLabelText("Configuracoes")).toBeNull();
       expect(view.queryByLabelText("Sair")).toBeNull();
       expect(view.queryByLabelText("Area do dono")).toBeNull();

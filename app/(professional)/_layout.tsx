@@ -6,7 +6,7 @@ import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { hasAnyPending } from "@lib/completion";
 
 // Nav v2 (Andre 2026-07-23, mockup design/professional-nav-v2.html):
-// RODAPE = LUGARES — Fila · Meu dia · Configuracoes. As ACOES do dia vivem na
+// RODAPE = LUGARES — Fila · Relatorios · Configuracoes. As ACOES do dia vivem na
 // tela "Opcoes da fila" (banco no header da Fila), SEM duplicar o rodape.
 // A aba Configuracoes ganha DOT quando ha pendencia de cadastro.
 const HIDDEN = { href: null } as const;
@@ -47,7 +47,7 @@ export default function ProfessionalLayout() {
       <Tabs.Screen
         name="my-day"
         options={{
-          title: "Meu dia",
+          title: "Relatorios",
           tabBarIcon: ({ focused }) => <TabBarIcon name="stats-chart" focused={focused} />,
         }}
       />

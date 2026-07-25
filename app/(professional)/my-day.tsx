@@ -179,7 +179,7 @@ export default function MyDayScreen() {
         <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Meu dia
+          Relatorios
         </Heading>
 
         <HStack mt="$6" space="sm">

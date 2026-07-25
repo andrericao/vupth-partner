@@ -10,7 +10,7 @@ import {
   Divider,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
@@ -74,6 +74,12 @@ const ABSORPTION_LABELS: Record<number, string> = {
 };
 
 export default function MyServicesScreen() {
+  // Voltar retorna a ORIGEM real (Configuracoes, Fila ou card de pendencia).
+  // Sem isto o botao caia sempre na Fila (feedback Andre 2026-07-24).
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const backTarget =
+    from === "queue" ? "/(professional)/queue" : "/(professional)/settings";
+
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
@@ -254,7 +260,7 @@ export default function MyServicesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
+        <Header showBackButton onBack={() => router.navigate(backTarget as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Meus Servicos

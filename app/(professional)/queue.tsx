@@ -728,7 +728,7 @@ export default function ProfessionalQueueScreen() {
             </Text>
             <Button
               title="Adicionar Servico"
-              onPress={() => router.push("/(professional)/my-services" as any)}
+              onPress={() => router.push("/(professional)/my-services?from=queue" as any)}
               bg="$green500"
               $active-bg="$green600"
               mt="$2"

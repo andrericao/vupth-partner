@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
 import { cardShadow } from "@lib/styles";
 import { Input } from "@components/Input";
@@ -48,6 +48,17 @@ export default function MealsScreen() {
       setMealNudgeOff(!next); // nao mentir na UI se a gravacao falhar
     }
   };
+
+  // Voltar retorna a ORIGEM real (Configuracoes ou Opcoes da fila). Sem isto o
+  // botao caia sempre na Fila (feedback Andre 2026-07-24). Tabs href:null nao
+  // dao router.back() confiavel, entao o chamador informa `from`.
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const backTarget =
+    from === "queue-options"
+      ? "/(professional)/queue-options"
+      : from === "queue"
+        ? "/(professional)/queue"
+        : "/(professional)/settings";
 
   const professional = useProfessionalStore((s) => s.professional);
   const profId = professional?.id ?? "";
@@ -189,7 +200,7 @@ export default function MealsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
+          <Header showBackButton onBack={() => router.navigate(backTarget as any)} />
 
           <Heading mt="$8" size="2xl" fontFamily="$heading">
             Refeicoes
