@@ -49,19 +49,59 @@ describe("isValidTime", () => {
   });
 });
 
+// QA 2026-07-24 (bug do fuso, 2a metade): o `toApiTime` ja manda o offset REAL
+// do aparelho, mas o backend NORMALIZA o OffsetTime para UTC e devolve "15:00Z"
+// p/ um almoco de 12:00 local — a UI mostrava 15:00 (+3h). O parseApiTime tem
+// de CONVERTER o OffsetTime de volta ao relogio de parede local (inverso do
+// toApiTime), robusto a qualquer offset que o backend ecoe.
 describe("parseApiTime", () => {
-  it("parses HH:mmZ (seconds omitted)", () => {
-    expect(parseApiTime("09:00Z")).toBe("09:00");
-    expect(parseApiTime("11:30Z")).toBe("11:30");
+  const withOffset = (min: number, fn: () => void) => {
+    const spy = jest.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(min);
+    try {
+      fn();
+    } finally {
+      spy.mockRestore();
+    }
+  };
+
+  it("aparelho em UTC: hora Z fica igual", () => {
+    withOffset(0, () => {
+      expect(parseApiTime("09:00Z")).toBe("09:00");
+      expect(parseApiTime("11:30Z")).toBe("11:30");
+      expect(parseApiTime("18:05:00Z")).toBe("18:05");
+    });
   });
 
-  it("parses HH:mm:ssZ (seconds present)", () => {
-    expect(parseApiTime("09:00:00Z")).toBe("09:00");
-    expect(parseApiTime("18:05:00Z")).toBe("18:05");
+  it("Brasil (UTC-3): converte o UTC normalizado do backend p/ o relogio local", () => {
+    withOffset(180, () => {
+      // backend guarda 12:00 local como 15:00Z; a UI deve mostrar 12:00.
+      expect(parseApiTime("15:00:00Z")).toBe("12:00");
+      expect(parseApiTime("15:00Z")).toBe("12:00");
+      expect(parseApiTime("21:30Z")).toBe("18:30");
+    });
   });
 
-  it("parses offsets other than Z", () => {
-    expect(parseApiTime("09:00-03:00")).toBe("09:00");
+  it("round-trip com toApiTime preserva o relogio de parede", () => {
+    withOffset(180, () => {
+      expect(parseApiTime(toApiTime("12:00")!)).toBe("12:00");
+      expect(parseApiTime(toApiTime("18:30")!)).toBe("18:30");
+      // tanto faz o offset ecoado: "-03:00" original OU "Z" normalizado.
+      expect(parseApiTime("18:30:00-03:00")).toBe("18:30");
+    });
+  });
+
+  it("lida com a virada de dia (modulo 24h)", () => {
+    withOffset(180, () => {
+      // 01:00Z = 22:00 local do dia anterior.
+      expect(parseApiTime("01:00Z")).toBe("22:00");
+    });
+  });
+
+  it("sem offset explicito, trata como relogio local (sem shift)", () => {
+    withOffset(180, () => {
+      expect(parseApiTime("12:00")).toBe("12:00");
+      expect(parseApiTime("12:00:00")).toBe("12:00");
+    });
   });
 
   it("returns null for null/empty/garbage", () => {
