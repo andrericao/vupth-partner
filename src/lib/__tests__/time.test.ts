@@ -104,10 +104,19 @@ describe("parseApiTime", () => {
     });
   });
 
-  it("returns null for null/empty/garbage", () => {
+  it("aplica offset com sinal '+' (leste de Greenwich)", () => {
+    withOffset(0, () => {
+      // 12:00 num fuso +02:00 = 10:00 UTC; aparelho em UTC mostra 10:00.
+      expect(parseApiTime("12:00+02:00")).toBe("10:00");
+    });
+  });
+
+  it("returns null for null/empty/garbage e HH:MM fora de faixa", () => {
     expect(parseApiTime(null)).toBeNull();
     expect(parseApiTime("")).toBeNull();
     expect(parseApiTime("nope")).toBeNull();
+    expect(parseApiTime("24:00Z")).toBeNull();
+    expect(parseApiTime("12:60Z")).toBeNull();
   });
 });
 

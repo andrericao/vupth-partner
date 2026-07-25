@@ -21,12 +21,14 @@ export function isValidTime(value: string): boolean {
   return h >= 0 && h <= 23 && min >= 0 && min <= 59;
 }
 
-/** Offset OffsetTime ("Z" | "±HH:MM" | "±HHMM") -> minutos com sinal. */
+/**
+ * Offset OffsetTime -> minutos com sinal. Recebe so o que o regex de
+ * `parseApiTime` ja validou: "Z" ou "±HH:MM"/"±HHMM".
+ */
 function offsetToMinutes(off: string): number {
   if (off === "Z") return 0;
-  const m = /^([+-])(\d{2}):?(\d{2})$/.exec(off);
-  if (!m) return 0;
-  return (m[1] === "-" ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3]));
+  const sign = off[0] === "-" ? -1 : 1;
+  return sign * (Number(off.slice(1, 3)) * 60 + Number(off.slice(-2)));
 }
 
 /**

@@ -9,6 +9,15 @@ import {
 const at = (hhmm: string) => hhmmToMinutes(hhmm);
 const meal = (fixedStartTime: string | null, status = "SCHEDULED") => ({ status, fixedStartTime });
 
+// mealSignal le fixedStartTime via parseApiTime, que converte o OffsetTime p/ o
+// RELOGIO LOCAL do aparelho. Fixamos o offset em UTC p/ que "12:00Z" == 12:00
+// local, deixando as assercoes independentes do fuso de quem roda o CI/pre-push.
+let tzSpy: jest.SpyInstance;
+beforeAll(() => {
+  tzSpy = jest.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(0);
+});
+afterAll(() => tzSpy.mockRestore());
+
 describe("hhmmToMinutes", () => {
   it("converte HH:MM em minutos", () => {
     expect(hhmmToMinutes("00:00")).toBe(0);
