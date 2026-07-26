@@ -633,6 +633,7 @@ Sessao de design (mockups em `design/`, abrir com `file:///`; handoffs atualizad
 2. **Modal ⓘ "fechar fila"** — icone de info ao lado de "Fechar fila" abre modal explicando que o efeito e **so para o cliente** ("impede novos de entrar; quem ja esta continua; voce segue trabalhando"). Mockup no mesmo arquivo do card enxuto.
 
 **Backend-first (registrado nos handoffs):**
+> 📋 **A lista CONSOLIDADA e PRIORIZADA do que falta do backend (2026-07-25) vive no [`HANDOFF_BACKEND.md`](./HANDOFF_BACKEND.md) — bloco "ESTADO ATUAL — O QUE FALTA DO BACKEND"** (fonte unica; nao duplicar aqui). Resumo da ordem: **BUG1** auto-fechamento (= S1 fatia 5) · **S7** SMTP/Brevo (validar envio) · **BUG2** fuso (front OK nas 2 pontas; backend confere normalizacao + dados antigos) · **S9/S10/S11/S12** (REMOVIDO≠CANCELADO, ETA −10min, `/swap-offers`, filtro de periodo) · **S3/S4** (refeicoes Modelo B, expediente) · **S8/S5** · **S2** (backend pronto; gargalo = UI do CLIENT). No **front-partner nao ha feature de codigo pendente no MVP**.
 3. **Fechamento seguro (auto-close 15min)** — BUG1 evoluido (ver item 6 da ordem de execucao acima + HANDOFF_BACKEND "Detalhe — BUG1").
 4. **Status REMOVIDO** (profissional retira da fila) distinto de CANCELADO (cliente desiste) — HANDOFF_BACKEND S10 (RECUSADO p/ negado fora do horario ainda a decidir). O card enxuto ja preve o rotulo no ⋮ ("Remover da fila").
 5. **ETA com buffer de −10min** (regra global; backend calcula, ambos os fronts so exibem) — HANDOFF_BACKEND S11.
