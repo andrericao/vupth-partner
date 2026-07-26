@@ -185,6 +185,13 @@ export default function ProfessionalSettingsScreen() {
             dot={vinculoDot}
             onPress={() => router.push("/(professional)/settings-vinculo" as any)}
           />
+          {/* TEMPORARIO — piloto da migracao Gluestack v2 (NativeWind). Remover
+              quando concluir a migracao (junto com nativewind-pilot.tsx). */}
+          <MenuCard
+            title="🧪 Piloto NativeWind"
+            hint="teste da migracao Gluestack v2 (temporario)"
+            onPress={() => router.push("/(professional)/nativewind-pilot" as any)}
+          />
           {isOwner && (
             <MenuCard
               title="Area do dono"

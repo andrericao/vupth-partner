@@ -84,6 +84,8 @@ export default function ProfessionalLayout() {
       <Tabs.Screen name="find-establishment" options={HIDDEN} />
       <Tabs.Screen name="establishment-detail" options={HIDDEN} />
       <Tabs.Screen name="meals" options={HIDDEN} />
+      {/* PILOTO Gluestack v2 (NativeWind) — rota temporaria, remover ao concluir */}
+      <Tabs.Screen name="nativewind-pilot" options={HIDDEN} />
     </Tabs>
   );
 }

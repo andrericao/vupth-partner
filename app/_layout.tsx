@@ -1,3 +1,4 @@
+import "../global.css"; // NativeWind (Gluestack v2): habilita as classes Tailwind
 import { useEffect } from "react";
 import { LogBox, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
