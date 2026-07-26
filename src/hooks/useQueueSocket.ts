@@ -5,6 +5,8 @@ import * as SecureStore from "expo-secure-store";
 import { WS_URL } from "@lib/api";
 import type { EstablishmentWithProfessionals, QueueNotification } from "@lib/types";
 import { isCutRequestEvent } from "@lib/cutRequests";
+import { isClosingPromptEvent } from "@lib/closing";
+import { useUiStore } from "@store/ui.store";
 
 /**
  * Assina o tempo real da fila de um establishment via STOMP.
@@ -70,6 +72,10 @@ export function useQueueSocket(establishmentId: string | null) {
               const notification = JSON.parse(message.body) as QueueNotification;
               if (isCutRequestEvent(notification.type)) {
                 queryClient.invalidateQueries({ queryKey: ["cut-requests"] });
+              } else if (isClosingPromptEvent(notification.type)) {
+                // Auto-fechamento (BUG1): abre o prompt "quer fechar?" com o
+                // countdown do graceUntil. O backend fecha sozinho no fim.
+                useUiStore.getState().showClosingPrompt(notification.graceUntil ?? null);
               }
             } catch (e) {
               if (__DEV__) console.log("[ws] erro ao processar notificacao pessoal", e);

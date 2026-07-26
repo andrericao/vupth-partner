@@ -31,6 +31,7 @@ import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { activeCutRequests } from "@lib/cutRequests";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { ClosingPrompt } from "@components/ClosingPrompt";
 import { BenchIcon } from "@components/BenchIcon";
 import * as SecureStore from "expo-secure-store";
 
@@ -537,6 +538,10 @@ export default function ProfessionalQueueScreen() {
 
   return (
     <VStack flex={1}>
+      {/* Auto-fechamento (BUG1): o prompt "quer fechar?" com countdown aparece
+          por cima da fila quando chega o WS CLOSING_PROMPT (Modal, so visivel se
+          houver graceUntil na ui.store). */}
+      <ClosingPrompt />
       {/* flex={1} e obrigatorio aqui: como ScrollView virou FILHO (antes era a
           raiz da tela), sem ele a lista cresceria com o conteudo e empurraria a
           barra fixa do rodape para fora da tela. */}

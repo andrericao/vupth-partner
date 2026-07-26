@@ -28,6 +28,9 @@ export type QueueNotification = {
   attendanceId?: string | null;
   establishmentId?: string | null;
   cutRequestId?: string | null;
+  // Auto-fechamento (BUG1 / S1 fatia 5): no evento CLOSING_PROMPT vem o fim da
+  // carencia de 15min (ISO) para o countdown server-authoritative do prompt.
+  graceUntil?: string | null;
   message?: string | null;
   timestamp?: string | null;
 };
