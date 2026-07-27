@@ -46,7 +46,8 @@ export default function NativeWindPilotScreen() {
         <NwButton title="Primary" variant="primary" onPress={() => {}} />
         <NwButton title="Secondary" variant="secondary" onPress={() => {}} />
         <NwButton title="Danger" variant="danger" onPress={() => {}} />
-        <NwButton title="Outline" variant="outline" onPress={() => {}} />
+        <NwButton title="Outline verde" variant="outlineBrand" onPress={() => {}} />
+        <NwButton title="Outline vermelho" variant="outlineDanger" onPress={() => {}} />
         <NwButton title="Carregando…" variant="primary" isLoading onPress={() => {}} />
 
         {/* Botao (Pressable) com estado de toque */}

@@ -4,7 +4,12 @@ import { Pressable, Text, ActivityIndicator, type PressableProps } from "react-n
 // props de token do gluestack. Mesmo visual do Button v1 (pilula + sombra +
 // Poppins), so que via `className`. Usada nas telas JA convertidas; o Button v1
 // (src/components/Button.tsx) segue para as telas ainda no v1.
-type Variant = "primary" | "secondary" | "danger" | "outline";
+type Variant =
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "outlineBrand"
+  | "outlineDanger";
 
 type Props = Omit<PressableProps, "children"> & {
   title: string;
@@ -29,14 +34,16 @@ const BOX: Record<Variant, string> = {
   primary: "bg-brand active:bg-[#1B4332]",
   secondary: "bg-gray-200 active:bg-gray-300",
   danger: "bg-danger-500 active:bg-danger-600",
-  outline: "bg-transparent border border-danger-500 active:bg-red-50",
+  outlineBrand: "bg-white border border-brand active:bg-gray-100",
+  outlineDanger: "bg-transparent border border-danger-500 active:bg-red-50",
 };
 
 const LABEL: Record<Variant, string> = {
   primary: "text-white",
   secondary: "text-gray-700",
   danger: "text-white",
-  outline: "text-danger-500",
+  outlineBrand: "text-brand",
+  outlineDanger: "text-danger-500",
 };
 
 export function NwButton({
@@ -52,7 +59,7 @@ export function NwButton({
       accessibilityRole="button"
       accessibilityLabel={title}
       disabled={isLoading || disabled}
-      style={variant === "outline" ? undefined : shadow}
+      style={variant.startsWith("outline") ? undefined : shadow}
       className={`${BASE} ${BOX[variant]} ${className ?? ""}`}
       {...rest}
     >
