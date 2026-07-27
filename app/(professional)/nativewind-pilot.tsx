@@ -1,5 +1,6 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
+import { NwButton } from "@components/nw/Button";
 
 // PILOTO Gluestack v1->v2 (migracao faseada). Esta tela NAO usa @gluestack-ui/
 // themed nem props $token — so React Native puro + `className` do NativeWind.
@@ -40,10 +41,18 @@ export default function NativeWindPilotScreen() {
           </View>
         </View>
 
+        {/* Primitiva nw/Button — as 4 variantes (padrao da migracao) */}
+        <Text className="text-sm font-bold text-gray-900 mt-2">Componente NwButton</Text>
+        <NwButton title="Primary" variant="primary" onPress={() => {}} />
+        <NwButton title="Secondary" variant="secondary" onPress={() => {}} />
+        <NwButton title="Danger" variant="danger" onPress={() => {}} />
+        <NwButton title="Outline" variant="outline" onPress={() => {}} />
+        <NwButton title="Carregando…" variant="primary" isLoading onPress={() => {}} />
+
         {/* Botao (Pressable) com estado de toque */}
         <Pressable
           accessibilityRole="button"
-          className="bg-brand active:bg-[#1B4332] rounded-full py-3 items-center"
+          className="bg-brand active:bg-[#1B4332] rounded-full py-3 items-center mt-2"
           onPress={() => router.navigate("/(professional)/settings" as any)}
         >
           <Text className="text-white font-bold">Voltar para Configuracoes</Text>

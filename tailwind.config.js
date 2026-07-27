@@ -10,6 +10,12 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      // Fontes ja carregadas via @expo-google-fonts (mesmas do v1): Poppins nos
+      // titulos/botoes, Inter no corpo. Habilita `font-heading` / `font-body`.
+      fontFamily: {
+        heading: ["Poppins_700Bold"],
+        body: ["Inter_400Regular"],
+      },
       // Cores-ancora da marca (mesmas do gluestack-ui.config v1) p/ o className
       // bater com o visual atual durante a migracao.
       colors: {
