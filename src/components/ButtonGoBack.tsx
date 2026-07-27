@@ -1,27 +1,17 @@
-import { ComponentProps } from "react";
-import {
-  Button as GlueStackButton,
-  ButtonGroup,
-  ButtonIcon,
-  ChevronLeftIcon,
-} from "@gluestack-ui/themed";
+import { Pressable, type PressableProps } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-type ButtonGoBackProps = ComponentProps<typeof GlueStackButton>;
-
-export function ButtonGoBack(props: ButtonGoBackProps) {
+// Botao "voltar" (chevron) — circulo verde. Migrado p/ NativeWind (v2);
+// mantem a API (onPress) usada pelo Header. RN puro + className.
+export function ButtonGoBack(props: PressableProps) {
   return (
-    <ButtonGroup flex={1}>
-      <GlueStackButton
-        alignItems="center"
-        justifyContent="center"
-        rounded={18}
-        w={39}
-        h={39}
-        bg="$green500"
-        {...props}
-      >
-        <ButtonIcon borderRadius={30} size="xl" as={ChevronLeftIcon} />
-      </GlueStackButton>
-    </ButtonGroup>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Voltar"
+      className="w-[39px] h-[39px] rounded-[18px] bg-brand items-center justify-center active:bg-[#1B4332]"
+      {...props}
+    >
+      <Ionicons name="chevron-back" size={22} color="#fff" />
+    </Pressable>
   );
 }

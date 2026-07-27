@@ -1,42 +1,22 @@
-import { ComponentProps } from "react";
+import { View, Text, TextInput, type TextInputProps } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import {
-  Input as GluestackInput,
-  InputField,
-  InputSlot,
-  InputIcon,
-  SearchIcon,
-  VStack,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@gluestack-ui/themed";
+// Campo de busca com lupa. Migrado p/ NativeWind (v2). API: textLabel + props
+// de TextInput. (Sem uso ativo hoje, mantido por compatibilidade.)
+type Props = TextInputProps & { textLabel: string };
 
-type InputSearchProps = ComponentProps<typeof InputField> & {
-  textLabel: string;
-}
-
-export function InputSearch(props: InputSearchProps) {
+export function InputSearch({ textLabel, ...rest }: Props) {
   return (
-    <VStack mb="$3" w="$full">
-      <FormControlLabel>
-        <FormControlLabelText>{props.textLabel}</FormControlLabelText>
-      </FormControlLabel>
-      <GluestackInput
-        h="$12"
-        w="$full"
-        mb="$3"
-        px="$3"
-        borderWidth="$1"
-        borderColor="$success500"
-        borderRadius="$md"
-        variant="outline"
-        $focus-borderWidth="$2"
-      >
-        <InputSlot>
-          <InputIcon size="md" as={SearchIcon} color="$emerald900" />
-        </InputSlot>
-        <InputField color="$success950" fontFamily="$body" {...props} />
-      </GluestackInput>
-    </VStack>
+    <View className="mb-3 w-full">
+      <Text className="font-body text-sm text-gray-600 mb-1">{textLabel}</Text>
+      <View className="flex-row items-center bg-white rounded-md px-3 h-12 border border-brand">
+        <Ionicons name="search" size={18} color="#065F46" />
+        <TextInput
+          className="flex-1 ml-2 font-body text-gray-900"
+          placeholderTextColor="#9CA3AF"
+          {...rest}
+        />
+      </View>
+    </View>
   );
 }

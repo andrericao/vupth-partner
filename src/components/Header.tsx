@@ -1,7 +1,6 @@
 import { useEffect } from "react";
-import { BackHandler } from "react-native";
+import { BackHandler, View, Text } from "react-native";
 import { router, useSegments } from "expo-router";
-import { HStack, Heading } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ButtonGoBack } from "@components/ButtonGoBack";
 import { RoleIcon } from "@components/RoleIcon";
@@ -58,18 +57,17 @@ export function Header({ showBackButton = false, onBack, showRoleIcon = true }: 
     // [new-design] Cabecalho clean: marca "VUPTH" a esquerda (verde escuro,
     // Poppins) e a figurinha do papel/tipo a direita. O titulo da tela
     // ("Minha fila" etc.) e renderizado por cada tela logo abaixo.
-    <HStack
-      alignItems="center"
-      justifyContent="space-between"
+    <View
+      className="flex-row items-center justify-between"
       style={{ paddingTop: insets.top }}
     >
-      <HStack alignItems="center" space="sm">
+      <View className="flex-row items-center gap-2">
         {showBackButton && <ButtonGoBack onPress={handleBack} />}
-        <Heading size="lg" fontFamily="$heading" color="$green700" letterSpacing="$lg">
+        <Text className="font-heading text-lg text-brand-600 tracking-widest">
           VUPTH
-        </Heading>
-      </HStack>
+        </Text>
+      </View>
       {showRoleIcon && role && <RoleIcon role={role} />}
-    </HStack>
+    </View>
   );
 }

@@ -1,9 +1,10 @@
-import { Center, Spinner } from "@gluestack-ui/themed";
+import { View, ActivityIndicator } from "react-native";
 
-export function Loading(){
-	return (
-		<Center flex={1}>
-			<Spinner size="large" color="$green500"/>
-		</ Center>
-	);
+// Spinner centralizado. Migrado p/ NativeWind (v2).
+export function Loading() {
+  return (
+    <View className="flex-1 items-center justify-center">
+      <ActivityIndicator size="large" color="#00B37E" />
+    </View>
+  );
 }
