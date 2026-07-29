@@ -23,14 +23,18 @@ module.exports = {
       // verdes diferentes no app.
       colors: {
         brand: {
-          DEFAULT: "#3b7a3f", // = $green500
+          // ⚠️ TEMPORARIO — MARCADOR DE OTA (ver mesmo aviso no
+          // config/gluestack-ui.config.ts). DEFAULT/500/600 em roxo p/
+          // identificar o bundle da branch chore/gluestack-update no aparelho.
+          // REVERTER antes do merge. Reais: #3b7a3f / #3b7a3f / #316635.
+          DEFAULT: "#7C3AED", // = $green500
           50: "#eef5ee",
           100: "#d9ead9",
           200: "#b5d5b6",
           300: "#8bbd8d",
           400: "#5c9c60",
-          500: "#3b7a3f",
-          600: "#316635",
+          500: "#7C3AED",
+          600: "#5B21B6",
           700: "#26522a",
           800: "#1c3d1f",
           900: "#142c17",
