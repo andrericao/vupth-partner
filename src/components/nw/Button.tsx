@@ -17,6 +17,12 @@ type Props = Omit<PressableProps, "children"> & {
   variant?: Variant;
   /** Classes extras (ex.: "mt-0 h-10") — sobrescrevem as do variant. */
   className?: string;
+  /**
+   * Classes do TEXTO — sobrescrevem a cor do variant. Para botao claro sobre
+   * fundo colorido (ex.: "Finalizar" no card verde da fila), onde nenhuma
+   * variante serve porque elas assumem fundo neutro.
+   */
+  textClassName?: string;
 };
 
 // Sombra via style RN (confiavel cross-platform, igual ao Button v1).
@@ -51,6 +57,7 @@ export function NwButton({
   isLoading,
   variant = "primary",
   className,
+  textClassName,
   disabled,
   ...rest
 }: Props) {
@@ -66,7 +73,9 @@ export function NwButton({
       {isLoading ? (
         <ActivityIndicator color={variant === "primary" || variant === "danger" ? "#fff" : "#374151"} />
       ) : (
-        <Text className={`font-heading text-base ${LABEL[variant]}`}>{title}</Text>
+        <Text className={`font-heading text-base ${textClassName ?? LABEL[variant]}`}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );

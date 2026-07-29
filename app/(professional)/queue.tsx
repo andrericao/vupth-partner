@@ -1,18 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
-  VStack,
-  HStack,
-  Heading,
+  View,
   Text,
-  Badge,
-  BadgeText,
   Pressable,
   ScrollView,
-} from "@gluestack-ui/themed";
-import { Alert, RefreshControl, BackHandler, Modal, View } from "react-native";
+  Alert,
+  RefreshControl,
+  BackHandler,
+  Modal,
+} from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -59,65 +58,54 @@ function ServingCard({
   );
 
   return (
-    <VStack
-      bg={isPaused ? "$amber500" : "$green500"}
-      p="$4"
-      borderRadius="$2xl"
+    <View
+      className={`p-4 rounded-2xl mt-4 ${isPaused ? "bg-amber-500" : "bg-brand"}`}
       style={cardShadow}
-      mt="$4"
     >
-      <HStack alignItems="center" space="xs">
-        <VStack w="$2" h="$2" borderRadius="$full" bg="$white" opacity={0.85} />
-        <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white" letterSpacing="$lg">
+      <View className="flex-row items-center gap-1">
+        <View className="w-2 h-2 rounded-full bg-white opacity-85" />
+        <Text className="font-heading text-[10px] text-white tracking-widest">
           {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
         </Text>
-      </HStack>
+      </View>
 
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$white" mt="$1">
+      <Text className="font-heading text-lg text-white mt-1">
         {attendance.clientName}
       </Text>
-      <Text fontFamily="$body" fontSize="$sm" color="$white" opacity={0.9}>
+      <Text className="font-body text-sm text-white opacity-90">
         {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
       </Text>
-      <Text fontFamily="$body" fontSize="$xs" color="$white" opacity={0.95} mt="$1.5">
+      <Text className="font-body text-xs text-white opacity-95 mt-1.5">
         ⏱ {formatted}
       </Text>
 
-      <HStack mt="$3" space="sm">
+      {/* Botoes claros sobre o card colorido: fora das variantes do NwButton
+          (que assumem fundo neutro), entao vao com className explicito. */}
+      <View className="flex-row gap-2 mt-3">
         {isPaused ? (
-          <Button
+          <NwButton
             title="Retomar"
             onPress={onResume}
-            bg="$white"
-            textColor="$amber700"
-            $active-bg="$coolGray100"
-            h="$10"
-            mt="$0"
-            flex={1}
+            variant="secondary"
+            className="flex-1 h-10 bg-white active:bg-gray-100"
+            textClassName="text-amber-700"
           />
         ) : (
-          <Button
+          <NwButton
             title="Pausar"
             onPress={onPause}
-            bg="$green600"
-            $active-bg="$green700"
-            h="$10"
-            mt="$0"
-            flex={1}
+            className="flex-1 h-10 bg-brand-600 active:bg-brand-700"
           />
         )}
-        <Button
+        <NwButton
           title="Finalizar"
           onPress={onFinish}
-          bg="$white"
-          textColor={isPaused ? "$amber700" : "$green700"}
-          $active-bg="$coolGray100"
-          h="$10"
-          mt="$0"
-          flex={1}
+          variant="secondary"
+          className="flex-1 h-10 bg-white active:bg-gray-100"
+          textClassName={isPaused ? "text-amber-700" : "text-brand-700"}
         />
-      </HStack>
-    </VStack>
+      </View>
+    </View>
   );
 }
 
@@ -147,65 +135,65 @@ function QueueRow({
       onPress={onMenu}
       accessibilityRole="button"
       accessibilityLabel={`Opcoes de ${attendance.clientName}`}
-      bg="$white"
-      p={isFirst ? "$4" : "$3"}
-      pl="$4"
-      borderRadius={isFirst ? "$2xl" : "$xl"}
-      borderWidth={isFirst ? "$1" : "$0"}
-      borderColor="$green200"
+      className={`bg-white pl-4 active:bg-gray-50 ${
+        isFirst ? "p-4 rounded-2xl border border-brand-200 mb-3" : "p-3 rounded-xl mb-2"
+      }`}
       style={cardShadow}
-      mb={isFirst ? "$3" : "$2"}
-      $active-bg="$coolGray50"
     >
-      <HStack alignItems="center" space="sm">
-        <VStack
-          w="$6"
-          h="$6"
-          bg={isFirst ? "$green500" : "$coolGray100"}
-          borderRadius="$full"
-          alignItems="center"
-          justifyContent="center"
+      <View className="flex-row items-center gap-2">
+        <View
+          className={`w-6 h-6 rounded-full items-center justify-center ${
+            isFirst ? "bg-brand" : "bg-gray-100"
+          }`}
         >
           <Text
-            fontFamily="$heading"
-            fontWeight="$bold"
-            fontSize="$xs"
-            color={isFirst ? "$white" : "$coolGray500"}
+            className={`font-heading text-xs ${isFirst ? "text-white" : "text-gray-500"}`}
           >
             {position}
           </Text>
-        </VStack>
+        </View>
 
-        <VStack flex={1}>
-          <HStack alignItems="center" space="sm">
+        <View className="flex-1">
+          <View className="flex-row items-center gap-2">
             <Text
-              fontFamily="$heading"
-              fontWeight="$bold"
-              fontSize={isFirst ? "$md" : "$sm"}
-              color="$coolGray900"
+              className={`font-heading text-gray-900 ${isFirst ? "text-base" : "text-sm"}`}
             >
               {attendance.clientName}
             </Text>
+            {/* Badge do gluestack (action warning/muted, solid): hexes do
+                config/theme/Badge.ts p/ manter o selo identico. */}
             {!isFirst && (
-              <Badge action={isLate ? "warning" : "muted"} variant="solid" borderRadius="$md" size="sm">
-                <BadgeText fontSize="$xs">{isLate ? "atrasado" : "aguardando"}</BadgeText>
-              </Badge>
+              <View
+                className={`rounded-md px-1.5 py-0.5 ${
+                  isLate ? "bg-[#FFF4EB]" : "bg-[#F6F6F7]"
+                }`}
+              >
+                <Text
+                  className={`text-xs ${isLate ? "text-[#ea580c]" : "text-[#525252]"}`}
+                >
+                  {isLate ? "atrasado" : "aguardando"}
+                </Text>
+              </View>
             )}
-          </HStack>
-          <Text fontFamily="$body" fontSize={isFirst ? "$sm" : "$xs"} color="$coolGray600">
+          </View>
+          <Text
+            className={`font-body text-gray-600 ${isFirst ? "text-sm" : "text-xs"}`}
+          >
             {services} · {price}
           </Text>
           {isFirst && (
-            <Text fontFamily="$body" fontSize="$xs" color={isLate ? "$amber600" : "$green600"} mt="$0.5">
+            <Text
+              className={`font-body text-xs mt-0.5 ${
+                isLate ? "text-amber-600" : "text-brand-600"
+              }`}
+            >
               {isLate ? "Atrasado" : "Proximo"}
             </Text>
           )}
-        </VStack>
+        </View>
 
-        <Text fontSize="$lg" color="$coolGray400" fontWeight="$bold">
-          ›
-        </Text>
-      </HStack>
+        <Text className="text-lg text-gray-400 font-bold">›</Text>
+      </View>
     </Pressable>
   );
 }
@@ -502,65 +490,50 @@ export default function ProfessionalQueueScreen() {
 
   if (!establishmentId) {
     return (
-      <VStack flex={1} py="$12" px="$6">
+      <View className="flex-1 py-12 px-6">
         <Header />
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Fila
-        </Heading>
-        <VStack
-          mt="$8"
-          bg="$amber50"
-          p="$5"
-          borderRadius="$lg"
-          borderWidth="$1"
-          borderColor="$amber200"
-          space="sm"
-        >
-          <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+        <Text className="font-heading text-2xl mt-8 text-gray-900">Fila</Text>
+        <View className="mt-8 bg-amber-50 p-5 rounded-lg border border-amber-200 gap-2">
+          <Text className="font-heading text-amber-700">
             Voce ainda nao tem fila
           </Text>
-          <Text fontFamily="$body" color="$amber700">
+          <Text className="font-body text-amber-700">
             Para receber clientes, voce precisa estar vinculado a um
             estabelecimento. Busque um estabelecimento e solicite a vinculacao —
             o dono confirma e voce passa a aparecer na fila.
           </Text>
-          <Button
+          <NwButton
             title="Buscar Estabelecimento"
             onPress={() => router.push("/(professional)/find-establishment" as any)}
-            bg="$green500"
-            $active-bg="$green600"
-            mt="$2"
+            className="mt-2"
           />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     );
   }
 
   return (
-    <VStack flex={1}>
+    <View className="flex-1">
       {/* Auto-fechamento (BUG1): o prompt "quer fechar?" com countdown aparece
           por cima da fila quando chega o WS CLOSING_PROMPT (Modal, so visivel se
           houver graceUntil na ui.store). */}
       <ClosingPrompt />
-      {/* flex={1} e obrigatorio aqui: como ScrollView virou FILHO (antes era a
+      {/* flex-1 e obrigatorio aqui: como ScrollView virou FILHO (antes era a
           raiz da tela), sem ele a lista cresceria com o conteudo e empurraria a
           barra fixa do rodape para fora da tela. */}
       <ScrollView
-        flex={1}
-        w="$full"
+        className="flex-1 w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-      <VStack flex={1} py="$12" px="$6">
+      <View className="flex-1 py-12 px-6">
         {/* Um icone por tela (QA 2026-07-22): aqui quem manda e o banco do menu. */}
         <Header showRoleIcon={false} />
 
         {/* Titulo + menu lado a lado (a tab bar saiu do rodape). */}
-        <HStack mt="$4" alignItems="center" justifyContent="space-between">
-          <Heading size="2xl" fontFamily="$heading">
-            Fila
-          </Heading>
+        <View className="flex-row mt-4 items-center justify-between">
+          <Text className="font-heading text-2xl text-gray-900">Fila</Text>
           {/* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
               modal — "mais amigavel a tela inteira"). Dot = refeicao na janela,
               pendencia de cadastro ou solicitacao de corte. */}
@@ -569,14 +542,8 @@ export default function ProfessionalQueueScreen() {
             accessibilityRole="button"
             accessibilityLabel="Opcoes da fila"
             hitSlop={8}
-            w="$10"
-            h="$10"
-            borderRadius="$xl"
-            bg="$white"
-            alignItems="center"
-            justifyContent="center"
+            className="w-10 h-10 rounded-xl bg-white items-center justify-center active:bg-brand-50"
             style={cardShadow}
-            $active-bg="$green50"
           >
             <BenchIcon />
             {(currentMealSignal != null || settingsDot || pendingCutRequests.length > 0) && (
@@ -596,10 +563,10 @@ export default function ProfessionalQueueScreen() {
               />
             )}
           </Pressable>
-        </HStack>
+        </View>
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
-          <Text fontFamily="$body" fontSize="$sm" color="$amber600" mt="$1">
+          <Text className="font-body text-sm text-amber-600 mt-1">
             ★ {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
           </Text>
         )}
@@ -628,31 +595,31 @@ export default function ProfessionalQueueScreen() {
         {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
             chips — liberam tela para a fila e para o botao fixo do rodape. */}
         {myProfessional && (
-          <HStack space="sm" mt="$4" alignItems="center">
-            <HStack bg="$green100" borderRadius="$full" px="$3" py="$1.5" alignItems="center" space="xs">
-              <Text fontSize="$xs">👥</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$green700">
+          <View className="flex-row gap-2 mt-4 items-center">
+            <View className="flex-row items-center gap-1 bg-brand-100 rounded-full px-3 py-1.5">
+              <Text className="text-xs">👥</Text>
+              <Text className="font-heading text-xs text-brand-700">
                 {myProfessional.queue_count} na fila
               </Text>
-            </HStack>
-            <HStack bg="$green100" borderRadius="$full" px="$3" py="$1.5" alignItems="center" space="xs">
-              <Text fontSize="$xs">⏱</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$green700">
+            </View>
+            <View className="flex-row items-center gap-1 bg-brand-100 rounded-full px-3 py-1.5">
+              <Text className="text-xs">⏱</Text>
+              <Text className="font-heading text-xs text-brand-700">
                 {myProfessional.estimated_wait_minutes} min
               </Text>
-            </HStack>
-          </HStack>
+            </View>
+          </View>
         )}
 
         {isLoading && !data && (
-          <VStack mt="$6">
+          <View className="mt-6">
             <SkeletonList count={3} />
-          </VStack>
+          </View>
         )}
 
         {waitingList.length > 0 && (
-          <VStack mt="$6">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+          <View className="mt-6">
+            <Text className="font-heading mb-2 text-gray-700">
               Lista de Espera ({waitingList.length})
             </Text>
             {waitingList.map((att, idx) => (
@@ -664,116 +631,87 @@ export default function ProfessionalQueueScreen() {
                 onMenu={() => setMenuTarget(att)}
               />
             ))}
-          </VStack>
+          </View>
         )}
 
         {/* Refeicoes sairam da tela (foram p/ o menu, design 2026-07-20). Fica
             so a faixa da refeicao EM ANDAMENTO, porque "Encerrar" precisa estar
             a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
         {activeMeal && (
-          <HStack
-            mt="$6"
-            bg="$amber100"
-            p="$3"
-            borderRadius="$2xl"
-            borderWidth="$1"
-            borderColor="$amber300"
-            alignItems="center"
-            space="sm"
-          >
-            <Text fontSize="$md">🍽️</Text>
-            <VStack flex={1}>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$amber700">
+          <View className="flex-row items-center gap-2 mt-6 bg-amber-100 p-3 rounded-2xl border border-amber-300">
+            <Text className="text-base">🍽️</Text>
+            <View className="flex-1">
+              <Text className="font-heading text-sm text-amber-700">
                 {mealName(activeMeal.description)} em andamento
               </Text>
-              <Text fontFamily="$body" fontSize="$xs" color="$amber600">
+              <Text className="font-body text-xs text-amber-600">
                 {activeMeal.durationMinutes}min previstos
               </Text>
-            </VStack>
-            <Button
+            </View>
+            <NwButton
               title="Encerrar"
               onPress={() => handleFinishMeal(activeMeal)}
-              bg="$amber500"
-              $active-bg="$amber600"
-              h="$9"
-              mt="$0"
+              className="h-9 px-4 bg-amber-500 active:bg-amber-600"
             />
-          </HStack>
+          </View>
         )}
 
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
-          <VStack flex={1} alignItems="center" justifyContent="center" mt="$6">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" fontSize="$lg">
+          <View className="flex-1 items-center justify-center mt-6">
+            <Text className="font-body text-lg text-gray-400 text-center">
               Nenhum cliente na fila
             </Text>
-            <Text fontFamily="$body" color="$coolGray300" textAlign="center" mt="$2">
+            <Text className="font-body text-gray-300 text-center mt-2">
               Novos clientes aparecerao automaticamente
             </Text>
-          </VStack>
+          </View>
         )}
 
         {/* Vinculado, mas o backend nao o lista na fila por nao ter servico:
             sem isto a tela ficava em branco. Damos a acao de adicionar servico. */}
         {!isLoading && data && !myProfessional && (
-          <VStack
-            mt="$8"
-            bg="$amber50"
-            p="$5"
-            borderRadius="$lg"
-            borderWidth="$1"
-            borderColor="$amber200"
-            space="sm"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
+          <View className="mt-8 bg-amber-50 p-5 rounded-lg border border-amber-200 gap-2">
+            <Text className="font-heading text-amber-700">
               Voce ainda nao aparece para os clientes
             </Text>
-            <Text fontFamily="$body" color="$amber700">
+            <Text className="font-body text-amber-700">
               Voce esta vinculado, mas precisa de pelo menos um servico cadastrado
               para entrar na fila e receber clientes.
             </Text>
-            <Button
+            <NwButton
               title="Adicionar Servico"
               onPress={() => router.push("/(professional)/my-services?from=queue" as any)}
-              bg="$green500"
-              $active-bg="$green600"
-              mt="$2"
+              className="mt-2"
             />
-          </VStack>
+          </View>
         )}
-      </VStack>
+      </View>
       </ScrollView>
 
       {/* Botao FIXO do rodape (design 2026-07-18): o unico "start", e sempre
           atende o 1o da fila. Com atendimento em andamento ele vira uma DICA —
           finalize antes de iniciar o proximo (nao atende dois ao mesmo tempo). */}
       {waitingList.length > 0 && (
-        <VStack
-          px="$6"
-          pt="$3"
+        <View
+          className="px-6 pt-3"
           style={{ paddingBottom: 12, backgroundColor: "#F7FAF8" }}
         >
           {currentAttendance ? (
-            <VStack
-              bg="$white"
-              borderRadius="$full"
-              py="$3.5"
-              alignItems="center"
+            <View
+              className="bg-white rounded-full py-3.5 items-center"
               style={cardShadow}
             >
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              <Text className="font-body text-sm text-gray-500">
                 Finalize para iniciar o proximo · {waitingList[0].clientName}
               </Text>
-            </VStack>
+            </View>
           ) : (
-            <Button
+            <NwButton
               title={`Iniciar proximo · ${waitingList[0].clientName}`}
               onPress={() => startClient(waitingList[0], false)}
-              bg="$green500"
-              $active-bg="$green600"
-              mt="$0"
             />
           )}
-        </VStack>
+        </View>
       )}
 
       {/* Menu do card (action sheet). Acoes por posicao — ver queueMenuActions. */}
@@ -783,48 +721,51 @@ export default function ProfessionalQueueScreen() {
         animationType="slide"
         onRequestClose={() => setMenuTarget(null)}
       >
-        <VStack flex={1} justifyContent="flex-end">
+        <View className="flex-1 justify-end">
           <Pressable
             style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
             onPress={() => setMenuTarget(null)}
             accessibilityLabel="Fechar menu"
           />
-          <VStack bg="$white" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" p="$4" pb="$8" space="xs">
+          <View className="bg-white rounded-t-2xl p-4 pb-8 gap-1">
             {menuTarget && (
               <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$1">
+                <Text className="font-heading text-gray-700 mb-1">
                   {menuTarget.clientName}
                 </Text>
                 {queueMenuActions(menuIsFirst).map((action) => (
                   <Pressable
                     key={action}
+                    accessibilityRole="button"
                     onPress={() => {
                       const t = menuTarget;
                       setMenuTarget(null);
                       if (t) runMenuAction(action, t);
                     }}
-                    py="$3"
+                    className="py-3"
                   >
                     <Text
-                      fontFamily="$body"
-                      fontSize="$md"
-                      color={action === "remover" ? "$red600" : "$coolGray900"}
+                      className={`font-body text-base ${
+                        action === "remover" ? "text-danger-600" : "text-gray-900"
+                      }`}
                     >
                       {QUEUE_ACTION_LABEL[action]}
                     </Text>
                   </Pressable>
                 ))}
-                <Pressable onPress={() => setMenuTarget(null)} py="$3">
-                  <Text fontFamily="$body" fontSize="$md" color="$coolGray500">
-                    Cancelar
-                  </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setMenuTarget(null)}
+                  className="py-3"
+                >
+                  <Text className="font-body text-base text-gray-500">Cancelar</Text>
                 </Pressable>
               </>
             )}
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       </Modal>
 
-    </VStack>
+    </View>
   );
 }
