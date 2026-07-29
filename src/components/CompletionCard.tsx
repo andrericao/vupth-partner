@@ -1,5 +1,4 @@
-import { VStack, HStack, Text, Pressable } from "@gluestack-ui/themed";
-import { View } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { cardShadow } from "@lib/styles";
 import type { Completion, CompletionTracker } from "@lib/completion";
@@ -45,7 +44,7 @@ function Row({
 }) {
   const navigable = !done && !!route;
   const content = (
-    <HStack alignItems="center" space="md" py="$2.5" px="$2">
+    <View className="flex-row items-center gap-3 py-2.5 px-2">
       <View
         style={{
           width: 22,
@@ -58,24 +57,26 @@ function Row({
           borderColor: "#E0E7E3",
         }}
       >
-        {done && <Text color="$white" fontSize="$xs" fontWeight="$bold">✓</Text>}
+        {done && <Text className="text-white text-xs font-bold">✓</Text>}
       </View>
       <Text
-        flex={1}
-        fontFamily="$body"
-        fontSize="$sm"
-        fontWeight={done ? "$normal" : "$bold"}
-        color={done ? "$coolGray400" : "$coolGray800"}
+        className={`flex-1 font-body text-sm ${
+          done ? "text-gray-400" : "font-bold text-gray-800"
+        }`}
       >
         {label}
       </Text>
-      {navigable && <Text color="$coolGray300" fontSize="$lg">›</Text>}
-    </HStack>
+      {navigable && <Text className="text-gray-300 text-lg">›</Text>}
+    </View>
   );
 
   if (navigable) {
     return (
-      <Pressable onPress={() => router.push(route as any)} $active-opacity={0.6}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(route as any)}
+        className="active:opacity-60"
+      >
         {content}
       </Pressable>
     );
@@ -91,14 +92,14 @@ function List({
   routeFor: (key: string) => string | undefined;
 }) {
   return (
-    <VStack mt="$2">
+    <View className="mt-2">
       {tracker.items.map((item, idx) => (
         <View key={item.key}>
           {idx > 0 && <View style={{ height: 1, backgroundColor: "#EEF2F0" }} />}
           <Row label={item.label} done={item.done} route={routeFor(item.key)} />
         </View>
       ))}
-    </VStack>
+    </View>
   );
 }
 
@@ -113,59 +114,48 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
     n === 1 ? "Falta 1 passo para aparecer aos clientes." : `Faltam ${n} passos para aparecer aos clientes.`;
 
   return (
-    <VStack bg="$white" borderRadius="$2xl" p="$4" style={cardShadow} mt="$4">
+    <View className="bg-white rounded-2xl p-4 mt-4" style={cardShadow}>
       {basic.percent === 100 ? (
-        <HStack
-          bg="$green600"
-          borderRadius="$xl"
-          px="$4"
-          py="$3.5"
-          alignItems="center"
-          space="md"
-        >
-          <Text fontSize="$xl">🎉</Text>
-          <VStack flex={1}>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$white" fontSize="$sm">
-              {doneBanner}
-            </Text>
-            <Text fontFamily="$body" color="$green50" fontSize="$xs">
+        <View className="flex-row items-center gap-3 bg-brand-600 rounded-xl px-4 py-3.5">
+          <Text className="text-xl">🎉</Text>
+          <View className="flex-1">
+            <Text className="font-heading text-sm text-white">{doneBanner}</Text>
+            <Text className="font-body text-xs text-brand-50">
               Pronto para atender — 100%
             </Text>
-          </VStack>
-        </HStack>
+          </View>
+        </View>
       ) : (
-        <VStack>
-          <HStack justifyContent="space-between" alignItems="baseline" mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray800">
+        <View>
+          <View className="flex-row justify-between items-baseline mb-2">
+            <Text className="font-heading text-base text-gray-800">
               Pronto para atender
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$green600">
+            <Text className="font-heading text-base text-brand-600">
               {basic.percent}%
             </Text>
-          </HStack>
+          </View>
           <Bar percent={basic.percent} />
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$2">
-            {hint}
-          </Text>
+          <Text className="font-body text-xs text-gray-500 mt-2">{hint}</Text>
           <List tracker={basic} routeFor={routeFor} />
-        </VStack>
+        </View>
       )}
 
       {profile.total > 0 && (
         <>
           <View style={{ height: 1, backgroundColor: "#EEF2F0", marginVertical: 14 }} />
-          <HStack justifyContent="space-between" alignItems="baseline" mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray700">
+          <View className="flex-row justify-between items-baseline mb-2">
+            <Text className="font-heading text-sm text-gray-700">
               Perfil completo
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$green600">
+            <Text className="font-heading text-sm text-brand-600">
               {profile.percent}%
             </Text>
-          </HStack>
+          </View>
           <Bar percent={profile.percent} muted />
           <List tracker={profile} routeFor={routeFor} />
         </>
       )}
-    </VStack>
+    </View>
   );
 }

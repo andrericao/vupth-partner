@@ -1,6 +1,5 @@
-import { View } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { VStack, HStack, Text, Pressable } from "@gluestack-ui/themed";
 import { comingSoon } from "@components/comingSoon";
 import type { MealSignal } from "@lib/meals";
 
@@ -34,25 +33,26 @@ type Props = {
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
 const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "$green500", emoji: "🟢" },
-  { key: "intervalo", label: "Intervalo", activeBg: "$amber500", emoji: "🟡" },
-  { key: "indisponivel", label: "Fora", activeBg: "$red500", emoji: "🔴" },
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-brand", emoji: "🟢" },
+  { key: "intervalo", label: "Intervalo", activeBg: "bg-amber-500", emoji: "🟡" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-danger-500", emoji: "🔴" },
 ];
+
+// Sombra dos cards via style RN (mesma do v1).
+const rowShadow = {
+  shadowColor: "#1A281A",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.1,
+  shadowRadius: 10,
+  elevation: 3,
+};
 
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
 // do componente, a inferencia do gluestack por instanciacao estourava a pilha,
 // alem do anti-padrao React de remontar a subarvore).
 function Section({ title }: { title: string }) {
   return (
-    <Text
-      fontFamily="$heading"
-      fontWeight="$bold"
-      fontSize="$2xs"
-      color="$coolGray400"
-      letterSpacing="$lg"
-      mt="$5"
-      mb="$2"
-    >
+    <Text className="font-heading text-[10px] text-gray-400 tracking-widest mt-5 mb-2">
       {title.toUpperCase()}
     </Text>
   );
@@ -74,50 +74,27 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      bg="$white"
-      px="$4"
-      py="$3.5"
-      borderRadius="$2xl"
-      mb="$2"
-      $active-bg="$coolGray50"
-      style={{
-        shadowColor: "#1A281A",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 3,
-      }}
+      className="bg-white px-4 py-3.5 rounded-2xl mb-2 active:bg-gray-50"
+      style={rowShadow}
     >
-      <HStack alignItems="center" space="md">
-        <Text fontSize="$md" w="$6" textAlign="center">
-          {icon}
-        </Text>
-        <VStack flex={1}>
-          <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color="$coolGray900">
+      <View className="flex-row items-center gap-3">
+        <Text className="text-base w-6 text-center">{icon}</Text>
+        <View className="flex-1">
+          <Text className="font-body text-base font-medium text-gray-900">
             {label}
           </Text>
           {hint && (
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
-              {hint}
-            </Text>
+            <Text className="font-body text-xs text-gray-500 mt-0.5">{hint}</Text>
           )}
-        </VStack>
+        </View>
         {children}
         {badge != null && badge > 0 && (
-          <VStack
+          <View
             testID="menu-badge-requests"
-            bg="$red600"
-            borderRadius="$full"
-            px="$2"
-            minWidth="$5"
-            h="$5"
-            alignItems="center"
-            justifyContent="center"
+            className="bg-danger-600 rounded-full px-2 min-w-5 h-5 items-center justify-center"
           >
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
-              {badge}
-            </Text>
-          </VStack>
+            <Text className="font-heading text-[10px] text-white">{badge}</Text>
+          </View>
         )}
         {dot && (
           <View
@@ -125,7 +102,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
             style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#E63946" }}
           />
         )}
-      </HStack>
+      </View>
     </Pressable>
   );
 }
@@ -160,41 +137,31 @@ export function QueueOptions({
         : `em ${mealSignal.minutesUntil} min — iniciar agora ou adiar`;
 
   return (
-    <VStack>
+    <View>
       <Section title="Agora" />
 
       {/* Status em bloco proprio, pills LARGAS embaixo (affordance — Andre
           2026-07-24: "so melhora saber que da pra clicar ali e mudar o estado").
           Nao ha mais botao de abrir/fechar loja: ficar "Trabalhando" abre sozinho
           (derivado); a tela avisa "voce e o primeiro". */}
-      <VStack
-        bg="$white"
-        px="$4"
-        py="$3.5"
-        borderRadius="$2xl"
-        mb="$2"
-        style={{
-          shadowColor: "#1A281A",
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          elevation: 3,
-        }}
+      <View
+        className="bg-white px-4 py-3.5 rounded-2xl mb-2"
+        style={rowShadow}
       >
-        <HStack alignItems="center" space="md">
-          <Text fontSize="$md" w="$6" textAlign="center">
+        <View className="flex-row items-center gap-3">
+          <Text className="text-base w-6 text-center">
             {STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"}
           </Text>
-          <VStack flex={1}>
-            <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color="$coolGray900">
+          <View className="flex-1">
+            <Text className="font-body text-base font-medium text-gray-900">
               Status
             </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
+            <Text className="font-body text-xs text-gray-500 mt-0.5">
               Voce esta: {currentLabel} · toque para trocar
             </Text>
-          </VStack>
-        </HStack>
-        <HStack space="sm" mt="$3">
+          </View>
+        </View>
+        <View className="flex-row gap-2 mt-3">
           {STATUS.map((s) => {
             const active = s.key === currentStatus;
             const blocked = s.key === "indisponivel" && hasQueue;
@@ -205,26 +172,23 @@ export function QueueOptions({
                 accessibilityRole="button"
                 accessibilityLabel={s.label}
                 accessibilityState={{ selected: active, disabled: blocked }}
-                opacity={blocked ? 0.45 : 1}
-                flex={1}
-                bg={active ? s.activeBg : "$coolGray100"}
-                borderRadius="$full"
-                py="$2.5"
-                alignItems="center"
+                style={{ opacity: blocked ? 0.45 : 1 }}
+                className={`flex-1 rounded-full py-2.5 items-center ${
+                  active ? s.activeBg : "bg-gray-100"
+                }`}
               >
                 <Text
-                  fontFamily="$heading"
-                  fontWeight="$bold"
-                  fontSize="$xs"
-                  color={active ? "$white" : "$coolGray600"}
+                  className={`font-heading text-xs ${
+                    active ? "text-white" : "text-gray-600"
+                  }`}
                 >
                   {s.label}
                 </Text>
               </Pressable>
             );
           })}
-        </HStack>
-      </VStack>
+        </View>
+      </View>
 
       {closeQueue && !closeQueue.acceptingNew ? (
         <Row
@@ -268,6 +232,6 @@ export function QueueOptions({
         hint="walk-in, sem app"
         onPress={() => router.push("/(professional)/add-guest" as any)}
       />
-    </VStack>
+    </View>
   );
 }

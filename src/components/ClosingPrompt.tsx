@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { VStack, Text } from "@gluestack-ui/themed";
-import { Alert, Modal, Pressable } from "react-native";
-import { Button } from "@components/Button";
+import { View, Text, Alert, Modal, Pressable } from "react-native";
+import { NwButton } from "@components/nw/Button";
 import { useUiStore } from "@store/ui.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -57,48 +56,40 @@ export function ClosingPrompt() {
 
   return (
     <Modal visible={!!graceUntil} transparent animationType="fade" onRequestClose={dismiss}>
-      <VStack flex={1} justifyContent="center" alignItems="center" px="$6">
+      <View className="flex-1 justify-center items-center px-6">
         <Pressable
           style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.45)" }}
           onPress={dismiss}
           accessibilityLabel="Fechar aviso"
         />
-        <VStack bg="$white" borderRadius="$2xl" p="$5" w="$full" space="sm" style={cardShadow}>
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$coolGray900">
+        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={cardShadow}>
+          <Text className="font-heading text-lg text-gray-900">
             Passou do horario de fechamento
           </Text>
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+          <Text className="font-body text-sm text-gray-600">
             A fila ja foi fechada para novos clientes. Quem esta na fila segue sendo
             atendido. Fecha sozinho em:
           </Text>
           <Text
             accessibilityLabel={`Fecha em ${graceCountdownLabel(remaining)}`}
-            fontFamily="$heading"
-            fontWeight="$bold"
-            fontSize="$2xl"
-            color="$amber600"
-            textAlign="center"
-            my="$1"
+            className="font-heading text-2xl text-amber-600 text-center my-1"
           >
             {graceCountdownLabel(remaining)}
           </Text>
-          <Button
+          <NwButton
             title="Fechar agora"
             onPress={onCloseNow}
             isLoading={closing}
-            bg="$red500"
-            $active-bg="$red600"
+            variant="danger"
           />
-          <Button
+          <NwButton
             title="Continuar atendendo"
             onPress={dismiss}
-            bg="$coolGray200"
-            textColor="$coolGray700"
-            h="$10"
-            mt="$0"
+            variant="secondary"
+            className="h-10"
           />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </Modal>
   );
 }
