@@ -1,10 +1,11 @@
-import { HStack, VStack, Text, Pressable, Box } from "@gluestack-ui/themed";
+import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { cardShadow } from "@lib/styles";
 
 // [#11] Seletor de "Tipo de servico" em grade de chips com icone (no lugar da
 // lista de pilulas de texto). 2 colunas, selecao verde com check. Idioma Verde
 // Imersivo (cardShadow, verde da marca, cantos arredondados).
+// Migrado p/ NativeWind (v2).
 
 // Icone por tipo (por palavra-chave no value do ServiceItemType). Ionicons —
 // mesmos da tab bar.
@@ -33,53 +34,45 @@ export function ServiceTypeGrid({
   onSelect: (item: Item) => void;
 }) {
   return (
-    <HStack flexWrap="wrap" justifyContent="space-between" mb="$2">
+    <View className="flex-row flex-wrap justify-between mb-2">
       {items.map((it) => {
         const isSel = selected === it.value;
         return (
           <Pressable
             key={it.value}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSel }}
             onPress={() => onSelect(it)}
-            w="48.5%"
-            mb="$2.5"
-            position="relative"
-            bg="$white"
-            borderRadius="$2xl"
-            borderWidth={isSel ? "$2" : "$1"}
-            borderColor={isSel ? "$green500" : "$coolGray200"}
-            p="$3"
+            className={`w-[48.5%] mb-2.5 relative bg-white rounded-2xl p-3 ${
+              isSel ? "border-2 border-brand" : "border border-gray-200"
+            }`}
             style={isSel ? undefined : cardShadow}
           >
             {isSel && (
-              <Box position="absolute" top="$1.5" right="$1.5">
+              <View className="absolute top-1.5 right-1.5">
                 <Ionicons name="checkmark-circle" size={16} color="#3b7a3f" />
-              </Box>
+              </View>
             )}
-            <HStack space="sm" alignItems="center">
-              <VStack
-                w="$8"
-                h="$8"
-                borderRadius="$lg"
-                alignItems="center"
-                justifyContent="center"
-                bg={isSel ? "$green500" : "$coolGray100"}
+            <View className="flex-row items-center gap-2">
+              <View
+                className={`w-8 h-8 rounded-lg items-center justify-center ${
+                  isSel ? "bg-brand" : "bg-gray-100"
+                }`}
               >
                 <Ionicons name={iconFor(it.value)} size={18} color={isSel ? "#FFFFFF" : "#316635"} />
-              </VStack>
+              </View>
               <Text
-                flex={1}
-                fontFamily="$body"
-                fontSize="$sm"
-                fontWeight={isSel ? "$bold" : "$medium"}
-                color={isSel ? "$green700" : "$coolGray800"}
                 numberOfLines={2}
+                className={`flex-1 font-body text-sm ${
+                  isSel ? "font-bold text-brand-700" : "font-medium text-gray-800"
+                }`}
               >
                 {it.label}
               </Text>
-            </HStack>
+            </View>
           </Pressable>
         );
       })}
-    </HStack>
+    </View>
   );
 }
