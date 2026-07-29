@@ -158,13 +158,8 @@ export const gluestackUIConfig = createConfig({
       green200: '#b5d5b6',
       green300: '#8bbd8d',
       green400: '#5c9c60',
-      // ⚠️ TEMPORARIO — MARCADOR DE OTA da branch chore/gluestack-update.
-      // Roxo no lugar do verde SO para dar para ver, no aparelho, qual bundle
-      // esta rodando (o app nao expoe a branch git). REVERTER (git revert do
-      // commit "temp(ota)") antes de qualquer merge. Valores reais:
-      // green500 '#3b7a3f' / green600 '#316635'.
-      green500: '#7C3AED',
-      green600: '#5B21B6',
+      green500: '#3b7a3f',
+      green600: '#316635',
       green700: '#26522a',
       green800: '#1c3d1f',
       green900: '#142c17',
