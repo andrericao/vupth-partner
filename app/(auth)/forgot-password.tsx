@@ -1,17 +1,16 @@
 import { useState } from "react";
+import { router } from "expo-router";
 import {
-  VStack,
-  FormControl,
-  Heading,
+  View,
   Text,
   ScrollView,
-} from "@gluestack-ui/themed";
-import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { InputPassword } from "@components/InputPassWord";
-import { Button } from "@components/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
@@ -94,119 +93,113 @@ export default function ForgotPasswordScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
+        <View className="flex-1 py-12 px-6">
           <Header showBackButton onBack={() => router.replace("/(auth)/login" as any)} />
 
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
+          <Text className="font-heading text-2xl mt-8 text-gray-900">
             Recuperar senha
-          </Heading>
+          </Text>
 
           {step === "email" ? (
-            <VStack mt="$6" space="md">
-              <Text fontFamily="$body" color="$coolGray600">
+            <View className="mt-6">
+              <Text className="font-body text-gray-600 mb-4">
                 Informe o e-mail da sua conta. Enviaremos um codigo de 6 digitos
                 para redefinir a senha.
               </Text>
-              <FormControl isInvalid={emailInvalid}>
-                <Input
-                  placeholder="email@email.com"
-                  textLabel="E-mail"
-                  messageError="E-mail invalido"
-                  value={email}
-                  onChangeText={(t: string) => {
-                    setEmail(t);
-                    if (emailInvalid) setEmailInvalid(false);
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  testID="forgot-email"
-                />
-              </FormControl>
-              <Button
+              <NwInput
+                label="E-mail"
+                placeholder="email@email.com"
+                value={email}
+                onChangeText={(t: string) => {
+                  setEmail(t);
+                  if (emailInvalid) setEmailInvalid(false);
+                }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                testID="forgot-email"
+                error={emailInvalid ? "E-mail invalido" : ""}
+              />
+              <NwButton
                 title={isLoading ? "Enviando..." : "Enviar codigo"}
                 onPress={handleSendCode}
                 isLoading={isLoading}
-                mt="$2"
+                className="mt-2"
               />
-            </VStack>
+            </View>
           ) : (
-            <VStack mt="$6" space="md">
-              <Text fontFamily="$body" color="$coolGray600">
+            <View className="mt-6">
+              <Text className="font-body text-gray-600 mb-4">
                 Digite o codigo de 6 digitos enviado para{" "}
-                <Text fontFamily="$body" fontWeight="$bold" color="$coolGray800">
+                <Text className="font-body font-bold text-gray-800">
                   {email.trim()}
                 </Text>{" "}
                 e escolha a nova senha. O codigo vale por 15 minutos.
               </Text>
 
-              <FormControl isInvalid={codeInvalid}>
-                <Input
-                  placeholder="000000"
-                  textLabel="Codigo (6 digitos)"
-                  messageError="O codigo tem 6 digitos numericos"
-                  value={code}
-                  onChangeText={(t: string) => {
-                    setCode(t);
-                    if (codeInvalid) setCodeInvalid(false);
-                  }}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  autoCapitalize="none"
-                  testID="forgot-code"
-                />
-              </FormControl>
+              <NwInput
+                label="Codigo (6 digitos)"
+                placeholder="000000"
+                value={code}
+                onChangeText={(t: string) => {
+                  setCode(t);
+                  if (codeInvalid) setCodeInvalid(false);
+                }}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoCapitalize="none"
+                testID="forgot-code"
+                error={codeInvalid ? "O codigo tem 6 digitos numericos" : ""}
+              />
 
-              <FormControl isInvalid={passwordInvalid}>
-                <InputPassword
-                  placeholder="nova senha"
-                  textLabel="Nova senha"
-                  messageError="A senha nao atende aos requisitos abaixo"
-                  value={password}
-                  onChangeText={(t: string) => {
-                    setPassword(t);
-                    if (passwordInvalid) setPasswordInvalid(false);
-                  }}
-                  testID="forgot-password"
-                />
-              </FormControl>
+              <NwInput
+                label="Nova senha"
+                placeholder="nova senha"
+                secure
+                value={password}
+                onChangeText={(t: string) => {
+                  setPassword(t);
+                  if (passwordInvalid) setPasswordInvalid(false);
+                }}
+                autoCapitalize="none"
+                testID="forgot-password"
+                error={passwordInvalid ? "A senha nao atende aos requisitos abaixo" : ""}
+              />
               {password.length > 0 && <PasswordRules rules={passwordRules} />}
 
-              <FormControl isInvalid={confirmInvalid}>
-                <InputPassword
-                  placeholder="confirmar nova senha"
-                  textLabel="Confirmar nova senha"
-                  messageError="As senhas nao coincidem"
-                  value={confirmPassword}
-                  onChangeText={(t: string) => {
-                    setConfirmPassword(t);
-                    if (confirmInvalid) setConfirmInvalid(false);
-                  }}
-                  testID="forgot-confirm"
-                />
-              </FormControl>
+              <NwInput
+                label="Confirmar nova senha"
+                placeholder="confirmar nova senha"
+                secure
+                value={confirmPassword}
+                onChangeText={(t: string) => {
+                  setConfirmPassword(t);
+                  if (confirmInvalid) setConfirmInvalid(false);
+                }}
+                autoCapitalize="none"
+                testID="forgot-confirm"
+                error={confirmInvalid ? "As senhas nao coincidem" : ""}
+              />
 
-              <Button
+              <NwButton
                 title={isLoading ? "Redefinindo..." : "Redefinir senha"}
                 onPress={handleReset}
                 isLoading={isLoading}
-                mt="$2"
+                className="mt-2"
               />
-              <Button
+              <NwButton
                 title="Reenviar codigo"
+                variant="secondary"
                 onPress={handleSendCode}
-                bg="$coolGray200"
-                textColor="$coolGray700"
-                h="$10"
-                mt="$0"
+                className="h-10 mt-3"
               />
-            </VStack>
+            </View>
           )}
-        </VStack>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
