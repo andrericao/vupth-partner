@@ -16,17 +16,29 @@ module.exports = {
         heading: ["Poppins_700Bold"],
         body: ["Inter_400Regular"],
       },
-      // Cores-ancora da marca (mesmas do gluestack-ui.config v1) p/ o className
-      // bater com o visual atual durante a migracao.
+      // Cores da marca espelhando a escala `green` do config/gluestack-ui.config.ts
+      // (FONTE DA VERDADE — paleta "Verde Marca", ancorada em #3b7a3f desde
+      // 2026-07-09). Precisa bater 1:1: durante a migracao as telas do v1 e do
+      // v2 convivem na mesma navegacao, e qualquer desvio aparece como dois
+      // verdes diferentes no app.
       colors: {
         brand: {
-          DEFAULT: "#00B37E",
-          500: "#00B37E",
-          600: "#1B4332",
-          400: "#52B788",
+          DEFAULT: "#3b7a3f", // = $green500
+          50: "#eef5ee",
+          100: "#d9ead9",
+          200: "#b5d5b6",
+          300: "#8bbd8d",
+          400: "#5c9c60",
+          500: "#3b7a3f",
+          600: "#316635",
+          700: "#26522a",
+          800: "#1c3d1f",
+          900: "#142c17",
         },
-        amber: { 500: "#FFB703", 600: "#B45309" },
-        danger: { 500: "#E63946", 600: "#B91C1C" },
+        // Verde dos campos (v1 usava a escala `success` nos inputs/busca).
+        success: { 500: "#348352", 950: "#071f11" },
+        amber: { 500: "#FFB703", 600: "#d97706", 700: "#b45309" },
+        danger: { 500: "#E63946", 600: "#dc2626" },
       },
     },
   },

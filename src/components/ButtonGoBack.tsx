@@ -8,7 +8,7 @@ export function ButtonGoBack(props: PressableProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Voltar"
-      className="w-[39px] h-[39px] rounded-[18px] bg-brand items-center justify-center active:bg-[#1B4332]"
+      className="w-[39px] h-[39px] rounded-[18px] bg-brand items-center justify-center active:bg-brand-600"
       {...props}
     >
       <Ionicons name="chevron-back" size={22} color="#fff" />

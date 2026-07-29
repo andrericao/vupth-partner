@@ -46,7 +46,8 @@ export function NwInput({ label, error, secure, ...rest }: Props) {
             accessibilityRole="button"
             accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
           >
-            <Ionicons name={show ? "eye-off" : "eye"} size={20} color="#065F46" />
+            {/* #064e3b = $emerald900 do v1 (mesmo olho do InputPassword). */}
+            <Ionicons name={show ? "eye-off" : "eye"} size={20} color="#064e3b" />
           </Pressable>
         )}
       </View>

@@ -31,7 +31,7 @@ const shadow = {
 const BASE = "h-[54px] rounded-full items-center justify-center px-4";
 
 const BOX: Record<Variant, string> = {
-  primary: "bg-brand active:bg-[#1B4332]",
+  primary: "bg-brand active:bg-brand-600",
   secondary: "bg-gray-200 active:bg-gray-300",
   danger: "bg-danger-500 active:bg-danger-600",
   outlineBrand: "bg-white border border-brand active:bg-gray-100",
