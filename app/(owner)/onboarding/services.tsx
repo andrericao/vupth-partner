@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 
 export default function ServicesScreen() {
   const [isInvalid] = useState(false);
@@ -17,50 +16,44 @@ export default function ServicesScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack
-        flex={1}
-        py="$12"
-        px="$6"
-        alignItems="center"
-        justifyContent="center"
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Header showBackButton />
+        <View className="flex-1 py-12 px-6 items-center justify-center">
+          <Header showBackButton />
 
-        <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
-          <Heading mb="$12" size="3xl" fontFamily="$heading">
-            Serviços Oferecidos
-          </Heading>
+          <View className="flex-1 mt-48 w-full">
+            <Text className="font-heading text-3xl mb-12 text-gray-900">
+              Serviços Oferecidos
+            </Text>
 
-          <Input
-            textLabel="Nome do Serviço"
-            placeholder="Corte Degradê"
-            messageError="Campo obrigatório"
-          />
+            <NwInput
+              label="Nome do Serviço"
+              placeholder="Corte Degradê"
+              error={isInvalid ? "Campo obrigatório" : ""}
+            />
 
-          <Input
-            textLabel="Preço"
-            placeholder="35.00"
-            messageError="Preço inválido"
-            keyboardType="decimal-pad"
-          />
+            <NwInput
+              label="Preço"
+              placeholder="35.00"
+              keyboardType="decimal-pad"
+              error={isInvalid ? "Preço inválido" : ""}
+            />
 
-          <Input
-            textLabel="Duração Estimada (min)"
-            placeholder="30"
-            messageError="Duração inválida"
-            keyboardType="number-pad"
-          />
+            <NwInput
+              label="Duração Estimada (min)"
+              placeholder="30"
+              keyboardType="number-pad"
+              error={isInvalid ? "Duração inválida" : ""}
+            />
 
-          <Button title="Finalizar Cadastro" onPress={handleFinish} />
-        </FormControl>
-      </VStack>
-    </ScrollView>
+            <NwButton title="Finalizar Cadastro" onPress={handleFinish} />
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

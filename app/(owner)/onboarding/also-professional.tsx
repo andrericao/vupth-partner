@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
-import { VStack, Heading, Text } from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -159,64 +165,55 @@ export default function AlsoProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} pb="$6" px="$6">
+        <View className="flex-1 pb-6 px-6">
           <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
 
-          <VStack flex={1} justifyContent="center" px="$2">
-            <Heading size="2xl" fontFamily="$heading" mb="$4">
+          <View className="flex-1 justify-center px-2">
+            <Text className="font-heading text-2xl mb-4 text-gray-900">
               Voce tambem sera profissional?
-            </Heading>
+            </Text>
 
-            <Text fontFamily="$body" color="$coolGray600" mb="$2" fontSize="$md">
+            <Text className="font-body text-base text-gray-600 mb-2">
               Se voce tambem atendera clientes neste estabelecimento, escolha sua
               especialidade abaixo.
             </Text>
 
             {ownerName ? (
-              <Text fontFamily="$body" color="$coolGray500" mb="$6" fontSize="$sm">
+              <Text className="font-body text-sm text-gray-500 mb-6">
                 Profissional: {ownerName}
               </Text>
             ) : null}
 
-            <Heading size="md" fontFamily="$heading" mb="$2">
+            <Text className="font-heading text-base mb-2 text-gray-900">
               Especialidade
-            </Heading>
+            </Text>
 
-            <VStack space="xs" mb="$6">
+            <View className="mb-6">
               {SPECIALTIES.map((s) => (
-                <Button
+                <NwButton
                   key={s.value}
                   title={s.label}
                   onPress={() => setSpecialty(s.value)}
-                  bg={specialty === s.value ? "$green500" : "$coolGray200"}
-                  textColor={specialty === s.value ? "$white" : "$coolGray700"}
-                  $active-bg={specialty === s.value ? "$green600" : "$coolGray300"}
-                  h="$10"
-                  mt="$1"
+                  variant={specialty === s.value ? "primary" : "secondary"}
+                  className="h-10 mt-1"
                 />
               ))}
-            </VStack>
+            </View>
 
-            <Button
+            <NwButton
               title="Sim, tambem serei profissional"
               onPress={handleYes}
               isLoading={isLoading}
-              bg="$green500"
-              $active-bg="$green600"
             />
 
-            <Button
+            <NwButton
               title="Nao, apenas proprietario"
               onPress={handleNo}
-              bg="transparent"
-              $active-bg="$red50"
-              borderWidth="$1"
-              borderColor="$red500"
-              textColor="$red500"
-              mt="$2"
+              variant="outlineDanger"
+              className="mt-2"
             />
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { VStack, FormControl, Heading, ScrollView, HStack, Spinner, Text } from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskCEP, unmask } from "@lib/masks";
@@ -118,98 +125,97 @@ export default function AddressScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 160 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack flex={1} py="$12" px="$6" alignItems="center">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/establishment-data" as any)} />
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 160 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="flex-1 py-12 px-6 items-center">
+          <Header showBackButton onBack={() => router.navigate("/(owner)/establishment-data" as any)} />
 
-        <FormControl flex={1} mt="$8" isInvalid={isInvalid}>
-          <Heading mb="$12" size="3xl" fontFamily="$heading">
-            Endereco da Loja
-          </Heading>
+          <View className="flex-1 mt-8 w-full">
+            <Text className="font-heading text-3xl mb-12 text-gray-900">
+              Endereco da Loja
+            </Text>
 
-          <Input
-            textLabel="CEP"
-            placeholder="01310-100"
-            messageError="CEP invalido"
-            value={zipCode}
-            onChangeText={handleCepChange}
-            keyboardType="number-pad"
-            maxLength={9}
-          />
+            <NwInput
+              label="CEP"
+              placeholder="01310-100"
+              value={zipCode}
+              onChangeText={handleCepChange}
+              keyboardType="number-pad"
+              maxLength={9}
+              error={isInvalid ? "CEP invalido" : ""}
+            />
 
-          {cepLoading && (
-            <HStack alignItems="center" space="sm" mb="$3" mt="-$1">
-              <Spinner size="small" color="$green500" />
-              <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                Buscando endereco pelo CEP...
-              </Text>
-            </HStack>
-          )}
+            {cepLoading && (
+              <View className="flex-row items-center gap-2 mb-3 -mt-1">
+                <ActivityIndicator size="small" color="#3b7a3f" />
+                <Text className="font-body text-xs text-gray-500">
+                  Buscando endereco pelo CEP...
+                </Text>
+              </View>
+            )}
 
-          <Input
-            textLabel="Logradouro"
-            placeholder="Rua de exemplo"
-            messageError="Campo obrigatorio"
-            value={street}
-            onChangeText={setStreet}
-          />
+            <NwInput
+              label="Logradouro"
+              placeholder="Rua de exemplo"
+              value={street}
+              onChangeText={setStreet}
+              error={isInvalid ? "Campo obrigatorio" : ""}
+            />
 
-          <Input
-            textLabel="Numero"
-            placeholder="123"
-            messageError="Campo obrigatorio"
-            value={number}
-            onChangeText={setNumber}
-            keyboardType="numeric"
-          />
+            <NwInput
+              label="Numero"
+              placeholder="123"
+              value={number}
+              onChangeText={setNumber}
+              keyboardType="numeric"
+              error={isInvalid ? "Campo obrigatorio" : ""}
+            />
 
-          <Input
-            textLabel="Complemento (opcional)"
-            placeholder="Apto 4B, sala 2, fundos..."
-            messageError=""
-            value={complement}
-            onChangeText={setComplement}
-          />
+            <NwInput
+              label="Complemento (opcional)"
+              placeholder="Apto 4B, sala 2, fundos..."
+              value={complement}
+              onChangeText={setComplement}
+            />
 
-          <Input
-            textLabel="Bairro"
-            placeholder="Bairro"
-            messageError="Campo obrigatorio"
-            value={neighborhood}
-            onChangeText={setNeighborhood}
-          />
+            <NwInput
+              label="Bairro"
+              placeholder="Bairro"
+              value={neighborhood}
+              onChangeText={setNeighborhood}
+              error={isInvalid ? "Campo obrigatorio" : ""}
+            />
 
-          <Input
-            textLabel="Cidade"
-            placeholder="Cidade"
-            messageError="Campo obrigatorio"
-            value={city}
-            onChangeText={setCity}
-          />
+            <NwInput
+              label="Cidade"
+              placeholder="Cidade"
+              value={city}
+              onChangeText={setCity}
+              error={isInvalid ? "Campo obrigatorio" : ""}
+            />
 
-          <Input
-            textLabel="Estado"
-            placeholder="SP"
-            messageError="Campo obrigatorio"
-            value={state}
-            onChangeText={setState}
-            autoCapitalize="characters"
-            maxLength={2}
-          />
+            <NwInput
+              label="Estado"
+              placeholder="SP"
+              value={state}
+              onChangeText={setState}
+              autoCapitalize="characters"
+              maxLength={2}
+              error={isInvalid ? "Campo obrigatorio" : ""}
+            />
 
-          <Button
-            title="Salvar Endereco"
-            onPress={handleSubmit}
-            isLoading={isLoading}
-          />
-        </FormControl>
-      </VStack>
-    </ScrollView>
+            <NwButton
+              title="Salvar Endereco"
+              onPress={handleSubmit}
+              isLoading={isLoading}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

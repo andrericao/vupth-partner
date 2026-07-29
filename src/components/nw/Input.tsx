@@ -15,7 +15,10 @@ type Props = TextInputProps & {
   secure?: boolean;
 };
 
-export function NwInput({ label, error, secure, ...rest }: Props) {
+// `autoCapitalize` default "words" replica o Input v1 (que embutia isso no
+// InputField): os campos de nome capitalizam sozinhos. Quem nao quer — e-mail,
+// senha, codigo — passa "none", como ja fazem as telas do (auth).
+export function NwInput({ label, error, secure, autoCapitalize = "words", ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [show, setShow] = useState(false);
   const invalid = !!error;
@@ -34,6 +37,7 @@ export function NwInput({ label, error, secure, ...rest }: Props) {
           className="flex-1 font-body text-gray-900"
           placeholderTextColor="#9CA3AF"
           autoCorrect={false}
+          autoCapitalize={autoCapitalize}
           secureTextEntry={secure && !show}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
