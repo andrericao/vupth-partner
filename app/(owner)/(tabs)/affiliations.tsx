@@ -12,6 +12,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
+import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 
@@ -179,9 +180,8 @@ export default function OwnerAffiliationsScreen() {
                 py="$3"
                 px="$4"
                 bg="$white"
-                borderRadius="$md"
-                borderWidth="$1"
-                borderColor="$coolGray200"
+                borderRadius="$2xl"
+                style={cardShadow}
                 mb="$2"
                 justifyContent="space-between"
                 alignItems="center"

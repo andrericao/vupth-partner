@@ -85,4 +85,42 @@ describe("waitForBackend", () => {
     // termina (nao trava) e respeita o teto
     expect(fetchImpl.mock.calls.length).toBeGreaterThan(0);
   });
+
+  it("usa os defaults reais (URL, Date.now e defaultSleep) resolvendo apos 1 retry", async () => {
+    // Sem injetar url/now/sleep: exercita os `?? DEFAULT` e o defaultSleep real.
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(error503)
+      .mockResolvedValueOnce(upResponse);
+
+    const ok = await waitForBackend({ fetchImpl, initialBackoffMs: 1 });
+
+    expect(ok).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    // url default (READINESS_URL): 1o argumento e a string do endpoint
+    expect(typeof fetchImpl.mock.calls[0][0]).toBe("string");
+  });
+
+  it("aborta a tentativa no timeout e conta como nao-pronto", async () => {
+    const clk = makeClock();
+    // fetch que so termina se o AbortController abortar (via signal).
+    const fetchImpl = jest.fn().mockImplementation(
+      (_url: string, init: any) =>
+        new Promise((_resolve, reject) => {
+          init.signal.addEventListener("abort", () => reject(new Error("aborted")));
+        })
+    );
+
+    const ok = await waitForBackend({
+      url: "x",
+      fetchImpl,
+      attemptTimeoutMs: 5,
+      ceilingMs: 1,
+      initialBackoffMs: 1,
+      ...clk,
+    });
+
+    expect(ok).toBe(false);
+    expect(fetchImpl).toHaveBeenCalled();
+  });
 });

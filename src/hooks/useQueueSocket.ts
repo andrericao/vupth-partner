@@ -3,7 +3,10 @@ import { Client, type IMessage } from "@stomp/stompjs";
 import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { WS_URL } from "@lib/api";
-import type { EstablishmentWithProfessionals } from "@lib/types";
+import type { EstablishmentWithProfessionals, QueueNotification } from "@lib/types";
+import { isCutRequestEvent } from "@lib/cutRequests";
+import { isClosingPromptEvent } from "@lib/closing";
+import { useUiStore } from "@store/ui.store";
 
 /**
  * Assina o tempo real da fila de um establishment via STOMP.
@@ -54,6 +57,28 @@ export function useQueueSocket(establishmentId: string | null) {
               });
             } catch (e) {
               if (__DEV__) console.log("[ws] erro ao processar snapshot", e);
+            }
+          });
+
+          // WS PESSOAL (C2, 2026-07-22) — mesma conexao, segunda assinatura.
+          // O backend dirige o CUT_REQUESTED (com cutRequestId proprio) ao
+          // userId da sessao. Nao montamos estado do payload: um evento CUT_*
+          // so INVALIDA a query de pendentes, e o GET (fonte da verdade)
+          // refaz a lista na hora — o refetch de 30s vira fallback p/ queda
+          // silenciosa do socket. Owner sem role PROFESSIONAL simplesmente
+          // nunca recebe nada aqui (inofensivo).
+          client?.subscribe("/user/queue/notifications", (message: IMessage) => {
+            try {
+              const notification = JSON.parse(message.body) as QueueNotification;
+              if (isCutRequestEvent(notification.type)) {
+                queryClient.invalidateQueries({ queryKey: ["cut-requests"] });
+              } else if (isClosingPromptEvent(notification.type)) {
+                // Auto-fechamento (BUG1): abre o prompt "quer fechar?" com o
+                // countdown do graceUntil. O backend fecha sozinho no fim.
+                useUiStore.getState().showClosingPrompt(notification.graceUntil ?? null);
+              }
+            } catch (e) {
+              if (__DEV__) console.log("[ws] erro ao processar notificacao pessoal", e);
             }
           });
         },

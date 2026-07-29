@@ -1,516 +1,202 @@
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack, Heading, Text, ScrollView, Divider, FormControl } from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { VStack, HStack, Heading, Text, ScrollView, Pressable } from "@gluestack-ui/themed";
+import { Alert, View } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
-import { Input } from "@components/Input";
-import { InputPassword } from "@components/InputPassWord";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
-import { getApiErrorMessage } from "@lib/api";
-import { validatePassword } from "@lib/passwordValidation";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
+import { cardShadow } from "@lib/styles";
 
-type Editing = null | "name" | "nickname" | "email" | "password";
+// Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
+// melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
+// MENU de cards; o conteudo mora nas sub-telas (settings-account, my-services,
+// meals, settings-vinculo). Area do dono (dupla role) e Sair vivem aqui — fora
+// das Opcoes da fila, que so tem acoes do dia.
+type CardProps = {
+  title: string;
+  hint: string;
+  badge?: number;
+  dot?: boolean;
+  danger?: boolean;
+  onPress: () => void;
+};
+
+// Escopo de MODULO (licao do segfault do tsc: componente definido dentro do
+// componente estoura a inferencia do gluestack e remonta a subarvore).
+function MenuCard({ title, hint, badge, dot, danger, onPress }: CardProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      bg="$white"
+      p="$4"
+      borderRadius="$2xl"
+      $active-bg="$coolGray50"
+      style={cardShadow}
+    >
+      <HStack alignItems="center">
+        <VStack flex={1}>
+          <HStack alignItems="center" space="xs">
+            <Text fontFamily="$heading" fontWeight="$bold" color={danger ? "$red500" : "$coolGray900"}>
+              {title}
+            </Text>
+            {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendencia" mas nao
+                ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
+            {dot && (
+              <View
+                testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
+                style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#E63946" }}
+              />
+            )}
+          </HStack>
+          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
+            {hint}
+          </Text>
+        </VStack>
+        {badge != null && badge > 0 && (
+          <VStack
+            testID="settings-badge-invites"
+            bg="$red600"
+            borderRadius="$full"
+            px="$2"
+            minWidth="$5"
+            h="$5"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
+              {badge}
+            </Text>
+          </VStack>
+        )}
+        <Text fontFamily="$body" fontSize="$lg" color="$coolGray400" ml="$2">
+          {"›"}
+        </Text>
+      </HStack>
+    </Pressable>
+  );
+}
 
 export default function ProfessionalSettingsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
-  const leaveEstablishment = useProfessionalStore((s) => s.leaveEstablishment);
-  const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
-  const updateNickname = useProfessionalStore((s) => s.updateNickname);
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
-  const acceptAffiliation = useProfessionalStore((s) => s.acceptAffiliation);
-  const rejectAffiliation = useProfessionalStore((s) => s.rejectAffiliation);
   const user = useAuthStore((s) => s.user);
-  const updateEmail = useAuthStore((s) => s.updateEmail);
-  const updatePassword = useAuthStore((s) => s.updatePassword);
+  const logout = useAuthStore((s) => s.logout);
   const { completion, routeFor } = useProfessionalCompletion();
 
-  // Convites de vinculacao recebidos do owner (type INVITATION, PENDING).
-  const [invites, setInvites] = useState<any[]>([]);
-  const [resolvingInvite, setResolvingInvite] = useState<string | null>(null);
+  const isOwner = user?.roles?.includes("OWNER");
+
+  // Mapeia as pendencias do checklist para o CARD exato (feedback Andre
+  // 2026-07-24: a aba tinha dot, mas dentro nao dava pra saber O QUE faltava).
+  const pendingKeys = new Set(
+    [...completion.basic.items, ...completion.profile.items]
+      .filter((i) => !i.done)
+      .map((i) => i.key)
+  );
+  const dadosDot = pendingKeys.has("nickname") || pendingKeys.has("specialty");
+  const servicosDot = pendingKeys.has("service");
+  const vinculoDot = pendingKeys.has("affiliated");
+
+  // Contagem de convites pendentes: o conteudo mora em settings-vinculo, mas o
+  // badge aqui evita que um convite do owner fique enterrado um nivel abaixo.
+  const [pendingInvites, setPendingInvites] = useState(0);
 
   const loadInvites = useCallback(async () => {
     try {
       const all = await fetchMyAffiliations();
-      setInvites(
-        (all ?? []).filter((a: any) => a.status === "PENDING" && a.type === "INVITATION")
+      setPendingInvites(
+        (all ?? []).filter((a: any) => a.status === "PENDING" && a.type === "INVITATION").length
       );
     } catch {}
   }, [fetchMyAffiliations]);
 
   useEffect(() => {
-    // carrega convites on-mount; setInvites e o efeito desejado do fetch.
+    // carrega a contagem on-mount; setPendingInvites e o efeito desejado do fetch.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadInvites();
   }, [loadInvites]);
 
-  const doAcceptInvite = async (inv: any) => {
-    setResolvingInvite(inv.id);
-    try {
-      await acceptAffiliation(inv.id);
-      setInvites((prev) => prev.filter((i) => i.id !== inv.id));
-      Alert.alert("Vinculado", `Voce agora esta vinculado a ${inv.establishmentName ?? "este estabelecimento"}.`);
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel aceitar o convite."));
-    } finally {
-      setResolvingInvite(null);
-    }
-  };
-
-  const doRejectInvite = async (inv: any) => {
-    setResolvingInvite(inv.id);
-    try {
-      await rejectAffiliation(inv.id);
-      setInvites((prev) => prev.filter((i) => i.id !== inv.id));
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel recusar o convite."));
-    } finally {
-      setResolvingInvite(null);
-    }
-  };
-
-  // R3: confirmacao antes de decidir a vinculacao.
-  const handleAcceptInvite = (inv: any) => {
-    const nome = inv.establishmentName ?? "este estabelecimento";
-    Alert.alert(
-      "Aceitar vinculacao",
-      `Deseja se vincular a ${nome}? Voce passara a atender por este estabelecimento.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Aceitar", onPress: () => doAcceptInvite(inv) },
-      ]
-    );
-  };
-
-  const handleRejectInvite = (inv: any) => {
-    const nome = inv.establishmentName ?? "este estabelecimento";
-    Alert.alert(
-      "Recusar convite",
-      `Deseja recusar o convite de ${nome}?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Recusar", style: "destructive", onPress: () => doRejectInvite(inv) },
-      ]
-    );
-  };
-
-  const [isLeaving, setIsLeaving] = useState(false);
-  const [editing, setEditing] = useState<Editing>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [name, setName] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [fieldError, setFieldError] = useState<string | null>(null);
-
-  const startEdit = (field: Editing) => {
-    setFieldError(null);
-    setName(field === "name" ? professional?.name ?? "" : "");
-    setNickname(field === "nickname" ? professional?.nickname ?? "" : "");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setEditing(field);
-  };
-
-  const handleSaveName = async () => {
-    const value = name.trim();
-    if (value.length < 2) {
-      setFieldError("Informe um nome valido.");
-      return;
-    }
-    setFieldError(null);
-    setIsSaving(true);
-    try {
-      await updateMyProfile({ name: value });
-      setEditing(null);
-      Alert.alert("Nome atualizado", "Seu nome foi alterado com sucesso.");
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveNickname = async () => {
-    const value = nickname.trim();
-    if (value.length > 50) {
-      setFieldError("O apelido deve ter no maximo 50 caracteres.");
-      return;
-    }
-    setFieldError(null);
-    setIsSaving(true);
-    try {
-      // String vazia limpa o apelido no backend.
-      await updateNickname(value);
-      setEditing(null);
-      Alert.alert(
-        "Apelido atualizado",
-        value ? "Seu apelido foi salvo." : "Seu apelido foi removido."
-      );
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o apelido."));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditing(null);
-    setFieldError(null);
-  };
-
-  const handleSaveEmail = async () => {
-    const value = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setFieldError("Informe um e-mail valido.");
-      return;
-    }
-    setFieldError(null);
-    setIsSaving(true);
-    try {
-      await updateEmail(value);
-      setEditing(null);
-      Alert.alert("E-mail atualizado", "Seu e-mail foi alterado com sucesso.");
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o e-mail."));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSavePassword = async () => {
-    const check = validatePassword(password);
-    if (!check.valid) {
-      setFieldError(check.errors.join("\n"));
-      return;
-    }
-    if (password !== confirmPassword) {
-      setFieldError("As senhas nao coincidem.");
-      return;
-    }
-    setFieldError(null);
-    setIsSaving(true);
-    try {
-      await updatePassword(password);
-      setEditing(null);
-      Alert.alert("Senha alterada", "Sua senha foi alterada com sucesso.");
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar a senha."));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleLeave = () => {
-    Alert.alert(
-      "Desafiliar do estabelecimento",
-      `Voce deixara de atender em ${professional?.establishment_name ?? "este estabelecimento"} e nao recebera novos clientes na fila. Deseja continuar?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Desafiliar",
-          style: "destructive",
-          onPress: async () => {
-            setIsLeaving(true);
-            try {
-              await leaveEstablishment();
-              Alert.alert(
-                "Desafiliado",
-                "Voce nao esta mais vinculado ao estabelecimento. Busque um novo estabelecimento quando quiser voltar a atender."
-              );
-            } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel desafiliar do estabelecimento. Tente novamente."));
-            } finally {
-              setIsLeaving(false);
-            }
-          },
+  const handleLogout = () => {
+    Alert.alert("Sair", "Tem certeza que deseja sair da conta?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/(auth)" as any);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1 }}
-    >
     <ScrollView
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
     >
       <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
+        <Header />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
           Configuracoes
         </Heading>
+        <Text fontFamily="$body" color="$coolGray500" mt="$1">
+          {[professional?.name, professional?.specialty, professional?.establishment_name]
+            .filter(Boolean)
+            .join(" · ") || "Complete seu cadastro para atender"}
+        </Text>
 
         {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
             faixa. Encaminha para buscar estabelecimento / adicionar servico. */}
         <CompletionCard
           completion={completion}
-          doneBanner="Você já aparece para clientes!"
+          doneBanner="Cadastro completo — já pode atender!"
           routeFor={routeFor}
         />
 
-        {invites.length > 0 && (
-          <VStack
-            mt="$6"
-            bg="$green50"
-            p="$4"
-            borderRadius="$lg"
-            borderWidth="$1"
-            borderColor="$green200"
-            space="sm"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
-              Convites de vinculacao
-            </Text>
-            {invites.map((inv) => (
-              <VStack key={inv.id} bg="$white" p="$3" borderRadius="$md" borderWidth="$1" borderColor="$coolGray200">
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Convite de
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
-                  {inv.establishmentName ?? "Estabelecimento"}
-                </Text>
-                <HStack space="sm">
-                  <Button
-                    title="Recusar"
-                    onPress={() => handleRejectInvite(inv)}
-                    isLoading={resolvingInvite === inv.id}
-                    bg="transparent"
-                    $active-bg="$red50"
-                    borderWidth="$1"
-                    borderColor="$red500"
-                    textColor="$red500"
-                    h="$9"
-                    flex={1}
-                  />
-                  <Button
-                    title="Aceitar"
-                    onPress={() => handleAcceptInvite(inv)}
-                    isLoading={resolvingInvite === inv.id}
-                    bg="$green500"
-                    $active-bg="$green600"
-                    h="$9"
-                    flex={1}
-                  />
-                </HStack>
-              </VStack>
-            ))}
-          </VStack>
-        )}
-
         <VStack mt="$6" space="md">
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Nome
-            </Text>
-            {editing === "name" ? (
-              <FormControl mt="$2">
-                <Input
-                  textLabel="Novo nome"
-                  placeholder="Seu nome"
-                  messageError=""
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSaveName} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  {professional?.name ?? "—"}
-                </Text>
-                <Button title="Editar" onPress={() => startEdit("name")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
-
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Apelido
-            </Text>
-            {editing === "nickname" ? (
-              <FormControl mt="$2">
-                <Input
-                  textLabel="Apelido (ajuda os clientes a te achar na busca)"
-                  placeholder="Ex.: Dedeco"
-                  messageError=""
-                  value={nickname}
-                  onChangeText={setNickname}
-                  autoCapitalize="words"
-                  maxLength={50}
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSaveNickname} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  {professional?.nickname || "—"}
-                </Text>
-                <Button title="Editar" onPress={() => startEdit("nickname")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
-
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              E-mail
-            </Text>
-            {editing === "email" ? (
-              <FormControl mt="$2">
-                <Input
-                  textLabel="Novo e-mail"
-                  placeholder="voce@email.com"
-                  messageError=""
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSaveEmail} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  {user?.email ?? "—"}
-                </Text>
-                <Button title="Editar" onPress={() => startEdit("email")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
-
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Senha
-            </Text>
-            {editing === "password" ? (
-              <FormControl mt="$2">
-                <InputPassword
-                  textLabel="Nova senha"
-                  placeholder="Nova senha"
-                  messageError=""
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <InputPassword
-                  textLabel="Confirmar nova senha"
-                  placeholder="Confirmar nova senha"
-                  messageError=""
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSavePassword} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  ********
-                </Text>
-                <Button title="Alterar" onPress={() => startEdit("password")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
-
-          <Divider my="$2" />
-
-          <VStack bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Refeicoes (almoco/janta)
-            </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
-              Editar horario e duracao; entram no calculo da fila.
-            </Text>
-            <Button
-              title="Gerenciar Refeicoes"
-              onPress={() => router.push("/(professional)/meals" as any)}
-              bg="$coolGray200"
-              textColor="$coolGray700"
-              h="$9"
-              mt="$2"
+          <MenuCard
+            title="Dados cadastrais"
+            hint="nome, apelido, e-mail, senha"
+            dot={dadosDot}
+            onPress={() => router.push("/(professional)/settings-account" as any)}
+          />
+          <MenuCard
+            title="Meus servicos"
+            hint="precos e duracao do que voce oferece"
+            dot={servicosDot}
+            onPress={() => router.push("/(professional)/my-services?from=settings" as any)}
+          />
+          <MenuCard
+            title="Refeicoes"
+            hint="horarios + aviso na hora (ligar/desligar)"
+            onPress={() => router.push("/(professional)/meals?from=settings" as any)}
+          />
+          <MenuCard
+            title="Vinculo"
+            hint={professional?.establishment_name ?? "nao vinculado — buscar estabelecimento"}
+            badge={pendingInvites}
+            dot={vinculoDot}
+            onPress={() => router.push("/(professional)/settings-vinculo" as any)}
+          />
+          {isOwner && (
+            <MenuCard
+              title="Area do dono"
+              hint="gerenciar o estabelecimento"
+              onPress={() => router.replace("/(owner)/dashboard" as any)}
             />
-          </VStack>
-
-          <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Estabelecimento
-            </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" color={professional?.establishment_name ? "$green700" : "$coolGray400"} mt="$1">
-              {professional?.establishment_name ?? "Nao vinculado"}
-            </Text>
-            {!professional?.establishment_id ? (
-              <Button
-                title="Buscar Estabelecimento"
-                onPress={() => router.push("/(professional)/find-establishment" as any)}
-                bg="$green500"
-                $active-bg="$green600"
-                h="$9"
-                mt="$2"
-              />
-            ) : (
-              <Button
-                title="Desafiliar do Estabelecimento"
-                onPress={handleLeave}
-                isLoading={isLeaving}
-                bg="transparent"
-                $active-bg="$red50"
-                borderWidth="$1"
-                borderColor="$red500"
-                textColor="$red500"
-                h="$9"
-                mt="$2"
-              />
-            )}
-          </VStack>
+          )}
+          <MenuCard title="Sair" hint="encerrar a sessao neste aparelho" danger onPress={handleLogout} />
 
           <OtaUpdateButton />
         </VStack>
       </VStack>
     </ScrollView>
-    </KeyboardAvoidingView>
   );
 }

@@ -9,6 +9,12 @@ import { RoleIcon } from "@components/RoleIcon";
 type Props = {
   showBackButton?: boolean;
   onBack?: () => void;
+  /**
+   * QA Andre 2026-07-22: "apenas um icone por tela". Telas que ja tem o icone
+   * do menu (banco) escondem a silhueta do papel para nao empilhar dois icones
+   * a direita. Default true (demais telas ficam como estao).
+   */
+  showRoleIcon?: boolean;
 };
 
 // Papel ativo deduzido do grupo de rota atual — define qual silhueta exibir
@@ -19,7 +25,7 @@ const ROLE_BY_SEGMENT: Record<string, "owner" | "professional"> = {
   "(professional)": "professional",
 };
 
-export function Header({ showBackButton = false, onBack }: Props) {
+export function Header({ showBackButton = false, onBack, showRoleIcon = true }: Props) {
   const insets = useSafeAreaInsets();
   const segments = useSegments();
   const role = segments
@@ -63,7 +69,7 @@ export function Header({ showBackButton = false, onBack }: Props) {
           VUPTH
         </Heading>
       </HStack>
-      {role && <RoleIcon role={role} />}
+      {showRoleIcon && role && <RoleIcon role={role} />}
     </HStack>
   );
 }

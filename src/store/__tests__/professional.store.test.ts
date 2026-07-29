@@ -1,4 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
+import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import { useProfessionalStore } from "../professional.store";
 
@@ -18,6 +19,8 @@ const REGISTER_RESPONSE = {
   establishment_id: null,
   establishment_name: null,
   is_available: true,
+  work_status: null,
+  accepting_new: null,
   message: "Professional created! Your ID is permanent.",
 };
 
@@ -29,6 +32,8 @@ const AFFILIATE_RESPONSE = {
   establishment_id: "estab-uuid-1",
   establishment_name: "Barbearia do Andre",
   is_available: true,
+  work_status: null,
+  accepting_new: null,
   message: "Affiliated successfully.",
 };
 
@@ -338,16 +343,20 @@ describe("professional.store", () => {
       expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
     });
 
-    it("keeps the saved nickname locally even if GET /professional/me omits it (BUG10)", async () => {
-      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+    // BUG3/BUG10 fechado no backend (2026-07-20): o GET /professional/me passou
+    // a projetar o nickname, entao a mitigacao que reescrevia o valor local foi
+    // REMOVIDA. O backend e a fonte da verdade — inclusive para limpar.
+    it("limpar o apelido: envia string vazia e reflete o que o backend devolver", async () => {
+      useProfessionalStore.setState({
+        professional: { ...AFFILIATE_RESPONSE, nickname: "Dedeco" } as any,
+      });
       mock.onPatch("/profile/general-infos").reply(200, {});
-      // /professional/me NAO projeta o nickname (gap de backend) — sem o merge
-      // local o valor recem-salvo "sumiria" logo apos o alerta de sucesso.
       mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, nickname: null });
 
-      await useProfessionalStore.getState().updateNickname("Dedeco");
+      await useProfessionalStore.getState().updateNickname("");
 
-      expect(useProfessionalStore.getState().professional?.nickname).toBe("Dedeco");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ nickname: "" });
+      expect(useProfessionalStore.getState().professional?.nickname).toBeNull();
     });
 
     it("rejects when the PATCH fails", async () => {
@@ -357,6 +366,69 @@ describe("professional.store", () => {
       await expect(
         useProfessionalStore.getState().updateNickname("x".repeat(51))
       ).rejects.toThrow();
+    });
+  });
+
+  describe("updateMyStatus (S1 fatia 1)", () => {
+    it("PATCHes /professional/me/status e refresca o work_status via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/status").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, work_status: "ON_BREAK" });
+
+      await useProfessionalStore.getState().updateMyStatus("ON_BREAK");
+
+      expect(mock.history.patch[0].url).toBe("/professional/me/status");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ status: "ON_BREAK" });
+      expect(useProfessionalStore.getState().professional?.work_status).toBe("ON_BREAK");
+    });
+
+    it("rejeita no 409 (ficar OFF com fila/atendimento)", async () => {
+      mock
+        .onPatch("/professional/me/status")
+        .reply(409, { message: "PROFESSIONAL_HAS_ACTIVE_ATTENDANCES" });
+
+      await expect(
+        useProfessionalStore.getState().updateMyStatus("OFF")
+      ).rejects.toThrow();
+    });
+
+    it("rejeita no 422 (entrar em expediente sem servico)", async () => {
+      mock
+        .onPatch("/professional/me/status")
+        .reply(422, { message: "PROFESSIONAL_HAS_NO_SERVICE" });
+
+      await expect(
+        useProfessionalStore.getState().updateMyStatus("WORKING")
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("setAcceptingNew (S1 fatia 3 — fechar/reabrir fila)", () => {
+    it("fechar fila: PATCH accepting-new {value:false} e re-le via fetchMe", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/accepting-new").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, accepting_new: false });
+
+      await useProfessionalStore.getState().setAcceptingNew(false);
+
+      expect(mock.history.patch[0].url).toBe("/professional/me/accepting-new");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ value: false });
+      expect(useProfessionalStore.getState().professional?.accepting_new).toBe(false);
+    });
+
+    it("reabrir fila: PATCH accepting-new {value:true}", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/accepting-new").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, accepting_new: true });
+
+      await useProfessionalStore.getState().setAcceptingNew(true);
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ value: true });
+      expect(useProfessionalStore.getState().professional?.accepting_new).toBe(true);
     });
   });
 
@@ -404,6 +476,101 @@ describe("professional.store", () => {
         "/professional-queue/prof-uuid-1/service-items/svc-1"
       );
       expect(useProfessionalStore.getState().myServices).toEqual([]);
+    });
+  });
+
+  describe("setProfessional", () => {
+    it("normaliza, persiste no SecureStore e seta o estado", async () => {
+      await useProfessionalStore.getState().setProfessional(AFFILIATE_RESPONSE as any);
+
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        "vupth_professional",
+        expect.any(String)
+      );
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-1");
+    });
+  });
+
+  describe("switchEstablishment", () => {
+    it("DELETE do estabelecimento atual + POST affiliate no novo", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onDelete("/professional/me/establishment").reply(204);
+      mock.onPost("/professional/affiliate").reply(200, {
+        ...AFFILIATE_RESPONSE,
+        establishment_id: "estab-uuid-2",
+        establishment_name: "Outra Barbearia",
+      });
+
+      await useProfessionalStore.getState().switchEstablishment("estab-uuid-2");
+
+      expect(mock.history.delete[0].url).toBe("/professional/me/establishment");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({ establishmentId: "estab-uuid-2" });
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-2");
+    });
+  });
+
+  describe("addMyServiceItem", () => {
+    it("lanca quando nao ha professional carregado", async () => {
+      useProfessionalStore.setState({ professional: null });
+
+      await expect(
+        useProfessionalStore.getState().addMyServiceItem("CORTE_MAQUINA", "Corte", 40)
+      ).rejects.toThrow("Professional not found");
+    });
+
+    it("POST /professional-queue/{id}/add-service-items e retorna o item criado", async () => {
+      useProfessionalStore.setState({ professional: REGISTER_RESPONSE });
+      const created = { id: "svc-9", serviceItemType: "CORTE_MAQUINA", customName: "Corte", price: 40 };
+      mock.onPost("/professional-queue/prof-uuid-1/add-service-items").reply(201, created);
+
+      const out = await useProfessionalStore
+        .getState()
+        .addMyServiceItem("CORTE_MAQUINA", "Corte", 40);
+
+      expect(mock.history.post[0].url).toBe("/professional-queue/prof-uuid-1/add-service-items");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({
+        serviceItemType: "CORTE_MAQUINA",
+        customName: "Corte",
+        price: 40,
+      });
+      expect(out).toEqual(created);
+    });
+  });
+
+  describe("restoreProfessional", () => {
+    it("restaura do SecureStore quando ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify(AFFILIATE_RESPONSE)
+      );
+
+      await useProfessionalStore.getState().restoreProfessional();
+
+      expect(SecureStore.getItemAsync).toHaveBeenCalledWith("vupth_professional");
+      expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-1");
+    });
+
+    it("nao altera o estado quando nao ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
+
+      await useProfessionalStore.getState().restoreProfessional();
+
+      expect(useProfessionalStore.getState().professional).toBeNull();
+    });
+  });
+
+  describe("reset", () => {
+    it("limpa o estado e apaga o SecureStore", () => {
+      useProfessionalStore.setState({
+        professional: AFFILIATE_RESPONSE,
+        myServices: [{ id: "svc-1" }] as any,
+      });
+
+      useProfessionalStore.getState().reset();
+
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_professional");
+      const s = useProfessionalStore.getState();
+      expect(s.professional).toBeNull();
+      expect(s.myServices).toEqual([]);
     });
   });
 });

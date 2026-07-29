@@ -21,7 +21,9 @@ type AuthState = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   updateEmail: (email: string) => Promise<void>;
-  updatePassword: (password: string) => Promise<void>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   refreshToken: () => Promise<void>;
   logout: () => Promise<void>;
   loadStoredTokens: () => Promise<void>;
@@ -72,8 +74,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }));
   },
 
-  updatePassword: async (password) => {
-    const { data } = await api.patch("/profile/update-password/me", { password });
+  // Breaking backend 2026-07-23: exige a senha ATUAL (conferida com
+  // PasswordEncoder.matches). Errada => 401 CURRENT_PASSWORD_INVALID (erro de
+  // campo, tratado no interceptor sem refresh/logout); ausente => 422.
+  updatePassword: async (currentPassword, newPassword) => {
+    const { data } = await api.patch("/profile/update-password/me", {
+      current_password: currentPassword,
+      password: newPassword,
+    });
 
     await SecureStore.setItemAsync("vupth_access_token", data.tokens.access_token);
     await SecureStore.setItemAsync("vupth_refresh_token", data.tokens.refresh_token);
@@ -82,6 +90,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     set((state) => ({
       user: state.user ? { ...state.user, roles } : null,
     }));
+  },
+
+  // Esqueci minha senha (S7, backend fatia 1 2026-07-20): codigo de 6 digitos
+  // por e-mail (validade 15min, uso unico, max 5 tentativas). Endpoints
+  // PUBLICOS — nada de token/estado. O backend responde 200 SEMPRE no
+  // forgot-password (anti-enumeracao de e-mails), entao a tela nao tem como
+  // saber se o e-mail existe — o texto de sucesso deve refletir isso.
+  forgotPassword: async (email) => {
+    await api.post("/auth/forgot-password", { email });
+  },
+
+  resetPassword: async (email, code, newPassword) => {
+    await api.post("/auth/reset-password", { email, code, new_password: newPassword });
   },
 
   refreshToken: async () => {

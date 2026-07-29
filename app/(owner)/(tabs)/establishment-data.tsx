@@ -23,11 +23,10 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
     <Pressable
       onPress={onPress}
       py="$4"
-      px="$4"
+      px="$5"
       bg="$white"
-      borderRadius="$md"
-      borderWidth="$1"
-      borderColor="$coolGray200"
+      borderRadius="$2xl"
+      style={cardShadow}
       $active-bg="$coolGray50"
     >
       <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray900">
@@ -60,7 +59,7 @@ export default function EstablishmentDataScreen() {
 
         <CompletionCard
           completion={completion}
-          doneBanner="Você já aparece para clientes!"
+          doneBanner="Cadastro completo — já pode abrir a loja e atender!"
           routeFor={routeFor}
         />
 
@@ -85,10 +84,8 @@ export default function EstablishmentDataScreen() {
         <HStack
           mt="$4"
           bg="$white"
-          borderRadius="$md"
-          borderWidth="$1"
-          borderColor="$coolGray200"
-          px="$4"
+          borderRadius="$2xl"
+          px="$5"
           py="$4"
           justifyContent="space-between"
           alignItems="center"

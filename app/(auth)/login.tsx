@@ -4,6 +4,7 @@ import {
   FormControl,
   Heading,
   Text,
+  Pressable,
   ScrollView,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
@@ -107,6 +108,18 @@ export default function LoginScreen() {
             title={isLoading ? "Entrando..." : "Entrar"}
             onPress={handleSubmit}
           />
+
+          {/* S7 LIGADO (backend fatia 1, 2026-07-20): codigo de 6 digitos por
+              e-mail. O envio REAL depende do SMTP (S8) estar configurado. */}
+          <Pressable
+            onPress={() => router.push("/(auth)/forgot-password" as any)}
+            mt="$4"
+            alignSelf="center"
+          >
+            <Text fontFamily="$body" fontSize="$sm" color="$green600" fontWeight="$medium">
+              Esqueci minha senha
+            </Text>
+          </Pressable>
         </VStack>
 
         <VStack mt="$12" space="sm" flex={1} w="$full">

@@ -41,7 +41,12 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
       alignItems="center"
       space="sm"
     >
-      <Pressable flex={1} onPress={() => router.push(targetRoute as any)}>
+      <Pressable
+        flex={1}
+        onPress={() => router.push(targetRoute as any)}
+        accessibilityRole="button"
+        accessibilityLabel="Completar cadastro"
+      >
         <HStack alignItems="center" space="sm">
           <View
             style={{

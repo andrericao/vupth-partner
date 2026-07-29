@@ -16,6 +16,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
+import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
 import {
   useEstablishmentStore,
@@ -151,9 +152,8 @@ export default function InviteProfessionalScreen() {
                   key={p.id}
                   bg="$white"
                   p="$3"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor="$coolGray200"
+                  borderRadius="$2xl"
+                  style={cardShadow}
                   justifyContent="space-between"
                   alignItems="center"
                 >

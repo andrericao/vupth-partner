@@ -1,0 +1,367 @@
+<title>Horas vagas — padrões de exibição</title>
+<style>
+  :root {
+    --bg: #f4f7f4;
+    --surface: #ffffff;
+    --ink: #17251a;
+    --muted: #5c6b60;
+    --line: #dfe7e0;
+    --brand: #3b7a3f;
+    --brand-ink: #1b4332;
+    --brand-tint: #e9f2ea;
+    --amber: #b7791f;
+    --amber-tint: #fbf1dc;
+    --amber-line: #eacf9a;
+    --shadow: 0 1px 2px rgba(23,37,26,.06), 0 8px 24px rgba(23,37,26,.08);
+    --radius: 18px;
+    --rec: #2f7a43;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e130f; --surface: #171f18; --ink: #e6efe7; --muted: #9bab9f;
+      --line: #29342b; --brand: #6fbf74; --brand-ink: #bfe6c3; --brand-tint: #17301c;
+      --amber: #e3b357; --amber-tint: #2a2312; --amber-line: #4a3d1c;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45); --rec: #6fbf74;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e130f; --surface: #171f18; --ink: #e6efe7; --muted: #9bab9f;
+    --line: #29342b; --brand: #6fbf74; --brand-ink: #bfe6c3; --brand-tint: #17301c;
+    --amber: #e3b357; --amber-tint: #2a2312; --amber-line: #4a3d1c;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45); --rec: #6fbf74;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f7f4; --surface: #ffffff; --ink: #17251a; --muted: #5c6b60;
+    --line: #dfe7e0; --brand: #3b7a3f; --brand-ink: #1b4332; --brand-tint: #e9f2ea;
+    --amber: #b7791f; --amber-tint: #fbf1dc; --amber-line: #eacf9a;
+    --shadow: 0 1px 2px rgba(23,37,26,.06), 0 8px 24px rgba(23,37,26,.08); --rec: #2f7a43;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 20px 72px; }
+  .head { max-width: 640px; margin-bottom: 8px; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); font-weight: 700; }
+  h1 { font-family: "Poppins", system-ui, sans-serif; font-weight: 700; font-size: clamp(26px, 4vw, 36px); line-height: 1.12; margin: 10px 0 12px; text-wrap: balance; letter-spacing: -.01em; }
+  .lede { color: var(--muted); font-size: 16px; margin: 0; }
+  .scenario {
+    margin: 26px 0 34px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center;
+  }
+  .scenario b { font-family: "Poppins", system-ui, sans-serif; }
+  .scenario .k { font-size: 13px; color: var(--muted); }
+  .scenario .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
+  .opt { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+  .opt.rec { border-color: var(--rec); box-shadow: var(--shadow), 0 0 0 1px var(--rec); }
+  .opt-head { padding: 18px 18px 4px; }
+  .opt-title { font-family: "Poppins", system-ui, sans-serif; font-weight: 600; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--rec); padding: 3px 8px; border-radius: 999px; }
+  :root[data-theme="dark"] .badge, :root:not([data-theme="light"]) .badge { color: #0e130f; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .badge { color: #fff; } }
+  .opt-sub { color: var(--muted); font-size: 13.5px; margin: 6px 0 0; }
+  /* phone preview */
+  .phone { margin: 16px 18px; background: var(--bg); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .phone .app-title { font-family: "Poppins", system-ui, sans-serif; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .phone .app-hint { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+  /* window band */
+  .band { border: 1px dashed var(--amber-line); background: var(--amber-tint); border-radius: 12px; padding: 14px; }
+  .band .from { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .band .big { font-family: "Poppins", system-ui, sans-serif; font-size: 26px; font-weight: 700; color: var(--amber); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .band .to { font-size: 13px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .rail { position: relative; height: 8px; border-radius: 999px; background: var(--line); margin: 14px 0 6px; overflow: hidden; }
+  .rail .busy { position: absolute; left: 0; top: 0; bottom: 0; width: 42%; background: repeating-linear-gradient(45deg, var(--muted) 0 4px, transparent 4px 8px); opacity: .35; }
+  .rail .free { position: absolute; left: 42%; right: 0; top: 0; bottom: 0; background: var(--brand); opacity: .5; }
+  .railkey { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  /* slots */
+  .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .slot { text-align: center; padding: 10px 0; border-radius: 10px; border: 1px solid var(--line); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 14px; background: var(--surface); }
+  .slot.off { color: var(--muted); opacity: .45; text-decoration: line-through; background: transparent; }
+  .slot.on { border-color: var(--brand); color: var(--brand-ink); background: var(--brand-tint); }
+  /* periods */
+  .period { margin-bottom: 12px; }
+  .period-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 6px; }
+  .period-h .lbl { font-weight: 600; }
+  .period-h .cap { color: var(--muted); font-size: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--brand); color: var(--brand-ink); background: var(--brand-tint); font-variant-numeric: tabular-nums; }
+  .period.full .chip { border-color: var(--line); color: var(--muted); background: transparent; }
+  /* list */
+  .nlist { display: flex; flex-direction: column; gap: 8px; }
+  .nrow { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  .nrow .t { font-family: "Poppins", system-ui, sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .nrow .m { font-size: 12px; color: var(--muted); }
+  .nrow .fee { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cta { margin-top: 14px; width: 100%; border: 0; background: var(--brand); color: #fff; font-weight: 600; font-family: "Poppins", system-ui, sans-serif; padding: 12px; border-radius: 999px; font-size: 15px; box-shadow: var(--shadow); }
+  :root[data-theme="dark"] .cta { color: #0e130f; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cta { color: #0e130f; } }
+  /* proscons */
+  .pc { padding: 4px 18px 18px; margin-top: auto; }
+  .pc dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 13px; }
+  .pc dt { color: var(--muted); }
+  .pc .good { color: var(--brand); font-weight: 700; }
+  .pc .bad { color: var(--amber); font-weight: 700; }
+  .foot { margin-top: 40px; padding: 20px 22px; background: var(--brand-tint); border: 1px solid var(--line); border-radius: 14px; font-size: 14.5px; }
+  .foot b { font-family: "Poppins", system-ui, sans-serif; }
+  .src { margin-top: 22px; font-size: 12.5px; color: var(--muted); }
+  .src a { color: var(--brand); }
+  /* ---- Cenário B: dia fragmentado ---- */
+  .divider { margin: 56px 0 8px; border: 0; border-top: 1px solid var(--line); }
+  .hero { margin: 8px 0 26px; padding: 22px; background: var(--surface); border: 1px solid var(--rec); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .hero h2 { font-family: "Poppins", system-ui, sans-serif; font-size: 20px; margin: 0 0 4px; }
+  .hero p { margin: 0 0 16px; color: var(--muted); font-size: 14.5px; }
+  .dayrail { display: flex; height: 46px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+  .dayrail .seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; padding: 0 4px; text-align: center; overflow: hidden; letter-spacing: .01em; }
+  .seg-q { background: var(--muted); }
+  .seg-free { background: var(--brand); }
+  .seg-book { background: var(--amber); }
+  .dayrail-key { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: var(--muted); }
+  .dayrail-key i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .faixas { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 560px) { .faixas { grid-template-columns: 1fr; } }
+  .grade { font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
+  .verdict { font-size: 12.5px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .verdict b { font-family: "Poppins", system-ui, sans-serif; }
+  .v-bad { color: var(--amber); }
+  .v-ok { color: var(--brand); }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow">VUPTH Parceiros · exploração de design</div>
+    <h1>Como mostrar as horas vagas para o cliente</h1>
+    <p class="lede">Quatro padrões consolidados de apps de fila/agendamento, renderizados no mesmo cenário. O objetivo é escolher <em>um</em> — não misturar.</p>
+  </header>
+
+  <div class="scenario">
+    <span class="k">Cenário:</span>
+    <span><span class="k">fecha às</span> <span class="v">20:00</span></span>
+    <span><span class="k">ocupado até</span> <span class="v">18:30</span> <span class="k">(corte já na fila)</span></span>
+    <span><span class="k">cliente quer</span> <span class="k">cortar</span> <span class="v">após 17:00</span></span>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1. JANELA -->
+    <article class="opt rec">
+      <div class="opt-head">
+        <div class="opt-title">Janela única <span class="badge">Recomendado</span></div>
+        <p class="opt-sub">Uma faixa contínua: “de X até o fechamento”. Uma promessa que a fila consegue cumprir.</p>
+      </div>
+      <div class="phone">
+        <div class="app-title">Próxima janela livre</div>
+        <div class="app-hint">A fila anda sozinha — o horário exato varia.</div>
+        <div class="band">
+          <div class="from">Disponível a partir de</div>
+          <div class="big">18:30</div>
+          <div class="to">até o fechamento · 20:00</div>
+        </div>
+        <div class="rail"><div class="busy"></div><div class="free"></div></div>
+        <div class="railkey"><span>17:00</span><span>ocupado</span><span>livre →</span><span>20:00</span></div>
+        <button class="cta">Entrar nessa janela</button>
+      </div>
+      <div class="pc">
+        <dl>
+          <dt class="good">A favor</dt><dd>honesto com duração variável; casa com o ETA que o app já calcula; 1 número só.</dd>
+          <dt class="bad">Contra</dt><dd>menos “controle” percebido — o cliente não escolhe um minuto exato.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 2. SLOTS -->
+    <article class="opt">
+      <div class="opt-head">
+        <div class="opt-title">Slots / pílulas</div>
+        <p class="opt-sub">Horários discretos em grade. Familiar, mas cada slot vira uma promessa exata.</p>
+      </div>
+      <div class="phone">
+        <div class="app-title">Escolha um horário</div>
+        <div class="app-hint">Slots de 20 min a partir do fim da fila.</div>
+        <div class="slots">
+          <div class="slot off">17:30</div>
+          <div class="slot off">17:50</div>
+          <div class="slot off">18:10</div>
+          <div class="slot on">18:30</div>
+          <div class="slot on">18:50</div>
+          <div class="slot on">19:10</div>
+          <div class="slot on">19:30</div>
+          <div class="slot on">19:50</div>
+          <div class="slot off">20:10</div>
+        </div>
+        <button class="cta">Reservar 18:30</button>
+      </div>
+      <div class="pc">
+        <dl>
+          <dt class="good">A favor</dt><dd>sensação de controle; padrão que todo mundo reconhece.</dd>
+          <dt class="bad">Contra</dt><dd>exige duração fixa; um no-show/atraso quebra a grade toda; vira agendamento de verdade.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 3. PERÍODOS -->
+    <article class="opt">
+      <div class="opt-head">
+        <div class="opt-title">Períodos (Tarde / Noite)</div>
+        <p class="opt-sub">Agrupa por faixa do dia e sinaliza onde há espaço. Bom quando o expediente é longo.</p>
+      </div>
+      <div class="phone">
+        <div class="app-title">Quando você prefere?</div>
+        <div class="app-hint">As faixas mostram onde ainda cabe.</div>
+        <div class="period full">
+          <div class="period-h"><span class="lbl">Tarde</span><span class="cap">cheio até 18:30</span></div>
+          <div class="chips"><span class="chip">17:00–18:30</span></div>
+        </div>
+        <div class="period">
+          <div class="period-h"><span class="lbl">Noite</span><span class="cap">livre</span></div>
+          <div class="chips"><span class="chip">18:30–19:15</span><span class="chip">19:15–20:00</span></div>
+        </div>
+        <button class="cta">Escolher “Noite”</button>
+      </div>
+      <div class="pc">
+        <dl>
+          <dt class="good">A favor</dt><dd>escaneável; comunica “tarde lotada, noite livre” num relance.</dd>
+          <dt class="bad">Contra</dt><dd>abstrato demais p/ um expediente curto; pode parecer que cabe mais do que cabe.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <!-- 4. LISTA PRÓXIMOS -->
+    <article class="opt">
+      <div class="opt-head">
+        <div class="opt-title">Lista “próximos”</div>
+        <p class="opt-sub">Sugestões dentro da janela, com preço. Híbrido entre janela e slot.</p>
+      </div>
+      <div class="phone">
+        <div class="app-title">Próximos horários</div>
+        <div class="app-hint">Estimativas — a fila pode adiantar.</div>
+        <div class="nlist">
+          <div class="nrow"><span><span class="t">~18:30</span> <span class="m">· 1º livre</span></span><span class="fee">R$ 45</span></div>
+          <div class="nrow"><span><span class="t">~19:00</span></span><span class="fee">R$ 45</span></div>
+          <div class="nrow"><span><span class="t">~19:30</span></span><span class="fee">R$ 45</span></div>
+        </div>
+        <button class="cta">Entrar por volta das 18:30</button>
+      </div>
+      <div class="pc">
+        <dl>
+          <dt class="good">A favor</dt><dd>mostra preço e opções sem prometer o minuto (“~”); fácil de escanear.</dd>
+          <dt class="bad">Contra</dt><dd>três linhas podem virar três “promessas”; precisa deixar o “~/estimado” bem claro.</dd>
+        </dl>
+      </div>
+    </article>
+
+  </div>
+
+  <hr class="divider" />
+
+  <header class="head">
+    <div class="eyebrow">Cenário B · dia fragmentado</div>
+    <h1>E quando o dia tem buracos?</h1>
+    <p class="lede">Ainda é de manhã. A <b>fila ao vivo vai até 14:00</b>, mas já há <b>pedidos às 17:00 e às 19:30</b>, e fecha 20:00. Agora não existe <em>uma</em> janela — existem várias, cortadas pelos compromissos. É aqui que os padrões se separam.</p>
+  </header>
+
+  <div class="scenario">
+    <span class="k">Cenário B:</span>
+    <span><span class="k">fila ao vivo até</span> <span class="v">14:00</span></span>
+    <span><span class="k">pedidos:</span> <span class="v">17:00</span> <span class="k">e</span> <span class="v">19:30</span></span>
+    <span><span class="k">fecha</span> <span class="v">20:00</span></span>
+  </div>
+
+  <!-- Resposta recomendada: trilho do dia -->
+  <div class="hero">
+    <h2>✅ Trilho do dia (o certo p/ dia fragmentado)</h2>
+    <p>Um único trilho mostra a forma do dia num relance — e é honesto sobre os buracos. Não promete minuto; mostra onde há espaço.</p>
+    <div class="dayrail">
+      <div class="seg seg-q" style="width:40%">Fila · até 14:00</div>
+      <div class="seg seg-free" style="width:30%">livre 14–17</div>
+      <div class="seg seg-book" style="width:5%">17h</div>
+      <div class="seg seg-free" style="width:20%">livre 17:30–19:30</div>
+      <div class="seg seg-book" style="width:5%">19:30</div>
+    </div>
+    <div class="dayrail-key">
+      <span><i style="background:var(--muted)"></i>fila ao vivo (entra e espera)</span>
+      <span><i style="background:var(--brand)"></i>livre (atende logo)</span>
+      <span><i style="background:var(--amber)"></i>já pedido</span>
+    </div>
+    <div class="faixas">
+      <div class="nrow"><span><span class="t">Agora</span> <span class="m">· entra na fila → ~14:00</span></span><span class="fee">R$ 45</span></div>
+      <div class="nrow"><span><span class="t">14:00–17:00</span> <span class="m">· livre</span></span><span class="fee">R$ 45</span></div>
+      <div class="nrow"><span><span class="t">17:30–19:30</span> <span class="m">· livre</span></span><span class="fee">R$ 45</span></div>
+      <div class="nrow"><span><span class="t">19:30</span> <span class="m">· quase fechando</span></span><span class="fee">—</span></div>
+    </div>
+    <p class="verdict v-ok"><b>Por quê:</b> o trilho é a evolução natural da <b>janela</b> quando há compromissos — vira “janela + marcadores”. E de graça ele também é a <b>agenda do dia do profissional</b> no partner (ver nota no fim).</p>
+  </div>
+
+  <!-- Como os 4 padrões sofrem -->
+  <div class="grid">
+
+    <article class="opt">
+      <div class="opt-head"><div class="opt-title">Janela única — quebra</div></div>
+      <div class="phone">
+        <div class="app-title">Próxima janela livre</div>
+        <div class="band">
+          <div class="from">Disponível a partir de</div>
+          <div class="big">14:00</div>
+          <div class="to">até o fechamento · 20:00</div>
+        </div>
+        <p class="grade">…mas 17:00 e 19:30 <b>não</b> estão livres. A faixa única <b>mente</b> — ou teria que esconder os pedidos.</p>
+      </div>
+      <div class="pc"><p class="verdict v-bad"><b>Falha:</b> só sabe expressar 1 intervalo contínuo.</p></div>
+    </article>
+
+    <article class="opt">
+      <div class="opt-head"><div class="opt-title">Slots — a parede furada</div></div>
+      <div class="phone">
+        <div class="app-title">Escolha um horário</div>
+        <div class="slots">
+          <div class="slot on">14:00</div><div class="slot on">14:30</div><div class="slot on">15:00</div>
+          <div class="slot on">15:30</div><div class="slot on">16:00</div><div class="slot on">16:30</div>
+          <div class="slot off">17:00</div><div class="slot on">17:30</div><div class="slot on">18:00</div>
+          <div class="slot on">18:30</div><div class="slot on">19:00</div><div class="slot off">19:30</div>
+        </div>
+        <p class="grade">12 pílulas com <b>2 furos</b>. Picotado, cansativo e sugere reserva exata que a fila não cumpre.</p>
+      </div>
+      <div class="pc"><p class="verdict v-bad"><b>Falha:</b> exatamente o “muito picotado” que você apontou.</p></div>
+    </article>
+
+    <article class="opt">
+      <div class="opt-head"><div class="opt-title">Períodos — com ressalvas</div></div>
+      <div class="phone">
+        <div class="app-title">Quando você prefere?</div>
+        <div class="period"><div class="period-h"><span class="lbl">Tarde</span><span class="cap">livre, exceto ~17:00</span></div><div class="chips"><span class="chip">14:00–17:00</span></div></div>
+        <div class="period"><div class="period-h"><span class="lbl">Noite</span><span class="cap">livre, exceto ~19:30</span></div><div class="chips"><span class="chip">17:30–19:30</span></div></div>
+        <p class="grade">Aguenta, mas o “exceto ~X” é ruído — vira desculpa em vez de informação.</p>
+      </div>
+      <div class="pc"><p class="verdict v-bad"><b>Meio-termo:</b> ok, mas abstrato e cheio de exceção.</p></div>
+    </article>
+
+    <article class="opt rec">
+      <div class="opt-head"><div class="opt-title">Lista → vira “faixas livres” <span class="badge">Escala</span></div></div>
+      <div class="phone">
+        <div class="app-title">Horários livres</div>
+        <div class="nlist">
+          <div class="nrow"><span><span class="t">Agora</span> <span class="m">· fila → ~14:00</span></span><span class="fee">R$ 45</span></div>
+          <div class="nrow"><span><span class="t">14:00–17:00</span></span><span class="fee">livre</span></div>
+          <div class="nrow"><span><span class="t">17:30–19:30</span></span><span class="fee">livre</span></div>
+        </div>
+        <p class="grade">Cada buraco vira <b>uma linha</b>. Cresce com a fragmentação sem virar parede.</p>
+      </div>
+      <div class="pc"><p class="verdict v-ok"><b>Escala bem:</b> é o trilho em forma de lista — bom pra quem prefere texto.</p></div>
+    </article>
+
+  </div>
+
+  <div class="foot">
+    <b>Recomendação (revisada com o Cenário B):</b> quando o dia é simples, <b>janela única</b>. Quando há compromissos e o dia fica picotado, ela quebra — a resposta certa é o <b>trilho do dia</b> (janela + marcadores) ou, em texto, <b>faixas livres</b> (a Lista evoluída). Os dois são a mesma ideia: mostrar os <em>intervalos</em> livres, nunca minutos exatos. <b>Slots morrem aqui</b> — viram a parede furada que você descreveu. <br><br><b>Divisão de responsabilidade:</b> o <b>cliente</b> nem precisa ver toda a fragmentação — ele diz “quero por volta das 18h” e o app responde “você entra na fila ali, ~N na frente”. O <b>trilho detalhado do dia</b> (fila + 17h + 19:30) é mais valioso no <b>partner</b> — é a <em>agenda do profissional</em>, o que ele olha pra se planejar. Ou seja: fragmentação = feature do cockpit (partner); no cliente, mantém simples.
+  </div>
+
+  <p class="src">Padrões consolidados a partir de:
+    <a href="https://www.eleken.co/blog-posts/time-picker-ux">Eleken — Time Picker UX</a> ·
+    <a href="https://baymard.com/ecommerce-design-examples/time-booking-interface">Baymard — Time Booking Interface</a> ·
+    <a href="https://scanqueue.com/solutions/barbershops">ScanQueue — Walk-in barbershop queue</a> ·
+    <a href="https://waitq.app/blog/set-up-digital-queue-barbershop">WaitQ — Digital queue for barbershops</a> ·
+    <a href="https://www.zenoti.com/thecheckin/best-barbershop-software-2026">Zenoti — Best barbershop software 2026</a>
+  </p>
+</div>

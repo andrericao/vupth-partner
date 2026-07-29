@@ -9,11 +9,12 @@ import {
   Pressable,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl, BackHandler } from "react-native";
+import { Alert, RefreshControl, BackHandler, Modal, View } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
+import { useQuery } from "@tanstack/react-query";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime, clearAttendanceStart } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -23,146 +24,189 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
-import { professionalCompletion } from "@lib/completion";
+import { professionalCompletion, hasAnyPending } from "@lib/completion";
+import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
+import { ratingLabel } from "@lib/rating";
+import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
+import { activeCutRequests } from "@lib/cutRequests";
+import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { ClosingPrompt } from "@components/ClosingPrompt";
+import { BenchIcon } from "@components/BenchIcon";
 import * as SecureStore from "expo-secure-store";
 
-// Janela (min) apos o horario previsto em que ainda vale avisar do almoco.
-const MEAL_NUDGE_WINDOW_MIN = 45;
-
-function hhmmToMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function AttendanceCard({
+// Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
+// design/queue-layout-combined.html). Fica no TOPO da tela e concentra as acoes
+// do atendimento em andamento — e a resposta a "como pauso/finalizo no meio do
+// atendimento", ja que o botao do rodape passou a ser so o 'Iniciar proximo'.
+// Pausado: o card fica ambar, ganha o selo e troca Pausar por Retomar.
+function ServingCard({
   attendance,
-  onStart,
   onFinish,
   onPause,
   onResume,
-  onRemove,
-  onLate,
-  onNoShow,
-  onAdvance,
-  isActive,
-  isFirst,
 }: {
   attendance: AttendanceInQueue;
-  onStart?: () => void;
   onFinish?: () => void;
   onPause?: () => void;
   onResume?: () => void;
-  onRemove?: () => void;
-  onLate?: () => void;
-  onNoShow?: () => void;
-  onAdvance?: () => void;
-  isActive: boolean;
-  isFirst: boolean;
 }) {
-  const isInProgress = attendance.status === "IN_PROGRESS";
   const isPaused = attendance.status === "PAUSED";
-  const isLate = attendance.status === "LATE";
-
   const { formatted } = useElapsedTime(
-    isInProgress || isPaused ? attendance.id : null,
+    attendance.id,
     (attendance as any).startTime ?? null,
     isPaused
   );
 
-  const statusLabel = isInProgress
-    ? "EM ATENDIMENTO"
-    : isPaused
-      ? "PAUSADO"
-      : isLate
-        ? "ATRASADO"
-        : "AGUARDANDO";
-
   return (
     <VStack
-      bg="$white"
+      bg={isPaused ? "$amber500" : "$green500"}
       p="$4"
       borderRadius="$2xl"
-      borderWidth={isActive ? "$2" : "$0"}
-      borderColor="$green400"
       style={cardShadow}
-      mb="$3"
+      mt="$4"
     >
-      <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$coolGray900">
-          {attendance.clientName}
+      <HStack alignItems="center" space="xs">
+        <VStack w="$2" h="$2" borderRadius="$full" bg="$white" opacity={0.85} />
+        <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white" letterSpacing="$lg">
+          {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
         </Text>
-        <Badge
-          action={isInProgress ? "success" : isPaused ? "warning" : isLate ? "error" : "info"}
-          variant="solid"
-          borderRadius="$md"
-        >
-          <BadgeText fontSize="$xs">{statusLabel}</BadgeText>
-        </Badge>
       </HStack>
 
-      <VStack mt="$2" space="xs">
-        {attendance.services.map((svc) => (
-          <Text key={svc.id} fontFamily="$body" fontSize="$sm" color="$coolGray600">
-            {svc.customName} ({svc.estimatedMinutes}min)
-          </Text>
-        ))}
-      </VStack>
+      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$white" mt="$1">
+        {attendance.clientName}
+      </Text>
+      <Text fontFamily="$body" fontSize="$sm" color="$white" opacity={0.9}>
+        {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
+      </Text>
+      <Text fontFamily="$body" fontSize="$xs" color="$white" opacity={0.95} mt="$1.5">
+        ⏱ {formatted}
+      </Text>
 
-      <HStack mt="$3" justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
-          R$ {attendance.totalValue.toFixed(2)}
-        </Text>
-        {(isInProgress || isPaused) && (
-          <Text fontFamily="$body" fontSize="$sm" color={isInProgress ? "$green500" : "$amber500"}>
-            {formatted}
-          </Text>
-        )}
-      </HStack>
-
-      {isActive && (isInProgress || isPaused) && (
-        <HStack mt="$3" space="sm">
-          {isInProgress && (
-            <>
-              <Button title="Pausar" onPress={onPause} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
-              <Button title="Finalizar" onPress={onFinish} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
-            </>
-          )}
-          {isPaused && (
-            <Button title="Retomar" onPress={onResume} bg="$blue500" $active-bg="$blue600" h="$10" flex={1} />
-          )}
-        </HStack>
-      )}
-
-      {/* O 1o da fila (indice 0) inicia direto. Se nao chegou, "Nao chegou"
-          (/late) o faz cair 1 posicao e o proximo vira o 1o.
-          Fora do 1o lugar da pra ADIANTAR (atender fora de ordem) — com
-          confirmacao, pois pula quem esta na frente (/start aceita qualquer
-          posicao). Ja em ATRASADO, "Nao compareceu" (/no-show) tira da fila com
-          strike (#39). "Remover" tira sem penalidade. */}
-      {!isActive && (attendance.status === "SCHEDULED" || isLate) && (
-        isFirst ? (
-          <VStack mt="$3" space="sm">
-            <HStack space="sm">
-              <Button title="Iniciar" onPress={onStart} bg="$green500" $active-bg="$green600" h="$10" flex={1} />
-              <Button title="Nao chegou" onPress={onLate} bg="$amber500" $active-bg="$amber600" h="$10" flex={1} />
-            </HStack>
-            {isLate && (
-              <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
-            )}
-            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
-          </VStack>
+      <HStack mt="$3" space="sm">
+        {isPaused ? (
+          <Button
+            title="Retomar"
+            onPress={onResume}
+            bg="$white"
+            textColor="$amber700"
+            $active-bg="$coolGray100"
+            h="$10"
+            mt="$0"
+            flex={1}
+          />
         ) : (
-          <VStack mt="$3" space="sm">
-            <Button title="Adiantar" onPress={onAdvance} bg="$green500" $active-bg="$green600" h="$10" />
-            {isLate && (
-              <Button title="Nao compareceu" onPress={onNoShow} bg="$red500" $active-bg="$red600" h="$10" />
-            )}
-            <Button title="Remover" onPress={onRemove} bg="transparent" borderWidth="$1" borderColor="$red400" textColor="$red500" $active-bg="$red50" h="$10" />
-          </VStack>
-        )
-      )}
+          <Button
+            title="Pausar"
+            onPress={onPause}
+            bg="$green600"
+            $active-bg="$green700"
+            h="$10"
+            mt="$0"
+            flex={1}
+          />
+        )}
+        <Button
+          title="Finalizar"
+          onPress={onFinish}
+          bg="$white"
+          textColor={isPaused ? "$amber700" : "$green700"}
+          $active-bg="$coolGray100"
+          h="$10"
+          mt="$0"
+          flex={1}
+        />
+      </HStack>
     </VStack>
+  );
+}
+
+// Linha da lista de espera. O CARD INTEIRO e clicavel e abre o menu de acoes
+// (design Andre 2026-07-18) — o kebab ⋮ saiu, o que elimina o toque errado ao
+// lado do botao. "Iniciar" tambem saiu do card: virou o botao FIXO do rodape,
+// que sempre atende o 1o. O 1o segue em destaque com o selo "Proximo"
+// (redundancia proposital). "Atrasado" e so um selo; as acoes seguem a POSICAO
+// (ver src/lib/queueCard.ts).
+function QueueRow({
+  attendance,
+  position,
+  isFirst,
+  onMenu,
+}: {
+  attendance: AttendanceInQueue;
+  position: number;
+  isFirst: boolean;
+  onMenu: () => void;
+}) {
+  const isLate = attendance.status === "LATE";
+  const services = formatServices(attendance.services);
+  const price = `R$ ${attendance.totalValue.toFixed(2)}`;
+
+  return (
+    <Pressable
+      onPress={onMenu}
+      accessibilityRole="button"
+      accessibilityLabel={`Opcoes de ${attendance.clientName}`}
+      bg="$white"
+      p={isFirst ? "$4" : "$3"}
+      pl="$4"
+      borderRadius={isFirst ? "$2xl" : "$xl"}
+      borderWidth={isFirst ? "$1" : "$0"}
+      borderColor="$green200"
+      style={cardShadow}
+      mb={isFirst ? "$3" : "$2"}
+      $active-bg="$coolGray50"
+    >
+      <HStack alignItems="center" space="sm">
+        <VStack
+          w="$6"
+          h="$6"
+          bg={isFirst ? "$green500" : "$coolGray100"}
+          borderRadius="$full"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Text
+            fontFamily="$heading"
+            fontWeight="$bold"
+            fontSize="$xs"
+            color={isFirst ? "$white" : "$coolGray500"}
+          >
+            {position}
+          </Text>
+        </VStack>
+
+        <VStack flex={1}>
+          <HStack alignItems="center" space="sm">
+            <Text
+              fontFamily="$heading"
+              fontWeight="$bold"
+              fontSize={isFirst ? "$md" : "$sm"}
+              color="$coolGray900"
+            >
+              {attendance.clientName}
+            </Text>
+            {!isFirst && (
+              <Badge action={isLate ? "warning" : "muted"} variant="solid" borderRadius="$md" size="sm">
+                <BadgeText fontSize="$xs">{isLate ? "atrasado" : "aguardando"}</BadgeText>
+              </Badge>
+            )}
+          </HStack>
+          <Text fontFamily="$body" fontSize={isFirst ? "$sm" : "$xs"} color="$coolGray600">
+            {services} · {price}
+          </Text>
+          {isFirst && (
+            <Text fontFamily="$body" fontSize="$xs" color={isLate ? "$amber600" : "$green600"} mt="$0.5">
+              {isLate ? "Atrasado" : "Proximo"}
+            </Text>
+          )}
+        </VStack>
+
+        <Text fontSize="$lg" color="$coolGray400" fontWeight="$bold">
+          ›
+        </Text>
+      </HStack>
+    </Pressable>
   );
 }
 
@@ -171,8 +215,10 @@ export default function ProfessionalQueueScreen() {
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
-  const { startAttendance, finishAttendance, pauseAttendance, resumeAttendance, markLate, noShow, removeFromQueue } =
-    useAttendanceStore();
+  const {
+    startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
+    markLate, removeFromQueue, promoteAttendance, fetchCutRequests,
+  } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
@@ -188,6 +234,8 @@ export default function ProfessionalQueueScreen() {
   const nudgedRef = useRef<Set<string>>(new Set());
 
   const [refreshing, setRefreshing] = useState(false);
+  // Cliente cujo menu ⋮ esta aberto (action sheet), ou null.
+  const [menuTarget, setMenuTarget] = useState<AttendanceInQueue | null>(null);
 
   useEffect(() => {
     const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
@@ -223,6 +271,16 @@ export default function ProfessionalQueueScreen() {
     [profId, startInterval]
   );
 
+  // "Nao ver mais": desliga o popup de vez. O aviso continua no menu (dot +
+  // contagem). Reversivel em Configuracoes > Refeicoes.
+  const disableMealNudge = useCallback(async () => {
+    try {
+      await setMealNudgeDisabled(true);
+    } catch {
+      // preferencia e best-effort; nao vale interromper o atendimento por isso
+    }
+  }, []);
+
   // "Nao almocar" do dia: pula a refeicao e derruba do ETA dos clientes (#17/#41).
   const handleSkipMeal = useCallback(
     async (m: Interval) => {
@@ -244,6 +302,10 @@ export default function ProfessionalQueueScreen() {
     let cancelled = false;
 
     (async () => {
+      // "Nao ver mais": o profissional desligou o popup — o aviso segue no
+      // menu (dot + contagem), sem intromissao na tela.
+      if (await isMealNudgeDisabled()) return;
+
       const now = new Date();
       const nowMin = now.getHours() * 60 + now.getMinutes();
       const today = isoDate(now);
@@ -275,6 +337,10 @@ export default function ProfessionalQueueScreen() {
           : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
         [
           { text: "Agora nao", style: "cancel" },
+          // "Nao ver mais" desliga o popup DE VEZ (Andre 2026-07-20: "sem
+          // intromissao na tela"). Depois disso o aviso fica so no menu — dot +
+          // contagem. Reversivel em Configuracoes > Refeicoes.
+          { text: "Nao ver mais", onPress: () => disableMealNudge() },
           { text: "Nao almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
           { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
         ]
@@ -284,20 +350,33 @@ export default function ProfessionalQueueScreen() {
     return () => {
       cancelled = true;
     };
-  }, [meals, profId, data, handleStartMeal, handleSkipMeal]);
+  }, [meals, profId, data, handleStartMeal, handleSkipMeal, disableMealNudge]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
+  const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
   // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
   const completion = professionalCompletion({
     isAffiliated: !!establishmentId,
     hasService: myServices.length > 0,
-    establishmentReady: (data?.open_status ?? "") === "OPEN",
     hasNickname: !!professional?.nickname,
     hasSpecialty: !!professional?.specialty,
   });
+
+  // Dots do menu ☰ (design 2026-07-18): refeicao dentro da janela + pendencia
+  // de cadastro. O 3o gatilho pedido (solicitacoes de corte com a fila fechada)
+  // aguarda o backend — ver HANDOFF_BACKEND "Detalhe — C2".
+  // "proxima" acende 30min ANTES do horario (pedido do Andre 2026-07-20): o
+  // profissional ve com antecedencia, toca e decide iniciar ou nao.
+  const currentMealSignal = mealSignal(meals, new Date().getHours() * 60 + new Date().getMinutes());
+  const settingsDot = hasAnyPending(completion);
+
+  // Refeicao EM ANDAMENTO fica na tela (Encerrar a um toque); o resto vai p/ o
+  // menu, que mostra o horario da proxima no proprio rotulo.
+  const activeMeal = meals.find((m) => m.status === "ACTIVE") ?? null;
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
@@ -319,8 +398,6 @@ export default function ProfessionalQueueScreen() {
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
   // finalizado antes (o profissional optou por pular pro proximo — ou por atender
   // alguem fora de ordem). `advance` = o escolhido nao e o 1o da fila.
-  // (A realocacao da fila quando se atende fora de ordem e do backend — o `start`
-  // ja aceita qualquer posicao; o "promover/reordenar" e o S7.)
   const startClient = (att: AttendanceInQueue, advance: boolean) => {
     const runningName = currentAttendance?.clientName;
     const doStart = () =>
@@ -347,6 +424,73 @@ export default function ProfessionalQueueScreen() {
     ]);
   };
 
+  // "Nao chegou": o cliente da vez cai uma posicao e vira ATRASADO (repetivel,
+  // sem teto). O proximo passa a ser o 1o.
+  const confirmLate = (att: AttendanceInQueue) => {
+    Alert.alert(
+      "Cliente nao chegou",
+      `${att.clientName} cai uma posicao e o proximo passa a ser o primeiro. Continuar?`,
+      [
+        { text: "Cancelar" },
+        { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
+      ]
+    );
+  };
+
+  // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
+  // remover a qualquer momento, inclusive no 1o atraso.
+  const confirmRemove = (att: AttendanceInQueue) => {
+    Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
+      { text: "Cancelar" },
+      { text: "Remover", style: "destructive", onPress: () => handleAction(() => removeFromQueue(att.id)) },
+    ]);
+  };
+
+  // "Promover ao topo" (S4): reordena ao 1o lugar SEM iniciar — os demais descem
+  // e o cliente vira o proximo. Diferente de "Adiantar", que inicia na hora.
+  const confirmPromote = (att: AttendanceInQueue) => {
+    Alert.alert(
+      "Promover ao topo",
+      `${att.clientName} vai para o 1o lugar da fila, sem iniciar o atendimento. Continuar?`,
+      [
+        { text: "Cancelar" },
+        { text: "Promover", onPress: () => handleAction(() => promoteAttendance(att.id)) },
+      ]
+    );
+  };
+
+  // Abrir/fechar o ESTABELECIMENTO pelo menu ☰ (pedido Andre 2026-07-18). O
+  // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
+  // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
+  // handleAction, que traduz a mensagem.
+  // C2 (desbloqueado 2026-07-22): pendentes via GET. TEMPO REAL: o WS pessoal
+  // (assinado no useQueueSocket, mesma conexao da fila) invalida esta query a
+  // cada evento CUT_* — o refetch de 30s vira fallback p/ socket caido. A
+  // validade e checada LOCALMENTE pelo expires_at (orientacao do backend) —
+  // pedido vencido some sozinho no proximo render.
+  // Relogio ancorado em estado (react-hooks/purity proibe Date.now() no
+  // render). Atualiza nos CALLBACKS — a cada fetch da lista (30s) e ao abrir o
+  // modal — granularidade de sobra p/ um TTL de 5min.
+  const [cutNowMs, setCutNowMs] = useState(() => Date.now());
+  const { data: cutRequestsData } = useQuery({
+    queryKey: ["cut-requests", profId],
+    queryFn: async () => {
+      const list = await fetchCutRequests();
+      setCutNowMs(Date.now()); // callback de sistema externo: permitido
+      return list;
+    },
+    enabled: !!profId && !!establishmentId,
+    refetchInterval: 30000,
+  });
+  const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
+
+  const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
+    if (action === "adiantar") startClient(att, true);
+    else if (action === "promover") confirmPromote(att);
+    else if (action === "nao-chegou") confirmLate(att);
+    else if (action === "remover") confirmRemove(att);
+  };
+
   const handleFinishMeal = async (m: Interval) => {
     if (!profId) return;
     try {
@@ -356,24 +500,12 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
-  // Editar refeicao: confirmacao para nao abrir por toque acidental.
-  const handleEditMeal = (m: Interval) => {
-    Alert.alert(
-      "Editar refeicao",
-      `Abrir a edicao de "${mealName(m.description)}" (horario/duracao)?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Editar", onPress: () => router.push("/(professional)/meals" as any) },
-      ]
-    );
-  };
-
   if (!establishmentId) {
     return (
       <VStack flex={1} py="$12" px="$6">
         <Header />
         <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Minha Fila
+          Fila
         </Heading>
         <VStack
           mt="$8"
@@ -405,18 +537,87 @@ export default function ProfessionalQueueScreen() {
   }
 
   return (
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
+    <VStack flex={1}>
+      {/* Auto-fechamento (BUG1): o prompt "quer fechar?" com countdown aparece
+          por cima da fila quando chega o WS CLOSING_PROMPT (Modal, so visivel se
+          houver graceUntil na ui.store). */}
+      <ClosingPrompt />
+      {/* flex={1} e obrigatorio aqui: como ScrollView virou FILHO (antes era a
+          raiz da tela), sem ele a lista cresceria com o conteudo e empurraria a
+          barra fixa do rodape para fora da tela. */}
+      <ScrollView
+        flex={1}
+        w="$full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
       <VStack flex={1} py="$12" px="$6">
-        <Header />
+        {/* Um icone por tela (QA 2026-07-22): aqui quem manda e o banco do menu. */}
+        <Header showRoleIcon={false} />
 
-        <Heading size="2xl" fontFamily="$heading" mt="$4">
-          Minha fila
-        </Heading>
+        {/* Titulo + menu lado a lado (a tab bar saiu do rodape). */}
+        <HStack mt="$4" alignItems="center" justifyContent="space-between">
+          <Heading size="2xl" fontFamily="$heading">
+            Fila
+          </Heading>
+          {/* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
+              modal — "mais amigavel a tela inteira"). Dot = refeicao na janela,
+              pendencia de cadastro ou solicitacao de corte. */}
+          <Pressable
+            onPress={() => router.push("/(professional)/queue-options" as any)}
+            accessibilityRole="button"
+            accessibilityLabel="Opcoes da fila"
+            hitSlop={8}
+            w="$10"
+            h="$10"
+            borderRadius="$xl"
+            bg="$white"
+            alignItems="center"
+            justifyContent="center"
+            style={cardShadow}
+            $active-bg="$green50"
+          >
+            <BenchIcon />
+            {(currentMealSignal != null || settingsDot || pendingCutRequests.length > 0) && (
+              <View
+                testID="menu-dot"
+                style={{
+                  position: "absolute",
+                  top: -3,
+                  right: -3,
+                  width: 12,
+                  height: 12,
+                  borderRadius: 6,
+                  backgroundColor: "#E63946",
+                  borderWidth: 2,
+                  borderColor: "#F7FAF8",
+                }}
+              />
+            )}
+          </Pressable>
+        </HStack>
+
+        {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
+          <Text fontFamily="$body" fontSize="$sm" color="$amber600" mt="$1">
+            ★ {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
+          </Text>
+        )}
+
+        {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
+        {currentAttendance && (
+          <ServingCard
+            attendance={currentAttendance}
+            onFinish={() =>
+              handleAction(async () => {
+                await finishAttendance(currentAttendance.id);
+                clearAttendanceStart(currentAttendance.id);
+              })
+            }
+            onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
+            onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
+          />
+        )}
 
         <ReadinessFaixa
           completion={completion}
@@ -424,25 +625,22 @@ export default function ProfessionalQueueScreen() {
           goalNoun="atender clientes"
         />
 
-        {/* [new-design] 2 cards verdes: pessoas na fila + tempo de espera (sem "~"). */}
+        {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
+            chips — liberam tela para a fila e para o botao fixo do rodape. */}
         {myProfessional && (
-          <HStack space="md" mt="$4">
-            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text fontFamily="$body" fontSize="$xs" color="$green50">
-                pessoas na fila
+          <HStack space="sm" mt="$4" alignItems="center">
+            <HStack bg="$green100" borderRadius="$full" px="$3" py="$1.5" alignItems="center" space="xs">
+              <Text fontSize="$xs">👥</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$green700">
+                {myProfessional.queue_count} na fila
               </Text>
-              <Text fontFamily="$heading" fontSize="$4xl" color="$white" mt="$1">
-                {myProfessional.queue_count}
-              </Text>
-            </VStack>
-            <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text fontFamily="$body" fontSize="$xs" color="$green50">
-                tempo de espera
-              </Text>
-              <Text fontFamily="$heading" fontSize="$3xl" color="$white" mt="$1">
+            </HStack>
+            <HStack bg="$green100" borderRadius="$full" px="$3" py="$1.5" alignItems="center" space="xs">
+              <Text fontSize="$xs">⏱</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xs" color="$green700">
                 {myProfessional.estimated_wait_minutes} min
               </Text>
-            </VStack>
+            </HStack>
           </HStack>
         )}
 
@@ -452,137 +650,55 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         )}
 
-        {currentAttendance && (
-          <VStack mt="$6">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
-              Atendimento Atual
-            </Text>
-            <AttendanceCard
-              attendance={currentAttendance}
-              isActive
-              isFirst={false}
-              onFinish={() =>
-                handleAction(async () => {
-                  await finishAttendance(currentAttendance.id);
-                  clearAttendanceStart(currentAttendance.id);
-                })
-              }
-              onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
-              onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
-            />
-          </VStack>
-        )}
-
         {waitingList.length > 0 && (
           <VStack mt="$6">
             <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
               Lista de Espera ({waitingList.length})
             </Text>
             {waitingList.map((att, idx) => (
-              <AttendanceCard
+              <QueueRow
                 key={att.id}
                 attendance={att}
-                isActive={false}
+                position={idx + 1}
                 isFirst={idx === 0}
-                onStart={() => startClient(att, false)}
-                onAdvance={() => startClient(att, true)}
-                onLate={() =>
-                  Alert.alert(
-                    "Cliente nao chegou",
-                    `${att.clientName} cai uma posicao e o proximo passa a ser o primeiro. Continuar?`,
-                    [
-                      { text: "Cancelar" },
-                      { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
-                    ]
-                  )
-                }
-                onNoShow={() =>
-                  Alert.alert(
-                    "Cliente nao compareceu",
-                    `${att.clientName} sai da fila com uma marca de falta (no-show). Continuar?`,
-                    [
-                      { text: "Cancelar" },
-                      { text: "Confirmar", style: "destructive", onPress: () => handleAction(() => noShow(att.id)) },
-                    ]
-                  )
-                }
-                onRemove={() =>
-                  Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
-                    { text: "Cancelar" },
-                    { text: "Remover", style: "destructive", onPress: () => handleAction(() => removeFromQueue(att.id)) },
-                  ])
-                }
+                onMenu={() => setMenuTarget(att)}
               />
             ))}
           </VStack>
         )}
 
-        {myProfessional && meals.length > 0 && (
-          <VStack mt="$6">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
-              Refeicoes
-            </Text>
-            {meals.map((m) => {
-              const active = m.status === "ACTIVE";
-              return (
-                <HStack
-                  key={m.intervalId}
-                  bg={active ? "$amber100" : "$amber50"}
-                  p="$3"
-                  mb="$2"
-                  borderRadius="$2xl"
-                  borderWidth="$1"
-                  borderColor={active ? "$amber300" : "$amber200"}
-                  alignItems="center"
-                  space="sm"
-                >
-                  <Text fontSize="$md">🍽️</Text>
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$amber700">
-                      {mealName(m.description)} {parseApiTime(m.fixedStartTime) ?? "--:--"}
-                    </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$amber600">
-                      {m.durationMinutes}min{active ? " • em andamento" : " • previsto"}
-                    </Text>
-                  </VStack>
-                  {!active && (
-                    <Pressable onPress={() => handleEditMeal(m)} px="$2" py="$1">
-                      <Text fontSize="$lg" color="$amber700">✎</Text>
-                    </Pressable>
-                  )}
-                  {active ? (
-                    <Button
-                      title="Encerrar"
-                      onPress={() => handleFinishMeal(m)}
-                      bg="$amber500"
-                      $active-bg="$amber600"
-                      h="$9"
-                      mt="$0"
-                    />
-                  ) : (
-                    <Button
-                      title="Iniciar"
-                      onPress={() => handleStartMeal(m)}
-                      bg="$green500"
-                      $active-bg="$green600"
-                      h="$9"
-                      mt="$0"
-                    />
-                  )}
-                </HStack>
-              );
-            })}
-          </VStack>
-        )}
-
-        {myProfessional && (
-          <Button
-            title="Adicionar Cliente"
-            onPress={() => router.push("/(professional)/add-guest" as any)}
-            bg="$amber500"
-            $active-bg="$amber600"
+        {/* Refeicoes sairam da tela (foram p/ o menu, design 2026-07-20). Fica
+            so a faixa da refeicao EM ANDAMENTO, porque "Encerrar" precisa estar
+            a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
+        {activeMeal && (
+          <HStack
             mt="$6"
-          />
+            bg="$amber100"
+            p="$3"
+            borderRadius="$2xl"
+            borderWidth="$1"
+            borderColor="$amber300"
+            alignItems="center"
+            space="sm"
+          >
+            <Text fontSize="$md">🍽️</Text>
+            <VStack flex={1}>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$amber700">
+                {mealName(activeMeal.description)} em andamento
+              </Text>
+              <Text fontFamily="$body" fontSize="$xs" color="$amber600">
+                {activeMeal.durationMinutes}min previstos
+              </Text>
+            </VStack>
+            <Button
+              title="Encerrar"
+              onPress={() => handleFinishMeal(activeMeal)}
+              bg="$amber500"
+              $active-bg="$amber600"
+              h="$9"
+              mt="$0"
+            />
+          </HStack>
         )}
 
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
@@ -617,7 +733,7 @@ export default function ProfessionalQueueScreen() {
             </Text>
             <Button
               title="Adicionar Servico"
-              onPress={() => router.push("/(professional)/my-services" as any)}
+              onPress={() => router.push("/(professional)/my-services?from=queue" as any)}
               bg="$green500"
               $active-bg="$green600"
               mt="$2"
@@ -625,6 +741,90 @@ export default function ProfessionalQueueScreen() {
           </VStack>
         )}
       </VStack>
-    </ScrollView>
+      </ScrollView>
+
+      {/* Botao FIXO do rodape (design 2026-07-18): o unico "start", e sempre
+          atende o 1o da fila. Com atendimento em andamento ele vira uma DICA —
+          finalize antes de iniciar o proximo (nao atende dois ao mesmo tempo). */}
+      {waitingList.length > 0 && (
+        <VStack
+          px="$6"
+          pt="$3"
+          style={{ paddingBottom: 12, backgroundColor: "#F7FAF8" }}
+        >
+          {currentAttendance ? (
+            <VStack
+              bg="$white"
+              borderRadius="$full"
+              py="$3.5"
+              alignItems="center"
+              style={cardShadow}
+            >
+              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+                Finalize para iniciar o proximo · {waitingList[0].clientName}
+              </Text>
+            </VStack>
+          ) : (
+            <Button
+              title={`Iniciar proximo · ${waitingList[0].clientName}`}
+              onPress={() => startClient(waitingList[0], false)}
+              bg="$green500"
+              $active-bg="$green600"
+              mt="$0"
+            />
+          )}
+        </VStack>
+      )}
+
+      {/* Menu do card (action sheet). Acoes por posicao — ver queueMenuActions. */}
+      <Modal
+        visible={!!menuTarget}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setMenuTarget(null)}
+      >
+        <VStack flex={1} justifyContent="flex-end">
+          <Pressable
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
+            onPress={() => setMenuTarget(null)}
+            accessibilityLabel="Fechar menu"
+          />
+          <VStack bg="$white" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" p="$4" pb="$8" space="xs">
+            {menuTarget && (
+              <>
+                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$1">
+                  {menuTarget.clientName}
+                </Text>
+                {queueMenuActions(menuIsFirst).map((action) => (
+                  <Pressable
+                    key={action}
+                    onPress={() => {
+                      const t = menuTarget;
+                      setMenuTarget(null);
+                      if (t) runMenuAction(action, t);
+                    }}
+                    py="$3"
+                  >
+                    <Text
+                      fontFamily="$body"
+                      fontSize="$md"
+                      color={action === "remover" ? "$red600" : "$coolGray900"}
+                    >
+                      {QUEUE_ACTION_LABEL[action]}
+                    </Text>
+                  </Pressable>
+                ))}
+                <Pressable onPress={() => setMenuTarget(null)} py="$3">
+                  <Text fontFamily="$body" fontSize="$md" color="$coolGray500">
+                    Cancelar
+                  </Text>
+                </Pressable>
+              </>
+            )}
+          </VStack>
+        </VStack>
+      </Modal>
+
+    </VStack>
   );
 }

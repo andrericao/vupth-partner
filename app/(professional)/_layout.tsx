@@ -1,9 +1,20 @@
 import { Tabs } from "expo-router";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
+import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
+import { hasAnyPending } from "@lib/completion";
+
+// Nav v2 (Andre 2026-07-23, mockup design/professional-nav-v2.html):
+// RODAPE = LUGARES — Fila · Relatorios · Configuracoes. As ACOES do dia vivem na
+// tela "Opcoes da fila" (banco no header da Fila), SEM duplicar o rodape.
+// A aba Configuracoes ganha DOT quando ha pendencia de cadastro.
+const HIDDEN = { href: null } as const;
 
 export default function ProfessionalLayout() {
   const insets = useSafeAreaInsets();
+  const { completion } = useProfessionalCompletion();
+  const settingsDot = hasAnyPending(completion);
 
   return (
     <Tabs
@@ -34,51 +45,45 @@ export default function ProfessionalLayout() {
         }}
       />
       <Tabs.Screen
-        name="my-services"
+        name="my-day"
         options={{
-          title: "Servicos",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="cut" focused={focused} />,
+          title: "Relatorios",
+          tabBarIcon: ({ focused }) => <TabBarIcon name="stats-chart" focused={focused} />,
         }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="person" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="onboarding"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="attendances"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="reports"
-        options={{ href: null }}
       />
       <Tabs.Screen
         name="settings"
-        options={{ href: null }}
+        options={{
+          title: "Configuracoes",
+          tabBarIcon: ({ focused }) => (
+            <View>
+              <TabBarIcon name="settings" focused={focused} />
+              {settingsDot && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -2,
+                    right: -4,
+                    width: 9,
+                    height: 9,
+                    borderRadius: 5,
+                    backgroundColor: "#E63946",
+                  }}
+                />
+              )}
+            </View>
+          ),
+        }}
       />
-      <Tabs.Screen
-        name="add-guest"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="find-establishment"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="establishment-detail"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="meals"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="queue-options" options={HIDDEN} />
+      <Tabs.Screen name="settings-account" options={HIDDEN} />
+      <Tabs.Screen name="settings-vinculo" options={HIDDEN} />
+      <Tabs.Screen name="my-services" options={HIDDEN} />
+      <Tabs.Screen name="onboarding" options={HIDDEN} />
+      <Tabs.Screen name="add-guest" options={HIDDEN} />
+      <Tabs.Screen name="find-establishment" options={HIDDEN} />
+      <Tabs.Screen name="establishment-detail" options={HIDDEN} />
+      <Tabs.Screen name="meals" options={HIDDEN} />
     </Tabs>
   );
 }

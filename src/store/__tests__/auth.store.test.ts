@@ -1,6 +1,7 @@
 import MockAdapter from "axios-mock-adapter";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+import { unregisterDevice } from "@lib/push";
 import { useAuthStore } from "../auth.store";
 
 jest.mock("expo-secure-store", () => ({
@@ -8,6 +9,8 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
+
+jest.mock("@lib/push", () => ({ unregisterDevice: jest.fn().mockResolvedValue(undefined) }));
 
 const mockEstablishmentReset = jest.fn();
 const mockRestoreEstablishment = jest.fn().mockResolvedValue(undefined);
@@ -252,12 +255,62 @@ describe("auth.store", () => {
         },
       });
 
-      await useAuthStore.getState().updatePassword("NovaSenha@123");
+      await useAuthStore.getState().updatePassword("SenhaAtual@123", "NovaSenha@123");
 
-      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ password: "NovaSenha@123" });
+      // Breaking backend 2026-07-23: o corpo agora leva a senha ATUAL tambem.
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        current_password: "SenhaAtual@123",
+        password: "NovaSenha@123",
+      });
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_access_token", PROFESSIONAL_TOKEN);
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_refresh_token", "refresh-new-pwd");
       expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    });
+  });
+
+  // Esqueci minha senha (S7, fatia 1 do backend 2026-07-20): codigo de 6
+  // digitos por e-mail, validade 15min, uso unico. Endpoints PUBLICOS — nao
+  // mexem em token nem em estado de sessao.
+  describe("forgotPassword", () => {
+    it("POSTa /auth/forgot-password com o e-mail", async () => {
+      mock.onPost("/auth/forgot-password").reply(200);
+
+      await useAuthStore.getState().forgotPassword("prof@test.com");
+
+      expect(mock.history.post[0].url).toBe("/auth/forgot-password");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({ email: "prof@test.com" });
+    });
+
+    it("nao toca em token nem autentica", async () => {
+      mock.onPost("/auth/forgot-password").reply(200);
+
+      await useAuthStore.getState().forgotPassword("prof@test.com");
+
+      expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    });
+  });
+
+  describe("resetPassword", () => {
+    it("POSTa /auth/reset-password com email, code e new_password (snake)", async () => {
+      mock.onPost("/auth/reset-password").reply(200);
+
+      await useAuthStore.getState().resetPassword("prof@test.com", "123456", "NovaSenha@123");
+
+      expect(mock.history.post[0].url).toBe("/auth/reset-password");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({
+        email: "prof@test.com",
+        code: "123456",
+        new_password: "NovaSenha@123",
+      });
+    });
+
+    it("rejeita no 400 (codigo invalido/expirado)", async () => {
+      mock.onPost("/auth/reset-password").reply(400, { message: "RESET_CODE_INVALID" });
+
+      await expect(
+        useAuthStore.getState().resetPassword("prof@test.com", "000000", "NovaSenha@123")
+      ).rejects.toThrow();
     });
   });
 
@@ -366,6 +419,50 @@ describe("auth.store", () => {
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
       expect(state.isLoading).toBe(false);
+    });
+  });
+
+  describe("logout", () => {
+    it("desregistra o push quando ha token salvo e encerra a sessao", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+        k === "vupth_push_token" ? "expo-push-abc" : null
+      );
+      mock.onPost("/auth/logout").reply(200);
+      useAuthStore.setState({
+        user: { id: "u1", email: "a@b.c", roles: ["OWNER"] } as any,
+        isAuthenticated: true,
+      });
+
+      await useAuthStore.getState().logout();
+
+      expect(unregisterDevice).toHaveBeenCalledWith("expo-push-abc");
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_push_token");
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_access_token");
+      expect(mockEstablishmentReset).toHaveBeenCalled();
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.isAuthenticated).toBe(false);
+    });
+
+    it("sem push token nao chama unregisterDevice, mas ainda encerra a sessao", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+      mock.onPost("/auth/logout").reply(200);
+      useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+      await useAuthStore.getState().logout();
+
+      expect(unregisterDevice).not.toHaveBeenCalled();
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    });
+
+    it("encerra a sessao mesmo se o POST /auth/logout falhar", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+      mock.onPost("/auth/logout").reply(500);
+      useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+      await useAuthStore.getState().logout();
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
     });
   });
 });

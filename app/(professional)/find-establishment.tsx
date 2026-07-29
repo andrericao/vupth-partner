@@ -18,6 +18,7 @@ import {
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
+import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { api, getApiErrorMessage } from "@lib/api";
@@ -163,7 +164,7 @@ export default function FindEstablishmentScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
+          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
           <Heading mt="$8" size="2xl" fontFamily="$heading">
             Buscar Estabelecimento
@@ -292,9 +293,8 @@ export default function FindEstablishmentScreen() {
               py="$4"
               px="$4"
               bg="$white"
-              borderRadius="$md"
-              borderWidth="$1"
-              borderColor="$coolGray200"
+              borderRadius="$2xl"
+              style={cardShadow}
               mb="$2"
               $active-bg="$coolGray50"
             >

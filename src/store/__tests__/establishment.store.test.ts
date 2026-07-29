@@ -1,4 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
+import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import { useEstablishmentStore } from "../establishment.store";
 import { useAuthStore } from "../auth.store";
@@ -22,6 +23,9 @@ const ESTABLISHMENT_RESPONSE = {
   instagram: null,
   opening_time: null,
   closing_time: null,
+  // normalizeEstablishment sempre popula (null sem endereco embutido) — sem
+  // isto o toEqual de objeto inteiro quebra.
+  address: null,
   created_at: "2026-05-17T10:00:00",
   message: "Establishment created!",
 };
@@ -285,6 +289,37 @@ describe("establishment.store", () => {
       );
     });
 
+    // QA 2026-07-22: o /mine ja embute o address (backend BUG4) e a store
+    // dropava — o checklist ficava com "endereco pendente" fantasma quando o
+    // GET rico falhava. Agora o normalize captura.
+    it("captura o address embutido do /mine (fallback do checklist)", async () => {
+      mock.onGet("/establishment/mine").reply(200, [
+        {
+          ...ESTABLISHMENT_RESPONSE,
+          address: {
+            street: "Rua A",
+            number: "10",
+            neighborhood: "Centro",
+            city: "Natal",
+            state: "RN",
+            zipCode: "59.000-000",
+          },
+        },
+      ]);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      expect(useEstablishmentStore.getState().establishment?.address?.neighborhood).toBe("Centro");
+    });
+
+    it("sem address no /mine, o campo fica null (nao inventa endereco)", async () => {
+      mock.onGet("/establishment/mine").reply(200, [ESTABLISHMENT_RESPONSE]);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      expect(useEstablishmentStore.getState().establishment?.address).toBeNull();
+    });
+
     it("keeps state when owner has no establishments", async () => {
       mock.onGet("/establishment/mine").reply(200, []);
 
@@ -515,6 +550,62 @@ describe("establishment.store", () => {
       expect(detail.instagram).toBeNull();
       expect(detail.opening_time).toBeNull();
       expect(detail.address).toBeNull();
+    });
+  });
+
+  describe("addAddress", () => {
+    it("POST /establishments/{id}/addresses e retorna o endereco criado", async () => {
+      const addr = {
+        street: "Rua A",
+        number: "10",
+        neighborhood: "Centro",
+        city: "Sao Paulo",
+        state: "SP",
+        zipCode: "01001000",
+      };
+      mock
+        .onPost("/establishments/estab-uuid-1/addresses")
+        .reply(201, { id: "addr-1", ...addr });
+
+      const out = await useEstablishmentStore
+        .getState()
+        .addAddress("estab-uuid-1", addr as any);
+
+      expect(mock.history.post[0].url).toBe("/establishments/estab-uuid-1/addresses");
+      expect(JSON.parse(mock.history.post[0].data)).toEqual(addr);
+      expect(out).toMatchObject({ id: "addr-1", neighborhood: "Centro" });
+    });
+  });
+
+  describe("restoreEstablishment", () => {
+    it("restaura do SecureStore quando ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(
+        JSON.stringify(ESTABLISHMENT_RESPONSE)
+      );
+
+      await useEstablishmentStore.getState().restoreEstablishment();
+
+      expect(SecureStore.getItemAsync).toHaveBeenCalledWith("vupth_establishment");
+      expect(useEstablishmentStore.getState().establishment?.id).toBe("estab-uuid-1");
+    });
+
+    it("nao altera o estado quando nao ha valor salvo", async () => {
+      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
+
+      await useEstablishmentStore.getState().restoreEstablishment();
+
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
+    });
+  });
+
+  describe("reset", () => {
+    it("limpa o estado e apaga o SecureStore", () => {
+      useEstablishmentStore.setState({ establishment: ESTABLISHMENT_RESPONSE as any });
+
+      useEstablishmentStore.getState().reset();
+
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_establishment");
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
     });
   });
 });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   VStack,
   HStack,
@@ -19,9 +19,29 @@ import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
 export default function EstablishmentHoursScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const updateGeneralInfos = useEstablishmentStore((s) => s.updateGeneralInfos);
+  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
 
   const [opening, setOpening] = useState(parseApiTime(establishment?.opening_time) ?? "");
   const [closing, setClosing] = useState(parseApiTime(establishment?.closing_time) ?? "");
+
+  // QA 2026-07-22 (#4): a store persistida pode nao ter o horario (projecao
+  // velha) — os campos abriam VAZIOS mesmo com horario ja configurado, e o
+  // "Salvar" parecia indevido. Busca o detalhe FRESCO e preenche o que o
+  // usuario ainda nao digitou (digitacao tem precedencia).
+  useEffect(() => {
+    if (!establishment?.id) return;
+    let active = true;
+    fetchEstablishmentById(establishment.id)
+      .then((d) => {
+        if (!active) return;
+        setOpening((cur) => cur || (parseApiTime(d.opening_time) ?? ""));
+        setClosing((cur) => cur || (parseApiTime(d.closing_time) ?? ""));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [establishment?.id, fetchEstablishmentById]);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {

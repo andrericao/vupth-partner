@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fila — layout combinado</title>
+<style>
+  :root{
+    --bg:#F7FAF8; --card:#fff; --brand:#3B7A3F; --brand-600:#2f6733; --brand-100:#e7f0e7; --brand-200:#cfe0cf;
+    --ink-900:#1a281a; --ink-700:#3f4a3f; --ink-600:#5b6b5b; --ink-500:#7d8a7d; --ink-400:#9aa79a;
+    --amber:#FFB703; --amber-600:#b97e00; --line:#e6ece6; --shadow:0 6px 18px rgba(26,40,26,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;background:#eaefea;color:var(--ink-900);padding:30px 18px 60px}
+  h1{text-align:center;font-size:20px;font-weight:800}
+  .lede{text-align:center;color:var(--ink-600);font-size:13.5px;max-width:760px;margin:8px auto 4px;line-height:1.5}
+  .grid{display:flex;flex-wrap:wrap;gap:34px;justify-content:center;align-items:flex-start;margin-top:24px}
+  .col{width:320px;display:flex;flex-direction:column;gap:10px}
+  .cap{display:flex;align-items:center;gap:8px}
+  .tag{font-size:11.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--brand-600);background:var(--brand-100);border-radius:999px;padding:4px 11px}
+  .note{font-size:12px;color:var(--ink-600);line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .note .why{color:var(--brand-600);font-weight:700}
+  .note ul{margin:6px 0 0 16px}.note li{margin:3px 0}
+
+  /* phone */
+  .phone{position:relative;background:var(--bg);border-radius:28px;padding:16px 14px 16px;box-shadow:var(--shadow);border:1px solid #dde6dd;height:560px;overflow:hidden}
+  .hd{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px}
+  .hd .ttl{font-weight:800;font-size:19px}
+  .menuBtn{position:relative;width:38px;height:38px;border-radius:11px;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--brand-600);font-size:18px;flex-direction:column;gap:3px}
+  .menuBtn span{display:block;width:16px;height:2px;background:var(--brand-600);border-radius:2px}
+  .menudot{position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:#E63946;border:2px solid var(--bg)}
+  .midot{width:9px;height:9px;border-radius:50%;background:#E63946;margin-left:auto;flex:0 0 auto}
+  .mcount{margin-left:auto;background:#E63946;color:#fff;font-size:11px;font-weight:800;border-radius:999px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+
+  .chips{display:flex;gap:8px;margin-bottom:2px}
+  .chip{display:flex;align-items:center;gap:5px;background:var(--brand-100);color:var(--brand-600);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
+
+  .list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .row{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:11px 12px;display:flex;align-items:center;gap:10px}
+  .row.first{border:1px solid var(--brand-200)}
+  .row.tap{position:relative}
+  .pos{width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .pos.m{background:#eef2ee;color:var(--ink-500)}
+  .who{flex:1;min-width:0}.who .n{font-weight:800;font-size:13.5px}.who .s{font-size:11.5px;color:var(--ink-600);margin-top:1px}
+  .mini{font-size:10.5px;color:var(--brand);font-weight:700;margin-top:2px}
+  .chev{color:var(--ink-400);font-size:18px;font-weight:700;flex:0 0 auto}
+
+  .btn{background:var(--brand);color:#fff;font-weight:800;border:none;border-radius:999px;padding:13px;font-size:14px;box-shadow:0 4px 12px rgba(59,122,63,.35);text-align:center}
+  .stickybar{position:absolute;left:0;right:0;bottom:0;padding:12px 14px 16px;background:linear-gradient(to top,var(--bg) 76%,transparent)}
+  .btn.ghost{background:#fff;color:var(--ink-500);box-shadow:var(--shadow);font-weight:700;border:1px solid var(--line)}
+  .btn.ghost b{color:var(--ink-700)}
+
+  /* atendendo agora */
+  .serving{background:var(--brand);border-radius:18px;padding:13px;color:#fff;box-shadow:0 8px 20px rgba(59,122,63,.30)}
+  .serving .cap2{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.85;font-weight:700;display:flex;align-items:center;gap:6px}
+  .serving .live{width:7px;height:7px;border-radius:50%;background:#8CE99A;box-shadow:0 0 0 3px rgba(140,233,154,.35)}
+  .serving .sn{font-weight:800;font-size:17px;margin-top:4px}
+  .serving .ss{font-size:12px;opacity:.9;margin-top:1px}
+  .serving .timer{font-size:12px;opacity:.95;margin-top:6px;font-variant-numeric:tabular-nums}
+  .servebtns{display:flex;gap:9px;margin-top:11px}
+  .sb{flex:1;border-radius:999px;padding:10px;text-align:center;font-weight:800;font-size:13px}
+  .sb.pause{background:rgba(255,255,255,.18);color:#fff}
+  .sb.finish{background:#fff;color:var(--brand-600)}
+  .sb.resume{background:#fff;color:var(--brand-600)}
+  .paused-badge{font-size:10.5px;background:rgba(255,255,255,.22);border-radius:999px;padding:2px 9px;font-weight:700;margin-left:auto}
+
+  /* header menu sheet (inset) */
+  .sheetphone{height:560px}
+  .scrim{position:absolute;inset:0;background:rgba(0,0,0,.28);border-radius:28px}
+  .sheet{position:absolute;left:12px;right:12px;top:60px;background:#fff;border-radius:16px;box-shadow:0 16px 36px rgba(26,40,26,.28);overflow:hidden}
+  .mi{display:flex;align-items:center;gap:11px;padding:14px 16px;font-size:14.5px;font-weight:600;color:var(--ink-700)}
+  .mi + .mi{border-top:1px solid #f1f4f1}
+  .mi .ic{width:22px;text-align:center;font-size:16px}
+  .mi small{display:block;font-size:11px;color:var(--ink-500);font-weight:500;margin-top:1px}
+  .caret{position:absolute;top:-7px;right:14px;width:14px;height:14px;background:#fff;transform:rotate(45deg)}
+</style>
+</head>
+<body>
+  <h1>Fila — layout combinado</h1>
+  <p class="lede">Mistura pedida: métricas = chips (opção 2) · card do cliente <b>inteiro clicável</b> abre as opções (cai o ⋮) · 1º card em destaque com “próximo a iniciar” (redundância da opção 2) · botão <b>Iniciar</b> fixo embaixo (opção 1) · <b>sem “Refeições” no rodapé</b> — menu ☰ no cabeçalho, com <b>dot</b> quando há refeição perto ou solicitação de corte na fila fechada. Dois estados: fila parada e atendimento em andamento.</p>
+
+  <div class="grid">
+
+    <!-- ESTADO A — fila parada -->
+    <div class="col">
+      <div class="cap"><span class="tag">A · fila parada</span></div>
+      <div class="phone">
+        <div class="hd">
+          <div class="ttl">Fila</div>
+          <div class="menuBtn"><span></span><span></span><span></span><i class="menudot"></i></div>
+        </div>
+        <div class="chips"><span class="chip">👥 3 na fila</span><span class="chip">⏱ ~40 min</span></div>
+
+        <div class="list">
+          <div class="row first tap">
+            <div class="pos">1</div>
+            <div class="who"><div class="n">João Silva</div><div class="s">Corte + Barba · R$ 45</div><div class="mini">próximo a iniciar</div></div>
+            <div class="chev">›</div>
+          </div>
+          <div class="row tap"><div class="pos m">2</div><div class="who"><div class="n">Marcos Lima</div><div class="s">Corte · R$ 30</div></div><div class="chev">›</div></div>
+          <div class="row tap"><div class="pos m">3</div><div class="who"><div class="n">Rafa Nunes</div><div class="s">Barba · R$ 25</div></div><div class="chev">›</div></div>
+        </div>
+
+        <div class="stickybar"><div class="btn">▶  Iniciar próximo · João</div></div>
+      </div>
+      <div class="note"><span class="why">Toque no card</span> (qualquer lugar, não só o ›) abre as opções por posição: 1º → Não chegou · Remover; demais → Adiantar · Promover · Remover. O único “start” é o botão fixo de baixo.</div>
+    </div>
+
+    <!-- ESTADO B — atendimento em andamento -->
+    <div class="col">
+      <div class="cap"><span class="tag">B · atendendo agora</span></div>
+      <div class="phone">
+        <div class="hd">
+          <div class="ttl">Fila</div>
+          <div class="menuBtn"><span></span><span></span><span></span><i class="menudot"></i></div>
+        </div>
+
+        <div class="serving">
+          <div class="cap2"><span class="live"></span> Atendendo agora</div>
+          <div class="sn">Maria Souza</div>
+          <div class="ss">Corte + Escova · R$ 60</div>
+          <div class="timer">⏱ em atendimento · 12:34</div>
+          <div class="servebtns">
+            <div class="sb pause">Pausar</div>
+            <div class="sb finish">Finalizar</div>
+          </div>
+        </div>
+
+        <div class="chips" style="margin-top:12px"><span class="chip">👥 2 na fila</span><span class="chip">⏱ ~28 min</span></div>
+        <div class="list">
+          <div class="row first tap"><div class="pos">1</div><div class="who"><div class="n">João Silva</div><div class="s">Corte + Barba · R$ 45</div><div class="mini">próximo a iniciar</div></div><div class="chev">›</div></div>
+          <div class="row tap"><div class="pos m">2</div><div class="who"><div class="n">Marcos Lima</div><div class="s">Corte · R$ 30</div></div><div class="chev">›</div></div>
+        </div>
+
+        <div class="stickybar"><div class="btn ghost">Finalize para iniciar o <b>próximo · João</b></div></div>
+      </div>
+      <div class="note"><span class="why">Sua pergunta (pausar/finalizar):</span> no atendimento, o card verde <b>“Atendendo agora”</b> no topo traz <b>Pausar</b> e <b>Finalizar</b>. O botão de baixo vira uma dica de quem é o próximo e só re-habilita “Iniciar” após o Finalizar (evita atender 2 ao mesmo tempo).</div>
+    </div>
+
+    <!-- INSET — menu do cabeçalho + estado pausado -->
+    <div class="col">
+      <div class="cap"><span class="tag">menu do cabeçalho</span></div>
+      <div class="phone sheetphone">
+        <div class="hd">
+          <div class="ttl">Fila</div>
+          <div class="menuBtn" style="background:var(--brand-100)"><span></span><span></span><span></span><i class="menudot"></i></div>
+        </div>
+        <div class="chips"><span class="chip">👥 3 na fila</span><span class="chip">⏱ ~40 min</span></div>
+        <div class="list">
+          <div class="row first tap"><div class="pos">1</div><div class="who"><div class="n">João Silva</div><div class="s">Corte + Barba · R$ 45</div></div><div class="chev">›</div></div>
+        </div>
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="caret"></div>
+          <div class="mi"><span class="ic">🍽️</span><div>Refeições<small>almoço perto — inicie ou adie</small></div><i class="midot"></i></div>
+          <div class="mi"><span class="ic">✋</span><div>Solicitações<small>fila fechada — pedidos de corte</small></div><span class="mcount">2</span></div>
+          <div class="mi"><span class="ic">✂️</span><div>Meus serviços<small>preços e duração</small></div></div>
+          <div class="mi"><span class="ic">⚙️</span><div>Configurações<small>status, apelido, especialidade, sair</small></div></div>
+        </div>
+      </div>
+      <div class="note"><span class="why">Rodapé sem “Refeições”:</span> ao lado de “Fila”, um menu (☰) abre Refeições + Configurações do profissional. Some a tab bar — o rodapé fica livre pro botão fixo. Mesmo menu vale no resto da área do profissional.
+        <br><br><span class="why">Dot no ☰ (vermelho):</span> aparece quando há algo a resolver atrás do menu — <b>(1)</b> um atendimento perto do <b>intervalo de refeição</b> (dot na Refeições) ou <b>(2)</b> <b>solicitações de corte com a fila fechada</b> (contador em Solicitações). Sem pendência, o menu fica limpo.
+        <br><br><span class="why">Pausado:</span> o card “Atendendo agora” fica âmbar com selo <b>Pausado</b> e troca “Pausar” por <b>Retomar</b> (+ Finalizar).</div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -21,19 +21,74 @@ export function isValidTime(value: string): boolean {
   return h >= 0 && h <= 23 && min >= 0 && min <= 59;
 }
 
-/** "HH:mm[:ss]±offset" da API -> "HH:MM" (relogio de parede). null se invalido. */
-export function parseApiTime(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const m = /^(\d{2}):(\d{2})/.exec(value);
-  if (!m) return null;
-  const hhmm = `${m[1]}:${m[2]}`;
-  return isValidTime(hhmm) ? hhmm : null;
+/**
+ * Offset OffsetTime -> minutos com sinal. Recebe so o que o regex de
+ * `parseApiTime` ja validou: "Z" ou "±HH:MM"/"±HHMM".
+ */
+function offsetToMinutes(off: string): number {
+  if (off === "Z") return 0;
+  const sign = off[0] === "-" ? -1 : 1;
+  return sign * (Number(off.slice(1, 3)) * 60 + Number(off.slice(-2)));
 }
 
-/** "HH:MM" -> OffsetTime UTC "HH:MM:00Z" para enviar a API. null se invalido. */
+/**
+ * "HH:mm[:ss]±offset" da API -> "HH:MM" no RELOGIO DE PAREDE do aparelho.
+ * null se invalido.
+ *
+ * ⚠️ QA 2026-07-24 (bug do fuso): o backend NORMALIZA o OffsetTime para UTC e
+ * devolve, p/ um almoco salvo as 12:00 local (enviado "12:00:00-03:00"), o
+ * valor "15:00Z". Ler o HH:MM cru mostrava 15:00 (+3h). Aqui convertemos de
+ * volta ao offset do aparelho (inverso do `toApiTime`), robusto a qualquer
+ * offset ecoado. Sem offset explicito, tratamos como relogio local (sem shift).
+ */
+export function parseApiTime(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const m = /^(\d{2}):(\d{2})(?::\d{2})?(Z|[+-]\d{2}:?\d{2})?/.exec(value);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return null;
+  const wall = h * 60 + min;
+  // Sem offset: e um relogio de parede local, nao mexemos.
+  if (!m[3]) return `${m[1]}:${m[2]}`;
+  const utc = wall - offsetToMinutes(m[3]);
+  const local = utc - new Date().getTimezoneOffset();
+  const norm = ((local % 1440) + 1440) % 1440; // vira o dia sem estourar
+  const hh = String(Math.floor(norm / 60)).padStart(2, "0");
+  const mm = String(norm % 60).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+/**
+ * Sufixo de offset do APARELHO no formato OffsetTime ("-03:00"; UTC vira "Z").
+ * `getTimezoneOffset()` devolve minutos a SOMAR na hora local p/ chegar em UTC
+ * (Brasil = +180), entao o sinal do sufixo e o INVERSO.
+ */
+export function deviceOffsetSuffix(now: Date = new Date()): string {
+  const min = now.getTimezoneOffset();
+  if (min === 0) return "Z";
+  const sign = min > 0 ? "-" : "+";
+  const abs = Math.abs(min);
+  const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mm = String(abs % 60).padStart(2, "0");
+  return `${sign}${hh}:${mm}`;
+}
+
+/**
+ * "HH:MM" -> OffsetTime "HH:MM:00±hh:mm" com o offset REAL do aparelho.
+ * null se invalido.
+ *
+ * ⚠️ QA 2026-07-23 (BUG do fuso): antes mandavamos a hora LOCAL rotulada como
+ * "Z" (UTC). O backend normaliza offsets e compara com o agora em UTC, entao a
+ * janela salva "08:00Z-18:00Z" valia, em hora LOCAL do Brasil (UTC-3),
+ * 05:00-15:00 — a loja aparecia aberta as 6:30 e barrava cliente as 18:30
+ * (era a raiz do BUG2). Mesmo veneno nas refeicoes (mesma funcao). Enviar o
+ * offset verdadeiro corrige; horarios JA SALVOS com "Z" continuam deslocados
+ * ate serem RE-SALVOS (ver HANDOFF).
+ */
 export function toApiTime(value: string): string | null {
   if (!isValidTime(value)) return null;
-  return `${value}:00Z`;
+  return `${value}:00${deviceOffsetSuffix()}`;
 }
 
 /** Data local como "YYYY-MM-DD" (ISO) para os params dateFrom/dateTo da API. */

@@ -16,6 +16,7 @@ import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
+import { ExpedienteCard } from "@components/ExpedienteCard";
 import { periodRange } from "@lib/time";
 
 type Period = "day" | "week" | "month";
@@ -150,6 +151,8 @@ export default function OwnerReportsScreen() {
             </Pressable>
           ))}
         </HStack>
+
+        <ExpedienteCard />
 
         {errorMsg && (
           <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$4">

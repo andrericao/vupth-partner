@@ -48,6 +48,19 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   INTERVAL_CONFLICT:
     "Conflito de horario: a refeicao ja foi iniciada/encerrada hoje ou se sobrepoe a outra.",
   INTERVAL_NOT_FOUND: "Refeicao/intervalo nao encontrado.",
+  // S1 — status do profissional (fatia 1).
+  PROFESSIONAL_HAS_NO_SERVICE:
+    "Cadastre pelo menos um servico antes de entrar em expediente.",
+  PROFESSIONAL_HAS_ACTIVE_ATTENDANCES:
+    "Nao da para ficar indisponivel com cliente em atendimento ou na fila. Termine a fila primeiro.",
+  // Esqueci minha senha (S7). O backend nao distingue "e-mail desconhecido" de
+  // "codigo errado" de proposito (anti-enumeracao) — a mensagem cobre os dois.
+  RESET_CODE_INVALID:
+    "Codigo invalido. Confira o e-mail e o codigo digitado (apos 5 erros ou uso, peca um novo).",
+  RESET_CODE_EXPIRED: "Codigo expirado (vale 15 minutos). Peca um novo codigo.",
+  // Trocar senha (breaking backend 2026-07-23): a senha ATUAL confere via
+  // PasswordEncoder.matches; errada volta 401 — erro de campo, nao de sessao.
+  CURRENT_PASSWORD_INVALID: "Senha atual incorreta.",
   VALIDATION_ERROR: "Verifique os dados informados e tente novamente.",
 };
 
@@ -86,7 +99,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // 401 de NEGOCIO, nao de sessao: senha atual incorreta na troca de senha
+    // (PATCH /profile/update-password/me). A tela trata como erro de campo —
+    // NAO pode disparar refresh/logout (senao o usuario cai fora ao errar a senha).
+    const errorCode = error.response?.data?.code;
+
+    if (
+      error.response?.status === 401 &&
+      errorCode !== "CURRENT_PASSWORD_INVALID" &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");

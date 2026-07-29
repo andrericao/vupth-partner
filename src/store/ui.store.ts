@@ -9,10 +9,19 @@ type UiState = {
   faixaDismissed: boolean;
   dismissFaixa: () => void;
   resetFaixa: () => void;
+  // Auto-fechamento (BUG1 / S1 fatia 5): quando chega o WS `CLOSING_PROMPT`,
+  // guardamos o `graceUntil` (fim da carencia de 15min, ISO) e a tela mostra o
+  // prompt "quer fechar?" com countdown. null = sem prompt ativo. Efemero.
+  closingGraceUntil: string | null;
+  showClosingPrompt: (graceUntil: string | null) => void;
+  dismissClosingPrompt: () => void;
 };
 
 export const useUiStore = create<UiState>((set) => ({
   faixaDismissed: false,
   dismissFaixa: () => set({ faixaDismissed: true }),
   resetFaixa: () => set({ faixaDismissed: false }),
+  closingGraceUntil: null,
+  showClosingPrompt: (graceUntil) => set({ closingGraceUntil: graceUntil }),
+  dismissClosingPrompt: () => set({ closingGraceUntil: null }),
 }));

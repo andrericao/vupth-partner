@@ -15,6 +15,11 @@ type Establishment = {
   instagram?: string | null;
   opening_time?: string | null;
   closing_time?: string | null;
+  /**
+   * Endereco PRINCIPAL embutido (backend BUG4: /mine e o detalhe mandam
+   * `address`; a store dropava). Fallback do checklist quando o GET rico falha.
+   */
+  address?: EstablishmentAddress | null;
   created_at?: string;
   message?: string;
 };
@@ -112,6 +117,7 @@ function normalizeEstablishment(data: any): Establishment {
     instagram: data.instagram ?? null,
     opening_time: data.opening_time ?? data.openingTime ?? null,
     closing_time: data.closing_time ?? data.closingTime ?? null,
+    address: normalizeAddress(data.address),
     created_at: data.created_at ?? data.createdAt,
     message: data.message,
   };

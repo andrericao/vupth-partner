@@ -3,6 +3,7 @@ import { api } from "@lib/api";
 import type {
   AttendanceInProgress,
   AttendanceHistoryItem,
+  CutRequestResponse,
   EstablishmentWithProfessionals,
   ProfessionalWithQueue,
   QueueResponse,
@@ -27,6 +28,10 @@ type AttendanceState = {
   undoLate: (attendanceId: string) => Promise<void>;
   noShow: (attendanceId: string) => Promise<void>;
   removeFromQueue: (attendanceId: string) => Promise<void>;
+  promoteAttendance: (attendanceId: string) => Promise<void>;
+  acceptCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
+  refuseCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
+  fetchCutRequests: () => Promise<CutRequestResponse[]>;
   reset: () => void;
 };
 
@@ -112,6 +117,36 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   removeFromQueue: async (attendanceId) => {
     await api.delete(`/professional-queue/${attendanceId}/remove`);
+  },
+
+  // S4 (backend 2026-07-18): move o atendimento ao indice 0 e empurra os demais,
+  // SEM inicia-lo (fica SCHEDULED). Diferente do "Adiantar", que inicia na hora
+  // via /start. No-op no backend se ja for o 1o; a fila ao vivo reflete via WS.
+  promoteAttendance: async (attendanceId) => {
+    await api.patch(`/attendances/${attendanceId}/promote`);
+  },
+
+  // C2 fatia 2 (backend 2026-07-18): o profissional dono decide um pedido de
+  // corte PENDING. accept -> nasce Attendance SCHEDULED na cauda (a fila reflete
+  // via WS); refuse -> pedido descartado. Ambos 200 CutRequestResponse.
+  // UI ligada em 2026-07-22 (modal na fila), apos o desbloqueio do GET.
+  acceptCutRequest: async (cutRequestId) => {
+    const { data } = await api.patch(`/attendances/cut-requests/${cutRequestId}/accept`);
+    return data;
+  },
+
+  refuseCutRequest: async (cutRequestId) => {
+    const { data } = await api.patch(`/attendances/cut-requests/${cutRequestId}/refuse`);
+    return data;
+  },
+
+  // C2 (desbloqueio 2026-07-22): pendentes do profissional logado (JWT),
+  // createdAt ASC. Fonte da verdade da lista: o WS pessoal (CUT_*) so INVALIDA
+  // a query e este GET refaz; o refetch de 30s e o fallback p/ socket caido e
+  // o fetch ao abrir recupera o que chegou com o app fechado.
+  fetchCutRequests: async () => {
+    const { data } = await api.get("/attendances/cut-requests");
+    return data;
   },
 
   reset: () =>

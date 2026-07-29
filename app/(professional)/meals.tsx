@@ -10,14 +10,16 @@ import {
   ScrollView,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
+import { cardShadow } from "@lib/styles";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
+import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 
 const PATTERNS = [
   { label: "Dias uteis", value: "WEEKDAYS" },
@@ -30,6 +32,34 @@ function patternLabel(value: string | null): string {
 }
 
 export default function MealsScreen() {
+  // Aviso na hora da refeicao (nav v2: o liga/desliga mora AQUI, junto das
+  // refeicoes — antes ficava perdido em Configuracoes). Reversao do "Nao ver
+  // mais" do popup; sem isto seria beco sem saida.
+  const [mealNudgeOff, setMealNudgeOff] = useState(false);
+  useEffect(() => {
+    isMealNudgeDisabled().then(setMealNudgeOff).catch(() => {});
+  }, []);
+  const toggleMealNudge = async () => {
+    const next = !mealNudgeOff;
+    setMealNudgeOff(next);
+    try {
+      await setMealNudgeDisabled(next);
+    } catch {
+      setMealNudgeOff(!next); // nao mentir na UI se a gravacao falhar
+    }
+  };
+
+  // Voltar retorna a ORIGEM real (Configuracoes ou Opcoes da fila). Sem isto o
+  // botao caia sempre na Fila (feedback Andre 2026-07-24). Tabs href:null nao
+  // dao router.back() confiavel, entao o chamador informa `from`.
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const backTarget =
+    from === "queue-options"
+      ? "/(professional)/queue-options"
+      : from === "queue"
+        ? "/(professional)/queue"
+        : "/(professional)/settings";
+
   const professional = useProfessionalStore((s) => s.professional);
   const profId = professional?.id ?? "";
 
@@ -170,7 +200,7 @@ export default function MealsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/profile" as any)} />
+          <Header showBackButton onBack={() => router.navigate(backTarget as any)} />
 
           <Heading mt="$8" size="2xl" fontFamily="$heading">
             Refeicoes
@@ -243,9 +273,8 @@ export default function MealsScreen() {
                   key={m.intervalId}
                   bg="$white"
                   p="$3"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor="$coolGray200"
+                  borderRadius="$2xl"
+                  style={cardShadow}
                   justifyContent="space-between"
                   alignItems="center"
                 >
@@ -360,6 +389,25 @@ export default function MealsScreen() {
               />
             </VStack>
           )}
+
+          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mt="$4">
+            <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
+              Aviso na hora da refeicao
+            </Text>
+            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+              {mealNudgeOff
+                ? "Desligado — o lembrete aparece so nas Opcoes da fila (bolinha + contagem)."
+                : "Ligado — um aviso aparece na tela no horario da refeicao."}
+            </Text>
+            <Button
+              title={mealNudgeOff ? "Ligar aviso" : "Desligar aviso"}
+              onPress={toggleMealNudge}
+              bg="$coolGray200"
+              textColor="$coolGray700"
+              h="$9"
+              mt="$2"
+            />
+          </VStack>
         </VStack>
       </ScrollView>
     </KeyboardAvoidingView>

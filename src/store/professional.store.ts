@@ -14,6 +14,17 @@ type Professional = {
   establishment_id: string | null;
   establishment_name: string | null;
   is_available: boolean;
+  /**
+   * S1 fatia 1 (backend, verificado no codigo 2026-07-22): WORKING (trabalhando),
+   * ON_BREAK (intervalo) ou OFF (indisponivel). Vem no DTO do /me (`work_status`).
+   */
+  work_status?: "WORKING" | "ON_BREAK" | "OFF" | null;
+  /**
+   * S1 fatia 3 (backend 2026-07-23): "fechar fila". false = fila fechada p/
+   * clientes novos (drenando — quem ja esta segue). Vem no DTO do /me
+   * (`accepting_new`). Ausente => tratamos como true (aceitando).
+   */
+  accepting_new?: boolean | null;
   message: string;
 };
 
@@ -50,6 +61,8 @@ type ProfessionalState = {
   setProfessional: (data: Professional) => Promise<void>;
   addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
+  updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
+  setAcceptingNew: (value: boolean) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
@@ -70,6 +83,8 @@ function normalizeProfessional(data: any): Professional {
     establishment_id: data.establishment_id ?? data.establishmentId ?? null,
     establishment_name: data.establishment_name ?? data.establishmentName ?? null,
     is_available: data.is_available ?? data.isAvailable ?? true,
+    work_status: data.work_status ?? data.workStatus ?? null,
+    accepting_new: data.accepting_new ?? data.acceptingNew ?? null,
     message: data.message ?? "",
   };
 }
@@ -173,21 +188,32 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     await get().fetchMe();
   },
 
+  // S1 fatia 1: o profissional muda o proprio status de trabalho. Gates do
+  // backend: 422 PROFESSIONAL_HAS_NO_SERVICE (entrar em expediente sem servico)
+  // e 409 PROFESSIONAL_HAS_ACTIVE_ATTENDANCES (ficar OFF com fila/atendimento).
+  // O fetchMe re-le o work_status do DTO do /me.
+  updateMyStatus: async (status) => {
+    await api.patch("/professional/me/status", { status });
+    await get().fetchMe();
+  },
+
+  // S1 fatia 3: "fechar fila" (value=false) / reabrir (value=true). Drena — quem
+  // ja esta segue; ao terminar o ultimo o backend poe OFF sozinho (e a loja
+  // fecha se for o ultimo). O fetchMe re-le accepting_new + work_status do /me.
+  setAcceptingNew: async (value) => {
+    await api.patch("/professional/me/accepting-new", { value });
+    await get().fetchMe();
+  },
+
   updateNickname: async (nickname) => {
     // Apelido e identidade do usuario (BaseUser), escrito so via /profile/general-infos
     // (#16). String vazia limpa o apelido.
+    // O `fetchMe` sozinho ja basta desde 2026-07-20: o backend passou a projetar
+    // o nickname no GET /professional/me (BUG3/BUG10 fechado). A mitigacao que
+    // reescrevia o valor no estado local foi REMOVIDA a pedido deles — manter
+    // mascararia uma eventual regressao da projecao.
     await api.patch("/profile/general-infos", { nickname });
     await get().fetchMe();
-    // O PATCH gravou (200), mas o GET /professional/me pode NAO projetar o nickname
-    // (gap de backend — ver HANDOFF_BACKEND BUG10). Sem isto, o fetchMe acima
-    // sobrescreve com null e o apelido "some" logo apos o alerta de sucesso.
-    // Reflete o valor recem-salvo no estado local + SecureStore.
-    const current = get().professional;
-    if (current) {
-      const updated = { ...current, nickname: nickname.trim() || null };
-      await persistProfessional(updated);
-      set({ professional: updated });
-    }
   },
 
   updateMyServiceItem: async (itemId, changes) => {
