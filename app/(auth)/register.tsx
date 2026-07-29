@@ -1,17 +1,9 @@
 import { useState } from "react";
-import {
-  VStack,
-  FormControl,
-  Heading,
-  Text,
-  ScrollView,
-} from "@gluestack-ui/themed";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { InputPassword } from "@components/InputPassWord";
-import { Button } from "@components/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
@@ -78,31 +70,21 @@ export default function RegisterScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack
-        flex={1}
-        py="$12"
-        px="$6"
-        alignItems="center"
-        justifyContent="center"
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Header showBackButton />
+        <View className="flex-1 py-12 px-6 items-center justify-center">
+          <Header showBackButton />
 
-        <VStack flex={1} mt="$48" w="$full">
-          <Heading mb="$12" size="3xl" fontFamily="$heading">
-            Cadastrar
-          </Heading>
+          <View className="flex-1 mt-48 w-full">
+            <Text className="font-heading text-3xl mb-12 text-gray-900">Cadastrar</Text>
 
-          <FormControl isInvalid={isEmailInvalid}>
-            <Input
+            <NwInput
+              label="E-mail"
               placeholder="email@email.com"
-              textLabel="E-mail"
-              messageError="E-mail inválido"
               value={email}
               onChangeText={(t) => {
                 setEmail(t);
@@ -111,74 +93,61 @@ export default function RegisterScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               testID="register-email"
+              error={isEmailInvalid ? "E-mail inválido" : ""}
             />
-          </FormControl>
 
-          <FormControl isInvalid={passwordErrors.length > 0}>
-            <InputPassword
+            <NwInput
+              label="Senha"
               placeholder="senha"
-              textLabel="Senha"
-              messageError={passwordErrors[0] ?? "Senha inválida"}
+              secure
               value={password}
               onChangeText={(t) => {
                 setPassword(t);
                 if (passwordErrors.length) setPasswordErrors([]);
               }}
+              autoCapitalize="none"
               testID="register-password"
+              error={passwordErrors.length > 0 ? (passwordErrors[0] ?? "Senha inválida") : ""}
             />
-          </FormControl>
 
-          {password.length > 0 && <PasswordRules rules={passwordRules} />}
+            {password.length > 0 && <PasswordRules rules={passwordRules} />}
 
-          <FormControl isInvalid={!!confirmError}>
-            <InputPassword
+            <NwInput
+              label="Confirmar senha"
               placeholder="confirmar senha"
-              textLabel="Confirmar senha"
-              messageError={confirmError ?? "As senhas não coincidem"}
+              secure
               value={confirmPassword}
               onChangeText={(t) => {
                 setConfirmPassword(t);
                 if (confirmError) setConfirmError(null);
               }}
+              autoCapitalize="none"
               testID="register-confirm-password"
+              error={confirmError ?? ""}
             />
-          </FormControl>
 
-          {confirmPassword.length > 0 && (
-            <Text
-              fontFamily="$body"
-              fontSize="$xs"
-              mb="$3"
-              color={passwordsMatch ? "$green600" : "$red500"}
-            >
-              {passwordsMatch ? "Senhas conferem" : "Senhas não conferem"}
-            </Text>
-          )}
+            {confirmPassword.length > 0 && (
+              <Text
+                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-brand-600" : "text-danger-500"}`}
+              >
+                {passwordsMatch ? "Senhas conferem" : "Senhas não conferem"}
+              </Text>
+            )}
 
-          <Button
-            title="Criar Conta"
-            onPress={handleSubmit}
-            isLoading={isLoading}
-          />
-        </VStack>
+            <NwButton title="Criar Conta" onPress={handleSubmit} isLoading={isLoading} />
+          </View>
 
-        <VStack mt="$12" space="sm" flex={1} w="$full">
-          <Text fontFamily="$body" textAlign="center" color="$coolGray500">
-            Já é cadastrado?
-          </Text>
-          <Button
-            title="Fazer login"
-            onPress={() => router.push(`/(auth)/login?role=${role ?? ""}`)}
-            mt="$2"
-            bg="$white"
-            borderWidth="$1"
-            borderColor="$green500"
-            $active-bg="$coolGray100"
-            textColor="$green500"
-          />
-        </VStack>
-      </VStack>
-    </ScrollView>
+          <View className="mt-12 flex-1 w-full">
+            <Text className="font-body text-center text-gray-500">Já é cadastrado?</Text>
+            <NwButton
+              title="Fazer login"
+              variant="outlineBrand"
+              onPress={() => router.push(`/(auth)/login?role=${role ?? ""}`)}
+              className="mt-2"
+            />
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

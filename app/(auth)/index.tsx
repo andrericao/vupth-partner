@@ -1,39 +1,35 @@
-import { VStack, Heading, Text } from "@gluestack-ui/themed";
+import { View, Text } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 
 export default function RoleChoiceScreen() {
   return (
-    <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
+    <View className="flex-1 py-12 px-6 items-center justify-center">
       <Header />
 
-      <VStack flex={1} mt="$48" w="$full" space="xl">
-        <Heading size="3xl" fontFamily="$heading" textAlign="center">
+      <View className="flex-1 mt-48 w-full gap-5">
+        <Text className="font-heading text-3xl text-center text-gray-900">
           Como deseja usar o VUPTH?
-        </Heading>
+        </Text>
 
-        <Text fontFamily="$body" textAlign="center" mt="$4" color="$coolGray500">
+        <Text className="font-body text-center mt-4 text-gray-500">
           Escolha seu papel para começar
         </Text>
 
-        <Button
+        <NwButton
           title="Sou dono de estabelecimento"
           onPress={() => router.push("/(auth)/register?role=owner")}
-          mt="$8"
+          className="mt-8"
         />
 
-        <Button
+        <NwButton
           title="Sou profissional"
+          variant="outlineBrand"
           onPress={() => router.push("/(auth)/register?role=professional")}
-          mt="$4"
-          bg="$white"
-          borderWidth="$1"
-          borderColor="$green500"
-          $active-bg="$coolGray100"
-          textColor="$green500"
+          className="mt-4"
         />
-      </VStack>
-    </VStack>
+      </View>
+    </View>
   );
 }
