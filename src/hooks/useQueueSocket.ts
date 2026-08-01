@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AppState } from "react-native";
 import { Client, type IMessage } from "@stomp/stompjs";
 import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
@@ -6,7 +7,9 @@ import { WS_URL } from "@lib/api";
 import type { EstablishmentWithProfessionals, QueueNotification } from "@lib/types";
 import { isCutRequestEvent } from "@lib/cutRequests";
 import { isClosingPromptEvent } from "@lib/closing";
+import { needsRefresh } from "@lib/socketAuth";
 import { useUiStore } from "@store/ui.store";
+import { useAuthStore } from "@store/auth.store";
 
 /**
  * Assina o tempo real da fila de um establishment via STOMP.
@@ -27,15 +30,36 @@ export function useQueueSocket(establishmentId: string | null) {
     let client: Client | null = null;
 
     (async () => {
-      const token = await SecureStore.getItemAsync("vupth_access_token");
-      if (!active) return;
-
       const topic = `/topic/establishment/${establishmentId}/queue`;
 
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
-        connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         reconnectDelay: 5000,
+        // TOKEN FRESCO A CADA TENTATIVA (estudo de infra 2026-08-01, S14).
+        // `beforeConnect` roda em TODA conexao — inclusive nas reconexoes
+        // automaticas — entao o header deixa de ser o do mount. Sem isto, o
+        // token de 1h expirava e o backend passava a aceitar a sessao como
+        // ANONIMA (ele nao recusa token invalido): o app seguia "conectado"
+        // sem receber mais nada em /user/queue/notifications.
+        beforeConnect: async () => {
+          let token = await SecureStore.getItemAsync("vupth_access_token");
+          if (needsRefresh(token)) {
+            // Best-effort: se o refresh falhar (offline, refresh vencido), a
+            // conexao segue com o que houver — o interceptor do axios trata a
+            // sessao morta no proximo request HTTP.
+            try {
+              await useAuthStore.getState().refreshToken();
+              token = await SecureStore.getItemAsync("vupth_access_token");
+            } catch {
+              // segue com o token atual
+            }
+          }
+          if (client) {
+            client.connectHeaders = token
+              ? { Authorization: `Bearer ${token}` }
+              : {};
+          }
+        },
         // Workaround obrigatorio do @stomp/stompjs no React Native: o WebSocket
         // nativo do RN "engole" o byte NULL que termina cada frame STOMP. Sem
         // isto o frame CONNECTED chega mas o parser nunca o reconhece, entao
@@ -95,8 +119,24 @@ export function useQueueSocket(establishmentId: string | null) {
       client.activate();
     })();
 
+    // VOLTA DO BACKGROUND (estudo de infra 2026-08-01, item 4). O Android
+    // suspende o processo e o socket morre SEM evento — o stompjs pode demorar
+    // a perceber, e enquanto isso nada chega. Na fila o polling mascara; no
+    // canal pessoal nao ha nada mascarando. Ao voltar para `active`: refetch da
+    // fila (fonte da verdade) e reconexao se o socket nao estiver de pe.
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active" || !active) return;
+      queryClient.invalidateQueries({ queryKey: ["professionals-with-queue"] });
+      queryClient.invalidateQueries({ queryKey: ["professional-queue"] });
+      if (client && !client.connected) {
+        // `activate()` e idempotente; o beforeConnect renova o token antes.
+        client.activate();
+      }
+    });
+
     return () => {
       active = false;
+      sub.remove();
       client?.deactivate();
     };
   }, [establishmentId, queryClient]);
