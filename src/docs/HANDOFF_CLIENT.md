@@ -2,7 +2,9 @@
 
 Itens descobertos no front-partner mas cujo **frontend pertence ao app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto). Registrados aqui para alinhamento: quando o usuario precisar, ele manda o front-client ler estas pendencias e implementar.
 
-Ultima atualizacao: 2026-07-24 · branch `dev` do front-partner.
+Ultima atualizacao: 2026-08-01 · branch `chore/gluestack-update` do front-partner.
+
+> 🎨 **NOVO (2026-08-01): C15 — padroes de estilizacao (NativeWind).** O partner esta **saindo do Gluestack** e passou a estilizar com **NativeWind/Tailwind (`className`)**. A cartilha completa (paleta, primitivas, convencoes e as armadilhas que ja custaram retrabalho aqui) esta na secao **"Detalhe — C15"** no fim deste documento. **Isso SUPERA o C2** (que mandava atualizar o Gluestack v1). ⚠️ O **C7 estava desatualizado** e foi corrigido na mesma data: ele documentava a paleta **teal antiga** (`#00B37E`), abandonada em 2026-07-09 — se o client copiou aqueles hexes, esta com o verde errado.
 
 > **Fonte unica dos handoffs partner → client.** Nao espalhar pelo corpo do PRD.
 
@@ -11,16 +13,91 @@ Ultima atualizacao: 2026-07-24 · branch `dev` do front-partner.
 | # | Item | Descricao | Justificativa / status |
 |---|------|-----------|------------------------|
 | C1 | **Busca de estabelecimento por bairro ordenada por menor fila** | A busca em que o **cliente** escolhe a barbearia pelo bairro (e depois por GPS, fase 2) **ordenada pela menor fila** e feature do **app cliente**, nao do partner (o partner so tem busca de afiliacao, sem ordenacao por fila). Depende do backend #2 (`GET /establishment?neighborhood=X` + tempo de espera agregado + ordenacao). | Esclarecimento do usuario (2026-06-14). Implementar no `vupth/` quando o backend #2 entregar. |
-| C2 | **Atualizar o Gluestack no front-client** | Como no partner (`@gluestack-ui/themed` → 1.1.73, ultima v1) e depois avaliar v1→v2. **Atencao:** 1.1.73 puxa `@gluestack-ui/tooltip → react-aria → react-dom` (adicionar `react-dom` na versao do React + `expo start -c`). | Pedido do usuario (2026-06-14). O client esta atras (`^1.1.34`). Implementar quando autorizado. |
+| C2 | ~~**Atualizar o Gluestack no front-client**~~ | ⚠️ **SUPERADO pelo C15 (2026-08-01).** O plano era acompanhar o partner no `@gluestack-ui/themed` 1.1.73 (ultima v1) e depois avaliar v1→v2. **O partner nao foi por ai:** a "v2" do Gluestack **e** NativeWind, entao a migracao virou **sair do Gluestack** em vez de subir de versao. Se o client ainda esta no `^1.1.34` e funcionando, **nao gaste esforco atualizando o v1** — vai direto para o C15. *(Historico: 1.1.73 puxa `@gluestack-ui/tooltip → react-aria → react-dom`, exigindo `react-dom` na versao do React + `expo start -c`.)* | Pedido do usuario (2026-06-14), **encerrado em 2026-08-01**. |
 | C3 | **Tempo real via WebSocket (STOMP) — fila + notificacoes pessoais** | Backend entregou o tempo real (contrato PRD_BACKEND 18b). Client deve: (1) `@stomp/stompjs`; (2) URL do socket a partir do BASE_URL (`http→ws`/`https→wss`, sufixo `/ws`); (3) `connectHeaders: { Authorization: "Bearer <token>" }`; (4) SUBSCRIBE `/topic/establishment/{id}/queue` (snapshot completo, substitui polling, mantem refetch fallback); (5) SUBSCRIBE `/user/queue/notifications` (`ATTENDANCE_STARTED`/`ATTENDANCE_FINISHED`). **Modelo:** o partner ja fez `/topic/.../queue` em `src/hooks/useQueueSocket.ts` — o client espelha + adiciona `/user/queue/notifications`. | Backend concluido. Implementar no `vupth/` quando autorizado. |
 | C4 | **Nao exibir profissional sem servico** | Backend (#31) ja filtra profissionais sem servico em `GET .../professionals-with-queue` e so abre a loja com >=1 profissional com >=1 servico. **Acao client:** garantir que a UI nao assume profissionais "fantasma" e trata lista vazia. | Backend concluido. So validar no client. |
 | C5 | **Encaixe — cliente pede atendimento antecipado (cliente→profissional)** | O **cliente pede ao profissional** para ser atendido antes; o **profissional decide**. Backend tem `PATCH /attendances/{id}/fit-in?aheadCount=N` (+ `/undo-fit`), endpoint do **PROFESSIONAL** → fluxo: cliente solicita (client) → pro aprova → app chama `/fit-in`. **A definir:** se a aprovacao do pro entra no partner (provavel pequena peca) ou o backend cria "pedido de encaixe" que o pro confirma. Distinto da troca entre clientes (C6). | Backend (fit-in) pronto. UI do pedido no `vupth/`; confirmar o lado da aprovacao. |
 | C6 | **Agendamento (INTENÇÃO) — UI do cliente** | Lado client do backend **S2**. UI = **barra de encaixe** (particao; = **C12**). O cliente cria uma INTENÇÃO (`/attendances/intentions`, create/edit/cancel ja prontos no backend) para um horario que a fila **ainda nao alcancou** ("hoje mais tarde"/"outro dia"); o backend **promove** quando o **fim da fila cruza o horario**. Profissional **nao participa**. **⚠️ CORRIGIDO 2026-07-15 (alinhado c/ PRD-Client):** "adiantar/atrasar" **NAO** e agendamento — e a **TROCA na fila viva** (`/swap-offers`, ver **C13**). O C6 antigo misturava as duas (e tambem dizia "promove ≤15min" — hoje e "quando o fim da fila cruza o horario"). | Depende do backend **S2** (promocao + expor `projectedQueueEnd`/`closing_time`/blocos ocupados). = C12. |
 | C14 | **Atendimento EM ANDAMENTO nao aparece pro cliente (so quando finaliza)** | 🐛 **Observado no device (Andre 2026-07-24):** o profissional INICIOU o atendimento (`PATCH /attendances/{id}/start` → IN_PROGRESS) e viu tudo certo no app dele, mas na tela do CLIENTE **nada mudou enquanto corria** — o card "voce esta sendo atendido agora" nao apareceu. So **ao FINALIZAR** o cliente viu o card de corte concluido. Ou seja: o cliente pula direto de "na fila" para "concluido", sem passar por "em atendimento". **Provavel raiz:** lado client do **C3** (tempo real via WS ainda nao implementado no client → depende de polling; a transicao SCHEDULED→IN_PROGRESS nao esta sendo refletida, so o estado terminal). **Acao client:** (a) renderizar o estado **IN_PROGRESS** do proprio atendimento ("sendo atendido agora"/cronometro) no "meu atendimento"; (b) refletir a transicao via **`ATTENDANCE_STARTED`** (`/user/queue/notifications`, C3) ou pelo refetch do proprio status. **Verificar no backend:** que o read-model do cliente (`GET /attendances/client/me` / client-queue) expoe o `IN_PROGRESS` e que `ATTENDANCE_STARTED` e emitido ao cliente no start (o `ATTENDANCE_FINISHED` claramente chega — o concluido aparece). **Partner: OK** (mostra IN_PROGRESS corretamente — nada a fazer do nosso lado). | Bug cross-project. Lado client do C3 + conferir emissao/read-model no backend. |
 | C13 | **Troca de posicao (Adiantar/Atrasar) na fila viva** | 🆕 Modelo fechado no PRD-Client (2026-07-15). Troca **1-por-1 bidirecional** via **`/swap-offers`** (backend NOVO): adiantar publica oferta p/ quem esta **a frente**; atrasar p/ quem esta **atras**; o solicitante pode estar **fora da fila** (entra na vaga de quem aceita; quem aceita vai pro fim); expira **so quando e atendido**; **nunca multa**. **Feature do CLIENTE** — o **partner so REFLETE** a fila pos-troca (nenhuma acao no partner; **nao marca LATE**). **Nao confundir** com C6 (agendamento/INTENÇÃO) nem com o partner **S4** (promover ao topo = acao do profissional). | Client implementa a UI ("Trocar" + dot). **Partner: passivo** (ja reflete via `professionals-with-queue`/WS). Backend: `POST/GET/PATCH-accept/DELETE /swap-offers`. |
-| C7 | **Alinhamento de design "Verde Imersivo" com o front-partner** | Aplicar no client a mesma linguagem (2026-06-26). Tokens (`gluestack-ui.config.ts`): off-white **#F7FAF8**; verde 400 #52B788 / 500 #00B37E / 600 #009E6F / 700 #1B4332; amber #FFB703; red #E63946; **Poppins** (titulos/botoes) + **Inter** (texto). Componentes 1:1: `cardShadow` (cards $2xl sem borda); **Button** pilula+sombra; **Input** raio $xl, foco verde; **Skeleton** no lugar dos Spinner; **Tab bar** `TabBarIcon` (outline/preenchido, sem pilula). Fonte da verdade: PRD partner secao 13.1 (Guia de Design). Refs no repo partner: `design/redesign-form-tabbar-skeleton.html`, `src/components/{Button,Input,Skeleton,TabBarIcon}.tsx`, `src/lib/styles.ts`. | Pedido do usuario (2026-06-26). Facilita se atualizar o Gluestack antes (C2). ✅ O client ja registrou este alinhamento (PRD-Client "Verde Imersivo, handoff C7"). |
+| C7 | **Alinhamento de design "Verde Imersivo" com o front-partner** | Aplicar no client a mesma linguagem (2026-06-26). ⚠️ **HEXES CORRIGIDOS EM 2026-08-01 — a versao anterior desta linha estava STALE:** ela listava a paleta **teal** (`400 #52B788 / 500 #00B37E / 600 #009E6F / 700 #1B4332`), **abandonada em 2026-07-09** quando o partner re-ancorou tudo na **"Verde Marca"** — que veio do proprio front-client (o client e a fonte da verdade da MARCA). **Escala valida:** 50 `#eef5ee` · 100 `#d9ead9` · 200 `#b5d5b6` · 300 `#8bbd8d` · 400 `#5c9c60` · **500 `#3b7a3f`** · 600 `#316635` · 700 `#26522a` · 800 `#1c3d1f` · 900 `#142c17`. Sombra dos cards `#1A281A`. Tokens (`gluestack-ui.config.ts`): off-white **#F7FAF8**; amber #FFB703; red #E63946; **Poppins** (titulos/botoes) + **Inter** (texto). **Se o client copiou os hexes antigos, esta com o verde errado.** Componentes 1:1: `cardShadow` (cards $2xl sem borda); **Button** pilula+sombra; **Input** raio $xl, foco verde; **Skeleton** no lugar dos Spinner; **Tab bar** `TabBarIcon` (outline/preenchido, sem pilula). Fonte da verdade: PRD partner secao 13.1 (Guia de Design). Refs no repo partner: `design/redesign-form-tabbar-skeleton.html`, `src/components/{Button,Input,Skeleton,TabBarIcon}.tsx`, `src/lib/styles.ts`. | Pedido do usuario (2026-06-26). Facilita se atualizar o Gluestack antes (C2). ✅ O client ja registrou este alinhamento (PRD-Client "Verde Imersivo, handoff C7"). |
 | C8 | **Cliente adiciona MAIS servico ja estando na fila** | 🆕 Pedido do usuario (2026-07-04). O cliente que **ja esta na fila** de um profissional pode **acrescentar servico(s)** ao seu atendimento (ex.: entrou so p/ corte, decide somar barba). Recalcula tempo estimado + total e reflete na fila (o profissional ve o atendimento atualizado). **UI = app cliente** (tela do "meu atendimento na fila" ganha "adicionar servico" a partir do catalogo do profissional). **Depende de backend:** endpoint p/ acrescentar service items a um attendance existente (ex.: `PATCH /attendances/{id}/service-items` add) que recalcula duracao/total — **ver HANDOFF_BACKEND S6**. | Feature nova. Implementar no `vupth/` quando o backend expuser o add-service ao attendance em fila. |
 | C9 | **Refletir REMOCAO da fila no app cliente** | 🐛 Observado (2026-07-04): o profissional **removeu** o cliente da fila (`DELETE /professional-queue/{id}/remove`), mas o **app cliente continua mostrando "voce esta na fila"**. O client precisa **detectar a remocao/cancelamento** e sair do estado "em fila" — via refetch do proprio status ou evento WS `/user/queue/notifications` (`ATTENDANCE_CANCELLED`/removido). Liga ao **C3** (tempo real ainda nao implementado no client → hoje mostra estado velho/cacheado). **Backend:** ✅ **resolvido 2026-07-09** (a remocao ja some do read do cliente + emite o evento). | Bug cross-project. **Backend resolvido** — falta so o `vupth/` **refletir** (refetch/WS). |
 | C10 | **Mensagens distintas: cliente cancelou vs profissional removeu vs pedido recusado** | 🆕 Pedido do usuario (2026-07-14). Lado client do **HANDOFF_BACKEND S10**: quando o backend expuser os status distintos, o app cliente deve mostrar mensagem **diferente** para cada saida da fila: **CANCELLED** = "voce cancelou seu atendimento"; **REMOVED** (REMOVIDO) = "o estabelecimento removeu voce da fila"; **REFUSED/RECUSADO** (se virar status proprio) = "seu pedido de corte fora do horario foi recusado". Extensao natural do C9 (que ja precisa sair do estado "em fila"). | Depende do backend **S10** (novo enum). Implementar no `vupth/` quando entregar. |
 | C11 | **Tempo de espera exibido = ETA com buffer de −10min (regra global)** | 🆕 Pedido do usuario (2026-07-14). Lado client do **HANDOFF_BACKEND S11**: o tempo de espera mostrado ao cliente ja vem do backend **com −10min** (para o cliente chegar antes). O client so **exibe** o valor do read-model — **nao** subtrair nada por conta (senao client e partner divergem). | Depende do backend **S11**. So garantir que o client usa o campo de espera exposto (nao recalcula). |
+| C15 | 🎨 **Padroes de estilizacao do front (NativeWind) — alinhar as duas UIs** | 🆕 **Pedido do Andre (2026-08-01).** O partner migrou a estilizacao de **Gluestack (props `$token`)** para **NativeWind/Tailwind (`className`)**, de forma **faseada** (as duas bibliotecas convivem, tela por tela). Este item registra **como** ele faz, para o client seguir o mesmo padrao e as duas UIs nao divergirem: paleta espelhada 1:1, primitivas `NwButton`/`NwInput` com API limpa, fontes, sombras, e as **armadilhas que ja custaram retrabalho aqui** (paleta ancorada no verde errado, `autoCapitalize` perdido, componentes sem equivalente). **Cartilha completa: secao "Detalhe — C15" no fim deste documento.** Substitui o C2. | Alinhamento de UI. O client decide **quando** migrar; o que nao pode e cada app inventar sua paleta/primitivas. |
 | C12 | **Agendar = barra de encaixe (particao de disco) + INTENÇÃO estimada** | 🆕 Modelo fechado com Andre (2026-07-14, evoluiu ao longo da conversa). A UI de agendar do cliente e uma **barra de encaixe estilo particao de disco**: comeca no **fim da fila viva** e vai ate o **fechamento**; os agendados ja congelados sao **blocos travados**; o cliente arrasta uma **"sombra" do tamanho do seu serviço** (soma das duracoes) e a encaixa num vao **sem cruzar ninguem**. O horario e uma **INTENÇÃO estimada** (o cliente confirma ciente de que pode oscilar): **congela num estimado realista** ao criar (ja contando quem esta na frente), **protegida por ordem de criacao** (nova intencao nao empurra as anteriores), **piso** no horario escolhido (nunca antes), e na **promocao** (fim da fila cruza o horario) vira fila viva e oscila de leve — **sem notificacao de atraso**. Mockup de referencia no repo partner: `design/agendamento-barra.html`. | Parte da UI de agendamento do cliente (**C6/S2**). Backend expoe `projectedQueueEnd` + `closing_time` + a **lista de blocos ocupados** (`{start,duracao}` por agendado) — ver HANDOFF_BACKEND "Detalhe — S2 · Encaixe de agendamento". Slots fixos foram **descartados** (quebram num modelo de fila). |
+
+---
+
+## Detalhe — C15 · Padroes de estilizacao do front (NativeWind)
+
+> **Escrito em 2026-08-01, a partir do estado real do front-partner** (branch `chore/gluestack-update`, 7 batches entregues: todo o `(auth)`, os dois onboardings, a tela da FILA e 16 componentes). Nao e teoria — e o que esta rodando aqui, com as armadilhas que ja pagamos.
+
+### 1. Por que NativeWind (e nao Gluestack v2)
+
+A "v2" do Gluestack **e** NativeWind por baixo — migrar nao e bump de versao, e **troca de arquitetura** (props `$token` → `className`). Medimos o escopo aqui: **49 arquivos** e **~974 props `$token`**. Por isso a regra numero um:
+
+**Nao faca big-bang.** NativeWind roda **ao lado** do Gluestack; converte-se **tela por tela**, e o `GluestackUIProvider` so sai do `_layout` quando o ultimo arquivo sair. Tela v1 e tela v2 convivem na mesma navegacao sem conflito.
+
+### 2. Toolchain
+
+- `nativewind` + `tailwindcss` (dependencias **JS/build-time**, sem modulo nativo → **entram por OTA**, nao exigem build novo).
+- `babel.config.js` (preset do NativeWind), `metro.config.js` (`withNativeWind`), `global.css` importado no `_layout`.
+- `jest`: incluir `nativewind|react-native-css-interop` no `transformIgnorePatterns`, senao os testes quebram ao importar componente com `className`.
+
+### 3. Paleta — a regra mais importante
+
+O `tailwind.config.js` **espelha 1:1** a escala `green` da marca. Enquanto a migracao durar, telas v1 e v2 dividem a mesma navegacao: **qualquer desvio vira "dois verdes" no app**.
+
+```js
+// tailwind.config.js — theme.extend.colors
+brand:   { DEFAULT:"#3b7a3f", 50:"#eef5ee", 100:"#d9ead9", 200:"#b5d5b6",
+           300:"#8bbd8d", 400:"#5c9c60", 500:"#3b7a3f", 600:"#316635",
+           700:"#26522a", 800:"#1c3d1f", 900:"#142c17" },
+success: { 500:"#348352", 950:"#071f11" },   // verde dos campos (inputs/busca)
+amber:   { 500:"#FFB703", 600:"#d97706", 700:"#b45309" },
+danger:  { 500:"#E63946", 600:"#dc2626" },
+// fontFamily: heading = Poppins_700Bold · body = Inter_400Regular
+```
+
+⚠️ **Armadilha real (custou um commit de correcao):** o config do partner nasceu ancorado no **teal antigo `#00B37E`**, e login/cadastro renderizaram com um verde diferente do resto do app ate alguem notar. **Ao criar o `tailwind.config.js` do client, copie os hexes da fonte da verdade da marca — nao "escolha um verde parecido".**
+
+Cinzas: a escala `gray` padrao do Tailwind **bate com a `coolGray` do Gluestack** (`gray-500` = `#6b7280` = `$coolGray500`, etc.) — nao precisa customizar. `amber-100/200/800` e `red-50` tambem batem com os defaults.
+
+### 4. Primitivas — API limpa, sem token
+
+Duas primitivas em `src/components/nw/` substituem `Button`, `Input`, `InputPassword` e `FormControl`:
+
+**`NwButton`** — `title`, `isLoading`, `variant`, `className`, `textClassName`.
+Variantes: `primary` · `secondary` · `danger` · `outlineBrand` · `outlineDanger`.
+Nada de `bg="$green500"` na chamada: quem precisa de um visual fora das variantes usa `className` (e `textClassName` para a cor do texto — existe para botao claro **sobre fundo colorido**, ex.: "Finalizar" no card verde da fila).
+
+**`NwInput`** — `label`, `error` (string; vazia = sem erro), `secure` (vira campo de senha com olho), mais os props de `TextInput`.
+Sem `FormControl`: o erro e uma string por campo, o que deixa **cada input acender sozinho** em vez do form inteiro.
+
+⚠️ **Armadilha real (regressao de COMPORTAMENTO, nao de estilo):** o `Input` do Gluestack embutia `autoCapitalize="words"` no `InputField`. Ao trocar pela primitiva nova, os campos de nome/endereco **param de capitalizar sozinhos** e ninguem nota na revisao de codigo. O `NwInput` do partner tem `autoCapitalize = "words"` como **default**; e-mail/senha/codigo passam `"none"` explicitamente.
+
+### 5. Convencoes
+
+| Situacao | Como fazer |
+|---|---|
+| Sombra de card | **`style={cardShadow}`** (objeto RN em `src/lib/styles.ts`). Sombra por classe nao e confiavel cross-platform — `elevation` no Android + `shadow*` no iOS. |
+| `ScrollView` | `className` estiliza o **componente**; `contentContainerStyle` continua **objeto de estilo** (`{ flexGrow: 1 }`). Nao da para trocar por classe. |
+| Espacamento entre filhos | `gap-*` no lugar de `space="sm"` (RN 0.71+ suporta `gap`). |
+| Feedback de toque | `active:bg-*` / `active:opacity-*` no `Pressable` (substitui `$active-bg`). |
+| Cor sem token equivalente | Classe arbitraria com o **hex real do tema antigo** (`bg-[#FFF4EB]`), nunca "uma cor parecida". Ex.: o `Badge` do Gluestack nao tem equivalente — fomos ao `config/theme/Badge.ts` buscar `warning` = `#FFF4EB`/`#ea580c` e `muted` = `#F6F6F7`/`#525252`. |
+| Sub-componentes (`Row`, `Section`) | **Sempre no escopo do MODULO**, nunca dentro do componente. Definidos dentro, a inferencia de tipos do Gluestack por instanciacao **estourava a pilha do `tsc` (segfault)** — e continua sendo anti-padrao React (remonta a subarvore a cada render). |
+| Textos/acessibilidade | **Preservar `testID` e `accessibilityLabel`** ao converter. Sao a ancora dos testes RNTL e dos flows do Maestro — e a unica rede de protecao que sobra, ja que a conversao nao tem como ser testada por tipo. |
+
+### 6. Como o partner faz cada batch (receita)
+
+1. Converter em **lotes pequenos e coerentes** (um grupo de rotas, ou os componentes de uma tela **antes** da tela).
+2. Componentes **compartilhados** primeiro e **in place** (mantendo import e API) — as telas que os usam nao mudam, zero churn.
+3. Componentes que **expoem token na API** (ex.: `bg="$white"` como prop) vao **junto das telas que os consomem**, senao a troca vaza para as chamadas.
+4. Gate por batch: **`tsc --noEmit` + `eslint --max-warnings 0`**, e `jest` antes do push (o partner tem hook de pre-push rodando lint → tsc → jest --coverage → expo-doctor).
+5. Commit por batch, com o **motivo** das decisoes nao obvias na mensagem.
+
+### 7. O que NAO da para verificar sozinho
+
+`tsc` e `eslint` provam que **compila**, nao que **renderiza**. Conversao de estilo so se valida **no device** — e o custo de nao validar e alto: sete batches acumulados aqui antes do primeiro QA real. **Recomendacao ao client: publicar OTA e olhar no aparelho a cada 2-3 batches**, nao no fim.
