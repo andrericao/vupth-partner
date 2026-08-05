@@ -2,6 +2,7 @@ import { View } from "react-native";
 import { router } from "expo-router";
 import { VStack, HStack, Text, Pressable } from "@gluestack-ui/themed";
 import { comingSoon } from "@components/comingSoon";
+import { NotificationBadge } from "@components/NotificationBadge";
 import type { MealSignal } from "@lib/meals";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
@@ -103,22 +104,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
           )}
         </VStack>
         {children}
-        {badge != null && badge > 0 && (
-          <VStack
-            testID="menu-badge-requests"
-            bg="$red600"
-            borderRadius="$full"
-            px="$2"
-            minWidth="$5"
-            h="$5"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
-              {badge}
-            </Text>
-          </VStack>
-        )}
+        {badge != null && <NotificationBadge count={badge} testID="menu-badge-requests" />}
         {dot && (
           <View
             testID="menu-dot-meals"
