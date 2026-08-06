@@ -8,7 +8,9 @@ Ultima atualizacao: 2026-08-01 · branch `chore/gluestack-update` do front-partn
 
 > **Fonte unica dos handoffs partner → client.** Nao espalhar pelo corpo do PRD.
 >
-> ⛔ **C21 e INTENCAO, nao pedido (Andre, 2026-08-05):** o modo *fila vs agenda pura* por profissional entrou na lista de **"possiveis implementacoes"** do PRD do partner — **nao e para comecar**. Fica registrado so para a tela da loja **nao ser desenhada assumindo que todo profissional tem fila**. (O **C20** — hibrido no fim da fila — tambem esta como intencao la, mas nele o backend **ja entregou** tudo e o gargalo continua sendo a UI daqui.)
+> ⛔ **C21 e INTENCAO, nao pedido (Andre, 2026-08-05):** o modo *fila vs agenda pura* por profissional ficou na lista de **"possiveis implementacoes"** do PRD do partner — **nao e para comecar**. Fica registrado so para a tela da loja **nao ser desenhada assumindo que todo profissional tem fila**.
+>
+> ✅ **O C20 (hibrido no fim da fila), ao contrario, e TRABALHO REAL** — o Andre promoveu ao backlog do partner no fim do dia (item 4 de la: exibir os agendados na cauda da fila). O backend **ja entregou tudo** (S2/INTENTION completo), entao **o gargalo e a UI daqui** — segue sendo a peca que falta p/ o modelo hibrido existir de ponta a ponta.
 
 ---
 
