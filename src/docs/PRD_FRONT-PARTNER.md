@@ -570,6 +570,31 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 | **P1 · Foto de perfil** (profissional; avaliar o estabelecimento junto) | **Primeira da fila**, mas **nao agora** | Backend **S22**: o profissional nao tem campo de imagem e nao existe upload em lugar nenhum dos dois apps (so o `url_image` do estabelecimento, que a gente so le). ⚠️ **Custo escondido no front:** `expo-image-picker` e **modulo NATIVO** — **nao sai por OTA**, pede `eas build` + bump de versao + redistribuir o APK. **Juntar com outras mudancas nativas** quando a hora chegar, p/ nao gastar um build so nisso. |
 | **P2 · Modo de operacao: fila ou agenda pura** (escolha do profissional) | Depois da foto | Backend **S24** · Client **C21**. Sao **dois regimes**, nao uma feature dentro da fila: no modo agenda o horario e **FIXO** (nada empurra). ⚠️ **Nao confundir com P3** (la o horario e estimado e a fila empurra). ⚠️ **Nao "desarquivar" os slots**: descartados em 2026-07-14 **para o modelo de fila** — a decisao segue valendo la. **Impacto:** a tela da Fila assume fila viva em tudo (ETA, "Iniciar proximo", "Fechar fila", promover, adiantar, refeicao no ETA); no modo agenda vira **grade do dia** e ate a abertura derivada da loja precisa de regra propria. **Comeca por mockup**, nao por codigo. |
 
+### 🧪 QA EM ANDAMENTO — bundle da migracao no canal `preview` (2026-08-05)
+
+> **Publicado** com `eas update --branch preview` rodado de dentro da `chore/gluestack-update` (Andre confirmou: *"o update foi feito"*). O canal tinha antes o bundle da **`dev`** (v1 + badge), subido pelo workflow no push da `dev` — foi **sobrescrito**. ⚠️ **Enquanto este QA durar, nao pushar a `dev`**: o `eas-update.yml` publicaria por cima e devolveria o v1 ao canal.
+>
+> **Como puxar no aparelho:** Configuracoes (profissional) ou menu do dono → **"Verificar atualizacao"** (`OtaUpdateButton`: `checkForUpdate` → `fetch` → `reload`, sem precisar fechar o app 2x). Logo acima do botao aparecem o **id do OTA e a data/hora da publicacao** — conferir que batem com a publicacao antes de comecar, senao o update nao aplicou.
+>
+> **E a PRIMEIRA VEZ que os 7 batches rodam em aparelho** (nada da migracao foi visto rodando desde 29/07). Roteiro, por batch:
+>
+> | Area | O que olhar |
+> |---|---|
+> | **(auth)** | login · cadastro (checklist de senha ao vivo + "senhas conferem") · escolha de papel · recuperar senha *(o texto "se este e-mail estiver cadastrado" segue o antigo — e o S21, pendente no backend)* |
+> | **Onboarding do dono** | dados da loja (pilulas de tipo) · endereco (mascara de CEP, auto-preenchimento, UF maiusculo) · servicos · tambem-profissional |
+> | **Onboarding do profissional** | os 3 passos |
+> | **A FILA** (mais critica) | card "atendendo agora" com cronometro (pausar/retomar/finalizar) · selos atrasado/aguardando · card inteiro clicavel abrindo o menu de acoes · **"Iniciar proximo" fixo no rodape — a lista nao pode empurrar** |
+> | **Badge** | numero no botao de Opcoes da fila · refeicao na janela sozinha = 1 · solicitacoes somam · some ao zerar · dentro do menu: numero nas Solicitacoes, dot na Refeicao |
+> | **WS / corte** | o fix `59a3b9b` (token fresco) foi junto neste bundle — pedir um corte pelo app cliente com a fila fechada e ver se o badge acende |
+>
+> **Duas armadilhas desta migracao, que passam despercebidas:**
+> 1. **`autoCapitalize`** — nome e endereco tem de continuar capitalizando sozinhos. E regressao de COMPORTAMENTO, nao de visual.
+> 2. **Dois verdes** — 23 telas seguem em gluestack e convivem com as convertidas; desvio de paleta aparece na navegacao entre elas.
+>
+> **Escape hatch:** se algo quebrar feio, `eas update --branch preview` rodado de dentro da **`dev`** devolve o bundle v1 ao canal na hora.
+>
+> **Resultado:** _(preencher apos o QA)_ — validado ⇒ **push da branch + merge na `dev`** (o objetivo declarado: a branch nunca foi vista rodando, e era esse o bloqueio do merge).
+
 > **QA no celular (continuo):** validar cada entrega acima via OTA. _(Validado 2026-06-28: criar/editar/remover servico do **profissional** OK; mascara R$ OK; tab bar nova OK; menu do owner-nao-profissional sem "Adicionar Servico".)_
 >
 > **Adiado (decisao do usuario 2026-06-28):** **meio de pagamento real / split de taxas** (Stripe/Pagar.me; unificar `src/utils/pricing.ts` e `src/lib/pricing.ts`). Fora do escopo atual; retomar pos-MVP.
