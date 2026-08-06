@@ -700,12 +700,14 @@ export default function ProfessionalQueueScreen() {
               style={cardShadow}
             >
               <Text className="font-body text-sm text-gray-500">
-                Finalize para iniciar o proximo · {waitingList[0].clientName}
+                Finalize para iniciar o proximo
               </Text>
             </View>
           ) : (
+            // Rotulo fixo (Andre 2026-08-05): o nome saiu do rodape. Ele ja
+            // aparece no card com o selo "Proximo", logo acima do botao.
             <NwButton
-              title={`Iniciar proximo · ${waitingList[0].clientName}`}
+              title="Iniciar proximo"
               onPress={() => startClient(waitingList[0], false)}
             />
           )}
