@@ -23,11 +23,13 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
 import { cardShadow } from "@lib/styles";
-import { professionalCompletion, hasAnyPending } from "@lib/completion";
+import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { activeCutRequests } from "@lib/cutRequests";
+import { queueMenuCount } from "@lib/notifications";
+import { NotificationBadge } from "@components/NotificationBadge";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { ClosingPrompt } from "@components/ClosingPrompt";
@@ -353,13 +355,13 @@ export default function ProfessionalQueueScreen() {
     hasSpecialty: !!professional?.specialty,
   });
 
-  // Dots do menu ☰ (design 2026-07-18): refeicao dentro da janela + pendencia
-  // de cadastro. O 3o gatilho pedido (solicitacoes de corte com a fila fechada)
-  // aguarda o backend — ver HANDOFF_BACKEND "Detalhe — C2".
+  // Notificacoes do menu de Opcoes da fila: refeicao na janela + solicitacoes de
+  // corte pendentes (contagem em `queueMenuCount`). A pendencia de CADASTRO saiu
+  // daqui em 2026-08-05 — ela ja acende o dot da aba Configuracoes, que e onde o
+  // profissional resolve; contar aqui so faria o badge apontar p/ lugar nenhum.
   // "proxima" acende 30min ANTES do horario (pedido do Andre 2026-07-20): o
   // profissional ve com antecedencia, toca e decide iniciar ou nao.
   const currentMealSignal = mealSignal(meals, new Date().getHours() * 60 + new Date().getMinutes());
-  const settingsDot = hasAnyPending(completion);
 
   // Refeicao EM ANDAMENTO fica na tela (Encerrar a um toque); o resto vai p/ o
   // menu, que mostra o horario da proxima no proprio rotulo.
@@ -535,8 +537,8 @@ export default function ProfessionalQueueScreen() {
         <View className="flex-row mt-4 items-center justify-between">
           <Text className="font-heading text-2xl text-gray-900">Fila</Text>
           {/* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
-              modal — "mais amigavel a tela inteira"). Dot = refeicao na janela,
-              pendencia de cadastro ou solicitacao de corte. */}
+              modal — "mais amigavel a tela inteira"). Badge = refeicao na
+              janela + solicitacoes de corte (o que o menu resolve). */}
           <Pressable
             onPress={() => router.push("/(professional)/queue-options" as any)}
             accessibilityRole="button"
@@ -546,22 +548,18 @@ export default function ProfessionalQueueScreen() {
             style={cardShadow}
           >
             <BenchIcon />
-            {(currentMealSignal != null || settingsDot || pendingCutRequests.length > 0) && (
-              <View
+            {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
+                DENTRO do menu — a pendencia de cadastro ficou de fora porque o
+                dot dela mora na aba Configuracoes (levar ao lugar certo). */}
+            <View style={{ position: "absolute", top: -5, right: -5 }}>
+              <NotificationBadge
                 testID="menu-dot"
-                style={{
-                  position: "absolute",
-                  top: -3,
-                  right: -3,
-                  width: 12,
-                  height: 12,
-                  borderRadius: 6,
-                  backgroundColor: "#E63946",
-                  borderWidth: 2,
-                  borderColor: "#F7FAF8",
-                }}
+                count={queueMenuCount({
+                  pendingRequests: pendingCutRequests.length,
+                  mealPending: currentMealSignal != null,
+                })}
               />
-            )}
+            </View>
           </Pressable>
         </View>
 

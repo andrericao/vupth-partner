@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { comingSoon } from "@components/comingSoon";
+import { NotificationBadge } from "@components/NotificationBadge";
 import type { MealSignal } from "@lib/meals";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
@@ -88,14 +89,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
           )}
         </View>
         {children}
-        {badge != null && badge > 0 && (
-          <View
-            testID="menu-badge-requests"
-            className="bg-danger-600 rounded-full px-2 min-w-5 h-5 items-center justify-center"
-          >
-            <Text className="font-heading text-[10px] text-white">{badge}</Text>
-          </View>
-        )}
+        {badge != null && <NotificationBadge count={badge} testID="menu-badge-requests" />}
         {dot && (
           <View
             testID="menu-dot-meals"
