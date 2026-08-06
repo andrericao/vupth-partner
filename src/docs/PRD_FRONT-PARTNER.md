@@ -529,6 +529,11 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ### Pendencias do partner (priorizado) — ABERTAS
 
+> ⚠️ **ONDE ESTA CADA COISA (2026-08-05) — o trabalho esta repartido em DUAS branches, nenhuma pushada:**
+> - **`dev`** (+1 commit local, `c15526d`): **codigo** do badge numerado do menu da fila + testes. E daqui que sai o OTA do canal `preview` — **push da `dev` = vai pro aparelho**.
+> - **`chore/gluestack-update`** (+2 commits locais de docs, `4c85511`/`2bdd7c4`): **estes documentos** (PRD + os dois handoffs) e a migracao NativeWind (7 batches, 23 telas restantes). Aqui tambem mora, sozinho, o **fix de WS `59a3b9b`** (token fresco no socket + reconexao ao voltar do background) — **decidir se ele vai p/ a `dev` antes do QA do corte**, porque um socket vencido mascara o teste.
+> - Consequencia a nao esquecer: a `dev` tem o codigo **sem** a documentacao dele, e a branch de migracao tem a documentacao **sem** o codigo. O merge (ou os cherry-picks) reconcilia; ate la, esta linha e o mapa.
+
 > Renumeradas 1..N por prioridade; itens concluidos saem da lista (o git history preserva). Dependencias de backend/client ficam na secao 11. Regra de gestao: ao concluir, remover e renumerar.
 
 > 🟢 **DECISAO DE PRODUTO (2026-06-28): servico e capacidade do PROFISSIONAL.** O **owner nao cria servico** enquanto for **so owner** — so se **acumular o papel PROFESSIONAL** (e ai gerencia pelo fluxo de profissional, "Meus Servicos", que ja tem criar/editar/remover completo via `professional-queue/.../service-items`). **Implicacoes (aplicadas):** o item de menu **"Adicionar Servico" do owner some** quando ele nao e profissional (`menu.tsx`, gate `isProfessional`); `add-service.tsx` tem guard que redireciona p/ o menu. **Consequencia nos afazeres:** o antigo "dono editar/remover servicos" **sai** (todo o CRUD de servico vive no fluxo do profissional) e a dependencia de backend `PUT/DELETE /establishment/{id}/service-items/{itemId}` (backend #5) **deixa de ser necessaria p/ o MVP** (rebaixada — ver secao 11). O afiliado adicionar servico (antigo S1) **ja funciona** via "Meus Servicos" (validado 2026-06-28 com prof afiliado).
