@@ -7,6 +7,8 @@ Ultima atualizacao: 2026-08-01 · branch `chore/gluestack-update` do front-partn
 > 🎨 **NOVO (2026-08-01): C15 — padroes de estilizacao (NativeWind).** O partner esta **saindo do Gluestack** e passou a estilizar com **NativeWind/Tailwind (`className`)**. A cartilha completa (paleta, primitivas, convencoes e as armadilhas que ja custaram retrabalho aqui) esta na secao **"Detalhe — C15"** no fim deste documento. **Isso SUPERA o C2** (que mandava atualizar o Gluestack v1). ⚠️ O **C7 estava desatualizado** e foi corrigido na mesma data: ele documentava a paleta **teal antiga** (`#00B37E`), abandonada em 2026-07-09 — se o client copiou aqueles hexes, esta com o verde errado.
 
 > **Fonte unica dos handoffs partner → client.** Nao espalhar pelo corpo do PRD.
+>
+> ⛔ **C21 e INTENCAO, nao pedido (Andre, 2026-08-05):** o modo *fila vs agenda pura* por profissional entrou na lista de **"possiveis implementacoes"** do PRD do partner — **nao e para comecar**. Fica registrado so para a tela da loja **nao ser desenhada assumindo que todo profissional tem fila**. (O **C20** — hibrido no fim da fila — tambem esta como intencao la, mas nele o backend **ja entregou** tudo e o gargalo continua sendo a UI daqui.)
 
 ---
 
