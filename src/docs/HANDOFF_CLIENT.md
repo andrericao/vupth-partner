@@ -2,7 +2,7 @@
 
 Itens descobertos no front-partner mas cujo **frontend pertence ao app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto). Registrados aqui para alinhamento: quando o usuario precisar, ele manda o front-client ler estas pendencias e implementar.
 
-Ultima atualizacao: 2026-08-01 · branch `chore/gluestack-update` do front-partner.
+Ultima atualizacao: 2026-08-07 · branch `chore/gluestack-update` do front-partner.
 
 > 🎨 **NOVO (2026-08-01): C15 — padroes de estilizacao (NativeWind).** O partner esta **saindo do Gluestack** e passou a estilizar com **NativeWind/Tailwind (`className`)**. A cartilha completa (paleta, primitivas, convencoes e as armadilhas que ja custaram retrabalho aqui) esta na secao **"Detalhe — C15"** no fim deste documento. **Isso SUPERA o C2** (que mandava atualizar o Gluestack v1). ⚠️ O **C7 estava desatualizado** e foi corrigido na mesma data: ele documentava a paleta **teal antiga** (`#00B37E`), abandonada em 2026-07-09 — se o client copiou aqueles hexes, esta com o verde errado.
 

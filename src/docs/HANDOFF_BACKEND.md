@@ -2,7 +2,7 @@
 
 Pendencias do app **partner** (profissional/owner) que dependem do backend. O front ja esta pronto (ou pronto para consumir) na maioria dos casos. Detalhe completo nos callouts do `PRD_FRONT-PARTNER.md`.
 
-Ultima atualizacao: 2026-08-05 · branch `chore/gluestack-update` do front-partner.
+Ultima atualizacao: 2026-08-07 · branch `chore/gluestack-update` do front-partner (branch UNICA desde 05/08 — a `dev` foi mergeada aqui).
 
 > 🧪 **PLANO DE TESTE DE WS PROPOSTO PELO BACKEND (2026-08-05) — ACEITO, com UMA CORRECAO QUE MUDA A LEITURA.** Eles montaram um A/B entre os dois apps (client sem as flags do stompjs + sem `AppState`; partner com as flags + com `AppState`) e propuseram 6 testes (0 headers do CONNECTED · 1 token expirado · 2 A/B das flags · 3 background · 4 ocioso longo · 5 troca de rede). **Bom desenho — mede sem ninguem alterar codigo antes, que era a nossa condicao ("nao removemos as flags sem medir").** Confirmado aqui: o partner **tem** as duas flags (`useQueueSocket.ts`), **tem** o reconnect por `AppState` e **nao seta heartbeat explicito** — usa o default do `@stomp/stompjs`, que ja e **10s/10s** (vale saber: se alguem mexer na config, isso muda calado).
 > - ⚠️ **A CORRECAO: a tabela deles tem DUAS variaveis, mas os apps divergem em TRES.** Falta a **renovacao de token**: o partner le o token no **`beforeConnect`** e renova se estiver vencido (v18.5 / `59a3b9b` / `src/lib/socketAuth.ts`); **o client nao tem isso** (e o **C16**, aberto). **Consequencia direta no Teste 1 (token expirado):** se o **partner passar, isso NAO absolve o S14** — prova so que o nosso `beforeConnect` funciona. Quem expoe o S14 e o **CLIENT**. Ler o Teste 1 como "partner passou ⇒ token nao e problema" seria a conclusao errada.
