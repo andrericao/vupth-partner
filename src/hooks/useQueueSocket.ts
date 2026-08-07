@@ -10,6 +10,7 @@ import { isClosingPromptEvent } from "@lib/closing";
 import { needsRefresh } from "@lib/socketAuth";
 import { useUiStore } from "@store/ui.store";
 import { useAuthStore } from "@store/auth.store";
+import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
 
 /**
  * Assina o tempo real da fila de um establishment via STOMP.
@@ -75,8 +76,17 @@ export function useQueueSocket(establishmentId: string | null) {
         // onConnect nao dispara e a conexao trava em "conectando" (sem erro).
         forceBinaryWSFrames: true,
         appendMissingNULLonIncoming: true,
-        onConnect: () => {
+        onConnect: (frame) => {
+          // DIAGNOSTICO (2026-08-05): os headers do CONNECTED sao o que decide
+          // o teste — `heart-beat` (S17) e `user-name` (S14, ausente = sessao
+          // ANONIMA). Uma conexao so serve os dois canais aqui, entao os dois
+          // sao marcados juntos.
+          const headers = (frame?.headers ?? {}) as Record<string, string>;
+          useWsDiagnosticsStore.getState().markConnected("public", headers);
+          useWsDiagnosticsStore.getState().markConnected("personal", headers);
+
           client?.subscribe(topic, (message: IMessage) => {
+            useWsDiagnosticsStore.getState().markMessage("public");
             try {
               const snapshot = JSON.parse(
                 message.body
@@ -101,6 +111,7 @@ export function useQueueSocket(establishmentId: string | null) {
           // silenciosa do socket. Owner sem role PROFESSIONAL simplesmente
           // nunca recebe nada aqui (inofensivo).
           client?.subscribe("/user/queue/notifications", (message: IMessage) => {
+            useWsDiagnosticsStore.getState().markMessage("personal");
             try {
               const notification = JSON.parse(message.body) as QueueNotification;
               if (isCutRequestEvent(notification.type)) {
@@ -116,12 +127,22 @@ export function useQueueSocket(establishmentId: string | null) {
           });
         },
         onStompError: (frame) => {
-          if (__DEV__) console.log("[ws] STOMP error:", frame.headers?.message);
+          const msg = frame.headers?.message ?? "STOMP error";
+          useWsDiagnosticsStore.getState().markError("public", msg);
+          useWsDiagnosticsStore.getState().markError("personal", msg);
+          if (__DEV__) console.log("[ws] STOMP error:", msg);
         },
         onWebSocketError: () => {
           // Log conciso (sem despejar o evento inteiro). Causa comum: handshake
           // barrado (401) quando o backend de staging nao tem /ws liberado/deployado.
-          if (__DEV__) console.log(`[ws] falha no handshake (${WS_URL}) — verifique o deploy do backend`);
+          const msg = `falha no handshake (${WS_URL})`;
+          useWsDiagnosticsStore.getState().markError("public", msg);
+          useWsDiagnosticsStore.getState().markError("personal", msg);
+          if (__DEV__) console.log(`[ws] ${msg} — verifique o deploy do backend`);
+        },
+        onWebSocketClose: () => {
+          useWsDiagnosticsStore.getState().markClosed("public");
+          useWsDiagnosticsStore.getState().markClosed("personal");
         },
       });
 

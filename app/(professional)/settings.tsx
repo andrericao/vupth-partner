@@ -6,6 +6,7 @@ import { Header } from "@components/Header";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
+import { WsDiagnostics } from "@components/WsDiagnostics";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { cardShadow } from "@lib/styles";
@@ -202,6 +203,9 @@ export default function ProfessionalSettingsScreen() {
           <MenuCard title="Sair" hint="encerrar a sessao neste aparelho" danger onPress={handleLogout} />
 
           <OtaUpdateButton />
+          {/* QA de device do WebSocket (2026-08-05): os logs sao gated por
+              __DEV__ e o QA roda em bundle de OTA, entao o dado sai por aqui. */}
+          <WsDiagnostics />
         </VStack>
       </VStack>
     </ScrollView>
