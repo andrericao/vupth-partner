@@ -35,6 +35,15 @@ export function useQueueSocket(establishmentId: string | null) {
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
         reconnectDelay: 5000,
+        // HEARTBEAT EXPLICITO (2026-08-05). Estes 10s espelham o
+        // `HEARTBEAT_MS` do `WebSocketConfig` do backend, que passou a mandar
+        // `heart-beat:10000,10000` no CONNECTED (S17, verificado no Render).
+        // Ja era o default do @stomp/stompjs — o problema e que era default:
+        // se alguem mexer na config, o heartbeat mudava calado e o socket
+        // zumbi voltava sem ninguem ligar uma coisa a outra. Declarado vira
+        // contrato; se o servidor mudar o valor, estas duas linhas mudam junto.
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
         // TOKEN FRESCO A CADA TENTATIVA (estudo de infra 2026-08-01, S14).
         // `beforeConnect` roda em TODA conexao — inclusive nas reconexoes
         // automaticas — entao o header deixa de ser o do mount. Sem isto, o
