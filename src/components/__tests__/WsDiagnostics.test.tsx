@@ -43,8 +43,9 @@ describe("WsDiagnostics (linha de QA do WebSocket)", () => {
     s.markMessage("public");
     s.markMessage("personal");
     const view = render(<WsDiagnostics />);
-    expect(view.getByTestId("ws-diag-public")).toHaveTextContent("2");
-    expect(view.getByTestId("ws-diag-personal")).toHaveTextContent("1");
+    // O matcher compara o texto INTEIRO do elemento, nao um pedaco.
+    expect(view.getByTestId("ws-diag-public")).toHaveTextContent("fila 2");
+    expect(view.getByTestId("ws-diag-personal")).toHaveTextContent("pessoal 1");
   });
 
   it("mostra o ultimo erro quando ha", () => {
