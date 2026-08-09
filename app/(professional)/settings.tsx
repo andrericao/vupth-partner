@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack, Heading, Text, ScrollView, Pressable } from "@gluestack-ui/themed";
-import { Alert, View } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { useProfessionalStore } from "@store/professional.store";
@@ -9,6 +8,7 @@ import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
+import { NotificationBadge } from "@components/NotificationBadge";
 import { cardShadow } from "@lib/styles";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
@@ -26,23 +26,20 @@ type CardProps = {
 };
 
 // Escopo de MODULO (licao do segfault do tsc: componente definido dentro do
-// componente estoura a inferencia do gluestack e remonta a subarvore).
+// componente estourava a inferencia e remonta a subarvore a cada render).
 function MenuCard({ title, hint, badge, dot, danger, onPress }: CardProps) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={title}
-      bg="$white"
-      p="$4"
-      borderRadius="$2xl"
-      $active-bg="$coolGray50"
+      className="bg-white p-4 rounded-2xl active:bg-gray-50"
       style={cardShadow}
     >
-      <HStack alignItems="center">
-        <VStack flex={1}>
-          <HStack alignItems="center" space="xs">
-            <Text fontFamily="$heading" fontWeight="$bold" color={danger ? "$red500" : "$coolGray900"}>
+      <View className="flex-row items-center">
+        <View className="flex-1">
+          <View className="flex-row items-center gap-1">
+            <Text className={`font-heading ${danger ? "text-danger-500" : "text-gray-900"}`}>
               {title}
             </Text>
             {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendencia" mas nao
@@ -53,31 +50,14 @@ function MenuCard({ title, hint, badge, dot, danger, onPress }: CardProps) {
                 style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#E63946" }}
               />
             )}
-          </HStack>
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
-            {hint}
-          </Text>
-        </VStack>
+          </View>
+          <Text className="font-body text-xs text-gray-500 mt-0.5">{hint}</Text>
+        </View>
         {badge != null && badge > 0 && (
-          <VStack
-            testID="settings-badge-invites"
-            bg="$red600"
-            borderRadius="$full"
-            px="$2"
-            minWidth="$5"
-            h="$5"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
-              {badge}
-            </Text>
-          </VStack>
+          <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
-        <Text fontFamily="$body" fontSize="$lg" color="$coolGray400" ml="$2">
-          {"›"}
-        </Text>
-      </HStack>
+        <Text className="font-body text-lg text-gray-400 ml-2">{"\u203A"}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -137,17 +117,15 @@ export default function ProfessionalSettingsScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} py="$12" px="$6">
+      <View className="flex-1 py-12 px-6">
         <Header />
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Configuracoes
-        </Heading>
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
+        <Text className="font-heading text-2xl text-gray-900 mt-8">Configuracoes</Text>
+        <Text className="font-body text-gray-500 mt-1">
           {[professional?.name, professional?.specialty, professional?.establishment_name]
             .filter(Boolean)
             .join(" · ") || "Complete seu cadastro para atender"}
@@ -161,7 +139,7 @@ export default function ProfessionalSettingsScreen() {
           routeFor={routeFor}
         />
 
-        <VStack mt="$6" space="md">
+        <View className="mt-6 gap-3">
           <MenuCard
             title="Dados cadastrais"
             hint="nome, apelido, e-mail, senha"
@@ -206,8 +184,8 @@ export default function ProfessionalSettingsScreen() {
           {/* QA de device do WebSocket (2026-08-05): os logs sao gated por
               __DEV__ e o QA roda em bundle de OTA, entao o dado sai por aqui. */}
           <WsDiagnostics />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }

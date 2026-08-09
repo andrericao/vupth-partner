@@ -556,7 +556,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
    - **Batch 2 — grupo `(auth)` 100% v2:** login, escolha de papel, cadastro, recuperar senha + `PasswordRules`.
    - **Batch 3 — compartilhados:** `ComingSoon`, `ExpedienteCard`, `Skeleton`, `SelectService`, `ServiceTypeGrid`.
    - ⚠️ **Paleta (armadilha ja corrigida em 2026-07-29):** o `tailwind.config.js` tinha nascido no teal antigo (`#00B37E`) e destoava das telas v1. A escala `brand` do Tailwind **espelha 1:1** a escala `green` do `config/gluestack-ui.config.ts` (**fonte da verdade**, "Verde Marca" `#3b7a3f`). Enquanto a migracao durar, **toda cor nova no `className` sai dessa escala** — v1 e v2 convivem na mesma navegacao e qualquer desvio vira "dois verdes" no app.
-   - **Falta:** onboarding (owner e profissional), abas do owner, telas do profissional, `SummaryCard`/`CompletionCard`/`QueueOptions`/`ClosingPrompt`/`ServerWarmup`/`OtaUpdateButton`, e por fim tirar o provider do `_layout` + desinstalar o gluestack.
+   - **Batch 8 (2026-08-07):** `queue-options.tsx` (a tela que hospeda o `QueueOptions`, ja v2) e `settings.tsx` (o menu de cards — o `MenuCard` passou a usar o `NotificationBadge`, entao o badge de convites herdou o **"9+"**, coerente com o padrao que o Andre pediu p/ o menu da fila). **Restam 29 arquivos** (22 telas + os componentes v1 + `_layout` + `renderWithProvider`).
 
 ### POSSIVEIS IMPLEMENTACOES — intencoes, NAO codar
 

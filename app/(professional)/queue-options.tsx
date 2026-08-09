@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { VStack, HStack, Heading, Text, Pressable, ScrollView } from "@gluestack-ui/themed";
-import { Alert, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, Modal } from "react-native";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 import { QueueOptions } from "@components/QueueOptions";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -147,13 +146,11 @@ export default function QueueOptionsScreen() {
     });
 
   return (
-    <ScrollView w="$full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} py="$12" px="$6">
+    <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <View className="flex-1 py-12 px-6">
         <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} showRoleIcon={false} />
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Opcoes da fila
-        </Heading>
+        <Text className="font-heading text-2xl text-gray-900 mt-8">Opcoes da fila</Text>
 
         <QueueOptions
           mealSignal={currentMealSignal}
@@ -175,72 +172,59 @@ export default function QueueOptionsScreen() {
           animationType="slide"
           onRequestClose={() => setShowCutRequests(false)}
         >
-          <VStack flex={1} justifyContent="flex-end">
+          <View className="flex-1 justify-end">
             <Pressable
               style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
               onPress={() => setShowCutRequests(false)}
               accessibilityLabel="Fechar solicitacoes"
             />
-            <VStack bg="$white" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" p="$4" pb="$8" space="sm">
-              <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$1">
-                Solicitacoes de corte
-              </Text>
+            <View className="bg-white rounded-t-2xl p-4 pb-8 gap-2">
+              <Text className="font-heading text-gray-700 mb-1">Solicitacoes de corte</Text>
               {pendingCutRequests.length === 0 ? (
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Nenhuma solicitacao pendente.
-                </Text>
+                <Text className="font-body text-sm text-gray-500">Nenhuma solicitacao pendente.</Text>
               ) : (
                 pendingCutRequests.map((req) => (
-                  <VStack key={req.id} bg="$coolGray50" borderRadius="$xl" p="$3" space="xs" style={cardShadow}>
-                    <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray900">
+                  <View key={req.id} className="bg-gray-50 rounded-xl p-3 gap-1" style={cardShadow}>
+                    <Text className="font-heading text-sm text-gray-900">
                       {cutRequestTitle(req, myServices)}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$amber600">
+                    <Text className="font-body text-xs text-amber-600">
                       expira em {minutesToExpire(req.expires_at, cutNowMs)} min — sem resposta, e negado sozinho
                     </Text>
-                    <HStack space="sm" mt="$1">
-                      <Button
+                    <View className="flex-row gap-2 mt-1">
+                      <NwButton
                         title="Recusar"
+                        variant="secondary"
+                        className="flex-1 h-9 mt-0"
                         onPress={() => {
                           setShowCutRequests(false);
                           decideCutRequest(req.id, false);
                         }}
-                        bg="$coolGray200"
-                        textColor="$coolGray700"
-                        h="$9"
-                        mt="$0"
-                        flex={1}
                       />
-                      <Button
+                      <NwButton
                         title="Aceitar"
+                        className="flex-1 h-9 mt-0"
                         onPress={() => {
                           setShowCutRequests(false);
                           decideCutRequest(req.id, true);
                         }}
-                        bg="$green500"
-                        $active-bg="$green600"
-                        h="$9"
-                        mt="$0"
-                        flex={1}
                       />
-                    </HStack>
-                  </VStack>
+                    </View>
+                  </View>
                 ))
               )}
               <Pressable
                 onPress={() => setShowCutRequests(false)}
-                py="$3"
+                className="py-3"
                 accessibilityRole="button"
                 accessibilityLabel="Fechar lista de solicitacoes"
               >
-                <Text fontFamily="$body" fontSize="$md" color="$coolGray500" textAlign="center">
-                  Fechar
-                </Text>
+                <Text className="font-body text-base text-gray-500 text-center">Fechar</Text>
               </Pressable>
-            </VStack>
-          </VStack>
+            </View>
+          </View>
         </Modal>
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
