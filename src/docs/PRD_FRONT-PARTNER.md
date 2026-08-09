@@ -604,6 +604,21 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 > **Concluidos** (bugs do teste 2026-06-05 e itens Alta/Media/Baixa prioridade ja entregues) foram **removidos desta lista** para nao acumular — o historico esta no git. Itens que dependem do backend estao na secao 11.
 
+### Feedback 2026-08-07 — a pendencia tem de mostrar a SAIDA · ✅ IMPLEMENTADO
+
+> **Andre:** *"quando o proprietario tiver na pendencia de profissional com servico quero que apareca a opcao de tambem ser um profissional. A intencao e sempre levar o usuario a um caminho, neste caso a solucao."*
+
+**O que estava errado.** A pendencia **"1+ profissional com servico"** (a que impede a loja de aparecer aos clientes) levava a `add-professional`, e la o dono NAO-profissional caia direto num **formulario de nome + especialidade** sob o titulo *"Adicionar Profissional"*. O formulario criava **o perfil dele proprio** — mas nada na tela dizia isso. Quem lia entendia *"cadastrar outra pessoa"*, nao percebia que a saida mais rapida estava ali, e o item continuava pendente.
+
+**Pior:** havia **duas portas divergentes** para a mesma intencao — o **menu** desviava o dono nao-profissional p/ o onboarding `also-professional`, enquanto o **checklist** mandava p/ `add-professional`. Telas diferentes, mesma decisao.
+
+**Como ficou** (`add-professional.tsx`, ja convertida p/ NativeWind no mesmo passo):
+- A tela abre com a pergunta **"Quem vai atender?"** e explica a regra em uma linha (*a loja so aparece com 1+ profissional com servico*).
+- **Tres caminhos nomeados**, em cards: **"Eu tambem vou atender"** (so p/ quem ainda nao e profissional; diz explicitamente que cria **o SEU** perfil e que voce passa a ter fila propria) · **"Convidar um profissional"** (→ `invite-professional`) · **"Ver solicitacoes"** (→ `affiliations`).
+- O **formulario so abre depois** de escolher o primeiro caminho — a escolha e que nomeia o que vai acontecer.
+- Ao criar, o alerta **encadeia o proximo passo**: perfil criado ainda **nao** destrava a loja (falta servico), entao ele oferece **"Cadastrar servicos"** em vez de so "OK". Sem isso o dono trocaria uma pendencia por outra sem saber.
+- **Porta unica:** o menu passou a apontar p/ a mesma tela (o desvio p/ `also-professional` saiu; a tela de onboarding segue existindo p/ o fluxo de cadastro inicial).
+
 ### Feedback 2026-08-05 (parte 2) — 4 decisoes de produto
 
 > Registro; **nada codado**. A logo saiu da mesa: *"vou decidir a logo pelo lado do cliente"* — o mockup `design/queue-menu-logo.html` (4 versoes: logo cheia vs so o V, botao branco vs verde) fica esperando a decisao vir de la, e ate entao o `BenchIcon` continua.

@@ -135,10 +135,13 @@ export default function OwnerMenuScreen() {
               <MenuItem
                 label="Adicionar Profissional"
                 onPress={() =>
+                  // Porta UNICA (2026-08-07): a propria tela oferece os caminhos
+                  // (ser tambem profissional / convidar / ver solicitacoes). Antes
+                  // o dono NAO-profissional era desviado p/ o onboarding
+                  // `also-professional`, que criava o perfil dele sem nomear a
+                  // escolha — e a pendencia do checklist ja apontava p/ ca.
                   router.push({
-                    pathname: isProfessional
-                      ? "/(owner)/add-professional"
-                      : "/(owner)/onboarding/also-professional",
+                    pathname: "/(owner)/add-professional",
                     params: { establishmentId: establishment.id },
                   } as any)
                 }
