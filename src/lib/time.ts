@@ -107,3 +107,19 @@ export function periodRange(
   else if (period === "month") from.setDate(from.getDate() - 29);
   return { dateFrom: isoDate(from), dateTo: isoDate(to) };
 }
+
+/**
+ * HH:MM (relogio LOCAL) a partir de um ISO completo — p/ mostrar a HORA de um
+ * timestamp do backend (ex.: `created_at` da solicitacao de corte).
+ *
+ * Nao confundir com `parseApiTime`, que le `OffsetTime` ("HH:mm[:ss]Z") de
+ * horario de funcionamento/refeicao. Aqui a entrada e data+hora, e o `Date` do
+ * runtime ja converte p/ o fuso do aparelho.
+ */
+export function hhmmFromIso(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

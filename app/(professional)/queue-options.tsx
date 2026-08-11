@@ -10,7 +10,7 @@ import { useAttendanceStore } from "@store/attendance.store";
 import { useIntervalStore, mealName } from "@store/interval.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
 import { getApiErrorMessage } from "@lib/api";
-import { parseApiTime } from "@lib/time";
+import { parseApiTime, hhmmFromIso } from "@lib/time";
 import { mealSignal } from "@lib/meals";
 import { activeCutRequests, minutesToExpire, cutRequestTitle } from "@lib/cutRequests";
 import { cardShadow } from "@lib/styles";
@@ -25,6 +25,7 @@ export default function QueueOptionsScreen() {
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
+  const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
 
   const establishmentId = professional?.establishment_id ?? null;
   const profId = professional?.id;
@@ -33,8 +34,13 @@ export default function QueueOptionsScreen() {
   const [showCutRequests, setShowCutRequests] = useState(false);
 
   useEffect(() => {
-    if (profId && establishmentId) fetchIntervals(profId).catch(() => {});
-  }, [profId, establishmentId, fetchIntervals]);
+    if (!profId || !establishmentId) return;
+    fetchIntervals(profId).catch(() => {});
+    // Os NOMES dos servicos do pedido saem daqui (o response so traz ids). A
+    // Fila carregava e esta tela herdava pelo store — aberta direto, o card
+    // caia em "Servico nao identificado".
+    fetchMyServices().catch(() => {});
+  }, [profId, establishmentId, fetchIntervals, fetchMyServices]);
 
   const handleAction = async (action: () => Promise<unknown>) => {
     try {
@@ -188,6 +194,11 @@ export default function QueueOptionsScreen() {
                     <Text className="font-heading text-sm text-gray-900">
                       {cutRequestTitle(req, myServices)}
                     </Text>
+                    {hhmmFromIso(req.created_at) && (
+                      <Text className="font-body text-xs text-gray-600">
+                        pedido as {hhmmFromIso(req.created_at)} · entra no fim da sua fila
+                      </Text>
+                    )}
                     <Text className="font-body text-xs text-amber-600">
                       expira em {minutesToExpire(req.expires_at, cutNowMs)} min — sem resposta, e negado sozinho
                     </Text>

@@ -1,4 +1,4 @@
-import { maskTime, isValidTime, parseApiTime, toApiTime, deviceOffsetSuffix, isoDate, periodRange } from "../time";
+import { maskTime, isValidTime, parseApiTime, toApiTime, deviceOffsetSuffix, isoDate, periodRange, hhmmFromIso } from "../time";
 
 describe("isoDate", () => {
   it("formata como YYYY-MM-DD com zero-pad", () => {
@@ -161,5 +161,26 @@ describe("toApiTime", () => {
     expect(toApiTime("24:00")).toBeNull();
     expect(toApiTime("9:00")).toBeNull();
     expect(toApiTime("")).toBeNull();
+  });
+});
+
+// hhmmFromIso — o card da solicitacao de corte mostra a HORA do pedido
+// (`created_at` vem como ISO completo, nao como OffsetTime do parseApiTime).
+describe("hhmmFromIso", () => {
+  it("extrai HH:MM no relogio LOCAL do aparelho", () => {
+    const iso = new Date(2026, 7, 7, 14, 32).toISOString();
+    expect(hhmmFromIso(iso)).toBe("14:32");
+  });
+
+  it("preenche o zero a esquerda", () => {
+    const iso = new Date(2026, 7, 7, 9, 5).toISOString();
+    expect(hhmmFromIso(iso)).toBe("09:05");
+  });
+
+  it("entrada invalida ou ausente nao quebra o card", () => {
+    expect(hhmmFromIso("nao e data")).toBeNull();
+    expect(hhmmFromIso(null)).toBeNull();
+    expect(hhmmFromIso(undefined)).toBeNull();
+    expect(hhmmFromIso("")).toBeNull();
   });
 });
