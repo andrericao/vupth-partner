@@ -167,20 +167,12 @@ export default function OwnerMenuScreen() {
                 }
               />
 
-              {/* Servico e capacidade do PROFISSIONAL: o owner so adiciona se
-                  tambem acumular o papel PROFESSIONAL (senao gerencia via "Meus
-                  Servicos"). Decisao de produto 2026-06-28. */}
-              {isProfessional && (
-                <MenuItem
-                  label="Adicionar Servico"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(owner)/add-service",
-                      params: { establishmentId: establishment.id },
-                    } as any)
-                  }
-                />
-              )}
+              {/* "Adicionar Servico" SAIU do menu do dono (Andre 2026-08-11).
+                  Servico e capacidade do PROFISSIONAL: quem acumula os dois
+                  papeis gerencia em "Meus Servicos", na area do profissional —
+                  ter as duas portas so criava duvida sobre de quem era o
+                  servico. A tela `add-service.tsx` segue existindo (rota
+                  href:null) ate a limpeza, mas nada mais aponta p/ ela. */}
 
               <MenuItem
                 label="Ver Filas"

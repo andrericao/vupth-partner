@@ -100,10 +100,10 @@ export default function AlsoProfessionalScreen() {
       await useProfessionalStore.getState().setProfessional(result);
       await refreshToken();
 
-      router.replace({
-        pathname: "/(owner)/add-service",
-        params: { establishmentId },
-      } as any);
+      // O servico e do PROFISSIONAL: o onboarding manda p/ "Meus Servicos", na
+      // area do profissional, e nao mais p/ a tela de servico do dono (que saiu
+      // do menu em 2026-08-11). Uma porta so p/ cadastrar servico.
+      router.replace("/(professional)/my-services?from=settings" as any);
     } catch (error: any) {
       const code = error?.response?.data?.code;
 
@@ -127,10 +127,7 @@ export default function AlsoProfessionalScreen() {
           return;
         }
         await refreshToken();
-        router.replace({
-          pathname: "/(owner)/add-service",
-          params: { establishmentId },
-        } as any);
+        router.replace("/(professional)/my-services?from=settings" as any);
         return;
       }
 
