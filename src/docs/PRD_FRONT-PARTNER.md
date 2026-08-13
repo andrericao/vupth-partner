@@ -1162,6 +1162,8 @@ build, a partir do `app.json` + config plugins, sempre coerentes com a SDK 54.
   (`extra.eas.projectId` em `app.json`, gravado por `eas init`).
 - Identificadores (em `app.json`): `android.package` e `ios.bundleIdentifier` =
   **`com.vupth.partner`** (permanente apos publicar na loja).
+> 🍎 **iOS ADIADO (decisao do Andre, 2026-08-11).** Os tres perfis do `eas.json` seguem **so com Android** — nenhuma configuracao de iOS foi adicionada. **Motivo:** instalar num iPhone real exige a **Apple Developer Program (US$ 99/ano)**; nao ha equivalente gratuito ao "instalar mesmo assim" do Android (ad hoc e TestFlight exigem conta paga, e o build de **simulador**, que e gratis, so roda em **macOS**). O que **ja esta pronto** para quando a decisao mudar: `ios.bundleIdentifier` = `com.vupth.partner` no `app.json`, e o build compila nas maquinas macOS da EAS (**nao precisa de Mac** para compilar, so para o simulador). O que faltara: perfis `ios` no `eas.json`, registrar aparelhos (`eas device:create`) e a **chave APNs** — que o `expo-notifications`, ja nos plugins, vai exigir. Os updates OTA ja sao publicados para **android e ios**, entao o canal atende as duas plataformas sem mudanca.
+
 - `eas.json` (perfis):
 
 | Perfil | Formato | Distribuicao | Uso |
