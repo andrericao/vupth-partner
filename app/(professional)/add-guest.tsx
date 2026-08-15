@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
-import {
-  VStack,
-  HStack,
-  FormControl,
-  Heading,
-  ScrollView,
-  Text,
-  Pressable,
-} from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -83,126 +74,108 @@ export default function AddGuestScreen() {
       style={{ flex: 1 }}
     >
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack flex={1} py="$12" px="$6">
+      <View className="flex-1 py-12 px-6">
         <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
+        <Text className="font-heading text-2xl text-gray-900 mt-8">
           Adicionar Cliente
-        </Heading>
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
+        </Text>
+        <Text className="font-body text-gray-500 mt-1">
           Cliente sem cadastro no app
         </Text>
 
-        <FormControl isInvalid={isInvalid} mt="$6">
-          <Input
-            textLabel="Nome do cliente"
+        <View className="mt-6">
+          <NwInput
+            label="Nome do cliente"
             placeholder="Ex: Maria"
-            messageError="Nome obrigatorio"
             value={clientName}
             onChangeText={setClientName}
+            error={isInvalid && !clientName.trim() ? "Nome obrigatorio" : ""}
             testID="guest-name"
           />
 
-          <Text fontFamily="$body" mb="$2" mt="$2" color="$coolGray600">
+          <Text className="font-body text-gray-600 mt-2 mb-2">
             Servicos ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
           </Text>
 
           {myServices.length === 0 && (
-            <Text fontFamily="$body" color="$coolGray400" fontSize="$sm">
+            <Text className="font-body text-sm text-gray-400">
               Nenhum servico cadastrado. Adicione servicos primeiro.
             </Text>
           )}
 
-          <VStack space="xs" mb="$4">
+          <View className="gap-1 mb-4">
             {myServices.map((svc) => {
               const isSelected = selectedServices.includes(svc.id);
               return (
                 <Pressable
                   key={svc.id}
                   onPress={() => toggleService(svc.id)}
-                  bg={isSelected ? "$green500" : "$coolGray100"}
-                  py="$3"
-                  px="$4"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor={isSelected ? "$green600" : "$coolGray200"}
+                  accessibilityRole="button"
+                  accessibilityLabel={svc.customName}
+                  accessibilityState={{ selected: isSelected }}
+                  className={`py-3 px-4 rounded-md border ${
+                    isSelected ? "bg-brand border-brand-600" : "bg-gray-100 border-gray-200"
+                  }`}
                 >
-                  <HStack justifyContent="space-between" alignItems="center">
-                    <VStack flex={1}>
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-1">
                       <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$white" : "$coolGray700"}
-                        fontSize="$sm"
+                        className={`font-body text-sm ${isSelected ? "text-white" : "text-gray-700"}`}
                       >
                         {svc.customName}
                       </Text>
                       <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$green100" : "$coolGray500"}
-                        fontSize="$xs"
+                        className={`font-body text-xs ${isSelected ? "text-brand-100" : "text-gray-500"}`}
                       >
                         {svc.estimatedMinutes}min
                       </Text>
-                    </VStack>
+                    </View>
                     <Text
-                      fontFamily="$heading"
-                      fontWeight="$bold"
-                      color={isSelected ? "$white" : "$green700"}
+                      className={`font-heading ${isSelected ? "text-white" : "text-brand-700"}`}
                     >
                       R$ {svc.price.toFixed(2)}
                     </Text>
-                  </HStack>
+                  </View>
                 </Pressable>
               );
             })}
-          </VStack>
+          </View>
 
           {selectedServices.length > 0 && (
-            <HStack
-              bg="$green50"
-              p="$3"
-              borderRadius="$md"
-              borderWidth="$1"
-              borderColor="$green200"
-              justifyContent="space-between"
-              alignItems="center"
-              mb="$4"
-            >
-              <Text fontFamily="$body" color="$green700">Total:</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" color="$green800" fontSize="$lg">
+            <View className="bg-brand-50 p-3 rounded-md border border-brand-200 flex-row justify-between items-center mb-4">
+              <Text className="font-body text-brand-700">Total:</Text>
+              <Text className="font-heading text-lg text-brand-800">
                 R$ {selectedTotal.toFixed(2)}
               </Text>
-            </HStack>
+            </View>
           )}
 
           {isInvalid && (
-            <Text fontFamily="$body" color="$red500" fontSize="$sm" mb="$2">
+            <Text className="font-body text-sm text-danger-500 mb-2">
               Informe o nome e selecione ao menos 1 servico.
             </Text>
           )}
 
-          <Button
+          <NwButton
             title="Adicionar na Fila"
             onPress={handleSubmit}
             isLoading={isLoading}
           />
 
-          <Button
+          <NwButton
             title="Cancelar"
             onPress={() => router.back()}
-            bg="transparent"
-            $active-bg="$red50"
-            borderWidth="$1"
-            borderColor="$red500"
-            textColor="$red500"
+            variant="outlineDanger"
+            className="mt-2"
           />
-        </FormControl>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
     </KeyboardAvoidingView>
   );

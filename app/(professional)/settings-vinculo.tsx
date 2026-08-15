@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack, Heading, Text, ScrollView } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 
@@ -117,98 +116,72 @@ export default function SettingsVinculoScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} py="$12" px="$6">
+      <View className="flex-1 py-12 px-6">
         <Header showBackButton onBack={() => router.navigate("/(professional)/settings" as any)} />
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Vinculo
-        </Heading>
+        <Text className="font-heading text-2xl text-gray-900 mt-8">Vinculo</Text>
 
         {invites.length > 0 && (
-          <VStack
-            mt="$6"
-            bg="$green50"
-            p="$4"
-            borderRadius="$lg"
-            borderWidth="$1"
-            borderColor="$green200"
-            space="sm"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+          <View className="mt-6 bg-brand-50 p-4 rounded-lg border border-brand-200 gap-2">
+            <Text className="font-heading text-brand-700">
               Convites de vinculacao
             </Text>
             {invites.map((inv) => (
-              <VStack key={inv.id} bg="$white" p="$3" borderRadius="$md" borderWidth="$1" borderColor="$coolGray200">
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Convite de
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
+              <View key={inv.id} className="bg-white p-3 rounded-md border border-gray-200">
+                <Text className="font-body text-sm text-gray-500">Convite de</Text>
+                <Text className="font-heading text-gray-900 mb-2">
                   {inv.establishmentName ?? "Estabelecimento"}
                 </Text>
-                <HStack space="sm">
-                  <Button
+                <View className="flex-row gap-2">
+                  <NwButton
                     title="Recusar"
                     onPress={() => handleRejectInvite(inv)}
                     isLoading={resolvingInvite === inv.id}
-                    bg="transparent"
-                    $active-bg="$red50"
-                    borderWidth="$1"
-                    borderColor="$red500"
-                    textColor="$red500"
-                    h="$9"
-                    flex={1}
+                    variant="outlineDanger"
+                    className="flex-1 h-9 mt-0"
                   />
-                  <Button
+                  <NwButton
                     title="Aceitar"
                     onPress={() => handleAcceptInvite(inv)}
                     isLoading={resolvingInvite === inv.id}
-                    bg="$green500"
-                    $active-bg="$green600"
-                    h="$9"
-                    flex={1}
+                    className="flex-1 h-9 mt-0"
                   />
-                </HStack>
-              </VStack>
+                </View>
+              </View>
             ))}
-          </VStack>
+          </View>
         )}
 
-        <VStack mt="$6" bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-            Estabelecimento
-          </Text>
-          <Text fontFamily="$heading" fontWeight="$bold" color={professional?.establishment_name ? "$green700" : "$coolGray400"} mt="$1">
+        <View className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <Text className="font-body text-sm text-gray-500">Estabelecimento</Text>
+          <Text
+            className={`font-heading mt-1 ${
+              professional?.establishment_name ? "text-brand-700" : "text-gray-400"
+            }`}
+          >
             {professional?.establishment_name ?? "Nao vinculado"}
           </Text>
           {!professional?.establishment_id ? (
-            <Button
+            <NwButton
               title="Buscar Estabelecimento"
               onPress={() => router.push("/(professional)/find-establishment" as any)}
-              bg="$green500"
-              $active-bg="$green600"
-              h="$9"
-              mt="$2"
+              className="h-9 mt-2"
             />
           ) : (
-            <Button
+            <NwButton
               title="Desafiliar do Estabelecimento"
               onPress={handleLeave}
               isLoading={isLeaving}
-              bg="transparent"
-              $active-bg="$red50"
-              borderWidth="$1"
-              borderColor="$red500"
-              textColor="$red500"
-              h="$9"
-              mt="$2"
+              variant="outlineDanger"
+              className="h-9 mt-2"
             />
           )}
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }
