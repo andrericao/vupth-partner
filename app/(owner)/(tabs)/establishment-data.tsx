@@ -1,11 +1,4 @@
-import {
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  Pressable,
-  ScrollView,
-} from "@gluestack-ui/themed";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { CompletionCard } from "@components/CompletionCard";
@@ -22,19 +15,13 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
   return (
     <Pressable
       onPress={onPress}
-      py="$4"
-      px="$5"
-      bg="$white"
-      borderRadius="$2xl"
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      className="py-4 px-5 bg-white rounded-2xl active:bg-gray-50"
       style={cardShadow}
-      $active-bg="$coolGray50"
     >
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray900">
-        {label}
-      </Text>
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$0.5">
-        {description}
-      </Text>
+      <Text className="font-heading text-base text-gray-900">{label}</Text>
+      <Text className="font-body text-sm text-gray-500 mt-0.5">{description}</Text>
     </Pressable>
   );
 }
@@ -46,16 +33,16 @@ export default function EstablishmentDataScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} py="$12" px="$6">
+      <View className="flex-1 py-12 px-6">
         <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
+        <Text className="font-heading text-2xl text-gray-900 mt-8">
           Dados do Estabelecimento
-        </Heading>
+        </Text>
 
         <CompletionCard
           completion={completion}
@@ -63,7 +50,7 @@ export default function EstablishmentDataScreen() {
           routeFor={routeFor}
         />
 
-        <VStack mt="$6" space="sm">
+        <View className="mt-6 gap-2">
           <MenuItem
             label="Dados Cadastrais"
             description="Nome do estabelecimento"
@@ -79,26 +66,20 @@ export default function EstablishmentDataScreen() {
             description="Rua, numero, bairro, CEP"
             onPress={() => router.push("/(owner)/onboarding/address" as any)}
           />
-        </VStack>
+        </View>
 
-        <HStack
-          mt="$4"
-          bg="$white"
-          borderRadius="$2xl"
-          px="$5"
-          py="$4"
-          justifyContent="space-between"
-          alignItems="center"
+        <View
+          className="mt-4 bg-white rounded-2xl px-5 py-4 flex-row justify-between items-center"
           style={cardShadow}
         >
-          <Text fontFamily="$body" fontSize="$md" color="$coolGray700">
+          <Text className="font-body text-base text-gray-700">
             Profissionais vinculados
           </Text>
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$green700">
+          <Text className="font-heading text-lg text-brand-700">
             {professionalsCount}
           </Text>
-        </HStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }

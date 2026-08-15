@@ -663,6 +663,7 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
    - **Batch 3 — compartilhados:** `ComingSoon`, `ExpedienteCard`, `Skeleton`, `SelectService`, `ServiceTypeGrid`.
    - ⚠️ **Paleta (armadilha ja corrigida em 2026-07-29):** o `tailwind.config.js` tinha nascido no teal antigo (`#00B37E`) e destoava das telas v1. A escala `brand` do Tailwind **espelha 1:1** a escala `green` do `config/gluestack-ui.config.ts` (**fonte da verdade**, "Verde Marca" `#3b7a3f`). Enquanto a migracao durar, **toda cor nova no `className` sai dessa escala** — v1 e v2 convivem na mesma navegacao e qualquer desvio vira "dois verdes" no app.
    - **Batch 8 (2026-08-07):** `queue-options.tsx` (a tela que hospeda o `QueueOptions`, ja v2) · `settings.tsx` (o menu de cards — o `MenuCard` passou a usar o `NotificationBadge`, entao o badge de convites herdou o **"9+"**, coerente com o padrao pedido p/ o menu da fila) · `add-professional.tsx` (convertida junto da reescrita do fluxo — ver "Feedback 2026-08-07"). **Restam 28 arquivos** (21 telas + os componentes v1 + `_layout` + `renderWithProvider`).
+   - **Batch 9 (2026-08-11, apos o QA passar):** `establishment-data.tsx` e `establishment-hours.tsx` (submenu "Dados do Estabelecimento" do dono; os dois campos de horario viraram `NwInput`). **Restam 26 arquivos.** ⚠️ A `establishment-hours` e a tela que o **S27** vai transformar em grade de 7 linhas — converter agora nao atrapalha (o layout muda de qualquer jeito), mas nao vale investir em polimento ali.
 
 ### POSSIVEIS IMPLEMENTACOES — intencoes, NAO codar
 
@@ -702,7 +703,9 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 >
 > **Escape hatch:** se algo quebrar feio, `eas update --branch preview` rodado de dentro da **`dev`** devolve o bundle v1 ao canal na hora.
 >
-> **Resultado:** _(preencher apos o QA)_ — validado ⇒ **push da branch + merge na `dev`** (o objetivo declarado: a branch nunca foi vista rodando, e era esse o bloqueio do merge).
+> ✅ **RESULTADO (Andre, 2026-08-11): "nesta versao nao vi nenhuma falha nas telas".** Os 7 batches convertidos passaram no device — **a primeira vez que a migracao roda em aparelho** desde 29/07. O que apareceu no teste **nao era de tela**: falha de handshake do WS (**cold start do Render, S29**), Relatorios com status velho (aba que nao remontava — corrigido), a ultima opcao do action sheet atras da barra de gestos (corrigido) e itens de regra (**S28**). ⇒ **O bloqueio do merge caiu.**
+>
+> **Resultado (historico):** validado ⇒ **push da branch + merge na `dev`** (o objetivo declarado: a branch nunca foi vista rodando, e era esse o bloqueio do merge).
 
 > **QA no celular (continuo):** validar cada entrega acima via OTA. _(Validado 2026-06-28: criar/editar/remover servico do **profissional** OK; mascara R$ OK; tab bar nova OK; menu do owner-nao-profissional sem "Adicionar Servico".)_
 >

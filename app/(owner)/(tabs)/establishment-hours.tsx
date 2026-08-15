@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
-import {
-  VStack,
-  HStack,
-  FormControl,
-  Heading,
-  Text,
-  ScrollView,
-} from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
@@ -75,54 +67,50 @@ export default function EstablishmentHoursScreen() {
       style={{ flex: 1 }}
     >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
+        <View className="flex-1 py-12 px-6">
           <Header
             showBackButton
             onBack={() => router.navigate("/(owner)/establishment-data" as any)}
           />
 
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
+          <Text className="font-heading text-2xl text-gray-900 mt-8">
             Horario de Funcionamento
-          </Heading>
-          <Text fontFamily="$body" color="$coolGray500" mt="$1">
+          </Text>
+          <Text className="font-body text-gray-500 mt-1">
             Necessario para abrir o estabelecimento. As refeicoes dos profissionais
             precisam caber nesse horario.
           </Text>
 
-          <VStack mt="$6" space="md">
-            <FormControl>
-              <HStack space="md">
-                <VStack flex={1}>
-                  <Input
-                    textLabel="Abertura (HH:MM)"
-                    placeholder="09:00"
-                    messageError=""
-                    value={opening}
-                    onChangeText={(t) => setOpening(maskTime(t))}
-                    keyboardType="number-pad"
-                  />
-                </VStack>
-                <VStack flex={1}>
-                  <Input
-                    textLabel="Fechamento (HH:MM)"
-                    placeholder="18:00"
-                    messageError=""
-                    value={closing}
-                    onChangeText={(t) => setClosing(maskTime(t))}
-                    keyboardType="number-pad"
-                  />
-                </VStack>
-              </HStack>
-            </FormControl>
+          <View className="mt-6 gap-3">
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <NwInput
+                  label="Abertura (HH:MM)"
+                  placeholder="09:00"
+                  value={opening}
+                  onChangeText={(t) => setOpening(maskTime(t))}
+                  keyboardType="number-pad"
+                />
+              </View>
+              <View className="flex-1">
+                <NwInput
+                  label="Fechamento (HH:MM)"
+                  placeholder="18:00"
+                  value={closing}
+                  onChangeText={(t) => setClosing(maskTime(t))}
+                  keyboardType="number-pad"
+                />
+              </View>
+            </View>
 
-            <Button title="Salvar" onPress={handleSave} isLoading={isSaving} />
-          </VStack>
-        </VStack>
+            <NwButton title="Salvar" onPress={handleSave} isLoading={isSaving} />
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
