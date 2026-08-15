@@ -6,14 +6,25 @@
 // "Adiantar" inicia o atendimento na hora (/start); "Promover" (S4, backend
 // 2026-07-18) so reordena ao 1o lugar SEM iniciar (/promote).
 
-export type QueueAction = "adiantar" | "promover" | "nao-chegou" | "remover";
+export type QueueAction = "iniciar" | "adiantar" | "promover" | "nao-chegou" | "remover";
 
-/** Acoes do menu ⋮ por posicao. "Iniciar" NAO entra aqui (e botao, so no 1o). */
+/**
+ * Acoes do menu do card, por POSICAO.
+ *
+ * "Iniciar" aparece p/ o 1o desde 2026-08-11 (pedido do Andre) — **redundante
+ * com o botao do rodape de proposito**: quem abre o menu do proximo espera
+ * poder inicia-lo dali, em vez de fechar o menu e procurar o botao. Para os
+ * demais ele continua FORA: a regra atende-primeiro nao admite iniciar do meio
+ * da fila (p/ isso existe "Adiantar", que troca a posicao antes de iniciar).
+ */
 export function queueMenuActions(isFirst: boolean): QueueAction[] {
-  return isFirst ? ["nao-chegou", "remover"] : ["adiantar", "promover", "remover"];
+  return isFirst
+    ? ["iniciar", "nao-chegou", "remover"]
+    : ["adiantar", "promover", "remover"];
 }
 
 export const QUEUE_ACTION_LABEL: Record<QueueAction, string> = {
+  iniciar: "Iniciar atendimento",
   adiantar: "Adiantar",
   promover: "Promover ao topo",
   "nao-chegou": "Não chegou",

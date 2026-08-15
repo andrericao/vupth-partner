@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Header } from "@components/Header";
 import { NwButton } from "@components/nw/Button";
 import { SkeletonList } from "@components/Skeleton";
@@ -201,6 +202,7 @@ function QueueRow({
 }
 
 export default function ProfessionalQueueScreen() {
+  const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const establishmentId = professional?.establishment_id;
 
@@ -475,7 +477,8 @@ export default function ProfessionalQueueScreen() {
   const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
-    if (action === "adiantar") startClient(att, true);
+    if (action === "iniciar") startClient(att, false);
+    else if (action === "adiantar") startClient(att, true);
     else if (action === "promover") confirmPromote(att);
     else if (action === "nao-chegou") confirmLate(att);
     else if (action === "remover") confirmRemove(att);
@@ -727,7 +730,12 @@ export default function ProfessionalQueueScreen() {
             onPress={() => setMenuTarget(null)}
             accessibilityLabel="Fechar menu"
           />
-          <View className="bg-white rounded-t-2xl p-4 pb-8 gap-1">
+          {/* paddingBottom = barra de gestos do aparelho + folga. Sem o inset,
+              a ULTIMA opcao ficava embaixo do rodape do celular (device 08-11). */}
+          <View
+            className="bg-white rounded-t-2xl p-4 gap-1"
+            style={{ paddingBottom: insets.bottom + 24 }}
+          >
             {menuTarget && (
               <>
                 <Text className="font-heading text-gray-700 mb-1">

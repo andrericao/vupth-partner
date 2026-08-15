@@ -47,6 +47,13 @@ describe("wsDiagnostics.store (espelha o wsDiagnosticsStore do client)", () => {
     expect(useWsDiagnosticsStore.getState().public.closedAt).not.toBeNull();
   });
 
+  it("conectar LIMPA o ultimo erro (falha de boot nao pode ficar na tela p/ sempre)", () => {
+    const s = useWsDiagnosticsStore.getState();
+    s.markError("public", "falha no handshake");
+    s.markConnected("public", { "heart-beat": "10000,10000" });
+    expect(useWsDiagnosticsStore.getState().public.lastError).toBeNull();
+  });
+
   it("markClosed NAO zera a contagem — o historico da sessao e a evidencia do teste", () => {
     const s = useWsDiagnosticsStore.getState();
     s.markMessage("public");

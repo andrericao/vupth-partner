@@ -48,6 +48,11 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
   public: emptyChannel(),
   personal: emptyChannel(),
 
+  // Conectar LIMPA o ultimo erro: sem isso, uma falha de handshake no boot (o
+  // caso comum — Render hibernado) ficava na tela p/ sempre e o `reconnectDelay`
+  // reconectava por baixo sem que a linha mudasse. Lia-se "WS conectado ·
+  // ultimo erro: falha no handshake" ao mesmo tempo, o que faz o diagnostico
+  // acusar defeito que ja passou.
   markConnected: (channel, headers) =>
     set((s) => ({
       [channel]: {
@@ -56,6 +61,7 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
         headers: headers ?? {},
         connectedAt: new Date().toISOString(),
         closedAt: null,
+        lastError: null,
       },
     })),
 

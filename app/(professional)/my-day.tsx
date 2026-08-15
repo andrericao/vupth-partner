@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import {
   VStack,
   HStack,
@@ -90,6 +91,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
 
 export default function MyDayScreen() {
   const professional = useProfessionalStore((s) => s.professional);
+  const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
   const history = useAttendanceStore((s) => s.history);
   const fetchHistory = useAttendanceStore((s) => s.fetchHistory);
@@ -138,17 +140,23 @@ export default function MyDayScreen() {
     }
   }, [professional?.id, filter, fetchHistory]);
 
+  // RECARREGA AO FOCAR (feedback de device 2026-08-11): "iniciei o atendimento,
+  // na Fila aparecia 'atendendo agora' e aqui continuava AGENDADO". A causa e
+  // que estas duas telas sao ABAS — o React Navigation nao remonta ao voltar,
+  // entao o fetch on-mount rodava uma vez so e a lista envelhecia calada (o
+  // "depois de um tempo atualizou" era outra remontagem). Com `isFocused` na
+  // dependencia, voltar p/ Relatorios busca de novo.
   useEffect(() => {
-    // fetch on-mount/periodo; sinaliza isLoading (padrao de carregamento).
+    if (!isFocused) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReport();
-  }, [loadReport]);
+  }, [loadReport, isFocused]);
 
   useEffect(() => {
-    // fetch on-mount/filtro; sinaliza isLoading (padrao de carregamento).
+    if (!isFocused) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
-  }, [loadHistory]);
+  }, [loadHistory, isFocused]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

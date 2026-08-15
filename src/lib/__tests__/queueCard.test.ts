@@ -2,10 +2,15 @@ import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCa
 
 describe("queueMenuActions", () => {
   it("1o da vez: nao chegou + remover (sem adiantar)", () => {
-    expect(queueMenuActions(true)).toEqual(["nao-chegou", "remover"]);
+    // "Iniciar" entrou no menu do 1o em 2026-08-11 (pedido do Andre): e
+    // REDUNDANTE com o botao do rodape de proposito — quem abriu o menu do
+    // proximo espera poder inicia-lo dali, sem fechar e procurar o botao.
+    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "remover"]);
   });
   it("demais: adiantar + promover + remover (sem nao chegou)", () => {
     expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
+    // quem nao e o 1o NAO pode ser iniciado direto (a regra atende-primeiro)
+    expect(queueMenuActions(false)).not.toContain("iniciar");
   });
   it("promover so aparece fora do 1o lugar (reordena sem iniciar)", () => {
     expect(queueMenuActions(false)).toContain("promover");
