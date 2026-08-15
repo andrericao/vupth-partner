@@ -525,6 +525,112 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ---
 
+## 9-A. DECISOES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz
+
+> 🧭 **Para que serve esta secao (criada em 2026-08-11, a pedido dele).** Ha escolhas que **nao sao tecnicas** — sao de produto, custo ou risco — e que **nenhuma equipe deve tomar sozinha**. Elas ficam aqui, cada uma com **contexto**, **a pergunta**, **o que se costuma fazer no mercado** e **o que muda dependendo da resposta**. O Andre le, pesquisa e responde quando quiser; ate la, **ninguem implementa** o item — o custo de errar e refazer.
+>
+> **Formato:** `D1..Dn`, numeracao **estavel** (nunca renumerar — igual aos `S`/`C` dos handoffs). Ao decidir, marcar ✅ com a data e a razao, e **manter a linha** — a decisao registrada vale mais que a lista curta.
+
+---
+
+### D1 · Render Free hiberna: pagar, cutucar ou aceitar?
+
+**Contexto.** O backend roda no **Render Free**, que **dorme com ~15min sem trafego**. Medido em 2026-08-11: o readiness respondeu **`200` em 35 segundos**; ja acordado, `/ws/info` responde em **0,5s**. Isso ja custou: o **primeiro cadastro/login falhava por timeout** (resolvido com o `waitForBackend()`, que segura o app numa tela "preparando servidor…") e agora a **"falha no handshake do websocket"** que voce viu no teste — o socket conecta depois do gate e, se a instancia re-hibernou, o handshake morre (**S29**).
+
+**A pergunta.** Manter o Free e conviver com o cold start, ou eliminar a hibernacao?
+
+**O que o mercado faz.**
+- **Plano pago do host** (Render Starter ~US$ 7/mes, Railway, Fly.io). E o padrao assim que existe **qualquer** usuario real: instancia sempre quente, sem 1a requisicao de 35s. Resolve na raiz — inclusive o cold start do login, que e a **primeira impressao** do app.
+- **Keep-alive** (cron externo pingando a cada 10-14min: UptimeRobot, cron-job.org, GitHub Actions). Custo zero, mas e um contorno do free tier: se o ping falhar ou a politica mudar, volta a dormir; e alguns hosts consideram abuso.
+- **Aceitar e mascarar no app.** E o que ja fazemos com o readiness gate. Funciona p/ HTTP; p/ o socket dava p/ adiar a 1a conexao ate o gate passar. **Nao resolve** a re-hibernacao no meio do dia.
+
+**O que muda.** Se for pago, o `waitForBackend()` vira rede de seguranca (nao caminho normal) e o S29 fecha. Se ficar Free, vale investir no app: adiar o socket, e talvez avisar "servidor acordando" em vez de "erro".
+
+---
+
+### D2 · Fila ou agenda pura: um modelo, dois, e quem escolhe?
+
+**Contexto.** Voce pediu (2026-08-05) que **o profissional escolha** trabalhar por **fila dinamica** (o modelo que construimos) ou **so por agenda, com horarios fixos** — **P2** das intencoes, **S24** no backend, **C21** no client. Isso convive com outra decisao sua: o **fim da fila hibrido** (o *cliente* escolhe entrar agora ou agendar), que ja tem motor pronto no backend (INTENÇÃO).
+
+**As perguntas.** (a) Os dois regimes convivem **no mesmo estabelecimento** (profissional A por fila, B por agenda)? (b) No modo agenda, o horario e **fixo de verdade** (hora marcada, atraso queima o slot) ou continua **estimado**? (c) Qual e o **default** de quem se cadastra hoje?
+
+**O que o mercado faz.**
+- **Agenda pura** (Booksy, Fresha, Trinks, Agendor): dominante em salao/estetica, onde o servico e longo e caro. Slot fixo, no-show com politica (cobranca, bloqueio), lembrete automatico.
+- **Fila / walk-in** (Waitwhile, QLess, senha de banco): dominante onde o servico e curto e a demanda e por chegada — barbearia de bairro e o caso classico.
+- **Hibrido** (Booksy e Fresha ja fazem): a agenda e a espinha, e o walk-in **entra nos buracos**. E o modelo mais comum nos apps grandes — e o mais caro de construir, porque exige que os dois compartilhem a mesma linha do tempo.
+
+**O que muda.** A tela da Fila do partner assume fila viva em **tudo** (ETA, "Iniciar proximo", "Fechar fila", promover, adiantar, refeicao no ETA). No modo agenda ela vira **grade do dia** e metade desses conceitos perde sentido — inclusive a **abertura derivada da loja**. Por isso o combinado e **comecar por mockup**, nao por codigo.
+
+---
+
+### D3 · Foto de perfil: onde a imagem mora?
+
+**Contexto.** Voce pediu foto de perfil (**P1**, **S22**). Hoje **nao existe upload** em nenhum dos dois apps, e o profissional nem tem campo de imagem. Do nosso lado o custo nao e a tela: `expo-image-picker` e **modulo nativo** — exige `eas build`, bump de versao e reinstalar o APK.
+
+**A pergunta.** O arquivo sobe **pelo backend** ou **direto do app** para um servico de midia?
+
+**O que o mercado faz.**
+- **URL pre-assinada** (S3, Cloudflare R2, Supabase Storage, GCS): o backend assina uma URL, o **app sobe direto**. E o padrao. Nao passa banda pelo servidor — o que importa muito num Render Free.
+- **Servico de imagem gerenciado** (Cloudinary, imgix, Uploadcare): sobe, e eles **redimensionam, cortam e servem por CDN**. Free tier costuma bastar p/ MVP. Poupa o trabalho de gerar thumbnail.
+- **Upload multipart pro proprio backend**: mais simples de comecar, mas o servidor vira gargalo de banda e voce ainda precisa resolver storage e CDN depois.
+
+**O que muda.** Se for pre-assinada ou Cloudinary, o backend expoe so a **URL final** e o app faz o upload — e ai precisamos decidir tambem **quem redimensiona** (mandar 8MP do celular e desperdicio). Em qualquer caso, **junte com outras mudancas nativas** p/ nao gastar um build inteiro so nisso.
+
+---
+
+### D4 · Horario por dia: ate onde modelar?
+
+**Contexto.** Voce pediu horarios especificos por dia (**S27**). Hoje o contrato tem **um** `opening_time`/`closing_time` p/ a semana inteira — nao da p/ ter domingo fechado. E nao e cosmetico: esse horario alimenta o **gate de entrada na fila**, o **auto-fechamento** e a **grade de refeicoes**.
+
+**A pergunta.** Modelar **so a semana** (7 linhas), ou ja incluir **excecoes** (feriado, folga, fechamento pontual)?
+
+**O que o mercado faz.**
+- **Semana + excecoes** e o padrao de fato (Google Business Profile, Booksy, Calendly): uma grade semanal recorrente **mais** uma lista de datas especiais que sobrescrevem. Quase todo produto acaba precisando das duas.
+- **Duas janelas no mesmo dia** (fecha p/ almoco) e comum no Brasil — mas aqui **talvez o modelo de refeicoes ja resolva**, e vale nao duplicar o conceito.
+
+**O que muda.** So a semana ja destrava o pedido e e bem menor. As excecoes podem vir depois **se** o modelo nascer preparado (uma tabela de datas que sobrescreve a recorrencia). Se nascer sem, incluir depois e migracao.
+
+---
+
+### D5 · Solicitacao de corte: "me encaixa quando der" ou hora marcada?
+
+**Contexto.** Voce pediu que o card mostre **"principalmente o horario"** (**S26**). Hoje o contrato so tem **quando o pedido foi feito** e **quando expira** — nao existe o horario que o cliente quer. E aceitar cria um atendimento **no fim da fila**, entao o profissional decide sem saber se aquilo serve p/ o cliente.
+
+**A pergunta.** O pedido de corte carrega um **horario desejado**, ou continua sendo "me encaixa quando der" e o que falta e mostrar o **ETA da cauda** na hora de decidir?
+
+**O que o mercado faz.**
+- **Pedido com horario** (o "solicitar horario" de Booksy/Fresha): o cliente propoe, o profissional aceita ou contrapropoe. Vira quase uma negociacao — e ai o aceite tem de **respeitar o horario**, nao jogar na cauda.
+- **Pedido sem horario, com previsao** (delivery, Uber): o app mostra "sera atendido por volta de X" e a pessoa aceita ou nao. Mais simples, e coerente com fila.
+
+**O que muda.** A primeira opcao aproxima o corte da INTENÇÃO (D2) — talvez sejam a mesma feature com nomes diferentes, e vale decidir junto. A segunda e barata: bastaria o backend expor o ETA no response.
+
+---
+
+### D6 · Apagar a conta: anonimizar ou apagar de verdade?
+
+**Contexto.** Voce pediu a opcao de apagar a conta (**S19**). Nao existe endpoint. Alem do seu pedido, **Google Play e App Store exigem** exclusao iniciada pelo usuario dentro do app, e a LGPD da ao titular o direito de eliminacao.
+
+**A pergunta.** Apagar **fisicamente** os dados ou **anonimizar** mantendo o historico? E o que acontece com um **dono que tem loja e profissionais vinculados**?
+
+**O que o mercado faz.**
+- **Anonimizacao** e o padrao quando ha historico financeiro: o cliente vira "Usuario removido", o **atendimento e a receita continuam** (a loja nao pode perder o faturamento dela), e os dados pessoais somem. Atende a LGPD, que preve a guarda p/ obrigacao legal/fiscal.
+- **Delecao fisica** so costuma valer p/ conta sem historico.
+- **Prazo de arrependimento** (7-30 dias antes de efetivar) e comum — evita exclusao por impulso e cobre o suporte.
+
+**O que muda.** Sendo anonimizacao, o backend precisa decidir o que fazer com o **owner com loja ativa** (bloquear? transferir? fechar?) e com **fila viva** (409). Sem essa regra, o front nao tem o que ligar.
+
+---
+
+### D7 · A logo no menu da fila
+
+**Contexto.** Voce pediu o logotipo no lugar do banco e depois disse que **decide pelo lado do client**. O mockup com **4 versoes** esta em `design/queue-menu-logo.html` (logo completa vs so o V; botao branco vs verde), cada uma com lupa 4x.
+
+**A pergunta.** Qual versao — e, se for a logo completa, **da p/ conseguir o SVG original** com o design?
+
+**O que pesa.** As **linhas de velocidade** do V sao a identidade da marca e sao exatamente o que **borra em 22px**. O PNG atual nao escala; a alternativa vetorial que desenhei e **aproximacao**. Com o SVG original, da p/ ter as duas coisas.
+
+---
+
 ## 10. Pendente de Implementacao
 
 ### Pendencias do partner (priorizado) — ABERTAS
@@ -568,8 +674,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 | Intencao | Quando | O que ja se sabe |
 |---|---|---|
-| **P1 · Foto de perfil** (profissional; avaliar o estabelecimento junto) | **Primeira da fila**, mas **nao agora** | Backend **S22**: o profissional nao tem campo de imagem e nao existe upload em lugar nenhum dos dois apps (so o `url_image` do estabelecimento, que a gente so le). ⚠️ **Custo escondido no front:** `expo-image-picker` e **modulo NATIVO** — **nao sai por OTA**, pede `eas build` + bump de versao + redistribuir o APK. **Juntar com outras mudancas nativas** quando a hora chegar, p/ nao gastar um build so nisso. |
-| **P2 · Modo de operacao: fila ou agenda pura** (escolha do profissional) | Depois da foto | Backend **S24** · Client **C21**. Sao **dois regimes**, nao uma feature dentro da fila: no modo agenda o horario e **FIXO** (nada empurra). ⚠️ **Nao confundir com P3** (la o horario e estimado e a fila empurra). ⚠️ **Nao "desarquivar" os slots**: descartados em 2026-07-14 **para o modelo de fila** — a decisao segue valendo la. **Impacto:** a tela da Fila assume fila viva em tudo (ETA, "Iniciar proximo", "Fechar fila", promover, adiantar, refeicao no ETA); no modo agenda vira **grade do dia** e ate a abertura derivada da loja precisa de regra propria. **Comeca por mockup**, nao por codigo. |
+| **P1 · Foto de perfil** *(decisao **D3**: onde a imagem mora)* (profissional; avaliar o estabelecimento junto) | **Primeira da fila**, mas **nao agora** | Backend **S22**: o profissional nao tem campo de imagem e nao existe upload em lugar nenhum dos dois apps (so o `url_image` do estabelecimento, que a gente so le). ⚠️ **Custo escondido no front:** `expo-image-picker` e **modulo NATIVO** — **nao sai por OTA**, pede `eas build` + bump de versao + redistribuir o APK. **Juntar com outras mudancas nativas** quando a hora chegar, p/ nao gastar um build so nisso. |
+| **P2 · Modo de operacao: fila ou agenda pura** *(decisao **D2**)* (escolha do profissional) | Depois da foto | Backend **S24** · Client **C21**. Sao **dois regimes**, nao uma feature dentro da fila: no modo agenda o horario e **FIXO** (nada empurra). ⚠️ **Nao confundir com P3** (la o horario e estimado e a fila empurra). ⚠️ **Nao "desarquivar" os slots**: descartados em 2026-07-14 **para o modelo de fila** — a decisao segue valendo la. **Impacto:** a tela da Fila assume fila viva em tudo (ETA, "Iniciar proximo", "Fechar fila", promover, adiantar, refeicao no ETA); no modo agenda vira **grade do dia** e ate a abertura derivada da loja precisa de regra propria. **Comeca por mockup**, nao por codigo. |
 
 ### 🧪 QA EM ANDAMENTO — bundle da migracao no canal `preview` (2026-08-05)
 
