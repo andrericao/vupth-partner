@@ -102,7 +102,7 @@ export default function InviteProfessionalScreen() {
           <GluestackInput
             h="$12"
             borderWidth="$1"
-            borderColor="$green500"
+            borderColor="$forest"
             borderRadius="$md"
             $focus-borderWidth="$2"
             mb="$4"
@@ -127,7 +127,7 @@ export default function InviteProfessionalScreen() {
             >
               <InputIcon
                 as={search.trim() ? CloseIcon : SearchIcon}
-                color={search.trim() ? "$coolGray500" : "$green600"}
+                color={search.trim() ? "$coolGray500" : "$forest"}
               />
             </InputSlot>
           </GluestackInput>
@@ -167,7 +167,7 @@ export default function InviteProfessionalScreen() {
                     </Text>
                   </VStack>
                   {invited ? (
-                    <Text fontFamily="$body" fontSize="$sm" color="$green700">
+                    <Text fontFamily="$body" fontSize="$sm" color="$forest">
                       Convite enviado
                     </Text>
                   ) : (
@@ -175,8 +175,8 @@ export default function InviteProfessionalScreen() {
                       title="Convidar"
                       onPress={() => handleInvite(p)}
                       isLoading={invitingId === p.id}
-                      bg="$green500"
-                      $active-bg="$green600"
+                      bg="$forest"
+                      $active-bg="$forestSoft"
                       h="$9"
                     />
                   )}

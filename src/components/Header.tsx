@@ -63,7 +63,7 @@ export function Header({ showBackButton = false, onBack, showRoleIcon = true }: 
     >
       <View className="flex-row items-center gap-2">
         {showBackButton && <ButtonGoBack onPress={handleBack} />}
-        <Text className="font-heading text-lg text-brand-700 tracking-widest">
+        <Text className="font-heading text-lg text-vupth-forest tracking-widest">
           VUPTH
         </Text>
       </View>

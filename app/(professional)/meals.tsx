@@ -219,7 +219,7 @@ export default function MealsScreen() {
                   p="$3"
                   borderRadius="$md"
                   borderWidth="$1"
-                  borderColor="$green400"
+                  borderColor="$forest"
                 >
                   <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
                     {mealName(m.description)}
@@ -261,8 +261,8 @@ export default function MealsScreen() {
                       title="Salvar"
                       onPress={() => handleSaveEdit(m.intervalId)}
                       isLoading={isSaving}
-                      bg="$green500"
-                      $active-bg="$green600"
+                      bg="$forest"
+                      $active-bg="$forestSoft"
                       h="$9"
                       flex={1}
                     />
@@ -294,7 +294,7 @@ export default function MealsScreen() {
                         </Text>
                       </Pressable>
                       <Pressable onPress={() => handleRemove(m)}>
-                        <Text fontFamily="$body" fontSize="$xs" color="$red500">
+                        <Text fontFamily="$body" fontSize="$xs" color="$brandDanger">
                           Remover
                         </Text>
                       </Pressable>
@@ -361,12 +361,12 @@ export default function MealsScreen() {
                     <Pressable
                       key={p.value}
                       onPress={() => setAddPattern(p.value)}
-                      bg={selected ? "$green500" : "$white"}
+                      bg={selected ? "$forest" : "$white"}
                       py="$1.5"
                       px="$3"
                       borderRadius="$full"
                       borderWidth="$1"
-                      borderColor={selected ? "$green600" : "$coolGray300"}
+                      borderColor={selected ? "$forest" : "$coolGray300"}
                       mb="$1"
                     >
                       <Text fontFamily="$body" fontSize="$xs" color={selected ? "$white" : "$coolGray600"}>
@@ -384,8 +384,8 @@ export default function MealsScreen() {
                 bg="transparent"
                 $active-bg="$red50"
                 borderWidth="$1"
-                borderColor="$red500"
-                textColor="$red500"
+                borderColor="$brandDanger"
+                textColor="$brandDanger"
               />
             </VStack>
           )}

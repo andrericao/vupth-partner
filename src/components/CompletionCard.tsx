@@ -26,7 +26,7 @@ function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
           height: "100%",
           width: `${percent}%`,
           borderRadius: 99,
-          backgroundColor: muted ? "#8bbd8d" : "#3b7a3f",
+          backgroundColor: muted ? "#E2F6D5" : "#9FE870", // [marca-vupth] greenTint / brandGreen
         }}
       />
     </View>
@@ -52,7 +52,7 @@ function Row({
           borderRadius: 11,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: done ? "#3b7a3f" : "#FFFFFF",
+          backgroundColor: done ? "#163300" : "#FFFFFF", // [marca-vupth] $forest
           borderWidth: done ? 0 : 2,
           borderColor: "#E0E7E3",
         }}
@@ -116,11 +116,11 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
   return (
     <View className="bg-white rounded-2xl p-4 mt-4" style={cardShadow}>
       {basic.percent === 100 ? (
-        <View className="flex-row items-center gap-3 bg-brand-600 rounded-xl px-4 py-3.5">
+        <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
           <Text className="text-xl">🎉</Text>
           <View className="flex-1">
             <Text className="font-heading text-sm text-white">{doneBanner}</Text>
-            <Text className="font-body text-xs text-brand-50">
+            <Text className="font-body text-xs text-vupth-greenTint">
               Pronto para atender — 100%
             </Text>
           </View>
@@ -131,7 +131,7 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
             <Text className="font-heading text-base text-gray-800">
               Pronto para atender
             </Text>
-            <Text className="font-heading text-base text-brand-600">
+            <Text className="font-heading text-base text-vupth-forest">
               {basic.percent}%
             </Text>
           </View>

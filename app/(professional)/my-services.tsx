@@ -267,7 +267,7 @@ export default function MyServicesScreen() {
         </Heading>
 
         {professional?.establishment_id && professional?.establishment_name ? (
-          <Text fontFamily="$body" fontSize="$sm" color="$green600" mt="$1">
+          <Text fontFamily="$body" fontSize="$sm" color="$forest" mt="$1">
             {professional.establishment_name}
           </Text>
         ) : null}
@@ -302,7 +302,7 @@ export default function MyServicesScreen() {
                   p="$3"
                   borderRadius="$md"
                   borderWidth="$1"
-                  borderColor="$green400"
+                  borderColor="$forest"
                 >
                   <FormControl>
                     <Input
@@ -347,12 +347,12 @@ export default function MyServicesScreen() {
                             <Pressable
                               key={pct}
                               onPress={() => setEditAbsorption(pct)}
-                              bg={isSelected ? "$green500" : "$white"}
+                              bg={isSelected ? "$forest" : "$white"}
                               py="$1.5"
                               px="$3"
                               borderRadius="$full"
                               borderWidth="$1"
-                              borderColor={isSelected ? "$green600" : "$coolGray300"}
+                              borderColor={isSelected ? "$forest" : "$coolGray300"}
                               mb="$1"
                             >
                               <Text
@@ -373,7 +373,7 @@ export default function MyServicesScreen() {
                         <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
                           Cliente paga:
                         </Text>
-                        <Text fontFamily="$heading" fontWeight="$bold" color="$green700" fontSize="$lg">
+                        <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
                           R$ {editPricing.clientPrice.toFixed(2)}
                         </Text>
                       </HStack>
@@ -415,8 +415,8 @@ export default function MyServicesScreen() {
                       title="Salvar"
                       onPress={() => handleSaveEdit(svc.id)}
                       isLoading={isEditSaving}
-                      bg="$green500"
-                      $active-bg="$green600"
+                      bg="$forest"
+                      $active-bg="$forestSoft"
                       h="$9"
                       flex={1}
                     />
@@ -446,13 +446,13 @@ export default function MyServicesScreen() {
                         </Text>
                       </Pressable>
                       <Pressable onPress={() => handleRemoveItem(svc)}>
-                        <Text fontFamily="$body" fontSize="$xs" color="$red500">
+                        <Text fontFamily="$body" fontSize="$xs" color="$brandDanger">
                           Remover
                         </Text>
                       </Pressable>
                     </HStack>
                   </VStack>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                     R$ {svc.price.toFixed(2)}
                   </Text>
                 </HStack>
@@ -553,12 +553,12 @@ export default function MyServicesScreen() {
                         <Pressable
                           key={pct}
                           onPress={() => setAbsorption(pct)}
-                          bg={isSelected ? "$green500" : "$white"}
+                          bg={isSelected ? "$forest" : "$white"}
                           py="$1.5"
                           px="$3"
                           borderRadius="$full"
                           borderWidth="$1"
-                          borderColor={isSelected ? "$green600" : "$coolGray300"}
+                          borderColor={isSelected ? "$forest" : "$coolGray300"}
                           mb="$1"
                         >
                           <Text
@@ -579,7 +579,7 @@ export default function MyServicesScreen() {
                     <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
                       Cliente paga:
                     </Text>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$green700" fontSize="$lg">
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
                       R$ {pricing.clientPrice.toFixed(2)}
                     </Text>
                   </HStack>
@@ -620,8 +620,8 @@ export default function MyServicesScreen() {
                 bg="transparent"
                 $active-bg="$red50"
                 borderWidth="$1"
-                borderColor="$red500"
-                textColor="$red500"
+                borderColor="$brandDanger"
+                textColor="$brandDanger"
               />
             </VStack>
           </VStack>

@@ -30,7 +30,7 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
         : `#${position}`;
   const statusColor =
     attendance.status === "IN_PROGRESS"
-      ? "$green500"
+      ? "$forest"
       : attendance.status === "PAUSED"
         ? "$amber500"
         : "$blue500";
@@ -75,15 +75,15 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
 
   return (
     <VStack
-      bg="$green50"
+      bg="$greenTint"
       p="$4"
       borderRadius="$lg"
       borderWidth="$1"
-      borderColor="$green300"
+      borderColor="$greenTint"
       mb="$4"
     >
       <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green800" fontSize="$lg">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
           {attendance.clientName}
         </Text>
         <Badge action="success" variant="solid" borderRadius="$md">
@@ -92,14 +92,14 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
           </BadgeText>
         </Badge>
       </HStack>
-      <Text fontFamily="$body" fontSize="$sm" color="$green700" mt="$1">
+      <Text fontFamily="$body" fontSize="$sm" color="$forest" mt="$1">
         {attendance.services?.map((s: any) => s.customName).join(", ")}
       </Text>
       <HStack mt="$2" justifyContent="space-between">
-        <Text fontFamily="$body" fontSize="$sm" color="$green600">
+        <Text fontFamily="$body" fontSize="$sm" color="$forest">
           Tempo: {formatted}
         </Text>
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </HStack>
@@ -179,9 +179,9 @@ export default function ProfessionalQueueScreen() {
             </Text>
 
             <HStack mt="$4" space="md" mb="$4">
-              <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
-                <Text fontFamily="$body" fontSize="$xs" color="$green700">Na fila</Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$greenTint">
+                <Text fontFamily="$body" fontSize="$xs" color="$forest">Na fila</Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                   {data.size}
                 </Text>
               </VStack>
@@ -199,7 +199,7 @@ export default function ProfessionalQueueScreen() {
 
         {isLoading && !data && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Spinner color="$green500" size="large" />
+            <Spinner color="$forest" size="large" />
             <Text fontFamily="$body" color="$coolGray500" mt="$4">Carregando fila...</Text>
           </VStack>
         )}
@@ -240,8 +240,8 @@ export default function ProfessionalQueueScreen() {
           isLoading={isRemoving}
           bg="transparent"
           borderWidth="$1"
-          borderColor="$red500"
-          textColor="$red500"
+          borderColor="$brandDanger"
+          textColor="$brandDanger"
           $active-bg="$red50"
         />
       </VStack>

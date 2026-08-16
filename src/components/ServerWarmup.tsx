@@ -14,7 +14,7 @@ import { Button } from "@components/Button";
 // unica verde da marca. Respeita reduce-motion (fallback: troca simples sem
 // movimento). Quando o design entregar os icones/JSON, trocar por Lottie.
 
-const GREEN = "#3b7a3f";
+const GREEN = "#163300"; // [marca-vupth] $forest — Ionicons `color` nao aceita token
 const STEPS: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { icon: "phone-portrait-outline", label: "Abrindo o app" },
   { icon: "storefront-outline", label: "Chegando na loja" },

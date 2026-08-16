@@ -125,7 +125,7 @@ export default function OwnerReportsScreen() {
           Agora
         </Text>
         <HStack space="md">
-          <StatCard label="Na fila" value={String(totalInQueue)} color="$green800" bg="$green50" border="$green200" />
+          <StatCard label="Na fila" value={String(totalInQueue)} color="$forest" bg="$greenTint" border="$greenTint" />
           <StatCard label="Profissionais disponiveis" value={String(availableProfs)} color="$blue800" bg="$blue50" border="$blue200" />
         </HStack>
 
@@ -134,7 +134,7 @@ export default function OwnerReportsScreen() {
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$green500" : "$coolGray100"}
+              bg={period === p.key ? "$forest" : "$coolGray100"}
               py="$2"
               px="$4"
               borderRadius="$full"
@@ -170,7 +170,7 @@ export default function OwnerReportsScreen() {
           <>
             <HStack space="md" mt="$4">
               <StatCard label="Atendimentos" value={String(report?.totalAttendances ?? 0)} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
-              <StatCard label="Receita" value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`} color="$green800" bg="$green50" border="$green200" />
+              <StatCard label="Receita" value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`} color="$forest" bg="$greenTint" border="$greenTint" />
             </HStack>
 
             <HStack space="md" mt="$3">
@@ -210,7 +210,7 @@ export default function OwnerReportsScreen() {
                             {p.specialty || "Sem especialidade"}
                           </Text>
                         </VStack>
-                        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+                        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                           R$ {r.revenue.toFixed(2)}
                         </Text>
                       </HStack>

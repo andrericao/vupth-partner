@@ -101,7 +101,7 @@ export default function LoginScreen() {
               onPress={() => router.push("/(auth)/forgot-password" as any)}
               className="mt-4 self-center"
             >
-              <Text className="font-body text-sm text-brand-600 font-medium">
+              <Text className="font-body text-sm text-vupth-forest font-medium">
                 Esqueci minha senha
               </Text>
             </Pressable>

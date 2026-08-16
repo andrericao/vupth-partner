@@ -126,8 +126,8 @@ export default function SettingsVinculoScreen() {
         <Text className="font-heading text-2xl text-gray-900 mt-8">Vinculo</Text>
 
         {invites.length > 0 && (
-          <View className="mt-6 bg-brand-50 p-4 rounded-lg border border-brand-200 gap-2">
-            <Text className="font-heading text-brand-700">
+          <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-forest gap-2">
+            <Text className="font-heading text-vupth-forest">
               Convites de vinculacao
             </Text>
             {invites.map((inv) => (
@@ -160,7 +160,7 @@ export default function SettingsVinculoScreen() {
           <Text className="font-body text-sm text-gray-500">Estabelecimento</Text>
           <Text
             className={`font-heading mt-1 ${
-              professional?.establishment_name ? "text-brand-700" : "text-gray-400"
+              professional?.establishment_name ? "text-vupth-forest" : "text-gray-400"
             }`}
           >
             {professional?.establishment_name ?? "Nao vinculado"}

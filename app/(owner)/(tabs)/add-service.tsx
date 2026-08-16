@@ -180,12 +180,12 @@ export default function AddServiceScreen() {
                 <Pressable
                   key={s.value}
                   onPress={() => handleSpecialtyChange(s.value)}
-                  bg={isSelected ? "$green500" : "$coolGray100"}
+                  bg={isSelected ? "$forest" : "$coolGray100"}
                   py="$2"
                   px="$4"
                   borderRadius="$md"
                   borderWidth="$1"
-                  borderColor={isSelected ? "$green600" : "$coolGray200"}
+                  borderColor={isSelected ? "$forest" : "$coolGray200"}
                 >
                   <Text
                     fontFamily="$body"
@@ -250,7 +250,7 @@ export default function AddServiceScreen() {
             borderRadius="$md"
             mb="$3"
             borderWidth="$1"
-            borderColor={showPricing ? "$green300" : "$coolGray200"}
+            borderColor={showPricing ? "$forest" : "$coolGray200"}
           >
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
               {showPricing ? "▼" : "▶"} Politica de preco (preview)
@@ -281,12 +281,12 @@ export default function AddServiceScreen() {
                     <Pressable
                       key={pct}
                       onPress={() => setAbsorption(pct)}
-                      bg={absorption === pct ? "$green500" : "$white"}
+                      bg={absorption === pct ? "$forest" : "$white"}
                       py="$1.5"
                       px="$3"
                       borderRadius="$full"
                       borderWidth="$1"
-                      borderColor={absorption === pct ? "$green600" : "$coolGray300"}
+                      borderColor={absorption === pct ? "$forest" : "$coolGray300"}
                       mb="$1"
                     >
                       <Text fontFamily="$body" fontSize="$xs" color={absorption === pct ? "$white" : "$coolGray600"}>
@@ -297,7 +297,7 @@ export default function AddServiceScreen() {
                 </HStack>
                 <HStack justifyContent="space-between" mb="$1">
                   <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Cliente paga:</Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$green700" fontSize="$lg">
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
                     R$ {pricing.clientPrice.toFixed(2)}
                   </Text>
                 </HStack>

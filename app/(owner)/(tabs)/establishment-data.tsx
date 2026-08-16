@@ -75,7 +75,7 @@ export default function EstablishmentDataScreen() {
           <Text className="font-body text-base text-gray-700">
             Profissionais vinculados
           </Text>
-          <Text className="font-heading text-lg text-brand-700">
+          <Text className="font-heading text-lg text-vupth-forest">
             {professionalsCount}
           </Text>
         </View>

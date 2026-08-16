@@ -133,8 +133,8 @@ export default function EstablishmentRegistrationScreen() {
                       title="Salvar"
                       onPress={handleSave}
                       isLoading={isSaving}
-                      bg="$green500"
-                      $active-bg="$green600"
+                      bg="$forest"
+                      $active-bg="$forestSoft"
                       h="$9"
                       flex={1}
                     />

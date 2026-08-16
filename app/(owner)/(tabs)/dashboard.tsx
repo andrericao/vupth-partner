@@ -187,14 +187,14 @@ export default function OwnerDashboardScreen() {
         />
 
         <HStack mt="$4" space="md">
-          <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$xs" color="$green50">na fila</Text>
+          <VStack flex={1} bg="$forest" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <Text fontFamily="$body" fontSize="$xs" color="$greenTint">na fila</Text>
             <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
               {totalInQueue}
             </Text>
           </VStack>
-          <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$xs" color="$green50">profissionais ativos</Text>
+          <VStack flex={1} bg="$forest" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <Text fontFamily="$body" fontSize="$xs" color="$greenTint">profissionais ativos</Text>
             <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
               {queueData?.available_professionals ?? 0}
             </Text>
@@ -208,8 +208,8 @@ export default function OwnerDashboardScreen() {
             title="Abrir Estabelecimento"
             onPress={() => setStatus("OPEN")}
             isLoading={isToggling}
-            bg="$green500"
-            $active-bg="$green600"
+            bg="$forest"
+            $active-bg="$forestSoft"
           />
         ) : (
           <VStack space="xs">
@@ -220,7 +220,7 @@ export default function OwnerDashboardScreen() {
               }}
               isLoading={isToggling}
               isDisabled={hasActiveWork}
-              bg="$red500"
+              bg="$brandDanger"
               $active-bg="$red600"
             />
             {hasActiveWork && (
@@ -247,8 +247,8 @@ export default function OwnerDashboardScreen() {
             title="Reabrir Estabelecimento"
             onPress={() => setStatus("OPEN")}
             isLoading={isToggling}
-            bg="$green500"
-            $active-bg="$green600"
+            bg="$forest"
+            $active-bg="$forestSoft"
           />
         )}
 
@@ -288,8 +288,8 @@ export default function OwnerDashboardScreen() {
                   params: { establishmentId: establishment.id },
                 } as any)
               }
-              bg="$green500"
-              $active-bg="$green600"
+              bg="$forest"
+              $active-bg="$forestSoft"
               mt="$2"
               h="$10"
             />
@@ -333,7 +333,7 @@ export default function OwnerDashboardScreen() {
                     >
                       <BadgeText fontSize="$xs">{prof.queue_count} na fila</BadgeText>
                     </Badge>
-                    <Text fontFamily="$body" fontSize="$xs" color={prof.is_available ? "$green500" : "$coolGray400"} mt="$1">
+                    <Text fontFamily="$body" fontSize="$xs" color={prof.is_available ? "$forest" : "$coolGray400"} mt="$1">
                       {prof.is_available ? "Disponivel" : "Indisponivel"}
                     </Text>
                   </VStack>

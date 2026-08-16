@@ -62,7 +62,7 @@ function ServingCard({
 
   return (
     <View
-      className={`p-4 rounded-2xl mt-4 ${isPaused ? "bg-amber-500" : "bg-brand"}`}
+      className={`p-4 rounded-2xl mt-4 ${isPaused ? "bg-amber-500" : "bg-vupth-forest"}`}
       style={cardShadow}
     >
       <View className="flex-row items-center gap-1">
@@ -97,7 +97,7 @@ function ServingCard({
           <NwButton
             title="Pausar"
             onPress={onPause}
-            className="flex-1 h-10 bg-brand-600 active:bg-brand-700"
+            className="flex-1 h-10 bg-vupth-forest active:bg-vupth-forestSoft"
           />
         )}
         <NwButton
@@ -105,7 +105,7 @@ function ServingCard({
           onPress={onFinish}
           variant="secondary"
           className="flex-1 h-10 bg-white active:bg-gray-100"
-          textClassName={isPaused ? "text-amber-700" : "text-brand-700"}
+          textClassName={isPaused ? "text-amber-700" : "text-vupth-forest"}
         />
       </View>
     </View>
@@ -139,14 +139,14 @@ function QueueRow({
       accessibilityRole="button"
       accessibilityLabel={`Opcoes de ${attendance.clientName}`}
       className={`bg-white pl-4 active:bg-gray-50 ${
-        isFirst ? "p-4 rounded-2xl border border-brand-200 mb-3" : "p-3 rounded-xl mb-2"
+        isFirst ? "p-4 rounded-2xl border border-vupth-forest mb-3" : "p-3 rounded-xl mb-2"
       }`}
       style={cardShadow}
     >
       <View className="flex-row items-center gap-2">
         <View
           className={`w-6 h-6 rounded-full items-center justify-center ${
-            isFirst ? "bg-brand" : "bg-gray-100"
+            isFirst ? "bg-vupth-forest" : "bg-gray-100"
           }`}
         >
           <Text
@@ -187,7 +187,7 @@ function QueueRow({
           {isFirst && (
             <Text
               className={`font-body text-xs mt-0.5 ${
-                isLate ? "text-amber-600" : "text-brand-600"
+                isLate ? "text-amber-600" : "text-vupth-forest"
               }`}
             >
               {isLate ? "Atrasado" : "Proximo"}
@@ -547,7 +547,7 @@ export default function ProfessionalQueueScreen() {
             accessibilityRole="button"
             accessibilityLabel="Opcoes da fila"
             hitSlop={8}
-            className="w-10 h-10 rounded-xl bg-white items-center justify-center active:bg-brand-50"
+            className="w-10 h-10 rounded-xl bg-white items-center justify-center active:bg-vupth-greenTint"
             style={cardShadow}
           >
             <BenchIcon />
@@ -597,15 +597,15 @@ export default function ProfessionalQueueScreen() {
             chips — liberam tela para a fila e para o botao fixo do rodape. */}
         {myProfessional && (
           <View className="flex-row gap-2 mt-4 items-center">
-            <View className="flex-row items-center gap-1 bg-brand-100 rounded-full px-3 py-1.5">
+            <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
               <Text className="text-xs">👥</Text>
-              <Text className="font-heading text-xs text-brand-700">
+              <Text className="font-heading text-xs text-vupth-forest">
                 {myProfessional.queue_count} na fila
               </Text>
             </View>
-            <View className="flex-row items-center gap-1 bg-brand-100 rounded-full px-3 py-1.5">
+            <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
               <Text className="text-xs">⏱</Text>
-              <Text className="font-heading text-xs text-brand-700">
+              <Text className="font-heading text-xs text-vupth-forest">
                 {myProfessional.estimated_wait_minutes} min
               </Text>
             </View>
@@ -754,7 +754,7 @@ export default function ProfessionalQueueScreen() {
                   >
                     <Text
                       className={`font-body text-base ${
-                        action === "remover" ? "text-danger-600" : "text-gray-900"
+                        action === "remover" ? "text-vupth-danger" : "text-gray-900"
                       }`}
                     >
                       {QUEUE_ACTION_LABEL[action]}

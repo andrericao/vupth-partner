@@ -128,7 +128,7 @@ export default function RegisterScreen() {
 
             {confirmPassword.length > 0 && (
               <Text
-                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-brand-600" : "text-danger-500"}`}
+                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-vupth-forest" : "text-vupth-danger"}`}
               >
                 {passwordsMatch ? "Senhas conferem" : "Senhas não conferem"}
               </Text>

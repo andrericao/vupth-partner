@@ -29,7 +29,7 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
         : "Aguardando";
   const statusColor =
     attendance.status === "IN_PROGRESS"
-      ? "$green500"
+      ? "$forest"
       : attendance.status === "PAUSED"
         ? "$amber500"
         : "$blue500";
@@ -117,11 +117,11 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
           }
           py="$2"
           px="$4"
-          bg="$green50"
+          bg="$greenTint"
           borderTopWidth="$1"
           borderTopColor="$coolGray100"
         >
-          <Text fontFamily="$body" fontSize="$sm" color="$green700" textAlign="center">
+          <Text fontFamily="$body" fontSize="$sm" color="$forest" textAlign="center">
             Ver fila detalhada
           </Text>
         </Pressable>
@@ -175,9 +175,9 @@ export default function OwnerQueuesScreen() {
 
         {data && (
           <HStack mt="$4" space="md" mb="$4">
-            <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
-              <Text fontFamily="$body" fontSize="$xs" color="$green700">Total na fila</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+            <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$greenTint">
+              <Text fontFamily="$body" fontSize="$xs" color="$forest">Total na fila</Text>
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                 {data.total_in_queue}
               </Text>
             </VStack>
@@ -215,8 +215,8 @@ export default function OwnerQueuesScreen() {
                   params: { establishmentId: establishmentId ?? "" },
                 } as any)
               }
-              bg="$green500"
-              $active-bg="$green600"
+              bg="$forest"
+              $active-bg="$forestSoft"
               mt="$4"
             />
           </VStack>

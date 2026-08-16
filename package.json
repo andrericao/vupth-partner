@@ -14,6 +14,8 @@
     "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
+    "@expo-google-fonts/archivo": "^0.4.2",
+    "@expo-google-fonts/dm-mono": "^0.4.2",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@gluestack-style/react": "^1.0.57",

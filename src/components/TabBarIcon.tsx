@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 // [new-design] Icone da tab bar: contorno (outline) quando inativo e
 // PREENCHIDO + verde quando ativo. O preenchimento e o indicador da aba atual
 // (sem pilula). `name` = nome base do Ionicons (ex.: "home").
-const ACTIVE = "#3b7a3f";
+const ACTIVE = "#163300"; // [marca-vupth] $forest — icone/label ativo nao aceita token, so hex
 const INACTIVE = "#9CA3AF";
 
 export function TabBarIcon({ name, focused }: { name: string; focused: boolean }) {

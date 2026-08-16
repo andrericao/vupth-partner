@@ -19,19 +19,25 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import { Archivo_700Bold, Archivo_800ExtraBold } from "@expo-google-fonts/archivo";
+import { DMMono_500Medium } from "@expo-google-fonts/dm-mono";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
 export default function RootLayout() {
-  // [new-design] Guia: Poppins p/ titulos/botoes, Inter p/ texto.
+  // [marca-vupth] Archivo substitui Poppins em titulos/botoes; Inter segue no
+  // corpo. Poppins segue carregado ate as telas v1 migrarem.
   const [fontLoaded] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
     Poppins_500Medium,
     Poppins_600SemiBold,
     Poppins_700Bold,
+    Archivo_700Bold,
+    Archivo_800ExtraBold,
+    DMMono_500Medium,
   });
 
   // Push: registra o device quando autenticado e trata o toque na notificacao.

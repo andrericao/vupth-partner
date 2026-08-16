@@ -181,7 +181,7 @@ export default function ProfessionalOnboardingScreen() {
                       accessibilityState={{ selected: isSelected }}
                       onPress={() => setSpecialty(isSelected ? "" : s.value)}
                       className={`py-2.5 px-4 rounded-md border ${
-                        isSelected ? "bg-brand border-brand-600" : "bg-gray-100 border-gray-200"
+                        isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
                       }`}
                     >
                       <Text
@@ -235,7 +235,7 @@ export default function ProfessionalOnboardingScreen() {
 
             <View
               className={`flex-row items-center h-12 rounded-md mb-4 pr-3 ${
-                searchFocused ? "border-2 border-brand" : "border border-brand"
+                searchFocused ? "border-2 border-vupth-forest" : "border border-vupth-forest"
               }`}
             >
               <TextInput
@@ -292,7 +292,7 @@ export default function ProfessionalOnboardingScreen() {
                       </Text>
                       <Text
                         className={`font-body text-sm ${
-                          estab.open_status === "OPEN" ? "text-brand" : "text-gray-400"
+                          estab.open_status === "OPEN" ? "text-vupth-forest" : "text-gray-400"
                         }`}
                       >
                         {estab.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
@@ -338,7 +338,7 @@ export default function ProfessionalOnboardingScreen() {
             </Text>
             <Text
               className={`font-body mt-1 ${
-                selectedEstablishment.open_status === "OPEN" ? "text-brand" : "text-gray-400"
+                selectedEstablishment.open_status === "OPEN" ? "text-vupth-forest" : "text-gray-400"
               }`}
             >
               {selectedEstablishment.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
@@ -357,7 +357,7 @@ export default function ProfessionalOnboardingScreen() {
           onPress={() => setStep("search")}
           className="mt-4"
         >
-          <Text className="font-body text-center text-brand-600">
+          <Text className="font-body text-center text-vupth-forest">
             Voltar e escolher outro
           </Text>
         </Pressable>

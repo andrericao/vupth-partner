@@ -24,7 +24,7 @@ export function NotificationBadge({ count, testID = "notification-badge" }: Prop
         height: 18,
         paddingHorizontal: 5,
         borderRadius: 9,
-        backgroundColor: "#E63946",
+        backgroundColor: "#B3261E", // [marca-vupth] $brandDanger
         alignItems: "center",
         justifyContent: "center",
       }}

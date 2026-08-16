@@ -58,9 +58,9 @@ export function OtaUpdateButton() {
         onPress={handleCheckUpdate}
         bg="transparent"
         borderWidth="$1"
-        borderColor="$green500"
-        textColor="$green600"
-        $active-bg="$green50"
+        borderColor="$forest"
+        textColor="$forest"
+        $active-bg="$greenTint"
         h="$9"
         mt="$2"
       />

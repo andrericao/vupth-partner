@@ -120,7 +120,7 @@ export default function AddGuestScreen() {
                   accessibilityLabel={svc.customName}
                   accessibilityState={{ selected: isSelected }}
                   className={`py-3 px-4 rounded-md border ${
-                    isSelected ? "bg-brand border-brand-600" : "bg-gray-100 border-gray-200"
+                    isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
                   }`}
                 >
                   <View className="flex-row justify-between items-center">
@@ -131,13 +131,13 @@ export default function AddGuestScreen() {
                         {svc.customName}
                       </Text>
                       <Text
-                        className={`font-body text-xs ${isSelected ? "text-brand-100" : "text-gray-500"}`}
+                        className={`font-body text-xs ${isSelected ? "text-vupth-greenTint" : "text-gray-500"}`}
                       >
                         {svc.estimatedMinutes}min
                       </Text>
                     </View>
                     <Text
-                      className={`font-heading ${isSelected ? "text-white" : "text-brand-700"}`}
+                      className={`font-heading ${isSelected ? "text-white" : "text-vupth-forest"}`}
                     >
                       R$ {svc.price.toFixed(2)}
                     </Text>
@@ -148,16 +148,16 @@ export default function AddGuestScreen() {
           </View>
 
           {selectedServices.length > 0 && (
-            <View className="bg-brand-50 p-3 rounded-md border border-brand-200 flex-row justify-between items-center mb-4">
-              <Text className="font-body text-brand-700">Total:</Text>
-              <Text className="font-heading text-lg text-brand-800">
+            <View className="bg-vupth-greenTint p-3 rounded-md border border-vupth-forest flex-row justify-between items-center mb-4">
+              <Text className="font-body text-vupth-forest">Total:</Text>
+              <Text className="font-heading text-lg text-vupth-forest">
                 R$ {selectedTotal.toFixed(2)}
               </Text>
             </View>
           )}
 
           {isInvalid && (
-            <Text className="font-body text-sm text-danger-500 mb-2">
+            <Text className="font-body text-sm text-vupth-danger mb-2">
               Informe o nome e selecione ao menos 1 servico.
             </Text>
           )}

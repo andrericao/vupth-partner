@@ -44,7 +44,7 @@ export function ServiceTypeGrid({
             accessibilityState={{ selected: isSel }}
             onPress={() => onSelect(it)}
             className={`w-[48.5%] mb-2.5 relative bg-white rounded-2xl p-3 ${
-              isSel ? "border-2 border-brand" : "border border-gray-200"
+              isSel ? "border-2 border-vupth-forest" : "border border-gray-200"
             }`}
             style={isSel ? undefined : cardShadow}
           >
@@ -56,7 +56,7 @@ export function ServiceTypeGrid({
             <View className="flex-row items-center gap-2">
               <View
                 className={`w-8 h-8 rounded-lg items-center justify-center ${
-                  isSel ? "bg-brand" : "bg-gray-100"
+                  isSel ? "bg-vupth-forest" : "bg-gray-100"
                 }`}
               >
                 <Ionicons name={iconFor(it.value)} size={18} color={isSel ? "#FFFFFF" : "#316635"} />
@@ -64,7 +64,7 @@ export function ServiceTypeGrid({
               <Text
                 numberOfLines={2}
                 className={`flex-1 font-body text-sm ${
-                  isSel ? "font-bold text-brand-700" : "font-medium text-gray-800"
+                  isSel ? "font-bold text-vupth-forest" : "font-medium text-gray-800"
                 }`}
               >
                 {it.label}

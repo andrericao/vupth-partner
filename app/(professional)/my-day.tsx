@@ -35,8 +35,8 @@ type Period = "day" | "week" | "month";
 type Filter = "ALL" | "FINISHED" | "CANCELLED";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Finalizado", color: "$green500" },
-  CANCELLED: { label: "Cancelado", color: "$red500" },
+  FINISHED: { label: "Finalizado", color: "$forest" },
+  CANCELLED: { label: "Cancelado", color: "$brandDanger" },
   IN_PROGRESS: { label: "Em andamento", color: "$blue500" },
   PAUSED: { label: "Pausado", color: "$amber500" },
   SCHEDULED: { label: "Agendado", color: "$coolGray500" },
@@ -81,7 +81,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
       </Text>
 
       <HStack mt="$2" justifyContent="flex-end">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           R$ {item.totalValue.toFixed(2)}
         </Text>
       </HStack>
@@ -195,7 +195,7 @@ export default function MyDayScreen() {
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$green500" : "$coolGray100"}
+              bg={period === p.key ? "$forest" : "$coolGray100"}
               py="$2"
               px="$4"
               borderRadius="$full"
@@ -223,7 +223,7 @@ export default function MyDayScreen() {
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Na fila agora
               </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$green700">
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
                 {queueCount}
               </Text>
             </VStack>
@@ -253,11 +253,11 @@ export default function MyDayScreen() {
                   {report?.totalAttendances ?? 0}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$green50" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$sm" color="$green700">
+              <VStack flex={1} bg="$greenTint" p="$4" borderRadius="$2xl" style={cardShadow}>
+                <Text fontFamily="$body" fontSize="$sm" color="$forest">
                   Receita
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                   R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
                 </Text>
               </VStack>
@@ -300,7 +300,7 @@ export default function MyDayScreen() {
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$green500" : "$coolGray100"}
+              bg={filter === f.key ? "$forest" : "$coolGray100"}
               py="$2"
               px="$4"
               borderRadius="$full"
@@ -330,7 +330,7 @@ export default function MyDayScreen() {
               {historyError}
             </Text>
             <Pressable onPress={loadHistory} mt="$2">
-              <Text fontFamily="$body" color="$green600" textAlign="center" fontSize="$sm">
+              <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
                 Tentar novamente
               </Text>
             </Pressable>

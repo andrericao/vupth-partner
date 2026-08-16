@@ -172,20 +172,20 @@ export default function FindEstablishmentScreen() {
 
           {gate === "loading" && (
             <VStack alignItems="center" mt="$12">
-              <Spinner color="$green500" size="large" />
+              <Spinner color="$forest" size="large" />
             </VStack>
           )}
 
           {gate === "affiliated" && (
             <VStack
-              bg="$green50"
+              bg="$greenTint"
               p="$4"
               borderRadius="$lg"
               borderWidth="$1"
-              borderColor="$green200"
+              borderColor="$forest"
               mt="$6"
             >
-              <Text fontFamily="$heading" fontWeight="$bold" color="$green700" mb="$2">
+              <Text fontFamily="$heading" fontWeight="$bold" color="$forest" mb="$2">
                 Voce ja esta vinculado
               </Text>
               <Text fontFamily="$body" color="$coolGray600" mb="$4">
@@ -196,8 +196,8 @@ export default function FindEstablishmentScreen() {
               <Button
                 title="Ir para Configuracoes"
                 onPress={() => router.navigate("/(professional)/settings" as any)}
-                bg="$green500"
-                $active-bg="$green600"
+                bg="$forest"
+                $active-bg="$forestSoft"
               />
             </VStack>
           )}
@@ -226,8 +226,8 @@ export default function FindEstablishmentScreen() {
                 isLoading={isCancelling}
                 bg="transparent"
                 borderWidth="$1"
-                borderColor="$red500"
-                textColor="$red500"
+                borderColor="$brandDanger"
+                textColor="$brandDanger"
                 $active-bg="$red50"
               />
             </VStack>
@@ -242,7 +242,7 @@ export default function FindEstablishmentScreen() {
           <GluestackInput
             h="$12"
             borderWidth="$1"
-            borderColor="$green500"
+            borderColor="$forest"
             borderRadius="$md"
             $focus-borderWidth="$2"
             mb="$4"
@@ -267,7 +267,7 @@ export default function FindEstablishmentScreen() {
             >
               <InputIcon
                 as={search.trim() ? CloseIcon : SearchIcon}
-                color={search.trim() ? "$coolGray500" : "$green600"}
+                color={search.trim() ? "$coolGray500" : "$forest"}
               />
             </InputSlot>
           </GluestackInput>
@@ -311,7 +311,7 @@ export default function FindEstablishmentScreen() {
                   <Text
                     fontFamily="$body"
                     fontSize="$xs"
-                    color={est.openStatus === "OPEN" ? "$green600" : "$coolGray400"}
+                    color={est.openStatus === "OPEN" ? "$forest" : "$coolGray400"}
                   >
                     {est.openStatus === "OPEN" ? "Aberto" : "Fechado"}
                   </Text>

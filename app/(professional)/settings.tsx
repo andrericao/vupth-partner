@@ -39,7 +39,7 @@ function MenuCard({ title, hint, badge, dot, danger, onPress }: CardProps) {
       <View className="flex-row items-center">
         <View className="flex-1">
           <View className="flex-row items-center gap-1">
-            <Text className={`font-heading ${danger ? "text-danger-500" : "text-gray-900"}`}>
+            <Text className={`font-heading ${danger ? "text-vupth-danger" : "text-gray-900"}`}>
               {title}
             </Text>
             {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendencia" mas nao

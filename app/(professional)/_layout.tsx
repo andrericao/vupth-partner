@@ -20,7 +20,7 @@ export default function ProfessionalLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#3b7a3f",
+        tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
           ...tabBarShadow,

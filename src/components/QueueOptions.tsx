@@ -34,9 +34,9 @@ type Props = {
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
 const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-brand", emoji: "🟢" },
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", emoji: "🟢" },
   { key: "intervalo", label: "Intervalo", activeBg: "bg-amber-500", emoji: "🟡" },
-  { key: "indisponivel", label: "Fora", activeBg: "bg-danger-500", emoji: "🔴" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", emoji: "🔴" },
 ];
 
 // Sombra dos cards via style RN (mesma do v1).

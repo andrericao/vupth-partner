@@ -108,7 +108,7 @@ export default function OwnerMenuScreen() {
             {establishment?.service_type ?? ""}
           </Text>
           {isProfessional && (
-            <Text fontFamily="$body" color="$green600" mt="$1">
+            <Text fontFamily="$body" color="$forest" mt="$1">
               Tambem profissional
             </Text>
           )}
@@ -124,7 +124,7 @@ export default function OwnerMenuScreen() {
             <MenuItem
               label="Atender como profissional"
               onPress={() => router.replace("/(professional)/queue" as any)}
-              color="$green600"
+              color="$forest"
             />
           </VStack>
         )}
@@ -233,7 +233,7 @@ export default function OwnerMenuScreen() {
           <MenuItem
             label="Sair da Conta"
             onPress={handleLogout}
-            color="$red500"
+            color="$brandDanger"
           />
         </VStack>
 

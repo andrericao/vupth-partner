@@ -49,7 +49,7 @@ function FieldCard({
         <View className="mt-2">
           {children}
           {error && (
-            <Text className="font-body text-xs text-danger-500 mb-2">{error}</Text>
+            <Text className="font-body text-xs text-vupth-danger mb-2">{error}</Text>
           )}
           <View className="flex-row gap-2">
             <NwButton title="Cancelar" onPress={onCancel} variant="secondary" className="flex-1 h-9 mt-0" />

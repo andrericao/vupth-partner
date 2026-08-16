@@ -149,8 +149,8 @@ export default function OwnerAffiliationsScreen() {
                     title="Aceitar"
                     onPress={() => handleAccept(aff)}
                     isLoading={actionLoading === aff.id}
-                    bg="$green500"
-                    $active-bg="$green600"
+                    bg="$forest"
+                    $active-bg="$forestSoft"
                     h="$9"
                     flex={1}
                   />
@@ -158,7 +158,7 @@ export default function OwnerAffiliationsScreen() {
                     title="Rejeitar"
                     onPress={() => handleReject(aff)}
                     isLoading={actionLoading === aff.id}
-                    bg="$red500"
+                    bg="$brandDanger"
                     $active-bg="$red600"
                     h="$9"
                     flex={1}

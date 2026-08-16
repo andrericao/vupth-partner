@@ -171,7 +171,7 @@ export default function EstablishmentDetailScreen() {
             <Text
               fontFamily="$body"
               fontSize="$sm"
-              color={isOpen ? "$green600" : "$coolGray400"}
+              color={isOpen ? "$forest" : "$coolGray400"}
             >
               {isOpen ? "Aberto" : "Fechado"}
             </Text>
@@ -185,7 +185,7 @@ export default function EstablishmentDetailScreen() {
 
           {isLoading ? (
             <VStack alignItems="center" mt="$8">
-              <Spinner color="$green500" size="large" />
+              <Spinner color="$forest" size="large" />
             </VStack>
           ) : (
             <VStack mt="$6" space="md">
@@ -203,8 +203,8 @@ export default function EstablishmentDetailScreen() {
             onPress={handleRequestAffiliation}
             isLoading={isRequesting}
             mt="$8"
-            bg="$green500"
-            $active-bg="$green600"
+            bg="$forest"
+            $active-bg="$forestSoft"
           />
         </VStack>
       </ScrollView>

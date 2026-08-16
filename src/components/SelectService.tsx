@@ -30,7 +30,7 @@ export function SelectService({ value, onValueChange }: Props) {
               accessibilityState={{ selected: isSelected }}
               onPress={() => onValueChange?.(type.value)}
               className={`py-2.5 px-4 rounded-md border ${
-                isSelected ? "bg-brand border-brand-600" : "bg-gray-100 border-gray-200"
+                isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
               }`}
             >
               <Text

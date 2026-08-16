@@ -46,7 +46,7 @@ function PathCard({
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
       className={`bg-white p-4 rounded-2xl mb-3 border ${
-        selected ? "border-brand" : "border-transparent"
+        selected ? "border-vupth-forest" : "border-transparent"
       } active:bg-gray-50`}
       style={cardShadow}
     >
