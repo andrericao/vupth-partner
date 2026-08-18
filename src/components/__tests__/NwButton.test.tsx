@@ -18,4 +18,27 @@ describe("NwButton (primitiva NativeWind)", () => {
     fireEvent.press(view.getByLabelText("Salvar"));
     expect(onPress).not.toHaveBeenCalled();
   });
+
+  // [marca-vupth] Variantes da identidade nova (design/marca-dev). Entraram
+  // SEM teste; sao o par claro brandGreen+forest, que so pode existir nelas.
+  it.each(["vupthPrimary", "vupthSecondary", "vupthOutline"] as const)(
+    "renderiza a variante %s e dispara onPress",
+    (variant) => {
+      const onPress = jest.fn();
+      const view = render(<NwButton title="Acao" variant={variant} onPress={onPress} />);
+
+      expect(view.getByText("Acao")).toBeTruthy();
+      fireEvent.press(view.getByText("Acao"));
+      expect(onPress).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("as variantes antigas continuam existindo (a marca nova nao as substituiu)", () => {
+    // A adocao e tela por tela: se alguem remover uma variante v1, as telas que
+    // ainda a usam quebram calado (o TS pega o nome, nao o visual).
+    for (const variant of ["primary", "secondary", "danger", "outlineBrand", "outlineDanger"] as const) {
+      const view = render(<NwButton title={variant} variant={variant} />);
+      expect(view.getByText(variant)).toBeTruthy();
+    }
+  });
 });
