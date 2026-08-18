@@ -8,6 +8,7 @@ import {
   registerDevice,
   unregisterDevice,
   type PushEnv,
+  pushSupported,
 } from "../push";
 
 jest.mock("expo-secure-store", () => ({
@@ -15,6 +16,28 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
+
+describe("pushSupported — onde vale carregar o expo-notifications", () => {
+  it("app instalado (build proprio): suportado", () => {
+    expect(pushSupported({ os: "android", executionEnvironment: "standalone" })).toBe(true);
+    expect(pushSupported({ os: "ios", executionEnvironment: "bare" })).toBe(true);
+  });
+
+  it("Expo Go NAO: o modulo grita no import desde o SDK 53", () => {
+    expect(pushSupported({ os: "android", executionEnvironment: "storeClient" })).toBe(false);
+    expect(pushSupported({ os: "ios", executionEnvironment: "storeClient" })).toBe(false);
+  });
+
+  it("web NAO: nao existe modulo nativo (build por URL, D8)", () => {
+    expect(pushSupported({ os: "web", executionEnvironment: "bare" })).toBe(false);
+    expect(pushSupported({ os: "web" })).toBe(false);
+  });
+
+  it("ambiente desconhecido nao bloqueia (fail-open — push e best-effort)", () => {
+    expect(pushSupported({ os: "android" })).toBe(true);
+    expect(pushSupported({ os: "android", executionEnvironment: null })).toBe(true);
+  });
+});
 
 describe("deviceDeletePath", () => {
   it("url-encoda os colchetes do token Expo (Tomcat rejeita [ ] crus no path)", () => {
