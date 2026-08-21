@@ -69,7 +69,12 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
           linha própria ACIMA e empurravam o titulo pra baixo, entao cada tela
           comecava numa altura diferente (QA Alexia, com a referencia do Pix).
           `min-h` de 44 mantem a altura da linha estavel mesmo sem botao. */}
-      <View className="flex-row items-center gap-3 min-h-[44px]">
+      {/* `items-start`, nao `items-center`: centrado, um titulo de DUAS linhas
+          (60px) estourava os 44 da linha e comecava no topo, enquanto um de uma
+          linha (30px) ficava centrado 7px abaixo — medido no navegador: 12px
+          contra 19px. Ancorado no topo, a 1a linha do titulo comeca sempre na
+          mesma altura, quebre ele ou nao. */}
+      <View className="flex-row items-start gap-3 min-h-[44px]">
         {onBack ? (
           <Pressable
             onPress={onBack}
@@ -83,24 +88,33 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
           </Pressable>
         ) : null}
 
-        {/* Titulo e subtitulo na MESMA coluna: com o voltar presente o texto
-            desloca junto, entao os dois seguem alinhados entre si. */}
-        <View className="flex-1 gap-0.5">
-          <Text
-            numberOfLines={2}
-            className="font-display text-[26px] leading-[30px] tracking-[-0.8px] text-vupth-forest"
-          >
-            {title}
-          </Text>
-          {subtitle ? (
-            <Text numberOfLines={2} className="font-body text-[13px] text-vupth-textSecondary">
-              {subtitle}
-            </Text>
-          ) : null}
-        </View>
+        {/* So o TITULO divide a linha com os botoes. */}
+        {/* O `mt-[5px]` centra a 1a linha do titulo (30 de entrelinha) no
+            botao redondo (40): (40 − 30) / 2. */}
+        <Text
+          numberOfLines={2}
+          className="flex-1 mt-[5px] font-display text-[26px] leading-[30px] tracking-[-0.8px] text-vupth-forest"
+        >
+          {title}
+        </Text>
 
         {action}
       </View>
+
+      {/* Subtitulo FORA da linha do titulo. Dentro dela, a coluna
+          titulo+subtitulo ficava centrada no eixo e empurrava o titulo ~7px
+          pra baixo so nas telas COM subtitulo — medido no navegador: 12px sem,
+          19px com. O titulo tem de comecar na MESMA altura em toda tela. O
+          recuo alinha o subtitulo com o titulo, saltando o botao voltar (40 de
+          botao + 12 de gap). */}
+      {subtitle ? (
+        <Text
+          numberOfLines={2}
+          className={`font-body text-[13px] text-vupth-textSecondary mt-1 ${onBack ? "ml-[52px]" : ""}`}
+        >
+          {subtitle}
+        </Text>
+      ) : null}
     </View>
   );
 }
