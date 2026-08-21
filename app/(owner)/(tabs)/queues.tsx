@@ -2,21 +2,19 @@ import { useState, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Badge,
   BadgeText,
   ScrollView,
   Pressable,
-  Divider,
 } from "@gluestack-ui/themed";
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { cardShadow } from "@lib/styles";
+import { useEstablishmentStore } from "@store/establishment.store";
 import { ratingLabel } from "@lib/rating";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
 
@@ -147,7 +145,14 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
 }
 
 export default function OwnerQueuesScreen() {
-  const { establishmentId } = useLocalSearchParams<{ establishmentId: string }>();
+  // Filas virou ABA — e aba nao recebe parametro de rota. O `establishmentId`
+  // do param so existe quando a tela e aberta empilhada (ex.: pelo card do
+  // dashboard); no acesso pela aba ele vem VAZIO, e sem o fallback pro store a
+  // tela ficava sem fila nenhuma pra mostrar.
+  const params = useLocalSearchParams<{ establishmentId?: string }>();
+  const storeEstablishment = useEstablishmentStore((s) => s.establishment);
+  const establishmentId = params.establishmentId || storeEstablishment?.id;
+
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -166,31 +171,21 @@ export default function OwnerQueuesScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
+      <VStack flex={1} pt="$12" pb="$8" px="$5">
+        {/* Sem botao de voltar: virou raiz de aba. O subtitulo carrega o total
+            que antes ocupava dois cartoes de numero — o dono ja ve a contagem
+            por profissional logo abaixo, entao repetir o agregado em destaque
+            so empurrava a lista pra baixo. */}
+        <Text fontFamily="$display" fontSize={26} letterSpacing={-0.8} color="$forest">
           Filas
-        </Heading>
-
-        {data && (
-          <HStack mt="$4" space="md" mb="$4">
-            <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$greenTint">
-              <Text fontFamily="$body" fontSize="$xs" color="$forest">Total na fila</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
-                {data.total_in_queue}
-              </Text>
-            </VStack>
-            <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
-              <Text fontFamily="$body" fontSize="$xs" color="$blue700">Profissionais</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
-                {data.available_professionals}
-              </Text>
-            </VStack>
-          </HStack>
-        )}
-
-        <Divider mb="$4" />
+        </Text>
+        <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$0.5" mb="$5">
+          {data
+            ? data.total_in_queue === 0
+              ? "Ninguém esperando agora"
+              : `${data.total_in_queue} ${data.total_in_queue === 1 ? "pessoa esperando" : "pessoas esperando"} agora`
+            : "Carregando..."}
+        </Text>
 
         {isLoading && !data && (
           <VStack mt="$6">
