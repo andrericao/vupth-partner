@@ -76,7 +76,10 @@ export default function OwnerDashboardScreen() {
   const STATUS_BADGE: Record<string, { label: string; action: "success" | "error" | "warning" }> = {
     OPEN: { label: "ABERTO", action: "success" },
     CLOSED: { label: "FECHADO", action: "error" },
-    TEMPORARILY_CLOSED: { label: "FECHADO TEMPORARIAMENTE", action: "warning" },
+    // "FECHADO TEMPORARIAMENTE" tinha 23 caracteres e espremia o nome da loja
+    // em tres linhas. "PAUSADO" diz a mesma coisa e casa com a acao que leva a
+    // esse estado ("Pausar entrada").
+    TEMPORARILY_CLOSED: { label: "PAUSADO", action: "warning" },
   };
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.CLOSED;
 
@@ -157,19 +160,29 @@ export default function OwnerDashboardScreen() {
   return (
     <ScrollView
       w="$full"
+      bg="$brandBackground"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$6" px="$6">
+      <VStack flex={1} pb="$6" px="$5" bg="$brandBackground">
         <Header />
 
         <HStack justifyContent="space-between" alignItems="center" mt="$4">
-          <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$forest">
+          <Text
+            fontFamily="$display"
+            fontSize={24}
+            letterSpacing={-0.8}
+            color="$forest"
+            flex={1}
+            numberOfLines={2}
+          >
             {establishment.name}
           </Text>
+          {/* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
+              `$border` cinza sobre fundo claro a pilula sumia. */}
           <VStack
-            bg={isOpen ? "$brandGreen" : "$border"}
+            bg={isOpen ? "$brandGreen" : status === "TEMPORARILY_CLOSED" ? "$amber500" : "$coolGray200"}
             borderRadius="$full"
             px="$3"
             py="$1.5"
@@ -177,7 +190,7 @@ export default function OwnerDashboardScreen() {
             <Text
               fontFamily="$display"
               fontSize={11}
-              color={isOpen ? "$forest" : "$coolGray600"}
+              color={isOpen || status === "TEMPORARILY_CLOSED" ? "$forest" : "$coolGray600"}
             >
               {badge.label}
             </Text>
@@ -215,9 +228,7 @@ export default function OwnerDashboardScreen() {
               <Text fontFamily="$display" fontSize={32} color="$forest">
                 {totalInQueue}
               </Text>
-              <Text fontFamily="$body" fontSize="$xl" color="$forest">
-                ›
-              </Text>
+              <Ionicons name="chevron-forward" size={18} color="#163300" />
             </HStack>
             <Text fontFamily="$body" fontSize="$xs" fontWeight="$semibold" color="$forest" mt="$1">
               na fila agora

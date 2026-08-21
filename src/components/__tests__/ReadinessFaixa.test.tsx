@@ -41,10 +41,13 @@ describe("ReadinessFaixa", () => {
   });
 
   it("renderiza quando ha pendencia basica e nao foi dispensada", () => {
-    const { getByText } = renderWithProvider(
+    const { getByText, getByLabelText } = renderWithProvider(
       <ReadinessFaixa completion={pending} targetRoute="/x" goalNoun="aparecer aos clientes" />
     );
-    expect(getByText("Complete seu cadastro")).toBeTruthy();
+    // Pelo rotulo de acessibilidade, nao pelo titulo: o titulo mudou com o
+    // redesenho ("Faltam N passos para abrir") e voltaria a quebrar o teste na
+    // proxima troca de copy. O que importa e que a faixa APARECE.
+    expect(getByLabelText("Completar cadastro")).toBeTruthy();
     expect(getByText(/5 passos para aparecer aos clientes/)).toBeTruthy();
   });
 
@@ -56,18 +59,18 @@ describe("ReadinessFaixa", () => {
   });
 
   it("nao renderiza quando o basico esta 100%", () => {
-    const { queryByText } = renderWithProvider(
+    const { queryByLabelText } = renderWithProvider(
       <ReadinessFaixa completion={done} targetRoute="/x" goalNoun="x" />
     );
-    expect(queryByText("Complete seu cadastro")).toBeNull();
+    expect(queryByLabelText("Completar cadastro")).toBeNull();
   });
 
   it("nao renderiza quando ja foi dispensada", () => {
     useUiStore.getState().dismissFaixa();
-    const { queryByText } = renderWithProvider(
+    const { queryByLabelText } = renderWithProvider(
       <ReadinessFaixa completion={pending} targetRoute="/x" goalNoun="x" />
     );
-    expect(queryByText("Complete seu cadastro")).toBeNull();
+    expect(queryByLabelText("Completar cadastro")).toBeNull();
   });
 
   it("tocar na faixa navega para o targetRoute", () => {
