@@ -721,7 +721,7 @@ export default function ProfessionalQueueScreen() {
       {waitingList.length > 0 && (
         <View
           className="px-6 pt-3"
-          style={{ paddingBottom: 12, backgroundColor: "#F7FAF8" }}
+          style={{ paddingBottom: 12, backgroundColor: "#FFFFFF" }}
         >
           {currentAttendance ? (
             <View

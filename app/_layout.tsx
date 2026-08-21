@@ -53,15 +53,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    // [new-design] Fundo off-white do guia (#F7FAF8) em todo o app — telas sem
-    // bg proprio herdam, e os cards brancos passam a "saltar" sobre ele.
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#F7FAF8" }}>
+    // [marca-vupth] Fundo BRANCO (#FFFFFF) em todo o app. Era #F7FAF8, o
+    // off-white da paleta ANTIGA — com a marca nova ele ficava um cinza-esverdeado
+    // competindo com o `surface` (#F3F5F1), que e justamente quem deve carregar
+    // o tom claro nos cards. Fundo branco + surface cinza recria a separacao que
+    // o off-white apagava.
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider config={config}>
           {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
-              style="dark" = icones escuros (visiveis sobre fundo claro). Aplica
-              em todas as telas (fundo do app e claro #F7FAF8). */}
-          <StatusBar style="dark" backgroundColor="#F7FAF8" />
+              style="dark" = icones escuros (visiveis sobre fundo claro). */}
+          <StatusBar style="dark" backgroundColor="#FFFFFF" />
           {fontLoaded ? <Slot /> : <Loading />}
         </GluestackUIProvider>
       </QueryClientProvider>

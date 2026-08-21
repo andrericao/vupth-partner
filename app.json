@@ -33,7 +33,7 @@
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
-      "backgroundColor": "#F7FAF8"
+      "backgroundColor": "#FFFFFF"
     },
     "extra": {
       "eas": {
