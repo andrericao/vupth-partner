@@ -34,6 +34,7 @@ import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { BenchIcon } from "@components/BenchIcon";
+import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
@@ -68,9 +69,9 @@ function ServingCard({
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5">
-          <View
-            className={`w-[7px] h-[7px] rounded-full ${isPaused ? "bg-white" : "bg-vupth-forest"}`}
-          />
+          {/* Pisca so ATENDENDO: pausado esta parado, e ponto piscando
+              sinalizaria movimento que nao esta acontecendo. */}
+          <LiveDot size={7} color={isPaused ? "#FFFFFF" : "#163300"} pulsing={!isPaused} />
           <Text
             className={`font-heading text-[10px] tracking-widest ${
               isPaused ? "text-white" : "text-vupth-forest"
