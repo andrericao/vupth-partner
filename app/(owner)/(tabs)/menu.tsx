@@ -1,10 +1,8 @@
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Pressable,
-  Divider,
   ScrollView,
 } from "@gluestack-ui/themed";
 import { Alert } from "react-native";
@@ -13,37 +11,86 @@ import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
-import { cardShadow } from "@lib/styles";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { PendingDot } from "@components/PendingDot";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { hasAnyPending } from "@lib/completion";
+import { Ionicons } from "@expo/vector-icons";
 
 type MenuItemProps = {
   label: string;
+  /** Linha de apoio — usada quando o item AGRUPA varios caminhos. */
+  hint?: string;
+  icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   color?: string;
   dot?: boolean;
+  /** Contagem que pede acao (ex.: solicitacoes pendentes). */
+  badge?: number;
+  /** Ultima linha do card nao leva divisor. */
+  last?: boolean;
 };
 
-function MenuItem({ label, onPress, color = "$coolGray900", dot = false }: MenuItemProps) {
+function MenuItem({
+  label,
+  hint,
+  icon,
+  onPress,
+  color = "$forest",
+  dot = false,
+  badge,
+  last = false,
+}: MenuItemProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      py="$4"
-      px="$5"
-      bg="$white"
-      borderRadius="$2xl"
-      style={cardShadow}
-      $active-bg="$coolGray50"
-    >
-      <HStack alignItems="center" space="sm">
-        <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color={color}>
-          {label}
-        </Text>
-        {dot && <PendingDot />}
-      </HStack>
-    </Pressable>
+    <>
+      <Pressable onPress={onPress} py="$3.5" px="$4" $active-bg="$coolGray50">
+        <HStack alignItems="center" space="md">
+          <Ionicons name={icon} size={19} color="#163300" />
+          <VStack flex={1}>
+            <HStack alignItems="center" space="sm">
+              <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color={color}>
+                {label}
+              </Text>
+              {dot && <PendingDot />}
+            </HStack>
+            {hint && (
+              <Text fontFamily="$body" fontSize="$2xs" color="$coolGray500" mt="$0.5">
+                {hint}
+              </Text>
+            )}
+          </VStack>
+          {badge != null && badge > 0 && (
+            <VStack bg="$brandDanger" borderRadius="$full" px="$2" py="$0.5">
+              <Text fontFamily="$display" fontSize={10} color="$white">
+                {badge}
+              </Text>
+            </VStack>
+          )}
+          <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+        </HStack>
+      </Pressable>
+      {!last && <VStack height={1} bg="$border" />}
+    </>
+  );
+}
+
+/** Bloco de itens sob um rotulo — o agrupamento e o que tira o menu do "tudo igual". */
+function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <VStack space="sm">
+      <Text
+        fontFamily="$body"
+        fontSize={11}
+        fontWeight="$bold"
+        letterSpacing={0.8}
+        color="$coolGray500"
+      >
+        {label}
+      </Text>
+      <VStack bg="$brandSurface" borderRadius="$card" overflow="hidden">
+        {children}
+      </VStack>
+    </VStack>
   );
 }
 
@@ -100,142 +147,118 @@ export default function OwnerMenuScreen() {
       <VStack flex={1} pb="$6" px="$6">
         <Header />
 
-        <VStack mt="$8" mb="$6">
-          <Heading size="2xl" fontFamily="$heading">
+        <VStack mt="$6" mb="$5">
+          <Text fontFamily="$display" fontSize={22} letterSpacing={-0.6} color="$forest">
             {establishment?.name ?? "Meu Estabelecimento"}
-          </Heading>
-          <Text fontFamily="$body" color="$coolGray500" mt="$1">
+          </Text>
+          <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$0.5">
             {establishment?.service_type ?? ""}
           </Text>
-          {isProfessional && (
-            <Text fontFamily="$body" color="$forest" mt="$1">
-              Tambem profissional
-            </Text>
-          )}
         </VStack>
 
-        <Divider mb="$4" />
-
-        {/* Seletor de papel: quem acumula OWNER + PROFESSIONAL alterna para a
-            sua area de profissional (e gerencia servicos por "Meus Servicos").
-            Owner-so-dono nao ve o botao. Decisao de produto 2026-06-28. */}
-        {isProfessional && (
-          <VStack mb="$4">
-            <MenuItem
-              label="Atender como profissional"
+        <VStack space="xl">
+          {/* Quem acumula os dois papeis troca de area por aqui. Fica FORA dos
+              grupos porque nao e configuracao — e mudar de contexto. */}
+          {isProfessional && (
+            <Pressable
               onPress={() => router.replace("/(professional)/queue" as any)}
-              color="$forest"
-            />
-          </VStack>
-        )}
+              bg="$greenTint"
+              borderRadius="$card"
+              py="$3.5"
+              px="$4"
+            >
+              <HStack alignItems="center" space="md">
+                <Ionicons name="swap-horizontal" size={19} color="#163300" />
+                <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$forest" flex={1}>
+                  Atender como profissional
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color="#163300" />
+              </HStack>
+            </Pressable>
+          )}
 
-        <VStack space="sm">
           {establishment?.id && (
-            <>
+            <Grupo label="EQUIPE">
+              {/* UMA porta pra equipe. Eram TRES linhas de mesmo peso
+                  (adicionar / convidar / solicitacoes) que levavam a variacoes
+                  da mesma tarefa — e a propria tela de destino ja oferece os
+                  tres caminhos. O badge traz a urgencia (solicitacao parada)
+                  pra fora, que era o unico motivo real de separar. */}
               <MenuItem
-                label="Adicionar Profissional"
+                icon="people-outline"
+                label="Profissionais"
+                hint="adicionar, convidar e ver solicitações"
                 onPress={() =>
-                  // Porta UNICA (2026-08-07): a propria tela oferece os caminhos
-                  // (ser tambem profissional / convidar / ver solicitacoes). Antes
-                  // o dono NAO-profissional era desviado p/ o onboarding
-                  // `also-professional`, que criava o perfil dele sem nomear a
-                  // escolha — e a pendencia do checklist ja apontava p/ ca.
                   router.push({
                     pathname: "/(owner)/add-professional",
                     params: { establishmentId: establishment.id },
                   } as any)
                 }
+                last
               />
-
-              <MenuItem
-                label="Convidar Profissional"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(owner)/invite-professional",
-                    params: { establishmentId: establishment.id },
-                  } as any)
-                }
-              />
-
-              <MenuItem
-                label="Solicitacoes de Vinculacao"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(owner)/affiliations",
-                    params: { establishmentId: establishment.id },
-                  } as any)
-                }
-              />
-
-              {/* "Adicionar Servico" SAIU do menu do dono (Andre 2026-08-11).
-                  Servico e capacidade do PROFISSIONAL: quem acumula os dois
-                  papeis gerencia em "Meus Servicos", na area do profissional —
-                  ter as duas portas so criava duvida sobre de quem era o
-                  servico. A tela `add-service.tsx` segue existindo (rota
-                  href:null) ate a limpeza, mas nada mais aponta p/ ela. */}
-
-              <MenuItem
-                label="Ver Filas"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(owner)/queues",
-                    params: { establishmentId: establishment.id },
-                  } as any)
-                }
-              />
-            </>
+            </Grupo>
           )}
 
-          <MenuItem
-            label="Dados Pessoais"
-            onPress={() =>
-              router.push({
-                pathname: "/(owner)/coming-soon",
-                params: { title: "Dados Pessoais" },
-              } as any)
-            }
-          />
-
-          {establishment?.id && (
+          <Grupo label="NEGÓCIO">
             <MenuItem
-              label="Dados do Estabelecimento"
-              dot={hasPending}
+              icon="clipboard-outline"
+              label="Atendimentos"
+              onPress={() => router.push("/(owner)/attendances" as any)}
+            />
+            <MenuItem
+              icon="bar-chart-outline"
+              label="Relatórios"
+              onPress={() => router.push("/(owner)/reports" as any)}
+              last={!establishment?.id}
+            />
+            {establishment?.id && (
+              <MenuItem
+                icon="storefront-outline"
+                label="Dados do estabelecimento"
+                dot={hasPending}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/establishment-data",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+                last
+              />
+            )}
+          </Grupo>
+
+          <Grupo label="CONTA">
+            <MenuItem
+              icon="person-outline"
+              label="Dados pessoais"
               onPress={() =>
                 router.push({
-                  pathname: "/(owner)/establishment-data",
-                  params: { establishmentId: establishment.id },
+                  pathname: "/(owner)/coming-soon",
+                  params: { title: "Dados Pessoais" },
                 } as any)
               }
+              last={!establishment?.id}
             />
-          )}
+            {establishment?.id && (
+              <MenuItem
+                icon="exit-outline"
+                label="Sair do estabelecimento"
+                onPress={handleLeaveEstablishment}
+                last
+              />
+            )}
+          </Grupo>
 
-          <MenuItem
-            label="Atendimentos"
-            onPress={() => router.push("/(owner)/attendances" as any)}
-          />
-
-          <MenuItem
-            label="Relatorios"
-            onPress={() => router.push("/(owner)/reports" as any)}
-          />
-
+          {/* Sair da conta fica solto e em vermelho: e a unica acao aqui que
+              tira a pessoa do app. */}
+          <Pressable onPress={handleLogout} py="$2">
+            <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandDanger">
+              Sair da conta
+            </Text>
+          </Pressable>
         </VStack>
 
-        <VStack mt="$8" space="sm">
-          {establishment?.id && (
-            <MenuItem
-              label="Sair do Estabelecimento"
-              onPress={handleLeaveEstablishment}
-              color="$amber700"
-            />
-          )}
-
-          <MenuItem
-            label="Sair da Conta"
-            onPress={handleLogout}
-            color="$brandDanger"
-          />
-        </VStack>
+        <VStack flex={1} />
 
         <OtaUpdateButton />
       </VStack>
