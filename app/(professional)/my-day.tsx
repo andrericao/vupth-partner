@@ -22,7 +22,6 @@ import { useProfessionalStore, type ProfessionalReport } from "@store/profession
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { periodRange } from "@lib/time";
-import { cardShadow } from "@lib/styles";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
@@ -57,7 +56,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <VStack bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow} mb="$3">
+    <VStack bg="$brandSurface" p="$4" borderRadius="$card" mb="$3">
       <HStack justifyContent="space-between" alignItems="center">
         <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
           {item.clientName}
@@ -223,7 +222,7 @@ export default function MyDayScreen() {
 
         {period === "day" && (
           <HStack space="md" mb="$4">
-            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
+            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Na fila agora
               </Text>
@@ -231,7 +230,7 @@ export default function MyDayScreen() {
                 {queueCount}
               </Text>
             </VStack>
-            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
+            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Espera estimada
               </Text>
@@ -255,7 +254,7 @@ export default function MyDayScreen() {
                 outros cards (2xl vs 3xl) — inconsistente pro card que deveria
                 pesar mais, nao menos. */}
             <HStack space="md">
-              <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card" style={cardShadow}>
+              <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card">
                 <Text fontFamily="$body" fontSize="$sm" color="$forest">
                   Receita
                 </Text>
@@ -263,7 +262,7 @@ export default function MyDayScreen() {
                   R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Atendimentos
                 </Text>
@@ -274,7 +273,7 @@ export default function MyDayScreen() {
             </HStack>
 
             <HStack space="md">
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Duracao media
                 </Text>
@@ -282,7 +281,7 @@ export default function MyDayScreen() {
                   {Math.round(report?.avgDurationMinutes ?? 0)} min
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Servico mais feito
                 </Text>

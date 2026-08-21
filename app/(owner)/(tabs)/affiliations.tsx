@@ -12,7 +12,6 @@ import { SkeletonList } from "@components/Skeleton";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
@@ -132,7 +131,7 @@ export default function OwnerAffiliationsScreen() {
             {pending.map((aff) => (
               <VStack
                 key={aff.id}
-                bg="$white"
+                bg="$brandSurface"
                 p="$4"
                 borderRadius="$md"
                 borderWidth="$1"
@@ -178,9 +177,8 @@ export default function OwnerAffiliationsScreen() {
                 key={aff.id}
                 py="$3"
                 px="$4"
-                bg="$white"
-                borderRadius="$2xl"
-                style={cardShadow}
+                bg="$brandSurface"
+                borderRadius="$card"
                 mb="$2"
                 justifyContent="space-between"
                 alignItems="center"

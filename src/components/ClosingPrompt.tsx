@@ -5,7 +5,7 @@ import { useUiStore } from "@store/ui.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { graceSecondsRemaining, graceCountdownLabel } from "@lib/closing";
-import { cardShadow } from "@lib/styles";
+import { floatingShadow } from "@lib/styles";
 
 /**
  * Prompt de AUTO-FECHAMENTO (BUG1 / S1 fatia 5). Quando o backend manda o WS
@@ -62,7 +62,7 @@ export function ClosingPrompt() {
           onPress={dismiss}
           accessibilityLabel="Fechar aviso"
         />
-        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={cardShadow}>
+        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
           <Text className="font-heading text-lg text-gray-900">
             Passou do horario de fechamento
           </Text>

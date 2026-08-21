@@ -12,7 +12,6 @@ import {
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
@@ -216,7 +215,7 @@ export default function MealsScreen() {
               editingId === m.intervalId ? (
                 <VStack
                   key={m.intervalId}
-                  bg="$white"
+                  bg="$brandSurface"
                   p="$3"
                   borderRadius="$md"
                   borderWidth="$1"
@@ -270,10 +269,9 @@ export default function MealsScreen() {
               ) : (
                 <HStack
                   key={m.intervalId}
-                  bg="$white"
+                  bg="$brandSurface"
                   p="$3"
-                  borderRadius="$2xl"
-                  style={cardShadow}
+                  borderRadius="$card"
                   justifyContent="space-between"
                   alignItems="center"
                 >
@@ -389,7 +387,7 @@ export default function MealsScreen() {
             </VStack>
           )}
 
-          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mt="$4">
+          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
               Aviso na hora da refeicao
             </Text>

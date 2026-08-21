@@ -13,7 +13,6 @@ import {
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
@@ -39,9 +38,8 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
     <HStack
       py="$3"
       px="$4"
-      bg="$white"
-      borderRadius="$2xl"
-      style={cardShadow}
+      bg="$brandSurface"
+      borderRadius="$card"
       mb="$2"
       justifyContent="space-between"
       alignItems="center"
@@ -77,7 +75,7 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
     <VStack
       bg="$greenTint"
       p="$4"
-      borderRadius="$lg"
+      borderRadius="$card"
       borderWidth="$1"
       borderColor="$greenTint"
       mb="$4"
@@ -179,13 +177,13 @@ export default function ProfessionalQueueScreen() {
             </Text>
 
             <HStack mt="$4" space="md" mb="$4">
-              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$greenTint">
+              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$greenTint">
                 <Text fontFamily="$body" fontSize="$xs" color="$forest">Na fila</Text>
                 <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                   {data.size}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
+              <VStack flex={1} bg="$blue50" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$blue200">
                 <Text fontFamily="$body" fontSize="$xs" color="$blue700">Espera total</Text>
                 <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
                   {data.totalRemainingMinutes} min

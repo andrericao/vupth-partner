@@ -1,5 +1,4 @@
 import { View, Text, Pressable } from "react-native";
-import { cardShadow } from "@lib/styles";
 import { comingSoon } from "@components/comingSoon";
 
 // S5 (stub; backend "Expediente nos relatorios") — mostrar o inicio/fim do
@@ -15,7 +14,7 @@ export function ExpedienteCard() {
         comingSoon("O expediente (horário de abertura e fechamento) nos relatórios")
       }
     >
-      <View className="bg-white p-4 rounded-2xl" style={cardShadow}>
+      <View className="bg-vupth-surface p-4 rounded-[20px]">
         <View className="flex-row justify-between items-center mb-1">
           <Text className="font-body text-xs text-gray-500">Expediente</Text>
           <View className="bg-amber-100 rounded-full px-2 py-0.5">

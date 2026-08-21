@@ -17,41 +17,9 @@ import { useEstablishmentStore, type EstablishmentReport } from "@store/establis
 import { getApiErrorMessage } from "@lib/api";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { periodRange } from "@lib/time";
+import { StatCard } from "@components/brand/StatCard";
 
 type Period = "day" | "week" | "month";
-
-// [marca-vupth] Era `color`/`bg`/`border` cru por chamada (e `border` nem
-// chegava a ser usado) — foi assim que um `$blue50`/`$blue800`, cor que nao
-// existe na marca, entrou na tela. Agora so existe UMA decisao: este card e o
-// heroi da secao ou nao. Heroi = brand-green (o Pencil usa 1-2 por tela);
-// resto = surface, PLANO. Sem sombra: no Pencil inteiro so 13 elementos tem
-// sombra (tab bars, FAB, notificacao — coisas que flutuam de verdade); card
-// sobre surface e sempre plano, e sombra em tudo faz tudo parecer clicavel.
-function StatCard({
-  label,
-  value,
-  hero = false,
-}: {
-  label: string;
-  value: string;
-  hero?: boolean;
-}) {
-  return (
-    <VStack flex={1} bg={hero ? "$brandGreen" : "$brandSurface"} p="$4" borderRadius="$card">
-      <Text fontFamily="$display" fontSize={26} color="$forest">
-        {value}
-      </Text>
-      <Text
-        fontFamily="$body"
-        fontSize="$xs"
-        color={hero ? "$forest" : "$coolGray500"}
-        mt="$1"
-      >
-        {label}
-      </Text>
-    </VStack>
-  );
-}
 
 export default function OwnerReportsScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -108,7 +76,7 @@ export default function OwnerReportsScreen() {
   const periods: { key: Period; label: string }[] = [
     { key: "day", label: "Hoje" },
     { key: "week", label: "Semana" },
-    { key: "month", label: "Mes" },
+    { key: "month", label: "Mês" },
   ];
 
   return (
@@ -122,7 +90,7 @@ export default function OwnerReportsScreen() {
         <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
 
         <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Relatorios
+          Relatórios
         </Heading>
         <Text fontFamily="$body" color="$coolGray500" mt="$1">
           {establishment?.name ?? ""}
@@ -134,8 +102,8 @@ export default function OwnerReportsScreen() {
         <HStack space="md">
           {/* "Na fila" so vira heroi quando HA fila: zero e a ausencia de
               fila, nao o numero que importa (mesma regra do dashboard). */}
-          <StatCard label="Na fila" value={String(totalInQueue)} hero={totalInQueue > 0} />
-          <StatCard label="Profissionais disponíveis" value={String(availableProfs)} />
+          <StatCard flex={1} label="Na fila" value={String(totalInQueue)} hero={totalInQueue > 0} />
+          <StatCard flex={1} label="Profissionais disponíveis" value={String(availableProfs)} />
         </HStack>
 
         <HStack mt="$6" space="sm">
@@ -182,15 +150,17 @@ export default function OwnerReportsScreen() {
                 pelo mesmo motivo (mesma ordem do relatorio do profissional). */}
             <HStack space="md" mt="$4">
               <StatCard
+                flex={1}
                 label="Receita"
                 value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`}
                 hero
               />
-              <StatCard label="Atendimentos" value={String(report?.totalAttendances ?? 0)} />
+              <StatCard flex={1} label="Atendimentos" value={String(report?.totalAttendances ?? 0)} />
             </HStack>
 
             <HStack space="md" mt="$3">
               <StatCard
+                flex={1}
                 label="Duração média"
                 value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
               />
@@ -211,7 +181,7 @@ export default function OwnerReportsScreen() {
             </Text>
 
             {liveProfs.length === 0 ? (
-              <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$4">
+              <Text fontFamily="$body" color="$coolGray500" textAlign="center" mt="$4">
                 Nenhum profissional vinculado
               </Text>
             ) : (

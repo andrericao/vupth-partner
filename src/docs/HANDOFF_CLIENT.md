@@ -173,3 +173,82 @@ O `brandGreen` **inverteu o habito da paleta antiga**. O `#3b7a3f` era escuro o 
 
 1. **Sincronizar os tokens** — e barato e nao muda tela nenhuma (sao aditivos). Os tres arquivos (`gluestack-ui.config.ts` daqui, `tailwind.config.js` daqui e `gluestack-ui.config.ts` de voces) precisam bater **1:1**: a paleta viver em dois lugares aqui e o que ja produziu dois verdes diferentes no mesmo app.
 2. **Adotar os componentes e decisao separada** — mais cara, e conversa com a **D9** (migracao Gluestack v2). Sincronizar token nao obriga a adotar componente.
+
+---
+
+### 6. As REGRAS DE USO (2026-08-21) — o que faltava, e o que custou caro
+
+> **Por que esta secao existe.** Ate aqui o C25 documentava os **tokens** e mais
+> nada. Token nao decide nada sozinho: sem regra de USO, cada tela decide de
+> novo, e foi o que aconteceu. Custou, em ordem de gravidade:
+>
+> - Um **`$blue50`/`$blue800`** — cor que **nao existe na marca** — chegou ao
+>   relatorio do dono e ficou. Entrou porque o `StatCard` de la aceitava `bg` e
+>   `color` **crus por parametro**.
+> - **Texto ilegivel** em 11 pontos do client (detalhe no item 6.4).
+> - **~60 sombras** contra **13** no `.pen` inteiro, o que fez o QA dizer que
+>   *"parece que tudo e clicavel e importante"*.
+
+#### 6.1 Verde e ACENTO — 1 a 2 por tela
+
+Medido no `.pen`, por tela: **1 a 2** elementos com fundo `brand-green`, contra
+**3 a 8** em `surface`. Referencia limpa: `PROF · 03 Relatorios` = **1 verde, 8
+surface**.
+
+Quando tudo e verde, nada e. Regra pratica que ja aplicamos duas vezes:
+**numero ZERO nao e heroi** — "0 na fila" e a *ausencia* de fila, nao o numero
+que importa; nesse estado o card fica neutro e o acento sobra pra acao da tela.
+
+#### 6.2 Card = `surface`, raio 20, PLANO
+
+O que separa um card do fundo e o proprio `$brandSurface` — **nao** a sombra,
+**nao** a borda. O trio `bg="$white"` + `borderRadius="$2xl"` + `cardShadow`
+era o card mais comum dos dois apps e esta **aposentado**.
+
+Primitiva pronta: `src/components/brand/Card.tsx` (`BrandCard`) nos dois repos.
+Em tela ja migrada p/ NativeWind: `bg-vupth-surface rounded-[20px]`.
+
+#### 6.3 Sombra so no que FLUTUA
+
+No `.pen` inteiro sao **13** elementos com sombra: as 5 tab bars, o FAB, o sino,
+a notificacao e os cards de resumo sobre `forest`. **Nada mais.**
+
+`cardShadow` foi **renomeada p/ `floatingShadow`** de proposito — o rename obriga
+a revisar cada ponto de uso em vez de o import antigo passar batido. Sombra e
+*affordance de toque*: em tudo, faz tudo parecer botao.
+
+#### 6.4 Contraste — a escala cinza do client e INVERTIDA
+
+⚠️ **Armadilha real, ja cobrada em producao.** No `gluestack-ui.config.ts` do
+client, `gray300` (#5C6265) e mais **ESCURO** que `gray400` (#B9BBBC), que e
+mais escuro que `gray500` (#DDDEDF). Quem escreve `$gray400` esperando "cinza
+medio" acerta um cinza **quase invisivel**:
+
+| token | hex | sobre branco | |
+|---|---|---|---|
+| `$gray400` | #B9BBBC | **1,93:1** | REPROVA |
+| `$gray500` | #DDDEDF | **1,35:1** | REPROVA |
+| `$gray200` | #F2F3F3 | **1,11:1** | REPROVA |
+| `$brandTextSecondary` | #454745 | 9,37:1 | ok |
+
+Minimo WCAG AA p/ texto = **4,5:1**. Texto secundario e
+**`$brandTextSecondary`**, ponto. Unica excecao legitima: controle
+**desabilitado**, que a WCAG isenta — baixo contraste ali *e* o sinal.
+
+#### 6.5 Sobre `forest`, o par e `brandGreen` — nunca branco
+
+Ja estava no topo do C25 na forma "brandGreen so entra como fundo". A outra
+metade da regra: **fundo `forest` pede `brandGreen` por cima**, nao `$white`.
+Branco sobre forest funciona de contraste mas nao e a marca — e o par da paleta
+antiga.
+
+#### 6.6 Numero e `$display`; hora/versao e `$mono`
+
+`$display` (Archivo ExtraBold) p/ numero grande e titulo. `$mono` (DM Mono) p/
+hora, cronometro e versao — digito que muda nao pode dancar de largura.
+
+#### 6.7 Primitiva nao aceita cor crua
+
+`StatCard` expoe **`hero`** (booleano), nao `bg`/`color`. Foi o parametro de cor
+cru que deixou o azul entrar. Se uma tela "precisa" de uma cor que a primitiva
+nao oferece, quase sempre o certo e a primitiva errada — nao uma cor nova.

@@ -39,15 +39,6 @@ const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }
   { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", emoji: "🔴" },
 ];
 
-// Sombra dos cards via style RN (mesma do v1).
-const rowShadow = {
-  shadowColor: "#1A281A",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.1,
-  shadowRadius: 10,
-  elevation: 3,
-};
-
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
 // do componente, a inferencia do gluestack por instanciacao estourava a pilha,
 // alem do anti-padrao React de remontar a subarvore).
@@ -75,8 +66,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="bg-white px-4 py-3.5 rounded-2xl mb-2 active:bg-gray-50"
-      style={rowShadow}
+      className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2 active:bg-gray-50"
     >
       <View className="flex-row items-center gap-3">
         <Text className="text-base w-6 text-center">{icon}</Text>
@@ -139,8 +129,7 @@ export function QueueOptions({
           Nao ha mais botao de abrir/fechar loja: ficar "Trabalhando" abre sozinho
           (derivado); a tela avisa "voce e o primeiro". */}
       <View
-        className="bg-white px-4 py-3.5 rounded-2xl mb-2"
-        style={rowShadow}
+        className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2"
       >
         <View className="flex-row items-center gap-3">
           <Text className="text-base w-6 text-center">

@@ -20,7 +20,6 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage } from "@lib/api";
-import { cardShadow } from "@lib/styles";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
@@ -373,11 +372,10 @@ export default function OwnerDashboardScreen() {
                     },
                   } as any)
                 }
-                bg="$white"
+                bg="$brandSurface"
                 py="$4"
                 px="$4"
-                borderRadius="$2xl"
-                style={cardShadow}
+                borderRadius="$card"
                 $active-bg="$coolGray50"
               >
                 <HStack justifyContent="space-between" alignItems="center">

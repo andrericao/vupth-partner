@@ -24,7 +24,6 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
-import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
@@ -67,7 +66,6 @@ function ServingCard({
     // claro da tela de proposito: e o que esta acontecendo agora.
     <View
       className={`p-4 rounded-[20px] mt-4 ${isPaused ? "bg-amber-500" : "bg-vupth-green"}`}
-      style={cardShadow}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5">
@@ -165,10 +163,9 @@ function QueueRow({
       onPress={onMenu}
       accessibilityRole="button"
       accessibilityLabel={`Opcoes de ${attendance.clientName}`}
-      className={`bg-white pl-4 active:bg-gray-50 ${
-        isFirst ? "p-4 rounded-2xl border border-vupth-forest mb-3" : "p-3 rounded-xl mb-2"
+      className={`bg-vupth-surface pl-4 active:bg-vupth-greenTint ${
+        isFirst ? "p-4 rounded-[20px] border border-vupth-forest mb-3" : "p-3 rounded-[20px] mb-2"
       }`}
-      style={cardShadow}
     >
       <View className="flex-row items-center gap-2">
         <View
@@ -577,8 +574,7 @@ export default function ProfessionalQueueScreen() {
             accessibilityRole="button"
             accessibilityLabel="Opcoes da fila"
             hitSlop={8}
-            className="w-10 h-10 rounded-xl bg-white items-center justify-center active:bg-vupth-greenTint"
-            style={cardShadow}
+            className="w-10 h-10 rounded-xl bg-vupth-surface items-center justify-center active:bg-vupth-greenTint"
           >
             <BenchIcon />
             {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
@@ -729,8 +725,7 @@ export default function ProfessionalQueueScreen() {
         >
           {currentAttendance ? (
             <View
-              className="bg-white rounded-full py-3.5 flex-row items-center justify-center gap-1.5"
-              style={cardShadow}
+              className="bg-vupth-surface rounded-full py-3.5 flex-row items-center justify-center gap-1.5"
             >
               {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
                   texto; o desenho marca com um icone de informacao. */}

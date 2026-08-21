@@ -18,7 +18,6 @@ import {
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
 import { SkeletonList } from "@components/Skeleton";
@@ -182,7 +181,7 @@ export default function FindEstablishmentScreen() {
             <VStack
               bg="$greenTint"
               p="$4"
-              borderRadius="$lg"
+              borderRadius="$card"
               borderWidth="$1"
               borderColor="$forest"
               mt="$6"
@@ -206,7 +205,7 @@ export default function FindEstablishmentScreen() {
             <VStack
               bg="$amber50"
               p="$4"
-              borderRadius="$lg"
+              borderRadius="$card"
               borderWidth="$1"
               borderColor="$amber200"
               mt="$6"
@@ -292,9 +291,8 @@ export default function FindEstablishmentScreen() {
               onPress={() => openDetail(est)}
               py="$4"
               px="$4"
-              bg="$white"
-              borderRadius="$2xl"
-              style={cardShadow}
+              bg="$brandSurface"
+              borderRadius="$card"
               mb="$2"
               $active-bg="$coolGray50"
             >

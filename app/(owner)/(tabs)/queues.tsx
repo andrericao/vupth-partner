@@ -13,7 +13,6 @@ import { RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { BrandButton } from "@components/brand/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { cardShadow } from "@lib/styles";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { ratingLabel } from "@lib/rating";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
@@ -69,8 +68,8 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
   ];
 
   return (
-    <VStack bg="$white" borderRadius="$2xl"
-      style={cardShadow} mb="$3" overflow="hidden">
+    <VStack bg="$brandSurface" borderRadius="$card"
+      mb="$3" overflow="hidden">
       <Pressable onPress={() => setExpanded(!expanded)} py="$3" px="$4">
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>

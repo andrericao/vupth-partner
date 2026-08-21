@@ -8,7 +8,6 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
-import { cardShadow } from "@lib/styles";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -43,7 +42,7 @@ function FieldCard({
   children?: React.ReactNode;
 }) {
   return (
-    <View className="bg-white p-4 rounded-2xl" style={cardShadow}>
+    <View className="bg-vupth-surface p-4 rounded-[20px]">
       <Text className="font-body text-sm text-gray-500">{label}</Text>
       {editing ? (
         <View className="mt-2">

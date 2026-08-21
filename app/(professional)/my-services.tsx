@@ -18,7 +18,6 @@ import { BrandButton } from "@components/brand/Button";
 import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
-import { cardShadow } from "@lib/styles";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 
 import {
@@ -277,7 +276,7 @@ export default function MyServicesScreen() {
           <VStack
             bg="$amber50"
             p="$4"
-            borderRadius="$lg"
+            borderRadius="$card"
             borderWidth="$1"
             borderColor="$amber200"
             mt="$6"
@@ -299,7 +298,7 @@ export default function MyServicesScreen() {
               editingId === svc.id ? (
                 <VStack
                   key={svc.id}
-                  bg="$white"
+                  bg="$brandSurface"
                   p="$3"
                   borderRadius="$md"
                   borderWidth="$1"
@@ -327,7 +326,7 @@ export default function MyServicesScreen() {
                     <VStack
                       bg="$coolGray50"
                       p="$4"
-                      borderRadius="$lg"
+                      borderRadius="$card"
                       borderWidth="$1"
                       borderColor="$coolGray200"
                       mt="$3"
@@ -424,10 +423,9 @@ export default function MyServicesScreen() {
               ) : (
                 <HStack
                   key={svc.id}
-                  bg="$white"
+                  bg="$brandSurface"
                   p="$4"
-                  borderRadius="$2xl"
-                  style={cardShadow}
+                  borderRadius="$card"
                   justifyContent="space-between"
                   alignItems="center"
                 >
@@ -532,7 +530,7 @@ export default function MyServicesScreen() {
                 <VStack
                   bg="$coolGray50"
                   p="$4"
-                  borderRadius="$lg"
+                  borderRadius="$card"
                   borderWidth="$1"
                   borderColor="$coolGray200"
                   mb="$4"

@@ -1,7 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
-import { cardShadow } from "@lib/styles";
 import type { Completion, CompletionTracker } from "@lib/completion";
 
 type Props = {
@@ -115,7 +114,7 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
     n === 1 ? "Falta 1 passo para aparecer aos clientes." : `Faltam ${n} passos para aparecer aos clientes.`;
 
   return (
-    <View className="bg-white rounded-2xl p-4 mt-4" style={cardShadow}>
+    <View className="bg-vupth-surface rounded-[20px] p-4 mt-4">
       {basic.percent === 100 ? (
         <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
           <Text className="text-xl">🎉</Text>

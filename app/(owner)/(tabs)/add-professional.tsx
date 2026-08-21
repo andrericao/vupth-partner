@@ -9,7 +9,6 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
-import { cardShadow } from "@lib/styles";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -45,10 +44,9 @@ function PathCard({
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
-      className={`bg-white p-4 rounded-2xl mb-3 border ${
+      className={`bg-vupth-surface p-4 rounded-[20px] mb-3 border ${
         selected ? "border-vupth-forest" : "border-transparent"
       } active:bg-gray-50`}
-      style={cardShadow}
     >
       <View className="flex-row items-center">
         <View className="flex-1">

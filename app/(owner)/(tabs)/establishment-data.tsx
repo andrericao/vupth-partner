@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { CompletionCard } from "@components/CompletionCard";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
-import { cardShadow } from "@lib/styles";
 
 type MenuItemProps = {
   label: string;
@@ -17,8 +16,7 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="py-4 px-5 bg-white rounded-2xl active:bg-gray-50"
-      style={cardShadow}
+      className="py-4 px-5 bg-vupth-surface rounded-[20px] active:bg-gray-50"
     >
       <Text className="font-heading text-base text-gray-900">{label}</Text>
       <Text className="font-body text-sm text-gray-500 mt-0.5">{description}</Text>
@@ -69,8 +67,7 @@ export default function EstablishmentDataScreen() {
         </View>
 
         <View
-          className="mt-4 bg-white rounded-2xl px-5 py-4 flex-row justify-between items-center"
-          style={cardShadow}
+          className="mt-4 bg-vupth-surface rounded-[20px] px-5 py-4 flex-row justify-between items-center"
         >
           <Text className="font-body text-base text-gray-700">
             Profissionais vinculados

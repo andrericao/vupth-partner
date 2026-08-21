@@ -17,7 +17,6 @@ import {
 import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
 import { formatCurrency } from "@utils/summaryCalculations";
-import { cardShadow } from "@lib/styles";
 
 // Tela "Encaixes" (Pencil PROF · 02): mesma feature de C2 (solicitacoes de
 // corte) que ja funcionava dentro de um bottom-sheet em "Opcoes da fila"
@@ -103,7 +102,6 @@ export default function CutRequestsScreen() {
                 <View
                   key={req.id}
                   className="bg-vupth-surface rounded-[20px] p-4 gap-3"
-                  style={cardShadow}
                 >
                   <View className="flex-row items-start justify-between">
                     <View className="flex-1 pr-3">

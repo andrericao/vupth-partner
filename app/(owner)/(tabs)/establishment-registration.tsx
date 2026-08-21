@@ -16,7 +16,6 @@ import { BrandButton } from "@components/brand/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskPhone, unmask } from "@lib/masks";
-import { cardShadow } from "@lib/styles";
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -93,7 +92,7 @@ export default function EstablishmentRegistrationScreen() {
           </Heading>
 
           <VStack mt="$6" space="md">
-            <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <VStack bg="$brandSurface" p="$4" borderRadius="$card">
               {editing ? (
                 <FormControl>
                   <Input

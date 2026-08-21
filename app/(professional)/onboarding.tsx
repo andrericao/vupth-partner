@@ -13,7 +13,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
@@ -282,8 +281,7 @@ export default function ProfessionalOnboardingScreen() {
                     accessibilityRole="button"
                     testID="establishment-card"
                     onPress={() => handleSelectEstablishment(estab)}
-                    className="bg-white py-3 px-4 rounded-2xl"
-                    style={cardShadow}
+                    className="bg-vupth-surface py-3 px-4 rounded-[20px]"
                   >
                     <Text className="font-heading text-gray-900">{estab.name}</Text>
                     <View className="flex-row gap-2 mt-1">
@@ -329,7 +327,7 @@ export default function ProfessionalOnboardingScreen() {
         </Text>
 
         {selectedEstablishment && (
-          <View className="bg-white p-6 rounded-2xl w-full mb-6" style={cardShadow}>
+          <View className="bg-vupth-surface p-6 rounded-[20px] w-full mb-6">
             <Text className="font-heading text-xl text-gray-900">
               {selectedEstablishment.name}
             </Text>
