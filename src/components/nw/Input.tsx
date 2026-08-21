@@ -13,26 +13,33 @@ type Props = TextInputProps & {
   error?: string;
   /** Campo de senha (mascara + botao de mostrar/ocultar). */
   secure?: boolean;
+  /** Icone a esquerda (Pencil: mail no e-mail, lock na senha). */
+  icon?: keyof typeof Ionicons.glyphMap;
 };
 
 // `autoCapitalize` default "words" replica o Input v1 (que embutia isso no
 // InputField): os campos de nome capitalizam sozinhos. Quem nao quer — e-mail,
 // senha, codigo — passa "none", como ja fazem as telas do (auth).
-export function NwInput({ label, error, secure, autoCapitalize = "words", ...rest }: Props) {
+export function NwInput({ label, error, secure, icon, autoCapitalize = "words", ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [show, setShow] = useState(false);
   const invalid = !!error;
 
+  // Foco no forest e erro no vupth-danger: o `border-brand` era a paleta
+  // ANTIGA (#3b7a3f) — ficava um verde diferente do resto da tela.
   const border = invalid
-    ? "border border-danger-500"
+    ? "border border-vupth-danger"
     : focused
-      ? "border-2 border-brand"
-      : "border border-gray-300";
+      ? "border-2 border-vupth-forest"
+      : "border border-vupth-border";
 
   return (
     <View className="mb-3 w-full">
-      <Text className="font-body text-sm text-gray-600 mb-1">{label}</Text>
-      <View className={`flex-row items-center bg-white rounded-xl px-3 h-12 ${border}`}>
+      <Text className="font-body text-[13px] font-medium text-vupth-textPrimary mb-2">
+        {label}
+      </Text>
+      <View className={`flex-row items-center gap-2 bg-white rounded-xl px-4 h-[50px] ${border}`}>
+        {icon && <Ionicons name={icon} size={18} color="#454745" />}
         <TextInput
           className="flex-1 font-body text-gray-900"
           placeholderTextColor="#9CA3AF"
@@ -50,13 +57,12 @@ export function NwInput({ label, error, secure, autoCapitalize = "words", ...res
             accessibilityRole="button"
             accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
           >
-            {/* #064e3b = $emerald900 do v1 (mesmo olho do InputPassword). */}
-            <Ionicons name={show ? "eye-off" : "eye"} size={20} color="#064e3b" />
+            <Ionicons name={show ? "eye-off" : "eye"} size={20} color="#163300" />
           </Pressable>
         )}
       </View>
       {invalid && (
-        <Text className="font-body text-xs text-danger-500 mt-1">{error}</Text>
+        <Text className="font-body text-xs text-vupth-danger mt-1">{error}</Text>
       )}
     </View>
   );

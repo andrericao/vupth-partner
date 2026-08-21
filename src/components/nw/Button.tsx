@@ -42,25 +42,27 @@ const shadow = {
 
 const BASE = "h-[54px] rounded-full items-center justify-center px-4";
 
-// [marca-vupth] primary/outlineBrand/danger/outlineDanger trocam so o TOM
-// (brand-500 -> forest, danger antigo -> vupth.danger) mantendo o par bg/texto
-// que ja existia (fundo escuro + texto branco, texto+borda escuros) — troca seg
-// -ura porque forest e vupth.danger sao igualmente escuros. O par CLARO
-// brandGreen+forest (o novo destaque da marca) so entra nos variants vupth*.
+// [marca-vupth] `primary` E o Button/Primary do Pencil: fundo brand-green com
+// texto forest. Na primeira passada ele ficou forest+branco — troca conservadora
+// pra nao mexer nas ~40 chamadas de uma vez —, mas isso deixou o app com DOIS
+// primarios diferentes: o do desenho e o legado. Como a estrutura nao muda (mesma
+// pilula, mesma altura), alinhar e seguro; e as chamadas sobre fundo colorido ja
+// sobrescrevem o bg por `className`, entao nao dependem deste valor.
 const BOX: Record<Variant, string> = {
-  primary: "bg-vupth-forest active:bg-vupth-forestSoft",
+  primary: "bg-vupth-green active:bg-vupth-success",
   secondary: "bg-gray-200 active:bg-gray-300",
   danger: "bg-vupth-danger active:bg-red-700",
   outlineBrand: "bg-white border border-vupth-forest active:bg-gray-100",
   outlineDanger: "bg-transparent border border-vupth-danger active:bg-red-50",
-  // brandGreen so como FUNDO (nunca texto/icone sobre claro) — ver nota no topo.
+  // `vupthPrimary` ficou IDENTICO ao primary depois do alinhamento acima —
+  // mantido como apelido pra nao quebrar quem ja chamava por ele.
   vupthPrimary: "bg-vupth-green active:bg-vupth-success",
   vupthSecondary: "bg-vupth-greenTint active:bg-vupth-surfaceAlt",
   vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint",
 };
 
 const LABEL: Record<Variant, string> = {
-  primary: "text-white",
+  primary: "text-vupth-forest",
   secondary: "text-gray-700",
   danger: "text-white",
   outlineBrand: "text-vupth-forest",
@@ -91,9 +93,9 @@ export function NwButton({
       {isLoading ? (
         <ActivityIndicator
           color={
-            variant === "primary" || variant === "danger"
+            variant === "danger"
               ? "#fff"
-              : variant.startsWith("vupth")
+              : variant === "primary" || variant.startsWith("vupth")
                 ? "#163300"
                 : "#374151"
           }

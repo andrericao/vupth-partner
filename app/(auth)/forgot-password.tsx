@@ -130,6 +130,7 @@ export default function ForgotPasswordScreen() {
             <View className="mt-6">
               <NwInput
                 label="E-mail"
+                icon="mail-outline"
                 placeholder="email@email.com"
                 value={email}
                 onChangeText={(t: string) => {

@@ -107,6 +107,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="E-mail"
+              icon="mail-outline"
               placeholder="email@email.com"
               value={email}
               onChangeText={(t) => {
@@ -121,6 +122,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="Senha"
+              icon="lock-closed-outline"
               placeholder="senha"
               secure
               value={password}
@@ -137,6 +139,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="Confirmar senha"
+              icon="lock-closed-outline"
               placeholder="confirmar senha"
               secure
               value={confirmPassword}

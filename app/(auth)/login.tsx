@@ -80,7 +80,8 @@ export default function LoginScreen() {
 
           <View className="mt-8">
             <NwInput
-              label="Email"
+              label="E-mail"
+              icon="mail-outline"
               placeholder="email@email.com"
               value={email}
               onChangeText={setEmail}
@@ -91,6 +92,7 @@ export default function LoginScreen() {
             />
             <NwInput
               label="Senha"
+              icon="lock-closed-outline"
               placeholder="senha"
               secure
               value={password}
@@ -105,7 +107,7 @@ export default function LoginScreen() {
               onPress={() => router.push("/(auth)/forgot-password" as any)}
               className="self-end mt-1"
             >
-              <Text className="font-body text-[13px] text-gray-500 font-semibold">
+              <Text className="font-body text-[13px] text-vupth-forest font-semibold">
                 Esqueci minha senha
               </Text>
             </Pressable>
