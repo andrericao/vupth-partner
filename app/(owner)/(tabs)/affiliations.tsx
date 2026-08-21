@@ -14,6 +14,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { Header } from "@components/Header";
 import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 
 type Affiliation = {
@@ -145,12 +146,10 @@ export default function OwnerAffiliationsScreen() {
                   {aff.type === "REQUEST" ? "Solicitou vinculacao" : "Convite enviado"}
                 </Text>
                 <HStack mt="$3" space="sm">
-                  <Button
+                  <BrandButton
                     title="Aceitar"
                     onPress={() => handleAccept(aff)}
                     isLoading={actionLoading === aff.id}
-                    bg="$forest"
-                    $active-bg="$forestSoft"
                     h="$9"
                     flex={1}
                   />

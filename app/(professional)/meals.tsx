@@ -15,6 +15,7 @@ import { Header } from "@components/Header";
 import { cardShadow } from "@lib/styles";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -257,12 +258,10 @@ export default function MealsScreen() {
                       h="$9"
                       flex={1}
                     />
-                    <Button
+                    <BrandButton
                       title="Salvar"
                       onPress={() => handleSaveEdit(m.intervalId)}
                       isLoading={isSaving}
-                      bg="$forest"
-                      $active-bg="$forestSoft"
                       h="$9"
                       flex={1}
                     />
@@ -312,7 +311,7 @@ export default function MealsScreen() {
           </VStack>
 
           {!showAdd ? (
-            <Button title="Adicionar Refeicao" onPress={() => { setEditingId(null); setShowAdd(true); }} mt="$6" />
+            <BrandButton title="Adicionar Refeicao" onPress={() => { setEditingId(null); setShowAdd(true); }} mt="$6" />
           ) : (
             <VStack mt="$6">
               <Divider mb="$4" />
@@ -377,7 +376,7 @@ export default function MealsScreen() {
                 })}
               </HStack>
 
-              <Button title="Adicionar" onPress={handleAdd} isLoading={isSaving} />
+              <BrandButton title="Adicionar" onPress={handleAdd} isLoading={isSaving} mt="$9" />
               <Button
                 title="Cancelar"
                 onPress={() => setShowAdd(false)}

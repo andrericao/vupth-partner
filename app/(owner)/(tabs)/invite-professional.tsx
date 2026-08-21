@@ -17,7 +17,7 @@ import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { cardShadow } from "@lib/styles";
-import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import {
   useEstablishmentStore,
   type ProfessionalSearchResult,
@@ -171,12 +171,10 @@ export default function InviteProfessionalScreen() {
                       Convite enviado
                     </Text>
                   ) : (
-                    <Button
+                    <BrandButton
                       title="Convidar"
                       onPress={() => handleInvite(p)}
                       isLoading={invitingId === p.id}
-                      bg="$forest"
-                      $active-bg="$forestSoft"
                       h="$9"
                     />
                   )}

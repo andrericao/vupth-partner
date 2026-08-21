@@ -14,6 +14,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -285,7 +286,7 @@ export default function MyServicesScreen() {
             <Text fontFamily="$body" color="$amber700" textAlign="center" mb="$4">
               Voce precisa estar vinculado a um estabelecimento para adicionar servicos. Se ja solicitou vinculacao, aguarde a aprovacao do proprietario e arraste para baixo para atualizar.
             </Text>
-            <Button
+            <BrandButton
               title="Buscar Estabelecimento"
               onPress={() => router.push("/(professional)/find-establishment" as any)}
             />
@@ -411,12 +412,10 @@ export default function MyServicesScreen() {
                       h="$9"
                       flex={1}
                     />
-                    <Button
+                    <BrandButton
                       title="Salvar"
                       onPress={() => handleSaveEdit(svc.id)}
                       isLoading={isEditSaving}
-                      bg="$forest"
-                      $active-bg="$forestSoft"
                       h="$9"
                       flex={1}
                     />
@@ -468,7 +467,7 @@ export default function MyServicesScreen() {
         )}
 
         {!showForm && professional?.establishment_id ? (
-          <Button
+          <BrandButton
             title="Adicionar Servico"
             onPress={() => {
               const first = filteredTypes[0];
@@ -608,10 +607,11 @@ export default function MyServicesScreen() {
                 </VStack>
               )}
 
-              <Button
+              <BrandButton
                 title="Adicionar Servico"
                 onPress={handleSubmit}
                 isLoading={isLoading}
+                mt="$9"
               />
 
               <Button

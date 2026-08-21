@@ -12,7 +12,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
@@ -320,10 +320,11 @@ export default function AddServiceScreen() {
             );
           })()}
 
-          <Button
+          <BrandButton
             title="Adicionar Serviço"
             onPress={handleSubmit}
             isLoading={isLoading}
+            mt="$9"
           />
         </VStack>
       </VStack>

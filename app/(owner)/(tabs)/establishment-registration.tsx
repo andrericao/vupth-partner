@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskPhone, unmask } from "@lib/masks";
@@ -129,12 +130,10 @@ export default function EstablishmentRegistrationScreen() {
                       h="$9"
                       flex={1}
                     />
-                    <Button
+                    <BrandButton
                       title="Salvar"
                       onPress={handleSave}
                       isLoading={isSaving}
-                      bg="$forest"
-                      $active-bg="$forestSoft"
                       h="$9"
                       flex={1}
                     />

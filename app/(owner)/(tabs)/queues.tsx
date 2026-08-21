@@ -11,7 +11,7 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { cardShadow } from "@lib/styles";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -202,7 +202,7 @@ export default function OwnerQueuesScreen() {
             <Text fontFamily="$body" color="$coolGray400" textAlign="center">
               Nenhum profissional cadastrado
             </Text>
-            <Button
+            <BrandButton
               title="Adicionar Profissional"
               onPress={() =>
                 router.push({
@@ -210,8 +210,6 @@ export default function OwnerQueuesScreen() {
                   params: { establishmentId: establishmentId ?? "" },
                 } as any)
               }
-              bg="$forest"
-              $active-bg="$forestSoft"
               mt="$4"
             />
           </VStack>
