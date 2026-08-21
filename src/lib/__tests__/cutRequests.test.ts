@@ -1,4 +1,12 @@
-import { activeCutRequests, minutesToExpire, cutRequestServices, cutRequestTitle, isCutRequestEvent } from "../cutRequests";
+import {
+  activeCutRequests,
+  minutesToExpire,
+  cutRequestServices,
+  cutRequestTitle,
+  cutRequestClientName,
+  cutRequestTotal,
+  isCutRequestEvent,
+} from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
 const NOW = Date.parse("2026-07-22T12:00:00Z");
@@ -100,6 +108,38 @@ describe("cutRequestTitle", () => {
     expect(
       cutRequestTitle({ client_name: "   ", service_item_ids: ["svc-1"] }, myServices)
     ).toBe("Cliente quer: Corte");
+  });
+});
+
+describe("cutRequestClientName", () => {
+  it("usa o client_name quando presente", () => {
+    expect(cutRequestClientName({ client_name: "Joao" })).toBe("Joao");
+  });
+
+  it("cai no fallback 'Cliente' quando ausente, nulo ou so espacos", () => {
+    expect(cutRequestClientName({})).toBe("Cliente");
+    expect(cutRequestClientName({ client_name: null })).toBe("Cliente");
+    expect(cutRequestClientName({ client_name: "   " })).toBe("Cliente");
+  });
+});
+
+describe("cutRequestTotal", () => {
+  const myServices = [
+    { id: "svc-1", price: 35 },
+    { id: "svc-2", price: 15 },
+  ];
+
+  it("soma os precos dos servicos resolvidos", () => {
+    expect(cutRequestTotal(["svc-1", "svc-2"], myServices)).toBe(50);
+  });
+
+  it("id desconhecido conta como 0, sem quebrar a soma", () => {
+    expect(cutRequestTotal(["svc-1", "svc-x"], myServices)).toBe(35);
+  });
+
+  it("nada resolvido ou lista vazia -> 0", () => {
+    expect(cutRequestTotal(["svc-x"], myServices)).toBe(0);
+    expect(cutRequestTotal([], myServices)).toBe(0);
   });
 });
 

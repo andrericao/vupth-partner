@@ -54,6 +54,31 @@ export function cutRequestTitle(
 }
 
 /**
+ * Nome do cliente do pedido, isolado do restante do titulo — usado na tela
+ * "Encaixes" (Pencil), que mostra nome e servico em linhas separadas em vez
+ * do "Fulano quer: X" corrido do bottom-sheet. Mesmo fallback de cutRequestTitle.
+ */
+export function cutRequestClientName(req: { client_name?: string | null }): string {
+  return req.client_name?.trim() || "Cliente";
+}
+
+/**
+ * Soma dos precos dos servicos do pedido, resolvidos contra os servicos do
+ * PROPRIO profissional (mesma fonte/invariante de cutRequestServices). Id
+ * desconhecido conta como 0 em vez de quebrar a soma — mostrar um total
+ * menor que o real e mais seguro do que travar o card.
+ */
+export function cutRequestTotal(
+  serviceItemIds: string[],
+  myServices: { id: string; price: number }[]
+): number {
+  return serviceItemIds.reduce((sum, id) => {
+    const item = myServices.find((s) => s.id === id);
+    return sum + (item?.price ?? 0);
+  }, 0);
+}
+
+/**
  * Eventos do WS pessoal (`/user/queue/notifications`) que devem re-buscar a
  * lista de pedidos. Prefixo `CUT_` cobre CUT_REQUESTED (o unico dirigido ao
  * profissional hoje) e qualquer evento de corte futuro sem retocar o hook.
