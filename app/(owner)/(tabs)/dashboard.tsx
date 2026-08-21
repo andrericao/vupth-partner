@@ -11,6 +11,7 @@ import {
   Pressable,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl, BackHandler } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
 import { Button } from "@components/Button";
@@ -164,19 +165,26 @@ export default function OwnerDashboardScreen() {
         <Header />
 
         <HStack justifyContent="space-between" alignItems="center" mt="$4">
-          <Heading size="2xl" fontFamily="$heading">
+          <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$forest">
             {establishment.name}
-          </Heading>
-          <Badge
-            action={badge.action}
-            variant="solid"
-            borderRadius="$md"
+          </Text>
+          <VStack
+            bg={isOpen ? "$brandGreen" : "$border"}
+            borderRadius="$full"
+            px="$3"
+            py="$1.5"
           >
-            <BadgeText fontSize="$2xs">{badge.label}</BadgeText>
-          </Badge>
+            <Text
+              fontFamily="$display"
+              fontSize={11}
+              color={isOpen ? "$forest" : "$coolGray600"}
+            >
+              {badge.label}
+            </Text>
+          </VStack>
         </HStack>
 
-        <Text fontFamily="$body" color="$coolGray500" mt="$2">
+        <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$1">
           {establishment.service_type}
         </Text>
 
@@ -186,83 +194,105 @@ export default function OwnerDashboardScreen() {
           goalNoun="aparecer aos clientes"
         />
 
-        <HStack mt="$4" space="md">
-          <VStack flex={1} bg="$forest" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$xs" color="$greenTint">na fila</Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
-              {totalInQueue}
+        {/* Os dois numeros que o dono abre o app pra ver. A fila e o card
+            verde-marca porque e o que muda o dia dele — e agora e o CAMINHO
+            pras filas, no lugar do botao ambar "Ver Filas" que competia com
+            tudo. */}
+        <HStack mt="$5" space="md">
+          <Pressable
+            flex={1}
+            onPress={() =>
+              router.push({
+                pathname: "/(owner)/queues",
+                params: { establishmentId: establishment.id },
+              } as any)
+            }
+            bg="$brandGreen"
+            p="$4"
+            borderRadius="$card"
+          >
+            <HStack justifyContent="space-between" alignItems="flex-start">
+              <Text fontFamily="$display" fontSize={32} color="$forest">
+                {totalInQueue}
+              </Text>
+              <Text fontFamily="$body" fontSize="$xl" color="$forest">
+                ›
+              </Text>
+            </HStack>
+            <Text fontFamily="$body" fontSize="$xs" fontWeight="$semibold" color="$forest" mt="$1">
+              na fila agora
             </Text>
-          </VStack>
-          <VStack flex={1} bg="$forest" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$xs" color="$greenTint">profissionais ativos</Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
+          </Pressable>
+
+          <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+            <Text fontFamily="$display" fontSize={32} color="$forest">
               {queueData?.available_professionals ?? 0}
+            </Text>
+            <Text
+              fontFamily="$body"
+              fontSize="$xs"
+              fontWeight="$semibold"
+              color="$coolGray500"
+              mt="$1"
+            >
+              profissionais ativos
             </Text>
           </VStack>
         </HStack>
 
-        <Divider my="$6" />
-
+        {/* Abrir e a unica acao de PESO aqui: e o que destrava o dia. Encerrar
+            e pausar viraram texto discreto — nao sao erros nem perigo, sao o
+            fim normal do expediente (e "fechar" em vermelho fazia parecer que
+            o dono estava fechando o NEGOCIO). */}
         {!isOpen ? (
-          <Button
-            title="Abrir Estabelecimento"
-            onPress={() => setStatus("OPEN")}
-            isLoading={isToggling}
-            bg="$forest"
-            $active-bg="$forestSoft"
-          />
-        ) : (
-          <VStack space="xs">
+          <VStack mt="$5">
             <Button
-              title="Fechar Estabelecimento"
-              onPress={() => {
-                if (!hasActiveWork) setStatus("CLOSED");
-              }}
+              title={status === "TEMPORARILY_CLOSED" ? "Reabrir agora" : "Abrir estabelecimento"}
+              onPress={() => setStatus("OPEN")}
               isLoading={isToggling}
-              isDisabled={hasActiveWork}
-              bg="$brandDanger"
-              $active-bg="$red600"
+              bg="$forest"
+              $active-bg="$forestSoft"
+              mt="$0"
             />
-            {hasActiveWork && (
-              <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" textAlign="center">
-                Nao e possivel fechar com cliente em atendimento ou na fila. Use Fechar Temporariamente para nao receber novos e terminar a fila.
-              </Text>
-            )}
+          </VStack>
+        ) : (
+          <VStack mt="$5" space="sm">
+            <HStack justifyContent="space-between" alignItems="center">
+              <Pressable
+                onPress={() => {
+                  if (hasActiveWork) {
+                    Alert.alert(
+                      "Ainda tem gente na fila",
+                      "Use 'Pausar entrada' para nao receber novos clientes e terminar quem ja esta esperando.",
+                    );
+                    return;
+                  }
+                  setStatus("CLOSED");
+                }}
+                disabled={isToggling}
+              >
+                <HStack space="xs" alignItems="center">
+                  <Ionicons name="moon-outline" size={15} color="#6B7280" />
+                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$coolGray500">
+                    Encerrar o dia
+                  </Text>
+                </HStack>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setStatus("TEMPORARILY_CLOSED")}
+                disabled={isToggling}
+              >
+                <HStack space="xs" alignItems="center">
+                  <Ionicons name="pause-outline" size={15} color="#6B7280" />
+                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$coolGray500">
+                    Pausar entrada
+                  </Text>
+                </HStack>
+              </Pressable>
+            </HStack>
           </VStack>
         )}
-
-        {status !== "TEMPORARILY_CLOSED" ? (
-          <Button
-            title="Fechar Temporariamente"
-            onPress={() => setStatus("TEMPORARILY_CLOSED")}
-            isLoading={isToggling}
-            bg="transparent"
-            borderWidth="$1"
-            borderColor="$amber500"
-            textColor="$amber600"
-            $active-bg="$amber50"
-          />
-        ) : (
-          <Button
-            title="Reabrir Estabelecimento"
-            onPress={() => setStatus("OPEN")}
-            isLoading={isToggling}
-            bg="$forest"
-            $active-bg="$forestSoft"
-          />
-        )}
-
-        <Button
-          title="Ver Filas"
-          onPress={() =>
-            router.push({
-              pathname: "/(owner)/queues",
-              params: { establishmentId: establishment.id },
-            } as any)
-          }
-          bg="$amber500"
-          $active-bg="$amber600"
-        />
 
         <Divider my="$6" />
 
