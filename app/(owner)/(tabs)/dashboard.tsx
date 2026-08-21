@@ -170,7 +170,11 @@ export default function OwnerDashboardScreen() {
       <VStack flex={1} pb="$6" px="$5" bg="$brandBackground">
         <Header />
 
-        <HStack justifyContent="space-between" alignItems="center" mt="$4">
+        <HStack justifyContent="space-between" alignItems="center" mt="$4" space="sm">
+          {/* [marca-vupth] flex={1} sem gap encostava o nome comprido direto na
+              pilula (QA Alexia: "Barbearia Teste Visual" grudado no "PAUSADO").
+              space-between so distribui espaco SOBRANDO — com o texto flexivel
+              preenchendo tudo, nao sobrava nada. */}
           <Text
             fontFamily="$display"
             fontSize={24}
