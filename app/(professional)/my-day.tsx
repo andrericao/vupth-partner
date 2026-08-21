@@ -57,7 +57,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
+    <VStack bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow} mb="$3">
       <HStack justifyContent="space-between" alignItems="center">
         <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
           {item.clientName}
@@ -186,8 +186,12 @@ export default function MyDayScreen() {
       <VStack flex={1} py="$12" px="$6">
         <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
 
+        {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
+            conceito interno da tela ("MEU DIA", que uniu Relatorios +
+            Atendimentos); "Relatorios" ficou so no rotulo da aba, mais curto
+            pra caber no rodape. */}
         <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Relatorios
+          Seu dia
         </Heading>
 
         <HStack mt="$6" space="sm">
@@ -203,7 +207,7 @@ export default function MyDayScreen() {
             >
               <Text
                 fontFamily="$body"
-                color={period === p.key ? "$white" : "$coolGray700"}
+                color={period === p.key ? "$brandGreen" : "$coolGray700"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -219,7 +223,7 @@ export default function MyDayScreen() {
 
         {period === "day" && (
           <HStack space="md" mb="$4">
-            <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Na fila agora
               </Text>
@@ -227,7 +231,7 @@ export default function MyDayScreen() {
                 {queueCount}
               </Text>
             </VStack>
-            <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
               <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                 Espera estimada
               </Text>
@@ -244,8 +248,22 @@ export default function MyDayScreen() {
           </VStack>
         ) : (
           <VStack space="md">
+            {/* [marca-vupth] Receita virou o card-heroi (brandGreen, primeira
+                posicao) — o Pencil (PROF · 03) da esse tratamento pro
+                faturado, o unico numero em dinheiro da tela. Era greenTint
+                (tom fraco) na segunda posicao, com o valor MENOR que o dos
+                outros cards (2xl vs 3xl) — inconsistente pro card que deveria
+                pesar mais, nao menos. */}
             <HStack space="md">
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card" style={cardShadow}>
+                <Text fontFamily="$body" fontSize="$sm" color="$forest">
+                  Receita
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
+                  R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
+                </Text>
+              </VStack>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Atendimentos
                 </Text>
@@ -253,18 +271,10 @@ export default function MyDayScreen() {
                   {report?.totalAttendances ?? 0}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$greenTint" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$sm" color="$forest">
-                  Receita
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
-                  R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
-                </Text>
-              </VStack>
             </HStack>
 
             <HStack space="md">
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Duracao media
                 </Text>
@@ -272,7 +282,7 @@ export default function MyDayScreen() {
                   {Math.round(report?.avgDurationMinutes ?? 0)} min
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card" style={cardShadow}>
                 <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
                   Servico mais feito
                 </Text>
@@ -308,7 +318,7 @@ export default function MyDayScreen() {
             >
               <Text
                 fontFamily="$body"
-                color={filter === f.key ? "$white" : "$coolGray700"}
+                color={filter === f.key ? "$brandGreen" : "$coolGray700"}
                 textAlign="center"
                 fontSize="$sm"
               >

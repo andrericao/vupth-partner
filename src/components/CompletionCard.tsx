@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
+import { ChevronRight } from "lucide-react-native";
 import { cardShadow } from "@lib/styles";
 import type { Completion, CompletionTracker } from "@lib/completion";
 
@@ -66,7 +67,7 @@ function Row({
       >
         {label}
       </Text>
-      {navigable && <Text className="text-gray-300 text-lg">›</Text>}
+      {navigable && <ChevronRight size={16} color="#D1D5DB" />}
     </View>
   );
 
@@ -148,7 +149,10 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
             <Text className="font-heading text-sm text-gray-700">
               Perfil completo
             </Text>
-            <Text className="font-heading text-sm text-brand-600">
+            {/* [marca-vupth] Era text-brand-600 — escala ANTIGA (#3b7a3f,
+                pre-marca), unico resquicio dela neste card (a linha "Pronto
+                para atender" acima ja usava vupth-forest). */}
+            <Text className="font-heading text-sm text-vupth-forest">
               {profile.percent}%
             </Text>
           </View>
