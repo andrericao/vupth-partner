@@ -2,7 +2,9 @@
 
 Itens descobertos no front-partner mas cujo **frontend pertence ao app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto). Registrados aqui para alinhamento: quando o usuario precisar, ele manda o front-client ler estas pendencias e implementar.
 
-Ultima atualizacao: 2026-08-11 · branch `chore/gluestack-update` do front-partner.
+Ultima atualizacao: 2026-08-18 · branch `design/marca-dev` do front-partner.
+
+> 🎨 **NOVO (2026-08-18): C25 — identidade visual nova (marca Vupth).** Paleta `brandGreen #9FE870` + `forest #163300`, **Archivo** no lugar da Poppins e **DMMono** para numeros. **Isso SUPERA a paleta do C7** (a "Verde Marca" `#3b7a3f`), que segue valida so durante a transicao. ⚠️ **Mea-culpa de processo:** a identidade foi aplicada em **55 arquivos de codigo e ZERO documentos**, numa branch nao mergeada — o client so descobriu porque o Andre mandou procurar. O que esperavamos deles estava escrito **dentro de um comentario de codigo**. Ficha completa na secao **"Detalhe — C25"** no fim deste documento.
 
 > 🎨 **NOVO (2026-08-01): C15 — padroes de estilizacao (NativeWind).** O partner esta **saindo do Gluestack** e passou a estilizar com **NativeWind/Tailwind (`className`)**. A cartilha completa (paleta, primitivas, convencoes e as armadilhas que ja custaram retrabalho aqui) esta na secao **"Detalhe — C15"** no fim deste documento. **Isso SUPERA o C2** (que mandava atualizar o Gluestack v1). ⚠️ O **C7 estava desatualizado** e foi corrigido na mesma data: ele documentava a paleta **teal antiga** (`#00B37E`), abandonada em 2026-07-09 — se o client copiou aqueles hexes, esta com o verde errado.
 
@@ -41,6 +43,7 @@ Ultima atualizacao: 2026-08-11 · branch `chore/gluestack-update` do front-partn
 | **C23** | 📧 **"Esqueci minha senha": a mensagem tambem muda no client** *(decorre do S21; evidencia de device do Andre em 2026-08-11)* | O Andre testou e **o fluxo passou com um e-mail sem cadastro** — o backend responde **200 sempre** (anti-enumeracao), entao os dois apps dizem *"se este e-mail estiver cadastrado..."* e seguem p/ o passo do codigo. Ele decidiu o contrario: o backend passa a devolver **`404 EMAIL_NOT_FOUND`** (**S21**). **Acao client, quando isso entrar:** trocar a mensagem por uma **afirmativa** ("Enviamos um codigo de 6 digitos para seu e-mail") e tratar o `404` como **erro do proprio campo** ("E-mail nao cadastrado"), sem popup. ⚠️ **No mesmo teste o e-mail NAO chegou** (**S7**, SMTP) — entao, ate o envio voltar, o fluxo segue inutilizavel nos dois apps mesmo com a mensagem certa. | ⛔ Depende do **S21** (e o fluxo so volta a funcionar com o **S7**). Trade-off de enumeracao de usuarios registrado no S21; a decisao do Andre esta mantida. |
 | **C21** | 🕐 **Cada profissional escolhe seu regime: fila ou agenda pura — a tela do cliente tem de servir os dois** *(decisao do Andre, 2026-08-05 parte 3)* | Andre: *"o profissional podera escolher se usara fila (modelo que estamos criando), ou se apenas agenda onde os horarios sao fixos."* **Nao confundir com o C20:** o C20 e a escolha do **cliente** no fim da fila (entrar agora ou agendar por INTENÇÃO, horario **estimado**); o C21 e a escolha do **profissional** sobre como ele trabalha, e no modo agenda o horario e **FIXO** (hora marcada, nada empurra). **Acao client:** o card/tela de cada profissional passa a oferecer **"entrar na fila"** ou **"escolher horario"** conforme o `queue_mode` **dele** — e **os dois modos convivem no mesmo estabelecimento**, entao a tela da loja nao pode assumir um regime unico. No modo agenda, nao existe posicao/ETA a mostrar: existe **grade de horarios livres**. | ⛔ **Depende do backend S24** (campo de modo + grade de slots + reserva). Registrado agora p/ o client nao desenhar a tela da loja assumindo que todo profissional tem fila. Partner: tela da Fila vira grade do dia no modo agenda (mesma dependencia). |
 | **C20** | 🎯 **O fim da fila e HIBRIDO: entrar na fila OU agendar — a escolha e do cliente** *(decisao do Andre, 2026-08-05 parte 2)* | Andre fechou o modelo: *"para o final da fila quero que o app seja hibrido, podendo ser por fila ou por agenda"*. **Nao e feature nova** — e a confirmacao de que o **C12/C6 (barra de encaixe + INTENÇÃO)** e mesmo o caminho, e que ele convive com o walk-in em vez de substituir. **Acao client:** no ponto em que hoje so existe "entrar na fila", oferecer **as duas portas** — *entrar agora* (vai pro fim da fila, ordem de chegada) ou *agendar* (INTENÇÃO num horario que a fila ainda nao alcancou, promovida sozinha quando o fim da fila cruza o horario). O backend **ja tem tudo** (S2/INTENTION completo: create/edit/cancel + promocao event-driven + agenda view + availability por profissional) — **o gargalo e a UI daqui**. ⚠️ Lembrar da implicacao ja registrada: disponibilidade e **por profissional**, entao o cliente pode entrar na fila do prof A (trabalhando) **e** agendar com o prof B (que ainda nao comecou) no mesmo estabelecimento. | Confirma C6/C12. Partner: passivo hoje, mas vai passar a **exibir os agendados na cauda da fila** (ver S2 no HANDOFF_BACKEND). |
+| **C25** | 🎨 **Identidade visual nova (marca Vupth) — os tokens precisam existir nos DOIS apps** *(design, 2026-08-18)* | Paleta nova, desenhada no Pencil (`pencil-new.pen`): **`brandGreen #9FE870`** (verde-limao) + **`forest #163300`** (verde escuro) + pasteis de apoio (`greenTint #E2F6D5`, `accentBlue #A0E1E1`, `accentPeach #FFC091`, `accentPink #FFD7EF`, `accentPlum #260A2F`). Neutros: `background #FFFFFF` · `surface #F3F5F1` · `textPrimary #163300` · `textSecondary #454745` · `border #D7DDD3` · `danger #B3261E`. Tipos: **Archivo** (`700Bold` heading / `800ExtraBold` display) no lugar da **Poppins**, **Inter** mantida no corpo, **DMMono `500Medium`** para numeros (posicao na fila, horarios). Raios novos: `card 20` · `hero 24`. ⚠️ **A REGRA QUE MAIS IMPORTA — o contraste inverteu:** o `brandGreen` e claro demais para texto/icone sobre fundo claro. Ele entra **SO como FUNDO**, sempre com **`forest` por cima**; **nunca o inverso**. Isso e o oposto do habito da paleta antiga (`#3b7a3f` era escuro o bastante para servir de texto). **Estado:** aplicado nos dois apps na branch `design/marca-dev` (PR [#16](https://github.com/andrericao/vupth-partner/pull/16) aqui, PR [#14](https://github.com/andrericao/vupth/pull/14) no client), **aguardando decisao do Andre** sobre adotar. ✅ **Risco baixo:** os tokens sao **ADITIVOS** — nao remapeiam a escala `green` atual, entao sincroniza-los **nao muda tela nenhuma**. | 🆕 **Sincronizacao pedida:** os tokens precisam bater 1:1 em **tres** arquivos (`vupth-partner/config/gluestack-ui.config.ts`, `vupth-partner/tailwind.config.js` e `vupth/config/gluestack-ui.config.ts`) — a paleta viver em dois lugares no partner e o que ja causou "dois verdes diferentes no app". **Adotar os componentes e decisao separada** (e cara — conversa com a **D9**/migracao Gluestack v2). |
 | C12 | **Agendar = barra de encaixe (particao de disco) + INTENÇÃO estimada** | 🆕 Modelo fechado com Andre (2026-07-14, evoluiu ao longo da conversa). A UI de agendar do cliente e uma **barra de encaixe estilo particao de disco**: comeca no **fim da fila viva** e vai ate o **fechamento**; os agendados ja congelados sao **blocos travados**; o cliente arrasta uma **"sombra" do tamanho do seu serviço** (soma das duracoes) e a encaixa num vao **sem cruzar ninguem**. O horario e uma **INTENÇÃO estimada** (o cliente confirma ciente de que pode oscilar): **congela num estimado realista** ao criar (ja contando quem esta na frente), **protegida por ordem de criacao** (nova intencao nao empurra as anteriores), **piso** no horario escolhido (nunca antes), e na **promocao** (fim da fila cruza o horario) vira fila viva e oscila de leve — **sem notificacao de atraso**. Mockup de referencia no repo partner: `design/agendamento-barra.html`. | Parte da UI de agendamento do cliente (**C6/S2**). Backend expoe `projectedQueueEnd` + `closing_time` + a **lista de blocos ocupados** (`{start,duracao}` por agendado) — ver HANDOFF_BACKEND "Detalhe — S2 · Encaixe de agendamento". Slots fixos foram **descartados** (quebram num modelo de fila). |
 
 ---
@@ -116,3 +119,57 @@ Sem `FormControl`: o erro e uma string por campo, o que deixa **cada input acend
 ### 7. O que NAO da para verificar sozinho
 
 `tsc` e `eslint` provam que **compila**, nao que **renderiza**. Conversao de estilo so se valida **no device** — e o custo de nao validar e alto: sete batches acumulados aqui antes do primeiro QA real. **Recomendacao ao client: publicar OTA e olhar no aparelho a cada 2-3 batches**, nao no fim.
+
+---
+
+## Detalhe — C25 · Identidade visual nova (marca Vupth)
+
+> **Escrito em 2026-08-18**, junto com a aplicacao nas duas branches `design/marca-dev`. Existe porque **faltou canal**: a identidade foi aplicada em 55 arquivos de codigo e nenhum documento, e o que esperavamos do client estava so num comentario de codigo, numa branch nao mergeada. Este documento e a correcao disso. *(O PRD do client cita "61 arquivos" — contagem feita de outro ponto; medindo `origin/dev...design/marca-dev` daqui dao 55 de codigo, 57 no total.)*
+
+### 1. Os tokens (fonte da verdade)
+
+| Token | Hex | Papel |
+|---|---|---|
+| `brandGreen` | `#9FE870` | verde-limao — **so como FUNDO** |
+| `forest` | `#163300` | verde escuro — **texto/icone**, e o par do brandGreen |
+| `forestSoft` | `#223D0D` | estado pressionado do forest |
+| `greenTint` | `#E2F6D5` | lavagem clara (cards, badges, avatares) |
+| `accentBlue` | `#A0E1E1` | apoio |
+| `accentPeach` | `#FFC091` | apoio |
+| `accentPink` | `#FFD7EF` | apoio |
+| `accentPlum` | `#260A2F` | apoio |
+| `background` | `#FFFFFF` | fundo da tela |
+| `surface` | `#F3F5F1` | fundo de campo/superficie |
+| `textPrimary` | `#163300` | texto principal (= forest) |
+| `textSecondary` | `#454745` | texto de apoio |
+| `border` | `#D7DDD3` | bordas |
+| `danger` | `#B3261E` | erro/destrutivo |
+
+**Tipografia:** `heading` **Archivo_700Bold** · `display` **Archivo_800ExtraBold** · `body` **Inter_400Regular** (inalterado) · `mono` **DMMono_500Medium** (numeros: posicao na fila, horarios). Pacotes: `@expo-google-fonts/archivo` e `@expo-google-fonts/dm-mono`.
+
+**Raios:** `card 20` · `hero 24` (somam aos existentes, nao substituem).
+
+### 2. A regra de contraste — o que mais custa se ignorar
+
+O `brandGreen` **inverteu o habito da paleta antiga**. O `#3b7a3f` era escuro o bastante para ser texto sobre branco; o `#9FE870` **nao e**.
+
+- ✅ `brandGreen` de **fundo**, `forest` de **texto/icone** por cima.
+- ⛔ `brandGreen` como cor de texto, icone ou borda fina sobre fundo claro — **some**.
+- ⚠️ Cuidado com o caso **invertido**: onde hoje existe fundo escuro (`green500`) com texto claro (`green50`/branco), trocar o fundo para `brandGreen` **exige** trocar o texto para `forest` no mesmo passo. Trocar so o fundo produz claro-sobre-claro.
+
+### 3. Como aplicamos aqui (e o que deixamos de fora de proposito)
+
+- **Aditivo, nao substituicao:** a escala `green50-900` continua definida e em uso. Nao remapeamos porque ela ainda serve de **cor de texto** em varias telas — remapear exigiria auditar contraste tela por tela.
+- **Onde o fundo era escuro + texto branco** (a maioria dos botoes), trocamos so o tom: `green500` → `forest`. Continua escuro, o texto branco continua legivel. **O par claro `brandGreen`+`forest` entra so onde foi desenhado.**
+- **Icones com hex cru** (`Ionicons color=`, `ActivityIndicator color=`, `tabBarActiveTintColor`) **nao aceitam token** — foram para `#163300` na mao. Vale checar os equivalentes no client: uma busca por `#3b7a3f` acha o que um grep por `$green` nao acha.
+- **Ambar/warning ficou intocado.**
+
+### 4. Componentes
+
+- `src/components/brand/Button.tsx` — variantes `primary` (fundo brandGreen) / `secondary` (greenTint) / `outline` / `ghost`. ⚠️ **O comentario original dizia espelhar um `src/components/brand/Button.tsx` do client que nao existia** — agora existe, criado no PR #14 do client.
+- `src/components/nw/Button.tsx` (NativeWind) — ganhou `vupthPrimary` / `vupthSecondary` / `vupthOutline` ao lado das variantes antigas, que **mudaram so de tom** (nao de estrutura), entao as ~36 chamadas existentes herdaram sem edicao.
+
+### 5. O que pedimos ao client
+
+1. **Sincronizar os tokens** — e barato e nao muda tela nenhuma (sao aditivos). Os tres arquivos (`gluestack-ui.config.ts` daqui, `tailwind.config.js` daqui e `gluestack-ui.config.ts` de voces) precisam bater **1:1**: a paleta viver em dois lugares aqui e o que ja produziu dois verdes diferentes no mesmo app.
+2. **Adotar os componentes e decisao separada** — mais cara, e conversa com a **D9** (migracao Gluestack v2). Sincronizar token nao obriga a adotar componente.
