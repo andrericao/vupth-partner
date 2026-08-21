@@ -61,52 +61,78 @@ function ServingCard({
   );
 
   return (
+    // Pausado fica AMBAR (estado de atencao); atendendo fica no verde-marca —
+    // com `forest` por cima, que e o par de contraste da marca. E o card mais
+    // claro da tela de proposito: e o que esta acontecendo agora.
     <View
-      className={`p-4 rounded-2xl mt-4 ${isPaused ? "bg-amber-500" : "bg-vupth-forest"}`}
+      className={`p-4 rounded-[20px] mt-4 ${isPaused ? "bg-amber-500" : "bg-vupth-green"}`}
       style={cardShadow}
     >
-      <View className="flex-row items-center gap-1">
-        <View className="w-2 h-2 rounded-full bg-white opacity-85" />
-        <Text className="font-heading text-[10px] text-white tracking-widest">
-          {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-1.5">
+          <View
+            className={`w-[7px] h-[7px] rounded-full ${isPaused ? "bg-white" : "bg-vupth-forest"}`}
+          />
+          <Text
+            className={`font-heading text-[10px] tracking-widest ${
+              isPaused ? "text-white" : "text-vupth-forest"
+            }`}
+          >
+            {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
+          </Text>
+        </View>
+        {/* Cronometro em DM Mono: numero que muda a cada segundo nao pode
+            dancar de largura a cada digito. */}
+        <Text
+          className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-forest"}`}
+        >
+          {formatted}
         </Text>
       </View>
 
-      <Text className="font-heading text-lg text-white mt-1">
-        {attendance.clientName}
-      </Text>
-      <Text className="font-body text-sm text-white opacity-90">
-        {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
-      </Text>
-      <Text className="font-body text-xs text-white opacity-95 mt-1.5">
-        ⏱ {formatted}
-      </Text>
+      <View className="mt-3 gap-1">
+        <Text
+          className={`font-display text-[22px] ${isPaused ? "text-white" : "text-vupth-forest"}`}
+        >
+          {attendance.clientName}
+        </Text>
+        <Text
+          className={`font-body text-xs font-semibold ${
+            isPaused ? "text-white opacity-90" : "text-vupth-forest opacity-70"
+          }`}
+        >
+          {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
+        </Text>
+      </View>
 
-      {/* Botoes claros sobre o card colorido: fora das variantes do NwButton
-          (que assumem fundo neutro), entao vao com className explicito. */}
-      <View className="flex-row gap-2 mt-3">
+      {/* Finalizar e a acao mais comum — vem primeiro e cheia. Pausar e a
+          excecao e fica vazada. (Estava invertido: Pausar ocupava o primeiro
+          lugar.) Botoes sobre card colorido ficam fora das variantes do
+          NwButton, que assumem fundo neutro. */}
+      <View className="flex-row gap-2.5 mt-4">
+        <NwButton
+          title="Finalizar"
+          onPress={onFinish}
+          className={`flex-1 h-11 ${
+            isPaused ? "bg-white active:bg-gray-100" : "bg-vupth-forest active:bg-vupth-forestSoft"
+          }`}
+          textClassName={isPaused ? "text-amber-700" : "text-vupth-green"}
+        />
         {isPaused ? (
           <NwButton
             title="Retomar"
             onPress={onResume}
-            variant="secondary"
-            className="flex-1 h-10 bg-white active:bg-gray-100"
-            textClassName="text-amber-700"
+            className="flex-1 h-11 bg-transparent border-2 border-white active:bg-amber-600"
+            textClassName="text-white"
           />
         ) : (
           <NwButton
             title="Pausar"
             onPress={onPause}
-            className="flex-1 h-10 bg-vupth-forest active:bg-vupth-forestSoft"
+            className="flex-1 h-11 bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint"
+            textClassName="text-vupth-forest"
           />
         )}
-        <NwButton
-          title="Finalizar"
-          onPress={onFinish}
-          variant="secondary"
-          className="flex-1 h-10 bg-white active:bg-gray-100"
-          textClassName={isPaused ? "text-amber-700" : "text-vupth-forest"}
-        />
       </View>
     </View>
   );
