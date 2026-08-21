@@ -46,7 +46,7 @@ export function ClosingPrompt() {
       dismiss();
     } catch (e: any) {
       Alert.alert(
-        "Nao foi possivel fechar",
+        "Não foi possível fechar",
         getApiErrorMessage(e, "Ainda ha atendimento em andamento — finalize antes de fechar.")
       );
     } finally {
@@ -64,10 +64,10 @@ export function ClosingPrompt() {
         />
         <View className="bg-white rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
           <Text className="font-heading text-lg text-gray-900">
-            Passou do horario de fechamento
+            Passou do horário de fechamento
           </Text>
           <Text className="font-body text-sm text-gray-600">
-            A fila ja foi fechada para novos clientes. Quem esta na fila segue sendo
+            A fila já foi fechada para novos clientes. Quem está na fila segue sendo
             atendido. Fecha sozinho em:
           </Text>
           <Text

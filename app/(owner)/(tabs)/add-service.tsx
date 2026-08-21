@@ -161,7 +161,7 @@ export default function AddServiceScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         <ScreenHeader
           title="Novo serviço"
           onBack={() => router.navigate("/(owner)/menu" as any)}
@@ -169,7 +169,7 @@ export default function AddServiceScreen() {
 
         <VStack flex={1}>
 
-          <Text fontFamily="$body" mb="$2" color="$coolGray600">
+          <Text fontFamily="$body" mb="$2" color="$brandTextSecondary">
             Especialidade do profissional
           </Text>
           <VStack space="xs" mb="$4">
@@ -179,16 +179,16 @@ export default function AddServiceScreen() {
                 <Pressable
                   key={s.value}
                   onPress={() => handleSpecialtyChange(s.value)}
-                  bg={isSelected ? "$forest" : "$coolGray100"}
+                  bg={isSelected ? "$forest" : "$brandSurface"}
                   py="$2"
                   px="$4"
                   borderRadius="$md"
                   borderWidth="$1"
-                  borderColor={isSelected ? "$forest" : "$coolGray200"}
+                  borderColor={isSelected ? "$forest" : "$brandBorder"}
                 >
                   <Text
                     fontFamily="$body"
-                    color={isSelected ? "$white" : "$coolGray700"}
+                    color={isSelected ? "$white" : "$brandTextSecondary"}
                     textAlign="center"
                     fontSize="$sm"
                   >
@@ -199,7 +199,7 @@ export default function AddServiceScreen() {
             })}
           </VStack>
 
-          <Text fontFamily="$body" mb="$2" color="$coolGray600">
+          <Text fontFamily="$body" mb="$2" color="$brandTextSecondary">
             Tipo de serviço
           </Text>
           {/* [#11] grade de chips com icone (substitui a lista de pilulas).
@@ -244,17 +244,17 @@ export default function AddServiceScreen() {
 
           <Pressable
             onPress={() => setShowPricing(!showPricing)}
-            bg="$coolGray50"
+            bg="$brandSurface"
             p="$3"
             borderRadius="$md"
             mb="$3"
             borderWidth="$1"
-            borderColor={showPricing ? "$forest" : "$coolGray200"}
+            borderColor={showPricing ? "$forest" : "$brandBorder"}
           >
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
+            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
               {showPricing ? "▼" : "▶"} Politica de preco (preview)
             </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">
+            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
               Simule como ficara com taxas + arredondamento R$X,90
             </Text>
           </Pressable>
@@ -271,8 +271,8 @@ export default function AddServiceScreen() {
               100: "Pro paga tudo",
             };
             return (
-              <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200" mb="$3">
-                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
+              <VStack bg="$brandSurface" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$brandBorder" mb="$3">
+                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mb="$2">
                   Quem absorve as Taxas Vupth (6%)?
                 </Text>
                 <HStack space="xs" mb="$3" flexWrap="wrap">
@@ -285,34 +285,34 @@ export default function AddServiceScreen() {
                       px="$3"
                       borderRadius="$full"
                       borderWidth="$1"
-                      borderColor={absorption === pct ? "$forest" : "$coolGray300"}
+                      borderColor={absorption === pct ? "$forest" : "$brandBorder"}
                       mb="$1"
                     >
-                      <Text fontFamily="$body" fontSize="$xs" color={absorption === pct ? "$white" : "$coolGray600"}>
+                      <Text fontFamily="$body" fontSize="$xs" color={absorption === pct ? "$white" : "$brandTextSecondary"}>
                         {labels[pct] ?? `${pct}%`}
                       </Text>
                     </Pressable>
                   ))}
                 </HStack>
                 <HStack justifyContent="space-between" mb="$1">
-                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Cliente paga:</Text>
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">Cliente paga:</Text>
                   <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
                     R$ {pricing.clientPrice.toFixed(2)}
                   </Text>
                 </HStack>
                 <HStack justifyContent="space-between" mb="$1">
-                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Pro recebe:</Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$blue600">
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">Pro recebe:</Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                     R$ {pricing.proReceives.toFixed(2)}
                   </Text>
                 </HStack>
                 <HStack justifyContent="space-between">
-                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">Taxas Vupth:</Text>
-                  <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">Taxas Vupth:</Text>
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                     R$ {pricing.platformFee.toFixed(2)}
                   </Text>
                 </HStack>
-                <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
+                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$3">
                   * O preco salvo do servico e o total pago pelo cliente
                 </Text>
               </VStack>
@@ -320,7 +320,7 @@ export default function AddServiceScreen() {
           })()}
 
           <BrandButton
-            title="Adicionar Serviço"
+            title="Adicionar serviço"
             onPress={handleSubmit}
             isLoading={isLoading}
             mt="$9"

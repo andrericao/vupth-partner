@@ -59,7 +59,7 @@ export default function CutRequestsScreen() {
       // refetch ja reexecuta o queryFn abaixo, que atualiza nowMs sozinho.
       await refetch();
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel decidir a solicitacao."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível decidir a solicitação."));
     } finally {
       setBusyId(null);
     }
@@ -79,11 +79,11 @@ export default function CutRequestsScreen() {
           onBack={() => router.back()}
         />
 
-        <View className="px-4 gap-3">
+        <View className="gap-3">
           {pending.length === 0 ? (
             <View className="bg-vupth-surface rounded-[20px] p-6 items-center gap-2 mt-2">
               <Clock size={22} color="#9CA3AF" />
-              <Text className="font-body text-sm text-gray-500 text-center">
+              <Text className="font-body text-sm text-vupth-textSecondary text-center">
                 Nenhum pedido de encaixe no momento.
               </Text>
             </View>
@@ -105,7 +105,7 @@ export default function CutRequestsScreen() {
                   <View className="flex-row items-start justify-between">
                     <View className="flex-1 pr-3">
                       <Text className="font-display text-base text-vupth-forest">{who}</Text>
-                      <Text className="font-body text-xs text-gray-500 mt-0.5">
+                      <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
                         {services}
                         {total > 0 ? ` · ${formatCurrency(total)}` : ""}
                       </Text>
@@ -117,7 +117,7 @@ export default function CutRequestsScreen() {
                     >
                       <Clock size={12} color={urgent ? "#FFFFFF" : "#454745"} />
                       <Text
-                        className={`font-mono text-[11px] ${urgent ? "text-white" : "text-gray-500"}`}
+                        className={`font-mono text-[11px] ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
                       >
                         {mins} min
                       </Text>
@@ -125,7 +125,7 @@ export default function CutRequestsScreen() {
                   </View>
 
                   {time && (
-                    <Text className="font-body text-[11px] text-gray-500">
+                    <Text className="font-body text-[11px] text-vupth-textSecondary">
                       Pediu às {time} · entra no fim da sua fila
                     </Text>
                   )}

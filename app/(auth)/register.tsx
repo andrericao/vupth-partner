@@ -87,7 +87,7 @@ export default function RegisterScreen() {
           </Pressable>
 
           {/* O titulo diz o PAPEL escolhido na tela anterior: quem chega aqui
-              ja decidiu, e ver a escolha confirmada evita a duvida de "sera que
+              já decidiu, e ver a escolha confirmada evita a dúvida de "será que
               cliquei no lugar certo?". Sem papel (link direto), cai no
               generico. */}
           <View className="mt-10 gap-2">
@@ -165,7 +165,7 @@ export default function RegisterScreen() {
           <View className="flex-1 justify-end gap-4 mt-8">
             <NwButton title="Criar conta" onPress={handleSubmit} isLoading={isLoading} />
             <View className="flex-row justify-center items-center gap-1.5">
-              <Text className="font-body text-[13px] text-gray-500">Já é cadastrado?</Text>
+              <Text className="font-body text-[13px] text-vupth-textSecondary">Já é cadastrado?</Text>
               <Pressable
                 onPress={() => router.push(`/(auth)/login?role=${role ?? ""}` as any)}
                 testID="go-login"

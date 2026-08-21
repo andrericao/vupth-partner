@@ -79,7 +79,7 @@ export default function ProfessionalOnboardingScreen() {
         const msg = Object.values(fieldErrors).join("\n");
         Alert.alert("Erro de validacao", msg);
       } else {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel criar o perfil. Tente novamente."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível criar o perfil. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -92,7 +92,7 @@ export default function ProfessionalOnboardingScreen() {
       const results = await searchByName(searchQuery.trim());
       setSearchResults(results);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel buscar estabelecimentos."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível buscar estabelecimentos."));
     } finally {
       setIsSearching(false);
     }
@@ -119,18 +119,18 @@ export default function ProfessionalOnboardingScreen() {
     try {
       await requestAffiliation(selectedEstablishment.id);
       Alert.alert(
-        "Solicitacao enviada",
-        `Sua solicitacao para ${selectedEstablishment.name} foi enviada. Aguarde a aprovacao do proprietario.`,
+        "Solicitação enviada",
+        `Sua solicitação para ${selectedEstablishment.name} foi enviada. Aguarde a aprovação do proprietário.`,
         [{ text: "OK", onPress: () => router.replace("/(professional)/queue" as any) }]
       );
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "PROFESSIONAL_ALREADY_AFFILIATED") {
-        Alert.alert("Aviso", "Voce ja esta vinculado a um estabelecimento.");
+        Alert.alert("Aviso", "Você já está vinculado a um estabelecimento.");
       } else if (code === "AFFILIATION_ALREADY_REQUESTED") {
-        Alert.alert("Aviso", "Voce ja solicitou vinculacao a este estabelecimento. Aguarde a aprovacao.");
+        Alert.alert("Aviso", "Você já solicitou vinculação a este estabelecimento. Aguarde a aprovação.");
       } else {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao. Tente novamente."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível enviar a solicitação. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -155,7 +155,7 @@ export default function ProfessionalOnboardingScreen() {
             onBack={() => router.navigate("/(professional)/queue" as any)}
           />
 
-          <View className="flex-1 px-4 w-full">
+          <View className="flex-1 w-full">
 
             <NwInput
               label="Seu nome"
@@ -163,11 +163,11 @@ export default function ProfessionalOnboardingScreen() {
               value={name}
               onChangeText={setName}
               testID="professional-name"
-              error={isInvalid ? "Nome obrigatorio" : ""}
+              error={isInvalid ? "Nome obrigatório" : ""}
             />
 
             <View className="mb-3 w-full">
-              <Text className="font-body text-gray-600 mb-1">
+              <Text className="font-body text-vupth-textSecondary mb-1">
                 Especialidade (opcional)
               </Text>
               <View className="gap-1">
@@ -180,12 +180,12 @@ export default function ProfessionalOnboardingScreen() {
                       accessibilityState={{ selected: isSelected }}
                       onPress={() => setSpecialty(isSelected ? "" : s.value)}
                       className={`py-2.5 px-4 rounded-md border ${
-                        isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
+                        isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
                       }`}
                     >
                       <Text
                         className={`font-body text-center ${
-                          isSelected ? "text-white" : "text-gray-700"
+                          isSelected ? "text-white" : "text-vupth-textSecondary"
                         }`}
                       >
                         {s.label}
@@ -223,10 +223,10 @@ export default function ProfessionalOnboardingScreen() {
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader title="Buscar estabelecimento" onBack={() => setStep("profile")} />
 
-          <View className="flex-1 px-4">
+          <View className="flex-1">
 
-            <Text className="font-body text-gray-600 mb-6">
-              Busque o estabelecimento onde voce vai trabalhar.
+            <Text className="font-body text-vupth-textSecondary mb-6">
+              Busque o estabelecimento onde você vai trabalhar.
             </Text>
 
             <View
@@ -235,7 +235,7 @@ export default function ProfessionalOnboardingScreen() {
               }`}
             >
               <TextInput
-                className="flex-1 px-3 font-body text-gray-900"
+                className="flex-1 px-3 font-body text-vupth-forest"
                 placeholder="Nome do estabelecimento"
                 placeholderTextColor="#9CA3AF"
                 value={searchQuery}
@@ -280,14 +280,14 @@ export default function ProfessionalOnboardingScreen() {
                     onPress={() => handleSelectEstablishment(estab)}
                     className="bg-vupth-surface py-3 px-4 rounded-[20px]"
                   >
-                    <Text className="font-heading text-gray-900">{estab.name}</Text>
+                    <Text className="font-heading text-vupth-forest">{estab.name}</Text>
                     <View className="flex-row gap-2 mt-1">
-                      <Text className="font-body text-sm text-gray-500">
+                      <Text className="font-body text-sm text-vupth-textSecondary">
                         {estab.services?.join(", ")}
                       </Text>
                       <Text
                         className={`font-body text-sm ${
-                          estab.open_status === "OPEN" ? "text-vupth-forest" : "text-gray-400"
+                          estab.open_status === "OPEN" ? "text-vupth-forest" : "text-vupth-textSecondary"
                         }`}
                       >
                         {estab.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
@@ -299,7 +299,7 @@ export default function ProfessionalOnboardingScreen() {
             )}
 
             {!isSearching && searchResults.length === 0 && searchQuery.length > 0 && (
-              <Text className="font-body text-gray-400 text-center mt-6">
+              <Text className="font-body text-vupth-textSecondary text-center mt-6">
                 Nenhum estabelecimento encontrado.
               </Text>
             )}
@@ -316,22 +316,22 @@ export default function ProfessionalOnboardingScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 py-12 px-4 items-center justify-center">
+      <View className="flex-1 pb-12 px-4 items-center justify-center">
         <ScreenHeader
-          title="Confirmar Vinculacao"
+          title="Confirmar vinculação"
         />
 
         {selectedEstablishment && (
           <View className="bg-vupth-surface p-6 rounded-[20px] w-full mb-6">
-            <Text className="font-heading text-xl text-gray-900">
+            <Text className="font-heading text-xl text-vupth-forest">
               {selectedEstablishment.name}
             </Text>
-            <Text className="font-body text-gray-500 mt-1">
+            <Text className="font-body text-vupth-textSecondary mt-1">
               {selectedEstablishment.services?.join(", ")}
             </Text>
             <Text
               className={`font-body mt-1 ${
-                selectedEstablishment.open_status === "OPEN" ? "text-vupth-forest" : "text-gray-400"
+                selectedEstablishment.open_status === "OPEN" ? "text-vupth-forest" : "text-vupth-textSecondary"
               }`}
             >
               {selectedEstablishment.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
@@ -340,7 +340,7 @@ export default function ProfessionalOnboardingScreen() {
         )}
 
         <NwButton
-          title="Solicitar Vinculacao"
+          title="Solicitar vinculação"
           onPress={handleAffiliate}
           isLoading={isLoading}
         />

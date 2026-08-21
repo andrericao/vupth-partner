@@ -44,7 +44,7 @@ export default function AddGuestScreen() {
     }
 
     if (!professional?.id || !professional.establishment_id) {
-      Alert.alert("Erro", "Profissional nao vinculado a um estabelecimento.");
+      Alert.alert("Erro", "Profissional não vinculado a um estabelecimento.");
       return;
     }
 
@@ -62,7 +62,7 @@ export default function AddGuestScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar o cliente."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível adicionar o cliente."));
     } finally {
       setIsLoading(false);
     }
@@ -79,12 +79,12 @@ export default function AddGuestScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <View className="flex-1 py-12 px-4">
+      <View className="flex-1 pb-12 px-4">
         <ScreenHeader
-          title="Adicionar Cliente"
+          title="Adicionar cliente"
           onBack={() => router.navigate("/(professional)/queue" as any)}
         />
-        <Text className="font-body text-gray-500 mt-1">
+        <Text className="font-body text-vupth-textSecondary mt-1">
           Cliente sem cadastro no app
         </Text>
 
@@ -94,17 +94,17 @@ export default function AddGuestScreen() {
             placeholder="Ex: Maria"
             value={clientName}
             onChangeText={setClientName}
-            error={isInvalid && !clientName.trim() ? "Nome obrigatorio" : ""}
+            error={isInvalid && !clientName.trim() ? "Nome obrigatório" : ""}
             testID="guest-name"
           />
 
-          <Text className="font-body text-gray-600 mt-2 mb-2">
-            Servicos ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
+          <Text className="font-body text-vupth-textSecondary mt-2 mb-2">
+            Serviços ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
           </Text>
 
           {myServices.length === 0 && (
-            <Text className="font-body text-sm text-gray-400">
-              Nenhum servico cadastrado. Adicione servicos primeiro.
+            <Text className="font-body text-sm text-vupth-textSecondary">
+              Nenhum serviço cadastrado. Adicione serviços primeiro.
             </Text>
           )}
 
@@ -119,18 +119,18 @@ export default function AddGuestScreen() {
                   accessibilityLabel={svc.customName}
                   accessibilityState={{ selected: isSelected }}
                   className={`py-3 px-4 rounded-md border ${
-                    isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
+                    isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
                   }`}
                 >
                   <View className="flex-row justify-between items-center">
                     <View className="flex-1">
                       <Text
-                        className={`font-body text-sm ${isSelected ? "text-white" : "text-gray-700"}`}
+                        className={`font-body text-sm ${isSelected ? "text-white" : "text-vupth-textSecondary"}`}
                       >
                         {svc.customName}
                       </Text>
                       <Text
-                        className={`font-body text-xs ${isSelected ? "text-vupth-greenTint" : "text-gray-500"}`}
+                        className={`font-body text-xs ${isSelected ? "text-vupth-greenTint" : "text-vupth-textSecondary"}`}
                       >
                         {svc.estimatedMinutes}min
                       </Text>
@@ -157,7 +157,7 @@ export default function AddGuestScreen() {
 
           {isInvalid && (
             <Text className="font-body text-sm text-vupth-danger mb-2">
-              Informe o nome e selecione ao menos 1 servico.
+              Informe o nome e selecione ao menos 1 serviço.
             </Text>
           )}
 

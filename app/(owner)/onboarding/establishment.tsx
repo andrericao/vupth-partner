@@ -83,7 +83,7 @@ export default function EstablishmentScreen() {
             onBack={() => router.navigate("/(owner)/dashboard" as any)}
           />
 
-          <View className="flex-1 px-4 w-full">
+          <View className="flex-1 w-full">
 
             <NwInput
               label="Seu nome"
@@ -104,7 +104,7 @@ export default function EstablishmentScreen() {
             <SelectService value={serviceType} onValueChange={setServiceType} />
 
             <NwButton
-              title="Criar Estabelecimento"
+              title="Criar estabelecimento"
               onPress={handleSubmit}
               isLoading={isLoading}
             />

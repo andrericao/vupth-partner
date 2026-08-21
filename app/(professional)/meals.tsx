@@ -45,7 +45,7 @@ export default function MealsScreen() {
     try {
       await setMealNudgeDisabled(next);
     } catch {
-      setMealNudgeOff(!next); // nao mentir na UI se a gravacao falhar
+      setMealNudgeOff(!next); // não mentir na UI se a gravacao falhar
     }
   };
 
@@ -110,11 +110,11 @@ export default function MealsScreen() {
   const handleSaveEdit = async (intervalId: string) => {
     const duration = parseInt(editDuration, 10);
     if (!isValidTime(editTime)) {
-      Alert.alert("Horario invalido", "Use o formato HH:MM (ex.: 12:00).");
+      Alert.alert("Horário inválido", "Use o formato HH:MM (ex.: 12:00).");
       return;
     }
     if (isNaN(duration) || duration <= 0 || duration > 240) {
-      Alert.alert("Duracao invalida", "Informe a duracao em minutos (1 a 240).");
+      Alert.alert("Duracao inválida", "Informe a duracao em minutos (1 a 240).");
       return;
     }
     setIsSaving(true);
@@ -125,7 +125,7 @@ export default function MealsScreen() {
       });
       setEditingId(null);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar a refeicao."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar a refeição."));
     } finally {
       setIsSaving(false);
     }
@@ -133,8 +133,8 @@ export default function MealsScreen() {
 
   const handleRemove = (m: Interval) => {
     Alert.alert(
-      "Remover refeicao",
-      `Deseja remover "${mealName(m.description)}"? Voce pode recria-la depois.`,
+      "Remover refeição",
+      `Deseja remover "${mealName(m.description)}"? Você pode recriá-la depois.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -145,7 +145,7 @@ export default function MealsScreen() {
               await deleteInterval(profId, m.intervalId);
               if (editingId === m.intervalId) setEditingId(null);
             } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel remover a refeicao."));
+              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover a refeição."));
             }
           },
         },
@@ -156,15 +156,15 @@ export default function MealsScreen() {
   const handleAdd = async () => {
     const duration = parseInt(addDuration, 10);
     if (!addDesc.trim()) {
-      Alert.alert("Nome obrigatorio", "Informe o nome da refeicao (ex.: Almoco).");
+      Alert.alert("Nome obrigatório", "Informe o nome da refeição (ex.: Almoço).");
       return;
     }
     if (!isValidTime(addTime)) {
-      Alert.alert("Horario invalido", "Use o formato HH:MM (ex.: 12:00).");
+      Alert.alert("Horário inválido", "Use o formato HH:MM (ex.: 12:00).");
       return;
     }
     if (isNaN(duration) || duration <= 0 || duration > 240) {
-      Alert.alert("Duracao invalida", "Informe a duracao em minutos (1 a 240).");
+      Alert.alert("Duracao inválida", "Informe a duracao em minutos (1 a 240).");
       return;
     }
     setIsSaving(true);
@@ -181,7 +181,7 @@ export default function MealsScreen() {
       setAddDuration("");
       setAddPattern("WEEKDAYS");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar a refeicao."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível adicionar a refeição."));
     } finally {
       setIsSaving(false);
     }
@@ -199,15 +199,12 @@ export default function MealsScreen() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <VStack flex={1} py="$12" px="$4">
+        <VStack flex={1} pb="$12" px="$4">
           <ScreenHeader
-          title="Refeicoes"
-          onBack={() => router.navigate(backTarget as any)}
-        />
-          <Text fontFamily="$body" color="$coolGray500" mt="$1">
-            Almoco e janta entram no calculo da fila. O horario e so previsao —
-            voce inicia a refeicao na tela da fila.
-          </Text>
+            title="Refeições"
+            subtitle="Entram no cálculo da fila. O horário é previsão — você inicia a refeição na tela da fila."
+            onBack={() => router.navigate(backTarget as any)}
+          />
 
           <VStack mt="$6" space="sm">
             {meals.map((m) =>
@@ -220,14 +217,14 @@ export default function MealsScreen() {
                   borderWidth="$1"
                   borderColor="$forest"
                 >
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest" mb="$2">
                     {mealName(m.description)}
                   </Text>
                   <FormControl>
                     <HStack space="md">
                       <VStack flex={1}>
                         <Input
-                          textLabel="Horario (HH:MM)"
+                          textLabel="Horário (HH:MM)"
                           placeholder="12:00"
                           messageError=""
                           value={editTime}
@@ -251,8 +248,8 @@ export default function MealsScreen() {
                     <Button
                       title="Cancelar"
                       onPress={() => setEditingId(null)}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
+                      bg="$brandBorder"
+                      textColor="$brandTextSecondary"
                       h="$9"
                       flex={1}
                     />
@@ -275,17 +272,17 @@ export default function MealsScreen() {
                   alignItems="center"
                 >
                   <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                       {mealName(m.description)}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
                       {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min •{" "}
                       {patternLabel(m.recurrencePattern)}
                       {m.status === "ACTIVE" ? " • em andamento" : ""}
                     </Text>
                     <HStack space="md" mt="$1">
                       <Pressable onPress={() => startEdit(m)}>
-                        <Text fontFamily="$body" fontSize="$xs" color="$blue600">
+                        <Text fontFamily="$body" fontSize="$xs" color="$forest">
                           Editar
                         </Text>
                       </Pressable>
@@ -301,24 +298,24 @@ export default function MealsScreen() {
             )}
 
             {meals.length === 0 && (
-              <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$2">
-                Nenhuma refeicao cadastrada
+              <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$2">
+                Nenhuma refeição cadastrada
               </Text>
             )}
           </VStack>
 
           {!showAdd ? (
-            <BrandButton title="Adicionar Refeicao" onPress={() => { setEditingId(null); setShowAdd(true); }} mt="$6" />
+            <BrandButton title="Adicionar refeição" onPress={() => { setEditingId(null); setShowAdd(true); }} mt="$6" />
           ) : (
             <VStack mt="$6">
               <Divider mb="$4" />
               <Heading size="lg" fontFamily="$heading" mb="$3">
-                Nova Refeicao
+                Nova Refeição
               </Heading>
               <FormControl>
                 <Input
                   textLabel="Nome"
-                  placeholder="Ex: Almoco"
+                  placeholder="Ex: Almoço"
                   messageError=""
                   value={addDesc}
                   onChangeText={setAddDesc}
@@ -326,7 +323,7 @@ export default function MealsScreen() {
                 <HStack space="md">
                   <VStack flex={1}>
                     <Input
-                      textLabel="Horario (HH:MM)"
+                      textLabel="Horário (HH:MM)"
                       placeholder="12:00"
                       messageError=""
                       value={addTime}
@@ -347,7 +344,7 @@ export default function MealsScreen() {
                 </HStack>
               </FormControl>
 
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mb="$2">
+              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mb="$2">
                 Recorrencia
               </Text>
               <HStack space="xs" mb="$4" flexWrap="wrap">
@@ -362,10 +359,10 @@ export default function MealsScreen() {
                       px="$3"
                       borderRadius="$full"
                       borderWidth="$1"
-                      borderColor={selected ? "$forest" : "$coolGray300"}
+                      borderColor={selected ? "$forest" : "$brandBorder"}
                       mb="$1"
                     >
-                      <Text fontFamily="$body" fontSize="$xs" color={selected ? "$white" : "$coolGray600"}>
+                      <Text fontFamily="$body" fontSize="$xs" color={selected ? "$white" : "$brandTextSecondary"}>
                         {p.label}
                       </Text>
                     </Pressable>
@@ -378,7 +375,7 @@ export default function MealsScreen() {
                 title="Cancelar"
                 onPress={() => setShowAdd(false)}
                 bg="transparent"
-                $active-bg="$red50"
+                $active-bg="$brandSurface"
                 borderWidth="$1"
                 borderColor="$brandDanger"
                 textColor="$brandDanger"
@@ -387,19 +384,19 @@ export default function MealsScreen() {
           )}
 
           <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray700">
-              Aviso na hora da refeicao
+            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+              Aviso na hora da refeição
             </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
               {mealNudgeOff
-                ? "Desligado — o lembrete aparece so nas Opcoes da fila (bolinha + contagem)."
-                : "Ligado — um aviso aparece na tela no horario da refeicao."}
+                ? "Desligado — o lembrete aparece só nas Opções da fila (bolinha + contagem)."
+                : "Ligado — um aviso aparece na tela no horário da refeição."}
             </Text>
             <Button
               title={mealNudgeOff ? "Ligar aviso" : "Desligar aviso"}
               onPress={toggleMealNudge}
-              bg="$coolGray200"
-              textColor="$coolGray700"
+              bg="$brandBorder"
+              textColor="$brandTextSecondary"
               h="$9"
               mt="$2"
             />

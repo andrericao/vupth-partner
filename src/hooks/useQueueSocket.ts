@@ -122,7 +122,7 @@ export function useQueueSocket(establishmentId: string | null) {
                 useUiStore.getState().showClosingPrompt(notification.graceUntil ?? null);
               }
             } catch (e) {
-              if (__DEV__) console.log("[ws] erro ao processar notificacao pessoal", e);
+              if (__DEV__) console.log("[ws] erro ao processar notificação pessoal", e);
             }
           });
         },

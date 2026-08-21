@@ -43,7 +43,7 @@ function FieldCard({
 }) {
   return (
     <View className="bg-vupth-surface p-4 rounded-[20px]">
-      <Text className="font-body text-sm text-gray-500">{label}</Text>
+      <Text className="font-body text-sm text-vupth-textSecondary">{label}</Text>
       {editing ? (
         <View className="mt-2">
           {children}
@@ -57,7 +57,7 @@ function FieldCard({
         </View>
       ) : (
         <>
-          <Text className="font-heading text-gray-900 mt-1">{value}</Text>
+          <Text className="font-heading text-vupth-forest mt-1">{value}</Text>
           <NwButton title={editLabel} onPress={onEdit} variant="secondary" className="h-9 mt-2" />
         </>
       )}
@@ -113,7 +113,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("Nome atualizado", "Seu nome foi alterado com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar o nome."));
     } finally {
       setIsSaving(false);
     }
@@ -122,7 +122,7 @@ export default function SettingsAccountScreen() {
   const handleSaveNickname = async () => {
     const value = nickname.trim();
     if (value.length > 50) {
-      setFieldError("O apelido deve ter no maximo 50 caracteres.");
+      setFieldError("O apelido deve ter no máximo 50 caracteres.");
       return;
     }
     setFieldError(null);
@@ -136,7 +136,7 @@ export default function SettingsAccountScreen() {
         value ? "Seu apelido foi salvo." : "Seu apelido foi removido."
       );
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o apelido."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o apelido."));
     } finally {
       setIsSaving(false);
     }
@@ -155,7 +155,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("E-mail atualizado", "Seu e-mail foi alterado com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o e-mail."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar o e-mail."));
     } finally {
       setIsSaving(false);
     }
@@ -172,7 +172,7 @@ export default function SettingsAccountScreen() {
       return;
     }
     if (password !== confirmPassword) {
-      setFieldError("As senhas nao coincidem.");
+      setFieldError("As senhas não coincidem.");
       return;
     }
     setFieldError(null);
@@ -182,7 +182,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("Senha alterada", "Sua senha foi alterada com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar a senha."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar a senha."));
     } finally {
       setIsSaving(false);
     }
@@ -199,7 +199,7 @@ export default function SettingsAccountScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-4">
+        <View className="flex-1 pb-12 px-4">
           <ScreenHeader
           title="Dados cadastrais"
           onBack={() => router.navigate("/(professional)/settings" as any)}

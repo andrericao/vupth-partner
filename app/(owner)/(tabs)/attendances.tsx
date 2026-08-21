@@ -22,13 +22,13 @@ import { getApiErrorMessage } from "@lib/api";
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   FINISHED: { label: "Finalizado", color: "$forest" },
   CANCELLED: { label: "Cancelado", color: "$brandDanger" },
-  IN_PROGRESS: { label: "Em andamento", color: "$blue500" },
-  PAUSED: { label: "Pausado", color: "$amber500" },
-  SCHEDULED: { label: "Agendado", color: "$coolGray500" },
+  IN_PROGRESS: { label: "Em andamento", color: "$forest" },
+  PAUSED: { label: "Pausado", color: "$brandWarning" },
+  SCHEDULED: { label: "Agendado", color: "$brandTextSecondary" },
 };
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$coolGray500" };
+  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$brandTextSecondary" };
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
@@ -41,10 +41,10 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
     >
       <HStack justifyContent="space-between" alignItems="center">
         <VStack flex={1}>
-          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+          <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
             {item.clientName}
           </Text>
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
             Prof: {item.professionalName}
           </Text>
         </VStack>
@@ -57,12 +57,12 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         </Badge>
       </HStack>
 
-      <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
 
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mt="$1">
+      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
@@ -99,7 +99,7 @@ export default function OwnerAttendancesScreen() {
       await fetchHistory(params);
       setLoaded(true);
     } catch (error: any) {
-      const msg = getApiErrorMessage(error, "Nao foi possivel carregar os atendimentos.");
+      const msg = getApiErrorMessage(error, "Não foi possível carregar os atendimentos.");
       setErrorMsg(msg);
     } finally {
       setIsLoading(false);
@@ -136,29 +136,28 @@ export default function OwnerAttendancesScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         <ScreenHeader
           title="Atendimentos"
+          subtitle={establishment?.name ?? undefined}
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
-          {establishment?.name}
-        </Text>
 
         <HStack mt="$4" space="sm" mb="$4">
           {filters.map((f) => (
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$forest" : "$coolGray100"}
+              bg={filter === f.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={filter === f.key ? "$white" : "$coolGray700"}
+                color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -175,8 +174,8 @@ export default function OwnerAttendancesScreen() {
         )}
 
         {errorMsg && (
-          <VStack bg="$amber50" p="$4" borderRadius="$card" borderWidth="$1" borderColor="$amber200" mt="$4">
-            <Text fontFamily="$body" color="$amber700" textAlign="center">
+          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
+            <Text fontFamily="$body" color="$brandDanger" textAlign="center">
               {errorMsg}
             </Text>
             <Pressable onPress={loadHistory} mt="$2">
@@ -201,7 +200,7 @@ export default function OwnerAttendancesScreen() {
         )}
 
         {loaded && !errorMsg && history.length === 0 && (
-          <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$12">
+          <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$12">
             Nenhum atendimento encontrado
           </Text>
         )}

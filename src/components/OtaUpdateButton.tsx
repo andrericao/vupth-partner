@@ -1,42 +1,55 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import * as Updates from "expo-updates";
-import { VStack, Text } from "@gluestack-ui/themed";
-import { Button } from "@components/Button";
 
-// Botao "Verificar atualizacao" (OTA) — espelhado do front-client. Forca a
-// checagem do EAS Update na hora (checkForUpdate -> fetch -> reload), evitando
+import { WsDiagnostics } from "@components/WsDiagnostics";
+
+// Botao de "puxar atualizacao agora" (OTA). Sem ele, o Expo aplica o update
+// so na 2a abertura do app — no teste de device isso vira "mas eu ja atualizei"
 // ter que fechar/abrir o app 2x pra puxar a versao nova. So funciona no APK de
-// build (no Expo Go/dev cai no catch).
+// build; no Expo Go / modo dev nao ha OTA pra buscar.
+//
+// [QA] O diagnostico de WebSocket MORA AQUI, atras de 7 toques na versao.
+// Ele nasceu porque os logs sao gated por `__DEV__` e o QA roda bundle de OTA,
+// entao o dado precisava sair na tela. So que ele estava SOLTO em
+// Configuracoes, e o usuario final via "falhou o handshake", contagem de erros
+// e a URL do servidor — ruido tecnico que nao ajuda quem so quer mexer na
+// conta (Alexia 2026-08-21). O gesto de 7 toques e o padrao de "modo
+// desenvolvedor": continua acessivel em producao, some da vista de quem nao
+// procura.
+const TOQUES_PRA_ABRIR = 7;
+
 export function OtaUpdateButton() {
   const [isChecking, setIsChecking] = useState(false);
+  const [toques, setToques] = useState(0);
+  const diagnosticoAberto = toques >= TOQUES_PRA_ABRIR;
 
-  async function handleCheckUpdate() {
+  const handleCheckUpdate = async () => {
     setIsChecking(true);
     try {
       const result = await Updates.checkForUpdateAsync();
       if (result.isAvailable) {
         await Updates.fetchUpdateAsync();
         Alert.alert(
-          "Atualizacao baixada",
-          "O app vai reiniciar para aplicar a nova versao.",
+          "Atualização baixada",
+          "O app vai reiniciar para aplicar a nova versão.",
           [{ text: "OK", onPress: () => Updates.reloadAsync() }]
         );
       } else {
-        Alert.alert("Tudo certo", "Voce ja esta na versao mais recente.");
+        Alert.alert("Tudo certo", "Você já está na versão mais recente.");
       }
     } catch {
       Alert.alert(
-        "Nao foi possivel verificar",
-        "Atualizacoes OTA so funcionam no APK de build (nao no Expo Go/modo dev)."
+        "Sem atualização",
+        "Atualizações OTA só funcionam no APK de build (não no Expo Go/modo dev)."
       );
     } finally {
       setIsChecking(false);
     }
-  }
+  };
 
-  // Mostra o id do OTA + data/hora em que ele foi publicado (Updates.createdAt) =
-  // o "horario do ultimo push". Espelhado do front-client (Settings.tsx).
+  // Id do OTA + data/hora de publicacao (Updates.createdAt) = o "horario do
+  // ultimo push". Espelhado do front-client (Settings.tsx).
   const otaInfo = Updates.updateId
     ? `OTA ${Updates.updateId.slice(0, 8)}${
         Updates.createdAt
@@ -46,24 +59,38 @@ export function OtaUpdateButton() {
     : "bundle embutido (nenhum OTA aplicado)";
 
   return (
-    <VStack mt="$8" alignItems="center" space="xs">
-      <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">
-        Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
-      </Text>
-      <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">
-        {otaInfo}
-      </Text>
-      <Button
-        title={isChecking ? "Verificando..." : "Verificar atualizacao"}
+    <View className="mt-8 items-center gap-3">
+      <Pressable
+        onPress={() => setToques((n) => n + 1)}
+        accessibilityRole="button"
+        accessibilityLabel="Informações da versão"
+        testID="version-line"
+      >
+        {/* Versao em DM Mono: e numero de build, nao prosa. */}
+        <Text className="font-mono text-[10px] text-vupth-textSecondary text-center">
+          {Updates.runtimeVersion ?? "—"} · {Updates.channel ?? "dev"}
+        </Text>
+        <Text className="font-mono text-[10px] text-vupth-textSecondary text-center">
+          {otaInfo}
+        </Text>
+      </Pressable>
+
+      <Pressable
         onPress={handleCheckUpdate}
-        bg="transparent"
-        borderWidth="$1"
-        borderColor="$forest"
-        textColor="$forest"
-        $active-bg="$greenTint"
-        h="$9"
-        mt="$2"
-      />
-    </VStack>
+        className="flex-row items-center bg-vupth-surface rounded-full px-4 py-3 active:opacity-70"
+        accessibilityRole="button"
+        testID="check-update"
+      >
+        <Text className="font-heading text-[13px] text-vupth-forest">
+          {isChecking ? "Verificando..." : "Verificar atualização"}
+        </Text>
+      </Pressable>
+
+      {diagnosticoAberto && (
+        <View className="w-full">
+          <WsDiagnostics />
+        </View>
+      )}
+    </View>
   );
 }

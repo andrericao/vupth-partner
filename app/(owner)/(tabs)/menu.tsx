@@ -50,7 +50,7 @@ function MenuItem({
 }: MenuItemProps) {
   return (
     <>
-      <Pressable onPress={onPress} py="$3.5" px="$4" $active-bg="$coolGray50">
+      <Pressable onPress={onPress} py="$3.5" px="$4" $active-bg="$brandSurface">
         <HStack alignItems="center" space="md">
           <Icon size={19} color="#163300" />
           <VStack flex={1}>
@@ -61,7 +61,7 @@ function MenuItem({
               {dot && <PendingDot />}
             </HStack>
             {hint && (
-              <Text fontFamily="$body" fontSize="$2xs" color="$coolGray500" mt="$0.5">
+              <Text fontFamily="$body" fontSize="$2xs" color="$brandTextSecondary" mt="$0.5">
                 {hint}
               </Text>
             )}
@@ -90,7 +90,7 @@ function Grupo({ label, children }: { label: string; children: React.ReactNode }
         fontSize={11}
         fontWeight="$bold"
         letterSpacing={0.8}
-        color="$coolGray500"
+        color="$brandTextSecondary"
       >
         {label}
       </Text>
@@ -115,7 +115,7 @@ export default function OwnerMenuScreen() {
   const handleLeaveEstablishment = () => {
     Alert.alert(
       "Sair do Estabelecimento",
-      "Voce sera desvinculado deste estabelecimento. Deseja continuar?",
+      "Você será desvinculado deste estabelecimento. Deseja continuar?",
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -153,13 +153,13 @@ export default function OwnerMenuScreen() {
     >
       <VStack flex={1} pb="$6" px="$4">
         <ScreenHeader
-          title={establishment?.name ?? "Meu Estabelecimento"}
+          title={establishment?.name ?? "Meu estabelecimento"}
           subtitle={serviceTypeLabel(establishment?.service_type)}
         />
 
         <VStack space="xl">
           {/* Quem acumula os dois papeis troca de area por aqui. Fica FORA dos
-              grupos porque nao e configuracao — e mudar de contexto. */}
+              grupos porque não e configuracao — e mudar de contexto. */}
           {isProfessional && (
             <Pressable
               onPress={() => router.replace("/(professional)/queue" as any)}
@@ -171,7 +171,7 @@ export default function OwnerMenuScreen() {
               <HStack alignItems="center" space="md">
                 {/* Sem equivalente no Pencil (elemento so do app, pra quem
                     acumula os dois papeis) — lucide por consistencia com o
-                    resto do menu, ja que os outros icones deixaram de ser
+                    resto do menu, já que os outros ícones deixaram de ser
                     Ionicons. */}
                 <ArrowLeftRight size={19} color="#163300" />
                 <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$forest" flex={1}>
@@ -185,9 +185,9 @@ export default function OwnerMenuScreen() {
           {establishment?.id && (
             <Grupo label="EQUIPE">
               {/* UMA porta pra equipe. Eram TRES linhas de mesmo peso
-                  (adicionar / convidar / solicitacoes) que levavam a variacoes
-                  da mesma tarefa — e a propria tela de destino ja oferece os
-                  tres caminhos. O badge traz a urgencia (solicitacao parada)
+                  (adicionar / convidar / solicitações) que levavam a variacoes
+                  da mesma tarefa — e a própria tela de destino já oferece os
+                  três caminhos. O badge traz a urgencia (solicitação parada)
                   pra fora, que era o unico motivo real de separar. */}
               <MenuItem
                 icon={Users}
@@ -239,7 +239,7 @@ export default function OwnerMenuScreen() {
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/coming-soon",
-                  params: { title: "Dados Pessoais" },
+                  params: { title: "Dados pessoais" },
                 } as any)
               }
               last={!establishment?.id}

@@ -2,7 +2,7 @@ import { render } from "@testing-library/react-native";
 import { NotificationBadge } from "../NotificationBadge";
 
 describe("NotificationBadge", () => {
-  it("nao renderiza nada quando nao ha notificacao", () => {
+  it("não renderiza nada quando não há notificação", () => {
     const view = render(<NotificationBadge count={0} />);
     expect(view.queryByTestId("notification-badge")).toBeNull();
   });
@@ -19,11 +19,11 @@ describe("NotificationBadge", () => {
   });
 
   it("anuncia a contagem p/ leitor de tela (singular e plural)", () => {
-    expect(render(<NotificationBadge count={1} />).getByLabelText("1 notificacao")).toBeTruthy();
-    expect(render(<NotificationBadge count={4} />).getByLabelText("4 notificacoes")).toBeTruthy();
+    expect(render(<NotificationBadge count={1} />).getByLabelText("1 notificação")).toBeTruthy();
+    expect(render(<NotificationBadge count={4} />).getByLabelText("4 notificações")).toBeTruthy();
   });
 
-  it("aceita testID proprio (p/ distinguir badges na mesma tela)", () => {
+  it("aceita testID próprio (p/ distinguir badges na mesma tela)", () => {
     const view = render(<NotificationBadge count={2} testID="menu-badge-requests" />);
     expect(view.getByTestId("menu-badge-requests")).toBeTruthy();
   });

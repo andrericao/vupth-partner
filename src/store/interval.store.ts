@@ -8,8 +8,8 @@ import { api } from "@lib/api";
 // / "Dinner Break"). Mostra "Almoco"/"Janta" no app.
 export function mealName(description: string): string {
   const map: Record<string, string> = {
-    "Lunch Break": "Almoco",
-    Lunch: "Almoco",
+    "Lunch Break": "Almoço",
+    Lunch: "Almoço",
     "Dinner Break": "Janta",
     Dinner: "Janta",
   };

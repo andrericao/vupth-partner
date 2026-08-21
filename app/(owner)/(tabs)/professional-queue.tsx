@@ -30,8 +30,8 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
     attendance.status === "IN_PROGRESS"
       ? "$forest"
       : attendance.status === "PAUSED"
-        ? "$amber500"
-        : "$blue500";
+        ? "$brandWarning"
+        : "$forest";
 
   return (
     <HStack
@@ -44,10 +44,10 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
       alignItems="center"
     >
       <VStack flex={1}>
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           {attendance.clientName}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           {attendance.services.map((s) => s.customName).join(", ")}
         </Text>
       </VStack>
@@ -55,7 +55,7 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
         <Text fontFamily="$body" fontSize="$sm" color={statusColor} fontWeight="$bold">
           {statusLabel}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           R$ {attendance.totalValue.toFixed(2)}
         </Text>
       </VStack>
@@ -131,7 +131,7 @@ export default function ProfessionalQueueScreen() {
     const name = data?.professionalName ?? professionalName ?? "este profissional";
     Alert.alert(
       "Desvincular profissional",
-      `Deseja desvincular ${name} do estabelecimento? Ele deixara de atender aqui.`,
+      `Deseja desvincular ${name} do estabelecimento? Ele deixará de atender aqui.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -145,7 +145,7 @@ export default function ProfessionalQueueScreen() {
                 { text: "OK", onPress: () => router.navigate("/(owner)/dashboard" as any) },
               ]);
             } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel desvincular o profissional. Verifique se nao ha atendimento em andamento."));
+              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desvincular o profissional. Verifique se não há atendimento em andamento."));
             } finally {
               setIsRemoving(false);
             }
@@ -162,7 +162,7 @@ export default function ProfessionalQueueScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         <ScreenHeader
           title={data?.professionalName ?? professionalName ?? "Fila"}
           onBack={() => router.navigate("/(owner)/dashboard" as any)}
@@ -170,7 +170,7 @@ export default function ProfessionalQueueScreen() {
 
         {data && (
           <>
-            <Text fontFamily="$body" color="$coolGray500" mt="$1">
+            <Text fontFamily="$body" color="$brandTextSecondary" mt="$1">
               {data.establishmentName}
             </Text>
 
@@ -181,9 +181,9 @@ export default function ProfessionalQueueScreen() {
                   {data.size}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$blue50" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$blue200">
+              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$blue200">
                 <Text fontFamily="$body" fontSize="$xs" color="$blue700">Espera total</Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                   {data.totalRemainingMinutes} min
                 </Text>
               </VStack>
@@ -196,13 +196,13 @@ export default function ProfessionalQueueScreen() {
         {isLoading && !data && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
             <Spinner color="$forest" size="large" />
-            <Text fontFamily="$body" color="$coolGray500" mt="$4">Carregando fila...</Text>
+            <Text fontFamily="$body" color="$brandTextSecondary" mt="$4">Carregando fila...</Text>
           </VStack>
         )}
 
         {data?.inAttendance && (
           <VStack mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Em Atendimento
             </Text>
             <CurrentAttendanceCard attendance={data.inAttendance} />
@@ -211,7 +211,7 @@ export default function ProfessionalQueueScreen() {
 
         {data && data.attendancesInQueue.length > 0 && (
           <VStack>
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Lista de Espera ({data.attendancesInQueue.length})
             </Text>
             {data.attendancesInQueue.map((att, i) => (
@@ -222,7 +222,7 @@ export default function ProfessionalQueueScreen() {
 
         {data && !data.inAttendance && data.attendancesInQueue.length === 0 && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" fontSize="$lg">
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" fontSize="$lg">
               Nenhum cliente na fila
             </Text>
           </VStack>
@@ -231,14 +231,14 @@ export default function ProfessionalQueueScreen() {
         <Divider my="$6" />
 
         <Button
-          title="Desvincular Profissional"
+          title="Desvincular profissional"
           onPress={handleRemove}
           isLoading={isRemoving}
           bg="transparent"
           borderWidth="$1"
           borderColor="$brandDanger"
           textColor="$brandDanger"
-          $active-bg="$red50"
+          $active-bg="$brandSurface"
         />
       </VStack>
     </ScrollView>

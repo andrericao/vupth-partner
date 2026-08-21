@@ -109,7 +109,7 @@ export function ServerWarmup({ failed, onRetry }: Props) {
         {failed ? (
           <>
             <Text fontFamily="$heading" fontSize="$lg" color="$coolGray700" textAlign="center">
-              Nao foi possivel conectar ao servidor
+              Não foi possível conectar ao servidor
             </Text>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" textAlign="center">
               O servidor pode estar iniciando. Tente novamente em alguns segundos.

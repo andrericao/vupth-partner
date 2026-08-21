@@ -149,8 +149,8 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
               Perfil completo
             </Text>
             {/* [marca-vupth] Era text-brand-600 — escala ANTIGA (#3b7a3f,
-                pre-marca), unico resquicio dela neste card (a linha "Pronto
-                para atender" acima ja usava vupth-forest). */}
+                pre-marca), único resquício dela neste card (a linha "Pronto
+                para atender" acima já usava vupth-forest). */}
             <Text className="font-heading text-sm text-vupth-forest">
               {profile.percent}%
             </Text>

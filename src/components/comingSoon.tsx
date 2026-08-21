@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 // chamada de `comingSoon(...)` pela API real — assim medimos quais features
 // fizeram mais falta. (Estrategia Andre 2026-07-12.)
 export function comingSoon(feature = "Essa funcionalidade") {
-  Alert.alert("Em breve 🚧", `${feature} estara disponivel em breve.`);
+  Alert.alert("Em breve 🚧", `${feature} estará disponível em breve.`);
 }
 
 // Tela placeholder (nao o alerta acima) para rotas ja linkadas no menu cujo

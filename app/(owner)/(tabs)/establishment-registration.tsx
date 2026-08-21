@@ -19,10 +19,10 @@ import { maskPhone, unmask } from "@lib/masks";
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
     <>
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$3">
+      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$3">
         {label}
       </Text>
-      <Text fontFamily="$heading" fontWeight="$bold" color={value ? "$coolGray900" : "$coolGray400"} mt="$0.5">
+      <Text fontFamily="$heading" fontWeight="$bold" color={value ? "$forest" : "$brandTextSecondary"} mt="$0.5">
         {value || "—"}
       </Text>
     </>
@@ -49,7 +49,7 @@ export default function EstablishmentRegistrationScreen() {
   const handleSave = async () => {
     const name = nameValue.trim();
     if (name.length < 2 || !establishment?.id) {
-      Alert.alert("Nome invalido", "Informe um nome valido para o estabelecimento.");
+      Alert.alert("Nome inválido", "Informe um nome valido para o estabelecimento.");
       return;
     }
     setIsSaving(true);
@@ -63,7 +63,7 @@ export default function EstablishmentRegistrationScreen() {
       setEditing(false);
       Alert.alert("Dados atualizados", "Os dados cadastrais foram alterados.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar os dados."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar os dados."));
     } finally {
       setIsSaving(false);
     }
@@ -80,9 +80,9 @@ export default function EstablishmentRegistrationScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$4">
+        <VStack flex={1} pb="$12" px="$4">
           <ScreenHeader
-          title="Dados Cadastrais"
+          title="Dados cadastrais"
           onBack={() => router.navigate("/(owner)/establishment-data" as any)}
         />
 
@@ -119,8 +119,8 @@ export default function EstablishmentRegistrationScreen() {
                     <Button
                       title="Cancelar"
                       onPress={() => setEditing(false)}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
+                      bg="$brandBorder"
+                      textColor="$brandTextSecondary"
                       h="$9"
                       flex={1}
                     />
@@ -141,8 +141,8 @@ export default function EstablishmentRegistrationScreen() {
                   <Button
                     title="Editar"
                     onPress={startEdit}
-                    bg="$coolGray200"
-                    textColor="$coolGray700"
+                    bg="$brandBorder"
+                    textColor="$brandTextSecondary"
                     h="$9"
                     mt="$4"
                   />

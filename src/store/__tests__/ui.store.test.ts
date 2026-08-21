@@ -5,7 +5,7 @@ describe("ui.store — faixa dismissal", () => {
     useUiStore.getState().resetFaixa();
   });
 
-  it("comeca visivel (nao dispensada)", () => {
+  it("comeca visivel (não dispensada)", () => {
     expect(useUiStore.getState().faixaDismissed).toBe(false);
   });
 

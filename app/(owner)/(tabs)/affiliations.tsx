@@ -41,7 +41,7 @@ export default function OwnerAffiliationsScreen() {
       );
       setAffiliations(data);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel carregar as solicitacoes."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível carregar as solicitações."));
     } finally {
       setIsLoading(false);
     }
@@ -94,9 +94,9 @@ export default function OwnerAffiliationsScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         <ScreenHeader
-          title="Solicitacoes"
+          title="Solicitações"
           subtitle="Profissionais que pediram para se vincular ao seu estabelecimento."
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
@@ -109,18 +109,18 @@ export default function OwnerAffiliationsScreen() {
 
         {!isLoading && pending.length === 0 && resolved.length === 0 && (
           <VStack alignItems="center" mt="$12">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
-              Nenhuma solicitacao recebida ainda.
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
+              Nenhuma solicitação recebida ainda.
             </Text>
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$2" fontSize="$sm">
-              Profissionais podem buscar seu estabelecimento pelo nome e solicitar vinculacao.
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$2" fontSize="$sm">
+              Profissionais podem buscar seu estabelecimento pelo nome e solicitar vinculação.
             </Text>
           </VStack>
         )}
 
         {pending.length > 0 && (
           <VStack mb="$4">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Pendentes ({pending.length})
             </Text>
             {pending.map((aff) => (
@@ -130,14 +130,14 @@ export default function OwnerAffiliationsScreen() {
                 p="$4"
                 borderRadius="$md"
                 borderWidth="$1"
-                borderColor="$amber200"
+                borderColor="$brandWarning"
                 mb="$2"
               >
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                   {aff.professionalName}
                 </Text>
-                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
-                  {aff.type === "REQUEST" ? "Solicitou vinculacao" : "Convite enviado"}
+                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
+                  {aff.type === "REQUEST" ? "Solicitou vinculação" : "Convite enviado"}
                 </Text>
                 <HStack mt="$3" space="sm">
                   <BrandButton
@@ -152,7 +152,7 @@ export default function OwnerAffiliationsScreen() {
                     onPress={() => handleReject(aff)}
                     isLoading={actionLoading === aff.id}
                     bg="$brandDanger"
-                    $active-bg="$red600"
+                    $active-bg="$brandDanger"
                     h="$9"
                     flex={1}
                   />
@@ -164,7 +164,7 @@ export default function OwnerAffiliationsScreen() {
 
         {resolved.length > 0 && (
           <VStack>
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Historico
             </Text>
             {resolved.map((aff) => (
@@ -178,7 +178,7 @@ export default function OwnerAffiliationsScreen() {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Text fontFamily="$body" color="$coolGray900">
+                <Text fontFamily="$body" color="$forest">
                   {aff.professionalName}
                 </Text>
                 <Badge

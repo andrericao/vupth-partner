@@ -41,7 +41,7 @@ export default function RoleChoiceScreen() {
         <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
           Como você vai usar o Vupth?
         </Text>
-        <Text className="font-body text-[15px] text-gray-500">
+        <Text className="font-body text-[15px] text-vupth-textSecondary">
           Escolha seu papel para começar.
         </Text>
       </View>
@@ -57,7 +57,7 @@ export default function RoleChoiceScreen() {
             className={`flex-row items-center gap-3.5 p-[18px] rounded-[20px] ${
               p.destaque
                 ? "bg-vupth-green active:bg-vupth-success"
-                : "bg-vupth-surface active:bg-gray-200"
+                : "bg-vupth-surface active:bg-vupth-border"
             }`}
             accessibilityRole="button"
             testID={`role-${p.role}`}
@@ -67,7 +67,7 @@ export default function RoleChoiceScreen() {
               <Text className="font-display text-base text-vupth-forest">{p.titulo}</Text>
               <Text
                 className={`font-body text-xs ${
-                  p.destaque ? "text-vupth-forest opacity-70" : "text-gray-500"
+                  p.destaque ? "text-vupth-forest opacity-70" : "text-vupth-textSecondary"
                 }`}
               >
                 {p.descricao}
@@ -79,7 +79,7 @@ export default function RoleChoiceScreen() {
       </View>
 
       <View className="px-4 mt-8 flex-row justify-center items-center gap-1.5">
-        <Text className="font-body text-[13px] text-gray-500">Já tem conta?</Text>
+        <Text className="font-body text-[13px] text-vupth-textSecondary">Já tem conta?</Text>
         <Pressable onPress={() => router.push("/(auth)/login" as any)} testID="go-login">
           <Text className="font-heading text-[13px] text-vupth-forest">Entrar</Text>
         </Pressable>

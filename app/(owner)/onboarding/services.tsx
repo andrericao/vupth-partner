@@ -29,7 +29,7 @@ export default function ServicesScreen() {
             onBack={defaultBack}
           />
 
-          <View className="flex-1 px-4 w-full">
+          <View className="flex-1 w-full">
 
             <NwInput
               label="Nome do Serviço"
@@ -51,7 +51,7 @@ export default function ServicesScreen() {
               error={isInvalid ? "Duração inválida" : ""}
             />
 
-            <NwButton title="Finalizar Cadastro" onPress={handleFinish} />
+            <NwButton title="Finalizar cadastro" onPress={handleFinish} />
           </View>
         </View>
       </ScrollView>

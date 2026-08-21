@@ -63,34 +63,43 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
   }, [onBack]);
 
   return (
-    <View style={{ paddingTop: insets.top + 12 }} className="pb-4 gap-3">
-      {(onBack || action) && (
-        <View className="flex-row items-center justify-between">
-          {onBack ? (
-            <Pressable
-              onPress={onBack}
-              testID="back-button"
-              accessibilityRole="button"
-              accessibilityLabel="Voltar"
-              hitSlop={8}
-              className="w-10 h-10 rounded-full bg-vupth-greenTint items-center justify-center active:bg-vupth-surface"
-            >
-              <ChevronLeft size={20} color="#163300" />
-            </Pressable>
-          ) : (
-            <View />
-          )}
-          {action}
-        </View>
-      )}
-
-      <View className="gap-1">
-        <Text className="font-display text-[26px] leading-[30px] tracking-[-0.8px] text-vupth-forest">
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text className="font-body text-[13px] text-vupth-textSecondary">{subtitle}</Text>
+    <View style={{ paddingTop: insets.top + 12 }} className="pb-4">
+      {/* LINHA UNICA: voltar · titulo · acao. O titulo fica sempre na MESMA
+          altura, tenha a tela botão ou não — antes os botões ocupavam uma
+          linha própria ACIMA e empurravam o titulo pra baixo, entao cada tela
+          comecava numa altura diferente (QA Alexia, com a referencia do Pix).
+          `min-h` de 44 mantem a altura da linha estavel mesmo sem botao. */}
+      <View className="flex-row items-center gap-3 min-h-[44px]">
+        {onBack ? (
+          <Pressable
+            onPress={onBack}
+            testID="back-button"
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+            hitSlop={8}
+            className="w-10 h-10 rounded-full bg-vupth-greenTint items-center justify-center active:bg-vupth-surface"
+          >
+            <ChevronLeft size={20} color="#163300" />
+          </Pressable>
         ) : null}
+
+        {/* Titulo e subtitulo na MESMA coluna: com o voltar presente o texto
+            desloca junto, entao os dois seguem alinhados entre si. */}
+        <View className="flex-1 gap-0.5">
+          <Text
+            numberOfLines={2}
+            className="font-display text-[26px] leading-[30px] tracking-[-0.8px] text-vupth-forest"
+          >
+            {title}
+          </Text>
+          {subtitle ? (
+            <Text numberOfLines={2} className="font-body text-[13px] text-vupth-textSecondary">
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+
+        {action}
       </View>
     </View>
   );

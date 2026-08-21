@@ -40,7 +40,7 @@ export default function OwnerReportsScreen() {
       const { dateFrom, dateTo } = periodRange(period);
       setReport(await fetchReport(establishment.id, dateFrom, dateTo));
     } catch (error: any) {
-      setErrorMsg(getApiErrorMessage(error, "Nao foi possivel carregar o relatorio."));
+      setErrorMsg(getApiErrorMessage(error, "Não foi possível carregar o relatório."));
       setReport(null);
     } finally {
       setIsLoading(false);
@@ -85,21 +85,19 @@ export default function OwnerReportsScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         <ScreenHeader
           title="Relatórios"
+          subtitle={establishment?.name ?? undefined}
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
-          {establishment?.name ?? ""}
-        </Text>
 
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mt="$6" mb="$2">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary" mt="$6" mb="$2">
           Agora
         </Text>
         <HStack space="md">
           {/* "Na fila" so vira heroi quando HA fila: zero e a ausencia de
-              fila, nao o numero que importa (mesma regra do dashboard). */}
+              fila, não o número que importa (mesma regra do dashboard). */}
           <StatCard flex={1} label="Na fila" value={String(totalInQueue)} hero={totalInQueue > 0} />
           <StatCard flex={1} label="Profissionais disponíveis" value={String(availableProfs)} />
         </HStack>
@@ -109,15 +107,16 @@ export default function OwnerReportsScreen() {
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$forest" : "$coolGray100"}
+              bg={period === p.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={period === p.key ? "$brandGreen" : "$coolGray700"}
+                color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -144,8 +143,8 @@ export default function OwnerReportsScreen() {
         ) : (
           <>
             {/* Receita e o heroi da secao do periodo — o unico numero em
-                dinheiro, e o que o dono abre o relatorio pra ver. Vem PRIMEIRO
-                pelo mesmo motivo (mesma ordem do relatorio do profissional). */}
+                dinheiro, e o que o dono abre o relatório pra ver. Vem PRIMEIRO
+                pelo mesmo motivo (mesma ordem do relatório do profissional). */}
             <HStack space="md" mt="$4">
               <StatCard
                 flex={1}
@@ -166,7 +165,7 @@ export default function OwnerReportsScreen() {
                 <Text fontFamily="$display" fontSize={16} color="$forest">
                   {report?.topProfessional ?? "—"}
                 </Text>
-                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
                   destaque
                 </Text>
               </VStack>
@@ -174,12 +173,12 @@ export default function OwnerReportsScreen() {
 
             <Divider my="$6" />
 
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$3">
+            <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary" mb="$3">
               Por profissional
             </Text>
 
             {liveProfs.length === 0 ? (
-              <Text fontFamily="$body" color="$coolGray500" textAlign="center" mt="$4">
+              <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$4">
                 Nenhum profissional vinculado
               </Text>
             ) : (
@@ -190,10 +189,10 @@ export default function OwnerReportsScreen() {
                     <VStack key={p.id} bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack justifyContent="space-between" alignItems="center">
                         <VStack flex={1}>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                             {p.name}
                           </Text>
-                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
                             {p.specialty || "Sem especialidade"}
                           </Text>
                         </VStack>
@@ -204,16 +203,16 @@ export default function OwnerReportsScreen() {
 
                       <HStack mt="$3" space="md">
                         <VStack flex={1}>
-                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Na fila</Text>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.queue_count}</Text>
+                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">Na fila</Text>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary">{p.queue_count}</Text>
                         </VStack>
                         <VStack flex={1}>
-                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Espera</Text>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{p.estimated_wait_minutes} min</Text>
+                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">Espera</Text>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary">{p.estimated_wait_minutes} min</Text>
                         </VStack>
                         <VStack flex={1}>
-                          <Text fontFamily="$body" fontSize="$xs" color="$coolGray400">Finalizados</Text>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700">{r.attendances}</Text>
+                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">Finalizados</Text>
+                          <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary">{r.attendances}</Text>
                         </VStack>
                       </HStack>
                     </VStack>

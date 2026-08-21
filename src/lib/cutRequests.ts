@@ -38,7 +38,7 @@ export function cutRequestServices(
   const names = serviceItemIds
     .map((id) => myServices.find((s) => s.id === id)?.customName)
     .filter((n): n is string => !!n);
-  return names.length > 0 ? names.join(" + ") : "Servico nao identificado";
+  return names.length > 0 ? names.join(" + ") : "Serviço não identificado";
 }
 
 /**

@@ -45,15 +45,15 @@ function formatHours(open: string | null, close: string | null): string | null {
 function DetailRow({ label, value }: { label: string; value: string | null }) {
   return (
     <VStack>
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray700">
+      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$brandTextSecondary">
         {label}
       </Text>
       <Text
         fontFamily="$body"
-        color={value ? "$coolGray600" : "$coolGray400"}
+        color={value ? "$brandTextSecondary" : "$brandTextSecondary"}
         mt="$1"
       >
-        {value ?? "Nao informado"}
+        {value ?? "Não informado"}
       </Text>
     </VStack>
   );
@@ -108,8 +108,8 @@ export default function EstablishmentDetailScreen() {
     try {
       await api.post("/professional/me/affiliations", { establishmentId: id });
       Alert.alert(
-        "Solicitacao enviada",
-        `Sua solicitacao para ${name} foi enviada. Aguarde a aprovacao do proprietario.`,
+        "Solicitação enviada",
+        `Sua solicitação para ${name} foi enviada. Aguarde a aprovação do proprietário.`,
         [
           {
             text: "OK",
@@ -120,7 +120,7 @@ export default function EstablishmentDetailScreen() {
     } catch (error: any) {
       Alert.alert(
         "Erro",
-        getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao.")
+        getApiErrorMessage(error, "Não foi possível enviar a solicitação.")
       );
     } finally {
       setIsRequesting(false);
@@ -136,7 +136,7 @@ export default function EstablishmentDetailScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack flex={1} py="$12" px="$4">
+        <VStack flex={1} pb="$12" px="$4">
           <ScreenHeader title={name} onBack={() => router.back()} />
 
           {detail?.url_image ? (
@@ -155,11 +155,11 @@ export default function EstablishmentDetailScreen() {
               mt="$4"
               h="$48"
               borderRadius="$xl"
-              bg="$coolGray100"
+              bg="$brandSurface"
               alignItems="center"
               justifyContent="center"
             >
-              <Text fontFamily="$body" color="$coolGray400">
+              <Text fontFamily="$body" color="$brandTextSecondary">
                 Sem foto
               </Text>
             </Box>
@@ -172,14 +172,14 @@ export default function EstablishmentDetailScreen() {
             <Text
               fontFamily="$body"
               fontSize="$sm"
-              color={isOpen ? "$forest" : "$coolGray400"}
+              color={isOpen ? "$forest" : "$brandTextSecondary"}
             >
               {isOpen ? "Aberto" : "Fechado"}
             </Text>
           </HStack>
 
           {serviceType ? (
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$1">
+            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
               {serviceType}
             </Text>
           ) : null}
@@ -190,8 +190,8 @@ export default function EstablishmentDetailScreen() {
             </VStack>
           ) : (
             <VStack mt="$6" space="md">
-              <DetailRow label="Endereco" value={address} />
-              <DetailRow label="Horario" value={hours} />
+              <DetailRow label="Endereço" value={address} />
+              <DetailRow label="Horário" value={hours} />
               <DetailRow label="Telefone" value={phone} />
               <DetailRow label="Instagram" value={instagram} />
             </VStack>
@@ -200,7 +200,7 @@ export default function EstablishmentDetailScreen() {
           <Box flex={1} />
 
           <BrandButton
-            title="Solicitar vinculacao"
+            title="Solicitar vinculação"
             onPress={handleRequestAffiliation}
             isLoading={isRequesting}
             mt="$8"

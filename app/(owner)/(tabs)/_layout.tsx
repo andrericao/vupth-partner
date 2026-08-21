@@ -39,7 +39,7 @@ export default function OwnerTabsLayout() {
       />
       {/* Filas vira ABA (Pencil OWNER): era um item no meio do menu e um botao
           ambar no dashboard, sendo a tela que o dono mais abre depois do
-          Inicio. A frequencia de uso e que decide o rodape, nao a categoria. */}
+          Inicio. A frequencia de uso e que decide o rodape, não a categoria. */}
       <Tabs.Screen
         name="queues"
         options={{

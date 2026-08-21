@@ -18,7 +18,7 @@ export function NotificationBadge({ count, testID = "notification-badge" }: Prop
   return (
     <View
       testID={testID}
-      accessibilityLabel={`${shown} ${shown === 1 ? "notificacao" : "notificacoes"}`}
+      accessibilityLabel={`${shown} ${shown === 1 ? "notificação" : "notificações"}`}
       style={{
         minWidth: 18,
         height: 18,

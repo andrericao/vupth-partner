@@ -163,7 +163,7 @@ export default function MyServicesScreen() {
   const handleSaveEdit = async (itemId: string) => {
     const trimmed = editName.trim();
     if (!trimmed || isNaN(editPriceNum) || editPriceNum <= 0) {
-      Alert.alert("Dados invalidos", "Informe um nome e um preco maior que zero.");
+      Alert.alert("Dados inválidos", "Informe um nome e um preco maior que zero.");
       return;
     }
     // Preco salvo = total que o cliente paga (digitado + taxas conforme absorcao),
@@ -174,7 +174,7 @@ export default function MyServicesScreen() {
       await updateMyServiceItem(itemId, { customName: trimmed, price: newPrice });
       cancelEditItem();
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o servico."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o serviço."));
     } finally {
       setIsEditSaving(false);
     }
@@ -182,8 +182,8 @@ export default function MyServicesScreen() {
 
   const handleRemoveItem = (svc: { id: string; customName: string }) => {
     Alert.alert(
-      "Remover servico",
-      `Deseja remover "${svc.customName}"? Esta acao nao pode ser desfeita.`,
+      "Remover serviço",
+      `Deseja remover "${svc.customName}"? Esta ação não pode ser desfeita.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -194,7 +194,7 @@ export default function MyServicesScreen() {
               await removeMyServiceItem(svc.id);
               if (editingId === svc.id) cancelEditItem();
             } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel remover o servico."));
+              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover o serviço."));
             }
           },
         },
@@ -233,7 +233,7 @@ export default function MyServicesScreen() {
         customName.trim(),
         finalPrice
       );
-      Alert.alert("Servico adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
+      Alert.alert("Serviço adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
       setShowForm(false);
       setServiceItemType("");
       setCustomName("");
@@ -241,7 +241,7 @@ export default function MyServicesScreen() {
       setAbsorption(0);
       await fetchMyServices();
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar o servico."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível adicionar o serviço."));
     } finally {
       setIsLoading(false);
     }
@@ -259,9 +259,9 @@ export default function MyServicesScreen() {
       keyboardShouldPersistTaps="handled"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         <ScreenHeader
-          title="Meus Servicos"
+          title="Meus serviços"
           onBack={() => router.navigate(backTarget as any)}
         />
 
@@ -273,19 +273,19 @@ export default function MyServicesScreen() {
 
         {!professional?.establishment_id && (
           <VStack
-            bg="$amber50"
+            bg="$brandWarning"
             p="$4"
             borderRadius="$card"
             borderWidth="$1"
-            borderColor="$amber200"
+            borderColor="$brandWarning"
             mt="$6"
             alignItems="center"
           >
-            <Text fontFamily="$body" color="$amber700" textAlign="center" mb="$4">
-              Voce precisa estar vinculado a um estabelecimento para adicionar servicos. Se ja solicitou vinculacao, aguarde a aprovacao do proprietario e arraste para baixo para atualizar.
+            <Text fontFamily="$body" color="$forest" textAlign="center" mb="$4">
+              Você precisa estar vinculado a um estabelecimento para adicionar serviços. Se já solicitou vinculação, aguarde a aprovação do proprietário e arraste para baixo para atualizar.
             </Text>
             <BrandButton
-              title="Buscar Estabelecimento"
+              title="Buscar estabelecimento"
               onPress={() => router.push("/(professional)/find-establishment" as any)}
             />
           </VStack>
@@ -305,7 +305,7 @@ export default function MyServicesScreen() {
                 >
                   <FormControl>
                     <Input
-                      textLabel="Nome do servico"
+                      textLabel="Nome do serviço"
                       placeholder="Ex: Corte Social"
                       messageError=""
                       value={editName}
@@ -323,19 +323,19 @@ export default function MyServicesScreen() {
 
                   {editPricing && (
                     <VStack
-                      bg="$coolGray50"
+                      bg="$brandSurface"
                       p="$4"
                       borderRadius="$card"
                       borderWidth="$1"
-                      borderColor="$coolGray200"
+                      borderColor="$brandBorder"
                       mt="$3"
                       mb="$2"
                     >
-                      <Text fontFamily="$heading" fontWeight="$bold" mb="$3" color="$coolGray700">
+                      <Text fontFamily="$heading" fontWeight="$bold" mb="$3" color="$brandTextSecondary">
                         Politica de preco (preview)
                       </Text>
 
-                      <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
+                      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mb="$2">
                         Quem absorve as Taxas Vupth (6%)?
                       </Text>
 
@@ -351,13 +351,13 @@ export default function MyServicesScreen() {
                               px="$3"
                               borderRadius="$full"
                               borderWidth="$1"
-                              borderColor={isSelected ? "$forest" : "$coolGray300"}
+                              borderColor={isSelected ? "$forest" : "$brandBorder"}
                               mb="$1"
                             >
                               <Text
                                 fontFamily="$body"
                                 fontSize="$xs"
-                                color={isSelected ? "$white" : "$coolGray600"}
+                                color={isSelected ? "$white" : "$brandTextSecondary"}
                               >
                                 {ABSORPTION_LABELS[pct] ?? `${pct}%`}
                               </Text>
@@ -369,7 +369,7 @@ export default function MyServicesScreen() {
                       <Divider mb="$3" />
 
                       <HStack justifyContent="space-between" mb="$1">
-                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                        <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                           Cliente paga:
                         </Text>
                         <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
@@ -378,24 +378,24 @@ export default function MyServicesScreen() {
                       </HStack>
 
                       <HStack justifyContent="space-between" mb="$1">
-                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
-                          Voce recebe:
+                        <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                          Você recebe:
                         </Text>
-                        <Text fontFamily="$heading" fontWeight="$bold" color="$blue600">
+                        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                           R$ {editPricing.proReceives.toFixed(2)}
                         </Text>
                       </HStack>
 
                       <HStack justifyContent="space-between">
-                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                        <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                           Taxas Vupth:
                         </Text>
-                        <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
+                        <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                           R$ {editPricing.platformFee.toFixed(2)}
                         </Text>
                       </HStack>
 
-                      <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
+                      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$3">
                         * O preco salvo do servico e o total pago pelo cliente
                       </Text>
                     </VStack>
@@ -405,8 +405,8 @@ export default function MyServicesScreen() {
                     <Button
                       title="Cancelar"
                       onPress={cancelEditItem}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
+                      bg="$brandBorder"
+                      textColor="$brandTextSecondary"
                       h="$9"
                       flex={1}
                     />
@@ -429,15 +429,15 @@ export default function MyServicesScreen() {
                   alignItems="center"
                 >
                   <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                       {svc.customName}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
                       {humanizeServiceType(svc.serviceItemType)} • {svc.estimatedMinutes}min
                     </Text>
                     <HStack space="md" mt="$1">
                       <Pressable onPress={() => startEditItem(svc)}>
-                        <Text fontFamily="$body" fontSize="$xs" color="$blue600">
+                        <Text fontFamily="$body" fontSize="$xs" color="$forest">
                           Editar
                         </Text>
                       </Pressable>
@@ -458,14 +458,14 @@ export default function MyServicesScreen() {
         )}
 
         {myServices.length === 0 && !showForm && (
-          <Text fontFamily="$body" color="$coolGray400" mt="$6" textAlign="center">
-            Nenhum servico cadastrado
+          <Text fontFamily="$body" color="$brandTextSecondary" mt="$6" textAlign="center">
+            Nenhum serviço cadastrado
           </Text>
         )}
 
         {!showForm && professional?.establishment_id ? (
           <BrandButton
-            title="Adicionar Servico"
+            title="Adicionar serviço"
             onPress={() => {
               const first = filteredTypes[0];
               setServiceItemType(first?.value ?? "");
@@ -480,11 +480,11 @@ export default function MyServicesScreen() {
 
             <VStack>
               <Heading size="lg" fontFamily="$heading" mb="$4">
-                Novo Servico
+                Novo Serviço
               </Heading>
 
-              <Text fontFamily="$body" mb="$2" color="$coolGray600">
-                Tipo de servico
+              <Text fontFamily="$body" mb="$2" color="$brandTextSecondary">
+                Tipo de serviço
               </Text>
               {/* [#11] grade de chips com icone (substitui a lista de pilulas).
                   Tocar substitui o nome no formulario. */}
@@ -527,18 +527,18 @@ export default function MyServicesScreen() {
 
               {pricing && (
                 <VStack
-                  bg="$coolGray50"
+                  bg="$brandSurface"
                   p="$4"
                   borderRadius="$card"
                   borderWidth="$1"
-                  borderColor="$coolGray200"
+                  borderColor="$brandBorder"
                   mb="$4"
                 >
-                  <Text fontFamily="$heading" fontWeight="$bold" mb="$3" color="$coolGray700">
+                  <Text fontFamily="$heading" fontWeight="$bold" mb="$3" color="$brandTextSecondary">
                     Politica de preco (preview)
                   </Text>
 
-                  <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mb="$2">
+                  <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mb="$2">
                     Quem absorve as Taxas Vupth (6%)?
                   </Text>
 
@@ -554,13 +554,13 @@ export default function MyServicesScreen() {
                           px="$3"
                           borderRadius="$full"
                           borderWidth="$1"
-                          borderColor={isSelected ? "$forest" : "$coolGray300"}
+                          borderColor={isSelected ? "$forest" : "$brandBorder"}
                           mb="$1"
                         >
                           <Text
                             fontFamily="$body"
                             fontSize="$xs"
-                            color={isSelected ? "$white" : "$coolGray600"}
+                            color={isSelected ? "$white" : "$brandTextSecondary"}
                           >
                             {ABSORPTION_LABELS[pct] ?? `${pct}%`}
                           </Text>
@@ -572,7 +572,7 @@ export default function MyServicesScreen() {
                   <Divider mb="$3" />
 
                   <HStack justifyContent="space-between" mb="$1">
-                    <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                    <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                       Cliente paga:
                     </Text>
                     <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
@@ -581,31 +581,31 @@ export default function MyServicesScreen() {
                   </HStack>
 
                   <HStack justifyContent="space-between" mb="$1">
-                    <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
-                      Voce recebe:
+                    <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                      Você recebe:
                     </Text>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$blue600">
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                       R$ {pricing.proReceives.toFixed(2)}
                     </Text>
                   </HStack>
 
                   <HStack justifyContent="space-between">
-                    <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
+                    <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                       Taxas Vupth:
                     </Text>
-                    <Text fontFamily="$body" fontSize="$sm" color="$coolGray400">
+                    <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                       R$ {pricing.platformFee.toFixed(2)}
                     </Text>
                   </HStack>
 
-                  <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$3">
+                  <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$3">
                     * O preco salvo do servico e o total pago pelo cliente
                   </Text>
                 </VStack>
               )}
 
               <BrandButton
-                title="Adicionar Servico"
+                title="Adicionar serviço"
                 onPress={handleSubmit}
                 isLoading={isLoading}
                 mt="$9"
@@ -615,7 +615,7 @@ export default function MyServicesScreen() {
                 title="Cancelar"
                 onPress={() => setShowForm(false)}
                 bg="transparent"
-                $active-bg="$red50"
+                $active-bg="$brandSurface"
                 borderWidth="$1"
                 borderColor="$brandDanger"
                 textColor="$brandDanger"

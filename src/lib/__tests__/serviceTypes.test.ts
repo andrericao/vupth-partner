@@ -10,7 +10,7 @@ describe("serviceTypeLabel", () => {
     expect(serviceTypeLabel("CLINIC")).toBe("Clínica");
   });
 
-  it("enum desconhecido cai no proprio valor (nunca fica em branco)", () => {
+  it("enum desconhecido cai no próprio valor (nunca fica em branco)", () => {
     expect(serviceTypeLabel("PET_SHOP")).toBe("PET_SHOP");
   });
 

@@ -29,8 +29,8 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
     attendance.status === "IN_PROGRESS"
       ? "$forest"
       : attendance.status === "PAUSED"
-        ? "$amber500"
-        : "$blue500";
+        ? "$brandWarning"
+        : "$forest";
 
   return (
     <HStack
@@ -39,13 +39,13 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
       justifyContent="space-between"
       alignItems="center"
       borderBottomWidth="$1"
-      borderBottomColor="$coolGray100"
+      borderBottomColor="$brandSurface"
     >
       <VStack flex={1}>
-        <Text fontFamily="$body" fontSize="$sm" color="$coolGray900">
+        <Text fontFamily="$body" fontSize="$sm" color="$forest">
           {attendance.clientName}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           {attendance.services.map((s) => s.customName).join(", ")}
         </Text>
       </VStack>
@@ -53,7 +53,7 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
         <Text fontFamily="$body" fontSize="$xs" color={statusColor}>
           {statusLabel}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           R$ {attendance.totalValue.toFixed(2)}
         </Text>
       </VStack>
@@ -74,14 +74,14 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
       <Pressable onPress={() => setExpanded(!expanded)} py="$3" px="$4">
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+            <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
               {professional.name}
             </Text>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
               {professional.specialty ?? ""}
             </Text>
             {ratingLabel(professional.rating_average, professional.rating_count) && (
-              <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$0.5">
+              <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$0.5">
                 ★ {ratingLabel(professional.rating_average, professional.rating_count)}
               </Text>
             )}
@@ -94,7 +94,7 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
             >
               <BadgeText fontSize="$xs">{professional.queue_count} na fila</BadgeText>
             </Badge>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
               {professional.estimated_wait_minutes} min
             </Text>
           </VStack>
@@ -117,7 +117,7 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
           px="$4"
           bg="$greenTint"
           borderTopWidth="$1"
-          borderTopColor="$coolGray100"
+          borderTopColor="$brandSurface"
         >
           <Text fontFamily="$body" fontSize="$sm" color="$forest" textAlign="center">
             Ver fila detalhada
@@ -126,7 +126,7 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
       )}
 
       {expanded && allAttendances.length > 0 && (
-        <VStack borderTopWidth="$1" borderTopColor="$coolGray100">
+        <VStack borderTopWidth="$1" borderTopColor="$brandSurface">
           {allAttendances.map((att) => (
             <AttendanceItem key={att.id} attendance={att} />
           ))}
@@ -134,8 +134,8 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
       )}
 
       {expanded && allAttendances.length === 0 && (
-        <VStack py="$3" px="$4" borderTopWidth="$1" borderTopColor="$coolGray100">
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray400" textAlign="center">
+        <VStack py="$3" px="$4" borderTopWidth="$1" borderTopColor="$brandSurface">
+          <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" textAlign="center">
             Nenhum cliente na fila
           </Text>
         </VStack>
@@ -173,9 +173,9 @@ export default function OwnerQueuesScreen() {
     >
       <VStack flex={1} pb="$8" px="$4">
         {/* Sem botao de voltar: virou raiz de aba. O subtitulo carrega o total
-            que antes ocupava dois cartoes de numero — o dono ja ve a contagem
+            que antes ocupava dois cartões de número — o dono já ve a contagem
             por profissional logo abaixo, entao repetir o agregado em destaque
-            so empurrava a lista pra baixo. */}
+            só empurrava a lista pra baixo. */}
         <ScreenHeader
           title="Filas"
           subtitle={
@@ -199,11 +199,11 @@ export default function OwnerQueuesScreen() {
 
         {!isLoading && professionals.length === 0 && (
           <VStack alignItems="center" mt="$12">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
               Nenhum profissional cadastrado
             </Text>
             <BrandButton
-              title="Adicionar Profissional"
+              title="Adicionar profissional"
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/add-professional",

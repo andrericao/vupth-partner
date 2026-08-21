@@ -80,12 +80,12 @@ export default function AlsoProfessionalScreen() {
 
   const handleYes = async () => {
     if (!ownerName.trim()) {
-      Alert.alert("Erro", "Nome do proprietario nao encontrado.");
+      Alert.alert("Erro", "Nome do proprietário não encontrado.");
       return;
     }
 
     if (!establishmentId) {
-      Alert.alert("Erro", "Estabelecimento nao encontrado.");
+      Alert.alert("Erro", "Estabelecimento não encontrado.");
       return;
     }
 
@@ -122,7 +122,7 @@ export default function AlsoProfessionalScreen() {
             await useProfessionalStore.getState().fetchMe();
           }
         } catch (err: any) {
-          Alert.alert("Erro", getApiErrorMessage(err, "Nao foi possivel vincular ao estabelecimento."));
+          Alert.alert("Erro", getApiErrorMessage(err, "Não foi possível vincular ao estabelecimento."));
           setIsLoading(false);
           return;
         }
@@ -132,7 +132,7 @@ export default function AlsoProfessionalScreen() {
       }
 
       const data = error?.response?.data;
-      let msg = "Nao foi possivel criar o perfil profissional.";
+      let msg = "Não foi possível criar o perfil profissional.";
       if (data?.fieldErrors) {
         msg = Object.entries(data.fieldErrors)
           .map(([field, err]) => `${field}: ${err}`)
@@ -169,15 +169,15 @@ export default function AlsoProfessionalScreen() {
             onBack={() => router.navigate("/(owner)/dashboard" as any)}
           />
 
-          <View className="flex-1 px-4">
+          <View className="flex-1">
 
             {ownerName ? (
-              <Text className="font-body text-sm text-gray-500 mb-6">
+              <Text className="font-body text-sm text-vupth-textSecondary mb-6">
                 Profissional: {ownerName}
               </Text>
             ) : null}
 
-            <Text className="font-heading text-base mb-2 text-gray-900">
+            <Text className="font-heading text-base mb-2 text-vupth-forest">
               Especialidade
             </Text>
 
@@ -194,13 +194,13 @@ export default function AlsoProfessionalScreen() {
             </View>
 
             <NwButton
-              title="Sim, tambem serei profissional"
+              title="Sim, também serei profissional"
               onPress={handleYes}
               isLoading={isLoading}
             />
 
             <NwButton
-              title="Nao, apenas proprietario"
+              title="Não, apenas proprietário"
               onPress={handleNo}
               variant="outlineDanger"
               className="mt-2"

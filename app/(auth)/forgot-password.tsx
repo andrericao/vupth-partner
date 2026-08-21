@@ -82,7 +82,7 @@ export default function ForgotPasswordScreen() {
         { text: "Ir para o login", onPress: () => router.replace("/(auth)/login" as any) },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel redefinir a senha."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível redefinir a senha."));
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ export default function ForgotPasswordScreen() {
           </Pressable>
 
           {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
-              recuperando a senha, esta criando uma nova. Mesma decisao do app
+              recuperando a senha, esta criando uma nova. Mesma decisão do app
               do cliente. */}
           <View className="mt-10 gap-2">
             <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
@@ -119,7 +119,7 @@ export default function ForgotPasswordScreen() {
             <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
               {step === "email" ? "Esqueceu a senha?" : "Nova senha"}
             </Text>
-            <Text className="font-body text-[15px] text-gray-500">
+            <Text className="font-body text-[15px] text-vupth-textSecondary">
               {step === "email"
                 ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
                 : "Use o código que enviamos e escolha uma senha nova."}
@@ -151,9 +151,9 @@ export default function ForgotPasswordScreen() {
             </View>
           ) : (
             <View className="mt-6">
-              <Text className="font-body text-gray-600 mb-4">
+              <Text className="font-body text-vupth-textSecondary mb-4">
                 Digite o código de 6 dígitos enviado para{" "}
-                <Text className="font-body font-bold text-gray-800">
+                <Text className="font-body font-bold text-vupth-forest">
                   {email.trim()}
                 </Text>{" "}
                 e escolha a nova senha. O código vale por 15 minutos.

@@ -45,7 +45,7 @@ describe("activeCutRequests", () => {
     expect(activeCutRequests([req({ status: "EXPIRED" })], NOW)).toEqual([]);
   });
 
-  it("descarta expires_at invalido (nao mantem lixo na tela)", () => {
+  it("descarta expires_at inválido (não mantem lixo na tela)", () => {
     expect(activeCutRequests([req({ expires_at: "banana" })], NOW)).toEqual([]);
   });
 });
@@ -60,7 +60,7 @@ describe("minutesToExpire", () => {
     expect(minutesToExpire("2026-07-22T11:50:00Z", NOW)).toBe(0);
   });
 
-  it("data invalida -> 0", () => {
+  it("data inválida -> 0", () => {
     expect(minutesToExpire("banana", NOW)).toBe(0);
   });
 });
@@ -71,7 +71,7 @@ describe("cutRequestServices", () => {
     { id: "svc-2", customName: "Barba" },
   ];
 
-  it("resolve os ids contra os servicos do profissional", () => {
+  it("resolve os ids contra os serviços do profissional", () => {
     expect(cutRequestServices(["svc-1", "svc-2"], myServices)).toBe("Corte + Barba");
   });
 
@@ -79,9 +79,9 @@ describe("cutRequestServices", () => {
     expect(cutRequestServices(["svc-1", "svc-x"], myServices)).toBe("Corte");
   });
 
-  it("nada resolvido ganha rotulo generico (card nao fica em branco)", () => {
-    expect(cutRequestServices(["svc-x"], myServices)).toBe("Servico nao identificado");
-    expect(cutRequestServices([], myServices)).toBe("Servico nao identificado");
+  it("nada resolvido ganha rotulo generico (card não fica em branco)", () => {
+    expect(cutRequestServices(["svc-x"], myServices)).toBe("Serviço não identificado");
+    expect(cutRequestServices([], myServices)).toBe("Serviço não identificado");
   });
 });
 
@@ -104,7 +104,7 @@ describe("cutRequestTitle", () => {
     ).toBe("Cliente quer: Corte");
   });
 
-  it("nome vazio/so espacos tambem cai no fallback", () => {
+  it("nome vazio/so espacos também cai no fallback", () => {
     expect(
       cutRequestTitle({ client_name: "   ", service_item_ids: ["svc-1"] }, myServices)
     ).toBe("Cliente quer: Corte");
@@ -116,7 +116,7 @@ describe("cutRequestClientName", () => {
     expect(cutRequestClientName({ client_name: "Joao" })).toBe("Joao");
   });
 
-  it("cai no fallback 'Cliente' quando ausente, nulo ou so espacos", () => {
+  it("cai no fallback 'Cliente' quando ausente, nulo ou só espacos", () => {
     expect(cutRequestClientName({})).toBe("Cliente");
     expect(cutRequestClientName({ client_name: null })).toBe("Cliente");
     expect(cutRequestClientName({ client_name: "   " })).toBe("Cliente");
@@ -129,7 +129,7 @@ describe("cutRequestTotal", () => {
     { id: "svc-2", price: 15 },
   ];
 
-  it("soma os precos dos servicos resolvidos", () => {
+  it("soma os precos dos serviços resolvidos", () => {
     expect(cutRequestTotal(["svc-1", "svc-2"], myServices)).toBe(50);
   });
 

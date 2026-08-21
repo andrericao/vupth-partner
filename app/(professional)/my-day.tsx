@@ -36,9 +36,9 @@ type Filter = "ALL" | "FINISHED" | "CANCELLED";
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   FINISHED: { label: "Finalizado", color: "$forest" },
   CANCELLED: { label: "Cancelado", color: "$brandDanger" },
-  IN_PROGRESS: { label: "Em andamento", color: "$blue500" },
-  PAUSED: { label: "Pausado", color: "$amber500" },
-  SCHEDULED: { label: "Agendado", color: "$coolGray500" },
+  IN_PROGRESS: { label: "Em andamento", color: "$forest" },
+  PAUSED: { label: "Pausado", color: "$brandWarning" },
+  SCHEDULED: { label: "Agendado", color: "$brandTextSecondary" },
 };
 
 function humanizeService(value: string | null): string {
@@ -51,14 +51,14 @@ function humanizeService(value: string | null): string {
 }
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$coolGray500" };
+  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$brandTextSecondary" };
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
     <VStack bg="$brandSurface" p="$4" borderRadius="$card" mb="$3">
       <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           {item.clientName}
         </Text>
         <Badge
@@ -70,12 +70,12 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         </Badge>
       </HStack>
 
-      <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
 
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mt="$1">
+      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
@@ -133,7 +133,7 @@ export default function MyDayScreen() {
       await fetchHistory(params);
       setHistoryLoaded(true);
     } catch (error: any) {
-      setHistoryError(getApiErrorMessage(error, "Nao foi possivel carregar os atendimentos."));
+      setHistoryError(getApiErrorMessage(error, "Não foi possível carregar os atendimentos."));
     } finally {
       setHistoryLoading(false);
     }
@@ -182,10 +182,10 @@ export default function MyDayScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$4">
+      <VStack flex={1} pb="$12" px="$4">
         {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
-            conceito interno da tela ("MEU DIA", que uniu Relatorios +
-            Atendimentos); "Relatorios" ficou so no rotulo da aba, mais curto
+            conceito interno da tela ("MEU DIA", que uniu Relatórios +
+            Atendimentos); "Relatórios" ficou só no rotulo da aba, mais curto
             pra caber no rodape. */}
         <ScreenHeader
           title="Seu dia"
@@ -197,15 +197,16 @@ export default function MyDayScreen() {
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$forest" : "$coolGray100"}
+              bg={period === p.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={period === p.key ? "$brandGreen" : "$coolGray700"}
+                color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -222,7 +223,7 @@ export default function MyDayScreen() {
         {period === "day" && (
           <HStack space="md" mb="$4">
             <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                 Na fila agora
               </Text>
               <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
@@ -230,10 +231,10 @@ export default function MyDayScreen() {
               </Text>
             </VStack>
             <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                 Espera estimada
               </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$blue600">
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
                 {waitMinutes} min
               </Text>
             </VStack>
@@ -247,11 +248,11 @@ export default function MyDayScreen() {
         ) : (
           <VStack space="md">
             {/* [marca-vupth] Receita virou o card-heroi (brandGreen, primeira
-                posicao) — o Pencil (PROF · 03) da esse tratamento pro
-                faturado, o unico numero em dinheiro da tela. Era greenTint
-                (tom fraco) na segunda posicao, com o valor MENOR que o dos
+                posição) — o Pencil (PROF · 03) da esse tratamento pro
+                faturado, o único número em dinheiro da tela. Era greenTint
+                (tom fraco) na segunda posição, com o valor MENOR que o dos
                 outros cards (2xl vs 3xl) — inconsistente pro card que deveria
-                pesar mais, nao menos. */}
+                pesar mais, não menos. */}
             <HStack space="md">
               <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card">
                 <Text fontFamily="$body" fontSize="$sm" color="$forest">
@@ -262,10 +263,10 @@ export default function MyDayScreen() {
                 </Text>
               </VStack>
               <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                   Atendimentos
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$coolGray800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
                   {report?.totalAttendances ?? 0}
                 </Text>
               </VStack>
@@ -273,24 +274,24 @@ export default function MyDayScreen() {
 
             <HStack space="md">
               <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                   Duracao media
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$coolGray800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$forest">
                   {Math.round(report?.avgDurationMinutes ?? 0)} min
                 </Text>
               </VStack>
               <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Servico mais feito
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                  Serviço mais feito
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$forest">
                   {humanizeService(report?.topService ?? null)}
                 </Text>
               </VStack>
             </HStack>
 
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray400" textAlign="center" mt="$2">
+            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" textAlign="center" mt="$2">
               {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
               atendimentos finalizados
             </Text>
@@ -308,15 +309,16 @@ export default function MyDayScreen() {
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$forest" : "$coolGray100"}
+              bg={filter === f.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={filter === f.key ? "$brandGreen" : "$coolGray700"}
+                color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -333,8 +335,8 @@ export default function MyDayScreen() {
         )}
 
         {historyError && (
-          <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$2">
-            <Text fontFamily="$body" color="$amber700" textAlign="center">
+          <VStack bg="$brandWarning" p="$4" borderRadius="$card" mt="$2">
+            <Text fontFamily="$body" color="$forest" textAlign="center">
               {historyError}
             </Text>
             <Pressable onPress={loadHistory} mt="$2">
@@ -346,7 +348,7 @@ export default function MyDayScreen() {
         )}
 
         {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
-          <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$6">
+          <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$6">
             Nenhum atendimento encontrado
           </Text>
         )}

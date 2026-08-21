@@ -56,16 +56,16 @@ export default function QueueOptionsScreen() {
       if (!wasOpen && nowOpen && next === "trabalhando") {
         Alert.alert(
           "Loja aberta",
-          "Voce foi o primeiro a comecar — a loja agora aparece para os clientes e recebe a fila."
+          "Você foi o primeiro a comecar — a loja agora aparece para os clientes e recebe a fila."
         );
       } else if (wasOpen && !nowOpen) {
         Alert.alert(
           "Loja fechada",
-          "Voce era o ultimo em atividade — a loja foi fechada para os clientes."
+          "Você era o último em atividade — a loja foi fechada para os clientes."
         );
       }
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel mudar o status."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível mudar o status."));
     }
   };
 
@@ -83,17 +83,17 @@ export default function QueueOptionsScreen() {
       const fresh = await refetchQueue();
       // Fechar a fila sendo o ultimo dispara auto-OFF => a loja fecha (derivado).
       if (!value && fresh.data?.open_status !== "OPEN") {
-        Alert.alert("Loja fechada", "Voce era o ultimo — a fila e a loja foram fechadas para os clientes.");
+        Alert.alert("Loja fechada", "Você era o último — a fila e a loja foram fechadas para os clientes.");
       }
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel atualizar a fila."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível atualizar a fila."));
     }
   };
   const toggleQueue = () => {
     if (acceptingNew) {
       Alert.alert(
         "Fechar fila",
-        "Ninguem novo entra na sua fila. Quem ja esta continua sendo atendido; ao terminar o ultimo voce fica indisponivel (e a loja fecha se voce for o ultimo). Continuar?",
+        "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
         [
           { text: "Cancelar", style: "cancel" },
           { text: "Fechar fila", style: "destructive", onPress: () => runToggleQueue(false) },
@@ -119,9 +119,9 @@ export default function QueueOptionsScreen() {
 
   return (
     <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <View className="flex-1 py-12 px-4">
+      <View className="flex-1 pb-12 px-4">
         <ScreenHeader
-          title="Opcoes da fila"
+          title="Opções da fila"
           onBack={() => router.navigate("/(professional)/queue" as any)}
         />
 

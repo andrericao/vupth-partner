@@ -39,11 +39,11 @@ export default function EstablishmentHoursScreen() {
   const handleSave = async () => {
     if (!establishment?.id) return;
     if (!isValidTime(opening) || !isValidTime(closing)) {
-      Alert.alert("Horario invalido", "Informe abertura e fechamento no formato HH:MM (ex.: 09:00).");
+      Alert.alert("Horário inválido", "Informe abertura e fechamento no formato HH:MM (ex.: 09:00).");
       return;
     }
     if (opening >= closing) {
-      Alert.alert("Horario invalido", "O fechamento deve ser depois da abertura.");
+      Alert.alert("Horário inválido", "O fechamento deve ser depois da abertura.");
       return;
     }
     setIsSaving(true);
@@ -52,10 +52,10 @@ export default function EstablishmentHoursScreen() {
         opening_time: toApiTime(opening)!,
         closing_time: toApiTime(closing)!,
       });
-      Alert.alert("Horario salvo", "O horario de funcionamento foi atualizado.");
+      Alert.alert("Horário salvo", "O horário de funcionamento foi atualizado.");
       router.navigate("/(owner)/establishment-data" as any);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o horario."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o horário."));
     } finally {
       setIsSaving(false);
     }
@@ -72,14 +72,14 @@ export default function EstablishmentHoursScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-4">
+        <View className="flex-1 pb-12 px-4">
           <ScreenHeader
-          title="Horario de Funcionamento"
+          title="Horário de funcionamento"
           onBack={() => router.navigate("/(owner)/establishment-data" as any)}
         />
-          <Text className="font-body text-gray-500 mt-1">
-            Necessario para abrir o estabelecimento. As refeicoes dos profissionais
-            precisam caber nesse horario.
+          <Text className="font-body text-vupth-textSecondary mt-1">
+            Necessario para abrir o estabelecimento. As refeições dos profissionais
+            precisam caber nesse horário.
           </Text>
 
           <View className="mt-6 gap-3">

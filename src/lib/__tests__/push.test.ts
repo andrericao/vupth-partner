@@ -85,7 +85,7 @@ describe("acquireExpoPushToken", () => {
     expect(env.getPermissionsAsync).not.toHaveBeenCalled();
   });
 
-  it("nao pede permissao de novo quando ja esta granted", async () => {
+  it("não pede permissao de novo quando já está granted", async () => {
     const env = makeEnv();
     const token = await acquireExpoPushToken(env);
     expect(token).toBe("ExponentPushToken[xyz]");
@@ -95,7 +95,7 @@ describe("acquireExpoPushToken", () => {
     });
   });
 
-  it("pede permissao quando ainda nao concedida e obtem o token se aceitar", async () => {
+  it("pede permissao quando ainda não concedida e obtem o token se aceitar", async () => {
     const env = makeEnv({
       getPermissionsAsync: jest
         .fn()
@@ -109,7 +109,7 @@ describe("acquireExpoPushToken", () => {
     expect(token).toBe("ExponentPushToken[xyz]");
   });
 
-  it("retorna null quando o usuario nega a permissao", async () => {
+  it("retorna null quando o usuário nega a permissao", async () => {
     const env = makeEnv({
       getPermissionsAsync: jest
         .fn()

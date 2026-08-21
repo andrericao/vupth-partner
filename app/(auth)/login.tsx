@@ -118,15 +118,15 @@ export default function LoginScreen() {
               teclado). */}
           <View className="flex-1 justify-end gap-4">
             {/* [igual front-client] "Entrando..." em texto (nao spinner); o
-                handleSubmit ja guarda o duplo-clique. */}
+                handleSubmit já guarda o duplo-clique. */}
             <NwButton
               title={isLoading ? "Entrando..." : "Entrar"}
               onPress={handleSubmit}
             />
             {/* "Criar conta" vira LINK: entrar e o que esta tela pede, e dois
-                botoes de peso parecido fazem quem ja tem conta hesitar. */}
+                botoes de peso parecido fazem quem já tem conta hesitar. */}
             <View className="flex-row justify-center items-center gap-1.5">
-              <Text className="font-body text-[13px] text-gray-500">
+              <Text className="font-body text-[13px] text-vupth-textSecondary">
                 Não possui cadastro?
               </Text>
               <Pressable onPress={() => router.push("/(auth)")} testID="go-register">

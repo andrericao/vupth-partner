@@ -22,7 +22,7 @@ describe("mealNudge", () => {
     await expect(isMealNudgeDisabled()).resolves.toBe(true);
   });
 
-  it("valor estranho no storage nao desliga", async () => {
+  it("valor estranho no storage não desliga", async () => {
     store.getItemAsync.mockResolvedValue("sim");
     await expect(isMealNudgeDisabled()).resolves.toBe(false);
   });

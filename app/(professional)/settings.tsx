@@ -14,7 +14,6 @@ import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
-import { WsDiagnostics } from "@components/WsDiagnostics";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
@@ -58,13 +57,13 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={title}
-        className="flex-row items-center gap-3 px-4 py-3.5 active:bg-gray-100"
+        className="flex-row items-center gap-3 px-4 py-3.5 active:bg-vupth-surface"
       >
         <Icon size={19} color="#163300" />
         <View className="flex-1">
           <View className="flex-row items-center gap-1">
-            <Text className="font-body text-sm font-semibold text-gray-900">{title}</Text>
-            {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendencia" mas nao
+            <Text className="font-body text-sm font-semibold text-vupth-forest">{title}</Text>
+            {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendência" mas nao
                 ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
             {dot && (
               <View
@@ -73,7 +72,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
               />
             )}
           </View>
-          <Text className="font-body text-xs text-gray-500 mt-0.5">{hint}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
         </View>
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID="settings-badge-invites" />
@@ -89,7 +88,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
 function Grupo({ label, children }: { label: string; children: ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-[11px] font-bold tracking-wider text-gray-500">
+      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
       <View className="bg-vupth-surface rounded-[20px] overflow-hidden">{children}</View>
@@ -159,7 +158,7 @@ export default function ProfessionalSettingsScreen() {
     <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
       {/* [marca-vupth] Cabecalho proprio (Pencil PROF · 04): forest + avatar
           com iniciais + nome. Substitui o Header padrao nesta tela — o .pen
-          nao repete a barra VUPTH/icone de papel aqui, o avatar ja identifica
+          não repete a barra VUPTH/icone de papel aqui, o avatar já identifica
           quem esta logado. */}
       <View
         className="bg-vupth-forest items-center px-4 pb-7"
@@ -178,7 +177,7 @@ export default function ProfessionalSettingsScreen() {
 
       <View className="flex-1 py-6 px-4 gap-5">
         {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
-            faixa. Encaminha para buscar estabelecimento / adicionar servico. */}
+            faixa. Encaminha para buscar estabelecimento / adicionar serviço. */}
         <CompletionCard
           completion={completion}
           doneBanner="Cadastro completo — já pode atender!"
@@ -187,7 +186,7 @@ export default function ProfessionalSettingsScreen() {
 
         {/* Quem acumula os dois papeis troca de area por aqui — mesmo padrao
             do menu do dono (menu.tsx "Atender como profissional"). Fica FORA
-            dos grupos porque nao e configuracao, e mudar de contexto. */}
+            dos grupos porque não e configuracao, e mudar de contexto. */}
         {isOwner && (
           <Pressable
             onPress={() => router.replace("/(owner)/dashboard" as any)}
@@ -238,7 +237,7 @@ export default function ProfessionalSettingsScreen() {
         </Grupo>
 
         {/* Sair da conta fica solto e em vermelho, fora dos grupos: e a unica
-            acao aqui que tira a pessoa do app (Pencil PROF · 04, mesmo padrao
+            ação aqui que tira a pessoa do app (Pencil PROF · 04, mesmo padrao
             do menu do dono). */}
         <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
           <Text className="font-body text-sm font-semibold text-vupth-danger text-center">
@@ -246,21 +245,10 @@ export default function ProfessionalSettingsScreen() {
           </Text>
         </Pressable>
 
+        {/* O diagnostico de WS mudou de casa: mora dentro do OtaUpdateButton,
+            atras de 7 toques na versao. Estava solto aqui e o usuario final
+            via "falhou o handshake" e a URL do servidor. */}
         <OtaUpdateButton />
-        {/* QA de device do WebSocket (2026-08-05): os logs sao gated por
-            __DEV__ e o QA roda em bundle de OTA, entao o dado sai por aqui. */}
-        <WsDiagnostics />
-
-        {/* TEMPORARIO — piloto da migracao Gluestack v2 (NativeWind). Remover
-            quando concluir a migracao (junto com nativewind-pilot.tsx). */}
-        <Pressable
-          onPress={() => router.push("/(professional)/nativewind-pilot" as any)}
-          className="py-2"
-        >
-          <Text className="font-body text-xs text-gray-400 text-center">
-            🧪 Piloto NativeWind (teste da migração, temporário)
-          </Text>
-        </Pressable>
       </View>
     </ScrollView>
   );
