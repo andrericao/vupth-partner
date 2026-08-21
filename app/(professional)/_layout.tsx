@@ -27,13 +27,18 @@ export default function ProfessionalLayout() {
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E5E7EB",
           borderTopWidth: 0,
-          height: 60 + insets.bottom,
+          // [marca-vupth] Rotulo cortado em device real (QA Alexia 2026-08-21):
+          // 60 - 8(top) - 8(bottom) sobrava so 44px pro icone (24) + label —
+          // sem folga, cortava embaixo dependendo do metrics da fonte. +12px.
+          // Mesmo ajuste em (owner)/(tabs)/_layout.tsx (formula identica).
+          height: 72 + insets.bottom,
           paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
           fontFamily: "Inter_400Regular",
           fontSize: 12,
+          lineHeight: 16,
         },
       }}
     >
@@ -76,6 +81,7 @@ export default function ProfessionalLayout() {
         }}
       />
       <Tabs.Screen name="queue-options" options={HIDDEN} />
+      <Tabs.Screen name="cut-requests" options={HIDDEN} />
       <Tabs.Screen name="settings-account" options={HIDDEN} />
       <Tabs.Screen name="settings-vinculo" options={HIDDEN} />
       <Tabs.Screen name="my-services" options={HIDDEN} />
