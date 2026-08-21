@@ -6,6 +6,7 @@ import { Slot } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@lib/queryClient";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ThemeProvider, DefaultTheme } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "../config/gluestack-ui.config";
@@ -25,6 +26,22 @@ import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
+
+// [marca-vupth] O fundo das telas vinha do DEFAULT do React Navigation —
+// `rgb(242,242,242)` (#F2F2F2), que nao e cor nenhuma da marca. Medido no
+// device web: pagina #F2F2F2 contra card #F3F5F1 ($brandSurface). Dois pontos
+// de diferenca por canal: visualmente indistinguiveis, e foi por isso que os
+// cards "sumiram" quando tiramos a sombra deles — nao era a sombra que fazia
+// falta, era o fundo estar errado.
+//
+// O `backgroundColor` do SafeAreaProvider nao resolvia: ele fica ATRAS do
+// navegador, entao o cinza do tema cobria por cima. O client ja fazia isso
+// certo (src/routes/index.tsx tem tema custom desde sempre) — o partner era o
+// unico sem, porque o Expo Router monta o navegador sem ThemeProvider.
+const navTheme = {
+  ...DefaultTheme,
+  colors: { ...DefaultTheme.colors, background: "#FFFFFF" }, // $brandBackground
+};
 
 export default function RootLayout() {
   // [marca-vupth] Archivo substitui Poppins em titulos/botoes; Inter segue no
@@ -61,10 +78,15 @@ export default function RootLayout() {
     <SafeAreaProvider style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider config={config}>
-          {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
-              style="dark" = icones escuros (visiveis sobre fundo claro). */}
-          <StatusBar style="dark" backgroundColor="#FFFFFF" />
-          {fontLoaded ? <Slot /> : <Loading />}
+          {/* ThemeProvider ENVOLVE o Slot: e ele que pinta o fundo das telas
+              (ver `navTheme` acima). Sem isso o navegador usava o cinza
+              #F2F2F2 do tema padrao, por cima do branco do SafeAreaProvider. */}
+          <ThemeProvider value={navTheme}>
+            {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
+                style="dark" = icones escuros (visiveis sobre fundo claro). */}
+            <StatusBar style="dark" backgroundColor="#FFFFFF" />
+            {fontLoaded ? <Slot /> : <Loading />}
+          </ThemeProvider>
         </GluestackUIProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
