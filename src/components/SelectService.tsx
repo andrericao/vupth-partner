@@ -1,16 +1,10 @@
 import { View, Text, Pressable } from "react-native";
+import { SERVICE_TYPES } from "@lib/serviceTypes";
 
 // Seletor de tipo de loja (lista de "pilulas"). Migrado p/ NativeWind (v2);
-// mantem a API (value/onValueChange).
-const SERVICE_TYPES = [
-  { label: "Barbearia", value: "BARBER" },
-  { label: "Salão de Beleza", value: "BEAUTY_SALON" },
-  { label: "Manicure / Pedicure", value: "NAIL_SALON" },
-  { label: "Sobrancelha", value: "EYEBROW" },
-  { label: "SPA", value: "SPA" },
-  { label: "Clínica", value: "CLINIC" },
-] as const;
-
+// mantem a API (value/onValueChange). Lista em @lib/serviceTypes — mesma
+// fonte usada por quem EXIBE o tipo (dashboard, menu, busca), pra rotulo e
+// picker nunca desalinharem.
 type Props = {
   value?: string;
   onValueChange?: (value: string) => void;
