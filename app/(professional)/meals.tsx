@@ -11,7 +11,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
@@ -199,12 +199,11 @@ export default function MealsScreen() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate(backTarget as any)} />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Refeicoes
-          </Heading>
+        <VStack flex={1} py="$12" px="$4">
+          <ScreenHeader
+          title="Refeicoes"
+          onBack={() => router.navigate(backTarget as any)}
+        />
           <Text fontFamily="$body" color="$coolGray500" mt="$1">
             Almoco e janta entram no calculo da fila. O horario e so previsao —
             voce inicia a refeicao na tela da fila.

@@ -1,0 +1,102 @@
+import { useEffect } from "react";
+import { BackHandler, View, Text, Pressable } from "react-native";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ChevronLeft } from "lucide-react-native";
+import type { ReactNode } from "react";
+
+type Props = {
+  /** Titulo da tela. Sai em Archivo display, 26. */
+  title: string;
+  /** Linha de apoio, opcional. */
+  subtitle?: string;
+  /**
+   * Mostra o botao voltar e define o destino. Ausente = tela RAIZ de aba
+   * (Fila, Início, Menu...), que nao tem para onde voltar.
+   */
+  onBack?: () => void;
+  /** Acao no canto direito, alinhada ao titulo (ex.: badge, "Agora não"). */
+  action?: ReactNode;
+};
+
+/**
+ * Cabecalho unico das telas do partner.
+ *
+ * [marca-vupth] Nasceu de duas queixas reais (QA Alexia 2026-08-21):
+ *
+ * 1. **A linha "VUPTH + icone" saiu.** Ela aparecia em TODA tela e nao
+ *    informava nada — quem esta dentro do app ja sabe em que app esta. Era
+ *    cromo ocupando os 42px mais valiosos da tela, empurrando o titulo (a
+ *    unica coisa que diz ONDE voce esta) para baixo da dobra em telas curtas.
+ *
+ * 2. **Cada tela inventava o proprio espacamento.** Medido antes de escrever
+ *    este componente: container em `py-12 px-6` (23 telas), `pt-14 pb-8 px-7`
+ *    (3), `py-6 px-6` (1), `py-3 px-4` (2); titulo com `mt-8` (15) ou `mt-6`
+ *    (21); e o titulo ora `text-2xl` cinza, ora `fontSize 26` forest, ora
+ *    `text-3xl`. Cinco decisoes repetidas em cada tela nova, cada uma uma
+ *    chance de divergir — e divergiram.
+ *
+ * Agora o cabecalho manda no espacamento VERTICAL (inclusive no `safe-area`) e
+ * a tela so diz o QUE mostrar. Titulo 26/display sai do Pencil (frames `Head`).
+ *
+ * ⚠️ O cabecalho NAO tem padding horizontal proprio, de proposito: ele fica
+ * DENTRO do container da tela, que ja aplica os **16px** padrao. Ter os dois
+ * dava 32px e o titulo recuava mais que os cards abaixo (QA Alexia). Uma fonte
+ * so de padding lateral por tela — o container.
+ *
+ * ⚠️ A tela NAO deve mais colocar `pt` no container: o cabecalho ja resolve o
+ * topo. Padding lateral segue com a tela, porque o conteudo abaixo varia
+ * (lista full-bleed x formulario).
+ */
+export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (!onBack) return;
+    // O voltar do Android segue o MESMO destino do botao — sem isso os dois
+    // divergem e o fisico pode deslogar caindo em /(auth).
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      onBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [onBack]);
+
+  return (
+    <View style={{ paddingTop: insets.top + 12 }} className="pb-4 gap-3">
+      {(onBack || action) && (
+        <View className="flex-row items-center justify-between">
+          {onBack ? (
+            <Pressable
+              onPress={onBack}
+              testID="back-button"
+              accessibilityRole="button"
+              accessibilityLabel="Voltar"
+              hitSlop={8}
+              className="w-10 h-10 rounded-full bg-vupth-greenTint items-center justify-center active:bg-vupth-surface"
+            >
+              <ChevronLeft size={20} color="#163300" />
+            </Pressable>
+          ) : (
+            <View />
+          )}
+          {action}
+        </View>
+      )}
+
+      <View className="gap-1">
+        <Text className="font-display text-[26px] leading-[30px] tracking-[-0.8px] text-vupth-forest">
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text className="font-body text-[13px] text-vupth-textSecondary">{subtitle}</Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+/** Voltar padrao: usa o historico quando ha, senao nao faz nada (nunca desloga). */
+export function defaultBack() {
+  if (router.canGoBack()) router.back();
+}

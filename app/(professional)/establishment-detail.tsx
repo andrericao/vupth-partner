@@ -10,7 +10,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
@@ -136,8 +136,8 @@ export default function EstablishmentDetailScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.back()} />
+        <VStack flex={1} py="$12" px="$4">
+          <ScreenHeader title={name} onBack={() => router.back()} />
 
           {detail?.url_image ? (
             <Image

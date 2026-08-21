@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Pressable,
   ScrollView,
@@ -11,7 +10,7 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -86,12 +85,11 @@ export default function OwnerReportsScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Relatórios
-        </Heading>
+      <VStack flex={1} py="$12" px="$4">
+        <ScreenHeader
+          title="Relatórios"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
         <Text fontFamily="$body" color="$coolGray500" mt="$1">
           {establishment?.name ?? ""}
         </Text>

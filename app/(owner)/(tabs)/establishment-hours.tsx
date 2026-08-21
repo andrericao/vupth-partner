@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -72,15 +72,11 @@ export default function EstablishmentHoursScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6">
-          <Header
-            showBackButton
-            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
-          />
-
-          <Text className="font-heading text-2xl text-gray-900 mt-8">
-            Horario de Funcionamento
-          </Text>
+        <View className="flex-1 py-12 px-4">
+          <ScreenHeader
+          title="Horario de Funcionamento"
+          onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+        />
           <Text className="font-body text-gray-500 mt-1">
             Necessario para abrir o estabelecimento. As refeicoes dos profissionais
             precisam caber nesse horario.

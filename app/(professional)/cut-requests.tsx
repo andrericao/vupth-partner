@@ -3,7 +3,7 @@ import { View, Text, ScrollView, RefreshControl, Alert } from "react-native";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Clock } from "lucide-react-native";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -72,15 +72,14 @@ export default function CutRequestsScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
     >
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.back()} showRoleIcon={false} />
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Encaixes"
+          subtitle="Sem resposta, o pedido é negado sozinho."
+          onBack={() => router.back()}
+        />
 
-        <Text className="font-display text-[26px] text-vupth-forest mt-6">Encaixes</Text>
-        <Text className="font-body text-[13px] text-gray-500 mt-1">
-          Sem resposta, o pedido é negado sozinho.
-        </Text>
-
-        <View className="mt-5 gap-3">
+        <View className="px-4 gap-3">
           {pending.length === 0 ? (
             <View className="bg-vupth-surface rounded-[20px] p-6 items-center gap-2 mt-2">
               <Clock size={22} color="#9CA3AF" />

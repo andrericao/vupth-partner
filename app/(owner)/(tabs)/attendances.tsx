@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Badge,
   BadgeText,
@@ -14,7 +13,7 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
@@ -137,12 +136,11 @@ export default function OwnerAttendancesScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Atendimentos
-        </Heading>
+      <VStack flex={1} py="$12" px="$4">
+        <ScreenHeader
+          title="Atendimentos"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
         <Text fontFamily="$body" color="$coolGray500" mt="$1">
           {establishment?.name}
         </Text>

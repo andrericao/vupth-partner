@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { View, Text, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -120,10 +120,11 @@ export default function SettingsVinculoScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/settings" as any)} />
-
-        <Text className="font-heading text-2xl text-gray-900 mt-8">Vinculo</Text>
+      <View className="flex-1 py-12 px-4">
+        <ScreenHeader
+          title="Vinculo"
+          onBack={() => router.navigate("/(professional)/settings" as any)}
+        />
 
         {invites.length > 0 && (
           <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-forest gap-2">

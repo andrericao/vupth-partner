@@ -3,14 +3,13 @@ import {
   VStack,
   HStack,
   FormControl,
-  Heading,
   ScrollView,
   Text,
   Pressable,
 } from "@gluestack-ui/themed";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input } from "@components/Input";
 import { BrandButton } from "@components/brand/Button";
 import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
@@ -162,13 +161,13 @@ export default function AddServiceScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
+      <VStack flex={1} py="$12" px="$4">
+        <ScreenHeader
+          title="Novo serviço"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
-        <VStack flex={1} mt="$12">
-          <Heading mb="$6" size="3xl" fontFamily="$heading">
-            Novo Serviço
-          </Heading>
+        <VStack flex={1}>
 
           <Text fontFamily="$body" mb="$2" color="$coolGray600">
             Especialidade do profissional

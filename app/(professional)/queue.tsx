@@ -12,7 +12,7 @@ import {
 import { router } from "expo-router";
 import { ChevronRight, Info } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -507,9 +507,10 @@ export default function ProfessionalQueueScreen() {
 
   if (!establishmentId) {
     return (
-      <View className="flex-1 py-12 px-6">
-        <Header />
-        <Text className="font-heading text-2xl mt-8 text-gray-900">Fila</Text>
+      <View className="flex-1 py-12 px-4">
+        <ScreenHeader
+          title="Fila"
+        />
         <View className="mt-8 bg-amber-50 p-5 rounded-lg border border-amber-200 gap-2">
           <Text className="font-heading text-amber-700">
             Voce ainda nao tem fila
@@ -544,17 +545,16 @@ export default function ProfessionalQueueScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-      <View className="flex-1 py-12 px-6">
-        {/* Um icone por tela (QA 2026-07-22): aqui quem manda e o banco do menu. */}
-        <Header showRoleIcon={false} />
-
-        {/* Titulo + menu lado a lado (a tab bar saiu do rodape). */}
-        <View className="flex-row mt-4 items-center justify-between">
-          <Text className="font-heading text-2xl text-gray-900">Fila</Text>
-          {/* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
-              modal — "mais amigavel a tela inteira"). Badge = refeicao na
-              janela + solicitacoes de corte (o que o menu resolve). */}
-          <Pressable
+      <View className="flex-1 pb-12 px-4">
+        {/* O banco de opcoes vira `action` do cabecalho — antes era um bloco
+            proprio com margem propria embaixo do Header. */}
+        <ScreenHeader
+          title="Fila"
+          action={
+            /* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
+               modal — "mais amigavel a tela inteira"). Badge = refeicao na
+               janela + solicitacoes de corte (o que o menu resolve). */
+            <Pressable
             onPress={() => router.push("/(professional)/queue-options" as any)}
             accessibilityRole="button"
             accessibilityLabel="Opcoes da fila"
@@ -575,7 +575,8 @@ export default function ProfessionalQueueScreen() {
               />
             </View>
           </Pressable>
-        </View>
+          }
+        />
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
           <Text className="font-body text-sm text-amber-600 mt-1">
@@ -705,7 +706,7 @@ export default function ProfessionalQueueScreen() {
           finalize antes de iniciar o proximo (nao atende dois ao mesmo tempo). */}
       {waitingList.length > 0 && (
         <View
-          className="px-6 pt-3"
+          className="px-4 pt-3"
           style={{ paddingBottom: 12, backgroundColor: "#FFFFFF" }}
         >
           {currentAttendance ? (

@@ -3,13 +3,12 @@ import {
   VStack,
   HStack,
   FormControl,
-  Heading,
   Text,
   ScrollView,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
@@ -81,15 +80,11 @@ export default function EstablishmentRegistrationScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header
-            showBackButton
-            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
-          />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Dados Cadastrais
-          </Heading>
+        <VStack flex={1} py="$12" px="$4">
+          <ScreenHeader
+          title="Dados Cadastrais"
+          onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+        />
 
           <VStack mt="$6" space="md">
             <VStack bg="$brandSurface" p="$4" borderRadius="$card">

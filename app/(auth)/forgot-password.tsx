@@ -99,7 +99,7 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 pt-14 pb-8 px-7">
+        <View className="flex-1 pt-14 pb-8 px-4">
           <Pressable
             onPress={() => router.replace("/(auth)/login" as any)}
             className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"

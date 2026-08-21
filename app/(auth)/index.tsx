@@ -34,7 +34,7 @@ export default function RoleChoiceScreen() {
       contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingVertical: 48 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="px-7 gap-3 mb-12">
+      <View className="px-4 gap-3 mb-12">
         <Text className="font-display text-[15px] tracking-[2px] text-vupth-forest">
           VUPTH
         </Text>
@@ -49,7 +49,7 @@ export default function RoleChoiceScreen() {
       {/* Cartoes em vez de dois botoes empilhados: a escolha tem consequencia
           (papeis diferentes, apps diferentes por dentro) e a descricao e o que
           permite decidir sem ter de adivinhar pelo titulo. */}
-      <View className="px-7 gap-3">
+      <View className="px-4 gap-3">
         {PAPEIS.map((p) => (
           <Pressable
             key={p.role}
@@ -78,7 +78,7 @@ export default function RoleChoiceScreen() {
         ))}
       </View>
 
-      <View className="px-7 mt-8 flex-row justify-center items-center gap-1.5">
+      <View className="px-4 mt-8 flex-row justify-center items-center gap-1.5">
         <Text className="font-body text-[13px] text-gray-500">Já tem conta?</Text>
         <Pressable onPress={() => router.push("/(auth)/login" as any)} testID="go-login">
           <Text className="font-heading text-[13px] text-vupth-forest">Entrar</Text>

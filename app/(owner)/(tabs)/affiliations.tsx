@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   ScrollView,
   Badge,
@@ -11,7 +10,7 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
@@ -95,16 +94,12 @@ export default function OwnerAffiliationsScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Solicitacoes
-        </Heading>
-
-        <Text fontFamily="$body" color="$coolGray500" mt="$2" mb="$4">
-          Profissionais que pediram para se vincular ao seu estabelecimento.
-        </Text>
+      <VStack flex={1} py="$12" px="$4">
+        <ScreenHeader
+          title="Solicitacoes"
+          subtitle="Profissionais que pediram para se vincular ao seu estabelecimento."
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
         {isLoading && (
           <VStack mt="$6">

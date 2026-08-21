@@ -56,7 +56,7 @@ export function ClosingPrompt() {
 
   return (
     <Modal visible={!!graceUntil} transparent animationType="fade" onRequestClose={dismiss}>
-      <View className="flex-1 justify-center items-center px-6">
+      <View className="flex-1 justify-center items-center px-4">
         <Pressable
           style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.45)" }}
           onPress={dismiss}

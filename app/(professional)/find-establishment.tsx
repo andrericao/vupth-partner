@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Pressable,
   ScrollView,
@@ -17,7 +16,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
 import { SkeletonList } from "@components/Skeleton";
@@ -164,12 +163,11 @@ export default function FindEstablishmentScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Buscar Estabelecimento
-          </Heading>
+        <VStack flex={1} py="$12" px="$4">
+          <ScreenHeader
+          title="Buscar Estabelecimento"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
 
           {gate === "loading" && (
             <VStack alignItems="center" mt="$12">

@@ -162,7 +162,7 @@ export default function ProfessionalSettingsScreen() {
           nao repete a barra VUPTH/icone de papel aqui, o avatar ja identifica
           quem esta logado. */}
       <View
-        className="bg-vupth-forest items-center px-6 pb-7"
+        className="bg-vupth-forest items-center px-4 pb-7"
         style={{ paddingTop: insets.top + 24 }}
       >
         <View className="w-[72px] h-[72px] rounded-full bg-vupth-green items-center justify-center">
@@ -176,7 +176,7 @@ export default function ProfessionalSettingsScreen() {
         <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
       </View>
 
-      <View className="flex-1 py-6 px-6 gap-5">
+      <View className="flex-1 py-6 px-4 gap-5">
         {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
             faixa. Encaminha para buscar estabelecimento / adicionar servico. */}
         <CompletionCard

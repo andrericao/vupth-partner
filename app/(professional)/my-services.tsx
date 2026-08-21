@@ -11,7 +11,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { BrandButton } from "@components/brand/Button";
@@ -259,12 +259,11 @@ export default function MyServicesScreen() {
       keyboardShouldPersistTaps="handled"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate(backTarget as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Meus Servicos
-        </Heading>
+      <VStack flex={1} py="$12" px="$4">
+        <ScreenHeader
+          title="Meus Servicos"
+          onBack={() => router.navigate(backTarget as any)}
+        />
 
         {professional?.establishment_id && professional?.establishment_name ? (
           <Text fontFamily="$body" fontSize="$sm" color="$forest" mt="$1">

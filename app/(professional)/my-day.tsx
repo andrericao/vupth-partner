@@ -13,7 +13,7 @@ import {
 } from "@gluestack-ui/themed";
 import { RefreshControl } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -182,16 +182,15 @@ export default function MyDayScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
+      <VStack flex={1} py="$12" px="$4">
         {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
             conceito interno da tela ("MEU DIA", que uniu Relatorios +
             Atendimentos); "Relatorios" ficou so no rotulo da aba, mais curto
             pra caber no rodape. */}
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Seu dia
-        </Heading>
+        <ScreenHeader
+          title="Seu dia"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
 
         <HStack mt="$6" space="sm">
           {periods.map((p) => (

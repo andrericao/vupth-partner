@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   ScrollView,
   Input as GluestackInput,
@@ -15,7 +14,7 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { BrandButton } from "@components/brand/Button";
 import {
   useEstablishmentStore,
@@ -87,12 +86,11 @@ export default function InviteProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Convidar Profissional
-          </Heading>
+        <VStack flex={1} py="$12" px="$4">
+          <ScreenHeader
+          title="Convidar Profissional"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
           <Text fontFamily="$body" color="$coolGray500" mt="$1" mb="$4">
             Busque pelo nome e envie o convite. O profissional precisa aceitar para
             ser vinculado.

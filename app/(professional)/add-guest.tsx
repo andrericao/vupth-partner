@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
@@ -79,12 +79,11 @@ export default function AddGuestScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
-        <Text className="font-heading text-2xl text-gray-900 mt-8">
-          Adicionar Cliente
-        </Text>
+      <View className="flex-1 py-12 px-4">
+        <ScreenHeader
+          title="Adicionar Cliente"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
         <Text className="font-body text-gray-500 mt-1">
           Cliente sem cadastro no app
         </Text>

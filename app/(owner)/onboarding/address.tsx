@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -131,13 +131,14 @@ export default function AddressScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/establishment-data" as any)} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Endereço da loja"
+            subtitle="O cliente vê a distância até você."
+            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+          />
 
-          <View className="flex-1 mt-8 w-full">
-            <Text className="font-heading text-3xl mb-12 text-gray-900">
-              Endereco da Loja
-            </Text>
+          <View className="flex-1 px-4 w-full">
 
             <NwInput
               label="CEP"

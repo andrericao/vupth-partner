@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
@@ -149,13 +149,13 @@ export default function ProfessionalOnboardingScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center justify-center">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Cadastro profissional"
+            onBack={() => router.navigate("/(professional)/queue" as any)}
+          />
 
-          <View className="flex-1 mt-48 w-full">
-            <Text className="font-heading text-3xl mb-8 text-gray-900">
-              Cadastro Profissional
-            </Text>
+          <View className="flex-1 px-4 w-full">
 
             <NwInput
               label="Seu nome"
@@ -220,13 +220,10 @@ export default function ProfessionalOnboardingScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6">
-          <Header showBackButton onBack={() => setStep("profile")} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader title="Buscar estabelecimento" onBack={() => setStep("profile")} />
 
-          <View className="flex-1 mt-12">
-            <Text className="font-heading text-2xl mb-4 text-gray-900">
-              Buscar Estabelecimento
-            </Text>
+          <View className="flex-1 px-4">
 
             <Text className="font-body text-gray-600 mb-6">
               Busque o estabelecimento onde voce vai trabalhar.
@@ -319,12 +316,10 @@ export default function ProfessionalOnboardingScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 py-12 px-6 items-center justify-center">
-        <Header />
-
-        <Text className="font-heading text-2xl mt-12 mb-8 text-gray-900">
-          Confirmar Vinculacao
-        </Text>
+      <View className="flex-1 py-12 px-4 items-center justify-center">
+        <ScreenHeader
+          title="Confirmar Vinculacao"
+        />
 
         {selectedEstablishment && (
           <View className="bg-vupth-surface p-6 rounded-[20px] w-full mb-6">

@@ -1,6 +1,6 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { CompletionCard } from "@components/CompletionCard";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 
@@ -16,7 +16,7 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="py-4 px-5 bg-vupth-surface rounded-[20px] active:bg-gray-50"
+      className="py-4 px-4 bg-vupth-surface rounded-[20px] active:bg-gray-50"
     >
       <Text className="font-heading text-base text-gray-900">{label}</Text>
       <Text className="font-body text-sm text-gray-500 mt-0.5">{description}</Text>
@@ -35,12 +35,11 @@ export default function EstablishmentDataScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Text className="font-heading text-2xl text-gray-900 mt-8">
-          Dados do Estabelecimento
-        </Text>
+      <View className="flex-1 py-12 px-4">
+        <ScreenHeader
+          title="Dados do Estabelecimento"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
         <CompletionCard
           completion={completion}
@@ -67,7 +66,7 @@ export default function EstablishmentDataScreen() {
         </View>
 
         <View
-          className="mt-4 bg-vupth-surface rounded-[20px] px-5 py-4 flex-row justify-between items-center"
+          className="mt-4 bg-vupth-surface rounded-[20px] px-4 py-4 flex-row justify-between items-center"
         >
           <Text className="font-body text-base text-gray-700">
             Profissionais vinculados

@@ -7,7 +7,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -151,17 +151,11 @@ export default function OwnerMenuScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} pb="$6" px="$6">
-        <Header />
-
-        <VStack mt="$6" mb="$5">
-          <Text fontFamily="$display" fontSize={22} letterSpacing={-0.6} color="$forest">
-            {establishment?.name ?? "Meu Estabelecimento"}
-          </Text>
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$0.5">
-            {serviceTypeLabel(establishment?.service_type)}
-          </Text>
-        </VStack>
+      <VStack flex={1} pb="$6" px="$4">
+        <ScreenHeader
+          title={establishment?.name ?? "Meu Estabelecimento"}
+          subtitle={serviceTypeLabel(establishment?.service_type)}
+        />
 
         <VStack space="xl">
           {/* Quem acumula os dois papeis troca de area por aqui. Fica FORA dos

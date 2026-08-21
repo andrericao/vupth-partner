@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { View, Text, ScrollView, Alert } from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { QueueOptions } from "@components/QueueOptions";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName } from "@store/interval.store";
@@ -119,10 +119,11 @@ export default function QueueOptionsScreen() {
 
   return (
     <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} showRoleIcon={false} />
-
-        <Text className="font-heading text-2xl text-gray-900 mt-8">Opcoes da fila</Text>
+      <View className="flex-1 py-12 px-4">
+        <ScreenHeader
+          title="Opcoes da fila"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
 
         <QueueOptions
           mealSignal={currentMealSignal}

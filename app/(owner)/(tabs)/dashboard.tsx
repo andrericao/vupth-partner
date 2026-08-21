@@ -15,7 +15,7 @@ import { ChevronRight, Moon, Pause } from "lucide-react-native";
 import { router } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
 import { BrandButton } from "@components/brand/Button";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
@@ -142,8 +142,8 @@ export default function OwnerDashboardScreen() {
 
   if (!establishment) {
     return (
-      <VStack flex={1} pb="$6" px="$6">
-        <Header />
+      <VStack flex={1} pb="$6" px="$4">
+        <ScreenHeader title="Meu estabelecimento" />
         <VStack flex={1} alignItems="center" justifyContent="center">
           <Text fontFamily="$body" color="$coolGray500">
             Nenhum estabelecimento encontrado.
@@ -166,45 +166,32 @@ export default function OwnerDashboardScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$6" px="$5" bg="$brandBackground">
-        <Header />
-
-        <HStack justifyContent="space-between" alignItems="center" mt="$4" space="sm">
-          {/* [marca-vupth] flex={1} sem gap encostava o nome comprido direto na
-              pilula (QA Alexia: "Barbearia Teste Visual" grudado no "PAUSADO").
-              space-between so distribui espaco SOBRANDO — com o texto flexivel
-              preenchendo tudo, nao sobrava nada. */}
-          <Text
-            fontFamily="$display"
-            fontSize={24}
-            letterSpacing={-0.8}
-            color="$forest"
-            flex={1}
-            numberOfLines={2}
-          >
-            {establishment.name}
-          </Text>
-          {/* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
-              `$border` cinza sobre fundo claro a pilula sumia. */}
-          <VStack
-            bg={isOpen ? "$brandGreen" : status === "TEMPORARILY_CLOSED" ? "$amber500" : "$coolGray200"}
-            borderRadius="$full"
-            px="$3"
-            py="$1.5"
-          >
-            <Text
-              fontFamily="$display"
-              fontSize={11}
-              color={isOpen || status === "TEMPORARILY_CLOSED" ? "$forest" : "$coolGray600"}
+      <VStack flex={1} pb="$6" px="$4" bg="$brandBackground">
+        {/* O nome da loja E o titulo desta tela, e o status a acao do canto —
+            entao viram title/subtitle/action do cabecalho, em vez de um bloco
+            proprio com margem propria embaixo de um Header vazio. */}
+        <ScreenHeader
+          title={establishment.name}
+          subtitle={serviceTypeLabel(establishment.service_type)}
+          action={
+            /* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
+               `$border` cinza sobre fundo claro a pilula sumia. */
+            <VStack
+              bg={isOpen ? "$brandGreen" : status === "TEMPORARILY_CLOSED" ? "$amber500" : "$coolGray200"}
+              borderRadius="$full"
+              px="$3"
+              py="$1.5"
             >
-              {badge.label}
-            </Text>
-          </VStack>
-        </HStack>
-
-        <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$1">
-          {serviceTypeLabel(establishment.service_type)}
-        </Text>
+              <Text
+                fontFamily="$display"
+                fontSize={11}
+                color={isOpen || status === "TEMPORARILY_CLOSED" ? "$forest" : "$coolGray600"}
+              >
+                {badge.label}
+              </Text>
+            </VStack>
+          }
+        />
 
         <ReadinessFaixa
           completion={completion}

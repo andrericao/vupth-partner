@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Badge,
   BadgeText,
@@ -12,7 +11,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
@@ -163,12 +162,11 @@ export default function ProfessionalQueueScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          {data?.professionalName ?? professionalName ?? "Fila"}
-        </Heading>
+      <VStack flex={1} py="$12" px="$4">
+        <ScreenHeader
+          title={data?.professionalName ?? professionalName ?? "Fila"}
+          onBack={() => router.navigate("/(owner)/dashboard" as any)}
+        />
 
         {data && (
           <>

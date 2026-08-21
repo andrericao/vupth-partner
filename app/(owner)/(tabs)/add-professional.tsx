@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -184,12 +184,11 @@ export default function AddProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-          <Text className="font-heading text-2xl text-gray-900 mt-8">
-            Quem vai atender?
-          </Text>
+        <View className="flex-1 py-12 px-4">
+          <ScreenHeader
+          title="Quem vai atender?"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
           <Text className="font-body text-sm text-gray-600 mt-1 mb-4">
             Sua loja so aparece para os clientes com pelo menos um profissional com
             servico cadastrado. Ha dois caminhos:

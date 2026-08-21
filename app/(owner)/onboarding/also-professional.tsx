@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -162,18 +162,14 @@ export default function AlsoProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 pb-6 px-6">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
+        <View className="flex-1 pb-6 px-4">
+          <ScreenHeader
+            title="Você também vai atender?"
+            subtitle="Se for atender clientes aqui, escolha sua especialidade."
+            onBack={() => router.navigate("/(owner)/dashboard" as any)}
+          />
 
-          <View className="flex-1 justify-center px-2">
-            <Text className="font-heading text-2xl mb-4 text-gray-900">
-              Voce tambem sera profissional?
-            </Text>
-
-            <Text className="font-body text-base text-gray-600 mb-2">
-              Se voce tambem atendera clientes neste estabelecimento, escolha sua
-              especialidade abaixo.
-            </Text>
+          <View className="flex-1 px-4">
 
             {ownerName ? (
               <Text className="font-body text-sm text-gray-500 mb-6">
