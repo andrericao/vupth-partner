@@ -31,15 +31,6 @@ type Props = Omit<PressableProps, "children"> & {
   textClassName?: string;
 };
 
-// Sombra via style RN (confiavel cross-platform, igual ao Button v1).
-const shadow = {
-  shadowColor: "#1A281A",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.18,
-  shadowRadius: 10,
-  elevation: 4,
-};
-
 const BASE = "h-[54px] rounded-full items-center justify-center px-4";
 
 // [marca-vupth] `primary` E o Button/Primary do Pencil: fundo brand-green com
@@ -86,7 +77,6 @@ export function NwButton({
       accessibilityRole="button"
       accessibilityLabel={title}
       disabled={isLoading || disabled}
-      style={variant.toLowerCase().includes("outline") ? undefined : shadow}
       className={`${BASE} ${BOX[variant]} ${className ?? ""}`}
       {...rest}
     >

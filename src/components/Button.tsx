@@ -20,14 +20,6 @@ type ButtonProps = ComponentProps<typeof GlueStackButton> & {
 // e so uma versao mais escura do verde antigo — troca segura, texto branco
 // continua legivel. O par brilhante brandGreen+forest do Pencil ja existe em
 // src/components/brand/Button.tsx, pra telas migradas explicitamente.
-const btnShadow = {
-  shadowColor: "#1A281A",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.18,
-  shadowRadius: 10,
-  elevation: 4,
-};
-
 export function Button(props: ButtonProps) {
   return (
     <GlueStackButton
@@ -35,7 +27,6 @@ export function Button(props: ButtonProps) {
       h={54}
       mt="$9"
       rounded="$full"
-      style={btnShadow}
       $active-bg="$forestSoft"
       disabled={props.isLoading}
       {...props}
