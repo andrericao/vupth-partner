@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
+import { ChevronRight, Info } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Header } from "@components/Header";
 import { NwButton } from "@components/nw/Button";
@@ -221,7 +222,10 @@ function QueueRow({
           )}
         </View>
 
-        <Text className="text-lg text-gray-400 font-bold">›</Text>
+        {/* [marca-vupth] Era o caractere "›" — mesmo padrao ja trocado por
+            icone no dashboard do dono; o Pencil (PROF · 01 Fila) especifica
+            chevron-right/lucide aqui tambem. */}
+        <ChevronRight size={18} color="#9CA3AF" />
       </View>
     </Pressable>
   );
@@ -725,9 +729,12 @@ export default function ProfessionalQueueScreen() {
         >
           {currentAttendance ? (
             <View
-              className="bg-white rounded-full py-3.5 items-center"
+              className="bg-white rounded-full py-3.5 flex-row items-center justify-center gap-1.5"
               style={cardShadow}
             >
+              {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
+                  texto; o desenho marca com um icone de informacao. */}
+              <Info size={15} color="#9CA3AF" />
               <Text className="font-body text-sm text-gray-500">
                 Finalize para iniciar o proximo
               </Text>

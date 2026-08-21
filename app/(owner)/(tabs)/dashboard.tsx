@@ -11,16 +11,17 @@ import {
   Pressable,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl, BackHandler } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronRight, Moon, Pause } from "lucide-react-native";
 import { router } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
-import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { Header } from "@components/Header";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage } from "@lib/api";
 import { cardShadow } from "@lib/styles";
+import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
 
@@ -148,9 +149,10 @@ export default function OwnerDashboardScreen() {
           <Text fontFamily="$body" color="$coolGray500">
             Nenhum estabelecimento encontrado.
           </Text>
-          <Button
+          <BrandButton
             title="Criar Estabelecimento"
             onPress={() => router.push("/(owner)/onboarding/establishment" as any)}
+            mt="$9"
           />
         </VStack>
       </VStack>
@@ -198,7 +200,7 @@ export default function OwnerDashboardScreen() {
         </HStack>
 
         <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$1">
-          {establishment.service_type}
+          {serviceTypeLabel(establishment.service_type)}
         </Text>
 
         <ReadinessFaixa
@@ -228,7 +230,7 @@ export default function OwnerDashboardScreen() {
               <Text fontFamily="$display" fontSize={32} color="$forest">
                 {totalInQueue}
               </Text>
-              <Ionicons name="chevron-forward" size={18} color="#163300" />
+              <ChevronRight size={18} color="#163300" />
             </HStack>
             <Text fontFamily="$body" fontSize="$xs" fontWeight="$semibold" color="$forest" mt="$1">
               na fila agora
@@ -257,13 +259,13 @@ export default function OwnerDashboardScreen() {
             o dono estava fechando o NEGOCIO). */}
         {!isOpen ? (
           <VStack mt="$5">
-            <Button
+            {/* [marca-vupth] Era bg="$forest" (par forest+branco, fora da id): o
+                Button/Primary do Pencil e brandGreen+forest. BrandButton ja
+                nasce nesse par — sem overrides de cor. */}
+            <BrandButton
               title={status === "TEMPORARILY_CLOSED" ? "Reabrir agora" : "Abrir estabelecimento"}
               onPress={() => setStatus("OPEN")}
               isLoading={isToggling}
-              bg="$forest"
-              $active-bg="$forestSoft"
-              mt="$0"
             />
           </VStack>
         ) : (
@@ -283,7 +285,7 @@ export default function OwnerDashboardScreen() {
                 disabled={isToggling}
               >
                 <HStack space="xs" alignItems="center">
-                  <Ionicons name="moon-outline" size={15} color="#6B7280" />
+                  <Moon size={15} color="#6B7280" />
                   <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$coolGray500">
                     Encerrar o dia
                   </Text>
@@ -295,7 +297,7 @@ export default function OwnerDashboardScreen() {
                 disabled={isToggling}
               >
                 <HStack space="xs" alignItems="center">
-                  <Ionicons name="pause-outline" size={15} color="#6B7280" />
+                  <Pause size={15} color="#6B7280" />
                   <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$coolGray500">
                     Pausar entrada
                   </Text>
@@ -321,7 +323,7 @@ export default function OwnerDashboardScreen() {
             <Text fontFamily="$body" color="$coolGray400" textAlign="center">
               Nenhum profissional vinculado
             </Text>
-            <Button
+            <BrandButton
               title="Adicionar Profissional"
               onPress={() =>
                 router.push({
@@ -329,8 +331,6 @@ export default function OwnerDashboardScreen() {
                   params: { establishmentId: establishment.id },
                 } as any)
               }
-              bg="$forest"
-              $active-bg="$forestSoft"
               mt="$2"
               h="$10"
             />

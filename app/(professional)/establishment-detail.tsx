@@ -11,8 +11,9 @@ import {
 import { Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
+import { serviceTypeLabel } from "@lib/serviceTypes";
 import {
   useEstablishmentStore,
   EstablishmentDetail,
@@ -91,7 +92,7 @@ export default function EstablishmentDetailScreen() {
   }, [id]);
 
   const name = detail?.name ?? params.name ?? "Estabelecimento";
-  const serviceType = detail?.service_type ?? params.serviceType ?? "";
+  const serviceType = serviceTypeLabel(detail?.service_type ?? params.serviceType);
   const openStatus = detail?.open_status ?? params.openStatus ?? "";
   const isOpen = openStatus === "OPEN";
   const address = formatAddress(detail?.address ?? null);
@@ -198,13 +199,11 @@ export default function EstablishmentDetailScreen() {
 
           <Box flex={1} />
 
-          <Button
+          <BrandButton
             title="Solicitar vinculacao"
             onPress={handleRequestAffiliation}
             isLoading={isRequesting}
             mt="$8"
-            bg="$forest"
-            $active-bg="$forestSoft"
           />
         </VStack>
       </ScrollView>

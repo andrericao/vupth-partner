@@ -20,8 +20,10 @@ import { router } from "expo-router";
 import { Header } from "@components/Header";
 import { cardShadow } from "@lib/styles";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { api, getApiErrorMessage } from "@lib/api";
+import { serviceTypeLabel } from "@lib/serviceTypes";
 import { useProfessionalStore } from "@store/professional.store";
 
 type EstablishmentResult = {
@@ -193,11 +195,9 @@ export default function FindEstablishmentScreen() {
                 profissional so pode trabalhar em um estabelecimento por vez.
                 Para mudar, desafilie-se em Configuracoes.
               </Text>
-              <Button
+              <BrandButton
                 title="Ir para Configuracoes"
                 onPress={() => router.navigate("/(professional)/settings" as any)}
-                bg="$forest"
-                $active-bg="$forestSoft"
               />
             </VStack>
           )}
@@ -304,7 +304,7 @@ export default function FindEstablishmentScreen() {
                     {est.name}
                   </Text>
                   <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                    {est.serviceType}
+                    {serviceTypeLabel(est.serviceType)}
                   </Text>
                 </VStack>
                 <HStack alignItems="center" space="sm">

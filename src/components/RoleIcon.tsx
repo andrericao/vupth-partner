@@ -1,4 +1,4 @@
-import Svg, { Path, Circle, Ellipse } from "react-native-svg";
+import { Store, User } from "lucide-react-native";
 
 type Props = {
   role: "owner" | "professional";
@@ -7,43 +7,27 @@ type Props = {
 };
 
 /**
- * Silhueta monocromatica do papel ativo, no estilo do icone de usuario.
- * Mesma posicao/tamanho para qualquer papel — so muda o desenho:
- *   - owner        → predio (estabelecimento)
- *   - professional → busto com chapeu (usuario "coberto")
+ * Icone do papel ativo no cabecalho. Mesma posicao para qualquer papel — so
+ * muda o glifo:
+ *   - owner        → loja (estabelecimento)
+ *   - professional → pessoa
+ *
+ * [marca-vupth] Era uma silhueta PREENCHIDA desenhada a mao (Material
+ * "apartment"/busto+chapeu, paleta antiga), depois um par Ionicons outline
+ * (aproximacao — o pacote lucide-react-native tinha sido dado como
+ * inexistente por engano). O Pencil (doc pencil-new.pen, cabecalho de toda
+ * tela — icon "Perfil", 22x22) especifica o GLIFO exato via campo
+ * icon+library do no: "store"/lucide no header do dono (OWNER · 01/02/03),
+ * "user"/lucide no do profissional (PROF · 02/03). Instalado lucide-react-native
+ * (peer react-native-svg ja presente) pra usar o icone identico, nao so
+ * equivalente.
  */
-// Verde primario da paleta do PRD (4 cores-ancora: #1A281A, #5c9c60, #3b7a3f, #F7FAF8).
-// [marca-vupth] $forest — default de cor, nao aceita token de dentro do SVG.
-export function RoleIcon({ role, size = 26, color = "#163300" }: Props) {
-  if (role === "owner") {
-    // Predio (Material "apartment"), silhueta cheia.
-    return (
-      <Svg width={size} height={size} viewBox="0 0 24 24">
-        <Path
-          fill={color}
-          d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm0-4H5V5h2v2zm4 12H9v-2h2v2zm0-4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm6 12h-2v-2h2v2zm0-4h-2v-2h2v2z"
-        />
-      </Svg>
-    );
-  }
+const ROLE_ICON = { owner: Store, professional: User } as const;
 
-  // Profissional: busto (igual ao usuario) + chapeu por cima.
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      {/* ombros/busto */}
-      <Path
-        fill={color}
-        d="M4 21v-1.5C4 16 7.6 14.5 12 14.5s8 1.5 8 5V21z"
-      />
-      {/* cabeca */}
-      <Circle cx={12} cy={10.2} r={3.4} fill={color} />
-      {/* aba do chapeu */}
-      <Ellipse cx={12} cy={6.8} rx={7} ry={1.1} fill={color} />
-      {/* copa do chapeu */}
-      <Path
-        fill={color}
-        d="M8.9 6.8 9.8 3.6C9.95 3 10.4 2.7 11 2.7h2c.6 0 1.05.3 1.2.9l.9 3.2z"
-      />
-    </Svg>
-  );
+// Verde primario da marca ($forest). Default de cor — lucide usa `color` como
+// stroke (currentColor via react-native-svg), nao aceita token do
+// NativeWind/gluestack diretamente.
+export function RoleIcon({ role, size = 22, color = "#163300" }: Props) {
+  const Icon = ROLE_ICON[role];
+  return <Icon size={size} color={color} />;
 }

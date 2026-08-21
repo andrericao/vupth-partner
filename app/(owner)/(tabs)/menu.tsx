@@ -15,13 +15,20 @@ import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { PendingDot } from "@components/PendingDot";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { hasAnyPending } from "@lib/completion";
-import { Ionicons } from "@expo/vector-icons";
+import { serviceTypeLabel } from "@lib/serviceTypes";
+import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight } from "lucide-react-native";
+import type { ComponentType } from "react";
+
+// [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
+// especifica o glifo exato via icon+library do no ("users", "clipboard-list",
+// "chart-column", "store", "user", "log-out", "chevron-right", todos lucide).
+type LucideIconType = ComponentType<{ size?: number; color?: string }>;
 
 type MenuItemProps = {
   label: string;
   /** Linha de apoio — usada quando o item AGRUPA varios caminhos. */
   hint?: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: LucideIconType;
   onPress: () => void;
   color?: string;
   dot?: boolean;
@@ -34,7 +41,7 @@ type MenuItemProps = {
 function MenuItem({
   label,
   hint,
-  icon,
+  icon: Icon,
   onPress,
   color = "$forest",
   dot = false,
@@ -45,7 +52,7 @@ function MenuItem({
     <>
       <Pressable onPress={onPress} py="$3.5" px="$4" $active-bg="$coolGray50">
         <HStack alignItems="center" space="md">
-          <Ionicons name={icon} size={19} color="#163300" />
+          <Icon size={19} color="#163300" />
           <VStack flex={1}>
             <HStack alignItems="center" space="sm">
               <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color={color}>
@@ -66,7 +73,7 @@ function MenuItem({
               </Text>
             </VStack>
           )}
-          <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+          <ChevronRight size={16} color="#6B7280" />
         </HStack>
       </Pressable>
       {!last && <VStack height={1} bg="$border" />}
@@ -152,7 +159,7 @@ export default function OwnerMenuScreen() {
             {establishment?.name ?? "Meu Estabelecimento"}
           </Text>
           <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$0.5">
-            {establishment?.service_type ?? ""}
+            {serviceTypeLabel(establishment?.service_type)}
           </Text>
         </VStack>
 
@@ -168,11 +175,15 @@ export default function OwnerMenuScreen() {
               px="$4"
             >
               <HStack alignItems="center" space="md">
-                <Ionicons name="swap-horizontal" size={19} color="#163300" />
+                {/* Sem equivalente no Pencil (elemento so do app, pra quem
+                    acumula os dois papeis) — lucide por consistencia com o
+                    resto do menu, ja que os outros icones deixaram de ser
+                    Ionicons. */}
+                <ArrowLeftRight size={19} color="#163300" />
                 <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$forest" flex={1}>
                   Atender como profissional
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color="#163300" />
+                <ChevronRight size={16} color="#163300" />
               </HStack>
             </Pressable>
           )}
@@ -185,7 +196,7 @@ export default function OwnerMenuScreen() {
                   tres caminhos. O badge traz a urgencia (solicitacao parada)
                   pra fora, que era o unico motivo real de separar. */}
               <MenuItem
-                icon="people-outline"
+                icon={Users}
                 label="Profissionais"
                 hint="adicionar, convidar e ver solicitações"
                 onPress={() =>
@@ -201,19 +212,19 @@ export default function OwnerMenuScreen() {
 
           <Grupo label="NEGÓCIO">
             <MenuItem
-              icon="clipboard-outline"
+              icon={ClipboardList}
               label="Atendimentos"
               onPress={() => router.push("/(owner)/attendances" as any)}
             />
             <MenuItem
-              icon="bar-chart-outline"
+              icon={ChartColumn}
               label="Relatórios"
               onPress={() => router.push("/(owner)/reports" as any)}
               last={!establishment?.id}
             />
             {establishment?.id && (
               <MenuItem
-                icon="storefront-outline"
+                icon={Store}
                 label="Dados do estabelecimento"
                 dot={hasPending}
                 onPress={() =>
@@ -229,7 +240,7 @@ export default function OwnerMenuScreen() {
 
           <Grupo label="CONTA">
             <MenuItem
-              icon="person-outline"
+              icon={User}
               label="Dados pessoais"
               onPress={() =>
                 router.push({
@@ -241,7 +252,7 @@ export default function OwnerMenuScreen() {
             />
             {establishment?.id && (
               <MenuItem
-                icon="exit-outline"
+                icon={LogOut}
                 label="Sair do estabelecimento"
                 onPress={handleLeaveEstablishment}
                 last
