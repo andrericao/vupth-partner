@@ -213,10 +213,17 @@ export default function OwnerDashboardScreen() {
           goalNoun="aparecer aos clientes"
         />
 
-        {/* Os dois numeros que o dono abre o app pra ver. A fila e o card
-            verde-marca porque e o que muda o dia dele — e agora e o CAMINHO
+        {/* Os dois numeros que o dono abre o app pra ver. A fila e o CAMINHO
             pras filas, no lugar do botao ambar "Ver Filas" que competia com
-            tudo. */}
+            tudo.
+
+            [marca-vupth] O verde-marca e ACENTO, nao cor de "clicavel". O
+            Pencil usa 1-2 elementos brand-green por tela contra 3-8 em
+            surface (PROF · 03: 1 verde, 8 surface) — quando tudo e verde,
+            nada e. Com a fila VAZIA nao ha destaque a dar (zero e a ausencia
+            de fila, nao o numero que importa), entao o card fica neutro e o
+            verde sobra pra unica acao da tela. Com gente na fila ele reassume
+            o acento e as acoes viram texto discreto. */}
         <HStack mt="$5" space="md">
           <Pressable
             flex={1}
@@ -226,7 +233,7 @@ export default function OwnerDashboardScreen() {
                 params: { establishmentId: establishment.id },
               } as any)
             }
-            bg="$brandGreen"
+            bg={totalInQueue > 0 ? "$brandGreen" : "$brandSurface"}
             p="$4"
             borderRadius="$card"
           >
@@ -236,7 +243,13 @@ export default function OwnerDashboardScreen() {
               </Text>
               <ChevronRight size={18} color="#163300" />
             </HStack>
-            <Text fontFamily="$body" fontSize="$xs" fontWeight="$semibold" color="$forest" mt="$1">
+            <Text
+              fontFamily="$body"
+              fontSize="$xs"
+              fontWeight="$semibold"
+              color={totalInQueue > 0 ? "$forest" : "$coolGray500"}
+              mt="$1"
+            >
               na fila agora
             </Text>
           </Pressable>
@@ -323,19 +336,25 @@ export default function OwnerDashboardScreen() {
         </HStack>
 
         {professionals.length === 0 ? (
-          <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200" alignItems="center">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
+          // [marca-vupth] Card do estado vazio no `surface` da marca (era
+          // coolGray + borda cinza, paleta neutra generica) e o botao em
+          // OUTLINE: e acao terciaria dentro de um placeholder, nao pode ter
+          // o mesmo peso do "Reabrir agora" logo acima — eram duas pilulas
+          // verde-marca identicas na mesma tela.
+          <VStack bg="$brandSurface" p="$4" borderRadius="$card" alignItems="center">
+            <Text fontFamily="$body" color="$coolGray500" textAlign="center">
               Nenhum profissional vinculado
             </Text>
             <BrandButton
               title="Adicionar Profissional"
+              variant="outline"
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/add-professional",
                   params: { establishmentId: establishment.id },
                 } as any)
               }
-              mt="$2"
+              mt="$3"
               h="$10"
             />
           </VStack>

@@ -15,32 +15,39 @@ import { Header } from "@components/Header";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
-import { cardShadow } from "@lib/styles";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { periodRange } from "@lib/time";
 
 type Period = "day" | "week" | "month";
 
+// [marca-vupth] Era `color`/`bg`/`border` cru por chamada (e `border` nem
+// chegava a ser usado) — foi assim que um `$blue50`/`$blue800`, cor que nao
+// existe na marca, entrou na tela. Agora so existe UMA decisao: este card e o
+// heroi da secao ou nao. Heroi = brand-green (o Pencil usa 1-2 por tela);
+// resto = surface, PLANO. Sem sombra: no Pencil inteiro so 13 elementos tem
+// sombra (tab bars, FAB, notificacao — coisas que flutuam de verdade); card
+// sobre surface e sempre plano, e sombra em tudo faz tudo parecer clicavel.
 function StatCard({
   label,
   value,
-  color,
-  bg,
-  border,
+  hero = false,
 }: {
   label: string;
   value: string;
-  color: string;
-  bg: string;
-  border: string;
+  hero?: boolean;
 }) {
   return (
-    <VStack flex={1} bg={bg} p="$4" borderRadius="$2xl" style={cardShadow}>
-      <Text fontFamily="$body" fontSize="$xs" color={color}>
-        {label}
-      </Text>
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color={color}>
+    <VStack flex={1} bg={hero ? "$brandGreen" : "$brandSurface"} p="$4" borderRadius="$card">
+      <Text fontFamily="$display" fontSize={26} color="$forest">
         {value}
+      </Text>
+      <Text
+        fontFamily="$body"
+        fontSize="$xs"
+        color={hero ? "$forest" : "$coolGray500"}
+        mt="$1"
+      >
+        {label}
       </Text>
     </VStack>
   );
@@ -125,8 +132,10 @@ export default function OwnerReportsScreen() {
           Agora
         </Text>
         <HStack space="md">
-          <StatCard label="Na fila" value={String(totalInQueue)} color="$forest" bg="$greenTint" border="$greenTint" />
-          <StatCard label="Profissionais disponiveis" value={String(availableProfs)} color="$blue800" bg="$blue50" border="$blue200" />
+          {/* "Na fila" so vira heroi quando HA fila: zero e a ausencia de
+              fila, nao o numero que importa (mesma regra do dashboard). */}
+          <StatCard label="Na fila" value={String(totalInQueue)} hero={totalInQueue > 0} />
+          <StatCard label="Profissionais disponíveis" value={String(availableProfs)} />
         </HStack>
 
         <HStack mt="$6" space="sm">
@@ -142,7 +151,7 @@ export default function OwnerReportsScreen() {
             >
               <Text
                 fontFamily="$body"
-                color={period === p.key ? "$white" : "$coolGray700"}
+                color={period === p.key ? "$brandGreen" : "$coolGray700"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -155,8 +164,8 @@ export default function OwnerReportsScreen() {
         <ExpedienteCard />
 
         {errorMsg && (
-          <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$4">
-            <Text fontFamily="$body" color="$amber700" textAlign="center">
+          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
+            <Text fontFamily="$body" color="$brandDanger" textAlign="center">
               {errorMsg}
             </Text>
           </VStack>
@@ -168,19 +177,29 @@ export default function OwnerReportsScreen() {
           </VStack>
         ) : (
           <>
+            {/* Receita e o heroi da secao do periodo — o unico numero em
+                dinheiro, e o que o dono abre o relatorio pra ver. Vem PRIMEIRO
+                pelo mesmo motivo (mesma ordem do relatorio do profissional). */}
             <HStack space="md" mt="$4">
-              <StatCard label="Atendimentos" value={String(report?.totalAttendances ?? 0)} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
-              <StatCard label="Receita" value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`} color="$forest" bg="$greenTint" border="$greenTint" />
+              <StatCard
+                label="Receita"
+                value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`}
+                hero
+              />
+              <StatCard label="Atendimentos" value={String(report?.totalAttendances ?? 0)} />
             </HStack>
 
             <HStack space="md" mt="$3">
-              <StatCard label="Duracao media" value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`} color="$coolGray800" bg="$coolGray50" border="$coolGray200" />
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                  Destaque
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray800">
+              <StatCard
+                label="Duração média"
+                value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
+              />
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                <Text fontFamily="$display" fontSize={16} color="$forest">
                   {report?.topProfessional ?? "—"}
+                </Text>
+                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+                  destaque
                 </Text>
               </VStack>
             </HStack>
@@ -200,7 +219,7 @@ export default function OwnerReportsScreen() {
                 {liveProfs.map((p) => {
                   const r = revById[p.id] ?? { revenue: 0, attendances: 0 };
                   return (
-                    <VStack key={p.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                    <VStack key={p.id} bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack justifyContent="space-between" alignItems="center">
                         <VStack flex={1}>
                           <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
