@@ -15,7 +15,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Header } from "@components/Header";
 import { NwButton } from "@components/nw/Button";
 import { SkeletonList } from "@components/Skeleton";
-import { useQuery } from "@tanstack/react-query";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime, clearAttendanceStart } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -28,11 +27,11 @@ import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
-import { activeCutRequests } from "@lib/cutRequests";
 import { queueMenuCount } from "@lib/notifications";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { BenchIcon } from "@components/BenchIcon";
 import * as SecureStore from "expo-secure-store";
@@ -236,7 +235,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, removeFromQueue, promoteAttendance, fetchCutRequests,
+    markLate, removeFromQueue, promoteAttendance,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -482,26 +481,11 @@ export default function ProfessionalQueueScreen() {
   // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
   // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
   // handleAction, que traduz a mensagem.
-  // C2 (desbloqueado 2026-07-22): pendentes via GET. TEMPO REAL: o WS pessoal
-  // (assinado no useQueueSocket, mesma conexao da fila) invalida esta query a
-  // cada evento CUT_* — o refetch de 30s vira fallback p/ socket caido. A
-  // validade e checada LOCALMENTE pelo expires_at (orientacao do backend) —
-  // pedido vencido some sozinho no proximo render.
-  // Relogio ancorado em estado (react-hooks/purity proibe Date.now() no
-  // render). Atualiza nos CALLBACKS — a cada fetch da lista (30s) e ao abrir o
-  // modal — granularidade de sobra p/ um TTL de 5min.
-  const [cutNowMs, setCutNowMs] = useState(() => Date.now());
-  const { data: cutRequestsData } = useQuery({
-    queryKey: ["cut-requests", profId],
-    queryFn: async () => {
-      const list = await fetchCutRequests();
-      setCutNowMs(Date.now()); // callback de sistema externo: permitido
-      return list;
-    },
-    enabled: !!profId && !!establishmentId,
-    refetchInterval: 30000,
-  });
-  const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
+  // C2: contagem de encaixes pendentes pelo hook compartilhado — a MESMA
+  // queryKey do rodape e da tela de Encaixes, entao e um cache so. O WS
+  // pessoal (eventos CUT_*, assinado no useQueueSocket) invalida; o refetch
+  // de 30s e o fallback p/ socket caido.
+  const { count: pendingCutRequests } = usePendingCutRequests();
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
@@ -584,7 +568,7 @@ export default function ProfessionalQueueScreen() {
               <NotificationBadge
                 testID="menu-dot"
                 count={queueMenuCount({
-                  pendingRequests: pendingCutRequests.length,
+                  pendingRequests: pendingCutRequests,
                   mealPending: currentMealSignal != null,
                 })}
               />

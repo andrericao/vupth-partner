@@ -1,26 +1,23 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { View, Text, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
 import { Header } from "@components/Header";
 import { QueueOptions } from "@components/QueueOptions";
 import { useProfessionalStore } from "@store/professional.store";
-import { useAttendanceStore } from "@store/attendance.store";
 import { useIntervalStore, mealName } from "@store/interval.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
+import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
 import { mealSignal } from "@lib/meals";
-import { activeCutRequests } from "@lib/cutRequests";
 
 // Tela "OPCOES DA FILA" (nav v2, 2026-07-23): o banco no header da Fila NAVEGA
 // para ca (nada de modal — "mais amigavel a tela inteira"). So acoes do dia; o
-// rodape (Fila/Relatorios/Configuracoes) segue visivel na aba Fila.
+// rodape (Fila/Encaixes/Relatorios/Perfil) segue visivel na aba Fila.
 export default function QueueOptionsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
   const setAcceptingNew = useProfessionalStore((s) => s.setAcceptingNew);
-  const { fetchCutRequests } = useAttendanceStore();
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
@@ -116,23 +113,9 @@ export default function QueueOptionsScreen() {
     ? `${mealName(nextMeal.description)} ${parseApiTime(nextMeal.fixedStartTime) ?? ""}`.trim()
     : undefined;
 
-  // ---- Solicitacoes de corte (mesma queryKey da tela de Encaixes: cache
-  // compartilhado; o WS pessoal assinado no useQueueSocket invalida e o GET
-  // refaz). So a CONTAGEM pro badge — a decisao (aceitar/recusar) mudou de um
-  // bottom-sheet aqui dentro pra tela cheia "Encaixes" (Pencil PROF · 02,
-  // mesma linha da decisao de nav v2 que tirou o menu-modal do banco).
-  const [cutNowMs, setCutNowMs] = useState(() => Date.now());
-  const { data: cutRequestsData } = useQuery({
-    queryKey: ["cut-requests", profId],
-    queryFn: async () => {
-      const list = await fetchCutRequests();
-      setCutNowMs(Date.now()); // callback de sistema externo: permitido
-      return list;
-    },
-    enabled: !!profId && !!establishmentId,
-    refetchInterval: 30000,
-  });
-  const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
+  // ---- Encaixes: contagem vem do hook compartilhado (mesma queryKey do
+  // rodape e da tela de Encaixes — cache unico, sem requisicao extra).
+  const { count: pendingCutRequests } = usePendingCutRequests();
 
   return (
     <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
@@ -147,7 +130,7 @@ export default function QueueOptionsScreen() {
           hasQueue={hasQueue}
           status={statusControl}
           closeQueue={{ acceptingNew, onToggle: toggleQueue }}
-          pendingRequests={pendingCutRequests.length}
+          pendingRequests={pendingCutRequests}
           onOpenRequests={() => router.push("/(professional)/cut-requests" as any)}
         />
       </View>

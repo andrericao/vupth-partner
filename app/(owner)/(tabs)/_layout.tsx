@@ -10,7 +10,7 @@ export default function OwnerTabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarInactiveTintColor: "#454745", // $text-secondary
         tabBarStyle: {
           ...tabBarShadow,
           backgroundColor: "#FFFFFF",
@@ -33,7 +33,7 @@ export default function OwnerTabsLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Inicio",
+          title: "Início",
           tabBarIcon: ({ focused }) => <TabBarIcon name="home" focused={focused} />,
         }}
       />
@@ -44,14 +44,14 @@ export default function OwnerTabsLayout() {
         name="queues"
         options={{
           title: "Filas",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="people" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabBarIcon name="queues" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="menu"
         options={{
           title: "Menu",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="apps" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabBarIcon name="menu" focused={focused} />,
         }}
       />
       <Tabs.Screen name="add-professional" options={{ href: null }} />
