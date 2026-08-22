@@ -1,5 +1,8 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
+
+import { resolveApiEnv } from "@lib/apiEnv";
 
 // Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
 // testa em device (Andre 2026-08-22).
@@ -15,8 +18,18 @@ const API_URLS: Record<string, string> = {
   prod: "https://vupth-backend-ia-production.up.railway.app",
 };
 
-const env = process.env.EXPO_PUBLIC_API_ENV ?? "staging";
-const BASE_URL = API_URLS[env] ?? API_URLS.staging;
+// O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando
+// local. Ver `apiEnv.ts` pro porque — em resumo, o `.env` de quem publica
+// vazava pro app de todo mundo.
+const canalDoBundle = (() => {
+  try {
+    return Updates.channel;
+  } catch {
+    return null;
+  }
+})();
+const env = resolveApiEnv(canalDoBundle, process.env.EXPO_PUBLIC_API_ENV);
+const BASE_URL = API_URLS[env];
 
 // URL do WebSocket STOMP. http→ws, https→wss.
 // O backend registra /ws com SockJS; para um WebSocket NATIVO (sem a lib SockJS)
