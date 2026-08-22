@@ -18,6 +18,7 @@ Ultima atualizacao: 2026-08-22 · branch `design/marca-dev` do front-partner.
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que hoje aparece no canto superior direito da tela do dono ("banco") **e apenas um icone de fila**, colocado como quebra-galho pelo Andre — **nao** e escolha de arte. **Substituicao livre.** | ℹ️ Aviso, nao bug. A design escolhe o icone definitivo (o Pencil ja padronizou `lucide` no commit `1d441a2`). |
 | DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🎨 Pedido de desenho (Andre, 2026-08-22). **Nao e falta de feature** — a acao existe e funciona; falta **affordance**. Ver "Detalhe — DS3". |
 | DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? Ver "Detalhe — DS4". |
+| DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🐛 + 🎨 Observado no device (Andre, 2026-08-22). **Parte disso e implementacao incompleta, parte e escolha de glifo.** Ver "Detalhe — DS5". |
 
 ---
 
@@ -53,6 +54,26 @@ Ultima atualizacao: 2026-08-22 · branch `design/marca-dev` do front-partner.
 - apontar o que **NAO deve escalar** (numeros de senha/posicao na fila, por exemplo, costumam ser desenhados como elemento grafico).
 
 **Cuidado especifico:** os rotulos do rodape (abas) ja apareceram **cortados em device real** — foi o commit `89f1678` da propria entrega. Essa e exatamente a area que quebra primeiro quando a fonte cresce.
+
+---
+
+## Detalhe — DS5 (estado ativo da tab bar e o icone de Menu)
+
+**Sao dois problemas com causas diferentes.**
+
+### 1. Falta destaque — a pilula do Pencil nao foi implementada
+
+O `src/components/TabBarIcon.tsx` **documenta o desenho correto no proprio comentario**: no Pencil, o estado ativo e marcado por **cor** (`$forest` vs `$text-secondary`) **mais a pilula `$green-tint` atras do icone**. O codigo entregue faz **so a cor** — a pilula nunca foi codada. Ou seja: **o desenho esta certo, a implementacao ficou pela metade.**
+
+E a cor sozinha nao da conta, com numero: ativo `#163300` contra inativo `#454745` tem contraste de **1,49:1** entre si. Os dois se leem bem sobre o branco (13,9:1 e 9,4:1), mas sao praticamente **indistinguiveis um do outro** — dois tons escuros. E a mesma armadilha que ja custou retrabalho nesta branch (trocar um verde escuro por outro e achar que a marca chegou): quem olha nao ve diferenca.
+
+**Acao:** e correcao de **CODIGO** (implementar a pilula `green-tint` sob o icone ativo, como o Pencil especifica). Nao depende de decisao nova da design — a nao ser que ela queira reforcar ainda mais o ativo (peso do rotulo, indicador superior).
+
+### 2. O icone de Menu e escolha de arte, e ela precisa ser revista
+
+O glifo hoje e o **`Grid3x3`** do `lucide` — uma grade de 9 quadrados. Ele **nao e aproximacao nossa**: veio do commit `1d441a2` (*"usa os icones exatos do Pencil (lucide), nao aproximacao"*), lido do proprio arquivo de design. Entao a revisao e **da design**, nao do front.
+
+**Por que estranha:** grade de quadrados e a convencao de **"todos os apps / launcher / dashboard"**, nao de "menu". O vocabulario que o usuario reconhece para menu e o hamburguer (`Menu`) ou as reticencias (`Ellipsis` / `MoreHorizontal`). Vale notar que esta mesma aba **ja deu problema de rotulo cortado** em device real (commit `89f1678` da propria entrega) — e a aba do rodape que mais pediu conserto ate agora.
 
 ---
 
