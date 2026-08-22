@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { NwButton } from "@components/nw/Button";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft, Mail, Lock } from "lucide-react-native";
 import { NwInput } from "@components/nw/Input";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
@@ -68,7 +68,7 @@ export default function LoginScreen() {
             accessibilityRole="button"
             testID="back-button"
           >
-            <Ionicons name="chevron-back" size={20} color="#163300" />
+            <ChevronLeft size={20} color="#163300" />
           </Pressable>
 
           <View className="mt-10 gap-2">
@@ -81,7 +81,7 @@ export default function LoginScreen() {
           <View className="mt-8">
             <NwInput
               label="E-mail"
-              icon="mail-outline"
+              icon={Mail}
               placeholder="email@email.com"
               value={email}
               onChangeText={setEmail}
@@ -92,7 +92,7 @@ export default function LoginScreen() {
             />
             <NwInput
               label="Senha"
-              icon="lock-closed-outline"
+              icon={Lock}
               placeholder="senha"
               secure
               value={password}

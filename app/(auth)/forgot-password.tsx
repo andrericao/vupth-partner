@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft, Mail } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
@@ -106,7 +106,7 @@ export default function ForgotPasswordScreen() {
             accessibilityRole="button"
             testID="back-button"
           >
-            <Ionicons name="chevron-back" size={20} color="#163300" />
+            <ChevronLeft size={20} color="#163300" />
           </Pressable>
 
           {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
@@ -130,7 +130,7 @@ export default function ForgotPasswordScreen() {
             <View className="mt-6">
               <NwInput
                 label="E-mail"
-                icon="mail-outline"
+                icon={Mail}
                 placeholder="email@email.com"
                 value={email}
                 onChangeText={(t: string) => {

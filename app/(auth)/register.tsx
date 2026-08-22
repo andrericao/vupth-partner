@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform, Pressabl
 import { router, useLocalSearchParams } from "expo-router";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft, Mail, Lock } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
@@ -83,7 +83,7 @@ export default function RegisterScreen() {
             accessibilityRole="button"
             testID="back-button"
           >
-            <Ionicons name="chevron-back" size={20} color="#163300" />
+            <ChevronLeft size={20} color="#163300" />
           </Pressable>
 
           {/* O titulo diz o PAPEL escolhido na tela anterior: quem chega aqui
@@ -107,7 +107,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="E-mail"
-              icon="mail-outline"
+              icon={Mail}
               placeholder="email@email.com"
               value={email}
               onChangeText={(t) => {
@@ -122,7 +122,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="Senha"
-              icon="lock-closed-outline"
+              icon={Lock}
               placeholder="senha"
               secure
               value={password}
@@ -139,7 +139,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="Confirmar senha"
-              icon="lock-closed-outline"
+              icon={Lock}
               placeholder="confirmar senha"
               secure
               value={confirmPassword}

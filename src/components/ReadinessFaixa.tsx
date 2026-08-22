@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { X } from "lucide-react-native";
 import { router } from "expo-router";
 import type { Completion } from "@lib/completion";
 import { hasBasicPending } from "@lib/completion";
@@ -57,7 +57,7 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
               accessibilityLabel="Fechar aviso"
               hitSlop={8}
             >
-              <Ionicons name="close" size={16} color="#163300" />
+              <X size={16} color="#163300" />
             </Pressable>
           </View>
         </View>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Smartphone, Store, Scissors, Footprints } from "lucide-react-native";
+import type { LucideIcon } from "lucide-react-native";
 import { Center, Text, VStack } from "@gluestack-ui/themed";
 import { Button } from "@components/Button";
 
@@ -14,12 +15,12 @@ import { Button } from "@components/Button";
 // unica verde da marca. Respeita reduce-motion (fallback: troca simples sem
 // movimento). Quando o design entregar os icones/JSON, trocar por Lottie.
 
-const GREEN = "#163300"; // [marca-vupth] $forest — Ionicons `color` nao aceita token
-const STEPS: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-  { icon: "phone-portrait-outline", label: "Abrindo o app" },
-  { icon: "storefront-outline", label: "Chegando na loja" },
-  { icon: "cut-outline", label: "Na cadeira" },
-  { icon: "walk-outline", label: "Pronto, sem fila" },
+const GREEN = "#163300"; // [marca-vupth] $forest — o `color` do lucide nao aceita token
+const STEPS: { icon: LucideIcon; label: string }[] = [
+  { icon: Smartphone, label: "Abrindo o app" },
+  { icon: Store, label: "Chegando na loja" },
+  { icon: Scissors, label: "Na cadeira" },
+  { icon: Footprints, label: "Pronto, sem fila" },
 ];
 
 const ICON_MS = 800; // tempo por icone (~0.8s)
@@ -88,11 +89,13 @@ function WarmupAnimation() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, reduceMotion]);
 
+  const Icon = STEPS[index].icon;
+
   return (
     <Animated.View
       style={{ opacity, transform: [{ scale }, { translateX: shiftX }] }}
     >
-      <Ionicons name={STEPS[index].icon} size={56} color={GREEN} />
+      <Icon size={56} color={GREEN} />
     </Animated.View>
   );
 }

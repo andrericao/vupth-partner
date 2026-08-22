@@ -1,5 +1,5 @@
 import { View, Text, TextInput, type TextInputProps } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Search } from "lucide-react-native";
 
 // Campo de busca com lupa. Migrado p/ NativeWind (v2). API: textLabel + props
 // de TextInput. (Sem uso ativo hoje, mantido por compatibilidade.)
@@ -8,13 +8,15 @@ type Props = TextInputProps & { textLabel: string };
 export function InputSearch({ textLabel, ...rest }: Props) {
   return (
     <View className="mb-3 w-full">
-      <Text className="font-body text-sm text-gray-600 mb-1">{textLabel}</Text>
-      <View className="flex-row items-center bg-white rounded-md px-3 h-12 border border-success-500">
-        {/* #064e3b = $emerald900 do v1. */}
-        <Ionicons name="search" size={18} color="#064e3b" />
+      <Text className="font-body text-sm text-vupth-textSecondary mb-1">{textLabel}</Text>
+      {/* [marca-vupth] Borda neutra no lugar do border-success-500 (escala v1):
+          o campo so fica verde (vupth-forest) em foco, e este componente nao
+          rastreia foco. */}
+      <View className="flex-row items-center bg-white rounded-md px-3 h-12 border border-vupth-border">
+        <Search size={18} color="#163300" />
         <TextInput
-          className="flex-1 ml-2 font-body text-success-950"
-          placeholderTextColor="#9CA3AF"
+          className="flex-1 ml-2 font-body text-vupth-textPrimary"
+          placeholderTextColor="#454745"
           {...rest}
         />
       </View>

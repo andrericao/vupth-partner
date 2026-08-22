@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { X, Search } from "lucide-react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
@@ -237,7 +237,7 @@ export default function ProfessionalOnboardingScreen() {
               <TextInput
                 className="flex-1 px-3 font-body text-vupth-forest"
                 placeholder="Nome do estabelecimento"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#454745"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
@@ -260,15 +260,15 @@ export default function ProfessionalOnboardingScreen() {
                     : handleSearch
                 }
               >
-                <Ionicons
-                  name={searchQuery.trim() ? "close" : "search"}
-                  size={18}
-                  color={searchQuery.trim() ? "#6b7280" : "#316635"}
-                />
+                {searchQuery.trim() ? (
+                  <X size={18} color="#454745" />
+                ) : (
+                  <Search size={18} color="#163300" />
+                )}
               </Pressable>
             </View>
 
-            {isSearching && <ActivityIndicator size="large" color="#3b7a3f" />}
+            {isSearching && <ActivityIndicator size="large" color="#163300" />}
 
             {searchResults.length > 0 && (
               <View className="mt-2 gap-2">

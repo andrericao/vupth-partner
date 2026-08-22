@@ -1,10 +1,11 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Store, User, ChevronRight } from "lucide-react-native";
+import type { LucideIcon } from "lucide-react-native";
 
 type Papel = {
   role: "owner" | "professional";
-  icone: keyof typeof Ionicons.glyphMap;
+  icone: LucideIcon;
   titulo: string;
   descricao: string;
   /** O papel de dono e o destaque: e quem traz o estabelecimento pro app. */
@@ -14,14 +15,14 @@ type Papel = {
 const PAPEIS: Papel[] = [
   {
     role: "owner",
-    icone: "storefront-outline",
+    icone: Store,
     titulo: "Sou dono de estabelecimento",
     descricao: "Gerencie sua loja, profissionais e filas",
     destaque: true,
   },
   {
     role: "professional",
-    icone: "person-outline",
+    icone: User,
     titulo: "Sou profissional",
     descricao: "Atenda clientes e organize sua fila",
   },
@@ -50,32 +51,35 @@ export default function RoleChoiceScreen() {
           (papeis diferentes, apps diferentes por dentro) e a descricao e o que
           permite decidir sem ter de adivinhar pelo titulo. */}
       <View className="px-4 gap-3">
-        {PAPEIS.map((p) => (
-          <Pressable
-            key={p.role}
-            onPress={() => router.push(`/(auth)/register?role=${p.role}` as any)}
-            className={`flex-row items-center gap-3.5 p-[18px] rounded-[20px] ${
-              p.destaque
-                ? "bg-vupth-green active:bg-vupth-success"
-                : "bg-vupth-surface active:bg-vupth-border"
-            }`}
-            accessibilityRole="button"
-            testID={`role-${p.role}`}
-          >
-            <Ionicons name={p.icone} size={24} color="#163300" />
-            <View className="flex-1 gap-0.5">
-              <Text className="font-display text-base text-vupth-forest">{p.titulo}</Text>
-              <Text
-                className={`font-body text-xs ${
-                  p.destaque ? "text-vupth-forest opacity-70" : "text-vupth-textSecondary"
-                }`}
-              >
-                {p.descricao}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#163300" />
-          </Pressable>
-        ))}
+        {PAPEIS.map((p) => {
+          const Icone = p.icone;
+          return (
+            <Pressable
+              key={p.role}
+              onPress={() => router.push(`/(auth)/register?role=${p.role}` as any)}
+              className={`flex-row items-center gap-3.5 p-[18px] rounded-[20px] ${
+                p.destaque
+                  ? "bg-vupth-green active:bg-vupth-success"
+                  : "bg-vupth-surface active:bg-vupth-border"
+              }`}
+              accessibilityRole="button"
+              testID={`role-${p.role}`}
+            >
+              <Icone size={24} color="#163300" />
+              <View className="flex-1 gap-0.5">
+                <Text className="font-display text-base text-vupth-forest">{p.titulo}</Text>
+                <Text
+                  className={`font-body text-xs ${
+                    p.destaque ? "text-vupth-forest opacity-70" : "text-vupth-textSecondary"
+                  }`}
+                >
+                  {p.descricao}
+                </Text>
+              </View>
+              <ChevronRight size={20} color="#163300" />
+            </Pressable>
+          );
+        })}
       </View>
 
       <View className="px-4 mt-8 flex-row justify-center items-center gap-1.5">

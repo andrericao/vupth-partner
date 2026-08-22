@@ -1,6 +1,6 @@
 import { Alert, TouchableOpacity } from "react-native";
 import { Center, VStack, Text, Box } from "@gluestack-ui/themed";
-import { Ionicons } from "@expo/vector-icons";
+import { ArrowLeft, Clock } from "lucide-react-native";
 
 // Placeholder para funcionalidades cujo BACKEND ainda nao existe: a UI ja fica
 // pronta e, no clique, avisamos "em breve". Ao ligar o endpoint, troca-se a
@@ -23,12 +23,12 @@ export function ComingSoon({ title, onBack }: { title: string; onBack: () => voi
         style={{ position: "absolute", top: 60, left: 20 }}
       >
         <Box bg="$greenTint" borderRadius="$full" p="$2.5">
-          <Ionicons name="arrow-back" size={20} color="#163300" />
+          <ArrowLeft size={20} color="#163300" />
         </Box>
       </TouchableOpacity>
       <VStack alignItems="center" space="md">
         <Center width={72} height={72} borderRadius="$full" bg="$greenTint">
-          <Ionicons name="time-outline" size={32} color="#163300" />
+          <Clock size={32} color="#163300" />
         </Center>
         <Text fontFamily="$display" fontSize="$xl" color="$forest" textAlign="center">
           {title}
