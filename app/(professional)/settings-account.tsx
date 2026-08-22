@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { NwInput } from "@components/nw/Input";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
-import { cardShadow } from "@lib/styles";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -43,13 +42,13 @@ function FieldCard({
   children?: React.ReactNode;
 }) {
   return (
-    <View className="bg-white p-4 rounded-2xl" style={cardShadow}>
-      <Text className="font-body text-sm text-gray-500">{label}</Text>
+    <View className="bg-vupth-surface p-4 rounded-[20px]">
+      <Text className="font-body text-sm text-vupth-textSecondary">{label}</Text>
       {editing ? (
         <View className="mt-2">
           {children}
           {error && (
-            <Text className="font-body text-xs text-danger-500 mb-2">{error}</Text>
+            <Text className="font-body text-xs text-vupth-danger mb-2">{error}</Text>
           )}
           <View className="flex-row gap-2">
             <NwButton title="Cancelar" onPress={onCancel} variant="secondary" className="flex-1 h-9 mt-0" />
@@ -58,7 +57,7 @@ function FieldCard({
         </View>
       ) : (
         <>
-          <Text className="font-heading text-gray-900 mt-1">{value}</Text>
+          <Text className="font-heading text-vupth-forest mt-1">{value}</Text>
           <NwButton title={editLabel} onPress={onEdit} variant="secondary" className="h-9 mt-2" />
         </>
       )}
@@ -114,7 +113,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("Nome atualizado", "Seu nome foi alterado com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar o nome."));
     } finally {
       setIsSaving(false);
     }
@@ -123,7 +122,7 @@ export default function SettingsAccountScreen() {
   const handleSaveNickname = async () => {
     const value = nickname.trim();
     if (value.length > 50) {
-      setFieldError("O apelido deve ter no maximo 50 caracteres.");
+      setFieldError("O apelido deve ter no máximo 50 caracteres.");
       return;
     }
     setFieldError(null);
@@ -137,7 +136,7 @@ export default function SettingsAccountScreen() {
         value ? "Seu apelido foi salvo." : "Seu apelido foi removido."
       );
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o apelido."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o apelido."));
     } finally {
       setIsSaving(false);
     }
@@ -156,7 +155,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("E-mail atualizado", "Seu e-mail foi alterado com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o e-mail."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar o e-mail."));
     } finally {
       setIsSaving(false);
     }
@@ -173,7 +172,7 @@ export default function SettingsAccountScreen() {
       return;
     }
     if (password !== confirmPassword) {
-      setFieldError("As senhas nao coincidem.");
+      setFieldError("As senhas não coincidem.");
       return;
     }
     setFieldError(null);
@@ -183,7 +182,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("Senha alterada", "Sua senha foi alterada com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar a senha."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar a senha."));
     } finally {
       setIsSaving(false);
     }
@@ -200,10 +199,11 @@ export default function SettingsAccountScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/settings" as any)} />
-
-          <Text className="font-heading text-2xl text-gray-900 mt-8">Dados cadastrais</Text>
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+          title="Dados cadastrais"
+          onBack={() => router.navigate("/(professional)/settings" as any)}
+        />
 
           <View className="mt-6 gap-3">
             <FieldCard

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Adoção da marca — o que muda em cada tela</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lima:#9FE870; --forest:#163300; --forestSoft:#223D0D; --tint:#E2F6D5;
+    --surface:#F3F5F1; --border:#D7DDD3; --txt2:#454745; --danger:#B3261E;
+    --antigo:#3b7a3f; --offwhite:#F7FAF8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 20px 60px;background:#EDEFEA;font-family:Inter,system-ui,sans-serif;color:var(--forest)}
+  h1{font-family:Archivo,sans-serif;font-size:22px;margin:0 0 6px}
+  .sub{color:var(--txt2);font-size:13px;max-width:70ch;line-height:1.55;margin:0 0 26px}
+  .par{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:30px;align-items:flex-start}
+  .col h2{font-family:Archivo,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt2);margin:0 0 8px}
+  .col.novo h2{color:var(--forest)}
+  /* moldura de celular */
+  .tel{width:290px;background:#fff;border-radius:22px;padding:16px 14px 20px;box-shadow:0 8px 22px rgba(22,51,0,.13)}
+  .tel.old{background:var(--offwhite)}
+  .tit{font-family:Archivo,sans-serif;font-size:19px;margin:2px 0 12px}
+  .chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:500}
+  .card{border-radius:15px;padding:12px;margin-bottom:8px;box-shadow:0 4px 9px rgba(22,51,0,.08)}
+  .btn{height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-size:13px;margin-top:9px}
+  .lbl{font-size:11px;color:var(--txt2)}
+  .nome{font-family:Archivo,sans-serif;font-size:13px}
+  .nota{background:#fff;border-left:3px solid var(--lima);padding:11px 13px;border-radius:0 10px 10px 0;font-size:12.5px;line-height:1.55;max-width:78ch;margin:0 0 26px}
+  .nota b{color:var(--forest)}
+  .swatches{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 26px}
+  .sw{width:104px;border-radius:10px;overflow:hidden;box-shadow:0 3px 8px rgba(22,51,0,.1);background:#fff}
+  .sw .c{height:44px}
+  .sw .n{font-size:10.5px;padding:5px 7px;line-height:1.35;color:var(--txt2)}
+  code{font-family:ui-monospace,monospace;font-size:11.5px;background:var(--tint);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<h1>Adoção da marca — o que muda, tela por tela</h1>
+<p class="sub">
+  À esquerda o app <b>hoje</b>; à direita <b>com a marca adotada</b>. A diferença
+  não é trocar um verde por outro: é o <b>lima entrar como cor de ação</b>, com o
+  verde-escuro virando texto e estrutura. As telas de entrada já estão assim no
+  aparelho — o resto é o que falta decidir.
+</p>
+
+<div class="swatches">
+  <div class="sw"><div class="c" style="background:var(--antigo)"></div><div class="n"><b>#3b7a3f</b><br>verde antigo</div></div>
+  <div class="sw"><div class="c" style="background:var(--forest)"></div><div class="n"><b>#163300</b><br>forest — texto/estrutura</div></div>
+  <div class="sw"><div class="c" style="background:var(--lima)"></div><div class="n"><b>#9FE870</b><br>lima — <b>ação</b></div></div>
+  <div class="sw"><div class="c" style="background:var(--tint)"></div><div class="n"><b>#E2F6D5</b><br>tint — realce suave</div></div>
+</div>
+
+<p class="nota">
+  <b>A regra que sustenta tudo:</b> o lima é claro demais para carregar texto branco.
+  Ele entra <b>como fundo</b>, sempre com <code>forest</code> por cima. É por isso que
+  o botão primário fica lima com letra escura — e não o contrário. Já existe um teste
+  travando isso: nenhum variante pode usar o lima como cor de texto.
+</p>
+
+<!-- ============ FILA ============ -->
+<div class="par">
+  <div class="col">
+    <h2>Fila — hoje</h2>
+    <div class="tel old">
+      <div class="tit">Fila</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <span class="chip" style="background:#eef2ee;color:#3f4a3f">3 na fila</span>
+        <span class="chip" style="background:#eef2ee;color:#3f4a3f">~45 min</span>
+      </div>
+      <div class="card" style="background:var(--forest);color:#fff">
+        <div style="font-size:10px;opacity:.85">ATENDENDO AGORA</div>
+        <div class="nome" style="color:#fff">Joana Prado</div>
+        <div style="font-size:11px;opacity:.9">Corte + Barba · R$ 65,00</div>
+      </div>
+      <div class="card" style="background:#fff">
+        <div class="nome">Marcos Vinícius</div>
+        <div class="lbl">Corte · R$ 40,00</div>
+      </div>
+      <div class="btn" style="background:var(--forest);color:#fff">Iniciar próximo</div>
+    </div>
+  </div>
+
+  <div class="col novo">
+    <h2>Fila — com a marca</h2>
+    <div class="tel">
+      <div class="tit">Fila</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <span class="chip" style="background:var(--tint);color:var(--forest)">3 na fila</span>
+        <span class="chip" style="background:var(--tint);color:var(--forest)">~45 min</span>
+      </div>
+      <div class="card" style="background:var(--forest);color:#fff">
+        <div style="font-size:10px;color:var(--lima)">ATENDENDO AGORA</div>
+        <div class="nome" style="color:#fff">Joana Prado</div>
+        <div style="font-size:11px;opacity:.9">Corte + Barba · R$ 65,00</div>
+      </div>
+      <div class="card" style="background:#fff;border:1px solid var(--border)">
+        <div class="nome">Marcos Vinícius</div>
+        <div class="lbl">Corte · R$ 40,00</div>
+      </div>
+      <div class="btn" style="background:var(--lima);color:var(--forest)">Iniciar próximo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DONO ============ -->
+<div class="par">
+  <div class="col">
+    <h2>Painel do dono — hoje</h2>
+    <div class="tel old">
+      <div class="tit">Rei do Corte</div>
+      <div class="card" style="background:#fff">
+        <div class="lbl">Status</div>
+        <div class="nome" style="color:var(--antigo)">Aberto</div>
+      </div>
+      <div class="card" style="background:#fff">
+        <div class="lbl">Falta para abrir</div>
+        <div class="nome">1 profissional com serviço</div>
+        <div class="btn" style="background:var(--forest);color:#fff;height:36px">Resolver</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col novo">
+    <h2>Painel do dono — com a marca</h2>
+    <div class="tel">
+      <div class="tit">Rei do Corte</div>
+      <div class="card" style="background:var(--tint)">
+        <div class="lbl" style="color:var(--forestSoft)">Status</div>
+        <div class="nome">Aberto</div>
+      </div>
+      <div class="card" style="background:#fff;border:1px solid var(--border)">
+        <div class="lbl">Falta para abrir</div>
+        <div class="nome">1 profissional com serviço</div>
+        <div class="btn" style="background:var(--lima);color:var(--forest);height:36px">Resolver</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="nota">
+  <b>O que isso custa no código.</b> As telas de entrada já usam as variantes novas —
+  foi só trocar o <code>variant</code> de cada botão. Para as demais, o caminho é
+  <b>trocar o padrão do <code>Button</code> compartilhado</b>, como o app do cliente
+  fez: lá 24 telas mudaram de uma vez. Medi o risco aqui: apenas <b>2 chamadas</b>
+  passam cor de fundo própria sem dizer a cor do texto, e as duas ganham
+  <code>textColor="$white"</code> no mesmo commit. O resto já declara as duas coisas.
+</p>
+
+<p class="nota">
+  <b>O que continua diferente do app do cliente — e por quê.</b> Lá o botão tem
+  <code>variant: solid | outline | destructive</code>; aqui ainda é
+  <code>bg</code>/<code>textColor</code> por prop, em 42 chamadas. Igualar a API
+  exigiria reescrever todas — trabalho que se perde, porque estas 13 telas viram
+  <code>NwButton</code> na migração. A convergência real de componente acontece
+  quando o cliente migrar para NativeWind (o <b>C15</b> do handoff). Até lá,
+  igualamos <b>o resultado visual</b>: mesma cor, mesma altura, mesma fonte,
+  mesma hierarquia.
+</p>
+
+</body>
+</html>

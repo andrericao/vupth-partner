@@ -17,7 +17,7 @@ export function PasswordRules({ rules }: { rules: PasswordRule[] }) {
             color={rule.passed ? "#3b7a3f" : "#E63946"}
           />
           <Text
-            className={`font-body text-xs ${rule.passed ? "text-brand-600" : "text-danger-500"}`}
+            className={`font-body text-xs ${rule.passed ? "text-vupth-forest" : "text-vupth-danger"}`}
           >
             {rule.label}
           </Text>

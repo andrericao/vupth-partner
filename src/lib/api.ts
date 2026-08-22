@@ -30,34 +30,34 @@ export const api = axios.create({
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
   AFFILIATION_ALREADY_PENDING:
-    "Voce ja tem uma solicitacao de vinculacao pendente para este estabelecimento. Aguarde a resposta do proprietario.",
+    "Você já tem uma solicitação de vinculação pendente para este estabelecimento. Aguarde a resposta do proprietário.",
   PROFESSIONAL_ALREADY_AFFILIATED:
-    "Voce ja esta vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
-  USER_ALREADY_PROFESSIONAL: "Voce ja possui um perfil profissional.",
-  ESTABLISHMENT_NOT_FOUND: "Estabelecimento nao encontrado.",
-  PROFESSIONAL_NOT_FOUND: "Perfil profissional nao encontrado.",
-  AFFILIATION_NOT_FOUND: "Solicitacao de vinculacao nao encontrada.",
+    "Você já está vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
+  USER_ALREADY_PROFESSIONAL: "Você já possui um perfil profissional.",
+  ESTABLISHMENT_NOT_FOUND: "Estabelecimento não encontrado.",
+  PROFESSIONAL_NOT_FOUND: "Perfil profissional não encontrado.",
+  AFFILIATION_NOT_FOUND: "Solicitação de vinculação não encontrada.",
   ESTABLISHMENT_NOT_READY:
-    "O estabelecimento precisa de pelo menos um profissional com servico cadastrado para abrir.",
+    "O estabelecimento precisa de pelo menos um profissional com serviço cadastrado para abrir.",
   ESTABLISHMENT_HOURS_REQUIRED:
-    "Defina o horario de funcionamento do estabelecimento antes de abrir.",
+    "Defina o horário de funcionamento do estabelecimento antes de abrir.",
   ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:
-    "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
+    "Não é possível fechar enquanto há clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
   INTERVAL_INVALID_TIME:
-    "Horario da refeicao fora do horario de funcionamento do estabelecimento.",
+    "Horário da refeição fora do horário de funcionamento do estabelecimento.",
   INTERVAL_CONFLICT:
-    "Conflito de horario: a refeicao ja foi iniciada/encerrada hoje ou se sobrepoe a outra.",
-  INTERVAL_NOT_FOUND: "Refeicao/intervalo nao encontrado.",
+    "Conflito de horário: a refeição já foi iniciada/encerrada hoje ou se sobrepoe a outra.",
+  INTERVAL_NOT_FOUND: "Refeicao/intervalo não encontrado.",
   // S1 — status do profissional (fatia 1).
   PROFESSIONAL_HAS_NO_SERVICE:
-    "Cadastre pelo menos um servico antes de entrar em expediente.",
+    "Cadastre pelo menos um serviço antes de entrar em expediente.",
   PROFESSIONAL_HAS_ACTIVE_ATTENDANCES:
-    "Nao da para ficar indisponivel com cliente em atendimento ou na fila. Termine a fila primeiro.",
+    "Não da para ficar indisponível com cliente em atendimento ou na fila. Termine a fila primeiro.",
   // Esqueci minha senha (S7). O backend nao distingue "e-mail desconhecido" de
   // "codigo errado" de proposito (anti-enumeracao) — a mensagem cobre os dois.
   RESET_CODE_INVALID:
-    "Codigo invalido. Confira o e-mail e o codigo digitado (apos 5 erros ou uso, peca um novo).",
-  RESET_CODE_EXPIRED: "Codigo expirado (vale 15 minutos). Peca um novo codigo.",
+    "Código inválido. Confira o e-mail e o código digitado (após 5 erros ou uso, peça um novo).",
+  RESET_CODE_EXPIRED: "Código expirado (vale 15 minutos). Peça um novo código.",
   // Trocar senha (breaking backend 2026-07-23): a senha ATUAL confere via
   // PasswordEncoder.matches; errada volta 401 — erro de campo, nao de sessao.
   CURRENT_PASSWORD_INVALID: "Senha atual incorreta.",

@@ -6,7 +6,8 @@ import Svg, { Rect } from "react-native-svg";
  * que e o que o menu governa, e a silhueta larga le bem em 24px.
  * (Provisorio por decisao dele: "outra hora a gente muda".)
  */
-export function BenchIcon({ size = 24, color = "#3b7a3f" }: { size?: number; color?: string }) {
+// [marca-vupth] $forest — default de cor, nao aceita token de dentro do SVG.
+export function BenchIcon({ size = 24, color = "#163300" }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* ripas do encosto (a de baixo mais clara, da profundidade) */}

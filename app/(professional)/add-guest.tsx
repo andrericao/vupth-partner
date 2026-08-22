@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
@@ -44,7 +44,7 @@ export default function AddGuestScreen() {
     }
 
     if (!professional?.id || !professional.establishment_id) {
-      Alert.alert("Erro", "Profissional nao vinculado a um estabelecimento.");
+      Alert.alert("Erro", "Profissional não vinculado a um estabelecimento.");
       return;
     }
 
@@ -62,7 +62,7 @@ export default function AddGuestScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar o cliente."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível adicionar o cliente."));
     } finally {
       setIsLoading(false);
     }
@@ -79,13 +79,12 @@ export default function AddGuestScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
-        <Text className="font-heading text-2xl text-gray-900 mt-8">
-          Adicionar Cliente
-        </Text>
-        <Text className="font-body text-gray-500 mt-1">
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Adicionar cliente"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
+        <Text className="font-body text-vupth-textSecondary mt-1">
           Cliente sem cadastro no app
         </Text>
 
@@ -95,17 +94,17 @@ export default function AddGuestScreen() {
             placeholder="Ex: Maria"
             value={clientName}
             onChangeText={setClientName}
-            error={isInvalid && !clientName.trim() ? "Nome obrigatorio" : ""}
+            error={isInvalid && !clientName.trim() ? "Nome obrigatório" : ""}
             testID="guest-name"
           />
 
-          <Text className="font-body text-gray-600 mt-2 mb-2">
-            Servicos ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
+          <Text className="font-body text-vupth-textSecondary mt-2 mb-2">
+            Serviços ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
           </Text>
 
           {myServices.length === 0 && (
-            <Text className="font-body text-sm text-gray-400">
-              Nenhum servico cadastrado. Adicione servicos primeiro.
+            <Text className="font-body text-sm text-vupth-textSecondary">
+              Nenhum serviço cadastrado. Adicione serviços primeiro.
             </Text>
           )}
 
@@ -120,24 +119,24 @@ export default function AddGuestScreen() {
                   accessibilityLabel={svc.customName}
                   accessibilityState={{ selected: isSelected }}
                   className={`py-3 px-4 rounded-md border ${
-                    isSelected ? "bg-brand border-brand-600" : "bg-gray-100 border-gray-200"
+                    isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
                   }`}
                 >
                   <View className="flex-row justify-between items-center">
                     <View className="flex-1">
                       <Text
-                        className={`font-body text-sm ${isSelected ? "text-white" : "text-gray-700"}`}
+                        className={`font-body text-sm ${isSelected ? "text-white" : "text-vupth-textSecondary"}`}
                       >
                         {svc.customName}
                       </Text>
                       <Text
-                        className={`font-body text-xs ${isSelected ? "text-brand-100" : "text-gray-500"}`}
+                        className={`font-body text-xs ${isSelected ? "text-vupth-greenTint" : "text-vupth-textSecondary"}`}
                       >
                         {svc.estimatedMinutes}min
                       </Text>
                     </View>
                     <Text
-                      className={`font-heading ${isSelected ? "text-white" : "text-brand-700"}`}
+                      className={`font-heading ${isSelected ? "text-white" : "text-vupth-forest"}`}
                     >
                       R$ {svc.price.toFixed(2)}
                     </Text>
@@ -148,17 +147,17 @@ export default function AddGuestScreen() {
           </View>
 
           {selectedServices.length > 0 && (
-            <View className="bg-brand-50 p-3 rounded-md border border-brand-200 flex-row justify-between items-center mb-4">
-              <Text className="font-body text-brand-700">Total:</Text>
-              <Text className="font-heading text-lg text-brand-800">
+            <View className="bg-vupth-greenTint p-3 rounded-md border border-vupth-forest flex-row justify-between items-center mb-4">
+              <Text className="font-body text-vupth-forest">Total:</Text>
+              <Text className="font-heading text-lg text-vupth-forest">
                 R$ {selectedTotal.toFixed(2)}
               </Text>
             </View>
           )}
 
           {isInvalid && (
-            <Text className="font-body text-sm text-danger-500 mb-2">
-              Informe o nome e selecione ao menos 1 servico.
+            <Text className="font-body text-sm text-vupth-danger mb-2">
+              Informe o nome e selecione ao menos 1 serviço.
             </Text>
           )}
 

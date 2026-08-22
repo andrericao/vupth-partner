@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { Header } from "@components/Header";
+import { View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { ScreenHeader, defaultBack } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 
@@ -22,13 +22,14 @@ export default function ServicesScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center justify-center">
-          <Header showBackButton />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Serviços oferecidos"
+            subtitle="O que você faz, quanto custa e quanto demora."
+            onBack={defaultBack}
+          />
 
-          <View className="flex-1 mt-48 w-full">
-            <Text className="font-heading text-3xl mb-12 text-gray-900">
-              Serviços Oferecidos
-            </Text>
+          <View className="flex-1 w-full">
 
             <NwInput
               label="Nome do Serviço"
@@ -50,7 +51,7 @@ export default function ServicesScreen() {
               error={isInvalid ? "Duração inválida" : ""}
             />
 
-            <NwButton title="Finalizar Cadastro" onPress={handleFinish} />
+            <NwButton title="Finalizar cadastro" onPress={handleFinish} />
           </View>
         </View>
       </ScrollView>

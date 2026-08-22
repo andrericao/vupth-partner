@@ -1,35 +1,89 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
-import { NwButton } from "@components/nw/Button";
+import { Ionicons } from "@expo/vector-icons";
+
+type Papel = {
+  role: "owner" | "professional";
+  icone: keyof typeof Ionicons.glyphMap;
+  titulo: string;
+  descricao: string;
+  /** O papel de dono e o destaque: e quem traz o estabelecimento pro app. */
+  destaque?: boolean;
+};
+
+const PAPEIS: Papel[] = [
+  {
+    role: "owner",
+    icone: "storefront-outline",
+    titulo: "Sou dono de estabelecimento",
+    descricao: "Gerencie sua loja, profissionais e filas",
+    destaque: true,
+  },
+  {
+    role: "professional",
+    icone: "person-outline",
+    titulo: "Sou profissional",
+    descricao: "Atenda clientes e organize sua fila",
+  },
+];
 
 export default function RoleChoiceScreen() {
   return (
-    <View className="flex-1 py-12 px-6 items-center justify-center">
-      <Header />
-
-      <View className="flex-1 mt-48 w-full gap-5">
-        <Text className="font-heading text-3xl text-center text-gray-900">
-          Como deseja usar o VUPTH?
+    <ScrollView
+      className="flex-1 bg-white"
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingVertical: 48 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="px-4 gap-3 mb-12">
+        <Text className="font-display text-[15px] tracking-[2px] text-vupth-forest">
+          VUPTH
         </Text>
-
-        <Text className="font-body text-center mt-4 text-gray-500">
-          Escolha seu papel para começar
+        <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+          Como você vai usar o Vupth?
         </Text>
-
-        <NwButton
-          title="Sou dono de estabelecimento"
-          onPress={() => router.push("/(auth)/register?role=owner")}
-          className="mt-8"
-        />
-
-        <NwButton
-          title="Sou profissional"
-          variant="outlineBrand"
-          onPress={() => router.push("/(auth)/register?role=professional")}
-          className="mt-4"
-        />
+        <Text className="font-body text-[15px] text-vupth-textSecondary">
+          Escolha seu papel para começar.
+        </Text>
       </View>
-    </View>
+
+      {/* Cartoes em vez de dois botoes empilhados: a escolha tem consequencia
+          (papeis diferentes, apps diferentes por dentro) e a descricao e o que
+          permite decidir sem ter de adivinhar pelo titulo. */}
+      <View className="px-4 gap-3">
+        {PAPEIS.map((p) => (
+          <Pressable
+            key={p.role}
+            onPress={() => router.push(`/(auth)/register?role=${p.role}` as any)}
+            className={`flex-row items-center gap-3.5 p-[18px] rounded-[20px] ${
+              p.destaque
+                ? "bg-vupth-green active:bg-vupth-success"
+                : "bg-vupth-surface active:bg-vupth-border"
+            }`}
+            accessibilityRole="button"
+            testID={`role-${p.role}`}
+          >
+            <Ionicons name={p.icone} size={24} color="#163300" />
+            <View className="flex-1 gap-0.5">
+              <Text className="font-display text-base text-vupth-forest">{p.titulo}</Text>
+              <Text
+                className={`font-body text-xs ${
+                  p.destaque ? "text-vupth-forest opacity-70" : "text-vupth-textSecondary"
+                }`}
+              >
+                {p.descricao}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#163300" />
+          </Pressable>
+        ))}
+      </View>
+
+      <View className="px-4 mt-8 flex-row justify-center items-center gap-1.5">
+        <Text className="font-body text-[13px] text-vupth-textSecondary">Já tem conta?</Text>
+        <Pressable onPress={() => router.push("/(auth)/login" as any)} testID="go-login">
+          <Text className="font-heading text-[13px] text-vupth-forest">Entrar</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
   );
 }

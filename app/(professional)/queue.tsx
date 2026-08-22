@@ -10,11 +10,11 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
+import { ChevronRight, Info } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { SkeletonList } from "@components/Skeleton";
-import { useQuery } from "@tanstack/react-query";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useElapsedTime, clearAttendanceStart } from "@hooks/useElapsedTime";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -23,18 +23,18 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime, isoDate } from "@lib/time";
-import { cardShadow } from "@lib/styles";
 import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
-import { activeCutRequests } from "@lib/cutRequests";
 import { queueMenuCount } from "@lib/notifications";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { BenchIcon } from "@components/BenchIcon";
+import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
@@ -61,52 +61,77 @@ function ServingCard({
   );
 
   return (
+    // Pausado fica AMBAR (estado de atencao); atendendo fica no verde-marca —
+    // com `forest` por cima, que e o par de contraste da marca. E o card mais
+    // claro da tela de proposito: e o que esta acontecendo agora.
     <View
-      className={`p-4 rounded-2xl mt-4 ${isPaused ? "bg-amber-500" : "bg-brand"}`}
-      style={cardShadow}
+      className={`p-4 rounded-[20px] mt-4 ${isPaused ? "bg-vupth-accentPeach" : "bg-vupth-green"}`}
     >
-      <View className="flex-row items-center gap-1">
-        <View className="w-2 h-2 rounded-full bg-white opacity-85" />
-        <Text className="font-heading text-[10px] text-white tracking-widest">
-          {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-1.5">
+          {/* Pisca so ATENDENDO: pausado esta parado, e ponto piscando
+              sinalizaria movimento que não esta acontecendo. */}
+          <LiveDot size={7} color={isPaused ? "#FFFFFF" : "#163300"} pulsing={!isPaused} />
+          <Text
+            className={`font-heading text-[10px] tracking-widest ${
+              isPaused ? "text-white" : "text-vupth-forest"
+            }`}
+          >
+            {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
+          </Text>
+        </View>
+        {/* Cronometro em DM Mono: numero que muda a cada segundo nao pode
+            dancar de largura a cada digito. */}
+        <Text
+          className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-forest"}`}
+        >
+          {formatted}
         </Text>
       </View>
 
-      <Text className="font-heading text-lg text-white mt-1">
-        {attendance.clientName}
-      </Text>
-      <Text className="font-body text-sm text-white opacity-90">
-        {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
-      </Text>
-      <Text className="font-body text-xs text-white opacity-95 mt-1.5">
-        ⏱ {formatted}
-      </Text>
+      <View className="mt-3 gap-1">
+        <Text
+          className={`font-display text-[22px] ${isPaused ? "text-white" : "text-vupth-forest"}`}
+        >
+          {attendance.clientName}
+        </Text>
+        <Text
+          className={`font-body text-xs font-semibold ${
+            isPaused ? "text-white opacity-90" : "text-vupth-forest opacity-70"
+          }`}
+        >
+          {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
+        </Text>
+      </View>
 
-      {/* Botoes claros sobre o card colorido: fora das variantes do NwButton
-          (que assumem fundo neutro), entao vao com className explicito. */}
-      <View className="flex-row gap-2 mt-3">
+      {/* Finalizar e a acao mais comum — vem primeiro e cheia. Pausar e a
+          excecao e fica vazada. (Estava invertido: Pausar ocupava o primeiro
+          lugar.) Botoes sobre card colorido ficam fora das variantes do
+          NwButton, que assumem fundo neutro. */}
+      <View className="flex-row gap-2.5 mt-4">
+        <NwButton
+          title="Finalizar"
+          onPress={onFinish}
+          className={`flex-1 h-11 ${
+            isPaused ? "bg-white active:bg-vupth-surface" : "bg-vupth-forest active:bg-vupth-forestSoft"
+          }`}
+          textClassName={isPaused ? "text-vupth-forest" : "text-vupth-green"}
+        />
         {isPaused ? (
           <NwButton
             title="Retomar"
             onPress={onResume}
-            variant="secondary"
-            className="flex-1 h-10 bg-white active:bg-gray-100"
-            textClassName="text-amber-700"
+            className="flex-1 h-11 bg-transparent border-2 border-white active:bg-vupth-accentPeach"
+            textClassName="text-white"
           />
         ) : (
           <NwButton
             title="Pausar"
             onPress={onPause}
-            className="flex-1 h-10 bg-brand-600 active:bg-brand-700"
+            className="flex-1 h-11 bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint"
+            textClassName="text-vupth-forest"
           />
         )}
-        <NwButton
-          title="Finalizar"
-          onPress={onFinish}
-          variant="secondary"
-          className="flex-1 h-10 bg-white active:bg-gray-100"
-          textClassName={isPaused ? "text-amber-700" : "text-brand-700"}
-        />
       </View>
     </View>
   );
@@ -137,20 +162,19 @@ function QueueRow({
     <Pressable
       onPress={onMenu}
       accessibilityRole="button"
-      accessibilityLabel={`Opcoes de ${attendance.clientName}`}
-      className={`bg-white pl-4 active:bg-gray-50 ${
-        isFirst ? "p-4 rounded-2xl border border-brand-200 mb-3" : "p-3 rounded-xl mb-2"
+      accessibilityLabel={`Opções de ${attendance.clientName}`}
+      className={`bg-vupth-surface pl-4 active:bg-vupth-greenTint ${
+        isFirst ? "p-4 rounded-[20px] border border-vupth-forest mb-3" : "p-3 rounded-[20px] mb-2"
       }`}
-      style={cardShadow}
     >
       <View className="flex-row items-center gap-2">
         <View
           className={`w-6 h-6 rounded-full items-center justify-center ${
-            isFirst ? "bg-brand" : "bg-gray-100"
+            isFirst ? "bg-vupth-forest" : "bg-vupth-surface"
           }`}
         >
           <Text
-            className={`font-heading text-xs ${isFirst ? "text-white" : "text-gray-500"}`}
+            className={`font-heading text-xs ${isFirst ? "text-white" : "text-vupth-textSecondary"}`}
           >
             {position}
           </Text>
@@ -159,7 +183,7 @@ function QueueRow({
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
             <Text
-              className={`font-heading text-gray-900 ${isFirst ? "text-base" : "text-sm"}`}
+              className={`font-heading text-vupth-forest ${isFirst ? "text-base" : "text-sm"}`}
             >
               {attendance.clientName}
             </Text>
@@ -180,22 +204,25 @@ function QueueRow({
             )}
           </View>
           <Text
-            className={`font-body text-gray-600 ${isFirst ? "text-sm" : "text-xs"}`}
+            className={`font-body text-vupth-textSecondary ${isFirst ? "text-sm" : "text-xs"}`}
           >
             {services} · {price}
           </Text>
           {isFirst && (
             <Text
               className={`font-body text-xs mt-0.5 ${
-                isLate ? "text-amber-600" : "text-brand-600"
+                isLate ? "text-vupth-textSecondary" : "text-vupth-forest"
               }`}
             >
-              {isLate ? "Atrasado" : "Proximo"}
+              {isLate ? "Atrasado" : "Próximo"}
             </Text>
           )}
         </View>
 
-        <Text className="text-lg text-gray-400 font-bold">›</Text>
+        {/* [marca-vupth] Era o caractere "›" — mesmo padrao ja trocado por
+            ícone no dashboard do dono; o Pencil (PROF · 01 Fila) especifica
+            chevron-right/lucide aqui também. */}
+        <ChevronRight size={18} color="#9CA3AF" />
       </View>
     </Pressable>
   );
@@ -209,7 +236,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, removeFromQueue, promoteAttendance, fetchCutRequests,
+    markLate, removeFromQueue, promoteAttendance,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -222,7 +249,7 @@ export default function ProfessionalQueueScreen() {
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
 
-  // Anti-nag: refeicoes ja avisadas nesta sessao (nao repetir o popup).
+  // Anti-nag: refeicoes ja avisadas nesta sessao (não repetir o popup).
   const nudgedRef = useRef<Set<string>>(new Set());
 
   const [refreshing, setRefreshing] = useState(false);
@@ -257,7 +284,7 @@ export default function ProfessionalQueueScreen() {
       try {
         await startInterval(profId, m.intervalId);
       } catch (error: any) {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel iniciar a refeicao."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível iniciar a refeição."));
       }
     },
     [profId, startInterval]
@@ -280,7 +307,7 @@ export default function ProfessionalQueueScreen() {
       try {
         await skipInterval(profId, m.intervalId);
       } catch (error: any) {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel pular a refeicao."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível pular a refeição."));
       }
     },
     [profId, skipInterval]
@@ -325,15 +352,15 @@ export default function ProfessionalQueueScreen() {
       Alert.alert(
         `Hora do ${mealName(due.description)}`,
         count > 0
-          ? `Voce tem ${count} cliente(s) na fila. Iniciar agora adia o proximo em ~${due.durationMinutes}min.`
+          ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
           : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
         [
-          { text: "Agora nao", style: "cancel" },
+          { text: "Agora não", style: "cancel" },
           // "Nao ver mais" desliga o popup DE VEZ (Andre 2026-07-20: "sem
           // intromissao na tela"). Depois disso o aviso fica so no menu — dot +
           // contagem. Reversivel em Configuracoes > Refeicoes.
-          { text: "Nao ver mais", onPress: () => disableMealNudge() },
-          { text: "Nao almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
+          { text: "Não ver mais", onPress: () => disableMealNudge() },
+          { text: "Não almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
           { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
         ]
       );
@@ -383,7 +410,7 @@ export default function ProfessionalQueueScreen() {
       // Iniciar um atendimento encerra a refeicao ativa no backend — refletir.
       if (profId) await fetchIntervals(profId).catch(() => {});
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar acao."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar ação."));
     }
   };
 
@@ -409,7 +436,7 @@ export default function ProfessionalQueueScreen() {
     }
     const msg = runningName
       ? `Isso finaliza o atendimento de ${runningName} e ${advance ? `atende ${att.clientName} na frente da fila` : `inicia ${att.clientName}`}. Continuar?`
-      : `${att.clientName} sera atendido agora, na frente da fila. Tem certeza?`;
+      : `${att.clientName} será atendido agora, na frente da fila. Tem certeza?`;
     Alert.alert(advance ? "Adiantar cliente" : "Iniciar atendimento", msg, [
       { text: "Cancelar" },
       { text: advance ? "Adiantar" : "Iniciar", onPress: doStart },
@@ -420,8 +447,8 @@ export default function ProfessionalQueueScreen() {
   // sem teto). O proximo passa a ser o 1o.
   const confirmLate = (att: AttendanceInQueue) => {
     Alert.alert(
-      "Cliente nao chegou",
-      `${att.clientName} cai uma posicao e o proximo passa a ser o primeiro. Continuar?`,
+      "Cliente não chegou",
+      `${att.clientName} cai uma posição e o próximo passa a ser o primeiro. Continuar?`,
       [
         { text: "Cancelar" },
         { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
@@ -455,26 +482,11 @@ export default function ProfessionalQueueScreen() {
   // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
   // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
   // handleAction, que traduz a mensagem.
-  // C2 (desbloqueado 2026-07-22): pendentes via GET. TEMPO REAL: o WS pessoal
-  // (assinado no useQueueSocket, mesma conexao da fila) invalida esta query a
-  // cada evento CUT_* — o refetch de 30s vira fallback p/ socket caido. A
-  // validade e checada LOCALMENTE pelo expires_at (orientacao do backend) —
-  // pedido vencido some sozinho no proximo render.
-  // Relogio ancorado em estado (react-hooks/purity proibe Date.now() no
-  // render). Atualiza nos CALLBACKS — a cada fetch da lista (30s) e ao abrir o
-  // modal — granularidade de sobra p/ um TTL de 5min.
-  const [cutNowMs, setCutNowMs] = useState(() => Date.now());
-  const { data: cutRequestsData } = useQuery({
-    queryKey: ["cut-requests", profId],
-    queryFn: async () => {
-      const list = await fetchCutRequests();
-      setCutNowMs(Date.now()); // callback de sistema externo: permitido
-      return list;
-    },
-    enabled: !!profId && !!establishmentId,
-    refetchInterval: 30000,
-  });
-  const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
+  // C2: contagem de encaixes pendentes pelo hook compartilhado — a MESMA
+  // queryKey do rodape e da tela de Encaixes, entao e um cache so. O WS
+  // pessoal (eventos CUT_*, assinado no useQueueSocket) invalida; o refetch
+  // de 30s e o fallback p/ socket caido.
+  const { count: pendingCutRequests } = usePendingCutRequests();
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
@@ -489,26 +501,27 @@ export default function ProfessionalQueueScreen() {
     try {
       await finishInterval(profId, m.intervalId);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel encerrar a refeicao."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível encerrar a refeição."));
     }
   };
 
   if (!establishmentId) {
     return (
-      <View className="flex-1 py-12 px-6">
-        <Header />
-        <Text className="font-heading text-2xl mt-8 text-gray-900">Fila</Text>
-        <View className="mt-8 bg-amber-50 p-5 rounded-lg border border-amber-200 gap-2">
-          <Text className="font-heading text-amber-700">
-            Voce ainda nao tem fila
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Fila"
+        />
+        <View className="mt-8 bg-vupth-accentPeach p-5 rounded-lg border border-vupth-accentPeach gap-2">
+          <Text className="font-heading text-vupth-forest">
+            Você ainda não tem fila
           </Text>
-          <Text className="font-body text-amber-700">
-            Para receber clientes, voce precisa estar vinculado a um
-            estabelecimento. Busque um estabelecimento e solicite a vinculacao —
-            o dono confirma e voce passa a aparecer na fila.
+          <Text className="font-body text-vupth-forest">
+            Para receber clientes, você precisa estar vinculado a um
+            estabelecimento. Busque um estabelecimento e solicite a vinculação —
+            o dono confirma e você passa a aparecer na fila.
           </Text>
           <NwButton
-            title="Buscar Estabelecimento"
+            title="Buscar estabelecimento"
             onPress={() => router.push("/(professional)/find-establishment" as any)}
             className="mt-2"
           />
@@ -520,7 +533,7 @@ export default function ProfessionalQueueScreen() {
   return (
     <View className="flex-1">
       {/* Auto-fechamento (BUG1): o prompt "quer fechar?" com countdown aparece
-          por cima da fila quando chega o WS CLOSING_PROMPT (Modal, so visivel se
+          por cima da fila quando chega o WS CLOSING_PROMPT (Modal, só visivel se
           houver graceUntil na ui.store). */}
       <ClosingPrompt />
       {/* flex-1 e obrigatorio aqui: como ScrollView virou FILHO (antes era a
@@ -532,42 +545,41 @@ export default function ProfessionalQueueScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-      <View className="flex-1 py-12 px-6">
-        {/* Um icone por tela (QA 2026-07-22): aqui quem manda e o banco do menu. */}
-        <Header showRoleIcon={false} />
-
-        {/* Titulo + menu lado a lado (a tab bar saiu do rodape). */}
-        <View className="flex-row mt-4 items-center justify-between">
-          <Text className="font-heading text-2xl text-gray-900">Fila</Text>
-          {/* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
-              modal — "mais amigavel a tela inteira"). Badge = refeicao na
-              janela + solicitacoes de corte (o que o menu resolve). */}
-          <Pressable
+      <View className="flex-1 pb-12 px-4">
+        {/* O banco de opcoes vira `action` do cabecalho — antes era um bloco
+            proprio com margem propria embaixo do Header. */}
+        <ScreenHeader
+          title="Fila"
+          action={
+            /* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
+               modal — "mais amigavel a tela inteira"). Badge = refeicao na
+               janela + solicitações de corte (o que o menu resolve). */
+            <Pressable
             onPress={() => router.push("/(professional)/queue-options" as any)}
             accessibilityRole="button"
-            accessibilityLabel="Opcoes da fila"
+            accessibilityLabel="Opções da fila"
             hitSlop={8}
-            className="w-10 h-10 rounded-xl bg-white items-center justify-center active:bg-brand-50"
-            style={cardShadow}
+            className="w-10 h-10 rounded-xl bg-vupth-surface items-center justify-center active:bg-vupth-greenTint"
           >
             <BenchIcon />
             {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
-                DENTRO do menu — a pendencia de cadastro ficou de fora porque o
-                dot dela mora na aba Configuracoes (levar ao lugar certo). */}
+                DENTRO do menu — a pendência de cadastro ficou de fora porque o
+                dot dela mora na aba Configurações (levar ao lugar certo). */}
             <View style={{ position: "absolute", top: -5, right: -5 }}>
               <NotificationBadge
                 testID="menu-dot"
                 count={queueMenuCount({
-                  pendingRequests: pendingCutRequests.length,
+                  pendingRequests: pendingCutRequests,
                   mealPending: currentMealSignal != null,
                 })}
               />
             </View>
           </Pressable>
-        </View>
+          }
+        />
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
-          <Text className="font-body text-sm text-amber-600 mt-1">
+          <Text className="font-body text-sm text-vupth-textSecondary mt-1">
             ★ {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
           </Text>
         )}
@@ -597,15 +609,15 @@ export default function ProfessionalQueueScreen() {
             chips — liberam tela para a fila e para o botao fixo do rodape. */}
         {myProfessional && (
           <View className="flex-row gap-2 mt-4 items-center">
-            <View className="flex-row items-center gap-1 bg-brand-100 rounded-full px-3 py-1.5">
+            <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
               <Text className="text-xs">👥</Text>
-              <Text className="font-heading text-xs text-brand-700">
+              <Text className="font-heading text-xs text-vupth-forest">
                 {myProfessional.queue_count} na fila
               </Text>
             </View>
-            <View className="flex-row items-center gap-1 bg-brand-100 rounded-full px-3 py-1.5">
+            <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
               <Text className="text-xs">⏱</Text>
-              <Text className="font-heading text-xs text-brand-700">
+              <Text className="font-heading text-xs text-vupth-forest">
                 {myProfessional.estimated_wait_minutes} min
               </Text>
             </View>
@@ -620,7 +632,7 @@ export default function ProfessionalQueueScreen() {
 
         {waitingList.length > 0 && (
           <View className="mt-6">
-            <Text className="font-heading mb-2 text-gray-700">
+            <Text className="font-heading mb-2 text-vupth-textSecondary">
               Lista de Espera ({waitingList.length})
             </Text>
             {waitingList.map((att, idx) => (
@@ -636,51 +648,51 @@ export default function ProfessionalQueueScreen() {
         )}
 
         {/* Refeicoes sairam da tela (foram p/ o menu, design 2026-07-20). Fica
-            so a faixa da refeicao EM ANDAMENTO, porque "Encerrar" precisa estar
+            só a faixa da refeição EM ANDAMENTO, porque "Encerrar" precisa estar
             a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
         {activeMeal && (
-          <View className="flex-row items-center gap-2 mt-6 bg-amber-100 p-3 rounded-2xl border border-amber-300">
+          <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-[20px]">
             <Text className="text-base">🍽️</Text>
             <View className="flex-1">
-              <Text className="font-heading text-sm text-amber-700">
+              <Text className="font-heading text-sm text-vupth-forest">
                 {mealName(activeMeal.description)} em andamento
               </Text>
-              <Text className="font-body text-xs text-amber-600">
+              <Text className="font-body text-xs text-vupth-textSecondary">
                 {activeMeal.durationMinutes}min previstos
               </Text>
             </View>
             <NwButton
               title="Encerrar"
               onPress={() => handleFinishMeal(activeMeal)}
-              className="h-9 px-4 bg-amber-500 active:bg-amber-600"
+              className="h-9 px-4 bg-vupth-accentPeach active:bg-vupth-accentPeach"
             />
           </View>
         )}
 
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
           <View className="flex-1 items-center justify-center mt-6">
-            <Text className="font-body text-lg text-gray-400 text-center">
+            <Text className="font-body text-lg text-vupth-textSecondary text-center">
               Nenhum cliente na fila
             </Text>
-            <Text className="font-body text-gray-300 text-center mt-2">
+            <Text className="font-body text-vupth-textSecondary text-center mt-2">
               Novos clientes aparecerao automaticamente
             </Text>
           </View>
         )}
 
         {/* Vinculado, mas o backend nao o lista na fila por nao ter servico:
-            sem isto a tela ficava em branco. Damos a acao de adicionar servico. */}
+            sem isto a tela ficava em branco. Damos a ação de adicionar serviço. */}
         {!isLoading && data && !myProfessional && (
-          <View className="mt-8 bg-amber-50 p-5 rounded-lg border border-amber-200 gap-2">
-            <Text className="font-heading text-amber-700">
-              Voce ainda nao aparece para os clientes
+          <View className="mt-8 bg-vupth-accentPeach p-5 rounded-lg border border-vupth-accentPeach gap-2">
+            <Text className="font-heading text-vupth-forest">
+              Você ainda não aparece para os clientes
             </Text>
-            <Text className="font-body text-amber-700">
-              Voce esta vinculado, mas precisa de pelo menos um servico cadastrado
+            <Text className="font-body text-vupth-forest">
+              Você está vinculado, mas precisa de pelo menos um serviço cadastrado
               para entrar na fila e receber clientes.
             </Text>
             <NwButton
-              title="Adicionar Servico"
+              title="Adicionar serviço"
               onPress={() => router.push("/(professional)/my-services?from=queue" as any)}
               className="mt-2"
             />
@@ -691,26 +703,28 @@ export default function ProfessionalQueueScreen() {
 
       {/* Botao FIXO do rodape (design 2026-07-18): o unico "start", e sempre
           atende o 1o da fila. Com atendimento em andamento ele vira uma DICA —
-          finalize antes de iniciar o proximo (nao atende dois ao mesmo tempo). */}
+          finalize antes de iniciar o próximo (não atende dois ao mesmo tempo). */}
       {waitingList.length > 0 && (
         <View
-          className="px-6 pt-3"
-          style={{ paddingBottom: 12, backgroundColor: "#F7FAF8" }}
+          className="px-4 pt-3"
+          style={{ paddingBottom: 12, backgroundColor: "#FFFFFF" }}
         >
           {currentAttendance ? (
             <View
-              className="bg-white rounded-full py-3.5 items-center"
-              style={cardShadow}
+              className="bg-vupth-surface rounded-full py-3.5 flex-row items-center justify-center gap-1.5"
             >
-              <Text className="font-body text-sm text-gray-500">
-                Finalize para iniciar o proximo
+              {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
+                  texto; o desenho marca com um icone de informacao. */}
+              <Info size={15} color="#9CA3AF" />
+              <Text className="font-body text-sm text-vupth-textSecondary">
+                Finalize para iniciar o próximo
               </Text>
             </View>
           ) : (
             // Rotulo fixo (Andre 2026-08-05): o nome saiu do rodape. Ele ja
             // aparece no card com o selo "Proximo", logo acima do botao.
             <NwButton
-              title="Iniciar proximo"
+              title="Iniciar próximo"
               onPress={() => startClient(waitingList[0], false)}
             />
           )}
@@ -738,7 +752,7 @@ export default function ProfessionalQueueScreen() {
           >
             {menuTarget && (
               <>
-                <Text className="font-heading text-gray-700 mb-1">
+                <Text className="font-heading text-vupth-textSecondary mb-1">
                   {menuTarget.clientName}
                 </Text>
                 {queueMenuActions(menuIsFirst).map((action) => (
@@ -754,7 +768,7 @@ export default function ProfessionalQueueScreen() {
                   >
                     <Text
                       className={`font-body text-base ${
-                        action === "remover" ? "text-danger-600" : "text-gray-900"
+                        action === "remover" ? "text-vupth-danger" : "text-vupth-forest"
                       }`}
                     >
                       {QUEUE_ACTION_LABEL[action]}
@@ -766,7 +780,7 @@ export default function ProfessionalQueueScreen() {
                   onPress={() => setMenuTarget(null)}
                   className="py-3"
                 >
-                  <Text className="font-body text-base text-gray-500">Cancelar</Text>
+                  <Text className="font-body text-base text-vupth-textSecondary">Cancelar</Text>
                 </Pressable>
               </>
             )}

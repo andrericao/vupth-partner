@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   ScrollView,
   Badge,
@@ -11,9 +10,9 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 
 type Affiliation = {
@@ -42,7 +41,7 @@ export default function OwnerAffiliationsScreen() {
       );
       setAffiliations(data);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel carregar as solicitacoes."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível carregar as solicitações."));
     } finally {
       setIsLoading(false);
     }
@@ -95,16 +94,12 @@ export default function OwnerAffiliationsScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Solicitacoes
-        </Heading>
-
-        <Text fontFamily="$body" color="$coolGray500" mt="$2" mb="$4">
-          Profissionais que pediram para se vincular ao seu estabelecimento.
-        </Text>
+      <VStack flex={1} pb="$12" px="$4">
+        <ScreenHeader
+          title="Solicitações"
+          subtitle="Profissionais que pediram para se vincular ao seu estabelecimento."
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
         {isLoading && (
           <VStack mt="$6">
@@ -114,43 +109,41 @@ export default function OwnerAffiliationsScreen() {
 
         {!isLoading && pending.length === 0 && resolved.length === 0 && (
           <VStack alignItems="center" mt="$12">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
-              Nenhuma solicitacao recebida ainda.
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
+              Nenhuma solicitação recebida ainda.
             </Text>
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$2" fontSize="$sm">
-              Profissionais podem buscar seu estabelecimento pelo nome e solicitar vinculacao.
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$2" fontSize="$sm">
+              Profissionais podem buscar seu estabelecimento pelo nome e solicitar vinculação.
             </Text>
           </VStack>
         )}
 
         {pending.length > 0 && (
           <VStack mb="$4">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Pendentes ({pending.length})
             </Text>
             {pending.map((aff) => (
               <VStack
                 key={aff.id}
-                bg="$white"
+                bg="$brandSurface"
                 p="$4"
                 borderRadius="$md"
                 borderWidth="$1"
-                borderColor="$amber200"
+                borderColor="$brandWarning"
                 mb="$2"
               >
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                   {aff.professionalName}
                 </Text>
-                <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
-                  {aff.type === "REQUEST" ? "Solicitou vinculacao" : "Convite enviado"}
+                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
+                  {aff.type === "REQUEST" ? "Solicitou vinculação" : "Convite enviado"}
                 </Text>
                 <HStack mt="$3" space="sm">
-                  <Button
+                  <BrandButton
                     title="Aceitar"
                     onPress={() => handleAccept(aff)}
                     isLoading={actionLoading === aff.id}
-                    bg="$green500"
-                    $active-bg="$green600"
                     h="$9"
                     flex={1}
                   />
@@ -158,8 +151,8 @@ export default function OwnerAffiliationsScreen() {
                     title="Rejeitar"
                     onPress={() => handleReject(aff)}
                     isLoading={actionLoading === aff.id}
-                    bg="$red500"
-                    $active-bg="$red600"
+                    bg="$brandDanger"
+                    $active-bg="$brandDanger"
                     h="$9"
                     flex={1}
                   />
@@ -171,7 +164,7 @@ export default function OwnerAffiliationsScreen() {
 
         {resolved.length > 0 && (
           <VStack>
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Historico
             </Text>
             {resolved.map((aff) => (
@@ -179,14 +172,13 @@ export default function OwnerAffiliationsScreen() {
                 key={aff.id}
                 py="$3"
                 px="$4"
-                bg="$white"
-                borderRadius="$2xl"
-                style={cardShadow}
+                bg="$brandSurface"
+                borderRadius="$card"
                 mb="$2"
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Text fontFamily="$body" color="$coolGray900">
+                <Text fontFamily="$body" color="$forest">
                   {aff.professionalName}
                 </Text>
                 <Badge

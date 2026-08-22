@@ -2,21 +2,19 @@ import { useState, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Badge,
   BadgeText,
   ScrollView,
   Pressable,
-  Divider,
 } from "@gluestack-ui/themed";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { cardShadow } from "@lib/styles";
+import { useEstablishmentStore } from "@store/establishment.store";
 import { ratingLabel } from "@lib/rating";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
 
@@ -29,10 +27,10 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
         : "Aguardando";
   const statusColor =
     attendance.status === "IN_PROGRESS"
-      ? "$green500"
+      ? "$forest"
       : attendance.status === "PAUSED"
-        ? "$amber500"
-        : "$blue500";
+        ? "$brandWarning"
+        : "$forest";
 
   return (
     <HStack
@@ -41,13 +39,13 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
       justifyContent="space-between"
       alignItems="center"
       borderBottomWidth="$1"
-      borderBottomColor="$coolGray100"
+      borderBottomColor="$brandSurface"
     >
       <VStack flex={1}>
-        <Text fontFamily="$body" fontSize="$sm" color="$coolGray900">
+        <Text fontFamily="$body" fontSize="$sm" color="$forest">
           {attendance.clientName}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           {attendance.services.map((s) => s.customName).join(", ")}
         </Text>
       </VStack>
@@ -55,7 +53,7 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
         <Text fontFamily="$body" fontSize="$xs" color={statusColor}>
           {statusLabel}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           R$ {attendance.totalValue.toFixed(2)}
         </Text>
       </VStack>
@@ -71,19 +69,19 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
   ];
 
   return (
-    <VStack bg="$white" borderRadius="$2xl"
-      style={cardShadow} mb="$3" overflow="hidden">
+    <VStack bg="$brandSurface" borderRadius="$card"
+      mb="$3" overflow="hidden">
       <Pressable onPress={() => setExpanded(!expanded)} py="$3" px="$4">
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+            <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
               {professional.name}
             </Text>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
               {professional.specialty ?? ""}
             </Text>
             {ratingLabel(professional.rating_average, professional.rating_count) && (
-              <Text fontFamily="$body" fontSize="$xs" color="$amber600" mt="$0.5">
+              <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$0.5">
                 ★ {ratingLabel(professional.rating_average, professional.rating_count)}
               </Text>
             )}
@@ -96,7 +94,7 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
             >
               <BadgeText fontSize="$xs">{professional.queue_count} na fila</BadgeText>
             </Badge>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
               {professional.estimated_wait_minutes} min
             </Text>
           </VStack>
@@ -117,18 +115,18 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
           }
           py="$2"
           px="$4"
-          bg="$green50"
+          bg="$greenTint"
           borderTopWidth="$1"
-          borderTopColor="$coolGray100"
+          borderTopColor="$brandSurface"
         >
-          <Text fontFamily="$body" fontSize="$sm" color="$green700" textAlign="center">
+          <Text fontFamily="$body" fontSize="$sm" color="$forest" textAlign="center">
             Ver fila detalhada
           </Text>
         </Pressable>
       )}
 
       {expanded && allAttendances.length > 0 && (
-        <VStack borderTopWidth="$1" borderTopColor="$coolGray100">
+        <VStack borderTopWidth="$1" borderTopColor="$brandSurface">
           {allAttendances.map((att) => (
             <AttendanceItem key={att.id} attendance={att} />
           ))}
@@ -136,8 +134,8 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
       )}
 
       {expanded && allAttendances.length === 0 && (
-        <VStack py="$3" px="$4" borderTopWidth="$1" borderTopColor="$coolGray100">
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray400" textAlign="center">
+        <VStack py="$3" px="$4" borderTopWidth="$1" borderTopColor="$brandSurface">
+          <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" textAlign="center">
             Nenhum cliente na fila
           </Text>
         </VStack>
@@ -147,7 +145,14 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
 }
 
 export default function OwnerQueuesScreen() {
-  const { establishmentId } = useLocalSearchParams<{ establishmentId: string }>();
+  // Filas virou ABA — e aba nao recebe parametro de rota. O `establishmentId`
+  // do param so existe quando a tela e aberta empilhada (ex.: pelo card do
+  // dashboard); no acesso pela aba ele vem VAZIO, e sem o fallback pro store a
+  // tela ficava sem fila nenhuma pra mostrar.
+  const params = useLocalSearchParams<{ establishmentId?: string }>();
+  const storeEstablishment = useEstablishmentStore((s) => s.establishment);
+  const establishmentId = params.establishmentId || storeEstablishment?.id;
+
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -166,31 +171,21 @@ export default function OwnerQueuesScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Filas
-        </Heading>
-
-        {data && (
-          <HStack mt="$4" space="md" mb="$4">
-            <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
-              <Text fontFamily="$body" fontSize="$xs" color="$green700">Total na fila</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
-                {data.total_in_queue}
-              </Text>
-            </VStack>
-            <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
-              <Text fontFamily="$body" fontSize="$xs" color="$blue700">Profissionais</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
-                {data.available_professionals}
-              </Text>
-            </VStack>
-          </HStack>
-        )}
-
-        <Divider mb="$4" />
+      <VStack flex={1} pb="$8" px="$4">
+        {/* Sem botao de voltar: virou raiz de aba. O subtitulo carrega o total
+            que antes ocupava dois cartões de número — o dono já ve a contagem
+            por profissional logo abaixo, entao repetir o agregado em destaque
+            só empurrava a lista pra baixo. */}
+        <ScreenHeader
+          title="Filas"
+          subtitle={
+            data
+              ? data.total_in_queue === 0
+                ? "Ninguém esperando agora"
+                : `${data.total_in_queue} ${data.total_in_queue === 1 ? "pessoa esperando" : "pessoas esperando"} agora`
+              : "Carregando..."
+          }
+        />
 
         {isLoading && !data && (
           <VStack mt="$6">
@@ -204,19 +199,17 @@ export default function OwnerQueuesScreen() {
 
         {!isLoading && professionals.length === 0 && (
           <VStack alignItems="center" mt="$12">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
               Nenhum profissional cadastrado
             </Text>
-            <Button
-              title="Adicionar Profissional"
+            <BrandButton
+              title="Adicionar profissional"
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/add-professional",
                   params: { establishmentId: establishmentId ?? "" },
                 } as any)
               }
-              bg="$green500"
-              $active-bg="$green600"
               mt="$4"
             />
           </VStack>

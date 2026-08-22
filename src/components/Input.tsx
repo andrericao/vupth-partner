@@ -32,7 +32,7 @@ export function Input(props: InputFieldProps) {
         borderRadius="$xl"
         variant="outline"
         $focus-borderWidth="$2"
-        $focus-borderColor="$green500"
+        $focus-borderColor="$forest"
       >
         <InputField color="$coolGray900" fontFamily="$body" autoCorrect={false} autoCapitalize="words" {...props} />
       </GluestackInput>

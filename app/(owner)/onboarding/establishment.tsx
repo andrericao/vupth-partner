@@ -2,14 +2,13 @@ import { useState } from "react";
 import { router } from "expo-router";
 import {
   View,
-  Text,
   ScrollView,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { SelectService } from "@components/SelectService";
 import { NwButton } from "@components/nw/Button";
@@ -77,13 +76,14 @@ export default function EstablishmentScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center justify-center">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Dados da loja"
+            subtitle="É assim que os clientes vão te encontrar."
+            onBack={() => router.navigate("/(owner)/dashboard" as any)}
+          />
 
-          <View className="flex-1 mt-48 w-full">
-            <Text className="font-heading text-3xl mb-12 text-gray-900">
-              Dados da Loja
-            </Text>
+          <View className="flex-1 w-full">
 
             <NwInput
               label="Seu nome"
@@ -104,7 +104,7 @@ export default function EstablishmentScreen() {
             <SelectService value={serviceType} onValueChange={setServiceType} />
 
             <NwButton
-              title="Criar Estabelecimento"
+              title="Criar estabelecimento"
               onPress={handleSubmit}
               isLoading={isLoading}
             />

@@ -2,14 +2,13 @@ import { useState } from "react";
 import { View, Text, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
-import { cardShadow } from "@lib/styles";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -45,17 +44,16 @@ function PathCard({
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
-      className={`bg-white p-4 rounded-2xl mb-3 border ${
-        selected ? "border-brand" : "border-transparent"
-      } active:bg-gray-50`}
-      style={cardShadow}
+      className={`bg-vupth-surface p-4 rounded-[20px] mb-3 border ${
+        selected ? "border-vupth-forest" : "border-transparent"
+      } active:bg-vupth-surface`}
     >
       <View className="flex-row items-center">
         <View className="flex-1">
-          <Text className="font-heading text-gray-900">{title}</Text>
-          <Text className="font-body text-xs text-gray-500 mt-0.5">{hint}</Text>
+          <Text className="font-heading text-vupth-forest">{title}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
         </View>
-        <Text className="font-body text-lg text-gray-400 ml-2">{"›"}</Text>
+        <Text className="font-body text-lg text-vupth-textSecondary ml-2">{"›"}</Text>
       </View>
     </Pressable>
   );
@@ -111,11 +109,11 @@ export default function AddProfessionalScreen() {
       await refreshToken();
       Alert.alert(
         "Perfil profissional criado",
-        `${result.name} ja aparece como profissional da sua loja. Falta so cadastrar seus servicos para a loja poder abrir.`,
+        `${result.name} já aparece como profissional da sua loja. Falta só cadastrar seus serviços para a loja poder abrir.`,
         [
           { text: "Depois", onPress: () => router.back() },
           {
-            text: "Cadastrar servicos",
+            text: "Cadastrar serviços",
             onPress: () => router.replace("/(professional)/my-services?from=settings" as any),
           },
         ]
@@ -133,7 +131,7 @@ export default function AddProfessionalScreen() {
             await refreshToken();
             Alert.alert(
               "Tudo certo",
-              "Seu perfil profissional ja esta vinculado a este estabelecimento.",
+              "Seu perfil profissional já está vinculado a este estabelecimento.",
               [{ text: "OK", onPress: () => router.back() }]
             );
           } else if (currentEstId) {
@@ -156,11 +154,11 @@ export default function AddProfessionalScreen() {
             );
           }
         } catch (err: any) {
-          Alert.alert("Erro", getApiErrorMessage(err, "Nao foi possivel verificar o perfil profissional."));
+          Alert.alert("Erro", getApiErrorMessage(err, "Não foi possível verificar o perfil profissional."));
         }
       } else {
         const data = error?.response?.data;
-        let msg = "Nao foi possivel criar o profissional.";
+        let msg = "Não foi possível criar o profissional.";
         if (data?.fieldErrors) {
           msg = Object.entries(data.fieldErrors)
             .map(([field, err]) => `${field}: ${err}`)
@@ -186,22 +184,22 @@ export default function AddProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-          <Text className="font-heading text-2xl text-gray-900 mt-8">
-            Quem vai atender?
-          </Text>
-          <Text className="font-body text-sm text-gray-600 mt-1 mb-4">
-            Sua loja so aparece para os clientes com pelo menos um profissional com
-            servico cadastrado. Ha dois caminhos:
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Profissionais"
+            subtitle="Quem vai atender na sua loja."
+            onBack={() => router.navigate("/(owner)/menu" as any)}
+          />
+          <Text className="font-body text-sm text-vupth-textSecondary mt-1 mb-4">
+            Sua loja só aparece para os clientes com pelo menos um profissional com
+            serviço cadastrado. Há dois caminhos:
           </Text>
 
           {!isProfessional && (
             <PathCard
               testID="path-me"
-              title="Eu tambem vou atender"
-              hint="cria o SEU perfil profissional — voce passa a ter fila propria"
+              title="Eu também vou atender"
+              hint="cria o SEU perfil profissional — você passa a ter fila própria"
               selected={meAsProfessional}
               onPress={() => setMeAsProfessional(true)}
             />
@@ -216,15 +214,15 @@ export default function AddProfessionalScreen() {
 
           <PathCard
             testID="path-requests"
-            title="Ver solicitacoes"
-            hint="quem ja pediu para trabalhar na sua loja"
+            title="Ver solicitações"
+            hint="quem já pediu para trabalhar na sua loja"
             onPress={goAffiliations}
           />
 
           {/* O formulario do dono-profissional so abre depois da escolha. */}
           {!isProfessional && meAsProfessional && (
             <View className="mt-4">
-              <Text className="font-heading text-base text-gray-900 mb-2">
+              <Text className="font-heading text-base text-vupth-forest mb-2">
                 Seu perfil profissional
               </Text>
 
@@ -236,7 +234,7 @@ export default function AddProfessionalScreen() {
                 error={isInvalid ? "Nome obrigatório" : ""}
               />
 
-              <Text className="font-heading text-base text-gray-900 mt-2 mb-2">
+              <Text className="font-heading text-base text-vupth-forest mt-2 mb-2">
                 Especialidade
               </Text>
 
@@ -261,9 +259,9 @@ export default function AddProfessionalScreen() {
           )}
 
           {isProfessional && (
-            <Text className="font-body text-xs text-gray-500 mt-2">
-              Voce ja tem perfil profissional nesta loja. Para somar mais gente,
-              convide alguem ou espere uma solicitacao de vinculo.
+            <Text className="font-body text-xs text-vupth-textSecondary mt-2">
+              Você já tem perfil profissional nesta loja. Para somar mais gente,
+              convide alguém ou espere uma solicitação de vinculo.
             </Text>
           )}
         </View>

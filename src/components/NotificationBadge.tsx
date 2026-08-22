@@ -18,13 +18,13 @@ export function NotificationBadge({ count, testID = "notification-badge" }: Prop
   return (
     <View
       testID={testID}
-      accessibilityLabel={`${shown} ${shown === 1 ? "notificacao" : "notificacoes"}`}
+      accessibilityLabel={`${shown} ${shown === 1 ? "notificação" : "notificações"}`}
       style={{
         minWidth: 18,
         height: 18,
         paddingHorizontal: 5,
         borderRadius: 9,
-        backgroundColor: "#E63946",
+        backgroundColor: "#B3261E", // [marca-vupth] $brandDanger
         alignItems: "center",
         justifyContent: "center",
       }}

@@ -16,11 +16,11 @@ describe("needsRefresh (token do socket)", () => {
     expect(needsRefresh("", NOW)).toBe(true);
   });
 
-  it("token ilegivel: precisa renovar (nao da p/ confiar)", () => {
+  it("token ilegivel: precisa renovar (não da p/ confiar)", () => {
     expect(needsRefresh("nao-e-um-jwt", NOW)).toBe(true);
   });
 
-  it("token ja expirado: precisa renovar", () => {
+  it("token já expirado: precisa renovar", () => {
     const t = tokenExpiringAt(NOW / 1000 - 10);
     expect(needsRefresh(t, NOW)).toBe(true);
   });

@@ -147,7 +147,7 @@ describe("deviceOffsetSuffix", () => {
 });
 
 describe("toApiTime", () => {
-  it("monta OffsetTime com o offset do aparelho (nao mais 'Z' fixo)", () => {
+  it("monta OffsetTime com o offset do aparelho (não mais 'Z' fixo)", () => {
     const spy = jest.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(180);
     try {
       expect(toApiTime("09:00")).toBe("09:00:00-03:00");
@@ -177,8 +177,8 @@ describe("hhmmFromIso", () => {
     expect(hhmmFromIso(iso)).toBe("09:05");
   });
 
-  it("entrada invalida ou ausente nao quebra o card", () => {
-    expect(hhmmFromIso("nao e data")).toBeNull();
+  it("entrada inválida ou ausente não quebra o card", () => {
+    expect(hhmmFromIso("não e data")).toBeNull();
     expect(hhmmFromIso(null)).toBeNull();
     expect(hhmmFromIso(undefined)).toBeNull();
     expect(hhmmFromIso("")).toBeNull();

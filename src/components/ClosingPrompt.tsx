@@ -5,7 +5,7 @@ import { useUiStore } from "@store/ui.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { graceSecondsRemaining, graceCountdownLabel } from "@lib/closing";
-import { cardShadow } from "@lib/styles";
+import { floatingShadow } from "@lib/styles";
 
 /**
  * Prompt de AUTO-FECHAMENTO (BUG1 / S1 fatia 5). Quando o backend manda o WS
@@ -46,7 +46,7 @@ export function ClosingPrompt() {
       dismiss();
     } catch (e: any) {
       Alert.alert(
-        "Nao foi possivel fechar",
+        "Não foi possível fechar",
         getApiErrorMessage(e, "Ainda ha atendimento em andamento — finalize antes de fechar.")
       );
     } finally {
@@ -56,18 +56,18 @@ export function ClosingPrompt() {
 
   return (
     <Modal visible={!!graceUntil} transparent animationType="fade" onRequestClose={dismiss}>
-      <View className="flex-1 justify-center items-center px-6">
+      <View className="flex-1 justify-center items-center px-4">
         <Pressable
           style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.45)" }}
           onPress={dismiss}
           accessibilityLabel="Fechar aviso"
         />
-        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={cardShadow}>
+        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
           <Text className="font-heading text-lg text-gray-900">
-            Passou do horario de fechamento
+            Passou do horário de fechamento
           </Text>
           <Text className="font-body text-sm text-gray-600">
-            A fila ja foi fechada para novos clientes. Quem esta na fila segue sendo
+            A fila já foi fechada para novos clientes. Quem está na fila segue sendo
             atendido. Fecha sozinho em:
           </Text>
           <Text

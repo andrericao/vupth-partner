@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -109,11 +109,11 @@ export default function AddressScreen() {
         state: state.trim(),
         zipCode: unmask(zipCode),
       });
-      Alert.alert("Endereco salvo", "Endereco do estabelecimento atualizado.", [
+      Alert.alert("Endereço salvo", "Endereço do estabelecimento atualizado.", [
         { text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) },
       ]);
     } catch (error: any) {
-      const msg = getApiErrorMessage(error, "Nao foi possivel salvar o endereco.");
+      const msg = getApiErrorMessage(error, "Não foi possível salvar o endereço.");
       Alert.alert("Erro", msg);
     } finally {
       setIsLoading(false);
@@ -131,13 +131,14 @@ export default function AddressScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/establishment-data" as any)} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Endereço da loja"
+            subtitle="O cliente vê a distância até você."
+            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+          />
 
-          <View className="flex-1 mt-8 w-full">
-            <Text className="font-heading text-3xl mb-12 text-gray-900">
-              Endereco da Loja
-            </Text>
+          <View className="flex-1 w-full">
 
             <NwInput
               label="CEP"
@@ -146,14 +147,14 @@ export default function AddressScreen() {
               onChangeText={handleCepChange}
               keyboardType="number-pad"
               maxLength={9}
-              error={isInvalid ? "CEP invalido" : ""}
+              error={isInvalid ? "CEP inválido" : ""}
             />
 
             {cepLoading && (
               <View className="flex-row items-center gap-2 mb-3 -mt-1">
                 <ActivityIndicator size="small" color="#3b7a3f" />
-                <Text className="font-body text-xs text-gray-500">
-                  Buscando endereco pelo CEP...
+                <Text className="font-body text-xs text-vupth-textSecondary">
+                  Buscando endereço pelo CEP...
                 </Text>
               </View>
             )}
@@ -163,16 +164,16 @@ export default function AddressScreen() {
               placeholder="Rua de exemplo"
               value={street}
               onChangeText={setStreet}
-              error={isInvalid ? "Campo obrigatorio" : ""}
+              error={isInvalid ? "Campo obrigatório" : ""}
             />
 
             <NwInput
-              label="Numero"
+              label="Número"
               placeholder="123"
               value={number}
               onChangeText={setNumber}
               keyboardType="numeric"
-              error={isInvalid ? "Campo obrigatorio" : ""}
+              error={isInvalid ? "Campo obrigatório" : ""}
             />
 
             <NwInput
@@ -187,7 +188,7 @@ export default function AddressScreen() {
               placeholder="Bairro"
               value={neighborhood}
               onChangeText={setNeighborhood}
-              error={isInvalid ? "Campo obrigatorio" : ""}
+              error={isInvalid ? "Campo obrigatório" : ""}
             />
 
             <NwInput
@@ -195,7 +196,7 @@ export default function AddressScreen() {
               placeholder="Cidade"
               value={city}
               onChangeText={setCity}
-              error={isInvalid ? "Campo obrigatorio" : ""}
+              error={isInvalid ? "Campo obrigatório" : ""}
             />
 
             <NwInput
@@ -205,11 +206,11 @@ export default function AddressScreen() {
               onChangeText={setState}
               autoCapitalize="characters"
               maxLength={2}
-              error={isInvalid ? "Campo obrigatorio" : ""}
+              error={isInvalid ? "Campo obrigatório" : ""}
             />
 
             <NwButton
-              title="Salvar Endereco"
+              title="Salvar endereço"
               onPress={handleSubmit}
               isLoading={isLoading}
             />

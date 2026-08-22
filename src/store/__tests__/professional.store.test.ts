@@ -392,7 +392,7 @@ describe("professional.store", () => {
       ).rejects.toThrow();
     });
 
-    it("rejeita no 422 (entrar em expediente sem servico)", async () => {
+    it("rejeita no 422 (entrar em expediente sem serviço)", async () => {
       mock
         .onPatch("/professional/me/status")
         .reply(422, { message: "PROFESSIONAL_HAS_NO_SERVICE" });
@@ -510,7 +510,7 @@ describe("professional.store", () => {
   });
 
   describe("addMyServiceItem", () => {
-    it("lanca quando nao ha professional carregado", async () => {
+    it("lanca quando não há professional carregado", async () => {
       useProfessionalStore.setState({ professional: null });
 
       await expect(
@@ -549,7 +549,7 @@ describe("professional.store", () => {
       expect(useProfessionalStore.getState().professional?.establishment_id).toBe("estab-uuid-1");
     });
 
-    it("nao altera o estado quando nao ha valor salvo", async () => {
+    it("não altera o estado quando não há valor salvo", async () => {
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
 
       await useProfessionalStore.getState().restoreProfessional();

@@ -11,7 +11,7 @@
       "expo-secure-store",
       "expo-notifications"
     ],
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.vupth.partner"
     },
@@ -33,7 +33,7 @@
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
-      "backgroundColor": "#F7FAF8"
+      "backgroundColor": "#FFFFFF"
     },
     "extra": {
       "eas": {
@@ -46,6 +46,7 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "backgroundColor": "#FFFFFF"
   }
 }

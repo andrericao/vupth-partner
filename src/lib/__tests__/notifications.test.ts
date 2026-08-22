@@ -1,12 +1,12 @@
 import { badgeLabel, queueMenuCount } from "../notifications";
 
 describe("badgeLabel", () => {
-  it("sem notificacao, nao ha rotulo (o badge nem aparece)", () => {
+  it("sem notificação, não há rotulo (o badge nem aparece)", () => {
     expect(badgeLabel(0)).toBe("");
     expect(badgeLabel(-3)).toBe("");
   });
 
-  it("de 1 a 9 mostra o numero exato", () => {
+  it("de 1 a 9 mostra o número exato", () => {
     expect(badgeLabel(1)).toBe("1");
     expect(badgeLabel(5)).toBe("5");
     expect(badgeLabel(9)).toBe("9");
@@ -17,7 +17,7 @@ describe("badgeLabel", () => {
     expect(badgeLabel(147)).toBe("9+");
   });
 
-  it("valor invalido nao vira badge", () => {
+  it("valor inválido não vira badge", () => {
     expect(badgeLabel(NaN)).toBe("");
     expect(badgeLabel(Number.POSITIVE_INFINITY)).toBe("9+");
   });
@@ -28,11 +28,11 @@ describe("badgeLabel", () => {
 });
 
 describe("queueMenuCount", () => {
-  it("conta as solicitacoes de corte", () => {
+  it("conta as solicitações de corte", () => {
     expect(queueMenuCount({ pendingRequests: 3 })).toBe(3);
   });
 
-  it("a refeicao sinalizada conta como UMA notificacao", () => {
+  it("a refeição sinalizada conta como UMA notificação", () => {
     expect(queueMenuCount({ mealPending: true })).toBe(1);
     expect(queueMenuCount({ mealPending: false })).toBe(0);
   });
@@ -41,11 +41,11 @@ describe("queueMenuCount", () => {
     expect(queueMenuCount({ pendingRequests: 2, mealPending: true })).toBe(3);
   });
 
-  it("sem pendencia nenhuma, zero", () => {
+  it("sem pendência nenhuma, zero", () => {
     expect(queueMenuCount({})).toBe(0);
   });
 
-  it("entrada suja nao quebra a contagem", () => {
+  it("entrada suja não quebra a contagem", () => {
     expect(queueMenuCount({ pendingRequests: -1 })).toBe(0);
     expect(queueMenuCount({ pendingRequests: NaN, mealPending: true })).toBe(1);
   });

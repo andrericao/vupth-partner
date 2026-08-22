@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform, Pressable } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Header } from "@components/Header";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
@@ -76,14 +76,38 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center justify-center">
-          <Header showBackButton />
+        <View className="flex-1 pt-14 pb-8 px-4">
+          <Pressable
+            onPress={() => router.back()}
+            className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
+            accessibilityRole="button"
+            testID="back-button"
+          >
+            <Ionicons name="chevron-back" size={20} color="#163300" />
+          </Pressable>
 
-          <View className="flex-1 mt-48 w-full">
-            <Text className="font-heading text-3xl mb-12 text-gray-900">Cadastrar</Text>
+          {/* O titulo diz o PAPEL escolhido na tela anterior: quem chega aqui
+              já decidiu, e ver a escolha confirmada evita a dúvida de "será que
+              cliquei no lugar certo?". Sem papel (link direto), cai no
+              generico. */}
+          <View className="mt-10 gap-2">
+            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+              VUPTH
+            </Text>
+            <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+              {role === "owner"
+                ? "Criar conta de dono"
+                : role === "professional"
+                  ? "Criar conta de profissional"
+                  : "Criar conta"}
+            </Text>
+          </View>
+
+          <View className="mt-8">
 
             <NwInput
               label="E-mail"
+              icon="mail-outline"
               placeholder="email@email.com"
               value={email}
               onChangeText={(t) => {
@@ -98,6 +122,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="Senha"
+              icon="lock-closed-outline"
               placeholder="senha"
               secure
               value={password}
@@ -114,6 +139,7 @@ export default function RegisterScreen() {
 
             <NwInput
               label="Confirmar senha"
+              icon="lock-closed-outline"
               placeholder="confirmar senha"
               secure
               value={confirmPassword}
@@ -128,23 +154,25 @@ export default function RegisterScreen() {
 
             {confirmPassword.length > 0 && (
               <Text
-                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-brand-600" : "text-danger-500"}`}
+                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-vupth-forest" : "text-vupth-danger"}`}
               >
                 {passwordsMatch ? "Senhas conferem" : "Senhas não conferem"}
               </Text>
             )}
 
-            <NwButton title="Criar Conta" onPress={handleSubmit} isLoading={isLoading} />
           </View>
 
-          <View className="mt-12 flex-1 w-full">
-            <Text className="font-body text-center text-gray-500">Já é cadastrado?</Text>
-            <NwButton
-              title="Fazer login"
-              variant="outlineBrand"
-              onPress={() => router.push(`/(auth)/login?role=${role ?? ""}`)}
-              className="mt-2"
-            />
+          <View className="flex-1 justify-end gap-4 mt-8">
+            <NwButton title="Criar conta" onPress={handleSubmit} isLoading={isLoading} />
+            <View className="flex-row justify-center items-center gap-1.5">
+              <Text className="font-body text-[13px] text-vupth-textSecondary">Já é cadastrado?</Text>
+              <Pressable
+                onPress={() => router.push(`/(auth)/login?role=${role ?? ""}` as any)}
+                testID="go-login"
+              >
+                <Text className="font-heading text-[13px] text-vupth-forest">Entrar</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </ScrollView>

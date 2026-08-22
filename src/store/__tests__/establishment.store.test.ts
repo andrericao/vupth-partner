@@ -312,7 +312,7 @@ describe("establishment.store", () => {
       expect(useEstablishmentStore.getState().establishment?.address?.neighborhood).toBe("Centro");
     });
 
-    it("sem address no /mine, o campo fica null (nao inventa endereco)", async () => {
+    it("sem address no /mine, o campo fica null (não inventa endereço)", async () => {
       mock.onGet("/establishment/mine").reply(200, [ESTABLISHMENT_RESPONSE]);
 
       await useEstablishmentStore.getState().fetchMine();
@@ -472,7 +472,7 @@ describe("establishment.store", () => {
       expect(JSON.parse(mock.history.post[0].data)).toEqual({ professionalId: "prof-uuid-9" });
     });
 
-    it("rejeita em 409 (ja afiliado/pendente)", async () => {
+    it("rejeita em 409 (já afiliado/pendente)", async () => {
       mock
         .onPost("/establishment/estab-uuid-1/affiliations")
         .reply(409, { code: "AFFILIATION_ALREADY_PENDING" });
@@ -554,7 +554,7 @@ describe("establishment.store", () => {
   });
 
   describe("addAddress", () => {
-    it("POST /establishments/{id}/addresses e retorna o endereco criado", async () => {
+    it("POST /establishments/{id}/addresses e retorna o endereço criado", async () => {
       const addr = {
         street: "Rua A",
         number: "10",
@@ -589,7 +589,7 @@ describe("establishment.store", () => {
       expect(useEstablishmentStore.getState().establishment?.id).toBe("estab-uuid-1");
     });
 
-    it("nao altera o estado quando nao ha valor salvo", async () => {
+    it("não altera o estado quando não há valor salvo", async () => {
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
 
       await useEstablishmentStore.getState().restoreEstablishment();

@@ -38,7 +38,7 @@ export function WsDiagnostics() {
 
       {connected && (
         <Text style={line}>
-          {principal ? `sessao autenticada (${principal.slice(0, 8)})` : "sessao ANONIMA — sem user-name"}
+          {principal ? `sessão autenticada (${principal.slice(0, 8)})` : "sessão ANONIMA — sem user-name"}
         </Text>
       )}
 
@@ -50,7 +50,7 @@ export function WsDiagnostics() {
       </Text>
 
       {lastError && (
-        <Text style={{ ...line, color: "#E63946" }}>ultimo erro: {lastError}</Text>
+        <Text style={{ ...line, color: "#E63946" }}>último erro: {lastError}</Text>
       )}
     </View>
   );

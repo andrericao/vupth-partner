@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Badge,
   BadgeText,
@@ -12,8 +11,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
@@ -30,27 +28,26 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
         : `#${position}`;
   const statusColor =
     attendance.status === "IN_PROGRESS"
-      ? "$green500"
+      ? "$forest"
       : attendance.status === "PAUSED"
-        ? "$amber500"
-        : "$blue500";
+        ? "$brandWarning"
+        : "$forest";
 
   return (
     <HStack
       py="$3"
       px="$4"
-      bg="$white"
-      borderRadius="$2xl"
-      style={cardShadow}
+      bg="$brandSurface"
+      borderRadius="$card"
       mb="$2"
       justifyContent="space-between"
       alignItems="center"
     >
       <VStack flex={1}>
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           {attendance.clientName}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           {attendance.services.map((s) => s.customName).join(", ")}
         </Text>
       </VStack>
@@ -58,7 +55,7 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
         <Text fontFamily="$body" fontSize="$sm" color={statusColor} fontWeight="$bold">
           {statusLabel}
         </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
           R$ {attendance.totalValue.toFixed(2)}
         </Text>
       </VStack>
@@ -75,15 +72,15 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
 
   return (
     <VStack
-      bg="$green50"
+      bg="$greenTint"
       p="$4"
-      borderRadius="$lg"
+      borderRadius="$card"
       borderWidth="$1"
-      borderColor="$green300"
+      borderColor="$greenTint"
       mb="$4"
     >
       <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green800" fontSize="$lg">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
           {attendance.clientName}
         </Text>
         <Badge action="success" variant="solid" borderRadius="$md">
@@ -92,14 +89,14 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
           </BadgeText>
         </Badge>
       </HStack>
-      <Text fontFamily="$body" fontSize="$sm" color="$green700" mt="$1">
+      <Text fontFamily="$body" fontSize="$sm" color="$forest" mt="$1">
         {attendance.services?.map((s: any) => s.customName).join(", ")}
       </Text>
       <HStack mt="$2" justifyContent="space-between">
-        <Text fontFamily="$body" fontSize="$sm" color="$green600">
+        <Text fontFamily="$body" fontSize="$sm" color="$forest">
           Tempo: {formatted}
         </Text>
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </HStack>
@@ -134,7 +131,7 @@ export default function ProfessionalQueueScreen() {
     const name = data?.professionalName ?? professionalName ?? "este profissional";
     Alert.alert(
       "Desvincular profissional",
-      `Deseja desvincular ${name} do estabelecimento? Ele deixara de atender aqui.`,
+      `Deseja desvincular ${name} do estabelecimento? Ele deixará de atender aqui.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -148,7 +145,7 @@ export default function ProfessionalQueueScreen() {
                 { text: "OK", onPress: () => router.navigate("/(owner)/dashboard" as any) },
               ]);
             } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel desvincular o profissional. Verifique se nao ha atendimento em andamento."));
+              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desvincular o profissional. Verifique se não há atendimento em andamento."));
             } finally {
               setIsRemoving(false);
             }
@@ -165,29 +162,28 @@ export default function ProfessionalQueueScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          {data?.professionalName ?? professionalName ?? "Fila"}
-        </Heading>
+      <VStack flex={1} pb="$12" px="$4">
+        <ScreenHeader
+          title={data?.professionalName ?? professionalName ?? "Fila"}
+          onBack={() => router.navigate("/(owner)/dashboard" as any)}
+        />
 
         {data && (
           <>
-            <Text fontFamily="$body" color="$coolGray500" mt="$1">
+            <Text fontFamily="$body" color="$brandTextSecondary" mt="$1">
               {data.establishmentName}
             </Text>
 
             <HStack mt="$4" space="md" mb="$4">
-              <VStack flex={1} bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200">
-                <Text fontFamily="$body" fontSize="$xs" color="$green700">Na fila</Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$greenTint">
+                <Text fontFamily="$body" fontSize="$xs" color="$forest">Na fila</Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                   {data.size}
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$blue50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$blue200">
+              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$blue200">
                 <Text fontFamily="$body" fontSize="$xs" color="$blue700">Espera total</Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$blue800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
                   {data.totalRemainingMinutes} min
                 </Text>
               </VStack>
@@ -199,14 +195,14 @@ export default function ProfessionalQueueScreen() {
 
         {isLoading && !data && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Spinner color="$green500" size="large" />
-            <Text fontFamily="$body" color="$coolGray500" mt="$4">Carregando fila...</Text>
+            <Spinner color="$forest" size="large" />
+            <Text fontFamily="$body" color="$brandTextSecondary" mt="$4">Carregando fila...</Text>
           </VStack>
         )}
 
         {data?.inAttendance && (
           <VStack mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Em Atendimento
             </Text>
             <CurrentAttendanceCard attendance={data.inAttendance} />
@@ -215,7 +211,7 @@ export default function ProfessionalQueueScreen() {
 
         {data && data.attendancesInQueue.length > 0 && (
           <VStack>
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$coolGray700">
+            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Lista de Espera ({data.attendancesInQueue.length})
             </Text>
             {data.attendancesInQueue.map((att, i) => (
@@ -226,7 +222,7 @@ export default function ProfessionalQueueScreen() {
 
         {data && !data.inAttendance && data.attendancesInQueue.length === 0 && (
           <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" fontSize="$lg">
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" fontSize="$lg">
               Nenhum cliente na fila
             </Text>
           </VStack>
@@ -235,14 +231,14 @@ export default function ProfessionalQueueScreen() {
         <Divider my="$6" />
 
         <Button
-          title="Desvincular Profissional"
+          title="Desvincular profissional"
           onPress={handleRemove}
           isLoading={isRemoving}
           bg="transparent"
           borderWidth="$1"
-          borderColor="$red500"
-          textColor="$red500"
-          $active-bg="$red50"
+          borderColor="$brandDanger"
+          textColor="$brandDanger"
+          $active-bg="$brandSurface"
         />
       </VStack>
     </ScrollView>

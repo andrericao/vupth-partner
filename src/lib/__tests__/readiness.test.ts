@@ -86,7 +86,7 @@ describe("waitForBackend", () => {
     expect(fetchImpl.mock.calls.length).toBeGreaterThan(0);
   });
 
-  it("usa os defaults reais (URL, Date.now e defaultSleep) resolvendo apos 1 retry", async () => {
+  it("usa os defaults reais (URL, Date.now e defaultSleep) resolvendo após 1 retry", async () => {
     // Sem injetar url/now/sleep: exercita os `?? DEFAULT` e o defaultSleep real.
     const fetchImpl = jest
       .fn()

@@ -44,7 +44,7 @@ describe("ownerCompletion", () => {
     expect(c.profile.percent).toBe(0);
   });
 
-  it("cadastro todo preenchido => basico 100% (independe da loja estar aberta)", () => {
+  it("cadastro todo preenchido => básico 100% (independe da lojá estár aberta)", () => {
     const c = ownerCompletion({
       hasName: true,
       hasServiceType: true,
@@ -71,7 +71,7 @@ describe("ownerCompletion", () => {
     expect(c.basic.percent).toBe(80);
   });
 
-  it("basic e profile sao independentes (profile pode adiantar o basico)", () => {
+  it("basic e profile sao independentes (profile pode adiantar o básico)", () => {
     const c = ownerCompletion({ ...ownerAllFalse, hasPhone: true, hasInstagram: true });
     expect(c.basic.percent).toBe(0);
     expect(c.profile.percent).toBe(100);
@@ -99,7 +99,7 @@ describe("professionalCompletion", () => {
     expect(keys).not.toContain("establishmentReady");
   });
 
-  it("vinculado + servico => basico 100%", () => {
+  it("vinculado + serviço => básico 100%", () => {
     const c = professionalCompletion({
       ...proAllFalse,
       isAffiliated: true,
@@ -108,7 +108,7 @@ describe("professionalCompletion", () => {
     expect(c.basic.percent).toBe(100);
   });
 
-  it("so vinculado => 50% (1 de 2)", () => {
+  it("só vinculado => 50% (1 de 2)", () => {
     const c = professionalCompletion({ ...proAllFalse, isAffiliated: true });
     expect(c.basic.done).toBe(1);
     expect(c.basic.percent).toBe(50);
@@ -121,11 +121,11 @@ describe("professionalCompletion", () => {
 });
 
 describe("hasBasicPending (faixa)", () => {
-  it("ha pendencia basica => true", () => {
+  it("ha pendência basica => true", () => {
     expect(hasBasicPending(ownerCompletion(ownerAllFalse))).toBe(true);
   });
 
-  it("basico 100% => false, mesmo com perfil pendente", () => {
+  it("básico 100% => false, mesmo com perfil pendente", () => {
     const c = ownerCompletion({
       ...ownerAllFalse,
       hasName: true,
@@ -146,7 +146,7 @@ describe("hasAnyPending (dot)", () => {
     expect(hasAnyPending(professionalCompletion(proAllFalse))).toBe(true);
   });
 
-  it("basico completo mas perfil pendente => true (o dot cobre perfil)", () => {
+  it("básico completo mas perfil pendente => true (o dot cobre perfil)", () => {
     const c = professionalCompletion({
       ...proAllFalse,
       isAffiliated: true,

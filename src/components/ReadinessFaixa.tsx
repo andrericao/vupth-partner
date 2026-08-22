@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { Completion } from "@lib/completion";
 import { hasBasicPending } from "@lib/completion";
@@ -28,48 +29,50 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
 
   const n = completion.basic.pending;
   const passos = n === 1 ? "1 passo" : `${n} passos`;
+  const total = completion.basic.total;
+  const feitos = Math.max(0, total - n);
 
   return (
-    <View className="flex-row items-center gap-2 bg-amber-100 border border-amber-200 rounded-xl px-3 py-3 mt-4">
+    // [marca-vupth] Vinha em AMBAR — cor de alerta pra uma tarefa que nao e
+    // erro nem urgencia: e so cadastro pendente. Passou pro greenTint com a
+    // barra de progresso do Pencil (OWNER · 02 Menu), que MOSTRA o quanto ja
+    // andou em vez de so cobrar o que falta.
+    <View className="bg-vupth-greenTint rounded-[20px] p-4 mt-4 gap-2.5">
       <Pressable
-        className="flex-1"
         onPress={() => router.push(targetRoute as any)}
         accessibilityRole="button"
         accessibilityLabel="Completar cadastro"
       >
-        <View className="flex-row items-center gap-2">
-          <View
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 13,
-              backgroundColor: "#FFB703",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text className="text-white font-bold text-sm">{n}</Text>
-          </View>
-          <View className="flex-1">
-            <Text className="font-heading text-sm text-amber-800">
-              Complete seu cadastro
+        <View className="flex-row items-center justify-between">
+          <Text className="font-display text-sm text-vupth-forest">
+            {n === 1 ? "Falta 1 passo para abrir" : `Faltam ${n} passos para abrir`}
+          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="font-mono text-xs text-vupth-forest">
+              {feitos} de {total}
             </Text>
-            <Text className="font-body text-xs text-amber-700">
-              {passos} para {goalNoun}
-            </Text>
+            <Pressable
+              onPress={dismiss}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar aviso"
+              hitSlop={8}
+            >
+              <Ionicons name="close" size={16} color="#163300" />
+            </Pressable>
           </View>
-          <Text className="text-amber-700 text-lg font-bold">›</Text>
         </View>
-      </Pressable>
 
-      <Pressable
-        onPress={dismiss}
-        accessibilityRole="button"
-        accessibilityLabel="Fechar aviso"
-        hitSlop={8}
-        className="w-6 h-6 items-center justify-center rounded-full active:bg-amber-200"
-      >
-        <Text className="text-amber-700 text-base">✕</Text>
+        {/* A barra e o ponto: progresso feito ao lado do que falta. */}
+        <View className="h-1.5 rounded-full bg-vupth-forest/15 mt-2.5 overflow-hidden">
+          <View
+            className="h-full rounded-full bg-vupth-forest"
+            style={{ width: `${total > 0 ? (feitos / total) * 100 : 0}%` }}
+          />
+        </View>
+
+        <Text className="font-body text-[11px] font-semibold text-vupth-forest mt-2.5">
+          {passos} para {goalNoun}.
+        </Text>
       </Pressable>
     </View>
   );

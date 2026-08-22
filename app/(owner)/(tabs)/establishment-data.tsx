@@ -1,9 +1,8 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { CompletionCard } from "@components/CompletionCard";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
-import { cardShadow } from "@lib/styles";
 
 type MenuItemProps = {
   label: string;
@@ -17,11 +16,10 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="py-4 px-5 bg-white rounded-2xl active:bg-gray-50"
-      style={cardShadow}
+      className="py-4 px-4 bg-vupth-surface rounded-[20px] active:bg-vupth-surface"
     >
-      <Text className="font-heading text-base text-gray-900">{label}</Text>
-      <Text className="font-body text-sm text-gray-500 mt-0.5">{description}</Text>
+      <Text className="font-heading text-base text-vupth-forest">{label}</Text>
+      <Text className="font-body text-sm text-vupth-textSecondary mt-0.5">{description}</Text>
     </Pressable>
   );
 }
@@ -37,12 +35,11 @@ export default function EstablishmentDataScreen() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 py-12 px-6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Text className="font-heading text-2xl text-gray-900 mt-8">
-          Dados do Estabelecimento
-        </Text>
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Dados do estabelecimento"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
         <CompletionCard
           completion={completion}
@@ -57,25 +54,24 @@ export default function EstablishmentDataScreen() {
             onPress={() => router.push("/(owner)/establishment-registration" as any)}
           />
           <MenuItem
-            label="Horario de Funcionamento"
+            label="Horário de Funcionamento"
             description="Abertura e fechamento"
             onPress={() => router.push("/(owner)/establishment-hours" as any)}
           />
           <MenuItem
-            label="Endereco"
-            description="Rua, numero, bairro, CEP"
+            label="Endereço"
+            description="Rua, número, bairro, CEP"
             onPress={() => router.push("/(owner)/onboarding/address" as any)}
           />
         </View>
 
         <View
-          className="mt-4 bg-white rounded-2xl px-5 py-4 flex-row justify-between items-center"
-          style={cardShadow}
+          className="mt-4 bg-vupth-surface rounded-[20px] px-4 py-4 flex-row justify-between items-center"
         >
-          <Text className="font-body text-base text-gray-700">
+          <Text className="font-body text-base text-vupth-textSecondary">
             Profissionais vinculados
           </Text>
-          <Text className="font-heading text-lg text-brand-700">
+          <Text className="font-heading text-lg text-vupth-forest">
             {professionalsCount}
           </Text>
         </View>

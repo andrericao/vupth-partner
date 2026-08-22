@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Badge,
   BadgeText,
@@ -14,40 +13,38 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useAttendanceStore } from "@store/attendance.store";
-import { cardShadow } from "@lib/styles";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Finalizado", color: "$green500" },
-  CANCELLED: { label: "Cancelado", color: "$red500" },
-  IN_PROGRESS: { label: "Em andamento", color: "$blue500" },
-  PAUSED: { label: "Pausado", color: "$amber500" },
-  SCHEDULED: { label: "Agendado", color: "$coolGray500" },
+  FINISHED: { label: "Finalizado", color: "$forest" },
+  CANCELLED: { label: "Cancelado", color: "$brandDanger" },
+  IN_PROGRESS: { label: "Em andamento", color: "$forest" },
+  PAUSED: { label: "Pausado", color: "$brandWarning" },
+  SCHEDULED: { label: "Agendado", color: "$brandTextSecondary" },
 };
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$coolGray500" };
+  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$brandTextSecondary" };
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
     <VStack
-      bg="$white"
+      bg="$brandSurface"
       p="$4"
-      borderRadius="$2xl"
-      style={cardShadow}
+      borderRadius="$card"
       mb="$3"
     >
       <HStack justifyContent="space-between" alignItems="center">
         <VStack flex={1}>
-          <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+          <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
             {item.clientName}
           </Text>
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
             Prof: {item.professionalName}
           </Text>
         </VStack>
@@ -60,17 +57,17 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         </Badge>
       </HStack>
 
-      <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
 
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mt="$1">
+      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
       <HStack mt="$2" justifyContent="flex-end">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           R$ {item.totalValue.toFixed(2)}
         </Text>
       </HStack>
@@ -102,7 +99,7 @@ export default function OwnerAttendancesScreen() {
       await fetchHistory(params);
       setLoaded(true);
     } catch (error: any) {
-      const msg = getApiErrorMessage(error, "Nao foi possivel carregar os atendimentos.");
+      const msg = getApiErrorMessage(error, "Não foi possível carregar os atendimentos.");
       setErrorMsg(msg);
     } finally {
       setIsLoading(false);
@@ -139,30 +136,28 @@ export default function OwnerAttendancesScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Atendimentos
-        </Heading>
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
-          {establishment?.name}
-        </Text>
+      <VStack flex={1} pb="$12" px="$4">
+        <ScreenHeader
+          title="Atendimentos"
+          subtitle={establishment?.name ?? undefined}
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
         <HStack mt="$4" space="sm" mb="$4">
           {filters.map((f) => (
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$green500" : "$coolGray100"}
+              bg={filter === f.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={filter === f.key ? "$white" : "$coolGray700"}
+                color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -179,12 +174,12 @@ export default function OwnerAttendancesScreen() {
         )}
 
         {errorMsg && (
-          <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$4">
-            <Text fontFamily="$body" color="$amber700" textAlign="center">
+          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
+            <Text fontFamily="$body" color="$brandDanger" textAlign="center">
               {errorMsg}
             </Text>
             <Pressable onPress={loadHistory} mt="$2">
-              <Text fontFamily="$body" color="$green600" textAlign="center" fontSize="$sm">
+              <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
                 Tentar novamente
               </Text>
             </Pressable>
@@ -192,12 +187,12 @@ export default function OwnerAttendancesScreen() {
         )}
 
         {loaded && !errorMsg && history.length > 0 && (
-          <VStack bg="$green50" p="$3" borderRadius="$lg" borderWidth="$1" borderColor="$green200" mb="$4">
+          <VStack bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$greenTint" mb="$4">
             <HStack justifyContent="space-between" alignItems="center">
-              <Text fontFamily="$body" fontSize="$sm" color="$green700">
+              <Text fontFamily="$body" fontSize="$sm" color="$forest">
                 {history.length} atendimento{history.length !== 1 ? "s" : ""}
               </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" color="$green800">
+              <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                 R$ {totalRevenue.toFixed(2)}
               </Text>
             </HStack>
@@ -205,7 +200,7 @@ export default function OwnerAttendancesScreen() {
         )}
 
         {loaded && !errorMsg && history.length === 0 && (
-          <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$12">
+          <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$12">
             Nenhum atendimento encontrado
           </Text>
         )}

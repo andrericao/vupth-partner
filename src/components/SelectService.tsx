@@ -1,16 +1,10 @@
 import { View, Text, Pressable } from "react-native";
+import { SERVICE_TYPES } from "@lib/serviceTypes";
 
 // Seletor de tipo de loja (lista de "pilulas"). Migrado p/ NativeWind (v2);
-// mantem a API (value/onValueChange).
-const SERVICE_TYPES = [
-  { label: "Barbearia", value: "BARBER" },
-  { label: "Salão de Beleza", value: "BEAUTY_SALON" },
-  { label: "Manicure / Pedicure", value: "NAIL_SALON" },
-  { label: "Sobrancelha", value: "EYEBROW" },
-  { label: "SPA", value: "SPA" },
-  { label: "Clínica", value: "CLINIC" },
-] as const;
-
+// mantem a API (value/onValueChange). Lista em @lib/serviceTypes — mesma
+// fonte usada por quem EXIBE o tipo (dashboard, menu, busca), pra rotulo e
+// picker nunca desalinharem.
 type Props = {
   value?: string;
   onValueChange?: (value: string) => void;
@@ -30,7 +24,7 @@ export function SelectService({ value, onValueChange }: Props) {
               accessibilityState={{ selected: isSelected }}
               onPress={() => onValueChange?.(type.value)}
               className={`py-2.5 px-4 rounded-md border ${
-                isSelected ? "bg-brand border-brand-600" : "bg-gray-100 border-gray-200"
+                isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
               }`}
             >
               <Text

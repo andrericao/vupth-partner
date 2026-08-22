@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Header } from "@components/Header";
 import { NwButton } from "@components/nw/Button";
+import { Ionicons } from "@expo/vector-icons";
 import { NwInput } from "@components/nw/Input";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
@@ -61,14 +61,27 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6 items-center justify-center">
-          <Header showBackButton />
+        <View className="flex-1 pt-14 pb-8 px-4">
+          <Pressable
+            onPress={() => router.back()}
+            className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
+            accessibilityRole="button"
+            testID="back-button"
+          >
+            <Ionicons name="chevron-back" size={20} color="#163300" />
+          </Pressable>
 
-          <View className="flex-1 mt-48 w-full">
-            <Text className="font-heading text-3xl mb-12 text-gray-900">Login</Text>
+          <View className="mt-10 gap-2">
+            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+              VUPTH
+            </Text>
+            <Text className="font-display text-[30px] text-vupth-forest">Entrar</Text>
+          </View>
 
+          <View className="mt-8">
             <NwInput
-              label="Email"
+              label="E-mail"
+              icon="mail-outline"
               placeholder="email@email.com"
               value={email}
               onChangeText={setEmail}
@@ -79,6 +92,7 @@ export default function LoginScreen() {
             />
             <NwInput
               label="Senha"
+              icon="lock-closed-outline"
               placeholder="senha"
               secure
               value={password}
@@ -88,35 +102,39 @@ export default function LoginScreen() {
               error={isPasswordInvalid ? "Informe sua senha (mínimo 6 caracteres)" : ""}
             />
 
-            {/* [igual front-client] "Entrando..." em texto (nao spinner); o
-                handleSubmit ja guarda o duplo-clique. */}
-            <NwButton
-              title={isLoading ? "Entrando..." : "Entrar"}
-              onPress={handleSubmit}
-              className="mt-9"
-            />
-
             {/* S7 LIGADO (backend fatia 1): codigo de 6 digitos por e-mail. */}
             <Pressable
               onPress={() => router.push("/(auth)/forgot-password" as any)}
-              className="mt-4 self-center"
+              className="self-end mt-1"
             >
-              <Text className="font-body text-sm text-brand-600 font-medium">
+              <Text className="font-body text-[13px] text-vupth-forest font-semibold">
                 Esqueci minha senha
               </Text>
             </Pressable>
           </View>
 
-          <View className="mt-12 flex-1 w-full">
-            <Text className="font-body text-center text-gray-500">
-              Não possui cadastro?
-            </Text>
+          {/* CTA ancorado no rodape em vez de solto no meio (era `mt-48` +
+              `mt-12`, que centralizava no chute e mudava de lugar conforme o
+              teclado). */}
+          <View className="flex-1 justify-end gap-4">
+            {/* [igual front-client] "Entrando..." em texto (nao spinner); o
+                handleSubmit já guarda o duplo-clique. */}
             <NwButton
-              title="Criar conta"
-              variant="outlineBrand"
-              onPress={() => router.push("/(auth)")}
-              className="mt-2"
+              title={isLoading ? "Entrando..." : "Entrar"}
+              onPress={handleSubmit}
             />
+            {/* "Criar conta" vira LINK: entrar e o que esta tela pede, e dois
+                botoes de peso parecido fazem quem já tem conta hesitar. */}
+            <View className="flex-row justify-center items-center gap-1.5">
+              <Text className="font-body text-[13px] text-vupth-textSecondary">
+                Não possui cadastro?
+              </Text>
+              <Pressable onPress={() => router.push("/(auth)")} testID="go-register">
+                <Text className="font-heading text-[13px] text-vupth-forest">
+                  Criar conta
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </ScrollView>

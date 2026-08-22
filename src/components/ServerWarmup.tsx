@@ -14,7 +14,7 @@ import { Button } from "@components/Button";
 // unica verde da marca. Respeita reduce-motion (fallback: troca simples sem
 // movimento). Quando o design entregar os icones/JSON, trocar por Lottie.
 
-const GREEN = "#3b7a3f";
+const GREEN = "#163300"; // [marca-vupth] $forest — Ionicons `color` nao aceita token
 const STEPS: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
   { icon: "phone-portrait-outline", label: "Abrindo o app" },
   { icon: "storefront-outline", label: "Chegando na loja" },
@@ -109,7 +109,7 @@ export function ServerWarmup({ failed, onRetry }: Props) {
         {failed ? (
           <>
             <Text fontFamily="$heading" fontSize="$lg" color="$coolGray700" textAlign="center">
-              Nao foi possivel conectar ao servidor
+              Não foi possível conectar ao servidor
             </Text>
             <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" textAlign="center">
               O servidor pode estar iniciando. Tente novamente em alguns segundos.

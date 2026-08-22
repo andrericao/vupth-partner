@@ -1,10 +1,9 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { cardShadow } from "@lib/styles";
 
 // [#11] Seletor de "Tipo de servico" em grade de chips com icone (no lugar da
 // lista de pilulas de texto). 2 colunas, selecao verde com check. Idioma Verde
-// Imersivo (cardShadow, verde da marca, cantos arredondados).
+// Imersivo (verde da marca, cantos arredondados).
 // Migrado p/ NativeWind (v2).
 
 // Icone por tipo (por palavra-chave no value do ServiceItemType). Ionicons —
@@ -43,10 +42,9 @@ export function ServiceTypeGrid({
             accessibilityRole="button"
             accessibilityState={{ selected: isSel }}
             onPress={() => onSelect(it)}
-            className={`w-[48.5%] mb-2.5 relative bg-white rounded-2xl p-3 ${
-              isSel ? "border-2 border-brand" : "border border-gray-200"
+            className={`w-[48.5%] mb-2.5 relative rounded-[20px] p-3 ${
+              isSel ? "bg-vupth-greenTint border-2 border-vupth-forest" : "bg-vupth-surface"
             }`}
-            style={isSel ? undefined : cardShadow}
           >
             {isSel && (
               <View className="absolute top-1.5 right-1.5">
@@ -56,7 +54,7 @@ export function ServiceTypeGrid({
             <View className="flex-row items-center gap-2">
               <View
                 className={`w-8 h-8 rounded-lg items-center justify-center ${
-                  isSel ? "bg-brand" : "bg-gray-100"
+                  isSel ? "bg-vupth-forest" : "bg-gray-100"
                 }`}
               >
                 <Ionicons name={iconFor(it.value)} size={18} color={isSel ? "#FFFFFF" : "#316635"} />
@@ -64,7 +62,7 @@ export function ServiceTypeGrid({
               <Text
                 numberOfLines={2}
                 className={`flex-1 font-body text-sm ${
-                  isSel ? "font-bold text-brand-700" : "font-medium text-gray-800"
+                  isSel ? "font-bold text-vupth-forest" : "font-medium text-gray-800"
                 }`}
               >
                 {it.label}

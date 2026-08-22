@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   Pressable,
   ScrollView,
@@ -17,11 +16,12 @@ import {
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { api, getApiErrorMessage } from "@lib/api";
+import { serviceTypeLabel } from "@lib/serviceTypes";
 import { useProfessionalStore } from "@store/professional.store";
 
 type EstablishmentResult = {
@@ -106,7 +106,7 @@ export default function FindEstablishmentScreen() {
       });
       setResults(data);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel buscar estabelecimentos."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível buscar estabelecimentos."));
     } finally {
       setIsSearching(false);
     }
@@ -127,12 +127,12 @@ export default function FindEstablishmentScreen() {
   const handleCancelAffiliation = () => {
     if (!pendingAffiliationId) return;
     Alert.alert(
-      "Cancelar solicitacao",
-      `Deseja cancelar sua solicitacao para ${blockedName ?? "este estabelecimento"}? Voce podera solicitar a outro estabelecimento depois.`,
+      "Cancelar solicitação",
+      `Deseja cancelar sua solicitação para ${blockedName ?? "este estabelecimento"}? Você poderá solicitar a outro estabelecimento depois.`,
       [
         { text: "Voltar", style: "cancel" },
         {
-          text: "Cancelar solicitacao",
+          text: "Cancelar solicitação",
           style: "destructive",
           onPress: async () => {
             setIsCancelling(true);
@@ -143,7 +143,7 @@ export default function FindEstablishmentScreen() {
               setGate("open");
               await loadAll();
             } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel cancelar a solicitacao."));
+              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível cancelar a solicitação."));
             } finally {
               setIsCancelling(false);
             }
@@ -163,86 +163,83 @@ export default function FindEstablishmentScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Buscar Estabelecimento
-          </Heading>
+        <VStack flex={1} pb="$12" px="$4">
+          <ScreenHeader
+          title="Buscar estabelecimento"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
 
           {gate === "loading" && (
             <VStack alignItems="center" mt="$12">
-              <Spinner color="$green500" size="large" />
+              <Spinner color="$forest" size="large" />
             </VStack>
           )}
 
           {gate === "affiliated" && (
             <VStack
-              bg="$green50"
+              bg="$greenTint"
               p="$4"
-              borderRadius="$lg"
+              borderRadius="$card"
               borderWidth="$1"
-              borderColor="$green200"
+              borderColor="$forest"
               mt="$6"
             >
-              <Text fontFamily="$heading" fontWeight="$bold" color="$green700" mb="$2">
-                Voce ja esta vinculado
+              <Text fontFamily="$heading" fontWeight="$bold" color="$forest" mb="$2">
+                Você já está vinculado
               </Text>
-              <Text fontFamily="$body" color="$coolGray600" mb="$4">
-                Voce atende em {blockedName ?? "um estabelecimento"}. Um
-                profissional so pode trabalhar em um estabelecimento por vez.
-                Para mudar, desafilie-se em Configuracoes.
+              <Text fontFamily="$body" color="$brandTextSecondary" mb="$4">
+                Você atende em {blockedName ?? "um estabelecimento"}. Um
+                profissional só pode trabalhar em um estabelecimento por vez.
+                Para mudar, desafilie-se em Configurações.
               </Text>
-              <Button
-                title="Ir para Configuracoes"
+              <BrandButton
+                title="Ir para Configurações"
                 onPress={() => router.navigate("/(professional)/settings" as any)}
-                bg="$green500"
-                $active-bg="$green600"
               />
             </VStack>
           )}
 
           {gate === "pending" && (
             <VStack
-              bg="$amber50"
+              bg="$brandWarning"
               p="$4"
-              borderRadius="$lg"
+              borderRadius="$card"
               borderWidth="$1"
-              borderColor="$amber200"
+              borderColor="$brandWarning"
               mt="$6"
             >
-              <Text fontFamily="$heading" fontWeight="$bold" color="$amber700" mb="$2">
-                Solicitacao em andamento
+              <Text fontFamily="$heading" fontWeight="$bold" color="$forest" mb="$2">
+                Solicitação em andamento
               </Text>
-              <Text fontFamily="$body" color="$coolGray600" mb="$4">
-                Voce ja solicitou vinculacao a {blockedName ?? "um estabelecimento"}{" "}
-                e esta aguardando a resposta do proprietario. So e possivel
+              <Text fontFamily="$body" color="$brandTextSecondary" mb="$4">
+                Você já solicitou vinculação a {blockedName ?? "um estabelecimento"}{" "}
+                e esta aguardando a resposta do proprietário. Só e possível
                 solicitar a um estabelecimento por vez — aguarde o retorno ou
-                cancele a solicitacao atual para tentar outro.
+                cancele a solicitação atual para tentar outro.
               </Text>
               <Button
-                title="Cancelar solicitacao"
+                title="Cancelar solicitação"
                 onPress={handleCancelAffiliation}
                 isLoading={isCancelling}
                 bg="transparent"
                 borderWidth="$1"
-                borderColor="$red500"
-                textColor="$red500"
-                $active-bg="$red50"
+                borderColor="$brandDanger"
+                textColor="$brandDanger"
+                $active-bg="$brandSurface"
               />
             </VStack>
           )}
 
           {gate === "open" && (
           <>
-          <Text fontFamily="$body" color="$coolGray500" mt="$2" mb="$4">
-            Encontre um estabelecimento e solicite vinculacao.
+          <Text fontFamily="$body" color="$brandTextSecondary" mt="$2" mb="$4">
+            Encontre um estabelecimento e solicite vinculação.
           </Text>
 
           <GluestackInput
             h="$12"
             borderWidth="$1"
-            borderColor="$green500"
+            borderColor="$forest"
             borderRadius="$md"
             $focus-borderWidth="$2"
             mb="$4"
@@ -252,7 +249,7 @@ export default function FindEstablishmentScreen() {
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={handleSearch}
-              color="$coolGray900"
+              color="$forest"
               fontFamily="$body"
               autoCorrect={false}
               returnKeyType="search"
@@ -267,7 +264,7 @@ export default function FindEstablishmentScreen() {
             >
               <InputIcon
                 as={search.trim() ? CloseIcon : SearchIcon}
-                color={search.trim() ? "$coolGray500" : "$green600"}
+                color={search.trim() ? "$brandTextSecondary" : "$forest"}
               />
             </InputSlot>
           </GluestackInput>
@@ -280,7 +277,7 @@ export default function FindEstablishmentScreen() {
 
           {!isSearching && hasSearched && results.length === 0 && (
             <VStack alignItems="center" mt="$8">
-              <Text fontFamily="$body" color="$coolGray400">
+              <Text fontFamily="$body" color="$brandTextSecondary">
                 Nenhum estabelecimento encontrado.
               </Text>
             </VStack>
@@ -292,30 +289,29 @@ export default function FindEstablishmentScreen() {
               onPress={() => openDetail(est)}
               py="$4"
               px="$4"
-              bg="$white"
-              borderRadius="$2xl"
-              style={cardShadow}
+              bg="$brandSurface"
+              borderRadius="$card"
               mb="$2"
-              $active-bg="$coolGray50"
+              $active-bg="$brandSurface"
             >
               <HStack justifyContent="space-between" alignItems="center">
                 <VStack flex={1}>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                     {est.name}
                   </Text>
-                  <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
-                    {est.serviceType}
+                  <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+                    {serviceTypeLabel(est.serviceType)}
                   </Text>
                 </VStack>
                 <HStack alignItems="center" space="sm">
                   <Text
                     fontFamily="$body"
                     fontSize="$xs"
-                    color={est.openStatus === "OPEN" ? "$green600" : "$coolGray400"}
+                    color={est.openStatus === "OPEN" ? "$forest" : "$brandTextSecondary"}
                   >
                     {est.openStatus === "OPEN" ? "Aberto" : "Fechado"}
                   </Text>
-                  <ChevronRightIcon color="$coolGray400" />
+                  <ChevronRightIcon color="$brandTextSecondary" />
                 </HStack>
               </HStack>
             </Pressable>

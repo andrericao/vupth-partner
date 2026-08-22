@@ -17,9 +17,9 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(undefined, "fallback")).toMatch(/Sem conexao/);
   });
 
-  it("codigo conhecido => traducao PT (nao usa o fallback)", () => {
+  it("código conhecido => traducao PT (não usa o fallback)", () => {
     const err = { response: { data: { code: "PROFESSIONAL_ALREADY_AFFILIATED" } } };
-    expect(getApiErrorMessage(err, "fallback")).toMatch(/ja esta vinculado/);
+    expect(getApiErrorMessage(err, "fallback")).toMatch(/já está vinculado/);
   });
 
   it("CURRENT_PASSWORD_INVALID => mensagem de senha atual incorreta", () => {
@@ -27,16 +27,16 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/senha atual/i);
   });
 
-  it("codigo desconhecido, com fieldErrors => lista campo: msg (uma por linha)", () => {
+  it("código desconhecido, com fieldErrors => lista campo: msg (uma por linha)", () => {
     const err = {
-      response: { data: { code: "SOMETHING_ELSE", fieldErrors: { email: "invalido", senha: "curta" } } },
+      response: { data: { code: "SOMETHING_ELSE", fieldErrors: { email: "inválido", senha: "curta" } } },
     };
-    expect(getApiErrorMessage(err, "fallback")).toBe("email: invalido\nsenha: curta");
+    expect(getApiErrorMessage(err, "fallback")).toBe("email: inválido\nsenha: curta");
   });
 
   it("sem code, com fieldErrors => lista os campos", () => {
-    const err = { response: { data: { fieldErrors: { nome: "obrigatorio" } } } };
-    expect(getApiErrorMessage(err, "fallback")).toBe("nome: obrigatorio");
+    const err = { response: { data: { fieldErrors: { nome: "obrigatório" } } } };
+    expect(getApiErrorMessage(err, "fallback")).toBe("nome: obrigatório");
   });
 
   it("sem code/fieldErrors, com message => devolve a message crua", () => {
@@ -121,7 +121,7 @@ describe("api — interceptor de refresh (401)", () => {
     expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
   });
 
-  it("erro != 401 apenas propaga (nao renova)", async () => {
+  it("erro != 401 apenas propaga (não renova)", async () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("access-1");
     apiMock.onGet("/x").reply(500);
 

@@ -47,14 +47,14 @@ describe("wsDiagnostics.store (espelha o wsDiagnosticsStore do client)", () => {
     expect(useWsDiagnosticsStore.getState().public.closedAt).not.toBeNull();
   });
 
-  it("conectar LIMPA o ultimo erro (falha de boot nao pode ficar na tela p/ sempre)", () => {
+  it("conectar LIMPA o último erro (falha de boot não pode ficar na tela p/ sempre)", () => {
     const s = useWsDiagnosticsStore.getState();
     s.markError("public", "falha no handshake");
     s.markConnected("public", { "heart-beat": "10000,10000" });
     expect(useWsDiagnosticsStore.getState().public.lastError).toBeNull();
   });
 
-  it("markClosed NAO zera a contagem — o historico da sessao e a evidencia do teste", () => {
+  it("markClosed NAO zera a contagem — o histórico da sessão e a evidencia do teste", () => {
     const s = useWsDiagnosticsStore.getState();
     s.markMessage("public");
     s.markClosed("public");
@@ -67,13 +67,13 @@ describe("leitura dos headers (o discriminador do diagnostico)", () => {
     expect(heartbeatOf({ "heart-beat": "10000,10000" })).toBe("10000,10000");
   });
 
-  it("heart-beat 0,0 e o sintoma antigo (S17) — nao pode ser confundido com ausente", () => {
+  it("heart-beat 0,0 e o sintoma antigo (S17) — não pode ser confundido com ausente", () => {
     expect(heartbeatOf({ "heart-beat": "0,0" })).toBe("0,0");
     expect(heartbeatOf({})).toBeNull();
     expect(heartbeatOf(null)).toBeNull();
   });
 
-  it("principalOf mostra o user-name: sem ele a sessao subiu ANONIMA (S14)", () => {
+  it("principalOf mostra o user-name: sem ele a sessão subiu ANONIMA (S14)", () => {
     expect(principalOf({ "user-name": "03d4583f-aaaa" })).toBe("03d4583f-aaaa");
     expect(principalOf({})).toBeNull();
     expect(principalOf(null)).toBeNull();

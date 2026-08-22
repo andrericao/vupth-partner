@@ -13,7 +13,7 @@ export function StepsButton({ title, isLoading, disabled, ...rest }: Props) {
     <Pressable
       accessibilityRole="button"
       disabled={isLoading || disabled}
-      className="h-12 mt-9 rounded-md bg-brand active:bg-brand-600 flex-row items-center justify-center px-4"
+      className="h-12 mt-9 rounded-md bg-vupth-forest active:bg-vupth-forestSoft flex-row items-center justify-center px-4"
       {...rest}
     >
       {isLoading ? (

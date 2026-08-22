@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Animated, View } from "react-native";
-import { cardShadow } from "@lib/styles";
 
 // [new-design] Skeleton loading (R4): placeholders com a forma do conteudo,
 // no lugar dos Spinner. Pulso de opacidade (Animated nativo, sem dep extra).
@@ -41,11 +40,11 @@ function Block({
   );
 }
 
-/** Um card "fantasma" com a mesma forma dos cards reais (cantos $2xl + cardShadow). */
+/** Um card "fantasma" com a mesma forma dos cards reais (surface, raio 20, plano). */
 export function SkeletonCard() {
   const opacity = usePulse();
   return (
-    <View className="bg-white p-4 rounded-2xl mb-3" style={cardShadow}>
+    <View className="bg-vupth-surface p-4 rounded-[20px] mb-3">
       <View className="flex-row justify-between items-center">
         <Block opacity={opacity} w="45%" h={14} />
         <Block opacity={opacity} w={64} h={22} r={999} />

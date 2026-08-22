@@ -34,19 +34,10 @@ type Props = {
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
 const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-brand", emoji: "🟢" },
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", emoji: "🟢" },
   { key: "intervalo", label: "Intervalo", activeBg: "bg-amber-500", emoji: "🟡" },
-  { key: "indisponivel", label: "Fora", activeBg: "bg-danger-500", emoji: "🔴" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", emoji: "🔴" },
 ];
-
-// Sombra dos cards via style RN (mesma do v1).
-const rowShadow = {
-  shadowColor: "#1A281A",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.1,
-  shadowRadius: 10,
-  elevation: 3,
-};
 
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
 // do componente, a inferencia do gluestack por instanciacao estourava a pilha,
@@ -75,8 +66,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="bg-white px-4 py-3.5 rounded-2xl mb-2 active:bg-gray-50"
-      style={rowShadow}
+      className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2 active:bg-gray-50"
     >
       <View className="flex-row items-center gap-3">
         <Text className="text-base w-6 text-center">{icon}</Text>
@@ -127,7 +117,7 @@ export function QueueOptions({
     mealSignal == null
       ? "almoco / janta — entram no ETA"
       : mealSignal.phase === "agora"
-        ? "esta na hora — iniciar, adiar ou pular"
+        ? "está na hora — iniciar, adiar ou pular"
         : `em ${mealSignal.minutesUntil} min — iniciar agora ou adiar`;
 
   return (
@@ -135,12 +125,11 @@ export function QueueOptions({
       <Section title="Agora" />
 
       {/* Status em bloco proprio, pills LARGAS embaixo (affordance — Andre
-          2026-07-24: "so melhora saber que da pra clicar ali e mudar o estado").
-          Nao ha mais botao de abrir/fechar loja: ficar "Trabalhando" abre sozinho
-          (derivado); a tela avisa "voce e o primeiro". */}
+          2026-07-24: "só melhora saber que dá pra clicar ali e mudar o estado").
+          Não há mais botão de abrir/fechar loja: ficar "Trabalhando" abre sozinho
+          (derivado); a tela avisa "você é o primeiro". */}
       <View
-        className="bg-white px-4 py-3.5 rounded-2xl mb-2"
-        style={rowShadow}
+        className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2"
       >
         <View className="flex-row items-center gap-3">
           <Text className="text-base w-6 text-center">
@@ -151,7 +140,7 @@ export function QueueOptions({
               Status
             </Text>
             <Text className="font-body text-xs text-gray-500 mt-0.5">
-              Voce esta: {currentLabel} · toque para trocar
+              Você está: {currentLabel} · toque para trocar
             </Text>
           </View>
         </View>
@@ -195,7 +184,7 @@ export function QueueOptions({
         <Row
           icon="🚦"
           label="Fechar fila"
-          hint="termina quem ja esta; ninguem novo entra"
+          hint="termina quem já está; ninguém novo entra"
           onPress={() => (closeQueue ? closeQueue.onToggle() : comingSoon("Fechar fila"))}
         />
       )}
@@ -204,18 +193,18 @@ export function QueueOptions({
       {pendingRequests > 0 && (
         <Row
           icon="✋"
-          label="Solicitacoes"
+          label="Solicitações"
           hint="fila fechada — pedidos de corte"
           badge={pendingRequests}
           onPress={() => {
             if (onOpenRequests) onOpenRequests();
-            else comingSoon("Aceitar ou recusar solicitacoes de corte");
+            else comingSoon("Aceitar ou recusar solicitações de corte");
           }}
         />
       )}
       <Row
         icon="🍽️"
-        label={mealLabel ?? "Refeicoes"}
+        label={mealLabel ?? "Refeições"}
         hint={mealHint}
         dot={mealDot}
         onPress={() => router.push("/(professional)/meals?from=queue-options" as any)}

@@ -7,10 +7,11 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
 } from "react-native";
-import { Header } from "@components/Header";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
@@ -54,12 +55,12 @@ export default function ForgotPasswordScreen() {
       await forgotPassword(value);
       // Sempre 200 (anti-enumeracao) — por isso o texto e "SE estiver cadastrado".
       Alert.alert(
-        "Codigo enviado",
-        "Se este e-mail estiver cadastrado, voce recebera um codigo de 6 digitos. Ele vale por 15 minutos."
+        "Código enviado",
+        "Se este e-mail estiver cadastrado, você receberá um código de 6 dígitos. Ele vale por 15 minutos."
       );
       setStep("code");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar o codigo."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível enviar o código."));
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +82,7 @@ export default function ForgotPasswordScreen() {
         { text: "Ir para o login", onPress: () => router.replace("/(auth)/login" as any) },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel redefinir a senha."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível redefinir a senha."));
     } finally {
       setIsLoading(false);
     }
@@ -98,21 +99,38 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 py-12 px-6">
-          <Header showBackButton onBack={() => router.replace("/(auth)/login" as any)} />
+        <View className="flex-1 pt-14 pb-8 px-4">
+          <Pressable
+            onPress={() => router.replace("/(auth)/login" as any)}
+            className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
+            accessibilityRole="button"
+            testID="back-button"
+          >
+            <Ionicons name="chevron-back" size={20} color="#163300" />
+          </Pressable>
 
-          <Text className="font-heading text-2xl mt-8 text-gray-900">
-            Recuperar senha
-          </Text>
+          {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
+              recuperando a senha, esta criando uma nova. Mesma decisão do app
+              do cliente. */}
+          <View className="mt-10 gap-2">
+            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+              VUPTH
+            </Text>
+            <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+              {step === "email" ? "Esqueceu a senha?" : "Nova senha"}
+            </Text>
+            <Text className="font-body text-[15px] text-vupth-textSecondary">
+              {step === "email"
+                ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
+                : "Use o código que enviamos e escolha uma senha nova."}
+            </Text>
+          </View>
 
           {step === "email" ? (
             <View className="mt-6">
-              <Text className="font-body text-gray-600 mb-4">
-                Informe o e-mail da sua conta. Enviaremos um codigo de 6 digitos
-                para redefinir a senha.
-              </Text>
               <NwInput
                 label="E-mail"
+                icon="mail-outline"
                 placeholder="email@email.com"
                 value={email}
                 onChangeText={(t: string) => {
@@ -122,10 +140,10 @@ export default function ForgotPasswordScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 testID="forgot-email"
-                error={emailInvalid ? "E-mail invalido" : ""}
+                error={emailInvalid ? "E-mail inválido" : ""}
               />
               <NwButton
-                title={isLoading ? "Enviando..." : "Enviar codigo"}
+                title={isLoading ? "Enviando..." : "Enviar código"}
                 onPress={handleSendCode}
                 isLoading={isLoading}
                 className="mt-2"
@@ -133,16 +151,16 @@ export default function ForgotPasswordScreen() {
             </View>
           ) : (
             <View className="mt-6">
-              <Text className="font-body text-gray-600 mb-4">
-                Digite o codigo de 6 digitos enviado para{" "}
-                <Text className="font-body font-bold text-gray-800">
+              <Text className="font-body text-vupth-textSecondary mb-4">
+                Digite o código de 6 dígitos enviado para{" "}
+                <Text className="font-body font-bold text-vupth-forest">
                   {email.trim()}
                 </Text>{" "}
-                e escolha a nova senha. O codigo vale por 15 minutos.
+                e escolha a nova senha. O código vale por 15 minutos.
               </Text>
 
               <NwInput
-                label="Codigo (6 digitos)"
+                label="Código (6 dígitos)"
                 placeholder="000000"
                 value={code}
                 onChangeText={(t: string) => {
@@ -153,7 +171,7 @@ export default function ForgotPasswordScreen() {
                 maxLength={6}
                 autoCapitalize="none"
                 testID="forgot-code"
-                error={codeInvalid ? "O codigo tem 6 digitos numericos" : ""}
+                error={codeInvalid ? "O código tem 6 dígitos numéricos" : ""}
               />
 
               <NwInput
@@ -167,7 +185,7 @@ export default function ForgotPasswordScreen() {
                 }}
                 autoCapitalize="none"
                 testID="forgot-password"
-                error={passwordInvalid ? "A senha nao atende aos requisitos abaixo" : ""}
+                error={passwordInvalid ? "A senha não atende aos requisitos abaixo" : ""}
               />
               {password.length > 0 && <PasswordRules rules={passwordRules} />}
 
@@ -182,7 +200,7 @@ export default function ForgotPasswordScreen() {
                 }}
                 autoCapitalize="none"
                 testID="forgot-confirm"
-                error={confirmInvalid ? "As senhas nao coincidem" : ""}
+                error={confirmInvalid ? "As senhas não coincidem" : ""}
               />
 
               <NwButton
@@ -192,7 +210,7 @@ export default function ForgotPasswordScreen() {
                 className="mt-2"
               />
               <NwButton
-                title="Reenviar codigo"
+                title="Reenviar código"
                 variant="secondary"
                 onPress={handleSendCode}
                 className="h-10 mt-3"
