@@ -74,3 +74,24 @@ export async function registerDevice(
 export async function unregisterDevice(token: string): Promise<void> {
   await api.delete(deviceDeletePath(token));
 }
+
+/**
+ * Onde push REALMENTE existe. Decide se vale a pena sequer CARREGAR o
+ * `expo-notifications` — em dois ambientes ele nao so falha, ele atrapalha:
+ *
+ * - **Expo Go**: desde o **SDK 53** a Expo REMOVEU push do app do Expo Go, e o
+ *   modulo **grita no import** ("Android Push notifications ... was removed").
+ *   Como o hook e importado pelo `_layout`, o erro aparece antes de qualquer
+ *   tela — durante o QA visual (2026-08-12) foi o que sujou a inicializacao.
+ * - **Web**: nao ha modulo nativo nenhum. O build por URL (D8) precisa disto.
+ *
+ * `executionEnvironment` vem do `expo-constants`: `"storeClient"` = Expo Go.
+ */
+export function pushSupported(env: {
+  os: string;
+  executionEnvironment?: string | null;
+}): boolean {
+  if (env.os === "web") return false;
+  if (env.executionEnvironment === "storeClient") return false; // Expo Go
+  return true;
+}
