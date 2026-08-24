@@ -47,6 +47,7 @@ const PARES: [keyof typeof vupth, string][] = [
   ["textSecondary", "brandTextSecondary"],
   ["border", "brandBorder"],
   ["danger", "brandDanger"],
+  ["dangerTint", "brandDangerTint"],
   ["warning", "brandWarning"],
   ["success", "brandSuccess"],
 ];
