@@ -104,6 +104,15 @@ export function getApiErrorMessage(error: any, fallback: string): string {
   if (data?.message) {
     return data.message;
   }
+
+  // 403 sem `code` nem `message`: o backend recusou, e o app nao tem como
+  // saber SE foi por o recurso nao ser seu ou por o seu papel nao permitir —
+  // os dois casos chegam iguais. Ate o backend distinguir (ver S31 no
+  // HANDOFF_BACKEND), a mensagem tem de ser verdadeira nos dois; dizer
+  // "faca login de novo" seria chute, e mandaria a pessoa pro lugar errado.
+  if (error.response.status === 403) {
+    return "Você não tem acesso a isso. Se acabou de mudar algo na sua conta, feche e abra o app.";
+  }
   return fallback;
 }
 
