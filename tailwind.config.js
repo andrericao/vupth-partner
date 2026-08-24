@@ -64,6 +64,7 @@ module.exports = {
           textSecondary: "#454745",
           border: "#D7DDD3",
           danger: "#B3261E",
+          dangerTint: "#F7E4E2",
           warning: "#FFC091",
           success: "#9FE870",
         },

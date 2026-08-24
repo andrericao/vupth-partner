@@ -4,6 +4,13 @@ import { Pressable, Text, ActivityIndicator, type PressableProps } from "react-n
 // props de token do gluestack. Mesmo visual do Button v1 (pilula + sombra +
 // Poppins), so que via `className`. Usada nas telas JA convertidas; o Button v1
 // (src/components/Button.tsx) segue para as telas ainda no v1.
+// [marca-vupth] O VERMELHO ($brandDanger) e so pra acao que EXCLUI ou DESFAZ
+// algo — desafiliar, apagar, encerrar vinculo. Ele nao e "o botao do nao": a
+// metade negativa de uma escolha binaria (Cancelar/Adicionar, Nao/Sim,
+// Recusar/Aceitar) vai de `secondary`, senao o app inteiro fica pedindo
+// confirmacao de perigo pra coisa rotineira. Encerrar expediente TAMBEM nao
+// conta: fechar a fila e rotina do dia e da pra reabrir — o "Fechar agora" do
+// ClosingPrompt e a acao afirmativa do modal, entao vai de primary.
 type Variant =
   | "primary"
   | "secondary"
@@ -41,10 +48,10 @@ const BASE = "h-[54px] rounded-full items-center justify-center px-4";
 // sobrescrevem o bg por `className`, entao nao dependem deste valor.
 const BOX: Record<Variant, string> = {
   primary: "bg-vupth-green active:bg-vupth-success",
-  secondary: "bg-gray-200 active:bg-gray-300",
-  danger: "bg-vupth-danger active:bg-red-700",
-  outlineBrand: "bg-white border border-vupth-forest active:bg-gray-100",
-  outlineDanger: "bg-transparent border border-vupth-danger active:bg-red-50",
+  secondary: "bg-vupth-surface active:bg-vupth-border",
+  danger: "bg-vupth-danger active:opacity-80",
+  outlineBrand: "bg-white border border-vupth-forest active:bg-vupth-surface",
+  outlineDanger: "bg-transparent border border-vupth-danger active:opacity-80",
   // `vupthPrimary` ficou IDENTICO ao primary depois do alinhamento acima —
   // mantido como apelido pra nao quebrar quem ja chamava por ele.
   vupthPrimary: "bg-vupth-green active:bg-vupth-success",
@@ -54,7 +61,7 @@ const BOX: Record<Variant, string> = {
 
 const LABEL: Record<Variant, string> = {
   primary: "text-vupth-forest",
-  secondary: "text-gray-700",
+  secondary: "text-vupth-textPrimary",
   danger: "text-white",
   outlineBrand: "text-vupth-forest",
   outlineDanger: "text-vupth-danger",
@@ -85,9 +92,9 @@ export function NwButton({
           color={
             variant === "danger"
               ? "#fff"
-              : variant === "primary" || variant.startsWith("vupth")
-                ? "#163300"
-                : "#374151"
+              : variant === "outlineDanger"
+                ? "#B3261E"
+                : "#163300"
           }
         />
       ) : (

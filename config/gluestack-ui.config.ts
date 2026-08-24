@@ -429,7 +429,7 @@ export const gluestackUIConfig = createConfig({
 
       // [marca-vupth] Tokens da nova identidade (Pencil, doc pencil-new.pen).
       // Precisa bater 1:1 com vupth/config/gluestack-ui.config.ts e com
-      // tailwind.config.js (colors.brandVupth) — mesma regra do remap antigo
+      // tailwind.config.js (colors.vupth) — mesma regra do remap antigo
       // do green500: os tres tem que ficar sincronizados no mesmo commit.
       // Aditivos: nao remapeiam green50-900 (ainda usado como texto em varias
       // telas) porque brandGreen e claro demais pra texto/icone sobre fundo
@@ -449,6 +449,7 @@ export const gluestackUIConfig = createConfig({
       brandTextSecondary: '#454745',
       brandBorder: '#D7DDD3',
       brandDanger: '#B3261E',
+      brandDangerTint: '#F7E4E2',
       brandWarning: '#FFC091',
       brandSuccess: '#9FE870',
     },

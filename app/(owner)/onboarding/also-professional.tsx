@@ -202,7 +202,7 @@ export default function AlsoProfessionalScreen() {
             <NwButton
               title="Não, apenas proprietário"
               onPress={handleNo}
-              variant="outlineDanger"
+              variant="secondary"
               className="mt-2"
             />
           </View>

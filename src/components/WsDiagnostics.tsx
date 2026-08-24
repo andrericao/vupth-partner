@@ -27,7 +27,9 @@ export function WsDiagnostics() {
   const connected = pub.connected || personal.connected;
   const lastError = pub.lastError ?? personal.lastError;
 
-  const line = { color: "#a3a3a3", fontSize: 11, textAlign: "center" as const };
+  // $brandTextSecondary. Era #a3a3a3 (2,5:1 no branco) — ilegivel pro QA em
+  // device, que e justamente quem le esta linha.
+  const line = { color: "#454745", fontSize: 11, textAlign: "center" as const };
 
   return (
     <View style={{ marginTop: 12, alignItems: "center", gap: 2 }}>
@@ -50,7 +52,7 @@ export function WsDiagnostics() {
       </Text>
 
       {lastError && (
-        <Text style={{ ...line, color: "#E63946" }}>último erro: {lastError}</Text>
+        <Text style={{ ...line, color: "#B3261E" }}>último erro: {lastError}</Text>
       )}
     </View>
   );

@@ -68,7 +68,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
             {dot && (
               <View
                 testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
-                className="w-2 h-2 rounded-full bg-[#E63946]"
+                className="w-2 h-2 rounded-full bg-vupth-danger"
               />
             )}
           </View>
@@ -77,7 +77,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
-        <ChevronRight size={16} color="#6B7280" />
+        <ChevronRight size={16} color="#454745" />
       </Pressable>
       {!last && <View className="h-px bg-vupth-border" />}
     </>

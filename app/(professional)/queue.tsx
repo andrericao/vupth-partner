@@ -187,16 +187,18 @@ function QueueRow({
             >
               {attendance.clientName}
             </Text>
-            {/* Badge do gluestack (action warning/muted, solid): hexes do
-                config/theme/Badge.ts p/ manter o selo identico. */}
+            {/* [marca-vupth] Era o selo do gluestack (hexes de config/theme/
+                Badge.ts, escala warning/muted). O atraso na marca e o pessego
+                com forest por cima; o laranja e o cinza antigos nao existem
+                na paleta. */}
             {!isFirst && (
               <View
                 className={`rounded-md px-1.5 py-0.5 ${
-                  isLate ? "bg-[#FFF4EB]" : "bg-[#F6F6F7]"
+                  isLate ? "bg-vupth-warning" : "bg-vupth-surface"
                 }`}
               >
                 <Text
-                  className={`text-xs ${isLate ? "text-[#ea580c]" : "text-[#525252]"}`}
+                  className={`text-xs ${isLate ? "text-vupth-forest" : "text-vupth-textSecondary"}`}
                 >
                   {isLate ? "atrasado" : "aguardando"}
                 </Text>
@@ -222,7 +224,7 @@ function QueueRow({
         {/* [marca-vupth] Era o caractere "›" — mesmo padrao ja trocado por
             ícone no dashboard do dono; o Pencil (PROF · 01 Fila) especifica
             chevron-right/lucide aqui também. */}
-        <ChevronRight size={18} color="#9CA3AF" />
+        <ChevronRight size={18} color="#454745" />
       </View>
     </Pressable>
   );
@@ -715,7 +717,7 @@ export default function ProfessionalQueueScreen() {
             >
               {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
                   texto; o desenho marca com um icone de informacao. */}
-              <Info size={15} color="#9CA3AF" />
+              <Info size={15} color="#454745" />
               <Text className="font-body text-sm text-vupth-textSecondary">
                 Finalize para iniciar o próximo
               </Text>

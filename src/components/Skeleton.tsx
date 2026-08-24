@@ -5,7 +5,10 @@ import { Animated, View } from "react-native";
 // no lugar dos Spinner. Pulso de opacidade (Animated nativo, sem dep extra).
 // Migrado p/ NativeWind (v2).
 
-const BASE = "#E2E9E5";
+// [marca-vupth] $brandBorder. Os blocos ficam DENTRO do card fantasma, que e
+// $brandSurface plano igual ao card real — border e o unico neutro da paleta
+// que aparece sobre ele. Era #E2E9E5, cinza da paleta pre-marca.
+const BASE = "#D7DDD3";
 
 function usePulse() {
   const [v] = useState(() => new Animated.Value(0.45));

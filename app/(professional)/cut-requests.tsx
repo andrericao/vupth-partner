@@ -82,7 +82,7 @@ export default function CutRequestsScreen() {
         <View className="gap-3">
           {pending.length === 0 ? (
             <View className="bg-vupth-surface rounded-[20px] p-6 items-center gap-2 mt-2">
-              <Clock size={22} color="#9CA3AF" />
+              <Clock size={22} color="#454745" />
               <Text className="font-body text-sm text-vupth-textSecondary text-center">
                 Nenhum pedido de encaixe no momento.
               </Text>

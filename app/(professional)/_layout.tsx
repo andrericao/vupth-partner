@@ -40,7 +40,7 @@ export default function ProfessionalLayout() {
         tabBarStyle: {
           ...tabBarShadow,
           backgroundColor: "#FFFFFF",
-          borderTopColor: "#E5E7EB",
+          borderTopColor: "#D7DDD3", // [marca-vupth] $brandBorder
           borderTopWidth: 0,
           // [marca-vupth] Rotulo cortado em device real (QA Alexia 2026-08-21):
           // 60 - 8(top) - 8(bottom) sobrava so 44px pro icone (24) + label —

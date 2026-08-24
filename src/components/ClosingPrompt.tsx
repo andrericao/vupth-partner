@@ -63,24 +63,29 @@ export function ClosingPrompt() {
           accessibilityLabel="Fechar aviso"
         />
         <View className="bg-white rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
-          <Text className="font-heading text-lg text-gray-900">
+          <Text className="font-heading text-lg text-vupth-textPrimary">
             Passou do horário de fechamento
           </Text>
-          <Text className="font-body text-sm text-gray-600">
+          <Text className="font-body text-sm text-vupth-textSecondary">
             A fila já foi fechada para novos clientes. Quem está na fila segue sendo
             atendido. Fecha sozinho em:
           </Text>
-          <Text
-            accessibilityLabel={`Fecha em ${graceCountdownLabel(remaining)}`}
-            className="font-heading text-2xl text-amber-600 text-center my-1"
-          >
-            {graceCountdownLabel(remaining)}
-          </Text>
+          {/* [marca-vupth] Countdown numa pilula $brandWarning com texto forest
+              — mesmo par do selo "EM BREVE". A paleta nao tem ambar escuro pra
+              texto: o peach (#FFC091) so funciona como FUNDO, nunca como cor de
+              letra sobre claro. Era text-amber-600, da escala antiga. */}
+          <View className="bg-vupth-warning rounded-full px-3 py-1 self-center my-1">
+            <Text
+              accessibilityLabel={`Fecha em ${graceCountdownLabel(remaining)}`}
+              className="font-heading text-2xl text-vupth-forest text-center"
+            >
+              {graceCountdownLabel(remaining)}
+            </Text>
+          </View>
           <NwButton
             title="Fechar agora"
             onPress={onCloseNow}
             isLoading={closing}
-            variant="danger"
           />
           <NwButton
             title="Continuar atendendo"

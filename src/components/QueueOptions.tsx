@@ -33,10 +33,15 @@ type Props = {
 };
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
-const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", emoji: "🟢" },
-  { key: "intervalo", label: "Intervalo", activeBg: "bg-amber-500", emoji: "🟡" },
-  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", emoji: "🔴" },
+const STATUS: {
+  key: StatusKey; label: string; activeBg: string; activeText: string; emoji: string;
+}[] = [
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", activeText: "text-white", emoji: "🟢" },
+  // [marca-vupth] `intervalo` e o unico ativo com fundo CLARO (warning #FFC091,
+  // que era bg-amber-500 da escala antiga) — por isso o texto e forest, e nao o
+  // branco dos outros dois: sobre claro a marca manda usar forest.
+  { key: "intervalo", label: "Intervalo", activeBg: "bg-vupth-warning", activeText: "text-vupth-forest", emoji: "🟡" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", activeText: "text-white", emoji: "🔴" },
 ];
 
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
@@ -44,7 +49,7 @@ const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }
 // alem do anti-padrao React de remontar a subarvore).
 function Section({ title }: { title: string }) {
   return (
-    <Text className="font-heading text-[10px] text-gray-400 tracking-widest mt-5 mb-2">
+    <Text className="font-heading text-[10px] text-vupth-textSecondary tracking-widest mt-5 mb-2">
       {title.toUpperCase()}
     </Text>
   );
@@ -66,16 +71,16 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2 active:bg-gray-50"
+      className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2 active:bg-vupth-surfaceAlt"
     >
       <View className="flex-row items-center gap-3">
         <Text className="text-base w-6 text-center">{icon}</Text>
         <View className="flex-1">
-          <Text className="font-body text-base font-medium text-gray-900">
+          <Text className="font-body text-base font-medium text-vupth-textPrimary">
             {label}
           </Text>
           {hint && (
-            <Text className="font-body text-xs text-gray-500 mt-0.5">{hint}</Text>
+            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
           )}
         </View>
         {children}
@@ -83,7 +88,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
         {dot && (
           <View
             testID="menu-dot-meals"
-            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#E63946" }}
+            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#B3261E" }}
           />
         )}
       </View>
@@ -136,10 +141,10 @@ export function QueueOptions({
             {STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"}
           </Text>
           <View className="flex-1">
-            <Text className="font-body text-base font-medium text-gray-900">
+            <Text className="font-body text-base font-medium text-vupth-textPrimary">
               Status
             </Text>
-            <Text className="font-body text-xs text-gray-500 mt-0.5">
+            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
               Você está: {currentLabel} · toque para trocar
             </Text>
           </View>
@@ -156,13 +161,16 @@ export function QueueOptions({
                 accessibilityLabel={s.label}
                 accessibilityState={{ selected: active, disabled: blocked }}
                 style={{ opacity: blocked ? 0.45 : 1 }}
+                // [marca-vupth] Pill inativa em branco, e nao no greenTint: estas
+                // pills sao um SEMAFORO (verde/ambar/vermelho no `activeBg`) — um
+                // fundo esverdeado no estado inativo leria como "Trabalhando".
                 className={`flex-1 rounded-full py-2.5 items-center ${
-                  active ? s.activeBg : "bg-gray-100"
+                  active ? s.activeBg : "bg-vupth-background"
                 }`}
               >
                 <Text
                   className={`font-heading text-xs ${
-                    active ? "text-white" : "text-gray-600"
+                    active ? s.activeText : "text-vupth-textSecondary"
                   }`}
                 >
                   {s.label}

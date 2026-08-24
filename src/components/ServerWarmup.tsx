@@ -111,10 +111,10 @@ export function ServerWarmup({ failed, onRetry }: Props) {
       <VStack space="lg" alignItems="center">
         {failed ? (
           <>
-            <Text fontFamily="$heading" fontSize="$lg" color="$coolGray700" textAlign="center">
+            <Text fontFamily="$heading" fontSize="$lg" color="$brandTextSecondary" textAlign="center">
               Não foi possível conectar ao servidor
             </Text>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" textAlign="center">
+            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" textAlign="center">
               O servidor pode estar iniciando. Tente novamente em alguns segundos.
             </Text>
             {onRetry && <Button title="Tentar de novo" onPress={onRetry} />}
@@ -122,7 +122,7 @@ export function ServerWarmup({ failed, onRetry }: Props) {
         ) : (
           <>
             <WarmupAnimation />
-            <Text fontFamily="$body" fontSize="$md" color="$coolGray600" textAlign="center">
+            <Text fontFamily="$body" fontSize="$md" color="$brandTextSecondary" textAlign="center">
               Preparando servidor...
             </Text>
           </>

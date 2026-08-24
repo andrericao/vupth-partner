@@ -73,7 +73,7 @@ function MenuItem({
               </Text>
             </VStack>
           )}
-          <ChevronRight size={16} color="#6B7280" />
+          <ChevronRight size={16} color="#454745" />
         </HStack>
       </Pressable>
       {!last && <VStack height={1} bg="$border" />}

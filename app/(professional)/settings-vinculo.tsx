@@ -142,7 +142,7 @@ export default function SettingsVinculoScreen() {
                     title="Recusar"
                     onPress={() => handleRejectInvite(inv)}
                     isLoading={resolvingInvite === inv.id}
-                    variant="outlineDanger"
+                    variant="secondary"
                     className="flex-1 h-9 mt-0"
                   />
                   <NwButton
