@@ -18,28 +18,33 @@ export const KEY_TO_WORK: Record<StatusKey, WorkStatus> = {
 };
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho
-// fora. As tres combinacoes passam no minimo AA — ver o teste.
+// fora. As tres combinacoes de fundo+texto passam no minimo AA — ver o teste.
+//
+// `cor` alimenta o PONTO das listas, onde antes havia 🟢🟡🔴. Emoji nao e
+// elemento de interface: ele nao herda a paleta, muda de desenho em cada
+// sistema e nao escala com o texto. Aqui o proprio semaforo ja E a cor — nao
+// precisa nem de icone, so do ponto.
 export const STATUS_META: Record<
   StatusKey,
-  { label: string; bg: string; texto: string; emoji: string }
+  { label: string; bg: string; texto: string; cor: string }
 > = {
   trabalhando: {
     label: "Trabalhando",
     bg: "bg-vupth-green",
     texto: "text-vupth-forest",
-    emoji: "🟢",
+    cor: "#9FE870",
   },
   intervalo: {
     label: "Intervalo",
     bg: "bg-vupth-warning",
     texto: "text-vupth-forest",
-    emoji: "🟡",
+    cor: "#FFC091",
   },
   indisponivel: {
     label: "Fora",
     bg: "bg-vupth-danger",
     texto: "text-white",
-    emoji: "🔴",
+    cor: "#B3261E",
   },
 };
 

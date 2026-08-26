@@ -21,6 +21,17 @@ describe("QueueOptions", () => {
       expect(router.push).toHaveBeenCalledWith(route);
     });
 
+    it("status desconhecido NAO vira 'Trabalhando'", () => {
+      // Num recarregamento frio o store ainda nao respondeu. Afirmar um status
+      // ali e pior do que nao dizer nada: quem esta "Fora" lia "Trabalhando".
+      const view = renderWithProvider(<QueueOptions />);
+      expect(view.queryByText(/Você está:/)).toBeNull();
+      view.getByText("Toque para definir");
+      expect(view.getByTestId("status-dot").props.style).toEqual(
+        expect.objectContaining({ backgroundColor: "#D7DDD3" })
+      );
+    });
+
     it("'Adicionar cliente' NAO mora mais aqui — foi pra tela da Fila (DS3)", () => {
       // Era a acao mais frequente do dia a tres toques de distancia, no mesmo
       // lugar do status. Se voltar pra ca, volta o problema.
@@ -73,18 +84,22 @@ describe("QueueOptions", () => {
       expect(onSelect).toHaveBeenCalledWith("indisponivel");
     });
 
-    // Semaforo (2026-07-23): o icone da linha acompanha o status.
+    // Semaforo (2026-07-23): o PONTO da linha acompanha o status. Era emoji
+    // (🟢/🟡/🔴) e o teste procurava o caractere; agora e cor da paleta, entao
+    // o teste mede a cor — que e o que de fato comunica o estado.
     it.each([
-      ["trabalhando", "🟢"],
-      ["intervalo", "🟡"],
-      ["indisponivel", "🔴"],
-    ])("ícone da linha Status reflete %s (%s)", (current, emoji) => {
+      ["trabalhando", "#9FE870"],
+      ["intervalo", "#FFC091"],
+      ["indisponivel", "#B3261E"],
+    ])("ponto da linha Status reflete %s (%s)", (current, cor) => {
       const view = renderWithProvider(
         <QueueOptions
           status={{ current: current as "trabalhando" | "intervalo" | "indisponivel", onSelect: jest.fn() }}
         />
       );
-      expect(view.getByText(emoji)).toBeTruthy();
+      expect(view.getByTestId("status-dot").props.style).toEqual(
+        expect.objectContaining({ backgroundColor: cor })
+      );
     });
 
     it("sem a prop, trocar status cai no comingSoon (fallback)", () => {

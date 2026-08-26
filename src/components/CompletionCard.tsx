@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight, Check, CircleCheck } from "lucide-react-native";
 import type { Completion, CompletionTracker } from "@lib/completion";
 
 type Props = {
@@ -60,7 +60,8 @@ function Row({
           borderColor: "#D7DDD3", // [marca-vupth] $brandBorder
         }}
       >
-        {done && <Text className="text-white text-xs font-bold">✓</Text>}
+        {/* [marca-vupth] Sobre `forest` o par e brand-green, nunca branco. */}
+        {done && <Check size={13} color="#9FE870" strokeWidth={3} />}
       </View>
       <Text
         className={`flex-1 font-body text-sm ${
@@ -120,7 +121,7 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
     <View className="bg-vupth-surface rounded-card p-4 mt-4">
       {basic.percent === 100 ? (
         <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
-          <Text className="text-xl">🎉</Text>
+          <CircleCheck size={22} color="#9FE870" />
           <View className="flex-1">
             <Text className="font-heading text-sm text-white">{doneBanner}</Text>
             <Text className="font-body text-xs text-vupth-greenTint">

@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info, Ellipsis, UserPlus } from "lucide-react-native";
+import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -34,6 +34,7 @@ import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
+import { AceitandoNovos } from "@components/AceitandoNovos";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
@@ -237,6 +238,7 @@ export default function ProfessionalQueueScreen() {
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
+  const setAcceptingNew = useProfessionalStore((s) => s.setAcceptingNew);
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
@@ -381,6 +383,41 @@ export default function ProfessionalQueueScreen() {
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
+
+  // DS3 (c) — a fila aceita gente nova? Ausente => aceitando.
+  const aceitandoNovos = professional?.accepting_new ?? true;
+  const aplicarAceitando = async (valor: boolean) => {
+    try {
+      await setAcceptingNew(valor);
+      const fresh = await refetch();
+      // Fechar a fila sendo o ultimo dispara auto-OFF no backend => a loja
+      // fecha (derivada). So da pra saber DEPOIS, comparando.
+      if (!valor && fresh.data?.open_status !== "OPEN") {
+        Alert.alert(
+          "Loja fechada",
+          "Você era o último — a fila e a loja foram fechadas para os clientes."
+        );
+      }
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível atualizar a fila."));
+    }
+  };
+  const alternarAceitando = () => {
+    // Reabrir e inofensivo e vai direto. Fechar confirma: quem ja esta na fila
+    // continua, mas ninguem novo entra — e pode fechar a loja junto.
+    if (!aceitandoNovos) {
+      aplicarAceitando(true);
+      return;
+    }
+    Alert.alert(
+      "Fechar fila",
+      "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Fechar fila", style: "destructive", onPress: () => aplicarAceitando(false) },
+      ]
+    );
+  };
 
   // ⚠️ Isto e regra de PRODUTO resolvida no cliente. O certo e o backend
   // derivar "atendendo => trabalhando", porque o app nao e o unico caminho ate
@@ -638,9 +675,12 @@ export default function ProfessionalQueueScreen() {
         />
 
         {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
-          <Text className="font-body text-sm text-vupth-textSecondary mt-1">
-            ★ {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
-          </Text>
+          <View className="flex-row items-center gap-1.5 mt-1">
+            <Star size={13} color="#454745" fill="#454745" />
+            <Text className="font-body text-sm text-vupth-textSecondary">
+              {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
+            </Text>
+          </View>
         )}
 
         {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
@@ -691,13 +731,13 @@ export default function ProfessionalQueueScreen() {
         {myProfessional && (
           <View className="flex-row gap-2 mt-4 items-center">
             <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
-              <Text className="text-xs">👥</Text>
+              <Users size={13} color="#163300" />
               <Text className="font-heading text-xs text-vupth-forest">
                 {myProfessional.queue_count} na fila
               </Text>
             </View>
             <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
-              <Text className="text-xs">⏱</Text>
+              <Clock size={13} color="#163300" />
               <Text className="font-heading text-xs text-vupth-forest">
                 {myProfessional.estimated_wait_minutes} min
               </Text>
@@ -733,7 +773,7 @@ export default function ProfessionalQueueScreen() {
             a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
         {activeMeal && (
           <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-card">
-            <Text className="text-base">🍽️</Text>
+            <UtensilsCrossed size={17} color="#163300" />
             <View className="flex-1">
               <Text className="font-heading text-sm text-vupth-forest">
                 {mealName(activeMeal.description)} em andamento
@@ -748,6 +788,13 @@ export default function ProfessionalQueueScreen() {
               className="h-9 px-4 bg-vupth-accentPeach active:bg-vupth-accentPeach"
             />
           </View>
+        )}
+
+        {/* DS3 (c) — a chave de "aceitando novos" fica no PE da lista, nao no
+            cabecalho: nao e um estado meu (isso e a pilula), e uma propriedade
+            da fila — e a decisao nasce olhando o fim dela. */}
+        {!isLoading && myProfessional && (
+          <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
         )}
 
         {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao

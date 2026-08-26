@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import { View, Text, Pressable } from "react-native";
+import { Unlock, Lock, Inbox, UtensilsCrossed } from "lucide-react-native";
 import { router } from "expo-router";
 import { comingSoon } from "@components/comingSoon";
 import { NotificationBadge } from "@components/NotificationBadge";
@@ -39,14 +41,14 @@ type Props = {
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
 const STATUS: {
-  key: StatusKey; label: string; activeBg: string; activeText: string; emoji: string;
+  key: StatusKey; label: string; activeBg: string; activeText: string; cor: string;
 }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", activeText: "text-white", emoji: "🟢" },
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", activeText: "text-white", cor: "#9FE870" },
   // [marca-vupth] `intervalo` e o unico ativo com fundo CLARO (warning #FFC091,
   // que era bg-amber-500 da escala antiga) — por isso o texto e forest, e nao o
   // branco dos outros dois: sobre claro a marca manda usar forest.
-  { key: "intervalo", label: "Intervalo", activeBg: "bg-vupth-warning", activeText: "text-vupth-forest", emoji: "🟡" },
-  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", activeText: "text-white", emoji: "🔴" },
+  { key: "intervalo", label: "Intervalo", activeBg: "bg-vupth-warning", activeText: "text-vupth-forest", cor: "#FFC091" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", activeText: "text-white", cor: "#B3261E" },
 ];
 
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
@@ -61,7 +63,7 @@ function Section({ title }: { title: string }) {
 }
 
 type RowProps = {
-  icon: string;
+  icon: ReactNode;
   label: string;
   hint?: string;
   dot?: boolean;
@@ -79,7 +81,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       className="bg-vupth-surface px-4 py-3.5 rounded-card mb-2 active:bg-vupth-surfaceAlt"
     >
       <View className="flex-row items-center gap-3">
-        <Text className="text-base w-6 text-center">{icon}</Text>
+        <View className="w-6 items-center">{icon}</View>
         <View className="flex-1">
           <Text className="font-body text-base font-medium text-vupth-textPrimary">
             {label}
@@ -110,8 +112,13 @@ export function QueueOptions({
   pendingRequests = 0,
   onOpenRequests,
 }: Props) {
-  const currentStatus: StatusKey = status?.current ?? "trabalhando";
-  const currentLabel = STATUS.find((s) => s.key === currentStatus)?.label ?? "Trabalhando";
+  // ⚠️ Nao inventar um valor quando o status ainda nao chegou. Isto ja dizia
+  // "Você está: Trabalhando" com o status DESCONHECIDO — num recarregamento
+  // frio a tela afirmava o contrario da verdade, e o profissional que estava
+  // "Fora" lia que estava trabalhando. Achado ao pôr a pilula no cabecalho:
+  // ela dizia "Fora" e esta tela, ao lado, dizia "Trabalhando".
+  const currentStatus = status?.current ?? null;
+  const currentLabel = currentStatus ? STATUS.find((s) => s.key === currentStatus)?.label : null;
 
   const selectStatus = (next: StatusKey) => {
     // Prevencao de clique (S1): com fila, "Fora" nem chega a tentar — o 409 do
@@ -142,15 +149,24 @@ export function QueueOptions({
         className="bg-vupth-surface px-4 py-3.5 rounded-card mb-2"
       >
         <View className="flex-row items-center gap-3">
-          <Text className="text-base w-6 text-center">
-            {STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"}
-          </Text>
+          {/* O ponto do semaforo: a cor do status atual. Era 🟢/🟡/🔴 —
+              emoji nao herda a paleta nem escala com o texto. */}
+          <View className="w-6 items-center">
+            <View
+              testID="status-dot"
+              className="w-2.5 h-2.5 rounded-full"
+              style={{
+                backgroundColor:
+                  STATUS.find((s) => s.key === currentStatus)?.cor ?? "#D7DDD3",
+              }}
+            />
+          </View>
           <View className="flex-1">
             <Text className="font-body text-base font-medium text-vupth-textPrimary">
               Status
             </Text>
             <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
-              Você está: {currentLabel} · toque para trocar
+              {currentLabel ? `Você está: ${currentLabel} · toque para trocar` : "Toque para definir"}
             </Text>
           </View>
         </View>
@@ -188,14 +204,14 @@ export function QueueOptions({
 
       {closeQueue && !closeQueue.acceptingNew ? (
         <Row
-          icon="🔓"
+          icon={<Unlock size={18} color="#163300" />}
           label="Reabrir fila"
           hint="fila fechada para proximos clientes"
           onPress={closeQueue.onToggle}
         />
       ) : (
         <Row
-          icon="🚦"
+          icon={<Lock size={18} color="#163300" />}
           label="Fechar fila"
           hint="termina quem já está; ninguém novo entra"
           onPress={() => (closeQueue ? closeQueue.onToggle() : comingSoon("Fechar fila"))}
@@ -205,7 +221,7 @@ export function QueueOptions({
       <Section title="Hoje" />
       {pendingRequests > 0 && (
         <Row
-          icon="✋"
+          icon={<Inbox size={18} color="#163300" />}
           label="Solicitações"
           hint="fila fechada — pedidos de corte"
           badge={pendingRequests}
@@ -216,7 +232,7 @@ export function QueueOptions({
         />
       )}
       <Row
-        icon="🍽️"
+        icon={<UtensilsCrossed size={18} color="#163300" />}
         label={mealLabel ?? "Refeições"}
         hint={mealHint}
         dot={mealDot}

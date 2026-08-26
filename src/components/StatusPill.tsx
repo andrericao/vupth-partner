@@ -85,7 +85,7 @@ export function StatusPill({ current, onSelect }: Props) {
                   }}
                   className="flex-row items-center gap-3 py-3.5 px-3 rounded-card active:bg-vupth-surface"
                 >
-                  <Text className="text-base">{m.emoji}</Text>
+                  <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.cor }} />
                   <Text className="font-body text-md flex-1 text-vupth-textPrimary">
                     {m.label}
                   </Text>
