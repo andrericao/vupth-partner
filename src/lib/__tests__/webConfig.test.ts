@@ -70,7 +70,7 @@ describe("caminho web — o backend do site nao pode ser implicito", () => {
     expect(["dev", "staging", "prod"]).toContain(valor);
   });
 });
-\n
+
 describe("caminho web — a saida do build nao pode contaminar as ferramentas", () => {
   // O `expo/tsconfig.base` nao exclui nada. Sem esta linha, rodar
   // `npm run build:web` fazia o `tsc` entrar no bundle de 5,4 MB do `dist/` e
