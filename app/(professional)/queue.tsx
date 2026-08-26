@@ -32,6 +32,7 @@ import { NotificationBadge } from "@components/NotificationBadge";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { BlocoBloqueio } from "@components/BlocoBloqueio";
+import { Titulo } from "@components/Titulo";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { BenchIcon } from "@components/BenchIcon";
@@ -654,9 +655,9 @@ export default function ProfessionalQueueScreen() {
 
         {waitingList.length > 0 && (
           <View className="mt-6">
-            <Text className="font-heading mb-2 text-vupth-textSecondary">
+            <Titulo nivel={2} className="mb-2">
               Lista de Espera ({waitingList.length})
-            </Text>
+            </Titulo>
             {waitingList.map((att, idx) => (
               <QueueRow
                 key={att.id}
@@ -699,9 +700,7 @@ export default function ProfessionalQueueScreen() {
               nao centralizava nada (o pai e o conteudo de um ScrollView), so
               empurrava o texto pro meio da largura. */
           <View className="mt-6 bg-vupth-surface rounded-[20px] p-5 gap-1.5">
-            <Text className="font-display text-base text-vupth-forest">
-              Nenhum cliente na fila
-            </Text>
+            <Titulo nivel={2}>Nenhum cliente na fila</Titulo>
             <Text className="font-body text-sm leading-5 text-vupth-textSecondary">
               Novos clientes aparecerão aqui automaticamente.
             </Text>

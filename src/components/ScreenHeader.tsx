@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Titulo } from "@components/Titulo";
 import { BackHandler, View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -91,12 +92,12 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
         {/* So o TITULO divide a linha com os botoes. */}
         {/* O `mt-[5px]` centra a 1a linha do titulo (30 de entrelinha) no
             botao redondo (40): (40 − 30) / 2. */}
-        <Text
-          numberOfLines={2}
-          className="flex-1 mt-[5px] font-display text-[26px] leading-[30px] tracking-[-0.8px] text-vupth-forest"
-        >
+        {/* h1 da tela: e o UNICO titulo de nivel 1 que o app emite, e todas
+            as telas passam por aqui — por isso a semantica mora no
+            ScreenHeader e nao em cada tela. */}
+        <Titulo nivel={1} numberOfLines={2} className="flex-1 mt-[5px]">
           {title}
-        </Text>
+        </Titulo>
 
         {/* A acao ocupa uma faixa de 40 e se centra nela — a mesma altura do
             botao redondo do voltar. Sem isso, com a linha ancorada no topo
