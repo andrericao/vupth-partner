@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info, ArrowRight } from "lucide-react-native";
+import { ChevronRight, Info } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -31,6 +31,7 @@ import { queueMenuCount } from "@lib/notifications";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { BenchIcon } from "@components/BenchIcon";
@@ -378,6 +379,10 @@ export default function ProfessionalQueueScreen() {
   const waitingList = myProfessional?.waiting_list ?? [];
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
+  // Vinculado (chegou aqui), mas o backend nao o devolve na fila — na pratica
+  // significa "sem servico cadastrado". Invisivel para o cliente.
+  const semServico = !isLoading && !!data && !myProfessional;
+
   // Checklist de prontidao (2 completes). Ver src/lib/completion.ts.
   const completion = professionalCompletion({
     isAffiliated: !!establishmentId,
@@ -513,27 +518,13 @@ export default function ProfessionalQueueScreen() {
         <ScreenHeader
           title="Fila"
         />
-        <View className="mt-8 bg-vupth-accentPeach p-4 rounded-[20px] gap-2.5">
-          {/* Mesmo bloco de bloqueio do desenho ("409 AGENDA CHEIA"): titulo
-              13/700, texto 14, acao como texto + seta. */}
-          <Text className="font-heading text-[13px] text-vupth-forest">
-            Você ainda não tem fila
-          </Text>
-          <Text className="font-body text-[14px] text-vupth-forest">
-            Para receber clientes, você precisa estar vinculado a um
-            estabelecimento. Busque um estabelecimento e solicite a vinculação —
-            o dono confirma e você passa a aparecer na fila.
-          </Text>
-          <Pressable
-            onPress={() => router.push("/(professional)/find-establishment" as any)}
-            className="flex-row items-center gap-1.5 mt-1 active:opacity-70"
-            accessibilityRole="button"
-          >
-            <Text className="font-heading text-[13px] text-vupth-forest">
-              Buscar estabelecimento
-            </Text>
-            <ArrowRight size={15} color="#163300" />
-          </Pressable>
+        <View className="mt-4">
+          <BlocoBloqueio
+            titulo="Você ainda não tem fila"
+            texto="Para receber clientes você precisa estar vinculado a um estabelecimento. O dono confirma a solicitação e você passa a aparecer na fila."
+            acao="Buscar estabelecimento"
+            rota="/(professional)/find-establishment"
+          />
         </View>
       </View>
     );
@@ -608,11 +599,33 @@ export default function ProfessionalQueueScreen() {
           />
         )}
 
-        <ReadinessFaixa
-          completion={completion}
-          targetRoute="/(professional)/settings"
-          goalNoun="atender clientes"
-        />
+        {/* BLOQUEIO vem primeiro: vinculado, mas o backend nao o lista na
+            fila por nao ter servico. Era o ULTIMO bloco do arquivo, abaixo de
+            tudo — sendo que quando ele aparece nao ha mais nada na tela. */}
+        {semServico && (
+          <View className="mt-4">
+            <BlocoBloqueio
+              titulo="Você ainda não aparece para os clientes"
+              texto="Você está vinculado, mas precisa de pelo menos um serviço cadastrado para entrar na fila e receber clientes."
+              acao="Adicionar serviço"
+              rota="/(professional)/my-services?from=queue"
+            />
+          </View>
+        )}
+
+        {/* A faixa de prontidao NAO acumula com o bloqueio. Nesta tela ela so
+            pode estar cobrando um passo — "1+ servico" —, ja que "vinculado"
+            e pre-requisito para chegar aqui. Ou seja: quando o bloqueio acima
+            aparece, os dois cartoes dizem A MESMA COISA, e o de cima diz de
+            forma mais vaga ("falta 1 passo") do que o de baixo, que nomeia o
+            passo e leva direto a ele. */}
+        {!semServico && (
+          <ReadinessFaixa
+            completion={completion}
+            targetRoute="/(professional)/settings"
+            goalNoun="atender clientes"
+          />
+        )}
 
         {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
             chips — liberam tela para a fila e para o botao fixo do rodape. */}
@@ -679,48 +692,22 @@ export default function ProfessionalQueueScreen() {
         )}
 
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
-          <View className="flex-1 items-center justify-center mt-6">
-            <Text className="font-body text-lg text-vupth-textSecondary text-center">
+          /* VAZIO nao e BLOQUEIO: aqui esta tudo certo, so nao ha ninguem
+              ainda — e nao ha o que o profissional possa fazer a respeito.
+              Entao vem em `surface`, sem acento e sem acao, ao contrario do
+              BlocoBloqueio. O `flex-1 items-center justify-center` de antes
+              nao centralizava nada (o pai e o conteudo de um ScrollView), so
+              empurrava o texto pro meio da largura. */
+          <View className="mt-6 bg-vupth-surface rounded-[20px] p-5 gap-1.5">
+            <Text className="font-display text-base text-vupth-forest">
               Nenhum cliente na fila
             </Text>
-            <Text className="font-body text-vupth-textSecondary text-center mt-2">
-              Novos clientes aparecerao automaticamente
+            <Text className="font-body text-sm leading-5 text-vupth-textSecondary">
+              Novos clientes aparecerão aqui automaticamente.
             </Text>
           </View>
         )}
 
-        {/* Vinculado, mas o backend nao o lista na fila por nao ter servico:
-            sem isto a tela ficava em branco. Damos a ação de adicionar serviço. */}
-        {!isLoading && data && !myProfessional && (
-          <View className="mt-8 bg-vupth-accentPeach p-4 rounded-[20px] gap-2.5">
-          {/* [marca-vupth] Segue o bloco "409 AGENDA CHEIA" do desenho, que e a
-              unica referencia de BLOQUEIO que o arquivo tem (nao ha estado
-              vazio desenhado em tela nenhuma). De la: pessego, raio 20, padding
-              16, gap 10, SEM borda, titulo 13/700 e texto 14 em forest — e a
-              acao como TEXTO + SETA, nao botao cheio.
-
-              O botao verde solido aqui gastava um segundo acento dentro de um
-              cartao que ja e acento; e a borda era da mesma cor do fundo, entao
-              nao desenhava nada. */}
-            <Text className="font-heading text-[13px] text-vupth-forest">
-              Você ainda não aparece para os clientes
-            </Text>
-            <Text className="font-body text-[14px] text-vupth-forest">
-              Você está vinculado, mas precisa de pelo menos um serviço cadastrado
-              para entrar na fila e receber clientes.
-            </Text>
-            <Pressable
-              onPress={() => router.push("/(professional)/my-services?from=queue" as any)}
-              className="flex-row items-center gap-1.5 mt-1 active:opacity-70"
-              accessibilityRole="button"
-            >
-              <Text className="font-heading text-[13px] text-vupth-forest">
-                Adicionar serviço
-              </Text>
-              <ArrowRight size={15} color="#163300" />
-            </Pressable>
-          </View>
-        )}
       </View>
       </ScrollView>
 
