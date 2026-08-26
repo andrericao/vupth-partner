@@ -42,7 +42,7 @@ function FieldCard({
   children?: React.ReactNode;
 }) {
   return (
-    <View className="bg-vupth-surface p-4 rounded-[20px]">
+    <View className="bg-vupth-surface p-4 rounded-card">
       <Text className="font-body text-sm text-vupth-textSecondary">{label}</Text>
       {editing ? (
         <View className="mt-2">

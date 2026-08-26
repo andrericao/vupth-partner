@@ -8,7 +8,7 @@ export function ButtonGoBack(props: PressableProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Voltar"
-      className="w-[39px] h-[39px] rounded-[18px] bg-vupth-forest items-center justify-center active:bg-vupth-forestSoft"
+      className="w-[39px] h-[39px] rounded-full bg-vupth-forest items-center justify-center active:bg-vupth-forestSoft"
       {...props}
     >
       <ChevronLeft size={22} color="#fff" />

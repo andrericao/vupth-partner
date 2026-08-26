@@ -117,7 +117,7 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
     n === 1 ? "Falta 1 passo para aparecer aos clientes." : `Faltam ${n} passos para aparecer aos clientes.`;
 
   return (
-    <View className="bg-vupth-surface rounded-[20px] p-4 mt-4">
+    <View className="bg-vupth-surface rounded-card p-4 mt-4">
       {basic.percent === 100 ? (
         <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
           <Text className="text-xl">🎉</Text>

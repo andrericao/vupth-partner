@@ -37,7 +37,7 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
     // erro nem urgencia: e so cadastro pendente. Passou pro greenTint com a
     // barra de progresso do Pencil (OWNER · 02 Menu), que MOSTRA o quanto ja
     // andou em vez de so cobrar o que falta.
-    <View className="bg-vupth-greenTint rounded-[20px] p-4 mt-4 gap-2.5">
+    <View className="bg-vupth-greenTint rounded-card p-4 mt-4 gap-2.5">
       <Pressable
         onPress={() => router.push(targetRoute as any)}
         accessibilityRole="button"

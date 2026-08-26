@@ -61,7 +61,7 @@ export function ServiceTypeGrid({
             accessibilityRole="button"
             accessibilityState={{ selected: isSel }}
             onPress={() => onSelect(it)}
-            className={`w-[48.5%] mb-2.5 relative rounded-[20px] p-3 ${
+            className={`w-[48.5%] mb-2.5 relative rounded-card p-3 ${
               isSel ? "bg-vupth-greenTint border-2 border-vupth-forest" : "bg-vupth-surface"
             }`}
           >

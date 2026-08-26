@@ -67,7 +67,7 @@ function ServingCard({
     // com `forest` por cima, que e o par de contraste da marca. E o card mais
     // claro da tela de proposito: e o que esta acontecendo agora.
     <View
-      className={`p-4 rounded-[20px] mt-4 ${isPaused ? "bg-vupth-accentPeach" : "bg-vupth-green"}`}
+      className={`p-4 rounded-card mt-4 ${isPaused ? "bg-vupth-accentPeach" : "bg-vupth-green"}`}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5">
@@ -166,7 +166,7 @@ function QueueRow({
       accessibilityRole="button"
       accessibilityLabel={`Opções de ${attendance.clientName}`}
       className={`bg-vupth-surface pl-4 active:bg-vupth-greenTint ${
-        isFirst ? "p-4 rounded-[20px] border border-vupth-forest mb-3" : "p-3 rounded-[20px] mb-2"
+        isFirst ? "p-4 rounded-card border border-vupth-forest mb-3" : "p-3 rounded-card mb-2"
       }`}
     >
       <View className="flex-row items-center gap-2">
@@ -674,7 +674,7 @@ export default function ProfessionalQueueScreen() {
             só a faixa da refeição EM ANDAMENTO, porque "Encerrar" precisa estar
             a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
         {activeMeal && (
-          <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-[20px]">
+          <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-card">
             <Text className="text-base">🍽️</Text>
             <View className="flex-1">
               <Text className="font-heading text-sm text-vupth-forest">
@@ -699,7 +699,7 @@ export default function ProfessionalQueueScreen() {
               BlocoBloqueio. O `flex-1 items-center justify-center` de antes
               nao centralizava nada (o pai e o conteudo de um ScrollView), so
               empurrava o texto pro meio da largura. */
-          <View className="mt-6 bg-vupth-surface rounded-[20px] p-5 gap-1.5">
+          <View className="mt-6 bg-vupth-surface rounded-card p-5 gap-1.5">
             <Titulo nivel={2}>Nenhum cliente na fila</Titulo>
             <Text className="font-body text-sm leading-5 text-vupth-textSecondary">
               Novos clientes aparecerão aqui automaticamente.

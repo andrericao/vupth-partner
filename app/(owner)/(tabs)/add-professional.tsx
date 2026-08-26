@@ -44,7 +44,7 @@ function PathCard({
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
-      className={`bg-vupth-surface p-4 rounded-[20px] mb-3 border ${
+      className={`bg-vupth-surface p-4 rounded-card mb-3 border ${
         selected ? "border-vupth-forest" : "border-transparent"
       } active:bg-vupth-surface`}
     >

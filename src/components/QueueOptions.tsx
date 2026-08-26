@@ -71,7 +71,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2 active:bg-vupth-surfaceAlt"
+      className="bg-vupth-surface px-4 py-3.5 rounded-card mb-2 active:bg-vupth-surfaceAlt"
     >
       <View className="flex-row items-center gap-3">
         <Text className="text-base w-6 text-center">{icon}</Text>
@@ -134,7 +134,7 @@ export function QueueOptions({
           Não há mais botão de abrir/fechar loja: ficar "Trabalhando" abre sozinho
           (derivado); a tela avisa "você é o primeiro". */}
       <View
-        className="bg-vupth-surface px-4 py-3.5 rounded-[20px] mb-2"
+        className="bg-vupth-surface px-4 py-3.5 rounded-card mb-2"
       >
         <View className="flex-row items-center gap-3">
           <Text className="text-base w-6 text-center">

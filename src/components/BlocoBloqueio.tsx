@@ -27,7 +27,7 @@ type Props = {
 
 export function BlocoBloqueio({ titulo, texto, acao, rota }: Props) {
   return (
-    <View className="bg-vupth-accentPeach rounded-[20px] p-4 gap-2.5">
+    <View className="bg-vupth-accentPeach rounded-card p-4 gap-2.5">
       <Titulo nivel={2}>{titulo}</Titulo>
       <Text className="font-body text-[14px] leading-5 text-vupth-forest">{texto}</Text>
       <Pressable

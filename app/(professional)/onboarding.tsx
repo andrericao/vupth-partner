@@ -278,7 +278,7 @@ export default function ProfessionalOnboardingScreen() {
                     accessibilityRole="button"
                     testID="establishment-card"
                     onPress={() => handleSelectEstablishment(estab)}
-                    className="bg-vupth-surface py-3 px-4 rounded-[20px]"
+                    className="bg-vupth-surface py-3 px-4 rounded-card"
                   >
                     <Text className="font-heading text-vupth-forest">{estab.name}</Text>
                     <View className="flex-row gap-2 mt-1">
@@ -322,7 +322,7 @@ export default function ProfessionalOnboardingScreen() {
         />
 
         {selectedEstablishment && (
-          <View className="bg-vupth-surface p-6 rounded-[20px] w-full mb-6">
+          <View className="bg-vupth-surface p-6 rounded-card w-full mb-6">
             <Text className="font-heading text-xl text-vupth-forest">
               {selectedEstablishment.name}
             </Text>

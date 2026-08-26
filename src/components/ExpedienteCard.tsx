@@ -14,7 +14,7 @@ export function ExpedienteCard() {
         comingSoon("O expediente (horário de abertura e fechamento) nos relatórios")
       }
     >
-      <View className="bg-vupth-surface p-4 rounded-[20px]">
+      <View className="bg-vupth-surface p-4 rounded-card">
         <View className="flex-row justify-between items-center mb-1">
           <Text className="font-body text-xs text-vupth-textSecondary">Expediente</Text>
           <View className="bg-vupth-warning rounded-full px-2 py-0.5">

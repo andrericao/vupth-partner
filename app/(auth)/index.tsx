@@ -83,7 +83,7 @@ export default function RoleChoiceScreen() {
             <Pressable
               key={p.role}
               onPress={() => router.push(getRoleCardRoute(isAuthenticated, p.role) as any)}
-              className={`flex-row items-center gap-3.5 p-[18px] rounded-[20px] ${
+              className={`flex-row items-center gap-3.5 p-[18px] rounded-card ${
                 p.destaque
                   ? "bg-vupth-green active:bg-vupth-success"
                   : "bg-vupth-surface active:bg-vupth-border"

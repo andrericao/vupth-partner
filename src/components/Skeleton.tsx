@@ -47,7 +47,7 @@ function Block({
 export function SkeletonCard() {
   const opacity = usePulse();
   return (
-    <View className="bg-vupth-surface p-4 rounded-[20px] mb-3">
+    <View className="bg-vupth-surface p-4 rounded-card mb-3">
       <View className="flex-row justify-between items-center">
         <Block opacity={opacity} w="45%" h={14} />
         <Block opacity={opacity} w={64} h={22} r={999} />
