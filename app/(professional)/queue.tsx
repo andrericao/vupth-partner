@@ -33,6 +33,8 @@ import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
+import { StatusPill } from "@components/StatusPill";
+import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
@@ -234,6 +236,7 @@ function QueueRow({
 export default function ProfessionalQueueScreen() {
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
+  const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
   const establishmentId = professional?.establishment_id;
 
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
@@ -378,6 +381,21 @@ export default function ProfessionalQueueScreen() {
   const currentAttendance = myProfessional?.current_attendance;
   const waitingList = myProfessional?.waiting_list ?? [];
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
+
+  // Troca de status pela pilula do cabecalho. Mesma regra da tela de Opcoes —
+  // o AVISO de loja aberta/fechada mora em `avisoDeLoja`, compartilhado, pra
+  // nao existirem duas versoes da mesma decisao.
+  const selectStatus = async (next: StatusKey) => {
+    const abertaAntes = data?.open_status === "OPEN";
+    try {
+      await updateMyStatus(KEY_TO_WORK[next]);
+      const fresh = await refetch();
+      const aviso = avisoDeLoja(next, abertaAntes, fresh.data?.open_status === "OPEN");
+      if (aviso) Alert.alert(aviso.titulo, aviso.texto);
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível mudar o status."));
+    }
+  };
 
   // Vinculado (chegou aqui), mas o backend nao o devolve na fila — na pratica
   // significa "sem servico cadastrado". Invisivel para o cliente.
@@ -551,9 +569,17 @@ export default function ProfessionalQueueScreen() {
         <ScreenHeader
           title="Fila"
           action={
-            /* Nav v2 (2026-07-23): o banco NAVEGA p/ a tela de opcoes (nada de
-               modal — "mais amigavel a tela inteira"). Badge = refeicao na
-               janela + solicitações de corte (o que o menu resolve). */
+            <View className="flex-row items-center gap-2">
+            {/* DS3 — a pilula do proprio status. Ate aqui o `work_status` so
+                existia dentro da tela de Opcoes: era preciso ABRIR o menu pra
+                descobrir se voce estava trabalhando. */}
+            <StatusPill
+              current={professional?.work_status ? WORK_TO_KEY[professional.work_status] : null}
+              onSelect={selectStatus}
+            />
+            {/* Nav v2 (2026-07-23): a reticencia NAVEGA p/ a tela de opcoes
+                (nada de modal — "mais amigavel a tela inteira"). Badge =
+                refeicao na janela + solicitacoes de corte. */}
             <Pressable
             onPress={() => router.push("/(professional)/queue-options" as any)}
             accessibilityRole="button"
@@ -580,6 +606,7 @@ export default function ProfessionalQueueScreen() {
               />
             </View>
           </Pressable>
+            </View>
           }
         />
 
