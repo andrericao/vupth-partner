@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info, Ellipsis } from "lucide-react-native";
+import { ChevronRight, Info, Ellipsis, UserPlus } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -382,6 +382,23 @@ export default function ProfessionalQueueScreen() {
   const waitingList = myProfessional?.waiting_list ?? [];
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
+  // ⚠️ Isto e regra de PRODUTO resolvida no cliente. O certo e o backend
+  // derivar "atendendo => trabalhando", porque o app nao e o unico caminho ate
+  // um atendimento. Registrado pro Andre; ate la fica aqui.
+  const garantirTrabalhando = async () => {
+    if (professional?.work_status === "WORKING") return;
+    const abertaAntes = data?.open_status === "OPEN";
+    try {
+      await updateMyStatus("WORKING");
+      const fresh = await refetch();
+      const aviso = avisoDeLoja("trabalhando", abertaAntes, fresh.data?.open_status === "OPEN");
+      if (aviso) Alert.alert(aviso.titulo, aviso.texto);
+    } catch {
+      // O atendimento ja comecou; o status se resolve no proximo toque da
+      // pilula, que agora esta visivel.
+    }
+  };
+
   // Troca de status pela pilula do cabecalho. Mesma regra da tela de Opcoes —
   // o AVISO de loja aberta/fechada mora em `avisoDeLoja`, compartilhado, pra
   // nao existirem duas versoes da mesma decisao.
@@ -451,6 +468,16 @@ export default function ProfessionalQueueScreen() {
           clearAttendanceStart(currentAttendance.id);
         }
         await startAttendance(att.id);
+        // Comecar a atender E dizer que voce esta trabalhando (decisao da
+        // Alexia, 2026-08-26). Antes o `work_status` so mudava pela mao: dava
+        // pra estar com um cliente na cadeira e o status em "Fora" — e a loja,
+        // que DERIVA do status, seguia apagada pros clientes enquanto havia
+        // gente sendo atendida.
+        //
+        // Silencioso de proposito, menos quando muda a loja: quem tocou em
+        // "Iniciar" pediu pra atender, nao pra ver um aviso de status. Falhar
+        // aqui nao derruba o atendimento, que ja comecou.
+        await garantirTrabalhando();
       });
 
     // Inicio direto (sem confirmacao) so quando e o 1o da fila E ninguem esta em
@@ -721,6 +748,23 @@ export default function ProfessionalQueueScreen() {
               className="h-9 px-4 bg-vupth-accentPeach active:bg-vupth-accentPeach"
             />
           </View>
+        )}
+
+        {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao
+            mais frequente do dia e estava enterrada tres toques adentro, no
+            mesmo lugar do status. Vive ABAIXO da lista, porque e sobre ela que
+            se age, e em `ghost` pra nao brigar com o "Iniciar proximo" fixo do
+            rodape — dois botoes cheios na mesma tela e uma escolha, nao uma
+            acao. Aparece tambem com a fila vazia, que e quando o cliente que
+            chega andando importa mais. */}
+        {!isLoading && myProfessional && (
+          <NwButton
+            title="Adicionar cliente"
+            variant="vupthGhost"
+            onPress={() => router.push("/(professional)/add-guest" as any)}
+            className="self-start mt-3"
+            icon={<UserPlus size={16} color="#163300" />}
+          />
         )}
 
         {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (

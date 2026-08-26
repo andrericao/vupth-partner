@@ -23,7 +23,11 @@ type Variant =
   // gluestack config (client e partner).
   | "vupthPrimary"
   | "vupthSecondary"
-  | "vupthOutline";
+  | "vupthOutline"
+  // Button/Ghost do desenho: sem fundo, texto forest, raio 8 e caixa BAIXA
+  // (10/12) — nao e uma pilula. E o peso mais leve da familia, pra acao que
+  // acompanha uma lista sem competir com o botao principal da tela.
+  | "vupthGhost";
 
 type Props = Omit<PressableProps, "children"> & {
   title: string;
@@ -45,6 +49,8 @@ type Props = Omit<PressableProps, "children"> & {
 };
 
 const BASE = "h-[54px] rounded-full items-center justify-center px-4";
+// O ghost e o unico que NAO e pilula alta: raio 8, caixa de 10/12 (do desenho).
+const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
 
 // [marca-vupth] `primary` E o Button/Primary do Pencil: fundo brand-green com
 // texto forest. Na primeira passada ele ficou forest+branco — troca conservadora
@@ -68,6 +74,7 @@ const BOX: Record<Variant, string> = {
   // Zero chamadas fora do proprio teste, entao a correcao nao tem raio.
   vupthSecondary: "bg-vupth-forest active:bg-vupth-forestSoft",
   vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint",
+  vupthGhost: "bg-transparent active:bg-vupth-surface",
 };
 
 const LABEL: Record<Variant, string> = {
@@ -79,6 +86,7 @@ const LABEL: Record<Variant, string> = {
   vupthPrimary: "text-vupth-forest",
   vupthSecondary: "text-vupth-green",
   vupthOutline: "text-vupth-forest",
+  vupthGhost: "text-vupth-forest",
 };
 
 export function NwButton({
@@ -96,7 +104,7 @@ export function NwButton({
       accessibilityRole="button"
       accessibilityLabel={title}
       disabled={isLoading || disabled}
-      className={`${BASE} ${BOX[variant]} ${className ?? ""}`}
+      className={`${variant === "vupthGhost" ? BASE_GHOST : BASE} ${BOX[variant]} ${className ?? ""}`}
       {...rest}
     >
       {isLoading ? (

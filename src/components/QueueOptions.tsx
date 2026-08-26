@@ -8,7 +8,12 @@ import type { MealSignal } from "@lib/meals";
 // design/professional-nav-v2.html). Substitui o antigo menu-modal do banco:
 // agora e TELA CHEIA ("mais amigavel"), SEM duplicar o rodape (Fila/Relatorios/
 // Configuracoes vivem la; Sair/Area do dono vivem em Configuracoes).
-// So ACOES DO DIA: Status, Fechar fila, Solicitacoes, Refeicoes, Adicionar cliente.
+// So ACOES DO DIA: Status, Fechar fila, Solicitacoes, Refeicoes.
+//
+// ⚠️ "Adicionar cliente" SAIU daqui em 2026-08-26 (DS3): e a acao mais
+// frequente do dia e estava a tres toques, no mesmo lugar do status. Foi pra
+// tela da Fila, abaixo da lista. O status tambem esta duplicado la agora, na
+// pilula do cabecalho — esta tela segue sendo o caminho longo, nao o unico.
 //
 // ⚠️ SEM "abrir/fechar estabelecimento" (decisao Andre 2026-07-24): o profissional
 // nao mexe na loja na mao — ele so muda o PROPRIO status. Ao ficar "Trabalhando"
@@ -216,12 +221,6 @@ export function QueueOptions({
         hint={mealHint}
         dot={mealDot}
         onPress={() => router.push("/(professional)/meals?from=queue-options" as any)}
-      />
-      <Row
-        icon="➕"
-        label="Adicionar cliente"
-        hint="walk-in, sem app"
-        onPress={() => router.push("/(professional)/add-guest" as any)}
       />
     </View>
   );

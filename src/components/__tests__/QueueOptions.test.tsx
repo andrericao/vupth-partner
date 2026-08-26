@@ -15,11 +15,17 @@ describe("QueueOptions", () => {
   describe("navegacao (só o que NAO esta no rodape)", () => {
     it.each([
       ["Refeições", "/(professional)/meals?from=queue-options"],
-      ["Adicionar cliente", "/(professional)/add-guest"],
     ])("'%s' navega para %s", (label, route) => {
       const view = renderWithProvider(<QueueOptions />);
       fireEvent.press(view.getByLabelText(label));
       expect(router.push).toHaveBeenCalledWith(route);
+    });
+
+    it("'Adicionar cliente' NAO mora mais aqui — foi pra tela da Fila (DS3)", () => {
+      // Era a acao mais frequente do dia a tres toques de distancia, no mesmo
+      // lugar do status. Se voltar pra ca, volta o problema.
+      const view = renderWithProvider(<QueueOptions />);
+      expect(view.queryByLabelText("Adicionar cliente")).toBeNull();
     });
 
     it("NAO ha itens duplicados do rodape (Relatorios/Configuracoes) nem Sair", () => {
