@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
@@ -11,6 +12,10 @@ import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 
 export default function RegisterScreen() {
+  // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
+  // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
+  // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
+  const insets = useSafeAreaInsets();
   const { role } = useLocalSearchParams<{ role: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,7 +81,7 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 pt-14 pb-8 px-4">
+        <View className="flex-1 pt-14 px-4" style={{ paddingBottom: Math.max(insets.bottom, 32) }}>
           <Pressable
             onPress={() => router.back()}
             className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"

@@ -102,3 +102,40 @@ describe("fontes declaradas x fontes CARREGADAS", () => {
     expect(layout).toContain(fonte);
   });
 });
+
+// DS5 (QA de device): "as abas do rodape nao mostram qual esta ativa".
+// A causa nao era o desenho — era a implementacao pela metade. O desenho
+// especifica COR + PILULA `green-tint`; o codigo entregue fazia so a cor.
+// E cor sozinha nao separa: ativo #163300 contra inativo #454745 da 1,49:1 UM
+// CONTRA O OUTRO. Os dois se leem sobre o branco; entre si, nao.
+describe("tab bar — o estado ativo nao pode depender so da cor", () => {
+  const FORESTE = "#163300";
+  const SECUNDARIO = "#454745";
+
+  function contraste(a: string, b: string) {
+    const lum = (h: string) => {
+      const c = [1, 3, 5]
+        .map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+        .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const [claro, escuro] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (claro + 0.05) / (escuro + 0.05);
+  }
+
+  it("os dois tons sao indistinguiveis entre si — por isso a pilula existe", () => {
+    expect(contraste(FORESTE, SECUNDARIO)).toBeLessThan(3);
+  });
+
+  it("a pilula esta implementada no TabBarIcon", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require("fs");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const path = require("path");
+    const fonte = fs.readFileSync(
+      path.resolve(__dirname, "../../components/TabBarIcon.tsx"),
+      "utf8"
+    );
+    expect(fonte).toMatch(/bg-vupth-greenTint/);
+  });
+});

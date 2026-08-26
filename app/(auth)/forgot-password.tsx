@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import {
   View,
@@ -26,6 +27,10 @@ import { PasswordRules } from "@components/PasswordRules";
 // ⚠️ Enquanto o SMTP (S8) nao estiver configurado no ambiente, o e-mail real
 // nao chega (NoOpEmailSender so loga o codigo no servidor).
 export default function ForgotPasswordScreen() {
+  // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
+  // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
+  // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
+  const insets = useSafeAreaInsets();
   const forgotPassword = useAuthStore((s) => s.forgotPassword);
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
@@ -99,7 +104,7 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 pt-14 pb-8 px-4">
+        <View className="flex-1 pt-14 px-4" style={{ paddingBottom: Math.max(insets.bottom, 32) }}>
           <Pressable
             onPress={() => router.replace("/(auth)/login" as any)}
             className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
