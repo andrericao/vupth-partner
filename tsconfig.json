@@ -12,5 +12,10 @@
       "@theme/*": ["./src/theme/*"],
       "@utils/*": ["./src/utils/*"]
     }
-  }
+  },
+  // O `expo/tsconfig.base` nao exclui nada, entao o tsc entrava no `dist/` do
+  // build web e engasgava no bundle de 5,4 MB — `RangeError: Maximum call
+  // stack size exceeded`, sem dizer o arquivo. Quem rodasse `npm run
+  // build:web` via o typecheck quebrar depois, sem ligar uma coisa a outra.
+  "exclude": ["node_modules", "dist", ".expo", "web-build"]
 }
