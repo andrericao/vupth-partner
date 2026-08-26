@@ -49,24 +49,29 @@ function makeToken(payload: object): string {
   return `${header}.${body}.fake`;
 }
 
+// Os fixtures usam o formato REAL do backend — string separada por virgula,
+// com prefixo `ROLE_` (token lido de uma sessao de verdade em 2026-08-26).
+// Antes montavam `["CLIENT"]`, array e sem prefixo: um contrato que o backend
+// nao cumpre, e foi por isso que ninguem viu o `getRolesFromToken` devolvendo
+// a string crua tipada como array.
 const CLIENT_TOKEN = makeToken({
   sub: "uuid-1",
   email: "owner@test.com",
-  roles: ["CLIENT"],
+  roles: "ROLE_CLIENT",
   exp: 9999999999,
 });
 
 const OWNER_TOKEN = makeToken({
   sub: "uuid-1",
   email: "owner@test.com",
-  roles: ["CLIENT", "OWNER"],
+  roles: "ROLE_CLIENT,ROLE_OWNER",
   exp: 9999999999,
 });
 
 const PROFESSIONAL_TOKEN = makeToken({
   sub: "uuid-2",
   email: "prof@test.com",
-  roles: ["CLIENT", "PROFESSIONAL"],
+  roles: "ROLE_CLIENT,ROLE_PROFESSIONAL",
   exp: 9999999999,
 });
 
