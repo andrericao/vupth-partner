@@ -47,6 +47,10 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "backgroundColor": "#FFFFFF"
+    "backgroundColor": "#FFFFFF",
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
   }
 }
