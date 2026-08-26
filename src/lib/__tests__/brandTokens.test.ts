@@ -70,22 +70,80 @@ describe("tokens da marca — tailwind x gluestack tem de bater 1:1", () => {
   });
 });
 
-describe("regra de contraste da marca — brandGreen so como FUNDO", () => {
-  // A propria doc da marca (e os comentarios nos dois configs) diz: o verde
-  // #9FE870 e claro demais p/ texto/icone sobre fundo claro; ele entra como
-  // FUNDO, com `forest` por cima. Aqui travamos isso no codigo das primitivas.
+// Razao de contraste WCAG entre dois hex.
+function luminancia(hex: string): number {
+  const c = hex.replace("#", "");
+  const canal = (i: number) => {
+    const v = parseInt(c.slice(i * 2, i * 2 + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * canal(0) + 0.7152 * canal(1) + 0.0722 * canal(2);
+}
+function razao(a: string, b: string): number {
+  const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+
+describe("contraste de cada variante do botao", () => {
+  // ⚠️ Esta guarda JA FOI uma proibicao literal: "nenhum variant usa
+  // text-vupth-green". A intencao estava certa — #9FE870 sobre claro da ~1.7:1
+  // — mas a forma estava errada, e ela reprovou o `Button/Secondary` do proprio
+  // arquivo de design, que e brand-green SOBRE FOREST e da 9.4:1.
+  //
+  // Proibir a cor e proibir o simbolo; o que importa e o PAR. Agora o teste le
+  // o fundo e o rotulo de cada variante e mede — pega o caso ruim sem vetar o
+  // bom, e nao precisa de emenda cada vez que uma variante nova aparece.
   const nwButton = fs.readFileSync(
     path.join(ROOT, "src/components/nw/Button.tsx"),
     "utf8"
   );
-  const labelMap = nwButton.slice(nwButton.indexOf("const LABEL"));
+  const bloco = (nome: string) => {
+    const i = nwButton.indexOf(`const ${nome}`);
+    return nwButton.slice(i, nwButton.indexOf("};", i));
+  };
+  const BOX = bloco("BOX");
+  const LABEL = bloco("LABEL");
 
-  it("nenhum variant usa vupth-green como cor de TEXTO", () => {
-    expect(labelMap).not.toContain("text-vupth-green");
+  // `bg-vupth-x` / `text-vupth-x` -> hex; `text-white` -> #FFFFFF.
+  const hexDe = (classe: string | undefined): string | null => {
+    if (!classe) return null;
+    if (classe === "white") return "#FFFFFF";
+    return vupth[classe] ?? null;
+  };
+  const capturar = (fonte: string, variante: string, prefixo: string) => {
+    const linha = fonte.match(new RegExp(`\\b${variante}:\\s*"([^"]*)"`));
+    if (!linha) return null;
+    const m = linha[1].match(new RegExp(`(?:^|\\s)${prefixo}-(?:vupth-)?([A-Za-z]+)`));
+    return m ? m[1] : null;
+  };
+
+  const VARIANTES = [
+    "primary",
+    "secondary",
+    "danger",
+    "outlineBrand",
+    "outlineDanger",
+    "vupthPrimary",
+    "vupthSecondary",
+    "vupthOutline",
+  ];
+
+  it.each(VARIANTES)("%s passa no minimo AA (4.5:1)", (v) => {
+    const fundo = hexDe(capturar(BOX, v, "bg") ?? undefined);
+    const texto = hexDe(capturar(LABEL, v, "text") ?? undefined);
+    // Variante transparente (outline/ghost) herda o fundo da tela — nao da p/
+    // medir aqui; o fundo real e coberto pela varredura de telas.
+    if (!fundo || !texto) return;
+    expect(razao(fundo, texto)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("nenhum variant usa vupth-greenTint como cor de TEXTO", () => {
-    expect(labelMap).not.toContain("text-vupth-greenTint");
+  it("brand-green como TEXTO so aparece sobre fundo escuro", () => {
+    for (const v of VARIANTES) {
+      if (capturar(LABEL, v, "text") !== "green") continue;
+      const fundo = hexDe(capturar(BOX, v, "bg") ?? undefined);
+      expect(fundo).toBeTruthy();
+      expect(razao(fundo as string, vupth.green)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });
 

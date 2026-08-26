@@ -1,4 +1,5 @@
-import { Pressable, Text, ActivityIndicator, type PressableProps } from "react-native";
+import { Pressable, Text, View, ActivityIndicator, type PressableProps } from "react-native";
+import type { ReactNode } from "react";
 
 // Primitiva NativeWind (migracao Gluestack v2). API LIMPA por VARIANTE — sem
 // props de token do gluestack. Mesmo visual do Button v1 (pilula + sombra +
@@ -31,6 +32,11 @@ type Props = Omit<PressableProps, "children"> & {
   /** Classes extras (ex.: "mt-0 h-10") — sobrescrevem as do variant. */
   className?: string;
   /**
+   * Icone a direita do rotulo. Os quatro botoes do desenho tem um slot de
+   * icone (18px; 16 no ghost) — nao e enfeite, e parte da primitiva.
+   */
+  icon?: ReactNode;
+  /**
    * Classes do TEXTO — sobrescrevem a cor do variant. Para botao claro sobre
    * fundo colorido (ex.: "Finalizar" no card verde da fila), onde nenhuma
    * variante serve porque elas assumem fundo neutro.
@@ -55,7 +61,12 @@ const BOX: Record<Variant, string> = {
   // `vupthPrimary` ficou IDENTICO ao primary depois do alinhamento acima —
   // mantido como apelido pra nao quebrar quem ja chamava por ele.
   vupthPrimary: "bg-vupth-green active:bg-vupth-success",
-  vupthSecondary: "bg-vupth-greenTint active:bg-vupth-surfaceAlt",
+  // [marca-vupth] CORRIGIDO 2026-08-26. Estava `greenTint` com texto forest,
+  // que nao e o Button/Secondary do desenho — la ele e o INVERSO do primary:
+  // fundo `$forest`, rotulo e icone `$brand-green`. E a ancora escura do
+  // sistema, o unico botao que segura peso sobre um fundo ja colorido.
+  // Zero chamadas fora do proprio teste, entao a correcao nao tem raio.
+  vupthSecondary: "bg-vupth-forest active:bg-vupth-forestSoft",
   vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint",
 };
 
@@ -66,7 +77,7 @@ const LABEL: Record<Variant, string> = {
   outlineBrand: "text-vupth-forest",
   outlineDanger: "text-vupth-danger",
   vupthPrimary: "text-vupth-forest",
-  vupthSecondary: "text-vupth-forest",
+  vupthSecondary: "text-vupth-green",
   vupthOutline: "text-vupth-forest",
 };
 
@@ -75,6 +86,7 @@ export function NwButton({
   isLoading,
   variant = "primary",
   className,
+  icon,
   textClassName,
   disabled,
   ...rest
@@ -94,13 +106,18 @@ export function NwButton({
               ? "#fff"
               : variant === "outlineDanger"
                 ? "#B3261E"
-                : "#163300"
+                : variant === "vupthSecondary"
+                  ? "#9FE870"
+                  : "#163300"
           }
         />
       ) : (
-        <Text className={`font-heading text-base ${textClassName ?? LABEL[variant]}`}>
-          {title}
-        </Text>
+        <View className="flex-row items-center gap-2">
+          <Text className={`font-heading text-base ${textClassName ?? LABEL[variant]}`}>
+            {title}
+          </Text>
+          {icon}
+        </View>
       )}
     </Pressable>
   );

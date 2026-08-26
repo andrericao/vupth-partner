@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info } from "lucide-react-native";
+import { ChevronRight, Info, Ellipsis } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -35,7 +35,6 @@ import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
-import { BenchIcon } from "@components/BenchIcon";
 import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
 
@@ -562,7 +561,12 @@ export default function ProfessionalQueueScreen() {
             hitSlop={8}
             className="w-10 h-10 rounded-xl bg-vupth-surface items-center justify-center active:bg-vupth-greenTint"
           >
-            <BenchIcon />
+            {/* Era um BANCO — quebra-galho do Andre, nunca escolha de arte, e
+                marcado como provisorio na doc desde sempre. Banco nao diz
+                "opcoes": nada no desenho sugeria status, refeicoes ou fechar
+                fila, que e o que mora atras deste botao. Vira reticencia, que
+                e o que o proprio time chamava de "mais opcoes". */}
+            <Ellipsis size={22} color="#163300" />
             {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
                 DENTRO do menu — a pendência de cadastro ficou de fora porque o
                 dot dela mora na aba Configurações (levar ao lugar certo). */}
