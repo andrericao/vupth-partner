@@ -98,7 +98,14 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
           {title}
         </Text>
 
-        {action}
+        {/* A acao ocupa uma faixa de 40 e se centra nela — a mesma altura do
+            botao redondo do voltar. Sem isso, com a linha ancorada no topo
+            (`items-start`), um link ou pilula de texto fica colado no topo
+            enquanto o titulo desce os 5 do respiro optico. Botao de 40 ja
+            preenche a faixa e nao muda. */}
+        {action ? (
+          <View className="min-h-[40px] justify-center">{action}</View>
+        ) : null}
       </View>
 
       {/* Subtitulo FORA da linha do titulo. Dentro dela, a coluna
