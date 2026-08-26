@@ -3,7 +3,7 @@
 > **Para:** André
 > **De:** front (partner + client)
 > **Data:** 2026-08-24
-> **Status:** ⬜ nenhuma respondida
+> **Status:** 🟡 **respondido em 2026-08-25** — 4 de 7 fechadas, 2 abertas, 1 reencaminhada
 
 Este documento nasceu do pedido *"o cliente poder ser dono de estabelecimento e
 vice-versa"* somado à meta de virar SaaS. Ao levantar o que o código suporta,
@@ -12,7 +12,37 @@ começa.
 
 ---
 
-## O fato: a Vupth nunca moveu um centavo
+## ✅ Respostas do André (2026-08-25)
+
+| # | pergunta | resposta |
+|---|---|---|
+| 1 | Quem paga | **Não haverá assinatura.** Receita é **taxa por atendimento + multa**; o profissional escolhe absorver ou repassar, na tela em que cria o serviço. |
+| 2 | Modelo de papel | **OWNER e PROFESSIONAL também são CLIENT**, por definição — e o cliente pode virar OWNER/PROFESSIONAL. O acúmulo vale **nos dois sentidos**. *(Fecha o **S23**.)* A escolha formal do modelo (booleano × vínculo) segue no **S32**. |
+| 3 | Multi-loja | **Está para ser feito.** |
+| 4 | Revogação | ⬜ **em aberto** — o enunciado não ficou claro. Reescrito com casos concretos no **S33**. |
+| 5 | Área administrativa | Era ambiguidade de nome: vira um **app administrativo separado**, não uma área dentro do app do parceiro. |
+| 6 | Apagar conta (S19) | **Já está na lista dele.** |
+| 7 | Hospedagem | Vai **medir a hibernação no Render primeiro, depois no Railway**, para comparar. Por isso o merge do PR #18 espera a 1ª medição. |
+
+### O que a resposta 1 muda — e o que não muda
+
+Sem assinatura, **o argumento do S32 caiu, mas a conclusão não.** As respostas 2 e 3
+substituem o fundamento por outro mais forte: no instante em que existir a
+segunda loja, `"é OWNER"` deixa de responder **de qual loja**; e a taxa por
+atendimento nasce de um atendimento, que acontece **numa loja**, absorvido ou
+repassado pelo profissional **daquela** loja. O S32 foi reescrito sobre esse
+fundamento em 2026-08-26.
+
+### O que a resposta 1 agrava
+
+A multa deixou de ser "aviso sem consequência" e passou a ser **receita
+declarada**. O app anuncia R$ 3,00 em três ações e o backend nunca cobra — não
+é mais só promessa vazia, é **receita que o produto anuncia e não arrecada**.
+O André não disse "implementar agora", então segue **item aberto**.
+
+---
+
+## O fato que gerou este documento: a Vupth nunca moveu um centavo
 
 Não é figura de linguagem. Varrendo os quatro repos e todos os docs:
 
