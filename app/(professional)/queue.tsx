@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info } from "lucide-react-native";
+import { ChevronRight, Info, ArrowRight } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -513,20 +513,27 @@ export default function ProfessionalQueueScreen() {
         <ScreenHeader
           title="Fila"
         />
-        <View className="mt-8 bg-vupth-accentPeach p-5 rounded-lg border border-vupth-accentPeach gap-2">
-          <Text className="font-heading text-vupth-forest">
+        <View className="mt-8 bg-vupth-accentPeach p-4 rounded-[20px] gap-2.5">
+          {/* Mesmo bloco de bloqueio do desenho ("409 AGENDA CHEIA"): titulo
+              13/700, texto 14, acao como texto + seta. */}
+          <Text className="font-heading text-[13px] text-vupth-forest">
             Você ainda não tem fila
           </Text>
-          <Text className="font-body text-vupth-forest">
+          <Text className="font-body text-[14px] text-vupth-forest">
             Para receber clientes, você precisa estar vinculado a um
             estabelecimento. Busque um estabelecimento e solicite a vinculação —
             o dono confirma e você passa a aparecer na fila.
           </Text>
-          <NwButton
-            title="Buscar estabelecimento"
+          <Pressable
             onPress={() => router.push("/(professional)/find-establishment" as any)}
-            className="mt-2"
-          />
+            className="flex-row items-center gap-1.5 mt-1 active:opacity-70"
+            accessibilityRole="button"
+          >
+            <Text className="font-heading text-[13px] text-vupth-forest">
+              Buscar estabelecimento
+            </Text>
+            <ArrowRight size={15} color="#163300" />
+          </Pressable>
         </View>
       </View>
     );
@@ -685,19 +692,33 @@ export default function ProfessionalQueueScreen() {
         {/* Vinculado, mas o backend nao o lista na fila por nao ter servico:
             sem isto a tela ficava em branco. Damos a ação de adicionar serviço. */}
         {!isLoading && data && !myProfessional && (
-          <View className="mt-8 bg-vupth-accentPeach p-5 rounded-lg border border-vupth-accentPeach gap-2">
-            <Text className="font-heading text-vupth-forest">
+          <View className="mt-8 bg-vupth-accentPeach p-4 rounded-[20px] gap-2.5">
+          {/* [marca-vupth] Segue o bloco "409 AGENDA CHEIA" do desenho, que e a
+              unica referencia de BLOQUEIO que o arquivo tem (nao ha estado
+              vazio desenhado em tela nenhuma). De la: pessego, raio 20, padding
+              16, gap 10, SEM borda, titulo 13/700 e texto 14 em forest — e a
+              acao como TEXTO + SETA, nao botao cheio.
+
+              O botao verde solido aqui gastava um segundo acento dentro de um
+              cartao que ja e acento; e a borda era da mesma cor do fundo, entao
+              nao desenhava nada. */}
+            <Text className="font-heading text-[13px] text-vupth-forest">
               Você ainda não aparece para os clientes
             </Text>
-            <Text className="font-body text-vupth-forest">
+            <Text className="font-body text-[14px] text-vupth-forest">
               Você está vinculado, mas precisa de pelo menos um serviço cadastrado
               para entrar na fila e receber clientes.
             </Text>
-            <NwButton
-              title="Adicionar serviço"
+            <Pressable
               onPress={() => router.push("/(professional)/my-services?from=queue" as any)}
-              className="mt-2"
-            />
+              className="flex-row items-center gap-1.5 mt-1 active:opacity-70"
+              accessibilityRole="button"
+            >
+              <Text className="font-heading text-[13px] text-vupth-forest">
+                Adicionar serviço
+              </Text>
+              <ArrowRight size={15} color="#163300" />
+            </Pressable>
           </View>
         )}
       </View>
