@@ -19,30 +19,43 @@ module.exports = {
         body: ["Inter_400Regular"],
         mono: ["DMMono_500Medium"],
       },
-      // ESCALA DE TEXTO — os 7 niveis nomeados do arquivo de design (frame
-      // "Type Rows"), com o papel de cada um. O arquivo DEFINE esses tokens e
-      // depois nao os usa: os 866 textos das 47 telas desenhadas escrevem o
-      // numero na mao, em 68 combinacoes diferentes de tamanho/peso/familia.
-      // Nosso codigo fez o mesmo — 14 tamanhos distintos, 9 deles escapes
-      // `text-[Npx]`. E assim que um titulo 13 acaba MENOR que o corpo 14.
+      // ═══ ESCALA DE TEXTO ═══ valores REAIS do arquivo de design, lidos da
+      // tabela de variaveis (`GetVariables()`), nao inferidos. O papel de cada
+      // nivel vem do frame "Foundations » TIPOGRAFIA":
       //
-      // Nomes por PAPEL, nao por camiseta: `text-secao` diz onde usar, `text-lg`
-      // nao diz nada. E nao colidem com a escala padrao do Tailwind, entao as
-      // chamadas antigas continuam valendo enquanto a migracao acontece.
+      //   xxxl 34 · 800 display · ls -1.5  Titulo Hero
+      //   xxl  28 · 800 display · ls -1    Titulo de Tela
+      //   xl   22 · 700 display · ls -0.5  Titulo de Secao
+      //   lg   18 · 500 body               Subtitulo
+      //   md   16 · 400 body               Corpo de texto padrao
+      //   sm   14 · 400 body               Texto secundario / legendas
+      //   xs   12 · 500 body               Rotulos e metadados
       //
-      // ⚠️ A tabela de variaveis do .pen nao e legivel pelo MCP (so os nomes
-      // dos tokens sao). `tela` = 26 esta ancorado no ScreenHeader, que ja
-      // renderiza 26/display/-0.8 em toda tela; os outros vieram da moda de
-      // cada par peso+familia nas telas desenhadas. Sujeitos a correcao pela
-      // equipe de design.
+      // Os NOMES sao os do arquivo de propósito: design e codigo passam a usar
+      // a mesma palavra. `xs`, `sm` e `lg` ja batiam com o padrao do Tailwind;
+      // `xl` muda de 20 para 22 (4 usos), e `md`/`xxl`/`xxxl` sao novos.
+      // `text-base`, `text-2xl` e `text-3xl` seguem existindo mas estao FORA
+      // da escala — migrar. Ver src/docs/DESIGN.md.
       fontSize: {
-        hero: ["40px", { lineHeight: "44px", letterSpacing: "-1.5px" }],   // Titulo Hero      · display 800
-        tela: ["26px", { lineHeight: "30px", letterSpacing: "-1px" }],     // Titulo de Tela   · display 800
-        secao: ["18px", { lineHeight: "22px", letterSpacing: "-0.5px" }],  // Titulo de Secao  · display 700
-        sub: ["15px", { lineHeight: "20px" }],                             // Subtitulo        · body 500
-        corpo: ["14px", { lineHeight: "20px" }],                           // Corpo de texto   · body 400
-        aux: ["13px", { lineHeight: "18px" }],                             // Secundario       · body 400
-        rotulo: ["11px", { lineHeight: "14px" }],                          // Rotulos/metadados· body 500
+        xs: ["12px", { lineHeight: "16px" }],
+        sm: ["14px", { lineHeight: "20px" }],
+        md: ["16px", { lineHeight: "22px" }],
+        lg: ["18px", { lineHeight: "24px" }],
+        xl: ["22px", { lineHeight: "26px", letterSpacing: "-0.5px" }],
+        xxl: ["28px", { lineHeight: "32px", letterSpacing: "-1px" }],
+        xxxl: ["34px", { lineHeight: "38px", letterSpacing: "-1.5px" }],
+      },
+      // ═══ RAIO ═══ tambem da tabela de variaveis. `card` (20) e `hero` (24)
+      // sao tokens proprios do arquivo, alem da escala sm/md/lg/xl. Hoje ha 26
+      // escapes `rounded-[20px]` no codigo — todos sao `rounded-card`.
+      borderRadius: {
+        sm: "4px",
+        md: "8px",
+        lg: "12px",
+        xl: "16px",
+        card: "20px",
+        hero: "24px",
+        full: "999px",
       },
       // Cores da marca espelhando a escala `green` do config/gluestack-ui.config.ts
       // (FONTE DA VERDADE — paleta "Verde Marca", ancorada em #3b7a3f desde
