@@ -40,34 +40,37 @@ describe("ReadinessFaixa", () => {
     jest.clearAllMocks();
   });
 
-  it("renderiza quando ha pendencia basica e nao foi dispensada", () => {
-    const { getByText } = renderWithProvider(
+  it("renderiza quando ha pendência basica e não foi dispensada", () => {
+    const { getByText, getByLabelText } = renderWithProvider(
       <ReadinessFaixa completion={pending} targetRoute="/x" goalNoun="aparecer aos clientes" />
     );
-    expect(getByText("Complete seu cadastro")).toBeTruthy();
+    // Pelo rotulo de acessibilidade, nao pelo titulo: o titulo mudou com o
+    // redesenho ("Faltam N passos para abrir") e voltaria a quebrar o teste na
+    // proxima troca de copy. O que importa e que a faixa APARECE.
+    expect(getByLabelText("Completar cadastro")).toBeTruthy();
     expect(getByText(/5 passos para aparecer aos clientes/)).toBeTruthy();
   });
 
-  it("usa singular '1 passo' quando falta so um", () => {
+  it("usa singular '1 passo' quando falta só um", () => {
     const { getByText } = renderWithProvider(
       <ReadinessFaixa completion={onePending} targetRoute="/x" goalNoun="atender clientes" />
     );
     expect(getByText(/1 passo para atender clientes/)).toBeTruthy();
   });
 
-  it("nao renderiza quando o basico esta 100%", () => {
-    const { queryByText } = renderWithProvider(
+  it("não renderiza quando o básico esta 100%", () => {
+    const { queryByLabelText } = renderWithProvider(
       <ReadinessFaixa completion={done} targetRoute="/x" goalNoun="x" />
     );
-    expect(queryByText("Complete seu cadastro")).toBeNull();
+    expect(queryByLabelText("Completar cadastro")).toBeNull();
   });
 
-  it("nao renderiza quando ja foi dispensada", () => {
+  it("não renderiza quando já foi dispensada", () => {
     useUiStore.getState().dismissFaixa();
-    const { queryByText } = renderWithProvider(
+    const { queryByLabelText } = renderWithProvider(
       <ReadinessFaixa completion={pending} targetRoute="/x" goalNoun="x" />
     );
-    expect(queryByText("Complete seu cadastro")).toBeNull();
+    expect(queryByLabelText("Completar cadastro")).toBeNull();
   });
 
   it("tocar na faixa navega para o targetRoute", () => {

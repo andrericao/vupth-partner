@@ -13,10 +13,10 @@ describe("ClosingPrompt (auto-fechamento — CLOSING_PROMPT)", () => {
     useProfessionalStore.setState({ updateMyStatus: jest.fn().mockResolvedValue(undefined) });
   });
 
-  it("com prompt ativo, mostra o aviso e as duas acoes", () => {
+  it("com prompt ativo, mostra o aviso e as duas ações", () => {
     useUiStore.getState().showClosingPrompt(FUTURE());
     const view = renderWithProvider(<ClosingPrompt />);
-    expect(view.getByText(/Passou do horario de fechamento/)).toBeTruthy();
+    expect(view.getByText(/Passou do horário de fechamento/)).toBeTruthy();
     expect(view.getByText("Fechar agora")).toBeTruthy();
     expect(view.getByText("Continuar atendendo")).toBeTruthy();
   });

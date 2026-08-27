@@ -3,27 +3,26 @@ import {
   VStack,
   HStack,
   FormControl,
-  Heading,
   Text,
   ScrollView,
 } from "@gluestack-ui/themed";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { BrandButton } from "@components/brand/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskPhone, unmask } from "@lib/masks";
-import { cardShadow } from "@lib/styles";
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
     <>
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$3">
+      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$3">
         {label}
       </Text>
-      <Text fontFamily="$heading" fontWeight="$bold" color={value ? "$coolGray900" : "$coolGray400"} mt="$0.5">
+      <Text fontFamily="$heading" fontWeight="$bold" color={value ? "$forest" : "$brandTextSecondary"} mt="$0.5">
         {value || "—"}
       </Text>
     </>
@@ -50,7 +49,7 @@ export default function EstablishmentRegistrationScreen() {
   const handleSave = async () => {
     const name = nameValue.trim();
     if (name.length < 2 || !establishment?.id) {
-      Alert.alert("Nome invalido", "Informe um nome valido para o estabelecimento.");
+      Alert.alert("Nome inválido", "Informe um nome valido para o estabelecimento.");
       return;
     }
     setIsSaving(true);
@@ -64,7 +63,7 @@ export default function EstablishmentRegistrationScreen() {
       setEditing(false);
       Alert.alert("Dados atualizados", "Os dados cadastrais foram alterados.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar os dados."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar os dados."));
     } finally {
       setIsSaving(false);
     }
@@ -81,18 +80,14 @@ export default function EstablishmentRegistrationScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header
-            showBackButton
-            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
-          />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Dados Cadastrais
-          </Heading>
+        <VStack flex={1} pb="$12" px="$4">
+          <ScreenHeader
+          title="Dados cadastrais"
+          onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+        />
 
           <VStack mt="$6" space="md">
-            <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+            <VStack bg="$brandSurface" p="$4" borderRadius="$card">
               {editing ? (
                 <FormControl>
                   <Input
@@ -124,17 +119,15 @@ export default function EstablishmentRegistrationScreen() {
                     <Button
                       title="Cancelar"
                       onPress={() => setEditing(false)}
-                      bg="$coolGray200"
-                      textColor="$coolGray700"
+                      bg="$brandBorder"
+                      textColor="$brandTextSecondary"
                       h="$9"
                       flex={1}
                     />
-                    <Button
+                    <BrandButton
                       title="Salvar"
                       onPress={handleSave}
                       isLoading={isSaving}
-                      bg="$green500"
-                      $active-bg="$green600"
                       h="$9"
                       flex={1}
                     />
@@ -148,8 +141,8 @@ export default function EstablishmentRegistrationScreen() {
                   <Button
                     title="Editar"
                     onPress={startEdit}
-                    bg="$coolGray200"
-                    textColor="$coolGray700"
+                    bg="$brandBorder"
+                    textColor="$brandTextSecondary"
                     h="$9"
                     mt="$4"
                   />

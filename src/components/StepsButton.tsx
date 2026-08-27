@@ -1,35 +1,29 @@
-import { ComponentProps } from "react";
-import {
-  Button as GlueStackButton,
-  ButtonText,
-  ButtonSpinner,
-  ButtonIcon,
-  ArrowRightIcon,
-} from "@gluestack-ui/themed";
+import { Pressable, Text, ActivityIndicator, View, type PressableProps } from "react-native";
+import { ArrowRight } from "lucide-react-native";
 
-type StepButtonProps = ComponentProps<typeof GlueStackButton> & {
+// Botao de "proximo passo" (texto + seta). Migrado p/ NativeWind (v2). API:
+// title/isLoading/onPress. (Sem uso ativo hoje, mantido por compatibilidade.)
+type Props = Omit<PressableProps, "children"> & {
   title?: string;
   isLoading?: boolean;
 };
 
-export function StepsButton(props: StepButtonProps) {
+export function StepsButton({ title, isLoading, disabled, ...rest }: Props) {
   return (
-    <GlueStackButton
-      bg="$green500"
-      h="$12"
-      mt="$9"
-      $active-bg="$green600"
-      disabled={props.isLoading}
-      {...props}
+    <Pressable
+      accessibilityRole="button"
+      disabled={isLoading || disabled}
+      className="h-12 mt-9 rounded-md bg-vupth-forest active:bg-vupth-forestSoft flex-row items-center justify-center px-4"
+      {...rest}
     >
-      {props.isLoading ? (
-        <ButtonSpinner color="$white" />
+      {isLoading ? (
+        <ActivityIndicator color="#fff" />
       ) : (
-        <ButtonText fontFamily="$body" color="$white" mr="$3">
-          {props.title}
-        </ButtonText>
+        <View className="flex-row items-center">
+          <Text className="font-body text-white mr-3">{title}</Text>
+          <ArrowRight size={18} color="#fff" />
+        </View>
       )}
-      <ButtonIcon as={ArrowRightIcon} />
-    </GlueStackButton>
+    </Pressable>
   );
 }

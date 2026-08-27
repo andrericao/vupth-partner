@@ -1,7 +1,6 @@
-import { VStack, HStack, Text, Pressable } from "@gluestack-ui/themed";
-import { View } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { cardShadow } from "@lib/styles";
+import { ChevronRight, Check, CircleCheck } from "lucide-react-native";
 import type { Completion, CompletionTracker } from "@lib/completion";
 
 type Props = {
@@ -18,7 +17,10 @@ function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
       style={{
         height: 9,
         borderRadius: 99,
-        backgroundColor: "#E8EDEA",
+        // [marca-vupth] Trilho vazio da barra: $brandBorder e o UNICO neutro da
+        // paleta mais escuro que o $brandSurface do card — no surface a barra
+        // sumiria. Era #E8EDEA, cinza da paleta pre-marca.
+        backgroundColor: "#D7DDD3",
         overflow: "hidden",
       }}
     >
@@ -27,7 +29,7 @@ function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
           height: "100%",
           width: `${percent}%`,
           borderRadius: 99,
-          backgroundColor: muted ? "#8bbd8d" : "#3b7a3f",
+          backgroundColor: muted ? "#E2F6D5" : "#9FE870", // [marca-vupth] greenTint / brandGreen
         }}
       />
     </View>
@@ -45,7 +47,7 @@ function Row({
 }) {
   const navigable = !done && !!route;
   const content = (
-    <HStack alignItems="center" space="md" py="$2.5" px="$2">
+    <View className="flex-row items-center gap-3 py-2.5 px-2">
       <View
         style={{
           width: 22,
@@ -53,29 +55,32 @@ function Row({
           borderRadius: 11,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: done ? "#3b7a3f" : "#FFFFFF",
+          backgroundColor: done ? "#163300" : "#FFFFFF", // [marca-vupth] $forest
           borderWidth: done ? 0 : 2,
-          borderColor: "#E0E7E3",
+          borderColor: "#D7DDD3", // [marca-vupth] $brandBorder
         }}
       >
-        {done && <Text color="$white" fontSize="$xs" fontWeight="$bold">✓</Text>}
+        {/* [marca-vupth] Sobre `forest` o par e brand-green, nunca branco. */}
+        {done && <Check size={13} color="#9FE870" strokeWidth={3} />}
       </View>
       <Text
-        flex={1}
-        fontFamily="$body"
-        fontSize="$sm"
-        fontWeight={done ? "$normal" : "$bold"}
-        color={done ? "$coolGray400" : "$coolGray800"}
+        className={`flex-1 font-body text-sm ${
+          done ? "text-vupth-textSecondary" : "font-bold text-vupth-textPrimary"
+        }`}
       >
         {label}
       </Text>
-      {navigable && <Text color="$coolGray300" fontSize="$lg">›</Text>}
-    </HStack>
+      {navigable && <ChevronRight size={16} color="#454745" />}
+    </View>
   );
 
   if (navigable) {
     return (
-      <Pressable onPress={() => router.push(route as any)} $active-opacity={0.6}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(route as any)}
+        className="active:opacity-60"
+      >
         {content}
       </Pressable>
     );
@@ -91,14 +96,14 @@ function List({
   routeFor: (key: string) => string | undefined;
 }) {
   return (
-    <VStack mt="$2">
+    <View className="mt-2">
       {tracker.items.map((item, idx) => (
         <View key={item.key}>
-          {idx > 0 && <View style={{ height: 1, backgroundColor: "#EEF2F0" }} />}
+          {idx > 0 && <View style={{ height: 1, backgroundColor: "#D7DDD3" }} />}
           <Row label={item.label} done={item.done} route={routeFor(item.key)} />
         </View>
       ))}
-    </VStack>
+    </View>
   );
 }
 
@@ -113,59 +118,51 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
     n === 1 ? "Falta 1 passo para aparecer aos clientes." : `Faltam ${n} passos para aparecer aos clientes.`;
 
   return (
-    <VStack bg="$white" borderRadius="$2xl" p="$4" style={cardShadow} mt="$4">
+    <View className="bg-vupth-surface rounded-card p-4 mt-4">
       {basic.percent === 100 ? (
-        <HStack
-          bg="$green600"
-          borderRadius="$xl"
-          px="$4"
-          py="$3.5"
-          alignItems="center"
-          space="md"
-        >
-          <Text fontSize="$xl">🎉</Text>
-          <VStack flex={1}>
-            <Text fontFamily="$heading" fontWeight="$bold" color="$white" fontSize="$sm">
-              {doneBanner}
-            </Text>
-            <Text fontFamily="$body" color="$green50" fontSize="$xs">
+        <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
+          <CircleCheck size={22} color="#9FE870" />
+          <View className="flex-1">
+            <Text className="font-heading text-sm text-white">{doneBanner}</Text>
+            <Text className="font-body text-xs text-vupth-greenTint">
               Pronto para atender — 100%
             </Text>
-          </VStack>
-        </HStack>
+          </View>
+        </View>
       ) : (
-        <VStack>
-          <HStack justifyContent="space-between" alignItems="baseline" mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray800">
+        <View>
+          <View className="flex-row justify-between items-baseline mb-2">
+            <Text className="font-heading text-base text-vupth-textPrimary">
               Pronto para atender
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$green600">
+            <Text className="font-heading text-base text-vupth-forest">
               {basic.percent}%
             </Text>
-          </HStack>
+          </View>
           <Bar percent={basic.percent} />
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$2">
-            {hint}
-          </Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-2">{hint}</Text>
           <List tracker={basic} routeFor={routeFor} />
-        </VStack>
+        </View>
       )}
 
       {profile.total > 0 && (
         <>
-          <View style={{ height: 1, backgroundColor: "#EEF2F0", marginVertical: 14 }} />
-          <HStack justifyContent="space-between" alignItems="baseline" mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray700">
+          <View style={{ height: 1, backgroundColor: "#D7DDD3", marginVertical: 14 }} />
+          <View className="flex-row justify-between items-baseline mb-2">
+            <Text className="font-heading text-sm text-vupth-textPrimary">
               Perfil completo
             </Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$green600">
+            {/* [marca-vupth] Era text-brand-600 — escala ANTIGA (#3b7a3f,
+                pre-marca), único resquício dela neste card (a linha "Pronto
+                para atender" acima já usava vupth-forest). */}
+            <Text className="font-heading text-sm text-vupth-forest">
               {profile.percent}%
             </Text>
-          </HStack>
+          </View>
           <Bar percent={profile.percent} muted />
           <List tracker={profile} routeFor={routeFor} />
         </>
       )}
-    </VStack>
+    </View>
   );
 }

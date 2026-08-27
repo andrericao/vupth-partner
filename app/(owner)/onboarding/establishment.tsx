@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { VStack, FormControl, Heading, ScrollView } from "@gluestack-ui/themed";
 import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
-import { Input } from "@components/Input";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwInput } from "@components/nw/Input";
 import { SelectService } from "@components/SelectService";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -65,52 +70,47 @@ export default function EstablishmentScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack
-        flex={1}
-        py="$12"
-        px="$6"
-        alignItems="center"
-        justifyContent="center"
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
-
-        <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
-          <Heading mb="$12" size="3xl" fontFamily="$heading">
-            Dados da Loja
-          </Heading>
-
-          <Input
-            textLabel="Seu nome"
-            placeholder="Ex: João Silva"
-            messageError="Nome obrigatório"
-            value={ownerName}
-            onChangeText={setOwnerName}
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Dados da loja"
+            subtitle="É assim que os clientes vão te encontrar."
+            onBack={() => router.navigate("/(owner)/dashboard" as any)}
           />
 
-          <Input
-            textLabel="Nome da Loja"
-            placeholder="Rei do Corte LTDA"
-            messageError="Nome obrigatório"
-            value={name}
-            onChangeText={setName}
-          />
+          <View className="flex-1 w-full">
 
-          <SelectService value={serviceType} onValueChange={setServiceType} />
+            <NwInput
+              label="Seu nome"
+              placeholder="Ex: João Silva"
+              value={ownerName}
+              onChangeText={setOwnerName}
+              error={isInvalid ? "Nome obrigatório" : ""}
+            />
 
-          <Button
-            title="Criar Estabelecimento"
-            onPress={handleSubmit}
-            isLoading={isLoading}
-          />
-        </FormControl>
-      </VStack>
-    </ScrollView>
+            <NwInput
+              label="Nome da Loja"
+              placeholder="Rei do Corte LTDA"
+              value={name}
+              onChangeText={setName}
+              error={isInvalid ? "Nome obrigatório" : ""}
+            />
+
+            <SelectService value={serviceType} onValueChange={setServiceType} />
+
+            <NwButton
+              title="Criar estabelecimento"
+              onPress={handleSubmit}
+              isLoading={isLoading}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

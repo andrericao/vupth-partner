@@ -28,13 +28,13 @@ export function Input(props: InputFieldProps) {
         w="$full"
         bg="$white"
         borderWidth="$1"
-        borderColor="$coolGray300"
+        borderColor="$brandBorder"
         borderRadius="$xl"
         variant="outline"
         $focus-borderWidth="$2"
-        $focus-borderColor="$green500"
+        $focus-borderColor="$forest"
       >
-        <InputField color="$coolGray900" fontFamily="$body" autoCorrect={false} autoCapitalize="words" {...props} />
+        <InputField color="$brandTextPrimary" fontFamily="$body" autoCorrect={false} autoCapitalize="words" {...props} />
       </GluestackInput>
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} />

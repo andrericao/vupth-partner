@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   VStack,
   HStack,
-  Heading,
   Text,
   ScrollView,
   Input as GluestackInput,
@@ -15,9 +14,8 @@ import {
 import { SkeletonList } from "@components/Skeleton";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { BrandButton } from "@components/brand/Button";
 import {
   useEstablishmentStore,
   type ProfessionalSearchResult,
@@ -41,7 +39,7 @@ export default function InviteProfessionalScreen() {
       try {
         setResults(await searchProfessionals(term));
       } catch (error: any) {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel buscar profissionais."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível buscar profissionais."));
       } finally {
         setIsSearching(false);
       }
@@ -61,17 +59,17 @@ export default function InviteProfessionalScreen() {
     try {
       await inviteProfessional(establishment.id, p.id);
       setInvitedIds((prev) => [...prev, p.id]);
-      Alert.alert("Convite enviado", `${p.name ?? "Profissional"} recebera a solicitacao de vinculacao.`);
+      Alert.alert("Convite enviado", `${p.name ?? "Profissional"} receberá a solicitação de vinculação.`);
     } catch (error: any) {
       const code = error?.response?.data?.code;
       // Mensagem no contexto do OWNER (o map padrao fala "voce ja esta vinculado").
       const message =
         code === "PROFESSIONAL_ALREADY_AFFILIATED"
-          ? `${p.name ?? "Esse profissional"} ja esta vinculado a um estabelecimento.`
+          ? `${p.name ?? "Esse profissional"} já está vinculado a um estabelecimento.`
           : code === "AFFILIATION_ALREADY_PENDING"
-          ? `Ja existe uma solicitacao pendente com ${p.name ?? "esse profissional"}.`
-          : getApiErrorMessage(error, "Nao foi possivel enviar o convite.");
-      Alert.alert("Nao foi possivel convidar", message);
+          ? `Já existe uma solicitação pendente com ${p.name ?? "esse profissional"}.`
+          : getApiErrorMessage(error, "Não foi possível enviar o convite.");
+      Alert.alert("Não foi possível convidar", message);
     } finally {
       setInvitingId(null);
     }
@@ -88,21 +86,17 @@ export default function InviteProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Convidar Profissional
-          </Heading>
-          <Text fontFamily="$body" color="$coolGray500" mt="$1" mb="$4">
-            Busque pelo nome e envie o convite. O profissional precisa aceitar para
-            ser vinculado.
-          </Text>
+        <VStack flex={1} pb="$12" px="$4">
+          <ScreenHeader
+            title="Convidar profissional"
+            subtitle="Busque pelo nome e envie o convite. O profissional precisa aceitar."
+            onBack={() => router.navigate("/(owner)/menu" as any)}
+          />
 
           <GluestackInput
             h="$12"
             borderWidth="$1"
-            borderColor="$green500"
+            borderColor="$forest"
             borderRadius="$md"
             $focus-borderWidth="$2"
             mb="$4"
@@ -112,7 +106,7 @@ export default function InviteProfessionalScreen() {
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={() => runSearch(search)}
-              color="$coolGray900"
+              color="$forest"
               fontFamily="$body"
               autoCorrect={false}
               returnKeyType="search"
@@ -127,7 +121,7 @@ export default function InviteProfessionalScreen() {
             >
               <InputIcon
                 as={search.trim() ? CloseIcon : SearchIcon}
-                color={search.trim() ? "$coolGray500" : "$green600"}
+                color={search.trim() ? "$brandTextSecondary" : "$forest"}
               />
             </InputSlot>
           </GluestackInput>
@@ -139,7 +133,7 @@ export default function InviteProfessionalScreen() {
           )}
 
           {!isSearching && results.length === 0 && (
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$8">
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$8">
               Nenhum profissional encontrado
             </Text>
           )}
@@ -150,33 +144,30 @@ export default function InviteProfessionalScreen() {
               return (
                 <HStack
                   key={p.id}
-                  bg="$white"
+                  bg="$brandSurface"
                   p="$3"
-                  borderRadius="$2xl"
-                  style={cardShadow}
+                  borderRadius="$card"
                   justifyContent="space-between"
                   alignItems="center"
                 >
                   <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                       {p.name ?? "Profissional"}
                       {p.nickname ? ` (${p.nickname})` : ""}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
                       {p.specialty ?? "Sem especialidade"}
                     </Text>
                   </VStack>
                   {invited ? (
-                    <Text fontFamily="$body" fontSize="$sm" color="$green700">
+                    <Text fontFamily="$body" fontSize="$sm" color="$forest">
                       Convite enviado
                     </Text>
                   ) : (
-                    <Button
+                    <BrandButton
                       title="Convidar"
                       onPress={() => handleInvite(p)}
                       isLoading={invitingId === p.id}
-                      bg="$green500"
-                      $active-bg="$green600"
                       h="$9"
                     />
                   )}

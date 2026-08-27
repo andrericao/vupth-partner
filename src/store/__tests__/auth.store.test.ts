@@ -49,24 +49,29 @@ function makeToken(payload: object): string {
   return `${header}.${body}.fake`;
 }
 
+// Os fixtures usam o formato REAL do backend — string separada por virgula,
+// com prefixo `ROLE_` (token lido de uma sessao de verdade em 2026-08-26).
+// Antes montavam `["CLIENT"]`, array e sem prefixo: um contrato que o backend
+// nao cumpre, e foi por isso que ninguem viu o `getRolesFromToken` devolvendo
+// a string crua tipada como array.
 const CLIENT_TOKEN = makeToken({
   sub: "uuid-1",
   email: "owner@test.com",
-  roles: ["CLIENT"],
+  roles: "ROLE_CLIENT",
   exp: 9999999999,
 });
 
 const OWNER_TOKEN = makeToken({
   sub: "uuid-1",
   email: "owner@test.com",
-  roles: ["CLIENT", "OWNER"],
+  roles: "ROLE_CLIENT,ROLE_OWNER",
   exp: 9999999999,
 });
 
 const PROFESSIONAL_TOKEN = makeToken({
   sub: "uuid-2",
   email: "prof@test.com",
-  roles: ["CLIENT", "PROFESSIONAL"],
+  roles: "ROLE_CLIENT,ROLE_PROFESSIONAL",
   exp: 9999999999,
 });
 
@@ -281,7 +286,7 @@ describe("auth.store", () => {
       expect(JSON.parse(mock.history.post[0].data)).toEqual({ email: "prof@test.com" });
     });
 
-    it("nao toca em token nem autentica", async () => {
+    it("não toca em token nem autentica", async () => {
       mock.onPost("/auth/forgot-password").reply(200);
 
       await useAuthStore.getState().forgotPassword("prof@test.com");
@@ -305,7 +310,7 @@ describe("auth.store", () => {
       });
     });
 
-    it("rejeita no 400 (codigo invalido/expirado)", async () => {
+    it("rejeita no 400 (código invalido/expirado)", async () => {
       mock.onPost("/auth/reset-password").reply(400, { message: "RESET_CODE_INVALID" });
 
       await expect(
@@ -423,7 +428,7 @@ describe("auth.store", () => {
   });
 
   describe("logout", () => {
-    it("desregistra o push quando ha token salvo e encerra a sessao", async () => {
+    it("desregistra o push quando ha token salvo e encerra a sessão", async () => {
       (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
         k === "vupth_push_token" ? "expo-push-abc" : null
       );
@@ -444,7 +449,7 @@ describe("auth.store", () => {
       expect(state.isAuthenticated).toBe(false);
     });
 
-    it("sem push token nao chama unregisterDevice, mas ainda encerra a sessao", async () => {
+    it("sem push token não chama unregisterDevice, mas ainda encerra a sessão", async () => {
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
       mock.onPost("/auth/logout").reply(200);
       useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
@@ -455,7 +460,7 @@ describe("auth.store", () => {
       expect(useAuthStore.getState().isAuthenticated).toBe(false);
     });
 
-    it("encerra a sessao mesmo se o POST /auth/logout falhar", async () => {
+    it("encerra a sessão mesmo se o POST /auth/logout falhar", async () => {
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
       mock.onPost("/auth/logout").reply(500);
       useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });

@@ -1,22 +1,70 @@
 import { useState } from "react";
-import { VStack, HStack, Heading, Text, ScrollView, FormControl } from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
-import { Button } from "@components/Button";
-import { Input } from "@components/Input";
-import { InputPassword } from "@components/InputPassWord";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwButton } from "@components/nw/Button";
+import { NwInput } from "@components/nw/Input";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
-import { cardShadow } from "@lib/styles";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida". Esta tela concentra os DADOS CADASTRAIS (nome, apelido,
 // e-mail, senha) que antes viviam misturados na Configuracoes gigante.
+// Card de UM campo editavel. Os quatro (nome, apelido, e-mail, senha) eram
+// blocos identicos copiados — na conversao p/ NativeWind viraram este
+// componente, que carrega o formulario como `children`. No escopo do MODULO,
+// nunca dentro da tela (licao do segfault do tsc).
+function FieldCard({
+  label,
+  value,
+  editing,
+  editLabel = "Editar",
+  onEdit,
+  onCancel,
+  onSave,
+  isSaving,
+  error,
+  children,
+}: {
+  label: string;
+  value: string;
+  editing: boolean;
+  editLabel?: string;
+  onEdit: () => void;
+  onCancel: () => void;
+  onSave: () => void;
+  isSaving: boolean;
+  error?: string | null;
+  children?: React.ReactNode;
+}) {
+  return (
+    <View className="bg-vupth-surface p-4 rounded-card">
+      <Text className="font-body text-sm text-vupth-textSecondary">{label}</Text>
+      {editing ? (
+        <View className="mt-2">
+          {children}
+          {error && (
+            <Text className="font-body text-xs text-vupth-danger mb-2">{error}</Text>
+          )}
+          <View className="flex-row gap-2">
+            <NwButton title="Cancelar" onPress={onCancel} variant="secondary" className="flex-1 h-9 mt-0" />
+            <NwButton title="Salvar" onPress={onSave} isLoading={isSaving} className="flex-1 h-9 mt-0" />
+          </View>
+        </View>
+      ) : (
+        <>
+          <Text className="font-heading text-vupth-forest mt-1">{value}</Text>
+          <NwButton title={editLabel} onPress={onEdit} variant="secondary" className="h-9 mt-2" />
+        </>
+      )}
+    </View>
+  );
+}
+
 export default function SettingsAccountScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
@@ -65,7 +113,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("Nome atualizado", "Seu nome foi alterado com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o nome."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar o nome."));
     } finally {
       setIsSaving(false);
     }
@@ -74,7 +122,7 @@ export default function SettingsAccountScreen() {
   const handleSaveNickname = async () => {
     const value = nickname.trim();
     if (value.length > 50) {
-      setFieldError("O apelido deve ter no maximo 50 caracteres.");
+      setFieldError("O apelido deve ter no máximo 50 caracteres.");
       return;
     }
     setFieldError(null);
@@ -88,7 +136,7 @@ export default function SettingsAccountScreen() {
         value ? "Seu apelido foi salvo." : "Seu apelido foi removido."
       );
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel salvar o apelido."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o apelido."));
     } finally {
       setIsSaving(false);
     }
@@ -107,7 +155,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("E-mail atualizado", "Seu e-mail foi alterado com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar o e-mail."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar o e-mail."));
     } finally {
       setIsSaving(false);
     }
@@ -124,7 +172,7 @@ export default function SettingsAccountScreen() {
       return;
     }
     if (password !== confirmPassword) {
-      setFieldError("As senhas nao coincidem.");
+      setFieldError("As senhas não coincidem.");
       return;
     }
     setFieldError(null);
@@ -134,7 +182,7 @@ export default function SettingsAccountScreen() {
       setEditing(null);
       Alert.alert("Senha alterada", "Sua senha foi alterada com sucesso.");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel alterar a senha."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível alterar a senha."));
     } finally {
       setIsSaving(false);
     }
@@ -145,173 +193,119 @@ export default function SettingsAccountScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/settings" as any)} />
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+          title="Dados cadastrais"
+          onBack={() => router.navigate("/(professional)/settings" as any)}
+        />
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Dados cadastrais
-        </Heading>
+          <View className="mt-6 gap-3">
+            <FieldCard
+              label="Nome"
+              value={professional?.name ?? "—"}
+              editing={editing === "name"}
+              onEdit={() => startEdit("name")}
+              onCancel={cancelEdit}
+              onSave={handleSaveName}
+              isSaving={isSaving}
+              error={fieldError}
+            >
+              <NwInput
+                label="Novo nome"
+                placeholder="Seu nome"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+              />
+            </FieldCard>
 
-        <VStack mt="$6" space="md">
-          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Nome
-            </Text>
-            {editing === "name" ? (
-              <FormControl mt="$2">
-                <Input
-                  textLabel="Novo nome"
-                  placeholder="Seu nome"
-                  messageError=""
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSaveName} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  {professional?.name ?? "—"}
-                </Text>
-                <Button title="Editar" onPress={() => startEdit("name")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
+            <FieldCard
+              label="Apelido"
+              value={professional?.nickname || "—"}
+              editing={editing === "nickname"}
+              onEdit={() => startEdit("nickname")}
+              onCancel={cancelEdit}
+              onSave={handleSaveNickname}
+              isSaving={isSaving}
+              error={fieldError}
+            >
+              <NwInput
+                label="Apelido (ajuda os clientes a te achar na busca)"
+                placeholder="Ex.: Dedeco"
+                value={nickname}
+                onChangeText={setNickname}
+                autoCapitalize="words"
+                maxLength={50}
+              />
+            </FieldCard>
 
-          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Apelido
-            </Text>
-            {editing === "nickname" ? (
-              <FormControl mt="$2">
-                <Input
-                  textLabel="Apelido (ajuda os clientes a te achar na busca)"
-                  placeholder="Ex.: Dedeco"
-                  messageError=""
-                  value={nickname}
-                  onChangeText={setNickname}
-                  autoCapitalize="words"
-                  maxLength={50}
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSaveNickname} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  {professional?.nickname || "—"}
-                </Text>
-                <Button title="Editar" onPress={() => startEdit("nickname")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
+            <FieldCard
+              label="E-mail"
+              value={user?.email ?? "—"}
+              editing={editing === "email"}
+              onEdit={() => startEdit("email")}
+              onCancel={cancelEdit}
+              onSave={handleSaveEmail}
+              isSaving={isSaving}
+              error={fieldError}
+            >
+              <NwInput
+                label="Novo e-mail"
+                placeholder="voce@email.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </FieldCard>
 
-          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              E-mail
-            </Text>
-            {editing === "email" ? (
-              <FormControl mt="$2">
-                <Input
-                  textLabel="Novo e-mail"
-                  placeholder="voce@email.com"
-                  messageError=""
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSaveEmail} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  {user?.email ?? "—"}
-                </Text>
-                <Button title="Editar" onPress={() => startEdit("email")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
-
-          <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-              Senha
-            </Text>
-            {editing === "password" ? (
-              <FormControl mt="$2">
-                <InputPassword
-                  textLabel="Senha atual"
-                  placeholder="Senha atual"
-                  messageError=""
-                  value={currentPassword}
-                  onChangeText={setCurrentPassword}
-                />
-                <InputPassword
-                  textLabel="Nova senha"
-                  placeholder="Nova senha"
-                  messageError=""
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <InputPassword
-                  textLabel="Confirmar nova senha"
-                  placeholder="Confirmar nova senha"
-                  messageError=""
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                />
-                {fieldError && (
-                  <Text fontFamily="$body" fontSize="$xs" color="$red500" mb="$2">
-                    {fieldError}
-                  </Text>
-                )}
-                <HStack space="sm">
-                  <Button title="Cancelar" onPress={cancelEdit} bg="$coolGray200" textColor="$coolGray700" h="$9" flex={1} />
-                  <Button title="Salvar" onPress={handleSavePassword} isLoading={isSaving} bg="$green500" $active-bg="$green600" h="$9" flex={1} />
-                </HStack>
-              </FormControl>
-            ) : (
-              <>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mt="$1">
-                  ********
-                </Text>
-                <Button title="Alterar" onPress={() => startEdit("password")} bg="$coolGray200" textColor="$coolGray700" h="$9" mt="$2" />
-              </>
-            )}
-          </VStack>
-        </VStack>
-      </VStack>
-    </ScrollView>
+            <FieldCard
+              label="Senha"
+              value="********"
+              editing={editing === "password"}
+              editLabel="Alterar"
+              onEdit={() => startEdit("password")}
+              onCancel={cancelEdit}
+              onSave={handleSavePassword}
+              isSaving={isSaving}
+              error={fieldError}
+            >
+              {/* "Senha atual" e exigida pelo backend desde 2026-07-23
+                  (CURRENT_PASSWORD_INVALID -> 401 tratado como erro de campo). */}
+              <NwInput
+                label="Senha atual"
+                placeholder="Senha atual"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secure
+                autoCapitalize="none"
+              />
+              <NwInput
+                label="Nova senha"
+                placeholder="Nova senha"
+                value={password}
+                onChangeText={setPassword}
+                secure
+                autoCapitalize="none"
+              />
+              <NwInput
+                label="Confirmar nova senha"
+                placeholder="Confirmar nova senha"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secure
+                autoCapitalize="none"
+              />
+            </FieldCard>
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

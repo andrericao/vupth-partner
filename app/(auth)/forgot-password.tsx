@@ -1,17 +1,18 @@
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import {
-  VStack,
-  FormControl,
-  Heading,
+  View,
   Text,
   ScrollView,
-} from "@gluestack-ui/themed";
-import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { InputPassword } from "@components/InputPassWord";
-import { Button } from "@components/Button";
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+} from "react-native";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
+import { ChevronLeft, Mail } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
@@ -26,6 +27,10 @@ import { PasswordRules } from "@components/PasswordRules";
 // ⚠️ Enquanto o SMTP (S8) nao estiver configurado no ambiente, o e-mail real
 // nao chega (NoOpEmailSender so loga o codigo no servidor).
 export default function ForgotPasswordScreen() {
+  // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
+  // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
+  // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
+  const insets = useSafeAreaInsets();
   const forgotPassword = useAuthStore((s) => s.forgotPassword);
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
@@ -55,12 +60,12 @@ export default function ForgotPasswordScreen() {
       await forgotPassword(value);
       // Sempre 200 (anti-enumeracao) — por isso o texto e "SE estiver cadastrado".
       Alert.alert(
-        "Codigo enviado",
-        "Se este e-mail estiver cadastrado, voce recebera um codigo de 6 digitos. Ele vale por 15 minutos."
+        "Código enviado",
+        "Se este e-mail estiver cadastrado, você receberá um código de 6 dígitos. Ele vale por 15 minutos."
       );
       setStep("code");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar o codigo."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível enviar o código."));
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +87,7 @@ export default function ForgotPasswordScreen() {
         { text: "Ir para o login", onPress: () => router.replace("/(auth)/login" as any) },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel redefinir a senha."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível redefinir a senha."));
     } finally {
       setIsLoading(false);
     }
@@ -94,119 +99,130 @@ export default function ForgotPasswordScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => router.replace("/(auth)/login" as any)} />
+        <View className="flex-1 pt-14 px-4" style={{ paddingBottom: Math.max(insets.bottom, 32) }}>
+          <Pressable
+            onPress={() => router.replace("/(auth)/login" as any)}
+            className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
+            accessibilityRole="button"
+            testID="back-button"
+          >
+            <ChevronLeft size={20} color="#163300" />
+          </Pressable>
 
-          <Heading mt="$8" size="2xl" fontFamily="$heading">
-            Recuperar senha
-          </Heading>
+          {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
+              recuperando a senha, esta criando uma nova. Mesma decisão do app
+              do cliente. */}
+          <View className="mt-10 gap-2">
+            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+              VUPTH
+            </Text>
+            <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+              {step === "email" ? "Esqueceu a senha?" : "Nova senha"}
+            </Text>
+            <Text className="font-body text-[15px] text-vupth-textSecondary">
+              {step === "email"
+                ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
+                : "Use o código que enviamos e escolha uma senha nova."}
+            </Text>
+          </View>
 
           {step === "email" ? (
-            <VStack mt="$6" space="md">
-              <Text fontFamily="$body" color="$coolGray600">
-                Informe o e-mail da sua conta. Enviaremos um codigo de 6 digitos
-                para redefinir a senha.
-              </Text>
-              <FormControl isInvalid={emailInvalid}>
-                <Input
-                  placeholder="email@email.com"
-                  textLabel="E-mail"
-                  messageError="E-mail invalido"
-                  value={email}
-                  onChangeText={(t: string) => {
-                    setEmail(t);
-                    if (emailInvalid) setEmailInvalid(false);
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  testID="forgot-email"
-                />
-              </FormControl>
-              <Button
-                title={isLoading ? "Enviando..." : "Enviar codigo"}
+            <View className="mt-6">
+              <NwInput
+                label="E-mail"
+                icon={Mail}
+                placeholder="email@email.com"
+                value={email}
+                onChangeText={(t: string) => {
+                  setEmail(t);
+                  if (emailInvalid) setEmailInvalid(false);
+                }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                testID="forgot-email"
+                error={emailInvalid ? "E-mail inválido" : ""}
+              />
+              <NwButton
+                title={isLoading ? "Enviando..." : "Enviar código"}
                 onPress={handleSendCode}
                 isLoading={isLoading}
-                mt="$2"
+                className="mt-2"
               />
-            </VStack>
+            </View>
           ) : (
-            <VStack mt="$6" space="md">
-              <Text fontFamily="$body" color="$coolGray600">
-                Digite o codigo de 6 digitos enviado para{" "}
-                <Text fontFamily="$body" fontWeight="$bold" color="$coolGray800">
+            <View className="mt-6">
+              <Text className="font-body text-vupth-textSecondary mb-4">
+                Digite o código de 6 dígitos enviado para{" "}
+                <Text className="font-body font-bold text-vupth-forest">
                   {email.trim()}
                 </Text>{" "}
-                e escolha a nova senha. O codigo vale por 15 minutos.
+                e escolha a nova senha. O código vale por 15 minutos.
               </Text>
 
-              <FormControl isInvalid={codeInvalid}>
-                <Input
-                  placeholder="000000"
-                  textLabel="Codigo (6 digitos)"
-                  messageError="O codigo tem 6 digitos numericos"
-                  value={code}
-                  onChangeText={(t: string) => {
-                    setCode(t);
-                    if (codeInvalid) setCodeInvalid(false);
-                  }}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  autoCapitalize="none"
-                  testID="forgot-code"
-                />
-              </FormControl>
+              <NwInput
+                label="Código (6 dígitos)"
+                placeholder="000000"
+                value={code}
+                onChangeText={(t: string) => {
+                  setCode(t);
+                  if (codeInvalid) setCodeInvalid(false);
+                }}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoCapitalize="none"
+                testID="forgot-code"
+                error={codeInvalid ? "O código tem 6 dígitos numéricos" : ""}
+              />
 
-              <FormControl isInvalid={passwordInvalid}>
-                <InputPassword
-                  placeholder="nova senha"
-                  textLabel="Nova senha"
-                  messageError="A senha nao atende aos requisitos abaixo"
-                  value={password}
-                  onChangeText={(t: string) => {
-                    setPassword(t);
-                    if (passwordInvalid) setPasswordInvalid(false);
-                  }}
-                  testID="forgot-password"
-                />
-              </FormControl>
+              <NwInput
+                label="Nova senha"
+                placeholder="nova senha"
+                secure
+                value={password}
+                onChangeText={(t: string) => {
+                  setPassword(t);
+                  if (passwordInvalid) setPasswordInvalid(false);
+                }}
+                autoCapitalize="none"
+                testID="forgot-password"
+                error={passwordInvalid ? "A senha não atende aos requisitos abaixo" : ""}
+              />
               {password.length > 0 && <PasswordRules rules={passwordRules} />}
 
-              <FormControl isInvalid={confirmInvalid}>
-                <InputPassword
-                  placeholder="confirmar nova senha"
-                  textLabel="Confirmar nova senha"
-                  messageError="As senhas nao coincidem"
-                  value={confirmPassword}
-                  onChangeText={(t: string) => {
-                    setConfirmPassword(t);
-                    if (confirmInvalid) setConfirmInvalid(false);
-                  }}
-                  testID="forgot-confirm"
-                />
-              </FormControl>
+              <NwInput
+                label="Confirmar nova senha"
+                placeholder="confirmar nova senha"
+                secure
+                value={confirmPassword}
+                onChangeText={(t: string) => {
+                  setConfirmPassword(t);
+                  if (confirmInvalid) setConfirmInvalid(false);
+                }}
+                autoCapitalize="none"
+                testID="forgot-confirm"
+                error={confirmInvalid ? "As senhas não coincidem" : ""}
+              />
 
-              <Button
+              <NwButton
                 title={isLoading ? "Redefinindo..." : "Redefinir senha"}
                 onPress={handleReset}
                 isLoading={isLoading}
-                mt="$2"
+                className="mt-2"
               />
-              <Button
-                title="Reenviar codigo"
+              <NwButton
+                title="Reenviar código"
+                variant="secondary"
                 onPress={handleSendCode}
-                bg="$coolGray200"
-                textColor="$coolGray700"
-                h="$10"
-                mt="$0"
+                className="h-10 mt-3"
               />
-            </VStack>
+            </View>
           )}
-        </VStack>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

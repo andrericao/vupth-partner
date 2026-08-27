@@ -1,50 +1,40 @@
-import { useState, useEffect } from "react";
-import { VStack, HStack, Heading, Text, Pressable, ScrollView } from "@gluestack-ui/themed";
-import { Alert, Modal } from "react-native";
+import { useEffect } from "react";
+import { View, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { QueueOptions } from "@components/QueueOptions";
 import { useProfessionalStore } from "@store/professional.store";
-import { useAttendanceStore } from "@store/attendance.store";
 import { useIntervalStore, mealName } from "@store/interval.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
+import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
 import { mealSignal } from "@lib/meals";
-import { activeCutRequests, minutesToExpire, cutRequestTitle } from "@lib/cutRequests";
-import { cardShadow } from "@lib/styles";
 
 // Tela "OPCOES DA FILA" (nav v2, 2026-07-23): o banco no header da Fila NAVEGA
 // para ca (nada de modal — "mais amigavel a tela inteira"). So acoes do dia; o
-// rodape (Fila/Relatorios/Configuracoes) segue visivel na aba Fila.
+// rodape (Fila/Encaixes/Relatorios/Perfil) segue visivel na aba Fila.
 export default function QueueOptionsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
   const setAcceptingNew = useProfessionalStore((s) => s.setAcceptingNew);
-  const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
+  const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
 
   const establishmentId = professional?.establishment_id ?? null;
   const profId = professional?.id;
   const { data, refetch: refetchQueue } = useProfessionalsWithQueueQuery(establishmentId);
 
-  const [showCutRequests, setShowCutRequests] = useState(false);
-
   useEffect(() => {
-    if (profId && establishmentId) fetchIntervals(profId).catch(() => {});
-  }, [profId, establishmentId, fetchIntervals]);
-
-  const handleAction = async (action: () => Promise<unknown>) => {
-    try {
-      await action();
-      await refetchQueue();
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar acao."));
-    }
-  };
+    if (!profId || !establishmentId) return;
+    fetchIntervals(profId).catch(() => {});
+    // Os NOMES dos servicos do pedido saem daqui (o response so traz ids). A
+    // Fila carregava e esta tela herdava pelo store — aberta direto, o card
+    // caia em "Servico nao identificado". A tela de Encaixes (destino da linha
+    // "Solicitacoes" abaixo) herda o mesmo store, entao continua valendo la.
+    fetchMyServices().catch(() => {});
+  }, [profId, establishmentId, fetchIntervals, fetchMyServices]);
 
   // ---- Status (S1) ----
   const WORK_TO_KEY = { WORKING: "trabalhando", ON_BREAK: "intervalo", OFF: "indisponivel" } as const;
@@ -66,16 +56,16 @@ export default function QueueOptionsScreen() {
       if (!wasOpen && nowOpen && next === "trabalhando") {
         Alert.alert(
           "Loja aberta",
-          "Voce foi o primeiro a comecar — a loja agora aparece para os clientes e recebe a fila."
+          "Você foi o primeiro a comecar — a loja agora aparece para os clientes e recebe a fila."
         );
       } else if (wasOpen && !nowOpen) {
         Alert.alert(
           "Loja fechada",
-          "Voce era o ultimo em atividade — a loja foi fechada para os clientes."
+          "Você era o último em atividade — a loja foi fechada para os clientes."
         );
       }
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel mudar o status."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível mudar o status."));
     }
   };
 
@@ -93,17 +83,17 @@ export default function QueueOptionsScreen() {
       const fresh = await refetchQueue();
       // Fechar a fila sendo o ultimo dispara auto-OFF => a loja fecha (derivado).
       if (!value && fresh.data?.open_status !== "OPEN") {
-        Alert.alert("Loja fechada", "Voce era o ultimo — a fila e a loja foram fechadas para os clientes.");
+        Alert.alert("Loja fechada", "Você era o último — a fila e a loja foram fechadas para os clientes.");
       }
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel atualizar a fila."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível atualizar a fila."));
     }
   };
   const toggleQueue = () => {
     if (acceptingNew) {
       Alert.alert(
         "Fechar fila",
-        "Ninguem novo entra na sua fila. Quem ja esta continua sendo atendido; ao terminar o ultimo voce fica indisponivel (e a loja fecha se voce for o ultimo). Continuar?",
+        "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
         [
           { text: "Cancelar", style: "cancel" },
           { text: "Fechar fila", style: "destructive", onPress: () => runToggleQueue(false) },
@@ -123,37 +113,17 @@ export default function QueueOptionsScreen() {
     ? `${mealName(nextMeal.description)} ${parseApiTime(nextMeal.fixedStartTime) ?? ""}`.trim()
     : undefined;
 
-  // ---- Solicitacoes de corte (mesma queryKey da Fila: cache compartilhado;
-  // o WS pessoal assinado no useQueueSocket invalida e o GET refaz) ----
-  const [cutNowMs, setCutNowMs] = useState(() => Date.now());
-  const { data: cutRequestsData, refetch: refetchCutRequests } = useQuery({
-    queryKey: ["cut-requests", profId],
-    queryFn: async () => {
-      const list = await fetchCutRequests();
-      setCutNowMs(Date.now()); // callback de sistema externo: permitido
-      return list;
-    },
-    enabled: !!profId && !!establishmentId,
-    refetchInterval: 30000,
-  });
-  const pendingCutRequests = activeCutRequests(cutRequestsData, cutNowMs);
-  const myServices = useProfessionalStore((s) => s.myServices);
-
-  const decideCutRequest = (cutRequestId: string, accept: boolean) =>
-    handleAction(async () => {
-      if (accept) await acceptCutRequest(cutRequestId);
-      else await refuseCutRequest(cutRequestId);
-      await refetchCutRequests();
-    });
+  // ---- Encaixes: contagem vem do hook compartilhado (mesma queryKey do
+  // rodape e da tela de Encaixes — cache unico, sem requisicao extra).
+  const { count: pendingCutRequests } = usePendingCutRequests();
 
   return (
-    <ScrollView w="$full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} showRoleIcon={false} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Opcoes da fila
-        </Heading>
+    <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Opções da fila"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
 
         <QueueOptions
           mealSignal={currentMealSignal}
@@ -161,86 +131,10 @@ export default function QueueOptionsScreen() {
           hasQueue={hasQueue}
           status={statusControl}
           closeQueue={{ acceptingNew, onToggle: toggleQueue }}
-          pendingRequests={pendingCutRequests.length}
-          onOpenRequests={() => {
-            setCutNowMs(Date.now());
-            setShowCutRequests(true);
-          }}
+          pendingRequests={pendingCutRequests}
+          onOpenRequests={() => router.push("/(professional)/cut-requests" as any)}
         />
-
-        {/* Solicitacoes de corte: pedidos com a fila fechada, aguardando decisao. */}
-        <Modal
-          visible={showCutRequests}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowCutRequests(false)}
-        >
-          <VStack flex={1} justifyContent="flex-end">
-            <Pressable
-              style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
-              onPress={() => setShowCutRequests(false)}
-              accessibilityLabel="Fechar solicitacoes"
-            />
-            <VStack bg="$white" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" p="$4" pb="$8" space="sm">
-              <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$1">
-                Solicitacoes de corte
-              </Text>
-              {pendingCutRequests.length === 0 ? (
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Nenhuma solicitacao pendente.
-                </Text>
-              ) : (
-                pendingCutRequests.map((req) => (
-                  <VStack key={req.id} bg="$coolGray50" borderRadius="$xl" p="$3" space="xs" style={cardShadow}>
-                    <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$coolGray900">
-                      {cutRequestTitle(req, myServices)}
-                    </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$amber600">
-                      expira em {minutesToExpire(req.expires_at, cutNowMs)} min — sem resposta, e negado sozinho
-                    </Text>
-                    <HStack space="sm" mt="$1">
-                      <Button
-                        title="Recusar"
-                        onPress={() => {
-                          setShowCutRequests(false);
-                          decideCutRequest(req.id, false);
-                        }}
-                        bg="$coolGray200"
-                        textColor="$coolGray700"
-                        h="$9"
-                        mt="$0"
-                        flex={1}
-                      />
-                      <Button
-                        title="Aceitar"
-                        onPress={() => {
-                          setShowCutRequests(false);
-                          decideCutRequest(req.id, true);
-                        }}
-                        bg="$green500"
-                        $active-bg="$green600"
-                        h="$9"
-                        mt="$0"
-                        flex={1}
-                      />
-                    </HStack>
-                  </VStack>
-                ))
-              )}
-              <Pressable
-                onPress={() => setShowCutRequests(false)}
-                py="$3"
-                accessibilityRole="button"
-                accessibilityLabel="Fechar lista de solicitacoes"
-              >
-                <Text fontFamily="$body" fontSize="$md" color="$coolGray500" textAlign="center">
-                  Fechar
-                </Text>
-              </Pressable>
-            </VStack>
-          </VStack>
-        </Modal>
-      </VStack>
+      </View>
     </ScrollView>
   );
 }

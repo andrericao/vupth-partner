@@ -1,17 +1,10 @@
 import { useState } from "react";
-import {
-  VStack,
-  FormControl,
-  Heading,
-  Text,
-  ScrollView,
-} from "@gluestack-ui/themed";
+import { View, Text, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -26,6 +19,46 @@ const SPECIALTIES = [
   { label: "Esteticista", value: "ESTHETICIAN" },
 ];
 
+// Card de CAMINHO (Andre 2026-08-07: "a intencao e sempre levar o usuario a um
+// caminho, neste caso a solucao"). A pendencia "1+ profissional com servico"
+// bloqueia a loja de abrir e caia aqui num formulario que criava o DONO como
+// profissional sem dizer isso — parecia "cadastrar outra pessoa". Agora a tela
+// abre com as saidas nomeadas.
+function PathCard({
+  title,
+  hint,
+  onPress,
+  selected,
+  testID,
+}: {
+  title: string;
+  hint: string;
+  onPress: () => void;
+  selected?: boolean;
+  testID?: string;
+}) {
+  return (
+    <Pressable
+      testID={testID}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ selected: !!selected }}
+      className={`bg-vupth-surface p-4 rounded-card mb-3 border ${
+        selected ? "border-vupth-forest" : "border-transparent"
+      } active:bg-vupth-surface`}
+    >
+      <View className="flex-row items-center">
+        <View className="flex-1">
+          <Text className="font-heading text-vupth-forest">{title}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
+        </View>
+        <Text className="font-body text-lg text-vupth-textSecondary ml-2">{"›"}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function AddProfessionalScreen() {
   const { establishmentId } = useLocalSearchParams<{ establishmentId: string }>();
   const user = useAuthStore((s) => s.user);
@@ -35,11 +68,26 @@ export default function AddProfessionalScreen() {
   const [specialty, setSpecialty] = useState("BARBER");
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // O formulario so aparece depois que o dono escolhe "eu tambem vou atender" —
+  // e o que deixa claro que o perfil criado e o DELE.
+  const [meAsProfessional, setMeAsProfessional] = useState(false);
 
   const quickCreateProfessional = useEstablishmentStore(
     (s) => s.quickCreateProfessional
   );
   const refreshToken = useAuthStore((s) => s.refreshToken);
+
+  const goInvite = () =>
+    router.push({
+      pathname: "/(owner)/invite-professional",
+      params: { establishmentId: establishmentId ?? "" },
+    } as any);
+
+  const goAffiliations = () =>
+    router.push({
+      pathname: "/(owner)/affiliations",
+      params: { establishmentId: establishmentId ?? "" },
+    } as any);
 
   const handleQuickCreate = async () => {
     if (!name.trim()) {
@@ -60,9 +108,15 @@ export default function AddProfessionalScreen() {
       await SecureStore.setItemAsync("vupth_owner_name", name.trim());
       await refreshToken();
       Alert.alert(
-        "Profissional criado",
-        `${result.name} vinculado ao estabelecimento!`,
-        [{ text: "OK", onPress: () => router.back() }]
+        "Perfil profissional criado",
+        `${result.name} já aparece como profissional da sua loja. Falta só cadastrar seus serviços para a loja poder abrir.`,
+        [
+          { text: "Depois", onPress: () => router.back() },
+          {
+            text: "Cadastrar serviços",
+            onPress: () => router.replace("/(professional)/my-services?from=settings" as any),
+          },
+        ]
       );
     } catch (error: any) {
       const code = error?.response?.data?.code;
@@ -77,7 +131,7 @@ export default function AddProfessionalScreen() {
             await refreshToken();
             Alert.alert(
               "Tudo certo",
-              "Seu perfil profissional ja esta vinculado a este estabelecimento. Para adicionar outros profissionais, eles devem se cadastrar pelo app e solicitar vinculacao.",
+              "Seu perfil profissional já está vinculado a este estabelecimento.",
               [{ text: "OK", onPress: () => router.back() }]
             );
           } else if (currentEstId) {
@@ -100,11 +154,11 @@ export default function AddProfessionalScreen() {
             );
           }
         } catch (err: any) {
-          Alert.alert("Erro", getApiErrorMessage(err, "Nao foi possivel verificar o perfil profissional."));
+          Alert.alert("Erro", getApiErrorMessage(err, "Não foi possível verificar o perfil profissional."));
         }
       } else {
         const data = error?.response?.data;
-        let msg = "Nao foi possivel criar o profissional.";
+        let msg = "Não foi possível criar o profissional.";
         if (data?.fieldErrors) {
           msg = Object.entries(data.fieldErrors)
             .map(([field, err]) => `${field}: ${err}`)
@@ -124,109 +178,94 @@ export default function AddProfessionalScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Profissionais"
+            subtitle="Quem vai atender na sua loja."
+            onBack={() => router.navigate("/(owner)/menu" as any)}
+          />
+          <Text className="font-body text-sm text-vupth-textSecondary mt-1 mb-4">
+            Sua loja só aparece para os clientes com pelo menos um profissional com
+            serviço cadastrado. Há dois caminhos:
+          </Text>
 
-        <Heading mt="$8" size="2xl" fontFamily="$heading" mb="$4">
-          Adicionar Profissional
-        </Heading>
+          {!isProfessional && (
+            <PathCard
+              testID="path-me"
+              title="Eu também vou atender"
+              hint="cria o SEU perfil profissional — você passa a ter fila própria"
+              selected={meAsProfessional}
+              onPress={() => setMeAsProfessional(true)}
+            />
+          )}
 
-        {!isProfessional ? (
-          <FormControl isInvalid={isInvalid}>
-            <Text fontFamily="$body" color="$coolGray600" mb="$4" fontSize="$sm">
-              Crie seu perfil profissional para atender clientes neste
-              estabelecimento.
+          <PathCard
+            testID="path-invite"
+            title="Convidar um profissional"
+            hint="buscar pelo nome e enviar convite"
+            onPress={goInvite}
+          />
+
+          <PathCard
+            testID="path-requests"
+            title="Ver solicitações"
+            hint="quem já pediu para trabalhar na sua loja"
+            onPress={goAffiliations}
+          />
+
+          {/* O formulario do dono-profissional so abre depois da escolha. */}
+          {!isProfessional && meAsProfessional && (
+            <View className="mt-4">
+              <Text className="font-heading text-base text-vupth-forest mb-2">
+                Seu perfil profissional
+              </Text>
+
+              <NwInput
+                label="Seu nome"
+                placeholder="Ex: João Silva"
+                value={name}
+                onChangeText={setName}
+                error={isInvalid ? "Nome obrigatório" : ""}
+              />
+
+              <Text className="font-heading text-base text-vupth-forest mt-2 mb-2">
+                Especialidade
+              </Text>
+
+              <View className="gap-1 mb-4">
+                {SPECIALTIES.map((s) => (
+                  <NwButton
+                    key={s.value}
+                    title={s.label}
+                    onPress={() => setSpecialty(s.value)}
+                    variant={specialty === s.value ? "primary" : "secondary"}
+                    className="h-10 mt-1"
+                  />
+                ))}
+              </View>
+
+              <NwButton
+                title="Criar meu perfil profissional"
+                onPress={handleQuickCreate}
+                isLoading={isLoading}
+              />
+            </View>
+          )}
+
+          {isProfessional && (
+            <Text className="font-body text-xs text-vupth-textSecondary mt-2">
+              Você já tem perfil profissional nesta loja. Para somar mais gente,
+              convide alguém ou espere uma solicitação de vinculo.
             </Text>
-
-            <Input
-              textLabel="Seu nome"
-              placeholder="Ex: João Silva"
-              messageError="Nome obrigatório"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <Heading size="md" fontFamily="$heading" mt="$2" mb="$2">
-              Especialidade
-            </Heading>
-
-            <VStack space="xs" mb="$4">
-              {SPECIALTIES.map((s) => (
-                <Button
-                  key={s.value}
-                  title={s.label}
-                  onPress={() => setSpecialty(s.value)}
-                  bg={specialty === s.value ? "$green500" : "$coolGray200"}
-                  textColor={specialty === s.value ? "$white" : "$coolGray700"}
-                  $active-bg={specialty === s.value ? "$green600" : "$coolGray300"}
-                  h="$10"
-                  mt="$1"
-                />
-              ))}
-            </VStack>
-
-            <Button
-              title="Criar Profissional"
-              onPress={handleQuickCreate}
-              isLoading={isLoading}
-              bg="$green500"
-              $active-bg="$green600"
-            />
-          </FormControl>
-        ) : (
-          <VStack>
-            <Text fontFamily="$body" color="$coolGray600" mb="$4" fontSize="$md">
-              Voce ja possui perfil profissional. Para adicionar outros
-              profissionais, eles devem se cadastrar pelo app e solicitar
-              vinculacao ao seu estabelecimento.
-            </Text>
-
-            <VStack
-              bg="$coolGray50"
-              p="$4"
-              borderRadius="$lg"
-              borderWidth="$1"
-              borderColor="$coolGray200"
-              mb="$6"
-            >
-              <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray700" mb="$2">
-                Como funciona:
-              </Text>
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mb="$1">
-                1. O profissional se cadastra no app
-              </Text>
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mb="$1">
-                2. Ele busca seu estabelecimento pelo nome
-              </Text>
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mb="$1">
-                3. Envia uma solicitacao de vinculacao
-              </Text>
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
-                4. Voce aceita ou recusa nas solicitacoes
-              </Text>
-            </VStack>
-
-            <Button
-              title="Ver Solicitacoes"
-              onPress={() =>
-                router.replace({
-                  pathname: "/(owner)/affiliations",
-                  params: { establishmentId: establishmentId ?? "" },
-                } as any)
-              }
-              bg="$green500"
-              $active-bg="$green600"
-            />
-          </VStack>
-        )}
-      </VStack>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

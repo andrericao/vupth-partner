@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack, Heading, Text, ScrollView } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 
@@ -17,7 +16,7 @@ export default function SettingsVinculoScreen() {
   const acceptAffiliation = useProfessionalStore((s) => s.acceptAffiliation);
   const rejectAffiliation = useProfessionalStore((s) => s.rejectAffiliation);
 
-  // Convites de vinculacao recebidos do owner (type INVITATION, PENDING).
+  // Convites de vinculação recebidos do owner (type INVITATION, PENDING).
   const [invites, setInvites] = useState<any[]>([]);
   const [resolvingInvite, setResolvingInvite] = useState<string | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -42,9 +41,9 @@ export default function SettingsVinculoScreen() {
     try {
       await acceptAffiliation(inv.id);
       setInvites((prev) => prev.filter((i) => i.id !== inv.id));
-      Alert.alert("Vinculado", `Voce agora esta vinculado a ${inv.establishmentName ?? "este estabelecimento"}.`);
+      Alert.alert("Vinculado", `Você agora está vinculado a ${inv.establishmentName ?? "este estabelecimento"}.`);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel aceitar o convite."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível aceitar o convite."));
     } finally {
       setResolvingInvite(null);
     }
@@ -56,7 +55,7 @@ export default function SettingsVinculoScreen() {
       await rejectAffiliation(inv.id);
       setInvites((prev) => prev.filter((i) => i.id !== inv.id));
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel recusar o convite."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível recusar o convite."));
     } finally {
       setResolvingInvite(null);
     }
@@ -66,8 +65,8 @@ export default function SettingsVinculoScreen() {
   const handleAcceptInvite = (inv: any) => {
     const nome = inv.establishmentName ?? "este estabelecimento";
     Alert.alert(
-      "Aceitar vinculacao",
-      `Deseja se vincular a ${nome}? Voce passara a atender por este estabelecimento.`,
+      "Aceitar vinculação",
+      `Deseja se vincular a ${nome}? Você passara a atender por este estabelecimento.`,
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Aceitar", onPress: () => doAcceptInvite(inv) },
@@ -90,7 +89,7 @@ export default function SettingsVinculoScreen() {
   const handleLeave = () => {
     Alert.alert(
       "Desafiliar do estabelecimento",
-      `Voce deixara de atender em ${professional?.establishment_name ?? "este estabelecimento"} e nao recebera novos clientes na fila. Deseja continuar?`,
+      `Você deixará de atender em ${professional?.establishment_name ?? "este estabelecimento"} e não receberá novos clientes na fila. Deseja continuar?`,
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -102,10 +101,10 @@ export default function SettingsVinculoScreen() {
               await leaveEstablishment();
               Alert.alert(
                 "Desafiliado",
-                "Voce nao esta mais vinculado ao estabelecimento. Busque um novo estabelecimento quando quiser voltar a atender."
+                "Você não está mais vinculado ao estabelecimento. Busque um novo estabelecimento quando quiser voltar a atender."
               );
             } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel desafiliar do estabelecimento. Tente novamente."));
+              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desafiliar do estabelecimento. Tente novamente."));
             } finally {
               setIsLeaving(false);
             }
@@ -117,98 +116,73 @@ export default function SettingsVinculoScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/settings" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Vinculo
-        </Heading>
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Vínculo"
+          onBack={() => router.navigate("/(professional)/settings" as any)}
+        />
 
         {invites.length > 0 && (
-          <VStack
-            mt="$6"
-            bg="$green50"
-            p="$4"
-            borderRadius="$lg"
-            borderWidth="$1"
-            borderColor="$green200"
-            space="sm"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
-              Convites de vinculacao
+          <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-forest gap-2">
+            <Text className="font-heading text-vupth-forest">
+              Convites de vinculação
             </Text>
             {invites.map((inv) => (
-              <VStack key={inv.id} bg="$white" p="$3" borderRadius="$md" borderWidth="$1" borderColor="$coolGray200">
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Convite de
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900" mb="$2">
+              <View key={inv.id} className="bg-white p-3 rounded-md border border-vupth-border">
+                <Text className="font-body text-sm text-vupth-textSecondary">Convite de</Text>
+                <Text className="font-heading text-vupth-forest mb-2">
                   {inv.establishmentName ?? "Estabelecimento"}
                 </Text>
-                <HStack space="sm">
-                  <Button
+                <View className="flex-row gap-2">
+                  <NwButton
                     title="Recusar"
                     onPress={() => handleRejectInvite(inv)}
                     isLoading={resolvingInvite === inv.id}
-                    bg="transparent"
-                    $active-bg="$red50"
-                    borderWidth="$1"
-                    borderColor="$red500"
-                    textColor="$red500"
-                    h="$9"
-                    flex={1}
+                    variant="secondary"
+                    className="flex-1 h-9 mt-0"
                   />
-                  <Button
+                  <NwButton
                     title="Aceitar"
                     onPress={() => handleAcceptInvite(inv)}
                     isLoading={resolvingInvite === inv.id}
-                    bg="$green500"
-                    $active-bg="$green600"
-                    h="$9"
-                    flex={1}
+                    className="flex-1 h-9 mt-0"
                   />
-                </HStack>
-              </VStack>
+                </View>
+              </View>
             ))}
-          </VStack>
+          </View>
         )}
 
-        <VStack mt="$6" bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200">
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-            Estabelecimento
-          </Text>
-          <Text fontFamily="$heading" fontWeight="$bold" color={professional?.establishment_name ? "$green700" : "$coolGray400"} mt="$1">
-            {professional?.establishment_name ?? "Nao vinculado"}
+        <View className="mt-6 bg-vupth-surface p-4 rounded-lg border border-vupth-border">
+          <Text className="font-body text-sm text-vupth-textSecondary">Estabelecimento</Text>
+          <Text
+            className={`font-heading mt-1 ${
+              professional?.establishment_name ? "text-vupth-forest" : "text-vupth-textSecondary"
+            }`}
+          >
+            {professional?.establishment_name ?? "Não vinculado"}
           </Text>
           {!professional?.establishment_id ? (
-            <Button
-              title="Buscar Estabelecimento"
+            <NwButton
+              title="Buscar estabelecimento"
               onPress={() => router.push("/(professional)/find-establishment" as any)}
-              bg="$green500"
-              $active-bg="$green600"
-              h="$9"
-              mt="$2"
+              className="h-9 mt-2"
             />
           ) : (
-            <Button
+            <NwButton
               title="Desafiliar do Estabelecimento"
               onPress={handleLeave}
               isLoading={isLeaving}
-              bg="transparent"
-              $active-bg="$red50"
-              borderWidth="$1"
-              borderColor="$red500"
-              textColor="$red500"
-              h="$9"
-              mt="$2"
+              variant="outlineDanger"
+              className="h-9 mt-2"
             />
           )}
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }

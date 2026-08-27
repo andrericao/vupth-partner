@@ -1,0 +1,44 @@
+import { View, Text, Switch } from "react-native";
+
+// DS3 (c) — "aceitando novos clientes".
+//
+// Mora no PE da lista, nao no cabecalho, e a diferenca importa: nao e um estado
+// MEU (isso e a pilula), e uma propriedade da FILA. E a decisao nasce olhando o
+// fim dela — "atendo esses tres e chega". Controle no lugar onde a decisao
+// acontece vale mais do que controle onde fica bonito.
+//
+// A forma (linha em `surface`, titulo + legenda + chave) vem do unico lugar do
+// arquivo de design onde isso foi desenhado: o quadro "ANTIGO · Partner Hoje",
+// marcado como referencia abandonada. Aproveitamos a LINHA; o switch de "Loja
+// aberta" que vinha ao lado dela nao existe mais — desde 2026-07-24 a loja e
+// derivada do status de quem trabalha nela, ninguem abre na mao.
+type Props = {
+  aceitando: boolean;
+  onToggle: () => void;
+};
+
+export function AceitandoNovos({ aceitando, onToggle }: Props) {
+  return (
+    <View className="flex-row items-center gap-3 mt-4 bg-vupth-surface rounded-card px-4 py-3">
+      <View className="flex-1">
+        <Text className="font-heading text-sm text-vupth-textPrimary">
+          Aceitando novos
+        </Text>
+        <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
+          {aceitando
+            ? "Entrada na fila liberada"
+            : "Fila fechada — só quem já está espera"}
+        </Text>
+      </View>
+      <Switch
+        testID="aceitando-novos"
+        value={aceitando}
+        onValueChange={onToggle}
+        accessibilityLabel="Aceitando novos clientes"
+        trackColor={{ false: "#D7DDD3", true: "#9FE870" }}
+        thumbColor="#FFFFFF"
+        ios_backgroundColor="#D7DDD3"
+      />
+    </View>
+  );
+}

@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
-import {
-  VStack,
-  HStack,
-  FormControl,
-  Heading,
-  ScrollView,
-  Text,
-  Pressable,
-} from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -53,7 +44,7 @@ export default function AddGuestScreen() {
     }
 
     if (!professional?.id || !professional.establishment_id) {
-      Alert.alert("Erro", "Profissional nao vinculado a um estabelecimento.");
+      Alert.alert("Erro", "Profissional não vinculado a um estabelecimento.");
       return;
     }
 
@@ -71,7 +62,7 @@ export default function AddGuestScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel adicionar o cliente."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível adicionar o cliente."));
     } finally {
       setIsLoading(false);
     }
@@ -83,126 +74,107 @@ export default function AddGuestScreen() {
       style={{ flex: 1 }}
     >
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Adicionar Cliente
-        </Heading>
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Adicionar cliente"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
+        <Text className="font-body text-vupth-textSecondary mt-1">
           Cliente sem cadastro no app
         </Text>
 
-        <FormControl isInvalid={isInvalid} mt="$6">
-          <Input
-            textLabel="Nome do cliente"
+        <View className="mt-6">
+          <NwInput
+            label="Nome do cliente"
             placeholder="Ex: Maria"
-            messageError="Nome obrigatorio"
             value={clientName}
             onChangeText={setClientName}
+            error={isInvalid && !clientName.trim() ? "Nome obrigatório" : ""}
             testID="guest-name"
           />
 
-          <Text fontFamily="$body" mb="$2" mt="$2" color="$coolGray600">
-            Servicos ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
+          <Text className="font-body text-vupth-textSecondary mt-2 mb-2">
+            Serviços ({selectedServices.length} selecionado{selectedServices.length !== 1 ? "s" : ""})
           </Text>
 
           {myServices.length === 0 && (
-            <Text fontFamily="$body" color="$coolGray400" fontSize="$sm">
-              Nenhum servico cadastrado. Adicione servicos primeiro.
+            <Text className="font-body text-sm text-vupth-textSecondary">
+              Nenhum serviço cadastrado. Adicione serviços primeiro.
             </Text>
           )}
 
-          <VStack space="xs" mb="$4">
+          <View className="gap-1 mb-4">
             {myServices.map((svc) => {
               const isSelected = selectedServices.includes(svc.id);
               return (
                 <Pressable
                   key={svc.id}
                   onPress={() => toggleService(svc.id)}
-                  bg={isSelected ? "$green500" : "$coolGray100"}
-                  py="$3"
-                  px="$4"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor={isSelected ? "$green600" : "$coolGray200"}
+                  accessibilityRole="button"
+                  accessibilityLabel={svc.customName}
+                  accessibilityState={{ selected: isSelected }}
+                  className={`py-3 px-4 rounded-md border ${
+                    isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
+                  }`}
                 >
-                  <HStack justifyContent="space-between" alignItems="center">
-                    <VStack flex={1}>
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-1">
                       <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$white" : "$coolGray700"}
-                        fontSize="$sm"
+                        className={`font-body text-sm ${isSelected ? "text-white" : "text-vupth-textSecondary"}`}
                       >
                         {svc.customName}
                       </Text>
                       <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$green100" : "$coolGray500"}
-                        fontSize="$xs"
+                        className={`font-body text-xs ${isSelected ? "text-vupth-greenTint" : "text-vupth-textSecondary"}`}
                       >
                         {svc.estimatedMinutes}min
                       </Text>
-                    </VStack>
+                    </View>
                     <Text
-                      fontFamily="$heading"
-                      fontWeight="$bold"
-                      color={isSelected ? "$white" : "$green700"}
+                      className={`font-heading ${isSelected ? "text-white" : "text-vupth-forest"}`}
                     >
                       R$ {svc.price.toFixed(2)}
                     </Text>
-                  </HStack>
+                  </View>
                 </Pressable>
               );
             })}
-          </VStack>
+          </View>
 
           {selectedServices.length > 0 && (
-            <HStack
-              bg="$green50"
-              p="$3"
-              borderRadius="$md"
-              borderWidth="$1"
-              borderColor="$green200"
-              justifyContent="space-between"
-              alignItems="center"
-              mb="$4"
-            >
-              <Text fontFamily="$body" color="$green700">Total:</Text>
-              <Text fontFamily="$heading" fontWeight="$bold" color="$green800" fontSize="$lg">
+            <View className="bg-vupth-greenTint p-3 rounded-md border border-vupth-forest flex-row justify-between items-center mb-4">
+              <Text className="font-body text-vupth-forest">Total:</Text>
+              <Text className="font-heading text-lg text-vupth-forest">
                 R$ {selectedTotal.toFixed(2)}
               </Text>
-            </HStack>
+            </View>
           )}
 
           {isInvalid && (
-            <Text fontFamily="$body" color="$red500" fontSize="$sm" mb="$2">
-              Informe o nome e selecione ao menos 1 servico.
+            <Text className="font-body text-sm text-vupth-danger mb-2">
+              Informe o nome e selecione ao menos 1 serviço.
             </Text>
           )}
 
-          <Button
+          <NwButton
             title="Adicionar na Fila"
             onPress={handleSubmit}
             isLoading={isLoading}
           />
 
-          <Button
+          <NwButton
             title="Cancelar"
             onPress={() => router.back()}
-            bg="transparent"
-            $active-bg="$red50"
-            borderWidth="$1"
-            borderColor="$red500"
-            textColor="$red500"
+            variant="secondary"
+            className="mt-2"
           />
-        </FormControl>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
     </KeyboardAvoidingView>
   );

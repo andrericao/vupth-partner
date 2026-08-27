@@ -162,7 +162,7 @@ describe("attendance.store", () => {
       ).rejects.toThrow();
     });
 
-    it("cai para [] quando a resposta nao traz o campo professionals", async () => {
+    it("cai para [] quando a resposta não traz o campo professionals", async () => {
       mock
         .onGet("/establishment/id/estab-sem-profs/professionals-with-queue")
         .reply(200, { name: "Loja Sem Profs" });
@@ -430,7 +430,7 @@ describe("attendance.store", () => {
       expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/no-show");
     });
 
-    it("rejects on 400 (atendimento nao esta em LATE)", async () => {
+    it("rejects on 400 (atendimento não está em LATE)", async () => {
       mock.onPatch("/attendances/att-uuid-1/no-show").reply(400, {
         message: "Invalid status",
       });
@@ -503,13 +503,13 @@ describe("attendance.store", () => {
       expect(out).toEqual(list);
     });
 
-    it("fetchCutRequests: lista vazia quando nao ha pendentes", async () => {
+    it("fetchCutRequests: lista vazia quando não há pendentes", async () => {
       mock.onGet("/attendances/cut-requests").reply(200, []);
 
       await expect(useAttendanceStore.getState().fetchCutRequests()).resolves.toEqual([]);
     });
 
-    it("rejeita no 409 (pedido ja decidido)", async () => {
+    it("rejeita no 409 (pedido já decidido)", async () => {
       mock.onPatch("/attendances/cut-requests/cut-uuid-1/accept").reply(409, {
         message: "CUT_REQUEST_NOT_PENDING",
       });

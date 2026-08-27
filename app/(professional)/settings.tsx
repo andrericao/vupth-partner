@@ -1,87 +1,103 @@
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack, Heading, Text, ScrollView, Pressable } from "@gluestack-ui/themed";
-import { Alert, View } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  Scissors,
+  Utensils,
+  User,
+  Link as LinkIcon,
+  ChevronRight,
+  ArrowLeftRight,
+} from "lucide-react-native";
+import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
-import { cardShadow } from "@lib/styles";
+import { NotificationBadge } from "@components/NotificationBadge";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
 // MENU de cards; o conteudo mora nas sub-telas (settings-account, my-services,
 // meals, settings-vinculo). Area do dono (dupla role) e Sair vivem aqui — fora
 // das Opcoes da fila, que so tem acoes do dia.
+//
+// [marca-vupth] Redesenhada p/ bater com o Pencil (PROF · 04 Perfil): cabecalho
+// proprio (forest + avatar + nome), sem o Header padrao (o .pen nao tem a barra
+// VUPTH/icone de papel nesta tela — o avatar+nome ja cumpre esse papel), e o
+// menu ganhou icone + agrupamento (ATENDIMENTO / CONTA) no lugar da lista lisa
+// com "›" de texto.
 type CardProps = {
+  icon: ComponentType<{ size?: number; color?: string }>;
   title: string;
   hint: string;
   badge?: number;
   dot?: boolean;
-  danger?: boolean;
+  last?: boolean;
   onPress: () => void;
 };
 
+function initials(name?: string | null): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  const first = parts[0][0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
 // Escopo de MODULO (licao do segfault do tsc: componente definido dentro do
-// componente estoura a inferencia do gluestack e remonta a subarvore).
-function MenuCard({ title, hint, badge, dot, danger, onPress }: CardProps) {
+// componente estourava a inferencia e remonta a subarvore a cada render).
+function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }: CardProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      bg="$white"
-      p="$4"
-      borderRadius="$2xl"
-      $active-bg="$coolGray50"
-      style={cardShadow}
-    >
-      <HStack alignItems="center">
-        <VStack flex={1}>
-          <HStack alignItems="center" space="xs">
-            <Text fontFamily="$heading" fontWeight="$bold" color={danger ? "$red500" : "$coolGray900"}>
-              {title}
-            </Text>
-            {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendencia" mas nao
+    <>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        className="flex-row items-center gap-3 px-4 py-3.5 active:bg-vupth-surface"
+      >
+        <Icon size={19} color="#163300" />
+        <View className="flex-1">
+          <View className="flex-row items-center gap-1">
+            <Text className="font-body text-sm font-semibold text-vupth-forest">{title}</Text>
+            {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendência" mas nao
                 ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
             {dot && (
               <View
                 testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
-                style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#E63946" }}
+                className="w-2 h-2 rounded-full bg-vupth-danger"
               />
             )}
-          </HStack>
-          <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
-            {hint}
-          </Text>
-        </VStack>
+          </View>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
+        </View>
         {badge != null && badge > 0 && (
-          <VStack
-            testID="settings-badge-invites"
-            bg="$red600"
-            borderRadius="$full"
-            px="$2"
-            minWidth="$5"
-            h="$5"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
-              {badge}
-            </Text>
-          </VStack>
+          <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
-        <Text fontFamily="$body" fontSize="$lg" color="$coolGray400" ml="$2">
-          {"›"}
-        </Text>
-      </HStack>
-    </Pressable>
+        <ChevronRight size={16} color="#454745" />
+      </Pressable>
+      {!last && <View className="h-px bg-vupth-border" />}
+    </>
+  );
+}
+
+/** Bloco de cards sob um rotulo — mesmo padrao do menu do dono (menu.tsx). */
+function Grupo({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <View className="gap-2">
+      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
+        {label.toUpperCase()}
+      </Text>
+      <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
+    </View>
   );
 }
 
 export default function ProfessionalSettingsScreen() {
+  const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
   const user = useAuthStore((s) => s.user);
@@ -134,69 +150,106 @@ export default function ProfessionalSettingsScreen() {
     ]);
   };
 
+  const subtitle =
+    [professional?.specialty, professional?.establishment_name].filter(Boolean).join(" · ") ||
+    "Complete seu cadastro para atender";
+
   return (
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <VStack flex={1} py="$12" px="$6">
-        <Header />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Configuracoes
-        </Heading>
-        <Text fontFamily="$body" color="$coolGray500" mt="$1">
-          {[professional?.name, professional?.specialty, professional?.establishment_name]
-            .filter(Boolean)
-            .join(" · ") || "Complete seu cadastro para atender"}
+    <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      {/* [marca-vupth] Cabecalho proprio (Pencil PROF · 04): forest + avatar
+          com iniciais + nome. Substitui o Header padrao nesta tela — o .pen
+          não repete a barra VUPTH/icone de papel aqui, o avatar já identifica
+          quem esta logado. */}
+      <View
+        className="bg-vupth-forest items-center px-4 pb-7"
+        style={{ paddingTop: insets.top + 24 }}
+      >
+        <View className="w-[72px] h-[72px] rounded-full bg-vupth-green items-center justify-center">
+          <Text className="font-display text-2xl text-vupth-forest">
+            {initials(professional?.name)}
+          </Text>
+        </View>
+        <Text className="font-display text-xl text-white mt-3">
+          {professional?.name ?? "Profissional"}
         </Text>
+        <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
+      </View>
 
+      <View className="flex-1 py-6 px-4 gap-5">
         {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
-            faixa. Encaminha para buscar estabelecimento / adicionar servico. */}
+            faixa. Encaminha para buscar estabelecimento / adicionar serviço. */}
         <CompletionCard
           completion={completion}
           doneBanner="Cadastro completo — já pode atender!"
           routeFor={routeFor}
         />
 
-        <VStack mt="$6" space="md">
+        {/* Quem acumula os dois papeis troca de area por aqui — mesmo padrao
+            do menu do dono (menu.tsx "Atender como profissional"). Fica FORA
+            dos grupos porque não e configuracao, e mudar de contexto. */}
+        {isOwner && (
+          <Pressable
+            onPress={() => router.replace("/(owner)/dashboard" as any)}
+            className="flex-row items-center gap-3 bg-vupth-greenTint rounded-card px-4 py-3.5"
+          >
+            <ArrowLeftRight size={19} color="#163300" />
+            <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
+              Área do dono
+            </Text>
+            <ChevronRight size={16} color="#163300" />
+          </Pressable>
+        )}
+
+        <Grupo label="Atendimento">
           <MenuCard
+            icon={Scissors}
+            title="Meus serviços"
+            hint="preços e duração do que você oferece"
+            dot={servicosDot}
+            onPress={() => router.push("/(professional)/my-services?from=settings" as any)}
+          />
+          <MenuCard
+            icon={Utensils}
+            title="Refeições"
+            hint="horários + aviso na hora (ligar/desligar)"
+            last
+            onPress={() => router.push("/(professional)/meals?from=settings" as any)}
+          />
+        </Grupo>
+
+        <Grupo label="Conta">
+          <MenuCard
+            icon={User}
             title="Dados cadastrais"
             hint="nome, apelido, e-mail, senha"
             dot={dadosDot}
             onPress={() => router.push("/(professional)/settings-account" as any)}
           />
           <MenuCard
-            title="Meus servicos"
-            hint="precos e duracao do que voce oferece"
-            dot={servicosDot}
-            onPress={() => router.push("/(professional)/my-services?from=settings" as any)}
-          />
-          <MenuCard
-            title="Refeicoes"
-            hint="horarios + aviso na hora (ligar/desligar)"
-            onPress={() => router.push("/(professional)/meals?from=settings" as any)}
-          />
-          <MenuCard
-            title="Vinculo"
-            hint={professional?.establishment_name ?? "nao vinculado — buscar estabelecimento"}
+            icon={LinkIcon}
+            title="Vínculo"
+            hint={professional?.establishment_name ?? "não vinculado — buscar estabelecimento"}
             badge={pendingInvites}
             dot={vinculoDot}
+            last
             onPress={() => router.push("/(professional)/settings-vinculo" as any)}
           />
-          {isOwner && (
-            <MenuCard
-              title="Area do dono"
-              hint="gerenciar o estabelecimento"
-              onPress={() => router.replace("/(owner)/dashboard" as any)}
-            />
-          )}
-          <MenuCard title="Sair" hint="encerrar a sessao neste aparelho" danger onPress={handleLogout} />
+        </Grupo>
 
-          <OtaUpdateButton />
-        </VStack>
-      </VStack>
+        {/* Sair da conta fica solto e em vermelho, fora dos grupos: e a unica
+            ação aqui que tira a pessoa do app (Pencil PROF · 04, mesmo padrao
+            do menu do dono). */}
+        <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
+          <Text className="font-body text-sm font-semibold text-vupth-danger text-center">
+            Sair da conta
+          </Text>
+        </Pressable>
+
+        {/* O diagnostico de WS mudou de casa: mora dentro do OtaUpdateButton,
+            atras de 7 toques na versao. Estava solto aqui e o usuario final
+            via "falhou o handshake" e a URL do servidor. */}
+        <OtaUpdateButton />
+      </View>
     </ScrollView>
   );
 }

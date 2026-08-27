@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
-import { VStack, Heading, Text } from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Header } from "@components/Header";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -74,12 +80,12 @@ export default function AlsoProfessionalScreen() {
 
   const handleYes = async () => {
     if (!ownerName.trim()) {
-      Alert.alert("Erro", "Nome do proprietario nao encontrado.");
+      Alert.alert("Erro", "Nome do proprietário não encontrado.");
       return;
     }
 
     if (!establishmentId) {
-      Alert.alert("Erro", "Estabelecimento nao encontrado.");
+      Alert.alert("Erro", "Estabelecimento não encontrado.");
       return;
     }
 
@@ -94,10 +100,10 @@ export default function AlsoProfessionalScreen() {
       await useProfessionalStore.getState().setProfessional(result);
       await refreshToken();
 
-      router.replace({
-        pathname: "/(owner)/add-service",
-        params: { establishmentId },
-      } as any);
+      // O servico e do PROFISSIONAL: o onboarding manda p/ "Meus Servicos", na
+      // area do profissional, e nao mais p/ a tela de servico do dono (que saiu
+      // do menu em 2026-08-11). Uma porta so p/ cadastrar servico.
+      router.replace("/(professional)/my-services?from=settings" as any);
     } catch (error: any) {
       const code = error?.response?.data?.code;
 
@@ -116,20 +122,17 @@ export default function AlsoProfessionalScreen() {
             await useProfessionalStore.getState().fetchMe();
           }
         } catch (err: any) {
-          Alert.alert("Erro", getApiErrorMessage(err, "Nao foi possivel vincular ao estabelecimento."));
+          Alert.alert("Erro", getApiErrorMessage(err, "Não foi possível vincular ao estabelecimento."));
           setIsLoading(false);
           return;
         }
         await refreshToken();
-        router.replace({
-          pathname: "/(owner)/add-service",
-          params: { establishmentId },
-        } as any);
+        router.replace("/(professional)/my-services?from=settings" as any);
         return;
       }
 
       const data = error?.response?.data;
-      let msg = "Nao foi possivel criar o perfil profissional.";
+      let msg = "Não foi possível criar o perfil profissional.";
       if (data?.fieldErrors) {
         msg = Object.entries(data.fieldErrors)
           .map(([field, err]) => `${field}: ${err}`)
@@ -159,64 +162,51 @@ export default function AlsoProfessionalScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} pb="$6" px="$6">
-          <Header showBackButton onBack={() => router.navigate("/(owner)/dashboard" as any)} />
+        <View className="flex-1 pb-6 px-4">
+          <ScreenHeader
+            title="Você também vai atender?"
+            subtitle="Se for atender clientes aqui, escolha sua especialidade."
+            onBack={() => router.navigate("/(owner)/dashboard" as any)}
+          />
 
-          <VStack flex={1} justifyContent="center" px="$2">
-            <Heading size="2xl" fontFamily="$heading" mb="$4">
-              Voce tambem sera profissional?
-            </Heading>
-
-            <Text fontFamily="$body" color="$coolGray600" mb="$2" fontSize="$md">
-              Se voce tambem atendera clientes neste estabelecimento, escolha sua
-              especialidade abaixo.
-            </Text>
+          <View className="flex-1">
 
             {ownerName ? (
-              <Text fontFamily="$body" color="$coolGray500" mb="$6" fontSize="$sm">
+              <Text className="font-body text-sm text-vupth-textSecondary mb-6">
                 Profissional: {ownerName}
               </Text>
             ) : null}
 
-            <Heading size="md" fontFamily="$heading" mb="$2">
+            <Text className="font-heading text-base mb-2 text-vupth-forest">
               Especialidade
-            </Heading>
+            </Text>
 
-            <VStack space="xs" mb="$6">
+            <View className="mb-6">
               {SPECIALTIES.map((s) => (
-                <Button
+                <NwButton
                   key={s.value}
                   title={s.label}
                   onPress={() => setSpecialty(s.value)}
-                  bg={specialty === s.value ? "$green500" : "$coolGray200"}
-                  textColor={specialty === s.value ? "$white" : "$coolGray700"}
-                  $active-bg={specialty === s.value ? "$green600" : "$coolGray300"}
-                  h="$10"
-                  mt="$1"
+                  variant={specialty === s.value ? "primary" : "secondary"}
+                  className="h-10 mt-1"
                 />
               ))}
-            </VStack>
+            </View>
 
-            <Button
-              title="Sim, tambem serei profissional"
+            <NwButton
+              title="Sim, também serei profissional"
               onPress={handleYes}
               isLoading={isLoading}
-              bg="$green500"
-              $active-bg="$green600"
             />
 
-            <Button
-              title="Nao, apenas proprietario"
+            <NwButton
+              title="Não, apenas proprietário"
               onPress={handleNo}
-              bg="transparent"
-              $active-bg="$red50"
-              borderWidth="$1"
-              borderColor="$red500"
-              textColor="$red500"
-              mt="$2"
+              variant="secondary"
+              className="mt-2"
             />
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

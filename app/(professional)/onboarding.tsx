@@ -1,26 +1,20 @@
 import { useState, useEffect } from "react";
 import {
-  VStack,
-  FormControl,
-  Heading,
-  ScrollView,
+  View,
   Text,
+  ScrollView,
+  TextInput,
   Pressable,
-  HStack,
-  Spinner,
-  Input as GluestackInput,
-  InputField,
-  InputSlot,
-  InputIcon,
-  SearchIcon,
-  CloseIcon,
-} from "@gluestack-ui/themed";
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { X, Search } from "lucide-react-native";
 import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Header } from "@components/Header";
-import { cardShadow } from "@lib/styles";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useEstablishmentStore, EstablishmentSearchResult } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
@@ -50,6 +44,9 @@ export default function ProfessionalOnboardingScreen() {
   const [selectedEstablishment, setSelectedEstablishment] = useState<EstablishmentSearchResult | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  // So p/ engrossar a borda do campo de busca no foco (o v1 fazia via
+  // $focus-borderWidth do gluestack).
+  const [searchFocused, setSearchFocused] = useState(false);
 
   const registerProfessional = useProfessionalStore((s) => s.register);
   const requestAffiliation = useProfessionalStore((s) => s.requestAffiliation);
@@ -82,7 +79,7 @@ export default function ProfessionalOnboardingScreen() {
         const msg = Object.values(fieldErrors).join("\n");
         Alert.alert("Erro de validacao", msg);
       } else {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel criar o perfil. Tente novamente."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível criar o perfil. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -95,7 +92,7 @@ export default function ProfessionalOnboardingScreen() {
       const results = await searchByName(searchQuery.trim());
       setSearchResults(results);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel buscar estabelecimentos."));
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível buscar estabelecimentos."));
     } finally {
       setIsSearching(false);
     }
@@ -122,18 +119,18 @@ export default function ProfessionalOnboardingScreen() {
     try {
       await requestAffiliation(selectedEstablishment.id);
       Alert.alert(
-        "Solicitacao enviada",
-        `Sua solicitacao para ${selectedEstablishment.name} foi enviada. Aguarde a aprovacao do proprietario.`,
+        "Solicitação enviada",
+        `Sua solicitação para ${selectedEstablishment.name} foi enviada. Aguarde a aprovação do proprietário.`,
         [{ text: "OK", onPress: () => router.replace("/(professional)/queue" as any) }]
       );
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "PROFESSIONAL_ALREADY_AFFILIATED") {
-        Alert.alert("Aviso", "Voce ja esta vinculado a um estabelecimento.");
+        Alert.alert("Aviso", "Você já está vinculado a um estabelecimento.");
       } else if (code === "AFFILIATION_ALREADY_REQUESTED") {
-        Alert.alert("Aviso", "Voce ja solicitou vinculacao a este estabelecimento. Aguarde a aprovacao.");
+        Alert.alert("Aviso", "Você já solicitou vinculação a este estabelecimento. Aguarde a aprovação.");
       } else {
-        Alert.alert("Erro", getApiErrorMessage(error, "Nao foi possivel enviar a solicitacao. Tente novamente."));
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível enviar a solicitação. Tente novamente."));
       }
     } finally {
       setIsLoading(false);
@@ -147,66 +144,65 @@ export default function ProfessionalOnboardingScreen() {
         style={{ flex: 1 }}
       >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
-          <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Cadastro profissional"
+            onBack={() => router.navigate("/(professional)/queue" as any)}
+          />
 
-          <FormControl flex={1} mt="$48" isInvalid={isInvalid}>
-            <Heading mb="$8" size="3xl" fontFamily="$heading">
-              Cadastro Profissional
-            </Heading>
+          <View className="flex-1 w-full">
 
-            <Input
-              textLabel="Seu nome"
+            <NwInput
+              label="Seu nome"
               placeholder="Joao Silva"
-              messageError="Nome obrigatorio"
               value={name}
               onChangeText={setName}
               testID="professional-name"
+              error={isInvalid ? "Nome obrigatório" : ""}
             />
 
-            <VStack mb="$3" w="$full">
-              <Text fontFamily="$body" mb="$1" color="$coolGray600">
+            <View className="mb-3 w-full">
+              <Text className="font-body text-vupth-textSecondary mb-1">
                 Especialidade (opcional)
               </Text>
-              <VStack space="xs">
+              <View className="gap-1">
                 {SPECIALTIES.map((s) => {
                   const isSelected = specialty === s.value;
                   return (
                     <Pressable
                       key={s.value}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
                       onPress={() => setSpecialty(isSelected ? "" : s.value)}
-                      bg={isSelected ? "$green500" : "$coolGray100"}
-                      py="$2.5"
-                      px="$4"
-                      borderRadius="$md"
-                      borderWidth="$1"
-                      borderColor={isSelected ? "$green600" : "$coolGray200"}
+                      className={`py-2.5 px-4 rounded-md border ${
+                        isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
+                      }`}
                     >
                       <Text
-                        fontFamily="$body"
-                        color={isSelected ? "$white" : "$coolGray700"}
-                        textAlign="center"
+                        className={`font-body text-center ${
+                          isSelected ? "text-white" : "text-vupth-textSecondary"
+                        }`}
                       >
                         {s.label}
                       </Text>
                     </Pressable>
                   );
                 })}
-              </VStack>
-            </VStack>
+              </View>
+            </View>
 
-            <Button
+            <NwButton
               title="Continuar"
               onPress={handleRegister}
               isLoading={isLoading}
             />
-          </FormControl>
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
       </KeyboardAvoidingView>
     );
@@ -219,95 +215,96 @@ export default function ProfessionalOnboardingScreen() {
         style={{ flex: 1 }}
       >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} py="$12" px="$6">
-          <Header showBackButton onBack={() => setStep("profile")} />
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader title="Buscar estabelecimento" onBack={() => setStep("profile")} />
 
-          <FormControl flex={1} mt="$12">
-            <Heading mb="$4" size="2xl" fontFamily="$heading">
-              Buscar Estabelecimento
-            </Heading>
+          <View className="flex-1">
 
-            <Text fontFamily="$body" mb="$6" color="$coolGray600">
-              Busque o estabelecimento onde voce vai trabalhar.
+            <Text className="font-body text-vupth-textSecondary mb-6">
+              Busque o estabelecimento onde você vai trabalhar.
             </Text>
 
-            <GluestackInput
-              h="$12"
-              borderWidth="$1"
-              borderColor="$green500"
-              borderRadius="$md"
-              $focus-borderWidth="$2"
-              mb="$4"
+            <View
+              className={`flex-row items-center h-12 rounded-md mb-4 pr-3 ${
+                searchFocused ? "border-2 border-vupth-forest" : "border border-vupth-forest"
+              }`}
             >
-              <InputField
+              <TextInput
+                className="flex-1 px-3 font-body text-vupth-forest"
                 placeholder="Nome do estabelecimento"
+                placeholderTextColor="#454745"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
-                color="$coolGray900"
-                fontFamily="$body"
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
                 autoCorrect={false}
                 returnKeyType="search"
                 testID="search-establishment"
               />
-              <InputSlot
-                pr="$3"
-                onPress={searchQuery.trim() ? () => { setSearchQuery(""); setSearchResults([]); } : handleSearch}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={searchQuery.trim() ? "Limpar busca" : "Buscar"}
+                hitSlop={8}
+                onPress={
+                  searchQuery.trim()
+                    ? () => {
+                        setSearchQuery("");
+                        setSearchResults([]);
+                      }
+                    : handleSearch
+                }
               >
-                <InputIcon
-                  as={searchQuery.trim() ? CloseIcon : SearchIcon}
-                  color={searchQuery.trim() ? "$coolGray500" : "$green600"}
-                />
-              </InputSlot>
-            </GluestackInput>
+                {searchQuery.trim() ? (
+                  <X size={18} color="#454745" />
+                ) : (
+                  <Search size={18} color="#163300" />
+                )}
+              </Pressable>
+            </View>
 
-          {isSearching && <Spinner color="$green500" size="large" />}
+            {isSearching && <ActivityIndicator size="large" color="#163300" />}
 
-          {searchResults.length > 0 && (
-            <VStack space="sm" mt="$2">
-              {searchResults.map((estab) => (
-                <Pressable
-                  key={estab.id}
-                  testID="establishment-card"
-                  onPress={() => handleSelectEstablishment(estab)}
-                  bg="$white"
-                  py="$3"
-                  px="$4"
-                  borderRadius="$2xl"
-                  style={cardShadow}
-                >
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
-                    {estab.name}
-                  </Text>
-                  <HStack space="sm" mt="$1">
-                    <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                      {estab.services?.join(", ")}
-                    </Text>
-                    <Text
-                      fontFamily="$body"
-                      fontSize="$sm"
-                      color={estab.open_status === "OPEN" ? "$green500" : "$coolGray400"}
-                    >
-                      {estab.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
-                    </Text>
-                  </HStack>
-                </Pressable>
-              ))}
-            </VStack>
-          )}
+            {searchResults.length > 0 && (
+              <View className="mt-2 gap-2">
+                {searchResults.map((estab) => (
+                  <Pressable
+                    key={estab.id}
+                    accessibilityRole="button"
+                    testID="establishment-card"
+                    onPress={() => handleSelectEstablishment(estab)}
+                    className="bg-vupth-surface py-3 px-4 rounded-card"
+                  >
+                    <Text className="font-heading text-vupth-forest">{estab.name}</Text>
+                    <View className="flex-row gap-2 mt-1">
+                      <Text className="font-body text-sm text-vupth-textSecondary">
+                        {estab.services?.join(", ")}
+                      </Text>
+                      <Text
+                        className={`font-body text-sm ${
+                          estab.open_status === "OPEN" ? "text-vupth-forest" : "text-vupth-textSecondary"
+                        }`}
+                      >
+                        {estab.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            )}
 
-          {!isSearching && searchResults.length === 0 && searchQuery.length > 0 && (
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$6">
-              Nenhum estabelecimento encontrado.
-            </Text>
-          )}
-          </FormControl>
-        </VStack>
+            {!isSearching && searchResults.length === 0 && searchQuery.length > 0 && (
+              <Text className="font-body text-vupth-textSecondary text-center mt-6">
+                Nenhum estabelecimento encontrado.
+              </Text>
+            )}
+          </View>
+        </View>
       </ScrollView>
       </KeyboardAvoidingView>
     );
@@ -315,54 +312,49 @@ export default function ProfessionalOnboardingScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} py="$12" px="$6" alignItems="center" justifyContent="center">
-        <Header />
-
-        <Heading mt="$12" mb="$8" size="2xl" fontFamily="$heading">
-          Confirmar Vinculacao
-        </Heading>
+      <View className="flex-1 pb-12 px-4 items-center justify-center">
+        <ScreenHeader
+          title="Confirmar vinculação"
+        />
 
         {selectedEstablishment && (
-          <VStack
-            bg="$white"
-            p="$6"
-            borderRadius="$2xl"
-            style={cardShadow}
-            w="$full"
-            mb="$6"
-          >
-            <Text fontFamily="$heading" fontSize="$xl" fontWeight="$bold" color="$coolGray900">
+          <View className="bg-vupth-surface p-6 rounded-card w-full mb-6">
+            <Text className="font-heading text-xl text-vupth-forest">
               {selectedEstablishment.name}
             </Text>
-            <Text fontFamily="$body" color="$coolGray500" mt="$1">
+            <Text className="font-body text-vupth-textSecondary mt-1">
               {selectedEstablishment.services?.join(", ")}
             </Text>
             <Text
-              fontFamily="$body"
-              mt="$1"
-              color={selectedEstablishment.open_status === "OPEN" ? "$green500" : "$coolGray400"}
+              className={`font-body mt-1 ${
+                selectedEstablishment.open_status === "OPEN" ? "text-vupth-forest" : "text-vupth-textSecondary"
+              }`}
             >
               {selectedEstablishment.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
             </Text>
-          </VStack>
+          </View>
         )}
 
-        <Button
-          title="Solicitar Vinculacao"
+        <NwButton
+          title="Solicitar vinculação"
           onPress={handleAffiliate}
           isLoading={isLoading}
         />
 
-        <Pressable onPress={() => setStep("search")} mt="$4">
-          <Text fontFamily="$body" color="$green600" textAlign="center">
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setStep("search")}
+          className="mt-4"
+        >
+          <Text className="font-body text-center text-vupth-forest">
             Voltar e escolher outro
           </Text>
         </Pressable>
-      </VStack>
+      </View>
     </ScrollView>
   );
 }

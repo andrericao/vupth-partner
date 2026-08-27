@@ -29,7 +29,7 @@ describe("hhmmToMinutes", () => {
 describe("mealSignal", () => {
   const almoco = [meal("12:00Z")];
 
-  it("null quando nao ha refeicao", () => {
+  it("null quando não há refeição", () => {
     expect(mealSignal([], at("12:00"))).toBeNull();
   });
 
@@ -44,7 +44,7 @@ describe("mealSignal", () => {
     expect(mealSignal(almoco, at("11:59"))).toEqual({ phase: "proxima", minutesUntil: 1 });
   });
 
-  it("'agora' no horario exato e dentro da janela", () => {
+  it("'agora' no horário exato e dentro da janela", () => {
     expect(mealSignal(almoco, at("12:00"))).toEqual({ phase: "agora", minutesUntil: 0 });
     expect(mealSignal(almoco, at("12:30"))).toEqual({ phase: "agora", minutesUntil: -30 });
   });
@@ -55,12 +55,12 @@ describe("mealSignal", () => {
     expect(mealSignal(almoco, limite + 1)).toBeNull();
   });
 
-  it("ignora refeicao que nao esta SCHEDULED (ja ativa nao e pendencia)", () => {
+  it("ignora refeição que não está SCHEDULED (já ativa não e pendência)", () => {
     expect(mealSignal([meal("12:00Z", "ACTIVE")], at("12:10"))).toBeNull();
     expect(mealSignal([meal("12:00Z", "ACTIVE")], at("11:40"))).toBeNull();
   });
 
-  it("ignora horario ausente ou invalido", () => {
+  it("ignora horário ausente ou inválido", () => {
     expect(mealSignal([meal(null)], at("12:10"))).toBeNull();
     expect(mealSignal([meal("banana")], at("12:10"))).toBeNull();
   });
@@ -85,7 +85,7 @@ describe("mealSignal", () => {
 });
 
 describe("isMealDue", () => {
-  it("true tanto na antecedencia quanto depois do horario", () => {
+  it("true tanto na antecedencia quanto depois do horário", () => {
     expect(isMealDue([meal("12:00Z")], at("11:40"))).toBe(true);
     expect(isMealDue([meal("12:00Z")], at("12:10"))).toBe(true);
   });

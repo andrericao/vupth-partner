@@ -1,14 +1,35 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
 
+import { resolveApiEnv } from "@lib/apiEnv";
+
+// Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
+// testa em device (Andre 2026-08-22).
+//
+// `staging` e `dev` sao o MESMO host de proposito: este app batizou de
+// `staging` o que o client batizou de `dev`, e o mesmo `.env` circula entre os
+// dois repos. Sem o apelido, `EXPO_PUBLIC_API_ENV=dev` aqui caia no fallback
+// sem avisar.
 const API_URLS: Record<string, string> = {
   local: `http://${process.env.EXPO_PUBLIC_API_LOCAL_IP ?? "192.168.0.16"}:8080`,
   staging: "https://vupth-backend-ia.onrender.com",
+  dev: "https://vupth-backend-ia.onrender.com",
   prod: "https://vupth-backend-ia-production.up.railway.app",
 };
 
-const env = process.env.EXPO_PUBLIC_API_ENV ?? "staging";
-const BASE_URL = API_URLS[env] ?? API_URLS.staging;
+// O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando
+// local. Ver `apiEnv.ts` pro porque — em resumo, o `.env` de quem publica
+// vazava pro app de todo mundo.
+const canalDoBundle = (() => {
+  try {
+    return Updates.channel;
+  } catch {
+    return null;
+  }
+})();
+const env = resolveApiEnv(canalDoBundle, process.env.EXPO_PUBLIC_API_ENV);
+const BASE_URL = API_URLS[env];
 
 // URL do WebSocket STOMP. http→ws, https→wss.
 // O backend registra /ws com SockJS; para um WebSocket NATIVO (sem a lib SockJS)
@@ -30,34 +51,34 @@ export const api = axios.create({
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
   AFFILIATION_ALREADY_PENDING:
-    "Voce ja tem uma solicitacao de vinculacao pendente para este estabelecimento. Aguarde a resposta do proprietario.",
+    "Você já tem uma solicitação de vinculação pendente para este estabelecimento. Aguarde a resposta do proprietário.",
   PROFESSIONAL_ALREADY_AFFILIATED:
-    "Voce ja esta vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
-  USER_ALREADY_PROFESSIONAL: "Voce ja possui um perfil profissional.",
-  ESTABLISHMENT_NOT_FOUND: "Estabelecimento nao encontrado.",
-  PROFESSIONAL_NOT_FOUND: "Perfil profissional nao encontrado.",
-  AFFILIATION_NOT_FOUND: "Solicitacao de vinculacao nao encontrada.",
+    "Você já está vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
+  USER_ALREADY_PROFESSIONAL: "Você já possui um perfil profissional.",
+  ESTABLISHMENT_NOT_FOUND: "Estabelecimento não encontrado.",
+  PROFESSIONAL_NOT_FOUND: "Perfil profissional não encontrado.",
+  AFFILIATION_NOT_FOUND: "Solicitação de vinculação não encontrada.",
   ESTABLISHMENT_NOT_READY:
-    "O estabelecimento precisa de pelo menos um profissional com servico cadastrado para abrir.",
+    "O estabelecimento precisa de pelo menos um profissional com serviço cadastrado para abrir.",
   ESTABLISHMENT_HOURS_REQUIRED:
-    "Defina o horario de funcionamento do estabelecimento antes de abrir.",
+    "Defina o horário de funcionamento do estabelecimento antes de abrir.",
   ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:
-    "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
+    "Não é possível fechar enquanto há clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
   INTERVAL_INVALID_TIME:
-    "Horario da refeicao fora do horario de funcionamento do estabelecimento.",
+    "Horário da refeição fora do horário de funcionamento do estabelecimento.",
   INTERVAL_CONFLICT:
-    "Conflito de horario: a refeicao ja foi iniciada/encerrada hoje ou se sobrepoe a outra.",
-  INTERVAL_NOT_FOUND: "Refeicao/intervalo nao encontrado.",
+    "Conflito de horário: a refeição já foi iniciada/encerrada hoje ou se sobrepoe a outra.",
+  INTERVAL_NOT_FOUND: "Refeicao/intervalo não encontrado.",
   // S1 — status do profissional (fatia 1).
   PROFESSIONAL_HAS_NO_SERVICE:
-    "Cadastre pelo menos um servico antes de entrar em expediente.",
+    "Cadastre pelo menos um serviço antes de entrar em expediente.",
   PROFESSIONAL_HAS_ACTIVE_ATTENDANCES:
-    "Nao da para ficar indisponivel com cliente em atendimento ou na fila. Termine a fila primeiro.",
+    "Não da para ficar indisponível com cliente em atendimento ou na fila. Termine a fila primeiro.",
   // Esqueci minha senha (S7). O backend nao distingue "e-mail desconhecido" de
   // "codigo errado" de proposito (anti-enumeracao) — a mensagem cobre os dois.
   RESET_CODE_INVALID:
-    "Codigo invalido. Confira o e-mail e o codigo digitado (apos 5 erros ou uso, peca um novo).",
-  RESET_CODE_EXPIRED: "Codigo expirado (vale 15 minutos). Peca um novo codigo.",
+    "Código inválido. Confira o e-mail e o código digitado (após 5 erros ou uso, peça um novo).",
+  RESET_CODE_EXPIRED: "Código expirado (vale 15 minutos). Peça um novo código.",
   // Trocar senha (breaking backend 2026-07-23): a senha ATUAL confere via
   // PasswordEncoder.matches; errada volta 401 — erro de campo, nao de sessao.
   CURRENT_PASSWORD_INVALID: "Senha atual incorreta.",
@@ -82,6 +103,15 @@ export function getApiErrorMessage(error: any, fallback: string): string {
   }
   if (data?.message) {
     return data.message;
+  }
+
+  // 403 sem `code` nem `message`: o backend recusou, e o app nao tem como
+  // saber SE foi por o recurso nao ser seu ou por o seu papel nao permitir —
+  // os dois casos chegam iguais. Ate o backend distinguir (ver S31 no
+  // HANDOFF_BACKEND), a mensagem tem de ser verdadeira nos dois; dizer
+  // "faca login de novo" seria chute, e mandaria a pessoa pro lugar errado.
+  if (error.response.status === 403) {
+    return "Você não tem acesso a isso. Se acabou de mudar algo na sua conta, feche e abra o app.";
   }
   return fallback;
 }

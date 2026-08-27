@@ -1,14 +1,21 @@
-import { View } from "react-native";
+import type { ReactNode } from "react";
+import { View, Text, Pressable } from "react-native";
+import { Unlock, Lock, Inbox, UtensilsCrossed } from "lucide-react-native";
 import { router } from "expo-router";
-import { VStack, HStack, Text, Pressable } from "@gluestack-ui/themed";
 import { comingSoon } from "@components/comingSoon";
+import { NotificationBadge } from "@components/NotificationBadge";
 import type { MealSignal } from "@lib/meals";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
 // design/professional-nav-v2.html). Substitui o antigo menu-modal do banco:
 // agora e TELA CHEIA ("mais amigavel"), SEM duplicar o rodape (Fila/Relatorios/
 // Configuracoes vivem la; Sair/Area do dono vivem em Configuracoes).
-// So ACOES DO DIA: Status, Fechar fila, Solicitacoes, Refeicoes, Adicionar cliente.
+// So ACOES DO DIA: Status, Fechar fila, Solicitacoes, Refeicoes.
+//
+// ⚠️ "Adicionar cliente" SAIU daqui em 2026-08-26 (DS3): e a acao mais
+// frequente do dia e estava a tres toques, no mesmo lugar do status. Foi pra
+// tela da Fila, abaixo da lista. O status tambem esta duplicado la agora, na
+// pilula do cabecalho — esta tela segue sendo o caminho longo, nao o unico.
 //
 // ⚠️ SEM "abrir/fechar estabelecimento" (decisao Andre 2026-07-24): o profissional
 // nao mexe na loja na mao — ele so muda o PROPRIO status. Ao ficar "Trabalhando"
@@ -33,10 +40,15 @@ type Props = {
 };
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
-const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "$green500", emoji: "🟢" },
-  { key: "intervalo", label: "Intervalo", activeBg: "$amber500", emoji: "🟡" },
-  { key: "indisponivel", label: "Fora", activeBg: "$red500", emoji: "🔴" },
+const STATUS: {
+  key: StatusKey; label: string; activeBg: string; activeText: string; cor: string;
+}[] = [
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", activeText: "text-white", cor: "#9FE870" },
+  // [marca-vupth] `intervalo` e o unico ativo com fundo CLARO (warning #FFC091,
+  // que era bg-amber-500 da escala antiga) — por isso o texto e forest, e nao o
+  // branco dos outros dois: sobre claro a marca manda usar forest.
+  { key: "intervalo", label: "Intervalo", activeBg: "bg-vupth-warning", activeText: "text-vupth-forest", cor: "#FFC091" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", activeText: "text-white", cor: "#B3261E" },
 ];
 
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
@@ -44,22 +56,14 @@ const STATUS: { key: StatusKey; label: string; activeBg: string; emoji: string }
 // alem do anti-padrao React de remontar a subarvore).
 function Section({ title }: { title: string }) {
   return (
-    <Text
-      fontFamily="$heading"
-      fontWeight="$bold"
-      fontSize="$2xs"
-      color="$coolGray400"
-      letterSpacing="$lg"
-      mt="$5"
-      mb="$2"
-    >
+    <Text className="font-heading text-[10px] text-vupth-textSecondary tracking-widest mt-5 mb-2">
       {title.toUpperCase()}
     </Text>
   );
 }
 
 type RowProps = {
-  icon: string;
+  icon: ReactNode;
   label: string;
   hint?: string;
   dot?: boolean;
@@ -74,58 +78,27 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      bg="$white"
-      px="$4"
-      py="$3.5"
-      borderRadius="$2xl"
-      mb="$2"
-      $active-bg="$coolGray50"
-      style={{
-        shadowColor: "#1A281A",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 3,
-      }}
+      className="bg-vupth-surface px-4 py-3.5 rounded-card mb-2 active:bg-vupth-surfaceAlt"
     >
-      <HStack alignItems="center" space="md">
-        <Text fontSize="$md" w="$6" textAlign="center">
-          {icon}
-        </Text>
-        <VStack flex={1}>
-          <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color="$coolGray900">
+      <View className="flex-row items-center gap-3">
+        <View className="w-6 items-center">{icon}</View>
+        <View className="flex-1">
+          <Text className="font-body text-base font-medium text-vupth-textPrimary">
             {label}
           </Text>
           {hint && (
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
-              {hint}
-            </Text>
+            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
           )}
-        </VStack>
+        </View>
         {children}
-        {badge != null && badge > 0 && (
-          <VStack
-            testID="menu-badge-requests"
-            bg="$red600"
-            borderRadius="$full"
-            px="$2"
-            minWidth="$5"
-            h="$5"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xs" color="$white">
-              {badge}
-            </Text>
-          </VStack>
-        )}
+        {badge != null && <NotificationBadge count={badge} testID="menu-badge-requests" />}
         {dot && (
           <View
             testID="menu-dot-meals"
-            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#E63946" }}
+            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#B3261E" }}
           />
         )}
-      </HStack>
+      </View>
     </Pressable>
   );
 }
@@ -139,8 +112,13 @@ export function QueueOptions({
   pendingRequests = 0,
   onOpenRequests,
 }: Props) {
-  const currentStatus: StatusKey = status?.current ?? "trabalhando";
-  const currentLabel = STATUS.find((s) => s.key === currentStatus)?.label ?? "Trabalhando";
+  // ⚠️ Nao inventar um valor quando o status ainda nao chegou. Isto ja dizia
+  // "Você está: Trabalhando" com o status DESCONHECIDO — num recarregamento
+  // frio a tela afirmava o contrario da verdade, e o profissional que estava
+  // "Fora" lia que estava trabalhando. Achado ao pôr a pilula no cabecalho:
+  // ela dizia "Fora" e esta tela, ao lado, dizia "Trabalhando".
+  const currentStatus = status?.current ?? null;
+  const currentLabel = currentStatus ? STATUS.find((s) => s.key === currentStatus)?.label : null;
 
   const selectStatus = (next: StatusKey) => {
     // Prevencao de clique (S1): com fila, "Fora" nem chega a tentar — o 409 do
@@ -156,45 +134,43 @@ export function QueueOptions({
     mealSignal == null
       ? "almoco / janta — entram no ETA"
       : mealSignal.phase === "agora"
-        ? "esta na hora — iniciar, adiar ou pular"
+        ? "está na hora — iniciar, adiar ou pular"
         : `em ${mealSignal.minutesUntil} min — iniciar agora ou adiar`;
 
   return (
-    <VStack>
+    <View>
       <Section title="Agora" />
 
       {/* Status em bloco proprio, pills LARGAS embaixo (affordance — Andre
-          2026-07-24: "so melhora saber que da pra clicar ali e mudar o estado").
-          Nao ha mais botao de abrir/fechar loja: ficar "Trabalhando" abre sozinho
-          (derivado); a tela avisa "voce e o primeiro". */}
-      <VStack
-        bg="$white"
-        px="$4"
-        py="$3.5"
-        borderRadius="$2xl"
-        mb="$2"
-        style={{
-          shadowColor: "#1A281A",
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          elevation: 3,
-        }}
+          2026-07-24: "só melhora saber que dá pra clicar ali e mudar o estado").
+          Não há mais botão de abrir/fechar loja: ficar "Trabalhando" abre sozinho
+          (derivado); a tela avisa "você é o primeiro". */}
+      <View
+        className="bg-vupth-surface px-4 py-3.5 rounded-card mb-2"
       >
-        <HStack alignItems="center" space="md">
-          <Text fontSize="$md" w="$6" textAlign="center">
-            {STATUS.find((s) => s.key === currentStatus)?.emoji ?? "🟢"}
-          </Text>
-          <VStack flex={1}>
-            <Text fontFamily="$body" fontSize="$md" fontWeight="$medium" color="$coolGray900">
+        <View className="flex-row items-center gap-3">
+          {/* O ponto do semaforo: a cor do status atual. Era 🟢/🟡/🔴 —
+              emoji nao herda a paleta nem escala com o texto. */}
+          <View className="w-6 items-center">
+            <View
+              testID="status-dot"
+              className="w-2.5 h-2.5 rounded-full"
+              style={{
+                backgroundColor:
+                  STATUS.find((s) => s.key === currentStatus)?.cor ?? "#D7DDD3",
+              }}
+            />
+          </View>
+          <View className="flex-1">
+            <Text className="font-body text-base font-medium text-vupth-textPrimary">
               Status
             </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$0.5">
-              Voce esta: {currentLabel} · toque para trocar
+            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
+              {currentLabel ? `Você está: ${currentLabel} · toque para trocar` : "Toque para definir"}
             </Text>
-          </VStack>
-        </HStack>
-        <HStack space="sm" mt="$3">
+          </View>
+        </View>
+        <View className="flex-row gap-2 mt-3">
           {STATUS.map((s) => {
             const active = s.key === currentStatus;
             const blocked = s.key === "indisponivel" && hasQueue;
@@ -205,39 +181,39 @@ export function QueueOptions({
                 accessibilityRole="button"
                 accessibilityLabel={s.label}
                 accessibilityState={{ selected: active, disabled: blocked }}
-                opacity={blocked ? 0.45 : 1}
-                flex={1}
-                bg={active ? s.activeBg : "$coolGray100"}
-                borderRadius="$full"
-                py="$2.5"
-                alignItems="center"
+                style={{ opacity: blocked ? 0.45 : 1 }}
+                // [marca-vupth] Pill inativa em branco, e nao no greenTint: estas
+                // pills sao um SEMAFORO (verde/ambar/vermelho no `activeBg`) — um
+                // fundo esverdeado no estado inativo leria como "Trabalhando".
+                className={`flex-1 rounded-full py-2.5 items-center ${
+                  active ? s.activeBg : "bg-vupth-background"
+                }`}
               >
                 <Text
-                  fontFamily="$heading"
-                  fontWeight="$bold"
-                  fontSize="$xs"
-                  color={active ? "$white" : "$coolGray600"}
+                  className={`font-heading text-xs ${
+                    active ? s.activeText : "text-vupth-textSecondary"
+                  }`}
                 >
                   {s.label}
                 </Text>
               </Pressable>
             );
           })}
-        </HStack>
-      </VStack>
+        </View>
+      </View>
 
       {closeQueue && !closeQueue.acceptingNew ? (
         <Row
-          icon="🔓"
+          icon={<Unlock size={18} color="#163300" />}
           label="Reabrir fila"
           hint="fila fechada para proximos clientes"
           onPress={closeQueue.onToggle}
         />
       ) : (
         <Row
-          icon="🚦"
+          icon={<Lock size={18} color="#163300" />}
           label="Fechar fila"
-          hint="termina quem ja esta; ninguem novo entra"
+          hint="termina quem já está; ninguém novo entra"
           onPress={() => (closeQueue ? closeQueue.onToggle() : comingSoon("Fechar fila"))}
         />
       )}
@@ -245,29 +221,23 @@ export function QueueOptions({
       <Section title="Hoje" />
       {pendingRequests > 0 && (
         <Row
-          icon="✋"
-          label="Solicitacoes"
+          icon={<Inbox size={18} color="#163300" />}
+          label="Solicitações"
           hint="fila fechada — pedidos de corte"
           badge={pendingRequests}
           onPress={() => {
             if (onOpenRequests) onOpenRequests();
-            else comingSoon("Aceitar ou recusar solicitacoes de corte");
+            else comingSoon("Aceitar ou recusar solicitações de corte");
           }}
         />
       )}
       <Row
-        icon="🍽️"
-        label={mealLabel ?? "Refeicoes"}
+        icon={<UtensilsCrossed size={18} color="#163300" />}
+        label={mealLabel ?? "Refeições"}
         hint={mealHint}
         dot={mealDot}
         onPress={() => router.push("/(professional)/meals?from=queue-options" as any)}
       />
-      <Row
-        icon="➕"
-        label="Adicionar cliente"
-        hint="walk-in, sem app"
-        onPress={() => router.push("/(professional)/add-guest" as any)}
-      />
-    </VStack>
+    </View>
   );
 }

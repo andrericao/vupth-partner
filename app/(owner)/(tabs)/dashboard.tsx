@@ -11,15 +11,16 @@ import {
   Pressable,
 } from "@gluestack-ui/themed";
 import { Alert, RefreshControl, BackHandler } from "react-native";
+import { ChevronRight, Moon, Pause } from "lucide-react-native";
 import { router } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
-import { Button } from "@components/Button";
-import { Header } from "@components/Header";
+import { BrandButton } from "@components/brand/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage } from "@lib/api";
-import { cardShadow } from "@lib/styles";
+import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
 
@@ -75,7 +76,10 @@ export default function OwnerDashboardScreen() {
   const STATUS_BADGE: Record<string, { label: string; action: "success" | "error" | "warning" }> = {
     OPEN: { label: "ABERTO", action: "success" },
     CLOSED: { label: "FECHADO", action: "error" },
-    TEMPORARILY_CLOSED: { label: "FECHADO TEMPORARIAMENTE", action: "warning" },
+    // "FECHADO TEMPORARIAMENTE" tinha 23 caracteres e espremia o nome da loja
+    // em tres linhas. "PAUSADO" diz a mesma coisa e casa com a acao que leva a
+    // esse estado ("Pausar entrada").
+    TEMPORARILY_CLOSED: { label: "PAUSADO", action: "warning" },
   };
   const badge = STATUS_BADGE[status] ?? STATUS_BADGE.CLOSED;
 
@@ -92,11 +96,11 @@ export default function OwnerDashboardScreen() {
       if (code === "ESTABLISHMENT_NOT_READY") {
         Alert.alert(
           "Estabelecimento sem profissional pronto",
-          getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com servico cadastrado."),
+          getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com serviço cadastrado."),
           [
             { text: "Cancelar", style: "cancel" },
             {
-              text: "Adicionar Profissional",
+              text: "Adicionar profissional",
               onPress: () =>
                 router.push({
                   pathname: "/(owner)/add-professional",
@@ -107,28 +111,28 @@ export default function OwnerDashboardScreen() {
         );
       } else if (code === "ESTABLISHMENT_HOURS_REQUIRED") {
         Alert.alert(
-          "Defina o horario de funcionamento",
-          getApiErrorMessage(error, "Defina o horario de funcionamento do estabelecimento antes de abrir."),
+          "Defina o horário de funcionamento",
+          getApiErrorMessage(error, "Defina o horário de funcionamento do estabelecimento antes de abrir."),
           [
             { text: "Cancelar", style: "cancel" },
             {
-              text: "Definir Horario",
+              text: "Definir Horário",
               onPress: () => router.push("/(owner)/establishment-hours" as any),
             },
           ]
         );
       } else if (code === "ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES") {
         Alert.alert(
-          "Ha atendimentos em andamento",
+          "Há atendimentos em andamento",
           getApiErrorMessage(
             error,
-            "Nao e possivel fechar enquanto ha clientes em atendimento ou na fila. Conclua a fila antes de fechar."
+            "Não é possível fechar enquanto há clientes em atendimento ou na fila. Conclua a fila antes de fechar."
           )
         );
       } else {
         Alert.alert(
           "Erro",
-          getApiErrorMessage(error, "Nao foi possivel atualizar o status. Tente novamente.")
+          getApiErrorMessage(error, "Não foi possível atualizar o status. Tente novamente.")
         );
       }
     } finally {
@@ -138,15 +142,16 @@ export default function OwnerDashboardScreen() {
 
   if (!establishment) {
     return (
-      <VStack flex={1} pb="$6" px="$6">
-        <Header />
+      <VStack flex={1} pb="$6" px="$4">
+        <ScreenHeader title="Meu estabelecimento" />
         <VStack flex={1} alignItems="center" justifyContent="center">
-          <Text fontFamily="$body" color="$coolGray500">
+          <Text fontFamily="$body" color="$brandTextSecondary">
             Nenhum estabelecimento encontrado.
           </Text>
-          <Button
-            title="Criar Estabelecimento"
+          <BrandButton
+            title="Criar estabelecimento"
             onPress={() => router.push("/(owner)/onboarding/establishment" as any)}
+            mt="$9"
           />
         </VStack>
       </VStack>
@@ -156,29 +161,37 @@ export default function OwnerDashboardScreen() {
   return (
     <ScrollView
       w="$full"
+      bg="$brandBackground"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$6" px="$6">
-        <Header />
-
-        <HStack justifyContent="space-between" alignItems="center" mt="$4">
-          <Heading size="2xl" fontFamily="$heading">
-            {establishment.name}
-          </Heading>
-          <Badge
-            action={badge.action}
-            variant="solid"
-            borderRadius="$md"
-          >
-            <BadgeText fontSize="$2xs">{badge.label}</BadgeText>
-          </Badge>
-        </HStack>
-
-        <Text fontFamily="$body" color="$coolGray500" mt="$2">
-          {establishment.service_type}
-        </Text>
+      <VStack flex={1} pb="$6" px="$4" bg="$brandBackground">
+        {/* O nome da loja E o titulo desta tela, e o status a acao do canto —
+            entao viram title/subtitle/action do cabecalho, em vez de um bloco
+            proprio com margem propria embaixo de um Header vazio. */}
+        <ScreenHeader
+          title={establishment.name}
+          subtitle={serviceTypeLabel(establishment.service_type)}
+          action={
+            /* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
+               `$border` cinza sobre fundo claro a pilula sumia. */
+            <VStack
+              bg={isOpen ? "$brandGreen" : status === "TEMPORARILY_CLOSED" ? "$brandWarning" : "$brandBorder"}
+              borderRadius="$full"
+              px="$3"
+              py="$1.5"
+            >
+              <Text
+                fontFamily="$display"
+                fontSize={11}
+                color={isOpen || status === "TEMPORARILY_CLOSED" ? "$forest" : "$brandTextSecondary"}
+              >
+                {badge.label}
+              </Text>
+            </VStack>
+          }
+        />
 
         <ReadinessFaixa
           completion={completion}
@@ -186,83 +199,116 @@ export default function OwnerDashboardScreen() {
           goalNoun="aparecer aos clientes"
         />
 
-        <HStack mt="$4" space="md">
-          <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$xs" color="$green50">na fila</Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
-              {totalInQueue}
+        {/* Os dois numeros que o dono abre o app pra ver. A fila e o CAMINHO
+            pras filas, no lugar do botão ambar "Ver Filas" que competia com
+            tudo.
+
+            [marca-vupth] O verde-marca e ACENTO, não cor de "clicavel". O
+            Pencil usa 1-2 elementos brand-green por tela contra 3-8 em
+            surface (PROF · 03: 1 verde, 8 surface) — quando tudo e verde,
+            nada e. Com a fila VAZIA não há destaque a dar (zero e a ausencia
+            de fila, não o número que importa), entao o card fica neutro e o
+            verde sobra pra única ação da tela. Com gente na fila ele reassume
+            o acento e as ações viram texto discreto. */}
+        <HStack mt="$5" space="md">
+          <Pressable
+            flex={1}
+            onPress={() =>
+              router.push({
+                pathname: "/(owner)/queues",
+                params: { establishmentId: establishment.id },
+              } as any)
+            }
+            bg={totalInQueue > 0 ? "$brandGreen" : "$brandSurface"}
+            p="$4"
+            borderRadius="$card"
+          >
+            <HStack justifyContent="space-between" alignItems="flex-start">
+              <Text fontFamily="$display" fontSize={32} color="$forest">
+                {totalInQueue}
+              </Text>
+              <ChevronRight size={18} color="#163300" />
+            </HStack>
+            <Text
+              fontFamily="$body"
+              fontSize="$xs"
+              fontWeight="$semibold"
+              color={totalInQueue > 0 ? "$forest" : "$brandTextSecondary"}
+              mt="$1"
+            >
+              na fila agora
             </Text>
-          </VStack>
-          <VStack flex={1} bg="$green500" p="$4" borderRadius="$2xl" style={cardShadow}>
-            <Text fontFamily="$body" fontSize="$xs" color="$green50">profissionais ativos</Text>
-            <Text fontFamily="$heading" fontWeight="$bold" fontSize="$4xl" color="$white" mt="$1">
+          </Pressable>
+
+          <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+            <Text fontFamily="$display" fontSize={32} color="$forest">
               {queueData?.available_professionals ?? 0}
+            </Text>
+            <Text
+              fontFamily="$body"
+              fontSize="$xs"
+              fontWeight="$semibold"
+              color="$brandTextSecondary"
+              mt="$1"
+            >
+              profissionais ativos
             </Text>
           </VStack>
         </HStack>
 
-        <Divider my="$6" />
-
+        {/* Abrir e a unica acao de PESO aqui: e o que destrava o dia. Encerrar
+            e pausar viraram texto discreto — não sao erros nem perigo, sao o
+            fim normal do expediente (e "fechar" em vermelho fazia parecer que
+            o dono estava fechando o NEGOCIO). */}
         {!isOpen ? (
-          <Button
-            title="Abrir Estabelecimento"
-            onPress={() => setStatus("OPEN")}
-            isLoading={isToggling}
-            bg="$green500"
-            $active-bg="$green600"
-          />
-        ) : (
-          <VStack space="xs">
-            <Button
-              title="Fechar Estabelecimento"
-              onPress={() => {
-                if (!hasActiveWork) setStatus("CLOSED");
-              }}
+          <VStack mt="$5">
+            {/* [marca-vupth] Era bg="$forest" (par forest+branco, fora da id): o
+                Button/Primary do Pencil e brandGreen+forest. BrandButton já
+                nasce nesse par — sem overrides de cor. */}
+            <BrandButton
+              title={status === "TEMPORARILY_CLOSED" ? "Reabrir agora" : "Abrir estabelecimento"}
+              onPress={() => setStatus("OPEN")}
               isLoading={isToggling}
-              isDisabled={hasActiveWork}
-              bg="$red500"
-              $active-bg="$red600"
             />
-            {hasActiveWork && (
-              <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" textAlign="center">
-                Nao e possivel fechar com cliente em atendimento ou na fila. Use Fechar Temporariamente para nao receber novos e terminar a fila.
-              </Text>
-            )}
+          </VStack>
+        ) : (
+          <VStack mt="$5" space="sm">
+            <HStack justifyContent="space-between" alignItems="center">
+              <Pressable
+                onPress={() => {
+                  if (hasActiveWork) {
+                    Alert.alert(
+                      "Ainda tem gente na fila",
+                      "Use 'Pausar entrada' para não receber novos clientes e terminar quem já está esperando.",
+                    );
+                    return;
+                  }
+                  setStatus("CLOSED");
+                }}
+                disabled={isToggling}
+              >
+                <HStack space="xs" alignItems="center">
+                  <Moon size={15} color="#454745" />
+                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandTextSecondary">
+                    Encerrar o dia
+                  </Text>
+                </HStack>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setStatus("TEMPORARILY_CLOSED")}
+                disabled={isToggling}
+              >
+                <HStack space="xs" alignItems="center">
+                  <Pause size={15} color="#454745" />
+                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandTextSecondary">
+                    Pausar entrada
+                  </Text>
+                </HStack>
+              </Pressable>
+            </HStack>
           </VStack>
         )}
-
-        {status !== "TEMPORARILY_CLOSED" ? (
-          <Button
-            title="Fechar Temporariamente"
-            onPress={() => setStatus("TEMPORARILY_CLOSED")}
-            isLoading={isToggling}
-            bg="transparent"
-            borderWidth="$1"
-            borderColor="$amber500"
-            textColor="$amber600"
-            $active-bg="$amber50"
-          />
-        ) : (
-          <Button
-            title="Reabrir Estabelecimento"
-            onPress={() => setStatus("OPEN")}
-            isLoading={isToggling}
-            bg="$green500"
-            $active-bg="$green600"
-          />
-        )}
-
-        <Button
-          title="Ver Filas"
-          onPress={() =>
-            router.push({
-              pathname: "/(owner)/queues",
-              params: { establishmentId: establishment.id },
-            } as any)
-          }
-          bg="$amber500"
-          $active-bg="$amber600"
-        />
 
         <Divider my="$6" />
 
@@ -270,27 +316,31 @@ export default function OwnerDashboardScreen() {
           <Heading size="lg" fontFamily="$heading">
             Profissionais
           </Heading>
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+          <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
             {professionals.length} cadastrado{professionals.length !== 1 ? "s" : ""}
           </Text>
         </HStack>
 
         {professionals.length === 0 ? (
-          <VStack bg="$coolGray50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$coolGray200" alignItems="center">
-            <Text fontFamily="$body" color="$coolGray400" textAlign="center">
+          // [marca-vupth] Card do estado vazio no `surface` da marca (era
+          // coolGray + borda cinza, paleta neutra generica) e o botao em
+          // OUTLINE: e acao terciaria dentro de um placeholder, nao pode ter
+          // o mesmo peso do "Reabrir agora" logo acima — eram duas pilulas
+          // verde-marca identicas na mesma tela.
+          <VStack bg="$brandSurface" p="$4" borderRadius="$card" alignItems="center">
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
               Nenhum profissional vinculado
             </Text>
-            <Button
-              title="Adicionar Profissional"
+            <BrandButton
+              title="Adicionar profissional"
+              variant="outline"
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/add-professional",
                   params: { establishmentId: establishment.id },
                 } as any)
               }
-              bg="$green500"
-              $active-bg="$green600"
-              mt="$2"
+              mt="$3"
               h="$10"
             />
           </VStack>
@@ -309,19 +359,18 @@ export default function OwnerDashboardScreen() {
                     },
                   } as any)
                 }
-                bg="$white"
+                bg="$brandSurface"
                 py="$4"
                 px="$4"
-                borderRadius="$2xl"
-                style={cardShadow}
-                $active-bg="$coolGray50"
+                borderRadius="$card"
+                $active-bg="$brandSurface"
               >
                 <HStack justifyContent="space-between" alignItems="center">
                   <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
                       {prof.name}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$coolGray500">
+                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
                       {prof.specialty ?? "Sem especialidade"}
                     </Text>
                   </VStack>
@@ -333,7 +382,7 @@ export default function OwnerDashboardScreen() {
                     >
                       <BadgeText fontSize="$xs">{prof.queue_count} na fila</BadgeText>
                     </Badge>
-                    <Text fontFamily="$body" fontSize="$xs" color={prof.is_available ? "$green500" : "$coolGray400"} mt="$1">
+                    <Text fontFamily="$body" fontSize="$xs" color={prof.is_available ? "$forest" : "$brandTextSecondary"} mt="$1">
                       {prof.is_available ? "Disponivel" : "Indisponivel"}
                     </Text>
                   </VStack>

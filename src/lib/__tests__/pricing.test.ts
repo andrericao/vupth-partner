@@ -15,7 +15,7 @@ describe("estimateDesiredFromClient", () => {
       expect(calculatePricing(base, 0).clientPrice).toBe(client);
     }
   });
-  it("retorna 0 para entradas nao positivas", () => {
+  it("retorna 0 para entradas não positivas", () => {
     expect(estimateDesiredFromClient(0)).toBe(0);
     expect(estimateDesiredFromClient(-5)).toBe(0);
   });
@@ -103,7 +103,7 @@ describe("calculatePricing", () => {
     });
   });
 
-  it("proReceives nunca passa do digitado; so cai se o pro absorve", () => {
+  it("proReceives nunca passa do digitado; só cai se o pro absorve", () => {
     PRICES.forEach((p) => {
       const options = getAbsorptionOptions(p);
       const receives = options.map((pct) => calculatePricing(p, pct).proReceives);

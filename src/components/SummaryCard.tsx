@@ -13,9 +13,9 @@ export function SummaryCard({
   label,
   value,
   bg = "$white",
-  borderColor = "$coolGray200",
-  labelColor = "$coolGray500",
-  valueColor = "$coolGray900",
+  borderColor = "$brandBorder",
+  labelColor = "$brandTextSecondary",
+  valueColor = "$brandTextPrimary",
 }: Props) {
   return (
     <VStack

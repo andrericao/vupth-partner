@@ -5,7 +5,7 @@ import {
 } from "../closing";
 
 describe("isClosingPromptEvent", () => {
-  it("true so para CLOSING_PROMPT", () => {
+  it("true só para CLOSING_PROMPT", () => {
     expect(isClosingPromptEvent("CLOSING_PROMPT")).toBe(true);
   });
   it("false para outros eventos / nulo", () => {
@@ -24,11 +24,11 @@ describe("graceSecondsRemaining", () => {
     expect(graceSecondsRemaining(end, now)).toBe(870);
   });
 
-  it("0 quando ja passou", () => {
+  it("0 quando já passou", () => {
     expect(graceSecondsRemaining("2026-07-25T19:59:00-03:00", now)).toBe(0);
   });
 
-  it("0 para data invalida ou ausente", () => {
+  it("0 para data inválida ou ausente", () => {
     expect(graceSecondsRemaining("nao-e-data", now)).toBe(0);
     expect(graceSecondsRemaining(null, now)).toBe(0);
     expect(graceSecondsRemaining(undefined, now)).toBe(0);

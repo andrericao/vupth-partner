@@ -1,10 +1,24 @@
 import { ReactElement } from "react";
 import { render } from "@testing-library/react-native";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
+import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
 import { config } from "../../config/gluestack-ui.config";
 
-// Render RNTL envolto no GluestackUIProvider (mesmo `config` do app/_layout),
-// necessario para componentes que usam tokens/props do gluestack.
+// Metricas de um aparelho com entalhe. Fora do teste quem entrega isso e o
+// sistema; aqui precisa ser fixo, senao qualquer componente que leia
+// `useSafeAreaInsets` levanta "No safe area value available" e derruba a
+// arvore inteira. Mesmo tratamento ja aplicado no app do cliente.
+const METRICAS = initialWindowMetrics ?? {
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+  insets: { top: 47, left: 0, right: 0, bottom: 34 },
+};
+
+// Render RNTL envolto no GluestackUIProvider (mesmo `config` do app/_layout) e
+// no SafeAreaProvider, que o cabecalho e as folhas de baixo exigem.
 export function renderWithProvider(ui: ReactElement) {
-  return render(<GluestackUIProvider config={config}>{ui}</GluestackUIProvider>);
+  return render(
+    <SafeAreaProvider initialMetrics={METRICAS}>
+      <GluestackUIProvider config={config}>{ui}</GluestackUIProvider>
+    </SafeAreaProvider>
+  );
 }

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { ComingSoon } from "@components/ComingSoon";
+import { ComingSoon } from "@components/comingSoon";
 
 export default function OwnerComingSoonScreen() {
   const { title } = useLocalSearchParams<{ title: string }>();

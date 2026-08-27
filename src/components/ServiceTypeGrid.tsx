@@ -1,24 +1,42 @@
-import { HStack, VStack, Text, Pressable, Box } from "@gluestack-ui/themed";
-import { Ionicons } from "@expo/vector-icons";
-import { cardShadow } from "@lib/styles";
+import { View, Text, Pressable } from "react-native";
+import {
+  Scissors,
+  UserRound,
+  Eye,
+  Palette,
+  Sparkles,
+  HandHeart,
+  Flower,
+  BriefcaseMedical,
+  Tag,
+  CircleCheck,
+} from "lucide-react-native";
+import type { LucideIcon } from "lucide-react-native";
 
 // [#11] Seletor de "Tipo de servico" em grade de chips com icone (no lugar da
 // lista de pilulas de texto). 2 colunas, selecao verde com check. Idioma Verde
-// Imersivo (cardShadow, verde da marca, cantos arredondados).
+// Imersivo (verde da marca, cantos arredondados).
+// Migrado p/ NativeWind (v2).
 
-// Icone por tipo (por palavra-chave no value do ServiceItemType). Ionicons —
-// mesmos da tab bar.
-function iconFor(value: string): keyof typeof Ionicons.glyphMap {
+// Icone por tipo (por palavra-chave no value do ServiceItemType). lucide —
+// mesma familia da tab bar.
+//
+// [marca-vupth] BARBA saiu do `man` do Ionicons pro UserRound: o lucide nao tem
+// navalha/barba, e cabeca+ombros mantem a leitura "servico no rosto" sem repetir
+// a tesoura do CORTE dentro da mesma grade.
+// MASSAGEM saiu do `body` (silhueta inteira) pro HandHeart: maos que cuidam
+// dizem massagem/drenagem; a silhueta sozinha sairia igual ao icone da BARBA.
+function iconFor(value: string): LucideIcon {
   const v = value.toUpperCase();
-  if (v.includes("CORTE") || v.includes("RECORTE") || v.includes("PONTAS")) return "cut";
-  if (v.includes("BARBA")) return "man";
-  if (v.includes("SOBRANCELHA") || v.includes("BROW") || v.includes("HENNA")) return "eye";
-  if (v.includes("ESCOVA") || v.includes("PINTURA") || v.includes("TINTURA") || v.includes("PROGRESSIVA") || v.includes("HIDRATACAO")) return "color-palette";
-  if (v.includes("MANICURE") || v.includes("PEDICURE") || v.includes("UNHAS") || v.includes("NAIL")) return "sparkles";
-  if (v.includes("MASSAGEM") || v.includes("DRENAGEM")) return "body";
-  if (v.includes("DEPILACAO")) return "flower";
-  if (v.includes("PELE") || v.includes("PEELING") || v.includes("BOTOX") || v.includes("MICRO") || v.includes("LIMPEZA")) return "medkit";
-  return "pricetag";
+  if (v.includes("CORTE") || v.includes("RECORTE") || v.includes("PONTAS")) return Scissors;
+  if (v.includes("BARBA")) return UserRound;
+  if (v.includes("SOBRANCELHA") || v.includes("BROW") || v.includes("HENNA")) return Eye;
+  if (v.includes("ESCOVA") || v.includes("PINTURA") || v.includes("TINTURA") || v.includes("PROGRESSIVA") || v.includes("HIDRATACAO")) return Palette;
+  if (v.includes("MANICURE") || v.includes("PEDICURE") || v.includes("UNHAS") || v.includes("NAIL")) return Sparkles;
+  if (v.includes("MASSAGEM") || v.includes("DRENAGEM")) return HandHeart;
+  if (v.includes("DEPILACAO")) return Flower;
+  if (v.includes("PELE") || v.includes("PEELING") || v.includes("BOTOX") || v.includes("MICRO") || v.includes("LIMPEZA")) return BriefcaseMedical;
+  return Tag;
 }
 
 type Item = { label: string; value: string };
@@ -33,53 +51,48 @@ export function ServiceTypeGrid({
   onSelect: (item: Item) => void;
 }) {
   return (
-    <HStack flexWrap="wrap" justifyContent="space-between" mb="$2">
+    <View className="flex-row flex-wrap justify-between mb-2">
       {items.map((it) => {
         const isSel = selected === it.value;
+        const Icon = iconFor(it.value);
         return (
           <Pressable
             key={it.value}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSel }}
             onPress={() => onSelect(it)}
-            w="48.5%"
-            mb="$2.5"
-            position="relative"
-            bg="$white"
-            borderRadius="$2xl"
-            borderWidth={isSel ? "$2" : "$1"}
-            borderColor={isSel ? "$green500" : "$coolGray200"}
-            p="$3"
-            style={isSel ? undefined : cardShadow}
+            className={`w-[48.5%] mb-2.5 relative rounded-card p-3 ${
+              isSel ? "bg-vupth-greenTint border-2 border-vupth-forest" : "bg-vupth-surface"
+            }`}
           >
             {isSel && (
-              <Box position="absolute" top="$1.5" right="$1.5">
-                <Ionicons name="checkmark-circle" size={16} color="#3b7a3f" />
-              </Box>
+              <View className="absolute top-1.5 right-1.5">
+                <CircleCheck size={16} color="#163300" />
+              </View>
             )}
-            <HStack space="sm" alignItems="center">
-              <VStack
-                w="$8"
-                h="$8"
-                borderRadius="$lg"
-                alignItems="center"
-                justifyContent="center"
-                bg={isSel ? "$green500" : "$coolGray100"}
+            <View className="flex-row items-center gap-2">
+              {/* [marca-vupth] Quadrado nao selecionado no greenTint, e nao no
+                  surface: o card ja e bg-vupth-surface e o quadrado sumiria
+                  dentro dele. */}
+              <View
+                className={`w-8 h-8 rounded-lg items-center justify-center ${
+                  isSel ? "bg-vupth-forest" : "bg-vupth-greenTint"
+                }`}
               >
-                <Ionicons name={iconFor(it.value)} size={18} color={isSel ? "#FFFFFF" : "#316635"} />
-              </VStack>
+                <Icon size={18} color={isSel ? "#FFFFFF" : "#163300"} />
+              </View>
               <Text
-                flex={1}
-                fontFamily="$body"
-                fontSize="$sm"
-                fontWeight={isSel ? "$bold" : "$medium"}
-                color={isSel ? "$green700" : "$coolGray800"}
                 numberOfLines={2}
+                className={`flex-1 font-body text-sm ${
+                  isSel ? "font-bold text-vupth-forest" : "font-medium text-vupth-textSecondary"
+                }`}
               >
                 {it.label}
               </Text>
-            </HStack>
+            </View>
           </Pressable>
         );
       })}
-    </HStack>
+    </View>
   );
 }

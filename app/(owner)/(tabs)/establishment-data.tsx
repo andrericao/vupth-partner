@@ -1,16 +1,8 @@
-import {
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  Pressable,
-  ScrollView,
-} from "@gluestack-ui/themed";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { CompletionCard } from "@components/CompletionCard";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
-import { cardShadow } from "@lib/styles";
 
 type MenuItemProps = {
   label: string;
@@ -22,19 +14,12 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
   return (
     <Pressable
       onPress={onPress}
-      py="$4"
-      px="$5"
-      bg="$white"
-      borderRadius="$2xl"
-      style={cardShadow}
-      $active-bg="$coolGray50"
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      className="py-4 px-4 bg-vupth-surface rounded-card active:bg-vupth-surface"
     >
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray900">
-        {label}
-      </Text>
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray500" mt="$0.5">
-        {description}
-      </Text>
+      <Text className="font-heading text-base text-vupth-forest">{label}</Text>
+      <Text className="font-body text-sm text-vupth-textSecondary mt-0.5">{description}</Text>
     </Pressable>
   );
 }
@@ -46,16 +31,15 @@ export default function EstablishmentDataScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(owner)/menu" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Dados do Estabelecimento
-        </Heading>
+      <View className="flex-1 pb-12 px-4">
+        <ScreenHeader
+          title="Dados do estabelecimento"
+          onBack={() => router.navigate("/(owner)/menu" as any)}
+        />
 
         <CompletionCard
           completion={completion}
@@ -63,42 +47,35 @@ export default function EstablishmentDataScreen() {
           routeFor={routeFor}
         />
 
-        <VStack mt="$6" space="sm">
+        <View className="mt-6 gap-2">
           <MenuItem
             label="Dados Cadastrais"
             description="Nome do estabelecimento"
             onPress={() => router.push("/(owner)/establishment-registration" as any)}
           />
           <MenuItem
-            label="Horario de Funcionamento"
+            label="Horário de Funcionamento"
             description="Abertura e fechamento"
             onPress={() => router.push("/(owner)/establishment-hours" as any)}
           />
           <MenuItem
-            label="Endereco"
-            description="Rua, numero, bairro, CEP"
+            label="Endereço"
+            description="Rua, número, bairro, CEP"
             onPress={() => router.push("/(owner)/onboarding/address" as any)}
           />
-        </VStack>
+        </View>
 
-        <HStack
-          mt="$4"
-          bg="$white"
-          borderRadius="$2xl"
-          px="$5"
-          py="$4"
-          justifyContent="space-between"
-          alignItems="center"
-          style={cardShadow}
+        <View
+          className="mt-4 bg-vupth-surface rounded-card px-4 py-4 flex-row justify-between items-center"
         >
-          <Text fontFamily="$body" fontSize="$md" color="$coolGray700">
+          <Text className="font-body text-base text-vupth-textSecondary">
             Profissionais vinculados
           </Text>
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$green700">
+          <Text className="font-heading text-lg text-vupth-forest">
             {professionalsCount}
           </Text>
-        </HStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }

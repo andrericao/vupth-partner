@@ -38,7 +38,7 @@ export function cutRequestServices(
   const names = serviceItemIds
     .map((id) => myServices.find((s) => s.id === id)?.customName)
     .filter((n): n is string => !!n);
-  return names.length > 0 ? names.join(" + ") : "Servico nao identificado";
+  return names.length > 0 ? names.join(" + ") : "Serviço não identificado";
 }
 
 /**
@@ -51,6 +51,31 @@ export function cutRequestTitle(
 ): string {
   const who = req.client_name?.trim() || "Cliente";
   return `${who} quer: ${cutRequestServices(req.service_item_ids, myServices)}`;
+}
+
+/**
+ * Nome do cliente do pedido, isolado do restante do titulo — usado na tela
+ * "Encaixes" (Pencil), que mostra nome e servico em linhas separadas em vez
+ * do "Fulano quer: X" corrido do bottom-sheet. Mesmo fallback de cutRequestTitle.
+ */
+export function cutRequestClientName(req: { client_name?: string | null }): string {
+  return req.client_name?.trim() || "Cliente";
+}
+
+/**
+ * Soma dos precos dos servicos do pedido, resolvidos contra os servicos do
+ * PROPRIO profissional (mesma fonte/invariante de cutRequestServices). Id
+ * desconhecido conta como 0 em vez de quebrar a soma — mostrar um total
+ * menor que o real e mais seguro do que travar o card.
+ */
+export function cutRequestTotal(
+  serviceItemIds: string[],
+  myServices: { id: string; price: number }[]
+): number {
+  return serviceItemIds.reduce((sum, id) => {
+    const item = myServices.find((s) => s.id === id);
+    return sum + (item?.price ?? 0);
+  }, 0);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { maskTime, isValidTime, parseApiTime, toApiTime, deviceOffsetSuffix, isoDate, periodRange } from "../time";
+import { maskTime, isValidTime, parseApiTime, toApiTime, deviceOffsetSuffix, isoDate, periodRange, hhmmFromIso } from "../time";
 
 describe("isoDate", () => {
   it("formata como YYYY-MM-DD com zero-pad", () => {
@@ -147,7 +147,7 @@ describe("deviceOffsetSuffix", () => {
 });
 
 describe("toApiTime", () => {
-  it("monta OffsetTime com o offset do aparelho (nao mais 'Z' fixo)", () => {
+  it("monta OffsetTime com o offset do aparelho (não mais 'Z' fixo)", () => {
     const spy = jest.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(180);
     try {
       expect(toApiTime("09:00")).toBe("09:00:00-03:00");
@@ -161,5 +161,26 @@ describe("toApiTime", () => {
     expect(toApiTime("24:00")).toBeNull();
     expect(toApiTime("9:00")).toBeNull();
     expect(toApiTime("")).toBeNull();
+  });
+});
+
+// hhmmFromIso — o card da solicitacao de corte mostra a HORA do pedido
+// (`created_at` vem como ISO completo, nao como OffsetTime do parseApiTime).
+describe("hhmmFromIso", () => {
+  it("extrai HH:MM no relogio LOCAL do aparelho", () => {
+    const iso = new Date(2026, 7, 7, 14, 32).toISOString();
+    expect(hhmmFromIso(iso)).toBe("14:32");
+  });
+
+  it("preenche o zero a esquerda", () => {
+    const iso = new Date(2026, 7, 7, 9, 5).toISOString();
+    expect(hhmmFromIso(iso)).toBe("09:05");
+  });
+
+  it("entrada inválida ou ausente não quebra o card", () => {
+    expect(hhmmFromIso("não e data")).toBeNull();
+    expect(hhmmFromIso(null)).toBeNull();
+    expect(hhmmFromIso(undefined)).toBeNull();
+    expect(hhmmFromIso("")).toBeNull();
   });
 });

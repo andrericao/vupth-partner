@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { VStack, Text } from "@gluestack-ui/themed";
-import { Alert, Modal, Pressable } from "react-native";
-import { Button } from "@components/Button";
+import { View, Text, Alert, Modal, Pressable } from "react-native";
+import { NwButton } from "@components/nw/Button";
 import { useUiStore } from "@store/ui.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { graceSecondsRemaining, graceCountdownLabel } from "@lib/closing";
-import { cardShadow } from "@lib/styles";
+import { floatingShadow } from "@lib/styles";
 
 /**
  * Prompt de AUTO-FECHAMENTO (BUG1 / S1 fatia 5). Quando o backend manda o WS
@@ -47,7 +46,7 @@ export function ClosingPrompt() {
       dismiss();
     } catch (e: any) {
       Alert.alert(
-        "Nao foi possivel fechar",
+        "Não foi possível fechar",
         getApiErrorMessage(e, "Ainda ha atendimento em andamento — finalize antes de fechar.")
       );
     } finally {
@@ -57,48 +56,45 @@ export function ClosingPrompt() {
 
   return (
     <Modal visible={!!graceUntil} transparent animationType="fade" onRequestClose={dismiss}>
-      <VStack flex={1} justifyContent="center" alignItems="center" px="$6">
+      <View className="flex-1 justify-center items-center px-4">
         <Pressable
           style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.45)" }}
           onPress={dismiss}
           accessibilityLabel="Fechar aviso"
         />
-        <VStack bg="$white" borderRadius="$2xl" p="$5" w="$full" space="sm" style={cardShadow}>
-          <Text fontFamily="$heading" fontWeight="$bold" fontSize="$lg" color="$coolGray900">
-            Passou do horario de fechamento
+        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
+          <Text className="font-heading text-lg text-vupth-textPrimary">
+            Passou do horário de fechamento
           </Text>
-          <Text fontFamily="$body" fontSize="$sm" color="$coolGray600">
-            A fila ja foi fechada para novos clientes. Quem esta na fila segue sendo
+          <Text className="font-body text-sm text-vupth-textSecondary">
+            A fila já foi fechada para novos clientes. Quem está na fila segue sendo
             atendido. Fecha sozinho em:
           </Text>
-          <Text
-            accessibilityLabel={`Fecha em ${graceCountdownLabel(remaining)}`}
-            fontFamily="$heading"
-            fontWeight="$bold"
-            fontSize="$2xl"
-            color="$amber600"
-            textAlign="center"
-            my="$1"
-          >
-            {graceCountdownLabel(remaining)}
-          </Text>
-          <Button
+          {/* [marca-vupth] Countdown numa pilula $brandWarning com texto forest
+              — mesmo par do selo "EM BREVE". A paleta nao tem ambar escuro pra
+              texto: o peach (#FFC091) so funciona como FUNDO, nunca como cor de
+              letra sobre claro. Era text-amber-600, da escala antiga. */}
+          <View className="bg-vupth-warning rounded-full px-3 py-1 self-center my-1">
+            <Text
+              accessibilityLabel={`Fecha em ${graceCountdownLabel(remaining)}`}
+              className="font-heading text-2xl text-vupth-forest text-center"
+            >
+              {graceCountdownLabel(remaining)}
+            </Text>
+          </View>
+          <NwButton
             title="Fechar agora"
             onPress={onCloseNow}
             isLoading={closing}
-            bg="$red500"
-            $active-bg="$red600"
           />
-          <Button
+          <NwButton
             title="Continuar atendendo"
             onPress={dismiss}
-            bg="$coolGray200"
-            textColor="$coolGray700"
-            h="$10"
-            mt="$0"
+            variant="secondary"
+            className="h-10"
           />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </Modal>
   );
 }

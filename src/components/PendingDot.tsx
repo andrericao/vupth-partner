@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-// Dot ambar discreto para sinalizar pendencia nas Configuracoes (dono: item
+// Dot pessego discreto para sinalizar pendencia nas Configuracoes (dono: item
 // "Dados do Estabelecimento"; profissional: item "Configuracoes"). Alerta
 // enquanto ha QUALQUER pendencia (basico ou perfil) — ver hasAnyPending.
 export function PendingDot() {
@@ -11,7 +11,7 @@ export function PendingDot() {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: "#FFB703",
+        backgroundColor: "#FFC091", // [marca-vupth] $brandWarning
       }}
     />
   );

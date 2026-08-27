@@ -4,7 +4,7 @@ import { useIntervalStore, mealName, type Interval } from "../interval.store";
 
 describe("mealName", () => {
   it("humaniza Lunch/Dinner Break para Almoco/Janta", () => {
-    expect(mealName("Lunch Break")).toBe("Almoco");
+    expect(mealName("Lunch Break")).toBe("Almoço");
     expect(mealName("Dinner Break")).toBe("Janta");
   });
   it("mantem descricoes customizadas", () => {
@@ -86,14 +86,14 @@ describe("interval.store", () => {
         durationMinutes: 60,
         fixedStartTime: "12:00:00Z",
         recurrencePattern: "WEEKDAYS",
-        description: "Almoco",
+        description: "Almoço",
       });
 
       expect(JSON.parse(mock.history.post[0].data)).toEqual({
         durationMinutes: 60,
         fixedStartTime: "12:00:00Z",
         recurrencePattern: "WEEKDAYS",
-        description: "Almoco",
+        description: "Almoço",
       });
       expect(useIntervalStore.getState().intervals).toEqual([LUNCH]);
     });
@@ -114,7 +114,7 @@ describe("interval.store", () => {
   });
 
   describe("skipInterval", () => {
-    it("PATCH .../skip ('Nao almocar' do dia) e refaz o fetch", async () => {
+    it("PATCH .../skip ('Não almocar' do dia) e refaz o fetch", async () => {
       mock.onPatch(`${BASE}/int-1/skip`).reply(200, {});
       mock.onGet(BASE).reply(200, []);
 

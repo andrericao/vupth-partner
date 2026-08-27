@@ -1,7 +1,13 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: ["babel-preset-expo"],
+    // NativeWind (Gluestack v2): jsxImportSource "nativewind" habilita a prop
+    // `className` em qualquer componente + o preset processa as classes. NAO
+    // afeta as telas v1 (que usam props $token, nao className).
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
     plugins: [
       [
         "module-resolver",

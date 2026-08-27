@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import {
   VStack,
   HStack,
@@ -12,7 +13,7 @@ import {
 } from "@gluestack-ui/themed";
 import { RefreshControl } from "react-native";
 import { router } from "expo-router";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -21,7 +22,6 @@ import { useProfessionalStore, type ProfessionalReport } from "@store/profession
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { periodRange } from "@lib/time";
-import { cardShadow } from "@lib/styles";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
@@ -34,11 +34,11 @@ type Period = "day" | "week" | "month";
 type Filter = "ALL" | "FINISHED" | "CANCELLED";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Finalizado", color: "$green500" },
-  CANCELLED: { label: "Cancelado", color: "$red500" },
-  IN_PROGRESS: { label: "Em andamento", color: "$blue500" },
-  PAUSED: { label: "Pausado", color: "$amber500" },
-  SCHEDULED: { label: "Agendado", color: "$coolGray500" },
+  FINISHED: { label: "Finalizado", color: "$forest" },
+  CANCELLED: { label: "Cancelado", color: "$brandDanger" },
+  IN_PROGRESS: { label: "Em andamento", color: "$forest" },
+  PAUSED: { label: "Pausado", color: "$brandWarning" },
+  SCHEDULED: { label: "Agendado", color: "$brandTextSecondary" },
 };
 
 function humanizeService(value: string | null): string {
@@ -51,14 +51,14 @@ function humanizeService(value: string | null): string {
 }
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$coolGray500" };
+  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$brandTextSecondary" };
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
+    <VStack bg="$brandSurface" p="$4" borderRadius="$card" mb="$3">
       <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$coolGray900">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           {item.clientName}
         </Text>
         <Badge
@@ -70,17 +70,17 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         </Badge>
       </HStack>
 
-      <Text fontFamily="$body" fontSize="$xs" color="$coolGray500" mt="$1">
+      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
 
-      <Text fontFamily="$body" fontSize="$sm" color="$coolGray600" mt="$1">
+      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
       <HStack mt="$2" justifyContent="flex-end">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$green700">
+        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           R$ {item.totalValue.toFixed(2)}
         </Text>
       </HStack>
@@ -90,6 +90,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
 
 export default function MyDayScreen() {
   const professional = useProfessionalStore((s) => s.professional);
+  const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
   const history = useAttendanceStore((s) => s.history);
   const fetchHistory = useAttendanceStore((s) => s.fetchHistory);
@@ -132,23 +133,29 @@ export default function MyDayScreen() {
       await fetchHistory(params);
       setHistoryLoaded(true);
     } catch (error: any) {
-      setHistoryError(getApiErrorMessage(error, "Nao foi possivel carregar os atendimentos."));
+      setHistoryError(getApiErrorMessage(error, "Não foi possível carregar os atendimentos."));
     } finally {
       setHistoryLoading(false);
     }
   }, [professional?.id, filter, fetchHistory]);
 
+  // RECARREGA AO FOCAR (feedback de device 2026-08-11): "iniciei o atendimento,
+  // na Fila aparecia 'atendendo agora' e aqui continuava AGENDADO". A causa e
+  // que estas duas telas sao ABAS — o React Navigation nao remonta ao voltar,
+  // entao o fetch on-mount rodava uma vez so e a lista envelhecia calada (o
+  // "depois de um tempo atualizou" era outra remontagem). Com `isFocused` na
+  // dependencia, voltar p/ Relatorios busca de novo.
   useEffect(() => {
-    // fetch on-mount/periodo; sinaliza isLoading (padrao de carregamento).
+    if (!isFocused) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReport();
-  }, [loadReport]);
+  }, [loadReport, isFocused]);
 
   useEffect(() => {
-    // fetch on-mount/filtro; sinaliza isLoading (padrao de carregamento).
+    if (!isFocused) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
-  }, [loadHistory]);
+  }, [loadHistory, isFocused]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -175,27 +182,31 @@ export default function MyDayScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} py="$12" px="$6">
-        <Header showBackButton onBack={() => router.navigate("/(professional)/queue" as any)} />
-
-        <Heading mt="$8" size="2xl" fontFamily="$heading">
-          Relatorios
-        </Heading>
+      <VStack flex={1} pb="$12" px="$4">
+        {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
+            conceito interno da tela ("MEU DIA", que uniu Relatórios +
+            Atendimentos); "Relatórios" ficou só no rotulo da aba, mais curto
+            pra caber no rodape. */}
+        <ScreenHeader
+          title="Seu dia"
+          onBack={() => router.navigate("/(professional)/queue" as any)}
+        />
 
         <HStack mt="$6" space="sm">
           {periods.map((p) => (
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$green500" : "$coolGray100"}
+              bg={period === p.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={period === p.key ? "$white" : "$coolGray700"}
+                color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -211,19 +222,19 @@ export default function MyDayScreen() {
 
         {period === "day" && (
           <HStack space="md" mb="$4">
-            <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                 Na fila agora
               </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$green700">
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
                 {queueCount}
               </Text>
             </VStack>
-            <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                 Espera estimada
               </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$blue600">
+              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
                 {waitMinutes} min
               </Text>
             </VStack>
@@ -236,45 +247,51 @@ export default function MyDayScreen() {
           </VStack>
         ) : (
           <VStack space="md">
+            {/* [marca-vupth] Receita virou o card-heroi (brandGreen, primeira
+                posição) — o Pencil (PROF · 03) da esse tratamento pro
+                faturado, o único número em dinheiro da tela. Era greenTint
+                (tom fraco) na segunda posição, com o valor MENOR que o dos
+                outros cards (2xl vs 3xl) — inconsistente pro card que deveria
+                pesar mais, não menos. */}
             <HStack space="md">
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Atendimentos
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$coolGray800">
-                  {report?.totalAttendances ?? 0}
-                </Text>
-              </VStack>
-              <VStack flex={1} bg="$green50" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$sm" color="$green700">
+              <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card">
+                <Text fontFamily="$body" fontSize="$sm" color="$forest">
                   Receita
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$green800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
                   R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
+                </Text>
+              </VStack>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                  Atendimentos
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
+                  {report?.totalAttendances ?? 0}
                 </Text>
               </VStack>
             </HStack>
 
             <HStack space="md">
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
                   Duracao media
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$coolGray800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$forest">
                   {Math.round(report?.avgDurationMinutes ?? 0)} min
                 </Text>
               </VStack>
-              <VStack flex={1} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-                <Text fontFamily="$body" fontSize="$sm" color="$coolGray500">
-                  Servico mais feito
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                  Serviço mais feito
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$coolGray800">
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$forest">
                   {humanizeService(report?.topService ?? null)}
                 </Text>
               </VStack>
             </HStack>
 
-            <Text fontFamily="$body" fontSize="$xs" color="$coolGray400" textAlign="center" mt="$2">
+            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" textAlign="center" mt="$2">
               {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
               atendimentos finalizados
             </Text>
@@ -292,15 +309,16 @@ export default function MyDayScreen() {
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$green500" : "$coolGray100"}
+              bg={filter === f.key ? "$forest" : "$brandSurface"}
               py="$2"
               px="$4"
               borderRadius="$full"
-              flex={1}
+              flexShrink={0}
             >
               <Text
+                numberOfLines={1}
                 fontFamily="$body"
-                color={filter === f.key ? "$white" : "$coolGray700"}
+                color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
                 textAlign="center"
                 fontSize="$sm"
               >
@@ -317,12 +335,12 @@ export default function MyDayScreen() {
         )}
 
         {historyError && (
-          <VStack bg="$amber50" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$amber200" mt="$2">
-            <Text fontFamily="$body" color="$amber700" textAlign="center">
+          <VStack bg="$brandWarning" p="$4" borderRadius="$card" mt="$2">
+            <Text fontFamily="$body" color="$forest" textAlign="center">
               {historyError}
             </Text>
             <Pressable onPress={loadHistory} mt="$2">
-              <Text fontFamily="$body" color="$green600" textAlign="center" fontSize="$sm">
+              <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
                 Tentar novamente
               </Text>
             </Pressable>
@@ -330,7 +348,7 @@ export default function MyDayScreen() {
         )}
 
         {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
-          <Text fontFamily="$body" color="$coolGray400" textAlign="center" mt="$6">
+          <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$6">
             Nenhum atendimento encontrado
           </Text>
         )}
