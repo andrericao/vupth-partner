@@ -76,6 +76,14 @@ describe("caminho web — a saida do build nao pode contaminar as ferramentas", 
   // `npm run build:web` fazia o `tsc` entrar no bundle de 5,4 MB do `dist/` e
   // morrer com `RangeError: Maximum call stack size exceeded` — erro que nao
   // cita arquivo nenhum e nao parece ter relacao com o build web.
+  it("eslint ignora a saida do export", () => {
+    // Mesmo defeito do tsconfig, com outra ferramenta: sem esta linha,
+    // `npm run lint` depois de um build web devolvia ~19.500 problemas vindos
+    // do bundle — e o `--max-warnings 0` do gate reprovava tudo.
+    const eslintrc = read("eslint.config.js");
+    expect(eslintrc).toMatch(/ignores:\s*\[[^\]]*'dist\/'/);
+  });
+
   it("tsconfig exclui a saida do export", () => {
     const tsconfig = JSON.parse(
       read("tsconfig.json").replace(/^\s*\/\/.*$/gm, "")

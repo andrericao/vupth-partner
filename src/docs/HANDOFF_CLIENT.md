@@ -282,9 +282,15 @@ Netlify tambem e gratis e tambem le os dois arquivos, com teto de banda (100 GB/
 
 **Custo total do caminho: zero.** So aparece conta se voces quiserem **dominio proprio** (o `*.pages.dev` sai de graca e o link funciona igual).
 
-### ⚠️ O gate de verdade: CORS
+### ⚠️ O gate de verdade: CORS — com uma CORRECAO sobre o WebSocket
 
-Nada disso funciona se a **API nao autorizar a origem nova**. No app nativo CORS nao existe, entao o assunto nunca apareceu — no navegador ele bloqueia **toda** chamada. **Isso trava os dois apps igual**, e e item de **backend**: sem ele, o link sobe bonito e falha inteiro, sem mensagem que explique.
+Nada disso funciona se a **API nao autorizar a origem nova**. No app nativo CORS nao existe, entao o assunto nunca apareceu — no navegador ele bloqueia **toda** chamada. **Isso trava os dois apps igual**, e e item de **backend**.
+
+❌ **CORRECAO (2026-08-27) — o WebSocket NAO precisa ser autorizado, e cobrar isso era pedir para quebrar o que funciona.** A primeira versao deste bloco dizia que o CORS tinha de valer *"em https e no WebSocket"*. O backend auditou o proprio codigo e mostrou que **o WS ja esta aberto**: `WebSocketConfig:68-69` tem `.setAllowedOriginPatterns("*")` no endpoint nativo **e** no SockJS, com `/ws/**` em `permitAll`. Handshake de WS **nativo nem passa por CORS**; o fallback SockJS passa, e ja emite os headers a partir desse mesmo `*`. ⚠️ **O alerta que eles devolveram e o que importa:** apertar o CORS do HTTP **junto com** a origem do WS quebraria o tempo real que hoje funciona — o commit do CORS deliberadamente nao toca no `*`. **Nao cobrem WS deles.**
+
+**E o lado HTTP e pior do que este documento dizia:** nao e "falta autorizar a origem" — **nao existe CORS nenhum** (auditado 26/08: `SecurityConfig` sem `.cors(...)`, sem `CorsConfigurationSource`, sem `addCorsMappings`; o unico `@CrossOrigin` esta comentado). Sem `.cors()`, o **preflight `OPTIONS`** cai em `anyRequest().authenticated()` e preflight **nao leva `Authorization`** — o navegador toma **401 no OPTIONS** antes de qualquer chamada real, e o console mostra so o erro generico de CORS, sem corpo e sem status util. ⚠️ **Armadilha:** `cors.allowed-origins` existe nos `application-*.properties` e e **propriedade MORTA**; "autorizar" la nao muda nada. O desenho aprovado (env var `CORS_ALLOWED_ORIGINS`, `setAllowedOriginPatterns` por causa do curinga no meio de `https://*.vupth-partner.pages.dev`, `allowCredentials(false)`) esta na **secao 18e do PRD_BACKEND**.
+
+📣 **Para o client, na pratica:** nada muda no codigo de voces — sigam mandando o JWT em `Authorization` e **nao usem cookie** (com `allowCredentials(false)` ele nao atravessa, e mudar isso exigiria abandonar o curinga de subdominio). Origem nova = avisar o backend para entrar na env var.
 
 ### A variavel de ambiente que e assada no build
 
