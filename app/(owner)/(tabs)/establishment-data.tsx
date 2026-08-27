@@ -16,7 +16,7 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="py-4 px-4 bg-vupth-surface rounded-[20px] active:bg-vupth-surface"
+      className="py-4 px-4 bg-vupth-surface rounded-card active:bg-vupth-surface"
     >
       <Text className="font-heading text-base text-vupth-forest">{label}</Text>
       <Text className="font-body text-sm text-vupth-textSecondary mt-0.5">{description}</Text>
@@ -66,7 +66,7 @@ export default function EstablishmentDataScreen() {
         </View>
 
         <View
-          className="mt-4 bg-vupth-surface rounded-[20px] px-4 py-4 flex-row justify-between items-center"
+          className="mt-4 bg-vupth-surface rounded-card px-4 py-4 flex-row justify-between items-center"
         >
           <Text className="font-body text-base text-vupth-textSecondary">
             Profissionais vinculados

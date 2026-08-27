@@ -18,7 +18,7 @@ import { ComponentProps } from "react";
  * - **sem sombra.** Ver `floatingShadow` em `@lib/styles`.
  *
  * Telas ja migradas p/ NativeWind fazem o equivalente por classe:
- * `bg-vupth-surface rounded-[20px]`.
+ * `bg-vupth-surface rounded-card`.
  */
 type Props = ComponentProps<typeof VStack>;
 

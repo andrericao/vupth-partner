@@ -75,6 +75,7 @@
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@gluestack-ui/.*|@gluestack-style/.*|@legendapp/.*|@tanstack/.*|zustand|expo-router|expo-secure-store|expo-font|expo-status-bar|nativewind|react-native-css-interop)"
     ],
     "moduleNameMapper": {
+      "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
       "^@lib/(.*)$": "<rootDir>/src/lib/$1",
       "^@store/(.*)$": "<rootDir>/src/store/$1",
       "^@hooks/(.*)$": "<rootDir>/src/hooks/$1",
@@ -115,7 +116,10 @@
         "functions": 98,
         "lines": 99
       }
-    }
+    },
+    "testPathIgnorePatterns": [
+      "<rootDir>/.claude/"
+    ]
   },
   "private": true,
   "expo": {

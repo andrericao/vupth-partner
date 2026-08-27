@@ -1,5 +1,5 @@
 import { Pressable, Text, ActivityIndicator, View, type PressableProps } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { ArrowRight } from "lucide-react-native";
 
 // Botao de "proximo passo" (texto + seta). Migrado p/ NativeWind (v2). API:
 // title/isLoading/onPress. (Sem uso ativo hoje, mantido por compatibilidade.)
@@ -21,7 +21,7 @@ export function StepsButton({ title, isLoading, disabled, ...rest }: Props) {
       ) : (
         <View className="flex-row items-center">
           <Text className="font-body text-white mr-3">{title}</Text>
-          <Ionicons name="arrow-forward" size={18} color="#fff" />
+          <ArrowRight size={18} color="#fff" />
         </View>
       )}
     </Pressable>

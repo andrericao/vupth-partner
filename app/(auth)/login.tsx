@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { NwButton } from "@components/nw/Button";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft, Mail, Lock } from "lucide-react-native";
 import { NwInput } from "@components/nw/Input";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
@@ -12,6 +13,10 @@ import { getApiErrorMessage } from "@lib/api";
 // identica ao v1 — so a apresentacao trocou (RN + className + nw/Input +
 // nw/Button). O `Header` segue no v1 (componente compartilhado, migra depois).
 export default function LoginScreen() {
+  // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
+  // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
+  // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
+  const insets = useSafeAreaInsets();
   const { role } = useLocalSearchParams<{ role: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,14 +66,14 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 pt-14 pb-8 px-4">
+        <View className="flex-1 pt-14 px-4" style={{ paddingBottom: Math.max(insets.bottom, 32) }}>
           <Pressable
             onPress={() => router.back()}
             className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
             accessibilityRole="button"
             testID="back-button"
           >
-            <Ionicons name="chevron-back" size={20} color="#163300" />
+            <ChevronLeft size={20} color="#163300" />
           </Pressable>
 
           <View className="mt-10 gap-2">
@@ -81,7 +86,7 @@ export default function LoginScreen() {
           <View className="mt-8">
             <NwInput
               label="E-mail"
-              icon="mail-outline"
+              icon={Mail}
               placeholder="email@email.com"
               value={email}
               onChangeText={setEmail}
@@ -92,7 +97,7 @@ export default function LoginScreen() {
             />
             <NwInput
               label="Senha"
-              icon="lock-closed-outline"
+              icon={Lock}
               placeholder="senha"
               secure
               value={password}

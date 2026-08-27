@@ -152,7 +152,7 @@ export default function AddressScreen() {
 
             {cepLoading && (
               <View className="flex-row items-center gap-2 mb-3 -mt-1">
-                <ActivityIndicator size="small" color="#3b7a3f" />
+                <ActivityIndicator size="small" color="#163300" />
                 <Text className="font-body text-xs text-vupth-textSecondary">
                   Buscando endereço pelo CEP...
                 </Text>

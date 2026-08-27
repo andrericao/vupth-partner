@@ -258,10 +258,37 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     return data;
   },
 
+  /**
+   * Restaura o perfil profissional no boot.
+   *
+   * ⚠️ O CACHE LOCAL NAO PODE SER A UNICA FONTE. Antes isto so lia o
+   * `SecureStore`; se nao houvesse nada gravado, o `professional` ficava nulo,
+   * o `establishmentId` da tela da Fila ficava indefinido e o app dizia
+   * **"Para receber clientes, voce precisa estar vinculado a um
+   * estabelecimento"** — pra alguem que ESTA vinculado, e ainda mandava
+   * vincular de novo.
+   *
+   * Isso acontece em toda sessao que nao herdou o cache: aparelho novo,
+   * reinstalacao, dados limpos, ou o app na web em outro navegador. Ninguem
+   * chamava `fetchMe` nem no boot nem no login — o dado so existia por
+   * acidente, de uma sessao anterior.
+   *
+   * Agora o cache serve pra PINTAR RAPIDO, e a API e quem tem a palavra final.
+   */
   restoreProfessional: async () => {
     const stored = await SecureStore.getItemAsync(STORAGE_KEY);
     if (stored) {
       set({ professional: normalizeProfessional(JSON.parse(stored)) });
+    }
+
+    // Sem cache, so a API sabe. Falha em silencio de proposito: sem rede o app
+    // segue com o que tinha, e quem nao tinha nada ja veria a mesma tela.
+    if (!stored) {
+      try {
+        await get().fetchMe();
+      } catch {
+        /* offline ou sem perfil profissional — o app trata como antes */
+      }
     }
   },
 

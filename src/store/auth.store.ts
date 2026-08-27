@@ -174,7 +174,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: {
         id: payload?.sub ?? "",
         email: payload?.email ?? "",
-        roles: payload?.roles ?? [],
+        // Pelo normalizador, nao pelo payload cru: o backend manda os papeis
+        // como STRING ("ROLE_OWNER,ROLE_CLIENT"), e ler direto daqui devolvia
+        // essa string tipada como array. Era o mesmo defeito do
+        // `getRolesFromToken`, num segundo lugar — o tsc so achou depois que o
+        // tipo do payload passou a dizer a verdade.
+        roles: getRolesFromToken(token),
       },
       isAuthenticated: true,
       isLoading: false,

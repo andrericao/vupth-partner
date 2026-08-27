@@ -206,7 +206,7 @@ O que separa um card do fundo e o proprio `$brandSurface` — **nao** a sombra,
 era o card mais comum dos dois apps e esta **aposentado**.
 
 Primitiva pronta: `src/components/brand/Card.tsx` (`BrandCard`) nos dois repos.
-Em tela ja migrada p/ NativeWind: `bg-vupth-surface rounded-[20px]`.
+Em tela ja migrada p/ NativeWind: `bg-vupth-surface rounded-card`.
 
 #### 6.3 Sombra so no que FLUTUA
 

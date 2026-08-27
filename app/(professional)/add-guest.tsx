@@ -170,7 +170,7 @@ export default function AddGuestScreen() {
           <NwButton
             title="Cancelar"
             onPress={() => router.back()}
-            variant="outlineDanger"
+            variant="secondary"
             className="mt-2"
           />
         </View>

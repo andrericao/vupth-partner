@@ -13,7 +13,7 @@ type Props = {
 export function SelectService({ value, onValueChange }: Props) {
   return (
     <View className="mb-3 w-full">
-      <Text className="font-body text-sm text-gray-600">Tipo de Loja</Text>
+      <Text className="font-body text-sm text-vupth-textSecondary">Tipo de Loja</Text>
       <View className="mt-1 gap-1">
         {SERVICE_TYPES.map((type) => {
           const isSelected = value === type.value;
@@ -24,11 +24,11 @@ export function SelectService({ value, onValueChange }: Props) {
               accessibilityState={{ selected: isSelected }}
               onPress={() => onValueChange?.(type.value)}
               className={`py-2.5 px-4 rounded-md border ${
-                isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-gray-100 border-gray-200"
+                isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
               }`}
             >
               <Text
-                className={`font-body text-center ${isSelected ? "text-white" : "text-gray-700"}`}
+                className={`font-body text-center ${isSelected ? "text-white" : "text-vupth-textPrimary"}`}
               >
                 {type.label}
               </Text>

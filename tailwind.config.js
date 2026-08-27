@@ -19,6 +19,44 @@ module.exports = {
         body: ["Inter_400Regular"],
         mono: ["DMMono_500Medium"],
       },
+      // ═══ ESCALA DE TEXTO ═══ valores REAIS do arquivo de design, lidos da
+      // tabela de variaveis (`GetVariables()`), nao inferidos. O papel de cada
+      // nivel vem do frame "Foundations » TIPOGRAFIA":
+      //
+      //   xxxl 34 · 800 display · ls -1.5  Titulo Hero
+      //   xxl  28 · 800 display · ls -1    Titulo de Tela
+      //   xl   22 · 700 display · ls -0.5  Titulo de Secao
+      //   lg   18 · 500 body               Subtitulo
+      //   md   16 · 400 body               Corpo de texto padrao
+      //   sm   14 · 400 body               Texto secundario / legendas
+      //   xs   12 · 500 body               Rotulos e metadados
+      //
+      // Os NOMES sao os do arquivo de propósito: design e codigo passam a usar
+      // a mesma palavra. `xs`, `sm` e `lg` ja batiam com o padrao do Tailwind;
+      // `xl` muda de 20 para 22 (4 usos), e `md`/`xxl`/`xxxl` sao novos.
+      // `text-base`, `text-2xl` e `text-3xl` seguem existindo mas estao FORA
+      // da escala — migrar. Ver src/docs/DESIGN.md.
+      fontSize: {
+        xs: ["12px", { lineHeight: "16px" }],
+        sm: ["14px", { lineHeight: "20px" }],
+        md: ["16px", { lineHeight: "22px" }],
+        lg: ["18px", { lineHeight: "24px" }],
+        xl: ["22px", { lineHeight: "26px", letterSpacing: "-0.5px" }],
+        xxl: ["28px", { lineHeight: "32px", letterSpacing: "-1px" }],
+        xxxl: ["34px", { lineHeight: "38px", letterSpacing: "-1.5px" }],
+      },
+      // ═══ RAIO ═══ tambem da tabela de variaveis. `card` (20) e `hero` (24)
+      // sao tokens proprios do arquivo, alem da escala sm/md/lg/xl. Hoje ha 26
+      // escapes `rounded-[20px]` no codigo — todos sao `rounded-card`.
+      borderRadius: {
+        sm: "4px",
+        md: "8px",
+        lg: "12px",
+        xl: "16px",
+        card: "20px",
+        hero: "24px",
+        full: "999px",
+      },
       // Cores da marca espelhando a escala `green` do config/gluestack-ui.config.ts
       // (FONTE DA VERDADE — paleta "Verde Marca", ancorada em #3b7a3f desde
       // 2026-07-09). Precisa bater 1:1: durante a migracao as telas do v1 e do
@@ -64,6 +102,7 @@ module.exports = {
           textSecondary: "#454745",
           border: "#D7DDD3",
           danger: "#B3261E",
+          dangerTint: "#F7E4E2",
           warning: "#FFC091",
           success: "#9FE870",
         },

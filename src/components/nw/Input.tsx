@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, type TextInputProps } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Eye, EyeOff } from "lucide-react-native";
+import type { LucideIcon } from "lucide-react-native";
 
 // Primitiva NativeWind (migracao Gluestack v2). Substitui Input + InputPassword
 // do v1 num so componente: passe `secure` p/ virar campo de senha com olho.
@@ -13,14 +14,14 @@ type Props = TextInputProps & {
   error?: string;
   /** Campo de senha (mascara + botao de mostrar/ocultar). */
   secure?: boolean;
-  /** Icone a esquerda (Pencil: mail no e-mail, lock na senha). */
-  icon?: keyof typeof Ionicons.glyphMap;
+  /** Icone a esquerda (Pencil: Mail no e-mail, Lock na senha). */
+  icon?: LucideIcon;
 };
 
 // `autoCapitalize` default "words" replica o Input v1 (que embutia isso no
 // InputField): os campos de nome capitalizam sozinhos. Quem nao quer — e-mail,
 // senha, codigo — passa "none", como ja fazem as telas do (auth).
-export function NwInput({ label, error, secure, icon, autoCapitalize = "words", ...rest }: Props) {
+export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "words", ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [show, setShow] = useState(false);
   const invalid = !!error;
@@ -39,10 +40,10 @@ export function NwInput({ label, error, secure, icon, autoCapitalize = "words", 
         {label}
       </Text>
       <View className={`flex-row items-center gap-2 bg-white rounded-xl px-4 h-[50px] ${border}`}>
-        {icon && <Ionicons name={icon} size={18} color="#454745" />}
+        {Icon && <Icon size={18} color="#454745" />}
         <TextInput
-          className="flex-1 font-body text-gray-900"
-          placeholderTextColor="#9CA3AF"
+          className="flex-1 font-body text-vupth-textPrimary"
+          placeholderTextColor="#454745"
           autoCorrect={false}
           autoCapitalize={autoCapitalize}
           secureTextEntry={secure && !show}
@@ -57,7 +58,7 @@ export function NwInput({ label, error, secure, icon, autoCapitalize = "words", 
             accessibilityRole="button"
             accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
           >
-            <Ionicons name={show ? "eye-off" : "eye"} size={20} color="#163300" />
+            {show ? <EyeOff size={20} color="#163300" /> : <Eye size={20} color="#163300" />}
           </Pressable>
         )}
       </View>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import {
   View,
@@ -11,7 +12,7 @@ import {
 } from "react-native";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft, Mail } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
@@ -26,6 +27,10 @@ import { PasswordRules } from "@components/PasswordRules";
 // ⚠️ Enquanto o SMTP (S8) nao estiver configurado no ambiente, o e-mail real
 // nao chega (NoOpEmailSender so loga o codigo no servidor).
 export default function ForgotPasswordScreen() {
+  // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
+  // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
+  // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
+  const insets = useSafeAreaInsets();
   const forgotPassword = useAuthStore((s) => s.forgotPassword);
   const resetPassword = useAuthStore((s) => s.resetPassword);
 
@@ -99,14 +104,14 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-1 pt-14 pb-8 px-4">
+        <View className="flex-1 pt-14 px-4" style={{ paddingBottom: Math.max(insets.bottom, 32) }}>
           <Pressable
             onPress={() => router.replace("/(auth)/login" as any)}
             className="w-10 h-10 rounded-full bg-vupth-surface items-center justify-center"
             accessibilityRole="button"
             testID="back-button"
           >
-            <Ionicons name="chevron-back" size={20} color="#163300" />
+            <ChevronLeft size={20} color="#163300" />
           </Pressable>
 
           {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
@@ -130,7 +135,7 @@ export default function ForgotPasswordScreen() {
             <View className="mt-6">
               <NwInput
                 label="E-mail"
-                icon="mail-outline"
+                icon={Mail}
                 placeholder="email@email.com"
                 value={email}
                 onChangeText={(t: string) => {

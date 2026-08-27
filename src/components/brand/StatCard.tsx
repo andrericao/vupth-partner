@@ -40,7 +40,7 @@ export function StatCard({ label, value, hero = false, flex }: Props) {
       <Text
         fontFamily="$body"
         fontSize="$xs"
-        color={hero ? "$forest" : "$coolGray500"}
+        color={hero ? "$forest" : "$brandTextSecondary"}
         mt="$1"
       >
         {label}

@@ -288,7 +288,7 @@ export default function OwnerDashboardScreen() {
                 disabled={isToggling}
               >
                 <HStack space="xs" alignItems="center">
-                  <Moon size={15} color="#6B7280" />
+                  <Moon size={15} color="#454745" />
                   <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandTextSecondary">
                     Encerrar o dia
                   </Text>
@@ -300,7 +300,7 @@ export default function OwnerDashboardScreen() {
                 disabled={isToggling}
               >
                 <HStack space="xs" alignItems="center">
-                  <Pause size={15} color="#6B7280" />
+                  <Pause size={15} color="#454745" />
                   <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandTextSecondary">
                     Pausar entrada
                   </Text>

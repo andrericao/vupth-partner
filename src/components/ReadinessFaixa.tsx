@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { X } from "lucide-react-native";
 import { router } from "expo-router";
 import type { Completion } from "@lib/completion";
 import { hasBasicPending } from "@lib/completion";
@@ -37,7 +37,7 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
     // erro nem urgencia: e so cadastro pendente. Passou pro greenTint com a
     // barra de progresso do Pencil (OWNER · 02 Menu), que MOSTRA o quanto ja
     // andou em vez de so cobrar o que falta.
-    <View className="bg-vupth-greenTint rounded-[20px] p-4 mt-4 gap-2.5">
+    <View className="bg-vupth-greenTint rounded-card p-4 mt-4 gap-2.5">
       <Pressable
         onPress={() => router.push(targetRoute as any)}
         accessibilityRole="button"
@@ -57,7 +57,7 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
               accessibilityLabel="Fechar aviso"
               hitSlop={8}
             >
-              <Ionicons name="close" size={16} color="#163300" />
+              <X size={16} color="#163300" />
             </Pressable>
           </View>
         </View>

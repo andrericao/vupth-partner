@@ -8,6 +8,7 @@ import {
   ScrollView,
   Pressable,
 } from "@gluestack-ui/themed";
+import { Star } from "lucide-react-native";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { RefreshControl } from "react-native";
@@ -81,9 +82,12 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
               {professional.specialty ?? ""}
             </Text>
             {ratingLabel(professional.rating_average, professional.rating_count) && (
-              <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$0.5">
-                ★ {ratingLabel(professional.rating_average, professional.rating_count)}
-              </Text>
+              <HStack alignItems="center" space="xs" mt="$0.5">
+                <Star size={12} color="#454745" fill="#454745" />
+                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+                  {ratingLabel(professional.rating_average, professional.rating_count)}
+                </Text>
+              </HStack>
             )}
           </VStack>
           <VStack alignItems="flex-end">

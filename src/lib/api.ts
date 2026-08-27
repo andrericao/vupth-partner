@@ -1,14 +1,35 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
 
+import { resolveApiEnv } from "@lib/apiEnv";
+
+// Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
+// testa em device (Andre 2026-08-22).
+//
+// `staging` e `dev` sao o MESMO host de proposito: este app batizou de
+// `staging` o que o client batizou de `dev`, e o mesmo `.env` circula entre os
+// dois repos. Sem o apelido, `EXPO_PUBLIC_API_ENV=dev` aqui caia no fallback
+// sem avisar.
 const API_URLS: Record<string, string> = {
   local: `http://${process.env.EXPO_PUBLIC_API_LOCAL_IP ?? "192.168.0.16"}:8080`,
   staging: "https://vupth-backend-ia.onrender.com",
+  dev: "https://vupth-backend-ia.onrender.com",
   prod: "https://vupth-backend-ia-production.up.railway.app",
 };
 
-const env = process.env.EXPO_PUBLIC_API_ENV ?? "staging";
-const BASE_URL = API_URLS[env] ?? API_URLS.staging;
+// O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando
+// local. Ver `apiEnv.ts` pro porque — em resumo, o `.env` de quem publica
+// vazava pro app de todo mundo.
+const canalDoBundle = (() => {
+  try {
+    return Updates.channel;
+  } catch {
+    return null;
+  }
+})();
+const env = resolveApiEnv(canalDoBundle, process.env.EXPO_PUBLIC_API_ENV);
+const BASE_URL = API_URLS[env];
 
 // URL do WebSocket STOMP. http→ws, https→wss.
 // O backend registra /ws com SockJS; para um WebSocket NATIVO (sem a lib SockJS)
@@ -82,6 +103,15 @@ export function getApiErrorMessage(error: any, fallback: string): string {
   }
   if (data?.message) {
     return data.message;
+  }
+
+  // 403 sem `code` nem `message`: o backend recusou, e o app nao tem como
+  // saber SE foi por o recurso nao ser seu ou por o seu papel nao permitir —
+  // os dois casos chegam iguais. Ate o backend distinguir (ver S31 no
+  // HANDOFF_BACKEND), a mensagem tem de ser verdadeira nos dois; dizer
+  // "faca login de novo" seria chute, e mandaria a pessoa pro lugar errado.
+  if (error.response.status === 403) {
+    return "Você não tem acesso a isso. Se acabou de mudar algo na sua conta, feche e abra o app.";
   }
   return fallback;
 }

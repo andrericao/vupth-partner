@@ -68,7 +68,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
             {dot && (
               <View
                 testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
-                className="w-2 h-2 rounded-full bg-[#E63946]"
+                className="w-2 h-2 rounded-full bg-vupth-danger"
               />
             )}
           </View>
@@ -77,7 +77,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
-        <ChevronRight size={16} color="#6B7280" />
+        <ChevronRight size={16} color="#454745" />
       </Pressable>
       {!last && <View className="h-px bg-vupth-border" />}
     </>
@@ -91,7 +91,7 @@ function Grupo({ label, children }: { label: string; children: ReactNode }) {
       <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
-      <View className="bg-vupth-surface rounded-[20px] overflow-hidden">{children}</View>
+      <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
     </View>
   );
 }
@@ -190,7 +190,7 @@ export default function ProfessionalSettingsScreen() {
         {isOwner && (
           <Pressable
             onPress={() => router.replace("/(owner)/dashboard" as any)}
-            className="flex-row items-center gap-3 bg-vupth-greenTint rounded-[20px] px-4 py-3.5"
+            className="flex-row items-center gap-3 bg-vupth-greenTint rounded-card px-4 py-3.5"
           >
             <ArrowLeftRight size={19} color="#163300" />
             <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">

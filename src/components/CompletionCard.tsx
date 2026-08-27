@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight, Check, CircleCheck } from "lucide-react-native";
 import type { Completion, CompletionTracker } from "@lib/completion";
 
 type Props = {
@@ -17,7 +17,10 @@ function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
       style={{
         height: 9,
         borderRadius: 99,
-        backgroundColor: "#E8EDEA",
+        // [marca-vupth] Trilho vazio da barra: $brandBorder e o UNICO neutro da
+        // paleta mais escuro que o $brandSurface do card — no surface a barra
+        // sumiria. Era #E8EDEA, cinza da paleta pre-marca.
+        backgroundColor: "#D7DDD3",
         overflow: "hidden",
       }}
     >
@@ -54,19 +57,20 @@ function Row({
           justifyContent: "center",
           backgroundColor: done ? "#163300" : "#FFFFFF", // [marca-vupth] $forest
           borderWidth: done ? 0 : 2,
-          borderColor: "#E0E7E3",
+          borderColor: "#D7DDD3", // [marca-vupth] $brandBorder
         }}
       >
-        {done && <Text className="text-white text-xs font-bold">✓</Text>}
+        {/* [marca-vupth] Sobre `forest` o par e brand-green, nunca branco. */}
+        {done && <Check size={13} color="#9FE870" strokeWidth={3} />}
       </View>
       <Text
         className={`flex-1 font-body text-sm ${
-          done ? "text-gray-400" : "font-bold text-gray-800"
+          done ? "text-vupth-textSecondary" : "font-bold text-vupth-textPrimary"
         }`}
       >
         {label}
       </Text>
-      {navigable && <ChevronRight size={16} color="#D1D5DB" />}
+      {navigable && <ChevronRight size={16} color="#454745" />}
     </View>
   );
 
@@ -95,7 +99,7 @@ function List({
     <View className="mt-2">
       {tracker.items.map((item, idx) => (
         <View key={item.key}>
-          {idx > 0 && <View style={{ height: 1, backgroundColor: "#EEF2F0" }} />}
+          {idx > 0 && <View style={{ height: 1, backgroundColor: "#D7DDD3" }} />}
           <Row label={item.label} done={item.done} route={routeFor(item.key)} />
         </View>
       ))}
@@ -114,10 +118,10 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
     n === 1 ? "Falta 1 passo para aparecer aos clientes." : `Faltam ${n} passos para aparecer aos clientes.`;
 
   return (
-    <View className="bg-vupth-surface rounded-[20px] p-4 mt-4">
+    <View className="bg-vupth-surface rounded-card p-4 mt-4">
       {basic.percent === 100 ? (
         <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
-          <Text className="text-xl">🎉</Text>
+          <CircleCheck size={22} color="#9FE870" />
           <View className="flex-1">
             <Text className="font-heading text-sm text-white">{doneBanner}</Text>
             <Text className="font-body text-xs text-vupth-greenTint">
@@ -128,7 +132,7 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
       ) : (
         <View>
           <View className="flex-row justify-between items-baseline mb-2">
-            <Text className="font-heading text-base text-gray-800">
+            <Text className="font-heading text-base text-vupth-textPrimary">
               Pronto para atender
             </Text>
             <Text className="font-heading text-base text-vupth-forest">
@@ -136,16 +140,16 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
             </Text>
           </View>
           <Bar percent={basic.percent} />
-          <Text className="font-body text-xs text-gray-500 mt-2">{hint}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-2">{hint}</Text>
           <List tracker={basic} routeFor={routeFor} />
         </View>
       )}
 
       {profile.total > 0 && (
         <>
-          <View style={{ height: 1, backgroundColor: "#EEF2F0", marginVertical: 14 }} />
+          <View style={{ height: 1, backgroundColor: "#D7DDD3", marginVertical: 14 }} />
           <View className="flex-row justify-between items-baseline mb-2">
-            <Text className="font-heading text-sm text-gray-700">
+            <Text className="font-heading text-sm text-vupth-textPrimary">
               Perfil completo
             </Text>
             {/* [marca-vupth] Era text-brand-600 — escala ANTIGA (#3b7a3f,

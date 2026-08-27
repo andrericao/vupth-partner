@@ -11,10 +11,16 @@ export default function OwnerTabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
         tabBarInactiveTintColor: "#454745", // $text-secondary
+        // Rotulo SEMPRE embaixo do icone. Sem isto o React Navigation decide
+        // sozinho e, faltando altura, joga o rotulo AO LADO — que com a pilula
+        // (larga) cai por cima do icone. Aconteceu no app do cliente em
+        // 2026-08-26; aqui ha folga (56 de conteudo pra 45 de pilula+rotulo),
+        // mas a folga some se alguem crescer o icone ou a fonte.
+        tabBarLabelPosition: "below-icon",
         tabBarStyle: {
           ...tabBarShadow,
           backgroundColor: "#FFFFFF",
-          borderTopColor: "#E5E7EB",
+          borderTopColor: "#D7DDD3", // [marca-vupth] $brandBorder
           borderTopWidth: 0,
           // [marca-vupth] Rotulo cortado em device real (QA Alexia 2026-08-21):
           // 60 - 8(top) - 8(bottom) sobrava so 44px pro icone (24) + label —
