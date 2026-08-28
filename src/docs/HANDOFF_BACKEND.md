@@ -20,6 +20,18 @@ Ultima atualizacao: 2026-08-27 · branch `front/alinhamento-backend` (auditoria 
 >
 > 7. ✅ **S7 saiu do vermelho sem que este handoff soubesse.** O reset de senha passou a sair pela **API HTTP do Brevo** (commit de 22/08) porque **a porta 587 nao abre do Render** — causa raiz que explica meses de "o e-mail nao sai". **Codigo pronto; falta LIGAR no Render**, que e painel, nao codigo. Enquanto nao ligarem, o comportamento em producao segue o de antes.
 >
+> 🧭 **DIRECAO DO ANDRE SOBRE S33 E S34 (2026-08-27) — os dois sao do BACKEND.**
+>
+> - **S33 (revogacao de papel):** e de voces. Do lado do front nao ha o que fazer enquanto nao existir caminho para perder papel. ⚠️ **O S34 mudou a pergunta:** como voces **ja** tem `is_active` por papel, o item deixa de ser *"da para revogar?"* e vira *"o que `is_active` significa hoje, quem o escreve, e por que ele nao chega ao front de forma utilizavel?"*.
+>
+> - **S34 (formato dos papeis):** tambem e de voces — o contrato e que diverge, nao o consumo. **Recorte importante, para nao gastarem esforco no lugar errado:** o **partner** le papel **do TOKEN** (`getRolesFromToken`, `src/store/auth.store.ts`), entao a terceira forma do corpo do `/auth/login` (`[{role_type, is_active}]`) **nao afeta o partner** — quem quebra com ela e o **client**, que declara `user.roles: string[]` e por isso le `undefined` sempre.
+>
+> **PERGUNTA DO ANDRE, a responder antes de qualquer implementacao:** *da para expor `is_active` no campo que o front consome — e isso tem efeito colateral ou custo de desempenho?* **A leitura daqui, para voces confirmarem ou corrigirem:**
+> - **Desempenho:** deve ser irrelevante. E um booleano ja persistido, no mesmo agregado que ja e carregado para montar a resposta — nao acrescenta consulta.
+> - ⚠️ **Efeito colateral, esse sim, e existe:** se `is_active` for para **dentro do JWT**, ele vira **retrato congelado** ate o token expirar. Desativar um papel nao teria efeito imediato — e o problema classico de revogacao com JWT. **Por isso a proposta daqui e separar os dois usos:** o **servidor decide** a cada request (fonte da verdade), e o front recebe `is_active` **so para a UI** (esconder area, explicar por que sumiu), nunca como autorizacao. Se voces concordarem, o item vira contrato; se discordarem, digam onde o raciocinio falha antes de codarmos.
+>
+> **Nada sera codado nos fronts antes desta resposta.**
+
 > **Pendencias de PAINEL do Andre, que nenhum time resolve por ele:** (a) Render → **Health Check Path = `/actuator/health/readiness`**; (b) ligar o provedor de e-mail no Render (item 7); (c) criar o pinger no cron-job.org (item 6); (d) `EXPO_PUBLIC_API_ENV` nos ambientes Production e Preview do Cloudflare Pages — **nao e herdada entre eles**.
 
 > 🧪 **PLANO DE TESTE DE WS PROPOSTO PELO BACKEND (2026-08-05) — ACEITO, com UMA CORRECAO QUE MUDA A LEITURA.** Eles montaram um A/B entre os dois apps (client sem as flags do stompjs + sem `AppState`; partner com as flags + com `AppState`) e propuseram 6 testes (0 headers do CONNECTED · 1 token expirado · 2 A/B das flags · 3 background · 4 ocioso longo · 5 troca de rede). **Bom desenho — mede sem ninguem alterar codigo antes, que era a nossa condicao ("nao removemos as flags sem medir").** Confirmado aqui: o partner **tem** as duas flags (`useQueueSocket.ts`), **tem** o reconnect por `AppState` e **nao seta heartbeat explicito** — usa o default do `@stomp/stompjs`, que ja e **10s/10s** (vale saber: se alguem mexer na config, isso muda calado).
