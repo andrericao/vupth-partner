@@ -10,18 +10,13 @@ import { ThemeProvider, DefaultTheme } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "../config/gluestack-ui.config";
-import {
-  useFonts,
-  Inter_400Regular,
-  Inter_700Bold,
-} from "@expo-google-fonts/inter";
-import {
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-} from "@expo-google-fonts/poppins";
-import { Archivo_700Bold, Archivo_800ExtraBold } from "@expo-google-fonts/archivo";
-import { DMMono_500Medium } from "@expo-google-fonts/dm-mono";
+// ⚠️ As fontes vem de `assets/fonts/`, NAO de `@expo-google-fonts`.
+// A Cloudflare Pages EXCLUI `node_modules` do deploy, por design — e o
+// `expo export --platform web` grava os assets espelhando o caminho de origem,
+// entao os TTFs saiam em `dist/assets/node_modules/@expo-google-fonts/...` e
+// eram descartados em silencio. O app publicado ficava num spinner eterno
+// (2026-08-27). Travado por teste em `brandTokens.test.ts`.
+import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 
@@ -46,15 +41,15 @@ const navTheme = {
 export default function RootLayout() {
   // [marca-vupth] Archivo substitui Poppins em titulos/botoes; Inter segue no
   // corpo. Poppins segue carregado ate as telas v1 migrarem.
-  const [fontLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_700Bold,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
-    Archivo_700Bold,
-    Archivo_800ExtraBold,
-    DMMono_500Medium,
+  const [fontLoaded, fontError] = useFonts({
+    Inter_400Regular: require("../assets/fonts/Inter_400Regular.ttf"),
+    Inter_700Bold: require("../assets/fonts/Inter_700Bold.ttf"),
+    Poppins_500Medium: require("../assets/fonts/Poppins_500Medium.ttf"),
+    Poppins_600SemiBold: require("../assets/fonts/Poppins_600SemiBold.ttf"),
+    Poppins_700Bold: require("../assets/fonts/Poppins_700Bold.ttf"),
+    Archivo_700Bold: require("../assets/fonts/Archivo_700Bold.ttf"),
+    Archivo_800ExtraBold: require("../assets/fonts/Archivo_800ExtraBold.ttf"),
+    DMMono_500Medium: require("../assets/fonts/DMMono_500Medium.ttf"),
   });
 
   // Push: registra o device quando autenticado e trata o toque na notificacao.
@@ -85,7 +80,10 @@ export default function RootLayout() {
             {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
                 style="dark" = icones escuros (visiveis sobre fundo claro). */}
             <StatusBar style="dark" backgroundColor="#FFFFFF" />
-            {fontLoaded ? <Slot /> : <Loading />}
+            {/* O erro entra no portao de proposito: fonte que nao carrega deve
+                degradar para a fonte do sistema, nunca prender o app numa tela
+                de carregamento. Foi o spinner eterno de 2026-08-27. */}
+            {fontLoaded || fontError ? <Slot /> : <Loading />}
           </ThemeProvider>
         </GluestackUIProvider>
       </QueryClientProvider>

@@ -197,3 +197,46 @@ describe("tab bar — o estado ativo nao pode depender so da cor", () => {
     expect(fonte).toMatch(/bg-vupth-greenTint/);
   });
 });
+
+describe("fontes — de ONDE elas sao carregadas (armadilha da Cloudflare Pages)", () => {
+  // 🔴 DEFEITO REAL, 2026-08-27: o app publicado ficava num spinner eterno.
+  //
+  // A Cloudflare Pages **exclui `node_modules` do deploy, por design**. O
+  // `expo export --platform web` grava os assets espelhando o caminho de
+  // origem, entao as fontes saiam em `dist/assets/node_modules/@expo-google-
+  // fonts/...` e a Pages descartava a pasta inteira, em silencio. Resultado:
+  // `useFonts` baixava o index.html do fallback de SPA no lugar do TTF, nunca
+  // resolvia, e o `_layout` segurava a tela para sempre.
+  //
+  // Nao da para testar o deploy daqui — da para travar as duas causas.
+  const layout = fs.readFileSync(path.join(ROOT, "app/_layout.tsx"), "utf8");
+
+  it("nenhuma fonte e IMPORTADA de @expo-google-fonts", () => {
+    // E o caminho que a Pages apaga. Os arquivos vivem em assets/fonts/.
+    //
+    // Casa `from "@expo-google-fonts/..."`, e nao a string solta: o comentario
+    // que explica esta regra no proprio `_layout.tsx` cita o pacote pelo nome,
+    // e a 1a versao deste teste reprovava por causa dele. Guarda que proibe
+    // ate falar do assunto empurra a explicacao para fora do codigo — que e o
+    // oposto do que se quer.
+    expect(layout).not.toMatch(/from\s+["']@expo-google-fonts/);
+  });
+
+  it("os TTFs existem no repositorio, fora de node_modules", () => {
+    const familias: string[] = Object.values(
+      tailwind.theme.extend.fontFamily as Record<string, string[]>
+    ).map((f) => f[0]);
+
+    for (const fonte of familias) {
+      const ttf = path.join(ROOT, "assets/fonts", `${fonte}.ttf`);
+      expect(fs.existsSync(ttf)).toBe(true);
+    }
+  });
+
+  it("a tela nao fica refem do carregamento de fonte", () => {
+    // `useFonts` devolve [loaded, error]. Segurando so no `loaded`, qualquer
+    // falha de fonte vira spinner eterno — que foi exatamente o sintoma.
+    // Com o erro no portao, o app abre com a fonte do sistema.
+    expect(layout).toMatch(/fontLoaded\s*\|\|\s*fontError/);
+  });
+});
