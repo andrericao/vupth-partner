@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { OnboardingPathChoice } from "@components/OnboardingPathChoice";
 import { useProfessionalStore } from "@store/professional.store";
 import { useEstablishmentStore, EstablishmentSearchResult } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
@@ -29,7 +30,7 @@ const SPECIALTIES = [
   { label: "Esteticista", value: "ESTHETICIAN" },
 ] as const;
 
-type Step = "profile" | "search" | "confirm";
+type Step = "profile" | "path" | "search" | "confirm";
 
 export default function ProfessionalOnboardingScreen() {
   const [step, setStep] = useState<Step>("profile");
@@ -69,11 +70,11 @@ export default function ProfessionalOnboardingScreen() {
         await refreshToken();
       } catch {}
 
-      setStep("search");
+      setStep("path");
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "USER_ALREADY_PROFESSIONAL") {
-        setStep("search");
+        setStep("path");
       } else if (code === "VALIDATION_ERROR") {
         const fieldErrors = error.response.data.fieldErrors;
         const msg = Object.values(fieldErrors).join("\n");
@@ -208,6 +209,33 @@ export default function ProfessionalOnboardingScreen() {
     );
   }
 
+  // S23 — a pergunta que nao existia. Antes daqui o fluxo caia direto na busca,
+  // e quem tem loja propria procurava uma loja que ainda nao existe.
+  if (step === "path") {
+    return (
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader title="Onde você vai atender?" onBack={() => setStep("profile")} />
+
+          <View className="flex-1">
+            <Text className="font-body text-vupth-textSecondary mb-6">
+              Perfil criado. Agora diga como você vai trabalhar — dá para mudar depois.
+            </Text>
+
+            <OnboardingPathChoice
+              onOwnShop={() => router.push("/(owner)/onboarding/establishment" as any)}
+              onExistingShop={() => setStep("search")}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
   if (step === "search") {
     return (
       <KeyboardAvoidingView
@@ -221,7 +249,7 @@ export default function ProfessionalOnboardingScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="flex-1 pb-12 px-4">
-          <ScreenHeader title="Buscar estabelecimento" onBack={() => setStep("profile")} />
+          <ScreenHeader title="Buscar estabelecimento" onBack={() => setStep("path")} />
 
           <View className="flex-1">
 

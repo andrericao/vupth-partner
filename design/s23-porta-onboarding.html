@@ -1,0 +1,81 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S23 — a porta que falta no onboarding</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;600&display=swap">
+<style>
+:root{--forest:#163300;--green:#9FE870;--tint:#E2F6D5;--surface:#F3F5F1;--border:#D7DDD3;--sec:#454745;--danger:#B3261E;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--forest);font-family:Inter,system-ui,sans-serif;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 24px 72px}
+h1{font-family:Archivo,sans-serif;font-weight:800;font-size:30px;line-height:1.15;margin:0 0 6px}
+.sub{color:var(--sec);font-size:15px;margin:0 0 32px;max-width:62ch}
+h2{font-family:Archivo,sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:36px 0 14px;color:var(--sec)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;align-items:start}
+.phone{border:1px solid var(--border);border-radius:22px;padding:18px;background:var(--bg);box-shadow:0 6px 18px rgba(22,51,0,.06)}
+.phone h3{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--sec);margin:0 0 12px}
+.tela{font-family:Archivo,sans-serif;font-weight:800;font-size:21px;margin:0 0 4px}
+.hint{color:var(--sec);font-size:13px;margin:0 0 16px}
+.card{border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;background:var(--surface)}
+.card.pick{background:var(--tint);border-color:var(--green)}
+.card b{font-family:Archivo,sans-serif;font-size:15px;display:block;margin-bottom:2px}
+.card span{font-size:13px;color:var(--sec)}
+.btn{background:var(--green);color:var(--forest);font-family:Archivo,sans-serif;font-weight:700;text-align:center;padding:14px;border-radius:999px;font-size:15px}
+.field{border:1px solid var(--border);border-radius:12px;padding:12px;color:var(--sec);font-size:14px;margin-bottom:10px;background:var(--bg)}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:10px}
+.hoje{background:#F7E4E2;color:var(--danger)}
+.novo{background:var(--tint);color:var(--forest)}
+.seta{text-align:center;color:var(--sec);font-size:22px;padding:6px 0}
+.nota{border-left:3px solid var(--green);background:var(--surface);padding:14px 16px;border-radius:0 12px 12px 0;font-size:14px;margin-top:12px}
+.nota b{font-family:Archivo,sans-serif}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-family:Archivo,sans-serif;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sec)}
+code{font-family:ui-monospace,monospace;font-size:13px;background:var(--surface);padding:1px 5px;border-radius:5px}
+</style></head><body><div class="wrap">
+
+<h1>S23 — a porta que falta no onboarding</h1>
+<p class="sub">Quem escolhe “sou profissional” cria o perfil e cai <b>direto</b> em “Buscar estabelecimento”. O dono de barbearia que se identifica como profissional fica preso no fluxo de afiliação, sem nunca ser perguntado se quer abrir a própria loja.</p>
+
+<h2>Hoje</h2>
+<div class="row">
+  <div class="phone"><h3>passo 1</h3><p class="tela">Seu perfil</p><p class="hint">nome e especialidade</p>
+    <div class="field">Nome</div><div class="field">Especialidade</div><div class="btn">Continuar</div></div>
+  <div class="seta">→</div>
+  <div class="phone"><span class="tag hoje">sem escolha</span><h3>passo 2</h3><p class="tela">Buscar estabelecimento</p>
+    <p class="hint">único caminho oferecido</p>
+    <div class="field">🔍 Nome da loja</div>
+    <div class="card"><b>Barbearia Central</b><span>Rua das Flores, 120</span></div>
+    <div class="nota"><b>O beco:</b> quem tem loja própria não encontra a dela na busca — ela não existe ainda. E não há como sair daqui.</div></div>
+</div>
+
+<h2>Proposta — um passo entre os dois</h2>
+<div class="row">
+  <div class="phone"><h3>passo 1</h3><p class="tela">Seu perfil</p><p class="hint">igual, sem mudança</p>
+    <div class="field">Nome</div><div class="field">Especialidade</div><div class="btn">Continuar</div></div>
+  <div class="seta">→</div>
+  <div class="phone"><span class="tag novo">novo</span><h3>passo 2</h3><p class="tela">Onde você vai atender?</p>
+    <p class="hint">a pergunta que não era feita</p>
+    <div class="card pick"><b>Na minha própria loja</b><span>Você abre o estabelecimento e atende nele</span></div>
+    <div class="card"><b>Numa loja que já existe</b><span>Você pede vínculo e o dono aprova</span></div>
+    <div class="nota">Sem opção pré-selecionada: as duas são legítimas, e escolher por engano custa desafiliação depois.</div></div>
+  <div class="seta">→</div>
+  <div class="phone"><h3>passo 3</h3><p class="tela">depende da escolha</p><p class="hint">dois destinos que já existem</p>
+    <div class="card"><b>Própria loja</b><span>vai para o cadastro de estabelecimento do dono</span></div>
+    <div class="card"><b>Loja existente</b><span>vai para a busca, exatamente como hoje</span></div>
+    <div class="nota"><b>Nada novo a construir</b> nos destinos — os dois fluxos já estão prontos.</div></div>
+</div>
+
+<h2>O que muda no código</h2>
+<table>
+<tr><th>onde</th><th>hoje</th><th>proposta</th></tr>
+<tr><td><code>onboarding.tsx</code> · <code>handleRegister</code></td><td><code>setStep("search")</code> fixo</td><td><code>setStep("path")</code> — o novo passo de escolha</td></tr>
+<tr><td><code>type Step</code></td><td><code>"profile" | "search" | "confirm"</code></td><td>acrescenta <code>"path"</code></td></tr>
+<tr><td>escolher “própria loja”</td><td>não existe</td><td>navega para o cadastro de estabelecimento (<code>quickCreate</code>, já implementado)</td></tr>
+<tr><td>escolher “loja existente”</td><td>é o comportamento único</td><td>segue idêntico ao de hoje</td></tr>
+</table>
+
+<div class="nota" style="margin-top:20px"><b>Por que isso é nosso e não do backend:</b> a auditoria de 27/08 confirmou no código deles que o <code>quick-create</code> já aceita quem é PROFESSIONAL, que os papéis são acumulativos e que a reputação acompanha a pessoa — sem migração de dado. O que faltava era só a pergunta.</div>
+
+<div class="nota"><b>Três decisões de produto ainda em aberto</b> (do Andre, não bloqueiam esta tela): pode abrir a própria loja <b>enquanto afiliado a outra</b>, ou tem de desafiliar antes? o histórico na casa antiga continua nos relatórios dele? ao abrir a loja, ele se <b>auto-afilia</b> como profissional dela?</div>
+
+</div></body></html>
