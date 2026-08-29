@@ -20,6 +20,10 @@ Ultima atualizacao: 2026-08-27 · branch `front/alinhamento-backend` (auditoria 
 >
 > 7. ✅ **S7 saiu do vermelho sem que este handoff soubesse.** O reset de senha passou a sair pela **API HTTP do Brevo** (commit de 22/08) porque **a porta 587 nao abre do Render** — causa raiz que explica meses de "o e-mail nao sai". **Codigo pronto; falta LIGAR no Render**, que e painel, nao codigo. Enquanto nao ligarem, o comportamento em producao segue o de antes.
 >
+> ✅ **S23 — A PARTE DO FRONT FOI ENTREGUE (2026-08-27).** Depois da auditoria que mostrou que voces nunca foram o bloqueio, implementamos o que faltava: entre "criar perfil" e "buscar estabelecimento" entra o passo **"Onde voce vai atender?"**, com os dois caminhos nomeados (loja propria x loja existente), nenhum pre-selecionado. Os destinos ja existiam — `quick-create` e a busca —, entao **nao houve endpoint novo nem mudanca de contrato**. Testado por RNTL e no ar no acesso por link.
+>
+> **O que ainda depende de decisao (do Andre, nao de voces):** (1) pode abrir a propria loja **enquanto afiliado a outra**, ou tem de desafiliar antes? (2) o historico na casa antiga continua no `/professional/me/reports` apos a troca? (hoje **continua**, porque o atendimento aponta para o `Professional`) (3) ao abrir a loja, ele se **auto-afilia** como profissional dela? **Enquanto (1) e (3) nao forem respondidas, a tela entrega os dois caminhos sem impedir nenhuma combinacao** — se a regra de negocio precisar barrar algo, e no backend que ela mora.
+
 > 📐 **S32 — RESPOSTA DO ANDRE SOBRE O QUE VAI NO TOKEN (2026-08-27): nome de loja NAO entra. Como se faz na pratica:**
 >
 > 1. **Token carrega IDENTIFICADOR, nunca nome de exibicao.** Nome muda; o JWT e um **retrato congelado** valido ate expirar (1h aqui). Loja renomeada = todo mundo com token na mao continua vendo o nome velho ate a proxima renovacao, e ninguem entende por que.
