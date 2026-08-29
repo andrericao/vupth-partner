@@ -1,0 +1,54 @@
+name: Deploy Web (Cloudflare Pages)
+
+# Publica a versao WEB do app (D8 — distribuir por web E por lojas).
+#
+# Fica INERTE ate os dois secrets existirem no repo:
+#   CLOUDFLARE_API_TOKEN   (token com permissao "Cloudflare Pages: Edit")
+#   CLOUDFLARE_ACCOUNT_ID
+# Sem eles o job falha no passo de deploy sem publicar nada — de proposito,
+# para nao passar despercebido que o site nao subiu.
+
+on:
+  push:
+    branches: [dev]
+    # Doc nao muda o site.
+    paths-ignore:
+      - "**.md"
+      - "src/docs/**"
+      - "design/**"
+      - ".maestro/**"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build web
+        # DECLARADO de proposito, nao herdado do ambiente: `EXPO_PUBLIC_API_ENV`
+        # e embutido no bundle em tempo de build, e o default do api.ts e
+        # "staging". Deixar implicito foi exatamente o defeito que quase mandou
+        # um bundle apontando para localhost ao aparelho (ver apiEnv.ts).
+        env:
+          EXPO_PUBLIC_API_ENV: staging # Render — trocar p/ prod (Railway) quando o link virar oficial
+        run: npm run build:web
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=vupth-partner --branch=${{ github.ref_name }}
