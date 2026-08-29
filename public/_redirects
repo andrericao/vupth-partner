@@ -1,0 +1,12 @@
+# Fallback de SPA (caminho web, D8).
+#
+# Com `web.output: "single"` o export gera UM index.html e o roteamento e do
+# expo-router, no navegador. Sem esta regra o host procura um arquivo fisico
+# para cada rota: abrir https://.../login direto, ou dar F5 dentro do app,
+# devolveria 404 do host em vez da tela.
+#
+# Formato lido por Cloudflare Pages e Netlify sem configuracao extra.
+# O 200 e o que faz o host SERVIR o index sem trocar a URL da barra
+# (301/302 mandariam o usuario para "/" e ele perderia a rota).
+
+/*    /index.html   200

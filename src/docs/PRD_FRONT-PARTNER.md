@@ -533,6 +533,36 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 
 ---
 
+### D8 · Como o testador chega no app — web por URL e/ou lojas ✅ **DECIDIDO (Andre, 2026-08-12): OS DOIS**
+
+**Contexto.** Mandar APK e pedir "instala mesmo assim" e caro: o Play Protect assusta, o arquivo circula por WhatsApp, e cada versao nova repete o ritual. Os testadores agora sao **donos de estabelecimento de verdade**, nao a equipe.
+
+**Decisao dele:** fazer **os dois**, comecando pelo **A (web)**; o **B (lojas)** fica preparado — **Play Store e Apple Store**.
+
+**A · Versao web (`react-native-web`, ja instalado).** Zero instalacao, atualizacao instantanea (o deploy substitui o app; nao ha "verificar atualizacao"). ⚠️ **O que NAO funciona na web:** **push** (`expo-notifications`) — o profissional so recebe solicitacao de corte com a **pagina aberta**, pelo WebSocket; `expo-updates` (irrelevante, o deploy faz o papel); e o **`expo-secure-store`**, usado em **19 arquivos**, que precisa de um adaptador (`SecureStore` no nativo, `localStorage` na web). ⚠️ **Seguranca:** no navegador nao existe Keychain — o token fica legivel por qualquer JS da mesma origem. Aceitavel p/ teste; se a web virar canal de acesso **real**, revisitar (cookie `HttpOnly`, que exige backend e traz dois modos de auth — **e a norma da industria**, nao anomalia; o que barateia e servir front e API **na mesma origem**).
+
+**B · Lojas (Play + Apple).** O testador instala pelo caminho normal, com push e OTA funcionando. **Custos reais:** Play Console **US$ 25 uma vez** (teste interno: ate 100 testadores, **sem revisao**, disponivel em minutos) · Apple Developer **US$ 99/ano** (TestFlight). ⚠️ **Isto REABRE a decisao de iOS**, registrada como adiada em 2026-08-11 justamente por causa dos US$ 99 — ver a nota na secao 14 e a lista "Preparar publicacao nas lojas" na secao 10.
+
+---
+
+### D9 · Recuperacao de senha: qual canal? ⚠️ **"o que tiver de gratis" tem uma resposta desconfortavel**
+
+**Contexto.** Voce pediu recuperacao por **notificacao, celular ou WhatsApp**, "o que tiver de gratis" — depois do teste em que o e-mail **nao chegou** (**S7**) e o fluxo **passou com e-mail inexistente** (**S21**).
+
+**A pergunta.** Trocar o canal de recuperacao, ou consertar o que existe?
+
+**O que cada canal custa de verdade:**
+- 🔴 **Push NAO SERVE p/ recuperar senha** — e uma falha de conceito, nao de custo. Conferido no codigo: o `logout` **apaga** o `vupth_push_token` e chama `DELETE /devices`. Quem esqueceu a senha esta **deslogado**, ou esta num **aparelho novo** — nos dois casos nao ha token p/ receber nada. Push serve p/ avisar quem **ja esta logado**, nao p/ readmitir quem ficou de fora.
+- 💰 **SMS nao e gratis.** Twilio, AWS SNS, Zenvia: todos cobram por mensagem no Brasil. **Firebase Phone Auth** tem cota gratuita diaria pequena e depois cobra por verificacao — **confirmar os limites atuais antes de contar com ela**.
+- 💰 **WhatsApp nao e gratis p/ isso.** Na API oficial da Meta, mensagem de **autenticacao** e categoria **paga** no Brasil (por mensagem), alem de exigir verificacao de negocio. O "gratis" do WhatsApp Business cobre outro tipo de conversa.
+- ✅ **E-mail e o unico canal realmente gratis em escala** (Brevo: 300/dia no free) — e e **exatamente o que ja temos e esta quebrado**.
+
+**Leitura honesta:** trocar de canal **nao resolve o problema, troca por outro mais caro**. O que resolve e o **S7** (fazer o e-mail sair) e o **S21** (parar de fingir que enviou). Se a decisao for por celular/WhatsApp mesmo assim, e legitimo — mas entra como **custo recorrente por usuario**, e a conta cresce junto com a base.
+
+**Alternativa gratuita que vale considerar:** o **login social** (Google Sign-In) elimina a senha em vez de recupera-la — quem entra com o Google nunca esquece senha nenhuma. Custo zero, adesao altissima, e resolve o problema pela raiz p/ boa parte dos usuarios.
+
+---
+
 ### D1 · Render Free hiberna: pagar, cutucar ou aceitar?
 
 **Contexto.** O backend roda no **Render Free**, que **dorme com ~15min sem trafego**. Medido em 2026-08-11: o readiness respondeu **`200` em 35 segundos**; ja acordado, `/ws/info` responde em **0,5s**. Isso ja custou: o **primeiro cadastro/login falhava por timeout** (resolvido com o `waitForBackend()`, que segura o app numa tela "preparando servidor…") e agora a **"falha no handshake do websocket"** que voce viu no teste — o socket conecta depois do gate e, se a instancia re-hibernou, o handshake morre (**S29**).
@@ -543,6 +573,8 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 - **Plano pago do host** (Render Starter ~US$ 7/mes, Railway, Fly.io). E o padrao assim que existe **qualquer** usuario real: instancia sempre quente, sem 1a requisicao de 35s. Resolve na raiz — inclusive o cold start do login, que e a **primeira impressao** do app.
 - **Keep-alive** (cron externo pingando a cada 10-14min: UptimeRobot, cron-job.org, GitHub Actions). Custo zero, mas e um contorno do free tier: se o ping falhar ou a politica mudar, volta a dormir; e alguns hosts consideram abuso.
 - **Aceitar e mascarar no app.** E o que ja fazemos com o readiness gate. Funciona p/ HTTP; p/ o socket dava p/ adiar a 1a conexao ate o gate passar. **Nao resolve** a re-hibernacao no meio do dia.
+
+⚠️ **Sobre Hostinger / HostGator (levantado pelo Andre, 2026-08-12):** a **hospedagem compartilhada** deles **nao roda Spring Boot** — e ambiente de PHP/WordPress, sem JVM nem container. O que serviria e o **VPS** (~R$ 30-50/mes), e ai voce assume **a administracao da maquina**: Docker, TLS/certificado, firewall, atualizacoes de SO, backup. E o mesmo trade-off do Oracle Free, so que pago. **Nao ha ganho** sobre o Render Starter (US$ 7 gerenciado) a menos que voce queira o controle do VPS por outro motivo.
 
 **O que muda.** Se for pago, o `waitForBackend()` vira rede de seguranca (nao caminho normal) e o S29 fecha. Se ficar Free, vale investir no app: adiar o socket, e talvez avisar "servidor acordando" em vez de "erro".
 
@@ -681,6 +713,63 @@ Nomes dinamicos com sufixo unico por execucao (ultimos 5 digitos do timestamp).
 |---|---|---|
 | **P1 · Foto de perfil** *(decisao **D3**: onde a imagem mora)* (profissional; avaliar o estabelecimento junto) | **Primeira da fila**, mas **nao agora** | Backend **S22**: o profissional nao tem campo de imagem e nao existe upload em lugar nenhum dos dois apps (so o `url_image` do estabelecimento, que a gente so le). ⚠️ **Custo escondido no front:** `expo-image-picker` e **modulo NATIVO** — **nao sai por OTA**, pede `eas build` + bump de versao + redistribuir o APK. **Juntar com outras mudancas nativas** quando a hora chegar, p/ nao gastar um build so nisso. |
 | **P2 · Modo de operacao: fila ou agenda pura** *(decisao **D2**)* (escolha do profissional) | Depois da foto | Backend **S24** · Client **C21**. Sao **dois regimes**, nao uma feature dentro da fila: no modo agenda o horario e **FIXO** (nada empurra). ⚠️ **Nao confundir com P3** (la o horario e estimado e a fila empurra). ⚠️ **Nao "desarquivar" os slots**: descartados em 2026-07-14 **para o modelo de fila** — a decisao segue valendo la. **Impacto:** a tela da Fila assume fila viva em tudo (ETA, "Iniciar proximo", "Fechar fila", promover, adiantar, refeicao no ETA); no modo agenda vira **grade do dia** e ate a abertura derivada da loja precisa de regra propria. **Comeca por mockup**, nao por codigo. |
+
+### 🎨 O DESIGN NOVO (canvas do Figma) — o que existe, o que nao, e o que pedir · 2026-08-12
+
+> ⚠️ **O canvas NAO esta no repositorio.** Andre mostrou prints do Figma com as telas novas (splash, onboarding com fotografia, login social, dashboard do dono com abas, fila do cliente em lima, notificacoes, atendimentos com agendamentos e pedidos de troca). **Conferido:** nenhum desses frames aparece nos docs da branch da marca, e os termos deles (*"Encerrar o dia"*, *"Pausar entrada"*, *"Continuar com Google"*, *"CHEGA DE FILA"*, *"PODE FECHAR O APP"*) tem **zero ocorrencias em todo o historico do repositorio** — e tambem no repo do client. A pasta `design/` so tem os mockups que eu mesmo fiz. **Unica excecao:** *"Chegando na loja"* existe — e o nosso `ServerWarmup.tsx`, ou seja, aquele frame desenha algo **ja implementado**.
+>
+> **A distancia e de natureza, nao de acabamento.** O commit da marca declara o proprio escopo com honestidade — *"reskin de cor/fonte em 22 telas v1 + 19 NativeWind"*. **Reskin = trocar cor e fonte sem mexer em estrutura.** O canvas mostra **redesenho de produto**: telas novas, navegacao nova, copy novo e **funcionalidade que nao existe** (login social — que e a alternativa registrada no **D9**; "Encerrar o dia"/"Pausar entrada"; abas Inicio/Filas/Menu p/ o dono; barra de progresso do checklist; agendamentos e pedidos de troca, que dependem de **S2** e **S11**; o estado offline da fila, que conversa com o **S29**).
+>
+> **Documentos de pedido versionados:** `design/PEDIDO_DESIGN.md` (para pessoas) e `design/PEDIDO_PARA_IA_DESIGN.md` (**de IA para IA** — a equipe de design tambem usa Claude). O essencial: **token da API do Figma + file key** (leio os valores exatos por no, muito melhor que PNG) e, sobretudo, **marcar cada frame como `RESKIN` / `RELAYOUT` / `NOVO`** — sem isso o canvas passa a impressao de que falta pouco, e nao falta. ⚠️ **Export de HTML do Figma NAO serve** (div em absoluto, sem traducao p/ React Native, e esconde os valores em CSS gerado).
+>
+> ✅ **Ja adotado (commit `0a346a0`):** as **telas de entrada** (escolha de papel, login, cadastro, recuperar senha) usam `vupthPrimary`/`vupthOutline` — **o Andre viu no aparelho e aprovou**. O resto do app seguia sem a marca porque `BrandButton` e as variantes `vupth*` estavam em **ZERO telas**: o que mudara ate entao era `bg-brand` (#3b7a3f) → `bg-vupth-forest` (#163300), dois verdes escuros, mais Poppins → Archivo. **A intuicao dele — "os componentes foram criados mas nao implementados" — estava certa, e eu a descartei rapido demais.**
+>
+> **Proximo passo tecnico, ja medido** (mockup em `design/marca-adocao.html`): trocar o **default do `Button` compartilhado** para o par lima+forest, como o **client** fez (la o remap do componente levou a marca a **24 telas** de uma vez). Risco medido: **apenas 2 chamadas** passam `bg` sem `textColor` e precisam de `textColor="$white"`. ⚠️ **Decisao do Andre:** *"a intencao e que nao haja divergencia, os mesmos componentes, fontes, hierarquia"* — a paridade de **API** so vem quando o client migrar p/ NativeWind (**C15**); ate la igualamos o **resultado visual**.
+
+### 🎨 BRANCH `design/marca-dev` — identidade nova (Pencil), avaliada em 2026-08-12
+
+> **Estado:** **3 commits locais** (nao pushados) sobre `1a42e87`. **Merge so apos a aprovacao visual do Andre.**
+>
+> **O que a branch faz:** **reskin** — troca **cor e fonte sem mexer em estrutura** (mesmas telas, mesmo fluxo). Tokens `vupth.*` no tailwind e `brandGreen/forest/...` no gluestack, **aditivos**: a escala `green` antiga **nao** foi remapeada de proposito, porque ela ainda e usada como TEXTO e o `#9FE870` e claro demais p/ isso. Fontes **Archivo** (heading/display) + **DM Mono**; Inter segue no corpo. `BrandButton` novo + variantes `vupth*` no `NwButton`. **Medido no codigo:** 22 arquivos usam os tokens novos no NativeWind e 27 no gluestack; sobraram 4 na paleta antiga (`nativewind-pilot`, `CompletionCard`, `nw/Input`, `brand/Button`).
+>
+> **O que eu acrescentei (3 commits):**
+> 1. **Bateria de testes** — a branch mexeu em **57 arquivos e nao tocou em nenhum teste**. Entraram: guarda do **1:1 tailwind × gluestack** (os dois arquivos so tinham COMENTARIO dizendo que precisavam bater — e comentario nao quebra build; "dois verdes" ja custou retrabalho em 29/07), **regra de contraste** (`vupth-green` nunca como cor de texto), **fontes declaradas × carregadas** (fonte sem `useFonts` cai na do sistema e a tela fica "quase certa"), `BrandButton` e as variantes `vupth*`. **Jest verde: 40 suites / 440 testes.**
+> 2. **`sessionStorage` no shim + `public/_headers` com CSP** — as duas mitigacoes do **D8**. *(Um **shim** e uma peca de encaixe: finge ser o pacote real p/ o resto do codigo nao perceber a diferenca — aqui, `expo-secure-store` na web.)*
+> 3. 🐛 **`expo-notifications` carregado sob demanda** — no **Expo Go** ele **grita no proprio import** desde o SDK 53, e como o hook e importado pelo `_layout`, o erro subia **antes de qualquer tela**. O arquivo ja tinha try/catch em toda chamada, o que **nao adianta quando o problema e o import**. Agora so carrega onde push existe (`pushSupported`, funcao pura +testes) — destrava o Expo Go **e entrega o item A4 do caminho web de brinde**.
+>
+> ⚠️ **Armadilhas do dia, p/ nao repetir:** (a) **`git pull`** — foi a causa real do "continuo vendo as telas antigas" (a branch local estava atras do origin); (b) quem trocar p/ esta branch precisa de **`npm install`** (Archivo/DM Mono), senao o `tsc` falha no `_layout`; (c) **`npx expo start -c`** — o NativeWind compila o tailwind em build-time e o cache guarda a paleta velha; (d) **nao trocar de branch com o Metro rodando** (eu fiz isso em 12/08 e o bundle saiu da branch errada); (e) o **fundo global** segue no off-white antigo (`#F7FAF8` no `_layout`) enquanto a marca nova define `background #FFFFFF` / `surface #F3F5F1` — ponta solta do reskin.
+>
+> **Merge:** simulado com `git merge-tree` contra a `chore/gluestack-update` → **ZERO conflitos** (depois de reverter o adaptador de storage). **Ordem combinada:** `design` → `dev` (apos o OK visual) → `dev` → `chore` → seguir a migracao **ja com a marca**, senao as 22 telas restantes nascem na paleta velha e viram repintura.
+
+### 🚀 PREPARAR PUBLICACAO — web (A) e lojas (B) · decisao **D8**
+
+> **Estado:** o **A (web)** comeca agora. O **B (lojas)** fica **preparado** — Andre quer subir na **Play Store E na Apple Store**. ⚠️ Isto **reabre o iOS**, adiado em 2026-08-11 por causa dos US$ 99/ano (nota na secao 14).
+
+**A · Versao web — o que falta**
+
+| # | Item | Quem | Nota |
+|---|------|------|------|
+| A1 | **Adaptador de storage** (`SecureStore` no nativo, `localStorage` na web) atras de uma interface unica | front | **O bloqueio**: `expo-secure-store` esta em **19 arquivos** e nao existe na web. Mexe em token — entra com teste. |
+| A2 | `expo export --platform web` + secao `web` no `app.json` | front | Expo Router funciona na web; `output: "single"` (SPA) ou `"static"`. |
+| A3 | **Hospedar** com preview por branch | front + Andre | **Cloudflare Pages / Netlify / Vercel** — free, cada branch com URL propria a cada push. Resolve tambem o **teste do visual do design**. |
+| A4 | **Gates de plataforma** onde a web nao tem o recurso | front | Esconder/desabilitar: "Verificar atualizacao" (`expo-updates`), registro de push, e qualquer coisa que assuma aparelho. Sem isso, quebra ou promete o que nao entrega. |
+| A6 | 🆕 **Assumir a limitacao na tela e oferecer o app** *(decisao do Andre, 2026-08-12)* | front | Ele fechou o buraco do push pela via honesta: *"pelo navegador nao tem notificacao e logo abaixo oferecer link para baixa-lo"*. **A fazer:** faixa **so na web** (`Platform.OS === "web"`) dizendo em uma linha o que falta — **"no navegador voce nao recebe aviso de cliente novo; a fila atualiza so com esta aba aberta"** — e, embaixo, **"Baixar o app"** apontando p/ a loja (ou p/ o APK ate a Play sair). ⚠️ **Onde ela precisa aparecer:** na **Fila** (e onde a falta de push machuca) e no **login/entrada** (antes de o testador tirar conclusao errada). ⚠️ **Nao repetir em toda tela** — vira ruido e as pessoas param de ler. **Dispensavel guardar** ("nao mostrar de novo") ate a sessao acabar. **Barato:** o gate ja existe (`pushSupported`), entao a faixa so consome o mesmo sinal. |
+| A5 | **QA proprio da web** | Andre | O que muda: sem push (so WS com a aba aberta), teclado/scroll diferentes, e as telas ainda em gluestack podem divergir mais (o NativeWind compila p/ CSS de verdade). |
+
+**B · Lojas — o que falta**
+
+| # | Item | Quem | Nota |
+|---|------|------|------|
+| B1 | **Conta Play Console** (US$ 25, uma vez) | Andre | Teste interno: ate 100 testadores, **sem revisao**, link direto. |
+| B2 | **Conta Apple Developer** (US$ 99/ano) | Andre | TestFlight. **Reabre a decisao de iOS**. |
+| B3 | **Perfis iOS no `eas.json`** + `eas device:create` + chave **APNs** | front | Hoje os tres perfis sao **so Android**. O `expo-notifications` exige a APNs. |
+| B4 | **Assets de loja**: icone (ja existe), **feature graphic**, screenshots por tamanho, descricao curta/longa, categoria | Andre + design | E o que mais atrasa publicacao na pratica. |
+| B5 | **Politica de privacidade** (URL publica) + **Data Safety** (Play) e **Privacy Nutrition Labels** (Apple) | Andre | **Obrigatorio nas duas lojas.** Declarar o que coletamos: e-mail, nome, localizacao (GPS do client), token de push. |
+| B6 | **Exclusao de conta dentro do app** (**S19**) e **URL publica de exclusao** | backend + front | **Exigencia das duas lojas** desde 2022/2023 — sem isso a submissao e **recusada**. Ja registrado como S19; agora virou bloqueio de publicacao. |
+| B7 | `version`/`versionCode` e `autoIncrement` | front | O perfil `production` ja tem `autoIncrement`; conferir a numeracao antes do 1o envio. |
+| B8 | **AAB de producao** + subir | front + Andre | O perfil `production` ja gera **app-bundle**, que e o formato da Play. |
+
+> ⚠️ **O B6 e o item que costuma pegar as equipes de surpresa:** as duas lojas **rejeitam** app com login que nao ofereca exclusao de conta pelo proprio app **e** por uma URL publica. Como o backend **nao tem o endpoint** (S19), isso deixou de ser "pedido do Andre" e virou **pre-requisito de publicacao**.
 
 ### 🧪 QA EM ANDAMENTO — bundle da migracao no canal `preview` (2026-08-05)
 
@@ -1275,7 +1364,7 @@ build, a partir do `app.json` + config plugins, sempre coerentes com a SDK 54.
   (`extra.eas.projectId` em `app.json`, gravado por `eas init`).
 - Identificadores (em `app.json`): `android.package` e `ios.bundleIdentifier` =
   **`com.vupth.partner`** (permanente apos publicar na loja).
-> 🍎 **iOS ADIADO (decisao do Andre, 2026-08-11).** Os tres perfis do `eas.json` seguem **so com Android** — nenhuma configuracao de iOS foi adicionada. **Motivo:** instalar num iPhone real exige a **Apple Developer Program (US$ 99/ano)**; nao ha equivalente gratuito ao "instalar mesmo assim" do Android (ad hoc e TestFlight exigem conta paga, e o build de **simulador**, que e gratis, so roda em **macOS**). O que **ja esta pronto** para quando a decisao mudar: `ios.bundleIdentifier` = `com.vupth.partner` no `app.json`, e o build compila nas maquinas macOS da EAS (**nao precisa de Mac** para compilar, so para o simulador). O que faltara: perfis `ios` no `eas.json`, registrar aparelhos (`eas device:create`) e a **chave APNs** — que o `expo-notifications`, ja nos plugins, vai exigir. Os updates OTA ja sao publicados para **android e ios**, entao o canal atende as duas plataformas sem mudanca.
+> 🍎 **iOS REABERTO em 2026-08-12** (ver **D8**: o Andre quer publicar nas **duas** lojas; o que segue abaixo era a decisao anterior, de 11/08, e continua valendo como registro do custo). **iOS ADIADO (decisao do Andre, 2026-08-11).** Os tres perfis do `eas.json` seguem **so com Android** — nenhuma configuracao de iOS foi adicionada. **Motivo:** instalar num iPhone real exige a **Apple Developer Program (US$ 99/ano)**; nao ha equivalente gratuito ao "instalar mesmo assim" do Android (ad hoc e TestFlight exigem conta paga, e o build de **simulador**, que e gratis, so roda em **macOS**). O que **ja esta pronto** para quando a decisao mudar: `ios.bundleIdentifier` = `com.vupth.partner` no `app.json`, e o build compila nas maquinas macOS da EAS (**nao precisa de Mac** para compilar, so para o simulador). O que faltara: perfis `ios` no `eas.json`, registrar aparelhos (`eas device:create`) e a **chave APNs** — que o `expo-notifications`, ja nos plugins, vai exigir. Os updates OTA ja sao publicados para **android e ios**, entao o canal atende as duas plataformas sem mudanca.
 
 - `eas.json` (perfis):
 
