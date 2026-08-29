@@ -48,28 +48,24 @@ describe("caminho web — arquivos que o host le", () => {
   });
 });
 
-describe("caminho web — o backend do site nao pode ser implicito", () => {
-  // ⚠️ Guarda nascida de um aviso do front-client (21/08) e confirmada contra
-  // o apiEnv.ts que vem no PR #18: o fallback do app deixa de ser "staging" e
-  // passa a ser "local". Como o export web NAO tem canal do EAS (canal so
-  // existe em bundle publicado por OTA), quem decide o backend do site e
-  // exclusivamente `EXPO_PUBLIC_API_ENV`.
-  //
-  // Sem a variavel declarada, o site sai apontando para o IP de LAN da maquina
-  // que buildou — e no navegador de outra pessoa isso nao da erro que explique,
-  // so nao conecta. O client tomou esse risco de frente porque o default deles
-  // ja era `local`.
-  const workflow = read(".github/workflows/deploy-web.yml");
-
-  it("o workflow de deploy DECLARA EXPO_PUBLIC_API_ENV", () => {
-    expect(workflow).toMatch(/EXPO_PUBLIC_API_ENV:\s*\S+/);
-  });
-
-  it("o valor declarado e um ambiente conhecido, nao `local`", () => {
-    const valor = workflow.match(/EXPO_PUBLIC_API_ENV:\s*(\S+)/)?.[1];
-    expect(["dev", "staging", "prod"]).toContain(valor);
-  });
-});
+// ⚠️ AQUI HAVIA UMA GUARDA QUE MORREU COM O `deploy-web.yml` (2026-08-27).
+//
+// Ela exigia que o workflow de deploy DECLARASSE `EXPO_PUBLIC_API_ENV`. O
+// workflow foi removido: o projeto do Cloudflare Pages e conectado ao GitHub e
+// **builda sozinho**, entao o nosso workflow era um segundo pipeline publicando
+// no mesmo projeto — e falhava, porque o wrangler la nao tem os secrets.
+//
+// O risco que a guarda cobria CONTINUA existindo, mas mudou de lugar: quem
+// decide o backend do site agora e a variavel no PAINEL da Cloudflare, por
+// ambiente (Production e Preview nao herdam uma da outra). Isso esta fora do
+// repositorio e nenhum teste daqui alcanca.
+//
+// Estado desejado, para quem for conferir no painel:
+//   Production (branch `main`)  -> EXPO_PUBLIC_API_ENV = prod     (Railway)
+//   Preview    (branch `dev`)   -> EXPO_PUBLIC_API_ENV = staging  (Render)
+//
+// NAO recriar uma guarda que leia um arquivo inexistente: teste que so pode
+// passar e pior que teste nenhum, porque da sensacao de cobertura.
 
 describe("caminho web — a saida do build nao pode contaminar as ferramentas", () => {
   // O `expo/tsconfig.base` nao exclui nada. Sem esta linha, rodar
