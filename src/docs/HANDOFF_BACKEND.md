@@ -20,6 +20,16 @@ Ultima atualizacao: 2026-08-27 · branch `front/alinhamento-backend` (auditoria 
 >
 > 7. ✅ **S7 saiu do vermelho sem que este handoff soubesse.** O reset de senha passou a sair pela **API HTTP do Brevo** (commit de 22/08) porque **a porta 587 nao abre do Render** — causa raiz que explica meses de "o e-mail nao sai". **Codigo pronto; falta LIGAR no Render**, que e painel, nao codigo. Enquanto nao ligarem, o comportamento em producao segue o de antes.
 >
+> 📐 **S32 — RESPOSTA DO ANDRE SOBRE O QUE VAI NO TOKEN (2026-08-27): nome de loja NAO entra. Como se faz na pratica:**
+>
+> 1. **Token carrega IDENTIFICADOR, nunca nome de exibicao.** Nome muda; o JWT e um **retrato congelado** valido ate expirar (1h aqui). Loja renomeada = todo mundo com token na mao continua vendo o nome velho ate a proxima renovacao, e ninguem entende por que.
+> 2. **O token viaja em TODO request**, no header `Authorization`. Lista de lojas com nome cresce sem teto e servidores tem limite pratico de header (~8 KB e comum). Um dono com 15 lojas passaria a arrastar peso em cada chamada da vida do app.
+> 3. ⚠️ **Autorizacao nao se le do token — decide-se no servidor, por request, contra o recurso.** O token diz **quem a pessoa e**; quem decide **o que ela pode naquela loja** e voces, olhando o `establishmentId` do path. Se o front liberar tela por claim, voces **ainda assim** tem de checar de novo — senao qualquer um forja. O claim serve p/ a **UI**, nunca como permissao.
+> 4. **Se precisar de escopo no token, claims MINIMOS e so IDs** — no maximo algo como `[{establishment_id, role}]`. Se a lista puder crescer muito, nem isso: o servidor resolve por consulta.
+> 5. **Nome para a UI vem de endpoint comum** (`GET /me/establishments`), que o app cacheia e revalida quando quiser. Barato, sempre fresco, e sem inchar o token.
+>
+> **Aplicado ao S32:** o que precisa entrar no modelo e o **vinculo pessoa↔loja com papel**, do lado de voces. O token, no maximo, carrega os **IDs**. *(Isto conversa direto com o `is_active` do S34: mesma logica — servidor decide, front so exibe.)*
+
 > 🧭 **DIRECAO DO ANDRE SOBRE S33 E S34 (2026-08-27) — os dois sao do BACKEND.**
 >
 > - **S33 (revogacao de papel):** e de voces. Do lado do front nao ha o que fazer enquanto nao existir caminho para perder papel. ⚠️ **O S34 mudou a pergunta:** como voces **ja** tem `is_active` por papel, o item deixa de ser *"da para revogar?"* e vira *"o que `is_active` significa hoje, quem o escreve, e por que ele nao chega ao front de forma utilizavel?"*.
