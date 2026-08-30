@@ -10,9 +10,12 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      // Fontes ja carregadas via @expo-google-fonts (mesmas do v1). Archivo
-      // substitui Poppins em heading/display; `mono` pros numeros (fila,
-      // horarios) — precisa bater com config/gluestack-ui.config.ts (fonts).
+      // Os TTFs vem de `assets/fonts/` e sao carregados no `app/_layout.tsx`
+      // — NAO de `@expo-google-fonts`: a Cloudflare Pages apaga node_modules
+      // do deploy e o app publicado ficava num spinner eterno (2026-08-27).
+      // Archivo substitui Poppins em heading/display; `mono` pros numeros
+      // (fila, horarios) — precisa bater com config/gluestack-ui.config.ts.
+      // O nome aqui e a chave do useFonts, entao mexer num lado exige o outro.
       fontFamily: {
         heading: ["Archivo_700Bold"],
         display: ["Archivo_800ExtraBold"],
@@ -57,11 +60,15 @@ module.exports = {
         hero: "24px",
         full: "999px",
       },
-      // Cores da marca espelhando a escala `green` do config/gluestack-ui.config.ts
-      // (FONTE DA VERDADE — paleta "Verde Marca", ancorada em #3b7a3f desde
-      // 2026-07-09). Precisa bater 1:1: durante a migracao as telas do v1 e do
-      // v2 convivem na mesma navegacao, e qualquer desvio aparece como dois
-      // verdes diferentes no app.
+      // ⚠️ Escala do v1 (LEGADO). Espelha a escala `green` do
+      // config/gluestack-ui.config.ts, que e a fonte da verdade DESTES tokens
+      // — paleta "Verde Marca", ancorada em #3b7a3f desde 2026-07-09. Precisa
+      // bater 1:1: durante a migracao as telas do v1 e do v2 convivem na mesma
+      // navegacao, e qualquer desvio aparece como dois verdes diferentes.
+      //
+      // Tela NOVA nao usa `brand-*`: a identidade atual e o par #9FE870 /
+      // #163300, que mora em `vupth.*` logo abaixo. Isto aqui sai quando a
+      // ultima tela do v1 migrar.
       colors: {
         brand: {
           DEFAULT: "#3b7a3f", // = $green500
