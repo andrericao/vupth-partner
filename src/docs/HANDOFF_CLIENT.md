@@ -283,6 +283,31 @@ Netlify tambem e gratis e tambem le os dois arquivos, com teto de banda (100 GB/
 
 **Custo total do caminho: zero.** So aparece conta se voces quiserem **dominio proprio** (o `*.pages.dev` sai de graca e o link funciona igual).
 
+### 🔴 A armadilha que derrubou o nosso app — e que ESTA no site de voces agora
+
+**A Cloudflare Pages exclui `node_modules` do deploy, por design** ([known issues](https://developers.cloudflare.com/pages/platform/known-issues/)). E o `expo export --platform web` grava os assets **espelhando o caminho de origem** — entao os TTFs saem em `dist/assets/node_modules/@expo-google-fonts/...` e a Pages **descarta a pasta inteira, em silencio**.
+
+**Medido no site de voces (`dev.vupth.pages.dev`, 2026-08-27):** o bundle referencia **42 fontes** sob `assets/node_modules/`, e a primeira que testamos responde **`200` com `content-type: text/html`** — ou seja, **nao existe**; quem respondeu foi o fallback de SPA devolvendo o `index.html`.
+
+⚠️ **No app de voces isso nao trava — e por isso e pior.** Como o `_layout` de voces nao segura a tela no `useFonts`, o site carrega normalmente **renderizando com a fonte do sistema, sem a identidade da marca**. Parece "quase certo", que e o tipo de defeito que ninguem reporta. No nosso, que segurava, virou **spinner eterno** — mais barulhento, mas mais facil de achar.
+
+**Como conferir em dois comandos:**
+
+```bash
+curl -s https://dev.vupth.pages.dev/ | grep -o '/_expo/static/js/web/[^"]*\.js'
+# baixe o bundle, pegue um caminho de fonte e teste o CONTENT-TYPE:
+curl -sI "https://dev.vupth.pages.dev/assets/node_modules/.../Inter_400Regular....ttf" | grep -i content-type
+```
+
+`content-type: text/html` = o arquivo nao existe.
+
+**As duas correcoes que fizemos:**
+
+1. **Tirar os TTFs de dentro do `node_modules`.** Copiamos os 8 arquivos para `assets/fonts/` e carregamos com `require("../assets/fonts/X.ttf")`. Verificado no build: 8 arquivos em `/assets/assets/fonts/`, **nenhum** sob `node_modules`, cada um servindo `200 font/ttf`. De brinde, o export caiu de **42 fontes para 8** — antes o pacote inteiro entrava no bundle.
+2. **Nao travar a tela no carregamento de fonte.** `useFonts` devolve `[loaded, error]`; usar so o `loaded` faz qualquer falha virar espera infinita. O portao passou a ser `fontLoaded || fontError`. **Esta e a correcao mais importante das duas** — vale para qualquer plataforma, e e o que impede o defeito de voltar por outro motivo.
+
+**A licao que generaliza, e que vale mais que o caso:** **`200` nao significa que o arquivo existe.** Com fallback de SPA, *tudo* responde 200 — o que distingue e o **`content-type`**. Isso vale para conferir qualquer asset de qualquer um dos dois apps.
+
 ### ⚠️ O gate de verdade: CORS — com uma CORRECAO sobre o WebSocket
 
 Nada disso funciona se a **API nao autorizar a origem nova**. No app nativo CORS nao existe, entao o assunto nunca apareceu — no navegador ele bloqueia **toda** chamada. **Isso trava os dois apps igual**, e e item de **backend**.
