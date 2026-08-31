@@ -2,7 +2,9 @@
 
 Itens levantados no **QA de device** do app partner cuja decisao pertence a **equipe de design**: desenho de tela, hierarquia, iconografia e affordance. Registrados aqui para alinhamento — o front nao muda desenho por conta propria.
 
-Ultima atualizacao: 2026-08-22 · branch `design/marca-dev` do front-partner.
+Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
+
+> **Estado da rodada de 22/08:** DS1, DS2 e a metade de codigo do DS5 fechados. **Aberto e esperando a design: DS3, DS4 e o glifo de Menu do DS5.**
 
 > **Direcao do documento.** Aqui vai o que o front PEDE ou APONTA para a design. O caminho inverso (o que a design pede ao front) esta em `design/PEDIDO_DESIGN.md` e `design/PEDIDO_PARA_IA_DESIGN.md`.
 
@@ -14,11 +16,11 @@ Ultima atualizacao: 2026-08-22 · branch `design/marca-dev` do front-partner.
 
 | # | Item | Descricao | Justificativa / status |
 |---|------|-----------|------------------------|
-| DS1 | **CTA "Entrar" do login cai sobre a barra do aparelho** | Na tela de login o botao de entrar ficou **por cima dos botoes de navegacao do dispositivo** (barra inferior do Android). Ver "Detalhe — DS1". | 🐛 Observado no device (Andre, 2026-08-22). **Correcao e de CODIGO**, mas a **decisao e da design**: manter o CTA ancorado no rodape (e entao respeitar o safe-area) ou devolve-lo ao fluxo da tela. |
+| DS1 | **CTA "Entrar" do login cai sobre a barra do aparelho** | Na tela de login o botao de entrar ficou **por cima dos botoes de navegacao do dispositivo** (barra inferior do Android). Ver "Detalhe — DS1". | ✅ **FECHADO em 2026-08-26 (Alexia, `85ae773`).** A design confirmou o CTA ancorado, e o `pb-8` fixo deu lugar ao inset real (`Math.max(insets.bottom, 32)` — o 32 e o piso pra tela sem barra nenhuma). Estava em **tres** telas, nao so no login: `login`, `register` e `forgot-password`. O gemeo no app do cliente saiu depois, na PR #23 do `vupth`. |
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que aparecia no canto superior direito da tela do dono ("banco") era **apenas um icone de fila**, quebra-galho do Andre — nao escolha de arte. | ✅ **FECHADO em 2026-08-26 (Alexia).** Ele **ja tinha saido** na componentizacao do cabecalho (`cac950de`), que apagou o `Header.tsx` e o `RoleIcon.tsx` juntos. Hoje o canto superior direito da tela do dono e a **pilula de status** (ABERTO / PAUSADO / FECHADO), nao um icone. Nao ha icone a substituir. ⚠️ **Nao confundir com o `BenchIcon`**, que segue vivo e e outra coisa: ele fica na tela do **PROFISSIONAL** e e a unica porta pras "Opcoes da fila" (ver DS3). |
 | DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🎨 Pedido de desenho (Andre, 2026-08-22). **Nao e falta de feature** — a acao existe e funciona; falta **affordance**. Ver "Detalhe — DS3". |
 | DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? Ver "Detalhe — DS4". |
-| DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🐛 + 🎨 Observado no device (Andre, 2026-08-22). **Parte disso e implementacao incompleta, parte e escolha de glifo.** Ver "Detalhe — DS5". |
+| DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🟡 **METADE FECHADA.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao — ver "Detalhe — DS5", item 1. **Continua aberto o item 2**: o glifo de Menu (`Grid3x3`) e escolha de arte e espera revisao da design. |
 
 ---
 
@@ -28,7 +30,9 @@ Ultima atualizacao: 2026-08-22 · branch `design/marca-dev` do front-partner.
 
 **Raiz:** o commit `7170796` (*"feat(login-partner): aplica o Pencil e ancora o CTA no rodape"*) passou a ancorar o botao no fim da tela usando **`pb-8` fixo**. Padding fixo **nao conhece a barra de navegacao** do aparelho: em device com barra por gestos ou por botoes, a altura util muda e o CTA invade a barra. O log do mesmo teste tambem acusou `SafeAreaView has been deprecated` — os dois apontam para o mesmo lugar.
 
-**Correcao tecnica (quando a design confirmar que o CTA fica ancorado):** trocar o padding fixo pelo inset real via `useSafeAreaInsets()` do `react-native-safe-area-context` (ja e a lib recomendada pelo warning), aplicando `paddingBottom: Math.max(insets.bottom, 32)`. Vale varrer as demais telas que ancoram CTA no rodape — o Pencil usa esse padrao em mais de uma.
+**✅ Corrigido em 2026-08-26 (`85ae773`).** A design confirmou o CTA ancorado, e o padding fixo deu lugar ao inset real via `useSafeAreaInsets()` do `react-native-safe-area-context` (a lib que o proprio warning recomendava): `paddingBottom: Math.max(insets.bottom, 32)`, com o 32 de piso pra tela sem barra nenhuma.
+
+A varredura prevista aqui valeu a pena: o padrao estava em **tres** telas, nao so no login — `login`, `register` e `forgot-password`. O mesmo defeito existia no **app do cliente** (as telas de auth de la vivem dentro do `Tab.Navigator`) e saiu na PR #23 do `vupth`, pelo `BottomTabBarHeightContext`.
 
 ## Detalhe — DS3 (affordance de "estou trabalhando")
 
@@ -67,7 +71,11 @@ O `src/components/TabBarIcon.tsx` **documenta o desenho correto no proprio comen
 
 E a cor sozinha nao da conta, com numero: ativo `#163300` contra inativo `#454745` tem contraste de **1,49:1** entre si. Os dois se leem bem sobre o branco (13,9:1 e 9,4:1), mas sao praticamente **indistinguiveis um do outro** — dois tons escuros. E a mesma armadilha que ja custou retrabalho nesta branch (trocar um verde escuro por outro e achar que a marca chegou): quem olha nao ve diferenca.
 
-**Acao:** e correcao de **CODIGO** (implementar a pilula `green-tint` sob o icone ativo, como o Pencil especifica). Nao depende de decisao nova da design — a nao ser que ela queira reforcar ainda mais o ativo (peso do rotulo, indicador superior).
+**✅ Corrigido em 2026-08-26 (`85ae773`).** A pilula `$green-tint` entrou sob o icone ativo, como o Pencil especifica. Ela **ocupa espaco sempre** (o inativo so nao pinta o fundo), senao a linha de icones pula de altura a cada troca de aba.
+
+Travado por **dois testes**: um mede que os dois tons NAO se separam sozinhos — e por isso a pilula precisa existir —, o outro garante que ela nao suma de novo.
+
+Segue em aberto, se a design quiser: reforcar ainda mais o ativo (peso do rotulo, indicador superior). Nao e pendencia, e opcao.
 
 ### 2. O icone de Menu e escolha de arte, e ela precisa ser revista
 
