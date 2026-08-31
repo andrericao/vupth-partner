@@ -19,7 +19,7 @@ Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 | DS1 | **CTA "Entrar" do login cai sobre a barra do aparelho** | Na tela de login o botao de entrar ficou **por cima dos botoes de navegacao do dispositivo** (barra inferior do Android). Ver "Detalhe — DS1". | ✅ **FECHADO em 2026-08-26 (Alexia, `85ae773`).** A design confirmou o CTA ancorado, e o `pb-8` fixo deu lugar ao inset real (`Math.max(insets.bottom, 32)` — o 32 e o piso pra tela sem barra nenhuma). Estava em **tres** telas, nao so no login: `login`, `register` e `forgot-password`. O gemeo no app do cliente saiu depois, na PR #23 do `vupth`. |
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que aparecia no canto superior direito da tela do dono ("banco") era **apenas um icone de fila**, quebra-galho do Andre — nao escolha de arte. | ✅ **FECHADO em 2026-08-26 (Alexia).** Ele **ja tinha saido** na componentizacao do cabecalho (`cac950de`), que apagou o `Header.tsx` e o `RoleIcon.tsx` juntos. Hoje o canto superior direito da tela do dono e a **pilula de status** (ABERTO / PAUSADO / FECHADO), nao um icone. Nao ha icone a substituir. ⚠️ **Nao confundir com o `BenchIcon`**, que segue vivo e e outra coisa: ele fica na tela do **PROFISSIONAL** e e a unica porta pras "Opcoes da fila" (ver DS3). |
 | DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🎨 Pedido de desenho (Andre, 2026-08-22). **Nao e falta de feature** — a acao existe e funciona; falta **affordance**. Ver "Detalhe — DS3". |
-| DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? Ver "Detalhe — DS4". |
+| DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? **Instrumentado em 2026-08-31** — o app ja honra a fonte do sistema, e sao **duas** primitivas que travam, nao "varias". Ver "Detalhe — DS4". |
 | DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🟡 **METADE FECHADA.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao — ver "Detalhe — DS5", item 1. **Continua aberto o item 2**: o glifo de Menu (`Grid3x3`) e escolha de arte e espera revisao da design. |
 
 ---
@@ -58,6 +58,38 @@ A varredura prevista aqui valeu a pena: o padrao estava em **tres** telas, nao s
 - apontar o que **NAO deve escalar** (numeros de senha/posicao na fila, por exemplo, costumam ser desenhados como elemento grafico).
 
 **Cuidado especifico:** os rotulos do rodape (abas) ja apareceram **cortados em device real** — foi o commit `89f1678` da propria entrega. Essa e exatamente a area que quebra primeiro quando a fonte cresce.
+
+### Levantamento de 2026-08-31 — o que de fato trava
+
+Feito para a decisao ser sobre desenho, e nao sobre descobrir onde esta o problema. Tudo abaixo se confere com um `grep` no repo.
+
+**1. O app JA honra a fonte do sistema.** `allowFontScaling` nao e desligado em lugar nenhum (`grep -rn allowFontScaling app src` nao retorna nada). Ou seja, a **opcao 1 do DS4 ja esta ligada** — o que ninguem sabe e ate onde o layout aguenta. Nao ha o que codar para "honrar o sistema"; ha o que **medir**.
+
+**2. Sao DUAS primitivas que travam, nao "varias".** Caixa de altura fixa segurando texto que cresce:
+
+| Onde | Altura | O que segura |
+|---|---|---|
+| `src/components/nw/Button.tsx:51` | `h-[54px]` | o rotulo do botao |
+| `src/components/nw/Input.tsx:42` | `h-[50px]` | o texto digitado e o placeholder |
+
+**3. As outras alturas fixas NAO seguram texto** — nao quebram com fonte maior: o avatar `w-[72px] h-[72px]` em `app/(professional)/settings.tsx:167` e o `w-[39px] h-[39px]` do `ButtonGoBack.tsx:11`. Sao caixas de icone/foto.
+
+**4. O padrao certo ja existe no repo.** O `ScreenHeader.tsx` usa `min-h-[44px]` (linha 78) e `min-h-[40px]` (linha 108) — altura **minima**, que cresce quando o conteudo cresce. Trocar `h-` por `min-h-` nas duas primitivas do item 2 e correcao mecanica e **nao depende de decisao nova**; o que depende e o item 6.
+
+**5. A tab bar e o unico ponto com altura verdadeiramente cravada.** Em `app/(owner)/(tabs)/_layout.tsx:28`: `height: 72 + insets.bottom`, com `paddingTop: 8` e `paddingBottom: 8 + insets.bottom` — sobram ~56px para pilula (34) + rotulo (13) + respiro. Ela **soma** o inset do device, mas **nao cresce com a fonte**. E exatamente onde o rotulo ja cortou.
+
+**6. Ha 7 pontos que TRUNCAM em vez de refluir** (`numberOfLines`): `my-day.tsx:207` e `:319`, `reports.tsx:117`, `attendances.tsx:158`, `ServiceTypeGrid.tsx:85`, `ScreenHeader.tsx:98` e `:120`. Com a fonte ampliada eles cortam a frase em vez de estourar a caixa — o que e melhor que quebrar o layout, mas e **perda de informacao silenciosa**.
+
+### O que isto muda no pedido a design
+
+O pedido original ("dizer como **cada** primitiva reflui") era grande porque ninguem tinha contado. Contado, sobra:
+
+- **o teto de ampliacao** que o desenho suporta (ex.: 130%) — segue sendo a pergunta principal, e so a design responde;
+- **quais dos 7 pontos podem truncar** e quais precisam quebrar em duas linhas;
+- **a tab bar**: cresce junto com a fonte, ou o rotulo some acima de um certo tamanho (padrao que iOS e Android usam)?
+- o que **NAO deve escalar** — numero de senha e posicao na fila costumam ser elemento grafico, nao texto.
+
+**Como se verifica este levantamento:** `grep -rnE 'h-\[[0-9]+px\]' --include='*.tsx' app src` para as alturas fixas, `grep -rn allowFontScaling app src` para o item 1, `grep -rn numberOfLines --include='*.tsx' app src` para o item 6. Se os numeros nao baterem, esta secao envelheceu — corrija-a.
 
 ---
 
