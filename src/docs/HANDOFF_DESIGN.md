@@ -4,7 +4,9 @@ Itens levantados no **QA de device** do app partner cuja decisao pertence a **eq
 
 Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 
-> **Estado da rodada de 22/08:** DS1, DS2, DS3, DS4 e a metade de codigo do DS5 fechados. **Aberto e esperando a design: so o glifo de Menu do DS5.** O DS3 e o DS4 tem desenho pronto; o que sobrou dos dois nao e decisao de design — e uma pergunta de modelo para o backend (DS3) e a escala dos icones (DS4).
+> **✅ Rodada de 22/08 ENCERRADA em 2026-08-31: DS1, DS2, DS3, DS4 e DS5 fechados.**
+>
+> Nada aqui espera mais a design. O que sobrou dos itens nao e decisao de desenho: uma pergunta de **modelo** para o backend (DS3 — se `ON_BREAK` deve parar a entrada) e a **escala dos icones** com a fonte do sistema (DS4), que vale conversar com o Andre.
 
 > **Direcao do documento.** Aqui vai o que o front PEDE ou APONTA para a design. O caminho inverso (o que a design pede ao front) esta em `design/PEDIDO_DESIGN.md` e `design/PEDIDO_PARA_IA_DESIGN.md`.
 
@@ -20,7 +22,7 @@ Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que aparecia no canto superior direito da tela do dono ("banco") era **apenas um icone de fila**, quebra-galho do Andre — nao escolha de arte. | ✅ **FECHADO em 2026-08-26 (Alexia).** Ele **ja tinha saido** na componentizacao do cabecalho (`cac950de`), que apagou o `Header.tsx` e o `RoleIcon.tsx` juntos. Hoje o canto superior direito da tela do dono e a **pilula de status** (ABERTO / PAUSADO / FECHADO), nao um icone. Nao ha icone a substituir. ⚠️ **Nao confundir com o `BenchIcon`**, que segue vivo e e outra coisa: ele fica na tela do **PROFISSIONAL** e e a unica porta pras "Opcoes da fila" (ver DS3). |
 | DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🟢 **DESENHO FECHADO em 2026-08-31, pronto para codar.** A pilula do status entrou em 26/08 (`85ae773`); o abrir/fechar fila **nao existia nem no desenho** — nao era falta de implementacao. Tres telas desenhadas e as quatro decisoes tomadas. **Sobra uma pergunta, e ela e de BACKEND**, nao de design: ver "Detalhe — DS3". |
 | DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🟢 **DECIDIDO em 2026-08-31.** O app **ja honra** a fonte do sistema — controle A-/A+ proprio esta descartado. Regua: WCAG 1.4.4, texto a **200%**. Duas telas medidas: a 130% passa inteiro; a 200% passa depois de tres correcoes (chave em linha propria, tab bar sem rotulo, aviso em duas linhas). **Sobram dois itens, e o segundo e de codigo/backend:** ver "Detalhe — DS4". |
-| DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🟡 **METADE FECHADA.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao — ver "Detalhe — DS5", item 1. **Continua aberto o item 2**: o glifo de Menu (`Grid3x3`) e escolha de arte e espera revisao da design. |
+| DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | ✅ **FECHADO.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao. O glifo de Menu virou **`list`** em 2026-08-31 — ver "Detalhe — DS5". |
 
 ---
 
@@ -192,7 +194,17 @@ Segue em aberto, se a design quiser: reforcar ainda mais o ativo (peso do rotulo
 
 O glifo hoje e o **`Grid3x3`** do `lucide` — uma grade de 9 quadrados. Ele **nao e aproximacao nossa**: veio do commit `1d441a2` (*"usa os icones exatos do Pencil (lucide), nao aproximacao"*), lido do proprio arquivo de design. Entao a revisao e **da design**, nao do front.
 
-**Por que estranha:** grade de quadrados e a convencao de **"todos os apps / launcher / dashboard"**, nao de "menu". O vocabulario que o usuario reconhece para menu e o hamburguer (`Menu`) ou as reticencias (`Ellipsis` / `MoreHorizontal`). Vale notar que esta mesma aba **ja deu problema de rotulo cortado** em device real (commit `89f1678` da propria entrega) — e a aba do rodape que mais pediu conserto ate agora.
+**Por que estranha:** grade de quadrados e a convencao de **"todos os apps / launcher / dashboard"**, nao de "menu". A aba abre uma **lista agrupada** de destinos — EQUIPE, NEGOCIO, CONTA —, entao o glifo promete uma grade de atalhos e entrega uma lista.
+
+**✅ Decidido em 2026-08-31 (Alexia): vira `list`.**
+
+**Por que nao a reticencia,** que seria o "Mais" do iOS e a escolha obvia: `Ellipsis` **ja e o botao "Opcoes da fila"** na tela do profissional, trocado justamente para dizer *"opcoes"*. O mesmo glifo nao pode significar uma **aba** que leva a uma secao e um **botao** que abre opcoes no mesmo app.
+
+**O que decidiu entre `list` e o hamburguer foi o DS4:** acima de ~185% a tab bar larga os rotulos e sobra so o icone. A palavra "Menu" nao vai estar la para desambiguar, entao o glifo tem de se virar sozinho — os dois se viram, e entre eles a escolha foi o que descreve o **conteudo** em vez do **gesto**.
+
+**Aplicado:** no arquivo de design (`Tab Bar Owner v2` e as tres telas OWNER) e no codigo, em `src/components/TabBarIcon.tsx`, mapa `ICONS`, chave `menu`.
+
+**Como se verifica:** `grep -rn 'Grid3x3' --include='*.tsx' src app`. Se voltar a aparecer, alguem reverteu.
 
 ---
 
