@@ -4,7 +4,7 @@ Itens levantados no **QA de device** do app partner cuja decisao pertence a **eq
 
 Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 
-> **Estado da rodada de 22/08:** DS1, DS2 e a metade de codigo do DS5 fechados; a metade "como eu estou" do DS3 tambem. **Aberto e esperando a design: o abrir/fechar fila do DS3 (com proposta desenhada), o DS4 (instrumentado) e o glifo de Menu do DS5.**
+> **Estado da rodada de 22/08:** DS1, DS2, DS3 e a metade de codigo do DS5 fechados. **Aberto e esperando a design: o DS4 (instrumentado) e o glifo de Menu do DS5.** O DS3 tem desenho pronto e uma pergunta pendente que e de **backend**.
 
 > **Direcao do documento.** Aqui vai o que o front PEDE ou APONTA para a design. O caminho inverso (o que a design pede ao front) esta em `design/PEDIDO_DESIGN.md` e `design/PEDIDO_PARA_IA_DESIGN.md`.
 
@@ -18,7 +18,7 @@ Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 |---|------|-----------|------------------------|
 | DS1 | **CTA "Entrar" do login cai sobre a barra do aparelho** | Na tela de login o botao de entrar ficou **por cima dos botoes de navegacao do dispositivo** (barra inferior do Android). Ver "Detalhe — DS1". | ✅ **FECHADO em 2026-08-26 (Alexia, `85ae773`).** A design confirmou o CTA ancorado, e o `pb-8` fixo deu lugar ao inset real (`Math.max(insets.bottom, 32)` — o 32 e o piso pra tela sem barra nenhuma). Estava em **tres** telas, nao so no login: `login`, `register` e `forgot-password`. O gemeo no app do cliente saiu depois, na PR #23 do `vupth`. |
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que aparecia no canto superior direito da tela do dono ("banco") era **apenas um icone de fila**, quebra-galho do Andre — nao escolha de arte. | ✅ **FECHADO em 2026-08-26 (Alexia).** Ele **ja tinha saido** na componentizacao do cabecalho (`cac950de`), que apagou o `Header.tsx` e o `RoleIcon.tsx` juntos. Hoje o canto superior direito da tela do dono e a **pilula de status** (ABERTO / PAUSADO / FECHADO), nao um icone. Nao ha icone a substituir. ⚠️ **Nao confundir com o `BenchIcon`**, que segue vivo e e outra coisa: ele fica na tela do **PROFISSIONAL** e e a unica porta pras "Opcoes da fila" (ver DS3). |
-| DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🟡 **METADE FECHADA.** A pilula do proprio status entrou em 2026-08-26 (Alexia, `85ae773`) e resolve o "como eu estou". **Continua aberto o abrir/fechar fila** — e a causa nao era a implementacao: o controle **nao existe no arquivo de design**. Proposta desenhada em 2026-08-31, ver "Detalhe — DS3". |
+| DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🟢 **DESENHO FECHADO em 2026-08-31, pronto para codar.** A pilula do status entrou em 26/08 (`85ae773`); o abrir/fechar fila **nao existia nem no desenho** — nao era falta de implementacao. Tres telas desenhadas e as quatro decisoes tomadas. **Sobra uma pergunta, e ela e de BACKEND**, nao de design: ver "Detalhe — DS3". |
 | DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? **Instrumentado em 2026-08-31** — o app ja honra a fonte do sistema, e sao **duas** primitivas que travam, nao "varias". Ver "Detalhe — DS4". |
 | DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🟡 **METADE FECHADA.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao — ver "Detalhe — DS5", item 1. **Continua aberto o item 2**: o glifo de Menu (`Grid3x3`) e escolha de arte e espera revisao da design. |
 
@@ -58,7 +58,7 @@ Ou seja: **o front nao deixou de implementar — nao havia o que implementar.** 
 
 ### Proposta desenhada (2026-08-31)
 
-Duas telas novas no arquivo de design, `PROF · 01 Fila · DS3 (fila aberta)` e `(fila fechada)`, com a `Nota DS3` ao lado. A disposicao e em tres linhas, cada uma com um dono:
+Tres telas novas no arquivo de design — `PROF · 01 Fila · DS3 (aceitando clientes)`, `(fila fechada)` e `(fila pausada)` — com a `Nota DS3` ao lado. A disposicao e em tres linhas, cada uma com um dono:
 
 1. **status a esquerda, reticencia a direita** — a faixa do que e do profissional;
 2. **titulo a esquerda, a chave da fila a direita**, alinhada com ele — o estado e *da fila*, e e o titulo que nomeia a fila;
@@ -75,9 +75,33 @@ Por a chave na linha do titulo resolve por **estrutura** o cuidado acima: os doi
 
 A tela "fila fechada" mostra de proposito o cruzamento que este handoff alertava: **Trabalhando + Fila fechada ao mesmo tempo**, com a linha de apoio trocando para a consequencia ("ninguem novo entra") e o rodape confirmando que o profissional segue atendendo quem ja entrou.
 
-**Falta decidir (design):** o toque alterna direto ou pede confirmacao, como a tela de opcoes faz hoje ao fechar? O rotulo fica "Aberta/Fechada" ou vira "Aceitando novos"? E o chevron na pilula de status vale a pena, ou polui?
+### Decisoes da design — 2026-08-31
 
-**Como se verifica:** abrir o arquivo de design e procurar as duas telas `PROF · 01 Fila · DS3`. Se elas nao existirem mais, esta secao esta desatualizada.
+1. **Confirmacao assimetrica**, igual ao que a tela de opcoes ja faz: **fechar pergunta** e explica a consequencia; **reabrir e imediato**, por ser acao inofensiva.
+2. **Vocabulario: "Aceitando clientes" · "Fila fechada" · "Fila pausada".** Sai o par "Aberta/Fechada": ele colidia com o `ABERTO / PAUSADO / FECHADO` da **loja** na tela do dono — mesmas palavras para sujeitos diferentes, e os dois se cruzam de verdade (fechar a fila do ultimo profissional fecha a loja).
+3. **Titulo: "Sua fila".** O app publica `"Fila"` — quem alinhar, alinhe o codigo com o desenho, nao o contrario.
+4. **O chevron na pilula de status fica.** Ela e clicavel desde 26/08 e nada na tela dizia isso.
+
+### O sistema que essas decisoes criaram
+
+A chave passou a ter **dois canais**, cada um dizendo uma coisa:
+
+- **posicao do knob** = `accepting_new`, que e o que a chave de fato controla — direita aceita, esquerda nao;
+- **cor** = o estado **efetivo** da fila, herdado do status quando ele importa.
+
+| Tela | Status | Chave | Leitura |
+|---|---|---|---|
+| `(aceitando clientes)` | Trabalhando | trilho forest, knob `brand-green` a direita | aceitando |
+| `(fila fechada)` | Trabalhando | trilho `surface` com contorno, knob a esquerda | nao aceitando |
+| `(fila pausada)` | Intervalo | trilho `accent-peach`, knob a direita | aceita, mas voce esta em intervalo |
+
+Isto **corrige o alerta anterior** de que a chave nao podia usar cor de acento: ela **pode** usar pessego — desde que pessego signifique *Intervalo*, que e exatamente o que ele significa na pilula de status. O erro seria pessego significando outra coisa.
+
+⚠️ **Falta confirmar, e e a unica coisa que sobrou:** *"Fila pausada"* aqui e **derivado**, nao um terceiro estado da fila. Hoje `accepting_new` e binario e `ON_BREAK` e so rotulo de status — nao toca na fila. Entao essa tela e **exibicao**: com o status em Intervalo, a chave mostra o que a fila *parece*, sem nada mudar no backend. **Se a intencao for que Intervalo de fato PARE a entrada de gente nova, isso e mudanca de modelo** e vira pedido para o backend, nao trabalho de front.
+
+**Como se verifica:** abrir o arquivo de design e procurar as tres telas `PROF · 01 Fila · DS3`. Se elas nao existirem mais, esta secao esta desatualizada.
+
+
 
 ---
 
