@@ -4,7 +4,7 @@ Itens levantados no **QA de device** do app partner cuja decisao pertence a **eq
 
 Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 
-> **Estado da rodada de 22/08:** DS1, DS2, DS3 e a metade de codigo do DS5 fechados. **Aberto e esperando a design: o DS4 (instrumentado) e o glifo de Menu do DS5.** O DS3 tem desenho pronto e uma pergunta pendente que e de **backend**.
+> **Estado da rodada de 22/08:** DS1, DS2, DS3, DS4 e a metade de codigo do DS5 fechados. **Aberto e esperando a design: so o glifo de Menu do DS5.** O DS3 e o DS4 tem desenho pronto; o que sobrou dos dois nao e decisao de design — e uma pergunta de modelo para o backend (DS3) e a escala dos icones (DS4).
 
 > **Direcao do documento.** Aqui vai o que o front PEDE ou APONTA para a design. O caminho inverso (o que a design pede ao front) esta em `design/PEDIDO_DESIGN.md` e `design/PEDIDO_PARA_IA_DESIGN.md`.
 
@@ -19,7 +19,7 @@ Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 | DS1 | **CTA "Entrar" do login cai sobre a barra do aparelho** | Na tela de login o botao de entrar ficou **por cima dos botoes de navegacao do dispositivo** (barra inferior do Android). Ver "Detalhe — DS1". | ✅ **FECHADO em 2026-08-26 (Alexia, `85ae773`).** A design confirmou o CTA ancorado, e o `pb-8` fixo deu lugar ao inset real (`Math.max(insets.bottom, 32)` — o 32 e o piso pra tela sem barra nenhuma). Estava em **tres** telas, nao so no login: `login`, `register` e `forgot-password`. O gemeo no app do cliente saiu depois, na PR #23 do `vupth`. |
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que aparecia no canto superior direito da tela do dono ("banco") era **apenas um icone de fila**, quebra-galho do Andre — nao escolha de arte. | ✅ **FECHADO em 2026-08-26 (Alexia).** Ele **ja tinha saido** na componentizacao do cabecalho (`cac950de`), que apagou o `Header.tsx` e o `RoleIcon.tsx` juntos. Hoje o canto superior direito da tela do dono e a **pilula de status** (ABERTO / PAUSADO / FECHADO), nao um icone. Nao ha icone a substituir. ⚠️ **Nao confundir com o `BenchIcon`**, que segue vivo e e outra coisa: ele fica na tela do **PROFISSIONAL** e e a unica porta pras "Opcoes da fila" (ver DS3). |
 | DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🟢 **DESENHO FECHADO em 2026-08-31, pronto para codar.** A pilula do status entrou em 26/08 (`85ae773`); o abrir/fechar fila **nao existia nem no desenho** — nao era falta de implementacao. Tres telas desenhadas e as quatro decisoes tomadas. **Sobra uma pergunta, e ela e de BACKEND**, nao de design: ver "Detalhe — DS3". |
-| DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? **Instrumentado em 2026-08-31** — o app ja honra a fonte do sistema, e sao **duas** primitivas que travam, nao "varias". Ver "Detalhe — DS4". |
+| DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🟢 **DECIDIDO em 2026-08-31.** O app **ja honra** a fonte do sistema — controle A-/A+ proprio esta descartado. Regua: WCAG 1.4.4, texto a **200%**. Duas telas medidas: a 130% passa inteiro; a 200% passa depois de tres correcoes (chave em linha propria, tab bar sem rotulo, aviso em duas linhas). **Sobram dois itens, e o segundo e de codigo/backend:** ver "Detalhe — DS4". |
 | DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🟡 **METADE FECHADA.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao — ver "Detalhe — DS5", item 1. **Continua aberto o item 2**: o glifo de Menu (`Grid3x3`) e escolha de arte e espera revisao da design. |
 
 ---
@@ -58,13 +58,16 @@ Ou seja: **o front nao deixou de implementar — nao havia o que implementar.** 
 
 ### Proposta desenhada (2026-08-31)
 
-Tres telas novas no arquivo de design — `PROF · 01 Fila · DS3 (aceitando clientes)`, `(fila fechada)` e `(fila pausada)` — com a `Nota DS3` ao lado. A disposicao e em tres linhas, cada uma com um dono:
+Tres telas novas no arquivo de design — `PROF · 01 Fila · DS3 (aceitando clientes)`, `(fila fechada)` e `(fila pausada)` — com a `Nota DS3` ao lado. A disposicao e em **quatro linhas**:
 
 1. **status a esquerda, reticencia a direita** — a faixa do que e do profissional;
-2. **titulo a esquerda, a chave da fila a direita**, alinhada com ele — o estado e *da fila*, e e o titulo que nomeia a fila;
-3. os numeros da fila.
+2. **titulo** `Sua fila`, ocupando a linha inteira;
+3. **a chave da fila**, em linha propria;
+4. os numeros da fila.
 
-Por a chave na linha do titulo resolve por **estrutura** o cuidado acima: os dois controles deixam de ser vizinhos, entao nao dependem de cor para nao lerem como um botao so.
+Os dois controles ficam em **linhas diferentes**, entao nao dependem de cor para nao lerem como um botao so — a separacao e estrutural.
+
+> **A chave comecou na linha do titulo, e saiu de la por causa do DS4.** Ela nao encolhe, e como o titulo e `flex-1` com `numberOfLines={2}`, quem cede espaco e sempre o titulo: com a fonte do sistema a 130% ele ja virava duas linhas, e a 200% uma coluna de letras. Em linha propria, o titulo cabe numa linha nos dois tamanhos. **Quem for reaproximar as duas coisas um dia, leia o DS4 antes.**
 
 **Os dois sao clicaveis, e por isso precisam ser controles de tipos diferentes:**
 
@@ -141,14 +144,29 @@ Feito para a decisao ser sobre desenho, e nao sobre descobrir onde esta o proble
 
 **6. Ha 7 pontos que TRUNCAM em vez de refluir** (`numberOfLines`): `my-day.tsx:207` e `:319`, `reports.tsx:117`, `attendances.tsx:158`, `ServiceTypeGrid.tsx:85`, `ScreenHeader.tsx:98` e `:120`. Com a fonte ampliada eles cortam a frase em vez de estourar a caixa — o que e melhor que quebrar o layout, mas e **perda de informacao silenciosa**.
 
-### O que isto muda no pedido a design
+### Decisoes da design — 2026-08-31
 
-O pedido original ("dizer como **cada** primitiva reflui") era grande porque ninguem tinha contado. Contado, sobra:
+**A regua e a norma, nao um numero a dedo.** Sendo acessibilidade, o alvo e a **WCAG 1.4.4**: texto a **200%** sem perda de conteudo ou funcao. Por isso duas telas desenhadas, `DS4 (fonte do sistema a 130%)` e `(a 200%)`, com a `Nota DS4` ao lado.
 
-- **o teto de ampliacao** que o desenho suporta (ex.: 130%) — segue sendo a pergunta principal, e so a design responde;
-- **quais dos 7 pontos podem truncar** e quais precisam quebrar em duas linhas;
-- **a tab bar**: cresce junto com a fonte, ou o rotulo some acima de um certo tamanho (padrao que iOS e Android usam)?
-- o que **NAO deve escalar** — numero de senha e posicao na fila costumam ser elemento grafico, nao texto.
+**O controle A-/A+ dentro do app esta descartado.** O app ja honra a fonte do sistema; um controle proprio seria uma segunda regua concorrendo com a do aparelho. Nao ha o que implementar para "honrar o sistema" — havia o que medir.
+
+| Decisao | O que fica |
+|---|---|
+| **A chave da fila** | Sai da linha do titulo, vai para linha propria (ver DS3). Era ela que esmagava o titulo. |
+| **A tab bar NAO cresce** | Guarda `358x64` sempre. Por volta de **185%**, onde os tabs passariam dos 358, o **rotulo sai e fica so o icone** — o padrao de iOS e Android. Medido a 200% com os rotulos desligados: os tabs caem de **380 para 200** numa barra de 358, com 158 de folga. |
+| **O aviso do rodape** | **Quebra em duas linhas**, mantendo a frase inteira e o icone. Encurtar o texto mudaria a copia em *todos* os tamanhos para resolver um problema que so existe no extremo; tirar o icone perderia a marcacao de "isto e um aviso". A 100% a pilula fica **identica a de hoje** (350x42, uma linha); a 200% vira 350x88. |
+
+⚠️ **A tab bar so pode perder o rotulo por causa da pilula do DS5.1.** Sem rotulo, e ela que diz em qual aba voce esta. Se alguem tirar a pilula, este comportamento cai junto.
+
+**Resultado a 200%:** nenhum corte no chrome fixo. A altura total maior que 844 e artefato do mockup — no aparelho o corpo rola.
+
+**O que isso custa, e vale saber:** o chrome passa a comer **450 dos 844** (cabecalho 266 + rodape 98 + tab bar 86), sobrando 394 para o conteudo. O rodape engordou de 67 para 98 por causa da decisao de quebrar em duas linhas. E o preco de manter a frase inteira.
+
+### Ainda em aberto
+
+1. **O que NAO deve escalar.** As telas escalaram tudo de proposito: o relogio (`18:42`) e os numeros de posicao da fila cresceram junto. Sao elemento grafico, nao texto corrido — provavelmente ficam fixos.
+2. **Os icones nao escalam com o texto, e isso e maior que uma tela.** A 200% o `info` do rodape segue com 15px ao lado de texto de 26, o chevron do status com 13, as setas da lista, a lupa da busca. Quem precisa de fonte grande costuma precisar de icone grande tambem. **E a mesma classe do problema da tab bar, e provavelmente e conversa com o Andre — nao so decisao de design.**
+3. **A area de toque da tab bar sem rotulo:** o conteudo do item fica com 34 de altura. Conferir em device que o toque continua sendo o item inteiro dentro da barra de 64, e nao so o icone.
 
 **Como se verifica este levantamento:** `grep -rnE 'h-\[[0-9]+px\]' --include='*.tsx' app src` para as alturas fixas, `grep -rn allowFontScaling app src` para o item 1, `grep -rn numberOfLines --include='*.tsx' app src` para o item 6. Se os numeros nao baterem, esta secao envelheceu — corrija-a.
 
