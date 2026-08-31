@@ -4,7 +4,7 @@ Itens levantados no **QA de device** do app partner cuja decisao pertence a **eq
 
 Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 
-> **Estado da rodada de 22/08:** DS1, DS2 e a metade de codigo do DS5 fechados. **Aberto e esperando a design: DS3, DS4 e o glifo de Menu do DS5.**
+> **Estado da rodada de 22/08:** DS1, DS2 e a metade de codigo do DS5 fechados; a metade "como eu estou" do DS3 tambem. **Aberto e esperando a design: o abrir/fechar fila do DS3 (com proposta desenhada), o DS4 (instrumentado) e o glifo de Menu do DS5.**
 
 > **Direcao do documento.** Aqui vai o que o front PEDE ou APONTA para a design. O caminho inverso (o que a design pede ao front) esta em `design/PEDIDO_DESIGN.md` e `design/PEDIDO_PARA_IA_DESIGN.md`.
 
@@ -18,7 +18,7 @@ Ultima atualizacao: 2026-08-31 · branch `design/marca-dev` do front-partner.
 |---|------|-----------|------------------------|
 | DS1 | **CTA "Entrar" do login cai sobre a barra do aparelho** | Na tela de login o botao de entrar ficou **por cima dos botoes de navegacao do dispositivo** (barra inferior do Android). Ver "Detalhe — DS1". | ✅ **FECHADO em 2026-08-26 (Alexia, `85ae773`).** A design confirmou o CTA ancorado, e o `pb-8` fixo deu lugar ao inset real (`Math.max(insets.bottom, 32)` — o 32 e o piso pra tela sem barra nenhuma). Estava em **tres** telas, nao so no login: `login`, `register` e `forgot-password`. O gemeo no app do cliente saiu depois, na PR #23 do `vupth`. |
 | DS2 | **Icone do canto superior direito na tela do proprietario e PROVISORIO** | O icone que aparecia no canto superior direito da tela do dono ("banco") era **apenas um icone de fila**, quebra-galho do Andre — nao escolha de arte. | ✅ **FECHADO em 2026-08-26 (Alexia).** Ele **ja tinha saido** na componentizacao do cabecalho (`cac950de`), que apagou o `Header.tsx` e o `RoleIcon.tsx` juntos. Hoje o canto superior direito da tela do dono e a **pilula de status** (ABERTO / PAUSADO / FECHADO), nao um icone. Nao ha icone a substituir. ⚠️ **Nao confundir com o `BenchIcon`**, que segue vivo e e outra coisa: ele fica na tela do **PROFISSIONAL** e e a unica porta pras "Opcoes da fila" (ver DS3). |
-| DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🎨 Pedido de desenho (Andre, 2026-08-22). **Nao e falta de feature** — a acao existe e funciona; falta **affordance**. Ver "Detalhe — DS3". |
+| DS3 | **Profissional nao acha onde abrir/fechar a propria fila** | A acao de **dizer que esta trabalhando** (e de abrir/fechar a fila dele) precisa estar **visivel na tela do profissional**. Hoje, de primeira viagem, o profissional **nao descobre por onde** faz isso. | 🟡 **METADE FECHADA.** A pilula do proprio status entrou em 2026-08-26 (Alexia, `85ae773`) e resolve o "como eu estou". **Continua aberto o abrir/fechar fila** — e a causa nao era a implementacao: o controle **nao existe no arquivo de design**. Proposta desenhada em 2026-08-31, ver "Detalhe — DS3". |
 | DS4 | **Poder aumentar e diminuir as fontes** | O usuario precisa conseguir **ampliar ou reduzir o tamanho do texto** do app. | 🎨 Pedido (Andre, 2026-08-22). **Decisao da design antes de codar:** honrar a fonte do sistema ou oferecer controle proprio? E ate onde o layout do Pencil aguenta? **Instrumentado em 2026-08-31** — o app ja honra a fonte do sistema, e sao **duas** primitivas que travam, nao "varias". Ver "Detalhe — DS4". |
 | DS5 | **Abas do rodape nao mostram qual esta ativa; o icone de "Menu" ficou estranho** | Ao tocar nas abas do rodape **nao ha destaque** da aba selecionada. Alem disso, o icone de **Menu** ficou estranho. | 🟡 **METADE FECHADA.** A pilula da aba ativa foi codada em 2026-08-26 (Alexia, `85ae773`), com dois testes de regressao — ver "Detalhe — DS5", item 1. **Continua aberto o item 2**: o glifo de Menu (`Grid3x3`) e escolha de arte e espera revisao da design. |
 
@@ -41,6 +41,43 @@ A varredura prevista aqui valeu a pena: o padrao estava em **tres** telas, nao s
 **O que se pede a design:** um ponto de entrada **na propria tela do profissional** que mostre, sem abrir menu, (a) o estado atual (trabalhando ou fora), (b) que aquilo e tocavel para trocar, e (c) o par abrir/fechar fila. As pilulas largas *"Voce esta: X · toque para trocar"* foram a tentativa anterior do front nessa direcao — servem como ponto de partida, nao como solucao aprovada.
 
 **Cuidado ao desenhar:** "estar trabalhando" e "aceitar novos clientes" sao **dois estados diferentes** (da para estar trabalhando com a fila fechada, drenando quem ja entrou). O desenho precisa deixar os dois legiveis sem sugerir que sao um so botao.
+
+### Estado em 2026-08-31
+
+**(a) e (b) fechados.** A pilula do proprio status entrou no `85ae773`: fica no cabecalho, mostra `Trabalhando` / `Intervalo` / `Fora` e abre um seletor curto ao toque — seletor, e nao ciclo, porque "Fora" tem consequencia (sendo o ultimo, fecha a loja) e num ciclo ela ficaria a dois toques distraidos de distancia.
+
+**(c) continua aberto — e a causa nao era a implementacao.** Fui conferir o arquivo de design e **o controle de abrir/fechar fila nao esta la**. A tela `PROF · 01 Fila` tem a pilula de status e nada mais; o conceito so aparece em tres lugares, nenhum deles na tela do profissional:
+
+| Onde | Como aparece |
+|---|---|
+| `ANTIGO · Partner Fila` | switch "Aceitando novos" — com rotulo errado sobrando (`1 · Aneka Silva`), herdado de quando o frame foi duplicado de uma linha de fila |
+| `OWNER · 01 Dashboard` | botao "Pausar entrada" |
+| `Q — Configuracoes Parceiro` | linha "Aceitando clientes" |
+
+Ou seja: **o front nao deixou de implementar — nao havia o que implementar.** A frase "a acao existe e funciona, falta affordance" valia para (a) e (b), nao para (c).
+
+### Proposta desenhada (2026-08-31)
+
+Duas telas novas no arquivo de design, `PROF · 01 Fila · DS3 (fila aberta)` e `(fila fechada)`, com a `Nota DS3` ao lado. A disposicao e em tres linhas, cada uma com um dono:
+
+1. **status a esquerda, reticencia a direita** — a faixa do que e do profissional;
+2. **titulo a esquerda, a chave da fila a direita**, alinhada com ele — o estado e *da fila*, e e o titulo que nomeia a fila;
+3. os numeros da fila.
+
+Por a chave na linha do titulo resolve por **estrutura** o cuidado acima: os dois controles deixam de ser vizinhos, entao nao dependem de cor para nao lerem como um botao so.
+
+**Os dois sao clicaveis, e por isso precisam ser controles de tipos diferentes:**
+
+- **status** — chip de cor + chevron. Vocabulario de ESCOLHA: toca, abre lista, tem tres respostas. O chevron entrou porque nada dizia que a pilula abre alguma coisa.
+- **chave da fila** — trilho + knob. Vocabulario de INTERRUPTOR: toca, vira, tem duas.
+
+⚠️ **A chave nao pode usar cor de acento.** A pilula de status ja fala por cor e ocupa tres: `brand-green` = Trabalhando, `#FFC091` = Intervalo, `danger` = Fora. Uma chave em pessego diria "Intervalo" na mesma tela. Por isso ela vive no eixo forest/neutro: aberta e trilho escuro com knob claro a direita; fechada e trilho `surface` com contorno, knob e texto em `text-secondary`, knob a esquerda.
+
+A tela "fila fechada" mostra de proposito o cruzamento que este handoff alertava: **Trabalhando + Fila fechada ao mesmo tempo**, com a linha de apoio trocando para a consequencia ("ninguem novo entra") e o rodape confirmando que o profissional segue atendendo quem ja entrou.
+
+**Falta decidir (design):** o toque alterna direto ou pede confirmacao, como a tela de opcoes faz hoje ao fechar? O rotulo fica "Aberta/Fechada" ou vira "Aceitando novos"? E o chevron na pilula de status vale a pena, ou polui?
+
+**Como se verifica:** abrir o arquivo de design e procurar as duas telas `PROF · 01 Fila · DS3`. Se elas nao existirem mais, esta secao esta desatualizada.
 
 ---
 
@@ -124,3 +161,17 @@ Ao rodar a branch `design/marca-dev` como entregue (`e76470d`) no **Expo Go**, o
 **Nao e defeito do desenho** e nao ha nada a fazer do lado da design. E uma limitacao do Expo Go desde o SDK 53: o modulo grita **no import**, antes de qualquer tela. O front ja corrigiu isso (carregar o modulo sob demanda, commit `6969ea9`), mas essa correcao **nao esta** na branch da design — ela vive na `design/marca-dev` local do front, junto do merge das duas pontas.
 
 **Consequencia pratica para quem for testar:** rodar o `e76470d` puro em Expo Go bate nesse erro. Testar a partir do merge (que tem **zero diferenca de tela** em relacao a entrega — so acrescenta dois arquivos de teste) mostra o mesmo desenho sem o crash.
+
+---
+
+## Nota de manutencao — a barra com o wordmark saiu do arquivo de design (2026-08-31)
+
+O app trocou o cabecalho na componentizacao (`cac950de`): hoje o `ScreenHeader` e **uma linha so** — voltar · titulo · acao — e nao existe mais barra com "VUPTH" acima do titulo. O arquivo de design tinha ficado para tras: **nove telas** ainda traziam essa barra.
+
+Corrigidas: `OWNER · 01 Dashboard`, `02 Menu`, `03 Filas`, `04 Onboarding · Loja`, `05 Quem vai atender`, `06 Onboarding · Endereco`, `PROF · 01 Fila`, `02 Encaixes`, `03 Relatorios`.
+
+A correcao foi minima e nao mexeu em nenhum titulo: sai o wordmark, a acao que morava ao lado dele (icone de loja, de perfil, ou a pilula de status) fica sozinha na linha, e a faixa passa a se chamar `Nav` — o mesmo papel que ela ja tem nas telas de login, onde o voltar fica em cima e o titulo vem abaixo.
+
+⚠️ **O wordmark segue, de proposito, em `PARTNER · 02 Login` e `03 Cadastro`.** Ali ele nao e barra de navegacao: e a marca na tela de entrada, dentro do proprio `Head`.
+
+**Como se verifica:** procurar por um texto "VUPTH" de 13px no arquivo de design. Se ele aparecer fora das duas telas de entrada, esta secao envelheceu — corrija-a.
