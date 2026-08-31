@@ -34,6 +34,7 @@ import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
+import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
@@ -821,12 +822,12 @@ export default function ProfessionalQueueScreen() {
               BlocoBloqueio. O `flex-1 items-center justify-center` de antes
               nao centralizava nada (o pai e o conteudo de um ScrollView), so
               empurrava o texto pro meio da largura. */
-          <View className="mt-6 bg-vupth-surface rounded-card p-5 gap-1.5">
-            <Titulo nivel={2}>Nenhum cliente na fila</Titulo>
-            <Text className="font-body text-sm leading-5 text-vupth-textSecondary">
-              Novos clientes aparecerão aqui automaticamente.
-            </Text>
-          </View>
+          <EstadoVazio
+            doodle="fila"
+            titulo="Nenhum cliente na fila"
+            texto="Novos clientes aparecerão aqui automaticamente."
+            className="mt-6"
+          />
         )}
 
       </View>
