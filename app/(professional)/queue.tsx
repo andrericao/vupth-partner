@@ -22,6 +22,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
+import { confirmar } from "@lib/confirmar";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -402,21 +403,27 @@ export default function ProfessionalQueueScreen() {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível atualizar a fila."));
     }
   };
-  const alternarAceitando = () => {
+  const alternarAceitando = async () => {
     // Reabrir e inofensivo e vai direto. Fechar confirma: quem ja esta na fila
     // continua, mas ninguem novo entra — e pode fechar a loja junto.
+    // (Confirmacao assimetrica: e a decisao da design no DS3, 31/08.)
     if (!aceitandoNovos) {
       aplicarAceitando(true);
       return;
     }
-    Alert.alert(
-      "Fechar fila",
-      "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Fechar fila", style: "destructive", onPress: () => aplicarAceitando(false) },
-      ]
-    );
+    // ⚠️ `confirmar()` e nao `Alert.alert` com botoes: o react-native-web nao
+    // implementa o Alert, entao na web a caixa nunca aparecia, o callback nunca
+    // rodava e a chave voltava sozinha — foi o "esse botao nao funciona" da
+    // issue #25. Fechar a fila e justamente o lado que pede confirmacao, entao
+    // na web SO o lado destrutivo estava morto: reabrir funcionava.
+    const ok = await confirmar({
+      titulo: "Fechar fila",
+      mensagem:
+        "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
+      confirmar: "Fechar fila",
+      destrutivo: true,
+    });
+    if (ok) aplicarAceitando(false);
   };
 
   // ⚠️ Isto e regra de PRODUTO resolvida no cliente. O certo e o backend
