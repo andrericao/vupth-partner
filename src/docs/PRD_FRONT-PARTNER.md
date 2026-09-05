@@ -1106,6 +1106,94 @@ backend auto-rollback homolog/prod).
 
 > **Movidas para [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** (C1–C7, tabela consolidada). Sao itens descobertos no front-partner cujo frontend pertence ao **app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto) — registrados la para alinhamento cross-project.
 
+### 11.2 🔴 O CLIENTE deixa de ver a posicao na fila — e o dado CONTINUA vindo (2026-08-31)
+
+> **Escrito pelo front-client a pedido do Andre.** Nao ha nada a implementar aqui; ha uma coisa a
+> **nao** fazer, e um conflito com a secao 12 que alguem precisa arbitrar.
+
+**Decisao do Andre em 31/08** (issue #20 do repo `vupth`): na tela do cliente, a **posicao na fila
+sai por completo** — fica so o tempo estimado, cru. Sai o numero grande de "N pessoas na frente" e
+sai tambem a fileira de bolinhas do "Voce ja passou N pessoas", porque essa **entrega a mesma
+informacao por outro caminho** (da para contar).
+
+#### ⚠️ O que NAO fazer — e o motivo de esta nota existir
+
+O `position` / `initialPosition` **continua vindo do backend, e deve continuar**:
+
+> **A posicao e informacao do PROFISSIONAL.** O app de voces precisa dela para tocar a fila. O que
+> muda e so que o **cliente nao a ve**. *(Andre, 2026-08-31.)*
+
+Quando o campo parar de ser usado na tela do cliente, a reacao natural de quem mexer vai ser
+"limpar" — tirar do tipo, ou abrir pedido ao backend para enxugar o payload da listagem. **Nao e
+para fazer:** seria economia de bytes que **quebraria o front-partner**. Registrado dos dois lados
+(nosso `PRD_FRONT-CLIENT.md`, item 10) justamente para nao acontecer.
+
+#### 🔴 Conflito com a secao 12 desta PRD — precisa de arbitragem do Andre
+
+A secao **12 (Features Futuras)** recomenda o **oposto**, e com pesquisa por tras:
+
+| Onde | O que a secao 12 diz | Estado apos 31/08 |
+|---|---|---|
+| §12, "O que CONSTRUIR" item 3 | tela de acompanhamento com **posicao + ETA + quem esta na frente**; *"a incerteza, nao a espera, e o que faz desistir"* | ⚠️ contradiz a decisao **na tela do cliente** |
+| §12, "O que CONSTRUIR" item 4 | notificacoes **"voce e o proximo / 3 na frente"** | ✅ **ARBITRADO (Andre, 31/08): "aviso sobre proximo ou quantos tem na frente serao mudados"** |
+| §12, "O que QUESTIONAR" item 1 | *"o texto explicito **voce e o Nº X de Y** - ~Z min e que informa"* | ⚠️ contradiz a decisao |
+
+**O item 4 ja foi arbitrado.** Levantamos porque uma push dizendo *"3 na frente"* entregaria ao
+cliente exatamente o numero que a decisao tirou da tela — desfazendo a decisao pela porta dos
+fundos, e sem ninguem perceber, por estar em outro repo e outra sprint. **O Andre decidiu em 31/08:
+"aviso sobre proximo ou quantos tem na frente serao mudados".** Vale para os avisos que ja existem,
+nao so para os futuros.
+
+⚠️ **Isso ja alcanca codigo em PRODUCAO, do lado do backend.** Conferimos: o push
+`QUEUE_NEXT_IN_LINE` ja e disparado hoje com o texto **"É quase a sua vez!" / "Você é o próximo da
+fila."** (`QueuePushService.java:60`) — a segunda frase e informacao de posicao, a mais especifica
+que existe. **Muda so o TEXTO**; gatilho, deduplicacao por `next_notified` e `data.type` continuam
+iguais. Registrado no `PRD_BACKEND.md`, na especificacao de push.
+
+**Nao estamos pedindo que voces mudem a secao 12** no resto. A pesquisa citada la e boa e o
+argumento da incerteza e legitimo — inclusive nos registramos no nosso PRD o risco previsto: sem
+posicao e com tempo cru, a tela do cliente **perde todo sinal de progresso**. Os itens 3 e 12.1
+seguem valendo para tudo que **nao** revele o numero.
+
+📌 **Escopo:** vale para o que o **cliente** ve. Na tela do **profissional**, posicao e ordem seguem
+livres — e o motivo de o campo continuar existindo.
+
+#### 🧭 RESPOSTA DO ANDRE (2026-09-05) — a escolha passa a ser do PROFISSIONAL
+
+> **"A intencao e de que o profissional possa escolher se o cliente tenha ou nao essa informacao."**
+> *(Andre, 2026-09-05, ao ler esta secao.)*
+
+**Isso ARBITRA o conflito com a secao 12 — e sem dar razao a nenhum dos dois lados.** A pesquisa da
+§12 ("a incerteza, nao a espera, e o que faz desistir") e a decisao de 31/08 (tirar a posicao)
+pararam de se contradizer porque **deixaram de ser a mesma pergunta**: nao e *"mostrar ou nao
+mostrar"*, e *"quem decide"*. O profissional que quer mostrar, mostra.
+
+⚠️ **NAO E TAREFA — e INTENCAO.** Vale a regra do Andre de 05/08: nada da lista de intencoes vira
+codigo sem o martelo dele. Ele foi explicito em 05/09: **"vamos deixar por hora"**. Ninguem abre
+pedido ao backend nem ao client por causa desta nota.
+
+**O que a nota MUDA hoje, mesmo sem virar codigo:** a leitura de que a posicao sai "por completo"
+da tela do cliente passa a ser **provisoria**. Quem for mexer nisso nao deve tratar a remocao como
+definitiva — e o alerta de **nao limpar o `position`/`initialPosition`** do payload fica ainda mais
+forte, porque agora o campo nao serve so ao profissional: ele volta a servir ao cliente sempre que
+o profissional escolher mostrar.
+
+**O que continua em aberto, e precisa do Andre antes de qualquer linha:**
+
+1. **Qual e o padrao?** Nasce mostrando ou escondendo? O padrao decide o que a maioria dos clientes
+   ve, porque quase ninguem mexe em configuracao.
+2. **A escolha e por profissional ou por loja?** O dono pode querer padronizar a vitrine; o
+   profissional pode querer o contrario. Sao donos diferentes para a mesma chave.
+3. **O aviso de push acompanha?** Em 31/08 ficou decidido mudar o texto do `QUEUE_NEXT_IN_LINE`
+   (*"Voce e o proximo da fila"*), que e informacao de posicao. Se a exibicao virar escolha, o texto
+   do push tambem vira — senao a escolha do profissional e desfeita pela notificacao.
+4. **A escolha some com o ETA junto, ou so com a posicao?** A decisao de 31/08 mantinha o tempo
+   estimado; se o profissional pode esconder a posicao, pode esconder o tempo tambem?
+
+**Se um dia virar trabalho**, ele nasce em tres pontas ao mesmo tempo: uma chave por profissional no
+**backend** (serie S), a tela do **partner** para liga-la, e o **client** honrando o campo. Nenhuma
+das tres foi aberta — de proposito.
+
 ---
 
 ## 12. Features Futuras (Planejamento)
