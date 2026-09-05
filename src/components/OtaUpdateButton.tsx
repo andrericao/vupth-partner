@@ -3,6 +3,7 @@ import { View, Text, Pressable, Alert } from "react-native";
 import * as Updates from "expo-updates";
 
 import { WsDiagnostics } from "@components/WsDiagnostics";
+import { avisar } from "@lib/confirmar";
 
 // Botao de "puxar atualizacao agora" (OTA). Sem ele, o Expo aplica o update
 // so na 2a abertura do app — no teste de device isso vira "mas eu ja atualizei"
@@ -30,11 +31,14 @@ export function OtaUpdateButton() {
       const result = await Updates.checkForUpdateAsync();
       if (result.isAvailable) {
         await Updates.fetchUpdateAsync();
-        Alert.alert(
-          "Atualização baixada",
-          "O app vai reiniciar para aplicar a nova versão.",
-          [{ text: "OK", onPress: () => Updates.reloadAsync() }]
-        );
+        // `avisar` e nao `Alert.alert` com botao: na web o Alert nao aparece,
+        // entao o onPress nunca roda e o app NAO reiniciava — o update ficava
+        // baixado e sem aplicar, calado.
+        await avisar({
+          titulo: "Atualização baixada",
+          mensagem: "O app vai reiniciar para aplicar a nova versão.",
+        });
+        await Updates.reloadAsync();
       } else {
         Alert.alert("Tudo certo", "Você já está na versão mais recente.");
       }

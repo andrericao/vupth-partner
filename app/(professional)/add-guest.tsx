@@ -7,6 +7,7 @@ import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { getApiErrorMessage } from "@lib/api";
+import { avisar } from "@lib/confirmar";
 
 export default function AddGuestScreen() {
   const professional = useProfessionalStore((s) => s.professional);
@@ -58,9 +59,13 @@ export default function AddGuestScreen() {
         serviceItemIds: selectedServices,
         clientName: clientName.trim(),
       });
-      Alert.alert("Adicionado", `${clientName.trim()} entrou na fila.`, [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      // O cliente JA entrou na fila. Sem a caixa na web a tela nao fechava, e
+      // o profissional adicionava de novo — cliente duplicado na fila.
+      await avisar({
+        titulo: "Adicionado",
+        mensagem: `${clientName.trim()} entrou na fila.`,
+      });
+      router.back();
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível adicionar o cliente."));
     } finally {

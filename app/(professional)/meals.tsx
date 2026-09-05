@@ -20,6 +20,7 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import { getApiErrorMessage } from "@lib/api";
 import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
 import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
+import { confirmar } from "@lib/confirmar";
 
 const PATTERNS = [
   { label: "Dias uteis", value: "WEEKDAYS" },
@@ -131,26 +132,21 @@ export default function MealsScreen() {
     }
   };
 
-  const handleRemove = (m: Interval) => {
-    Alert.alert(
-      "Remover refeição",
-      `Deseja remover "${mealName(m.description)}"? Você pode recriá-la depois.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Remover",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteInterval(profId, m.intervalId);
-              if (editingId === m.intervalId) setEditingId(null);
-            } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover a refeição."));
-            }
-          },
-        },
-      ]
-    );
+  const handleRemove = async (m: Interval) => {
+    const ok = await confirmar({
+      titulo: "Remover refeição",
+      mensagem: `Deseja remover "${mealName(m.description)}"? Você pode recriá-la depois.`,
+      confirmar: "Remover",
+      destrutivo: true,
+    });
+    if (!ok) return;
+
+      try {
+        await deleteInterval(profId, m.intervalId);
+        if (editingId === m.intervalId) setEditingId(null);
+      } catch (error: any) {
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover a refeição."));
+      }
   };
 
   const handleAdd = async () => {

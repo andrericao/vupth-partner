@@ -1,14 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  Alert,
-  RefreshControl,
-  BackHandler,
-  Modal,
-} from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -358,6 +349,28 @@ export default function ProfessionalQueueScreen() {
       await SecureStore.setItemAsync(key, today);
 
       const count = data?.professionals?.find((p) => p.id === profId)?.queue_count ?? 0;
+      // ⚠️ ESTE E O UNICO Alert.alert COM BOTOES QUE SOBROU, e de proposito:
+      // sao QUATRO opcoes, e o `window.confirm` da web so faz duas. O nativo
+      // fica intacto; na web degradamos para a pergunta principal.
+      //
+      // O que se perde na web: "Nao ver mais" e "Nao almocar". Nenhuma das duas
+      // some do app — a primeira e reversivel em Configuracoes > Refeicoes, e a
+      // refeicao segue no menu com dot e contagem. Quando existir o modal da
+      // marca (pergunta aberta no PR #27 do design), as quatro voltam a caber.
+      if (Platform.OS === "web") {
+        const iniciar = await confirmar({
+          titulo: `Hora do ${mealName(due.description)}`,
+          mensagem:
+            count > 0
+              ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
+              : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
+          confirmar: "Iniciar agora",
+          cancelar: "Agora não",
+        });
+        if (iniciar) handleStartMeal(due);
+        return;
+      }
+
       Alert.alert(
         `Hora do ${mealName(due.description)}`,
         count > 0
@@ -503,7 +516,7 @@ export default function ProfessionalQueueScreen() {
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
   // finalizado antes (o profissional optou por pular pro proximo — ou por atender
   // alguem fora de ordem). `advance` = o escolhido nao e o 1o da fila.
-  const startClient = (att: AttendanceInQueue, advance: boolean) => {
+  const startClient = async (att: AttendanceInQueue, advance: boolean) => {
     const runningName = currentAttendance?.clientName;
     const doStart = () =>
       handleAction(async () => {
@@ -533,45 +546,45 @@ export default function ProfessionalQueueScreen() {
     const msg = runningName
       ? `Isso finaliza o atendimento de ${runningName} e ${advance ? `atende ${att.clientName} na frente da fila` : `inicia ${att.clientName}`}. Continuar?`
       : `${att.clientName} será atendido agora, na frente da fila. Tem certeza?`;
-    Alert.alert(advance ? "Adiantar cliente" : "Iniciar atendimento", msg, [
-      { text: "Cancelar" },
-      { text: advance ? "Adiantar" : "Iniciar", onPress: doStart },
-    ]);
+    const ok = await confirmar({
+      titulo: advance ? "Adiantar cliente" : "Iniciar atendimento",
+      mensagem: msg,
+      confirmar: advance ? "Adiantar" : "Iniciar",
+    });
+    if (ok) doStart();
   };
 
   // "Nao chegou": o cliente da vez cai uma posicao e vira ATRASADO (repetivel,
   // sem teto). O proximo passa a ser o 1o.
-  const confirmLate = (att: AttendanceInQueue) => {
-    Alert.alert(
-      "Cliente não chegou",
-      `${att.clientName} cai uma posição e o próximo passa a ser o primeiro. Continuar?`,
-      [
-        { text: "Cancelar" },
-        { text: "Confirmar", onPress: () => handleAction(() => markLate(att.id)) },
-      ]
-    );
+  const confirmLate = async (att: AttendanceInQueue) => {
+    const ok = await confirmar({
+      titulo: "Cliente não chegou",
+      mensagem: `${att.clientName} cai uma posição e o próximo passa a ser o primeiro. Continuar?`,
+    });
+    if (ok) handleAction(() => markLate(att.id));
   };
 
   // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
   // remover a qualquer momento, inclusive no 1o atraso.
-  const confirmRemove = (att: AttendanceInQueue) => {
-    Alert.alert("Remover da fila", `Remover ${att.clientName}?`, [
-      { text: "Cancelar" },
-      { text: "Remover", style: "destructive", onPress: () => handleAction(() => removeFromQueue(att.id)) },
-    ]);
+  const confirmRemove = async (att: AttendanceInQueue) => {
+    const ok = await confirmar({
+      titulo: "Remover da fila",
+      mensagem: `Remover ${att.clientName}?`,
+      confirmar: "Remover",
+      destrutivo: true,
+    });
+    if (ok) handleAction(() => removeFromQueue(att.id));
   };
 
   // "Promover ao topo" (S4): reordena ao 1o lugar SEM iniciar — os demais descem
   // e o cliente vira o proximo. Diferente de "Adiantar", que inicia na hora.
-  const confirmPromote = (att: AttendanceInQueue) => {
-    Alert.alert(
-      "Promover ao topo",
-      `${att.clientName} vai para o 1o lugar da fila, sem iniciar o atendimento. Continuar?`,
-      [
-        { text: "Cancelar" },
-        { text: "Promover", onPress: () => handleAction(() => promoteAttendance(att.id)) },
-      ]
-    );
+  const confirmPromote = async (att: AttendanceInQueue) => {
+    const ok = await confirmar({
+      titulo: "Promover ao topo",
+      mensagem: `${att.clientName} vai para o 1o lugar da fila, sem iniciar o atendimento. Continuar?`,
+      confirmar: "Promover",
+    });
+    if (ok) handleAction(() => promoteAttendance(att.id));
   };
 
   // Abrir/fechar o ESTABELECIMENTO pelo menu ☰ (pedido Andre 2026-07-18). O

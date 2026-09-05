@@ -1,4 +1,4 @@
-import { confirmar } from "../confirmar";
+import { confirmar, avisar } from "../confirmar";
 
 // 🔴 DEFEITO REAL (issue #25, teste manual de 30/08): "botao de remover servico
 // nao funciona" e "o botao de aceitar novos nao funciona" — os dois na WEB.
@@ -85,5 +85,65 @@ describe("confirmar()", () => {
       }
     );
     expect(ok).toBe(false);
+  });
+});
+
+describe("avisar()", () => {
+  // 🔴 O IRMAO PIOR DO confirmar(): 11 chamadas do app sao
+  // `Alert.alert(titulo, msg, [{ text: "OK", onPress: () => router.replace(...) }])`.
+  // Na web a caixa nao aparece, entao o onPress NUNCA roda — e a acao JA
+  // ACONTECEU. O profissional envia a solicitacao de afiliacao e continua na
+  // mesma tela (e envia de novo); o servico e criado e a tela nao fecha (e ele
+  // cria duplicado); a senha e redefinida e o usuario fica preso.
+  //
+  // Diferenca de contrato em relacao ao confirmar(): aqui, se algo der errado
+  // na caixa, o fluxo SEGUE. A acao ja foi feita — bloquear a navegacao seria
+  // repetir o defeito que estamos consertando.
+  it("no NATIVO usa o Alert e so resolve quando o usuario reconhece", async () => {
+    let liberado = false;
+    const alert = jest.fn((_t, _m, botoes: any[]) => {
+      botoes[0].onPress?.();
+    });
+
+    await avisar(
+      { titulo: "Serviço adicionado", mensagem: "Corte — R$ 40,00" },
+      { plataforma: "android", alertImpl: alert as any }
+    ).then(() => {
+      liberado = true;
+    });
+
+    expect(alert).toHaveBeenCalled();
+    expect(liberado).toBe(true);
+  });
+
+  it("na WEB nao chama o Alert e mostra titulo + mensagem", async () => {
+    const alert = jest.fn();
+    const alertaWeb = jest.fn((_texto: string) => undefined);
+
+    await avisar(
+      { titulo: "Senha alterada", mensagem: "Entre com a senha nova." },
+      { plataforma: "web", alertImpl: alert as any, alertaWebImpl: alertaWeb }
+    );
+
+    expect(alert).not.toHaveBeenCalled();
+    const texto = alertaWeb.mock.calls[0][0];
+    expect(texto).toContain("Senha alterada");
+    expect(texto).toContain("Entre com a senha nova.");
+  });
+
+  it("se o navegador bloquear a caixa, o fluxo SEGUE assim mesmo", async () => {
+    // Este e o oposto do confirmar(): la, na duvida, nao age. Aqui a acao ja
+    // aconteceu — segurar a navegacao deixaria o usuario preso, que e o bug.
+    await expect(
+      avisar(
+        { titulo: "x", mensagem: "y" },
+        {
+          plataforma: "web",
+          alertaWebImpl: () => {
+            throw new Error("blocked");
+          },
+        }
+      )
+    ).resolves.toBeUndefined();
   });
 });

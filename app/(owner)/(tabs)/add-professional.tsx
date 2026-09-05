@@ -9,6 +9,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
+import { avisar, confirmar } from "@lib/confirmar";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -107,17 +108,16 @@ export default function AddProfessionalScreen() {
       await useProfessionalStore.getState().setProfessional(result);
       await SecureStore.setItemAsync("vupth_owner_name", name.trim());
       await refreshToken();
-      Alert.alert(
-        "Perfil profissional criado",
-        `${result.name} já aparece como profissional da sua loja. Falta só cadastrar seus serviços para a loja poder abrir.`,
-        [
-          { text: "Depois", onPress: () => router.back() },
-          {
-            text: "Cadastrar serviços",
-            onPress: () => router.replace("/(professional)/my-services?from=settings" as any),
-          },
-        ]
-      );
+      confirmar({
+        titulo: "Perfil profissional criado",
+        mensagem: `${result.name} já aparece como profissional da sua loja. Falta só cadastrar seus serviços para a loja poder abrir.`,
+        confirmar: "Cadastrar serviços",
+        cancelar: "Depois",
+      }).then((ok) => {
+        // Os DOIS lados agem — "Depois" nao e cancelar, e sair da tela.
+        if (ok) router.replace("/(professional)/my-services?from=settings" as any);
+        else router.back();
+      });
     } catch (error: any) {
       const code = error?.response?.data?.code;
 
@@ -129,29 +129,32 @@ export default function AddProfessionalScreen() {
           if (currentEstId === establishmentId) {
             await useProfessionalStore.getState().setProfessional(me);
             await refreshToken();
-            Alert.alert(
-              "Tudo certo",
-              "Seu perfil profissional já está vinculado a este estabelecimento.",
-              [{ text: "OK", onPress: () => router.back() }]
-            );
+            // A acao JA aconteceu — sem a caixa na web a tela nao fechava.
+            await avisar({
+              titulo: "Tudo certo",
+              mensagem: "Seu perfil profissional já está vinculado a este estabelecimento.",
+            });
+            router.back();
           } else if (currentEstId) {
             await useProfessionalStore.getState().switchEstablishment(establishmentId!);
             await useProfessionalStore.getState().fetchMe();
             await refreshToken();
-            Alert.alert(
-              "Vinculado",
-              "Seu perfil profissional foi transferido para este estabelecimento.",
-              [{ text: "OK", onPress: () => router.back() }]
-            );
+            // A acao JA aconteceu — sem a caixa na web a tela nao fechava.
+            await avisar({
+              titulo: "Vinculado",
+              mensagem: "Seu perfil profissional foi transferido para este estabelecimento.",
+            });
+            router.back();
           } else {
             await useProfessionalStore.getState().affiliate(establishmentId!);
             await useProfessionalStore.getState().fetchMe();
             await refreshToken();
-            Alert.alert(
-              "Vinculado",
-              "Seu perfil profissional foi vinculado a este estabelecimento.",
-              [{ text: "OK", onPress: () => router.back() }]
-            );
+            // A acao JA aconteceu — sem a caixa na web a tela nao fechava.
+            await avisar({
+              titulo: "Vinculado",
+              mensagem: "Seu perfil profissional foi vinculado a este estabelecimento.",
+            });
+            router.back();
           }
         } catch (err: any) {
           Alert.alert("Erro", getApiErrorMessage(err, "Não foi possível verificar o perfil profissional."));

@@ -16,6 +16,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskCEP, unmask } from "@lib/masks";
 import { lookupCep } from "@lib/cep";
+import { avisar } from "@lib/confirmar";
 
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -109,9 +110,13 @@ export default function AddressScreen() {
         state: state.trim(),
         zipCode: unmask(zipCode),
       });
-      Alert.alert("Endereço salvo", "Endereço do estabelecimento atualizado.", [
-        { text: "OK", onPress: () => router.replace("/(owner)/dashboard" as any) },
-      ]);
+      // O endereco JA FOI salvo — sem a caixa na web o dono ficava no
+      // formulario sem saber, e salvava de novo.
+      await avisar({
+        titulo: "Endereço salvo",
+        mensagem: "Endereço do estabelecimento atualizado.",
+      });
+      router.replace("/(owner)/dashboard" as any);
     } catch (error: any) {
       const msg = getApiErrorMessage(error, "Não foi possível salvar o endereço.");
       Alert.alert("Erro", msg);
