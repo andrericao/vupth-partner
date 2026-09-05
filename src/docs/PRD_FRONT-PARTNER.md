@@ -1106,109 +1106,17 @@ backend auto-rollback homolog/prod).
 
 > **Movidas para [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** (C1–C7, tabela consolidada). Sao itens descobertos no front-partner cujo frontend pertence ao **app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto) — registrados la para alinhamento cross-project.
 
-### 11.2 🔴 O CLIENTE deixa de ver a posicao na fila — e o dado CONTINUA vindo (2026-08-31)
+### 11.2 O CLIENTE deixa de ver a posicao na fila — MIGRADO PARA O SITE (2026-09-05)
 
-> **Escrito pelo front-client a pedido do Andre.** Nao ha nada a implementar aqui; ha uma coisa a
-> **nao** fazer, e um conflito com a secao 12 que alguem precisa arbitrar.
+> **O registro vive agora no VUPTH DOCS**, pagina Front-Partner, secao *"Quem ve a posicao na fila"*.
+> A arbitragem que esta secao pedia **foi dada pelo Andre em 05/09** — a escolha e do profissional —,
+> entao a pendencia fechou e o texto saiu daqui pela regra da migracao: *pendencia resolvida, o site
+> passa a ser o unico registro*. **Informacao nova nao entra mais neste arquivo.**
 
-**Decisao do Andre em 31/08** (issue #20 do repo `vupth`): na tela do cliente, a **posicao na fila
-sai por completo** — fica so o tempo estimado, cru. Sai o numero grande de "N pessoas na frente" e
-sai tambem a fileira de bolinhas do "Voce ja passou N pessoas", porque essa **entrega a mesma
-informacao por outro caminho** (da para contar).
-
-#### ⚠️ O que NAO fazer — e o motivo de esta nota existir
-
-O `position` / `initialPosition` **continua vindo do backend, e deve continuar**:
-
-> **A posicao e informacao do PROFISSIONAL.** O app de voces precisa dela para tocar a fila. O que
-> muda e so que o **cliente nao a ve**. *(Andre, 2026-08-31.)*
-
-Quando o campo parar de ser usado na tela do cliente, a reacao natural de quem mexer vai ser
-"limpar" — tirar do tipo, ou abrir pedido ao backend para enxugar o payload da listagem. **Nao e
-para fazer:** seria economia de bytes que **quebraria o front-partner**. Registrado dos dois lados
-(nosso `PRD_FRONT-CLIENT.md`, item 10) justamente para nao acontecer.
-
-#### 🔴 Conflito com a secao 12 desta PRD — precisa de arbitragem do Andre
-
-A secao **12 (Features Futuras)** recomenda o **oposto**, e com pesquisa por tras:
-
-| Onde | O que a secao 12 diz | Estado apos 31/08 |
-|---|---|---|
-| §12, "O que CONSTRUIR" item 3 | tela de acompanhamento com **posicao + ETA + quem esta na frente**; *"a incerteza, nao a espera, e o que faz desistir"* | ⚠️ contradiz a decisao **na tela do cliente** |
-| §12, "O que CONSTRUIR" item 4 | notificacoes **"voce e o proximo / 3 na frente"** | ✅ **ARBITRADO (Andre, 31/08): "aviso sobre proximo ou quantos tem na frente serao mudados"** |
-| §12, "O que QUESTIONAR" item 1 | *"o texto explicito **voce e o Nº X de Y** - ~Z min e que informa"* | ⚠️ contradiz a decisao |
-
-**O item 4 ja foi arbitrado.** Levantamos porque uma push dizendo *"3 na frente"* entregaria ao
-cliente exatamente o numero que a decisao tirou da tela — desfazendo a decisao pela porta dos
-fundos, e sem ninguem perceber, por estar em outro repo e outra sprint. **O Andre decidiu em 31/08:
-"aviso sobre proximo ou quantos tem na frente serao mudados".** Vale para os avisos que ja existem,
-nao so para os futuros.
-
-⚠️ **Isso ja alcanca codigo em PRODUCAO, do lado do backend.** Conferimos: o push
-`QUEUE_NEXT_IN_LINE` ja e disparado hoje com o texto **"É quase a sua vez!" / "Você é o próximo da
-fila."** (`QueuePushService.java:60`) — a segunda frase e informacao de posicao, a mais especifica
-que existe. **Muda so o TEXTO**; gatilho, deduplicacao por `next_notified` e `data.type` continuam
-iguais. Registrado no `PRD_BACKEND.md`, na especificacao de push.
-
-**Nao estamos pedindo que voces mudem a secao 12** no resto. A pesquisa citada la e boa e o
-argumento da incerteza e legitimo — inclusive nos registramos no nosso PRD o risco previsto: sem
-posicao e com tempo cru, a tela do cliente **perde todo sinal de progresso**. Os itens 3 e 12.1
-seguem valendo para tudo que **nao** revele o numero.
-
-📌 **Escopo:** vale para o que o **cliente** ve. Na tela do **profissional**, posicao e ordem seguem
-livres — e o motivo de o campo continuar existindo.
-
-#### 🧭 RESPOSTA DO ANDRE (2026-09-05) — a escolha passa a ser do PROFISSIONAL
-
-> **"A intencao e de que o profissional possa escolher se o cliente tenha ou nao essa informacao."**
-> *(Andre, 2026-09-05, ao ler esta secao.)*
-
-**Isso ARBITRA o conflito com a secao 12 — e sem dar razao a nenhum dos dois lados.** A pesquisa da
-§12 ("a incerteza, nao a espera, e o que faz desistir") e a decisao de 31/08 (tirar a posicao)
-pararam de se contradizer porque **deixaram de ser a mesma pergunta**: nao e *"mostrar ou nao
-mostrar"*, e *"quem decide"*. O profissional que quer mostrar, mostra.
-
-⚠️ **NAO E TAREFA — e INTENCAO.** Vale a regra do Andre de 05/08: nada da lista de intencoes vira
-codigo sem o martelo dele. Ele foi explicito em 05/09: **"vamos deixar por hora"**. Ninguem abre
-pedido ao backend nem ao client por causa desta nota.
-
-**O que a nota MUDA hoje, mesmo sem virar codigo:** a leitura de que a posicao sai "por completo"
-da tela do cliente passa a ser **provisoria**. Quem for mexer nisso nao deve tratar a remocao como
-definitiva — e o alerta de **nao limpar o `position`/`initialPosition`** do payload fica ainda mais
-forte, porque agora o campo nao serve so ao profissional: ele volta a servir ao cliente sempre que
-o profissional escolher mostrar.
-
-**AS QUATRO PERGUNTAS FORAM RESPONDIDAS (Andre, 2026-09-05):**
-
-1. **Padrao: mostrar a quantidade de clientes na fila.** A chave nasce ligada; esconder e a
-   escolha ativa do profissional. *(⚠️ A resposta veio como "quantidade de cliente" — se a
-   intencao era o contrario, e uma palavra a corrigir aqui.)*
-2. **A chave e POR PROFISSIONAL**, nao por loja. Cada um decide para a propria fila.
-3. 🔴 **O aviso deixa de falar de POSICAO e passa a falar de TEMPO.** Nao e trocar o texto do
-   `QUEUE_NEXT_IN_LINE` — e **trocar o gatilho**: notificar quando faltar **1 hora, 30 minutos e
-   15 minutos**, em vez de disparar quando o cliente vira o proximo. *"Isso e mais certeiro que
-   'voce e o proximo', ainda que ele pudesse consultar a quantidade de pessoas na fila."*
-4. **O ETA nunca esconde.** So a posicao entra na chave. O argumento dele, que e o mesmo da §12
-   por outro caminho: *"se voce sabe que tem tres na sua frente, mas nao sabe o tempo que cada um
-   levara no servico, voce nao tem como estimar. Ja o tempo de espera sem a sua posicao ajuda
-   mais."* **O tempo e a informacao fiel; a posicao e a que parece precisa e nao e.**
-
-**Onde mora, quando virar trabalho:** um **toggle na lista de menus da fila** — *"a informacao ja
-vem com o DTO"*, entao a tela nao precisa de dado novo do backend para exibir.
-
-⚠️ **MAS o item 3 nao cabe nesse toggle, e essa e a parte cara.** Trocar o gatilho do push de
-posicao para tempo e mudanca de **comportamento no backend**, nao de string: hoje o
-`QUEUE_NEXT_IN_LINE` dispara na virada de posicao, com deduplicacao por `next_notified`. Notificar
-em 1h/30/15 exige **avaliar o ETA ao longo do tempo** e deduplicar por **faixa**, nao por evento —
-e o ETA se move quando a fila anda. Um atendimento que atrasa pode fazer o cliente cruzar a faixa
-de 30min **duas vezes**; um que termina cedo pode pular a de 1h sem nunca dispara-la.
-
-**Continua sendo INTENCAO — nada foi aberto.** Ele manteve o *"se um dia virar trabalho"*. Quando
-mandar, nasce em tres pedidos: **backend** (a chave por profissional **e** o gatilho por tempo),
-**partner** (o toggle no menu da fila) e **client** (honrar o campo). Pela regra do VUPTH DOCS, cada
-um vira uma solicitacao na pagina da equipe dona — nenhuma foi escrita ainda, de proposito.
-
----
+⚠️ **O unico ponto que continua valendo como AVISO DE CODIGO, e por isso fica repetido aqui:**
+o `position` / `initialPosition` **continua vindo do backend e nao pode ser removido do payload**.
+Ele e informacao do PROFISSIONAL — o partner precisa dele para tocar a fila. "Limpar" o campo
+seria economia de bytes que quebraria este app.
 
 ## 12. Features Futuras (Planejamento)
 
