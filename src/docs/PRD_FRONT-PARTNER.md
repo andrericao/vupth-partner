@@ -1178,21 +1178,35 @@ definitiva — e o alerta de **nao limpar o `position`/`initialPosition`** do pa
 forte, porque agora o campo nao serve so ao profissional: ele volta a servir ao cliente sempre que
 o profissional escolher mostrar.
 
-**O que continua em aberto, e precisa do Andre antes de qualquer linha:**
+**AS QUATRO PERGUNTAS FORAM RESPONDIDAS (Andre, 2026-09-05):**
 
-1. **Qual e o padrao?** Nasce mostrando ou escondendo? O padrao decide o que a maioria dos clientes
-   ve, porque quase ninguem mexe em configuracao.
-2. **A escolha e por profissional ou por loja?** O dono pode querer padronizar a vitrine; o
-   profissional pode querer o contrario. Sao donos diferentes para a mesma chave.
-3. **O aviso de push acompanha?** Em 31/08 ficou decidido mudar o texto do `QUEUE_NEXT_IN_LINE`
-   (*"Voce e o proximo da fila"*), que e informacao de posicao. Se a exibicao virar escolha, o texto
-   do push tambem vira — senao a escolha do profissional e desfeita pela notificacao.
-4. **A escolha some com o ETA junto, ou so com a posicao?** A decisao de 31/08 mantinha o tempo
-   estimado; se o profissional pode esconder a posicao, pode esconder o tempo tambem?
+1. **Padrao: mostrar a quantidade de clientes na fila.** A chave nasce ligada; esconder e a
+   escolha ativa do profissional. *(⚠️ A resposta veio como "quantidade de cliente" — se a
+   intencao era o contrario, e uma palavra a corrigir aqui.)*
+2. **A chave e POR PROFISSIONAL**, nao por loja. Cada um decide para a propria fila.
+3. 🔴 **O aviso deixa de falar de POSICAO e passa a falar de TEMPO.** Nao e trocar o texto do
+   `QUEUE_NEXT_IN_LINE` — e **trocar o gatilho**: notificar quando faltar **1 hora, 30 minutos e
+   15 minutos**, em vez de disparar quando o cliente vira o proximo. *"Isso e mais certeiro que
+   'voce e o proximo', ainda que ele pudesse consultar a quantidade de pessoas na fila."*
+4. **O ETA nunca esconde.** So a posicao entra na chave. O argumento dele, que e o mesmo da §12
+   por outro caminho: *"se voce sabe que tem tres na sua frente, mas nao sabe o tempo que cada um
+   levara no servico, voce nao tem como estimar. Ja o tempo de espera sem a sua posicao ajuda
+   mais."* **O tempo e a informacao fiel; a posicao e a que parece precisa e nao e.**
 
-**Se um dia virar trabalho**, ele nasce em tres pontas ao mesmo tempo: uma chave por profissional no
-**backend** (serie S), a tela do **partner** para liga-la, e o **client** honrando o campo. Nenhuma
-das tres foi aberta — de proposito.
+**Onde mora, quando virar trabalho:** um **toggle na lista de menus da fila** — *"a informacao ja
+vem com o DTO"*, entao a tela nao precisa de dado novo do backend para exibir.
+
+⚠️ **MAS o item 3 nao cabe nesse toggle, e essa e a parte cara.** Trocar o gatilho do push de
+posicao para tempo e mudanca de **comportamento no backend**, nao de string: hoje o
+`QUEUE_NEXT_IN_LINE` dispara na virada de posicao, com deduplicacao por `next_notified`. Notificar
+em 1h/30/15 exige **avaliar o ETA ao longo do tempo** e deduplicar por **faixa**, nao por evento —
+e o ETA se move quando a fila anda. Um atendimento que atrasa pode fazer o cliente cruzar a faixa
+de 30min **duas vezes**; um que termina cedo pode pular a de 1h sem nunca dispara-la.
+
+**Continua sendo INTENCAO — nada foi aberto.** Ele manteve o *"se um dia virar trabalho"*. Quando
+mandar, nasce em tres pedidos: **backend** (a chave por profissional **e** o gatilho por tempo),
+**partner** (o toggle no menu da fila) e **client** (honrar o campo). Pela regra do VUPTH DOCS, cada
+um vira uma solicitacao na pagina da equipe dona — nenhuma foi escrita ainda, de proposito.
 
 ---
 
