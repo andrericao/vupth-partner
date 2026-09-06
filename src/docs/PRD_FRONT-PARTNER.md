@@ -1448,21 +1448,6 @@ Atualiza a camada **JavaScript** (telas/logica/fixes) pela internet, sem rebuild
 **Nao** atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK mudam o
 `runtimeVersion` e exigem um **build novo**.
 
-#### Ambientes, canais e variantes: ver [`AMBIENTES.md`](AMBIENTES.md)
-
-**Fonte unica do assunto** (Regra 1 do VUPTH_DOCS). La estao: qual backend cada canal fala,
-os tres apps no aparelho (`.dev`, `.preview` e o id limpo de producao), o porque de o Expo Go
-ter saido de cena, as contas de QA e o cold start do Render.
-
-O que fica **aqui**, porque e consequencia deste app:
-
-- **`expo-dev-client` entrou em 2026-09-06** e levou o partner de **1.1.0 para 1.2.0**
-  (`versionCode` 2 -> 3). Como o `runtimeVersion` segue `appVersion`, **o APK de `preview` da
-  1.1.0 parou de receber OTA** — precisa de build novo para voltar a receber.
-- **Testar PR:** `gh pr checkout <n>` + `npx expo start --dev-client` (ou `--web` para o que
-  for visual). Testa-se a branch **isolada**; depois do merge, roda-se a `dev` uma vez. Sao
-  duas perguntas diferentes: "este PR presta?" e "os dois convivem?".
-
 **Configuracao (feita):**
 - `expo-updates` instalado; `eas update:configure` gravou no `app.json`:
   `updates.url = https://u.expo.dev/<projectId>` e `runtimeVersion {policy: appVersion}`.
