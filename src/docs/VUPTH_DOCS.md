@@ -29,7 +29,7 @@ sem aviso — e e pior que documento nenhum, porque as pessoas confiam nele.
 | Identidade visual: tokens, tipografia, cor, espaco, raio | **`DESIGN.md`** | design |
 | Regras de UX: hierarquia, bloqueio x vazio, semantica, sombra | **`DESIGN.md`** | design |
 | Contrato da API: endpoints, payloads, codigos de erro, WebSocket | **`PRD_BACKEND.md`** | backend |
-| Ambientes: URLs, variaveis, canais, o que cada nome significa | **`AMBIENTES.md`** *(a criar)* | backend + fronts |
+| Ambientes: URLs, variaveis, canais, o que cada nome significa | **`AMBIENTES.md`** ✅ *(criado 2026-09-06, no repo do partner)* | backend + fronts |
 | Fluxo de trabalho: branches, PR, gate, OTA, deploy, publicacao | **`FLUXO.md`** *(a criar)* | fronts |
 | Pendencia de um time para outro | **`HANDOFF_<destino>.md`** do repo que pede | quem pede |
 | Decisao de produto (com alternativas e consequencia) | **`DECISOES_*.md`** | Andre |

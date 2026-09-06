@@ -2,7 +2,9 @@
 
 Itens descobertos no front-partner mas cujo **frontend pertence ao app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto). Registrados aqui para alinhamento: quando o usuario precisar, ele manda o front-client ler estas pendencias e implementar.
 
-Ultima atualizacao: 2026-08-18 · branch `design/marca-dev` do front-partner.
+Ultima atualizacao: 2026-09-06 · branch `dev` do front-partner.
+
+> 🔧 **NOVO (2026-09-06): C27 — o Expo Go saiu de cena, e o APK de teste pode estar gravando em PRODUCAO.** Duas coisas para o client conferir **hoje**: (1) o Expo Go carrega **so o SDK mais novo** (57) e os projetos estao no **54**, entao ele parou de abrir — o substituto e o `expo-dev-client`; (2) no partner, o canal `preview` apontava para o **Railway**, ou seja, **teste em device gravava no banco de producao** — vale checar se o repo de voces tem o mesmo mapeamento. Ficha completa na secao **"Detalhe — C27"** no fim deste documento. Fonte unica do assunto: [`AMBIENTES.md`](AMBIENTES.md).
 
 > 🎨 **NOVO (2026-08-18): C25 — identidade visual nova (marca Vupth).** Paleta `brandGreen #9FE870` + `forest #163300`, **Archivo** no lugar da Poppins e **DMMono** para numeros. **Isso SUPERA a paleta do C7** (a "Verde Marca" `#3b7a3f`), que segue valida so durante a transicao. ⚠️ **Mea-culpa de processo:** a identidade foi aplicada em **55 arquivos de codigo e ZERO documentos**, numa branch nao mergeada — o client so descobriu porque o Andre mandou procurar. O que esperavamos deles estava escrito **dentro de um comentario de codigo**. Ficha completa na secao **"Detalhe — C25"** no fim deste documento.
 
@@ -325,3 +327,93 @@ Nada disso funciona se a **API nao autorizar a origem nova**. No app nativo CORS
 ### Guarda automatica
 
 O partner escreveu `src/lib/__tests__/webConfig.test.ts`, que reprova se qualquer uma das quatro pecas sumir. Existe porque **nenhuma delas quebra typecheck, lint ou teste de componente**: o app continua compilando e o build nativo nem percebe — quem quebra e o **site**, e so em producao. Vale espelhar.
+
+
+---
+
+## Detalhe — C27 · Ambiente de teste: dev client, canais e os tres apks (2026-09-06)
+
+> **Fonte unica do assunto:** [`AMBIENTES.md`](AMBIENTES.md), no repo do partner (Regra 1 do
+> VUPTH_DOCS). O que segue e o resumo acionavel para o client, com o que **voces** precisam
+> conferir no repo de voces.
+
+### 1. O Expo Go parou de abrir os projetos — e nao e bug de voces
+
+O Expo Go e um app da Play Store e carrega **so o SDK mais novo**: o SDK 57 saiu em
+**30/06/2026** e os projetos estao no **54**. Como ele se atualiza sozinho pela loja, chegou o
+dia em que passou do 54 e nao abre mais. Nao adianta procurar no codigo: e acoplamento —
+enquanto o ambiente de teste for um app que a Expo atualiza, quem manda no calendario de
+voces e a Expo.
+
+### 2. O substituto: `expo-dev-client`
+
+Um build do **proprio app**, com menu de desenvolvimento e leitor de QR embutidos, e a camada
+nativa **congelada no SDK do projeto**. A Expo pode lancar o 58: nao chega no aparelho, porque
+o app nao vem da loja. So muda quando **voces** mandarem buildar.
+
+```
+npx expo install expo-dev-client
+eas build -p android --profile development
+# instala o APK, e a partir daqui:
+git switch <branch>          # ou: gh pr checkout <n>
+npx expo start --dev-client  # le o QR COM ESSE APP — sem Expo Go
+```
+
+**Rebuild so quando o nativo muda**: bump de SDK, lib nativa, plugin, permissao, icone,
+package id. Tela, logica, rota, estilo e troca de branch **nao** pedem rebuild.
+
+Bonus: como e o app de verdade, **push remoto volta a ser testavel** (o Expo Go nao entrega
+push desde o SDK 53). Se precisarem de um paliativo hoje, da para instalar o Expo Go da versao
+certa em `https://expo.dev/go?sdkVersion=54&platform=android&device=true` — mas e remendo, e
+precisa desligar a atualizacao automatica dele.
+
+### 3. ⚠️ Confiram se o `preview` de voces aponta para producao
+
+No partner, o canal `preview` — o APK de distribuicao interna, o que o time instala —
+apontava para o **Railway**. Consequencia: **teste em device gravava no banco de producao**.
+Corrigido em 2026-09-06.
+
+**Onde olhar no repo de voces:** o mapeamento canal -> ambiente (no partner e o
+`CANAL_PARA_ENV`, em `src/lib/apiEnv.ts`) e o `env` de cada perfil no `eas.json`. Se o
+`preview` estiver em `prod`, e o mesmo problema.
+
+A regra acordada: **`prod` e o Railway, `staging` e o Render, e o que se testa e o Render.**
+
+### 4. Tres apps no aparelho, um por papel
+
+O Android identifica app pelo `package`: dois builds com o mesmo id sao o **mesmo app**, e
+instalar um **desinstala** o outro. Era por isso que nao dava para ter o veiculo de teste e o
+de producao lado a lado. A saida foi um `app.config.js` que da sufixo as variantes de teste:
+
+| perfil | id | backend | de onde vem o JS |
+|---|---|---|---|
+| `development` | `...partner.dev` | Render | Metro local |
+| `preview` | `...partner.preview` | Render | OTA do push na `dev` |
+| `prod-apk` | `...partner` | Railway | OTA do push na `main` |
+
+⚠️ Dois detalhes que custaram confusao aqui: o canal **`preview` recebe OTA da `dev`**, nao da
+`main` (quem quer olhar producao usa o `prod-apk`); e o perfil **`production` gera app-bundle**,
+formato de loja que **nao instala no aparelho** — dai a existencia do `prod-apk`.
+
+### 5. Efeito colateral esperado, para ninguem abrir bug
+
+O Render Free hiberna: o APK de teste passa a ver o **portao de warmup (~50s)** no primeiro
+acesso apos ociosidade. E esperado.
+
+### 6. Contas de QA
+
+`<perfil>_<dezena>@teste.com` — prefixo `client`, `prof` ou `prop`, numero em **dezenas**, um
+por bateria. `client_10@teste.com`, `prof_10@teste.com` e `prop_10@teste.com` sao a **mesma
+rodada**; a proxima bateria comeca no **20**. Como o QA vive no Render, e la que essas contas
+existem.
+
+### 7. Como o partner esta revisando PR
+
+Duas passadas, porque sao duas perguntas diferentes: testa-se a branch **isolada** (aqui se
+julga o PR — se quebrou, a culpa e dele), e depois do merge roda-se a `dev` uma vez (aqui se
+pergunta se as duas mudancas convivem). Para PR visual, `npx expo start --web` adianta sem
+esperar build.
+
+E uma regra que vale espelhar: **lib nativa entrando = bump de versao obrigatorio**. Como o
+`runtimeVersion` segue `appVersion`, os APKs da versao anterior **param de receber OTA** — o
+que e correto, mas pega de surpresa quem nao sabe.

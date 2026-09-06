@@ -1448,77 +1448,20 @@ Atualiza a camada **JavaScript** (telas/logica/fixes) pela internet, sem rebuild
 **Nao** atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK mudam o
 `runtimeVersion` e exigem um **build novo**.
 
-#### Como se testa em device: dev client, nao Expo Go (2026-09-06)
+#### Ambientes, canais e variantes: ver [`AMBIENTES.md`](AMBIENTES.md)
 
-O **Expo Go nao serve mais**: ele e um app da loja que carrega **so o SDK mais novo** (hoje o
-**57**), se atualiza sozinho, e o projeto esta no **54** — entao ele simplesmente nao abre o
-projeto. Alem disso o Expo Go nao entrega **push remoto** desde o SDK 53.
+**Fonte unica do assunto** (Regra 1 do VUPTH_DOCS). La estao: qual backend cada canal fala,
+os tres apps no aparelho (`.dev`, `.preview` e o id limpo de producao), o porque de o Expo Go
+ter saido de cena, as contas de QA e o cold start do Render.
 
-A saida e o **`expo-dev-client`**: um build do PROPRIO app com menu de desenvolvimento e
-lancador embutidos. A camada nativa fica **congelada no SDK do projeto** no momento do build,
-e so muda quando **nos** rebuildarmos — bump de SDK da Expo nao alcanca o aparelho. O fluxo
-fica identico ao de antes, com uma flag a mais:
+O que fica **aqui**, porque e consequencia deste app:
 
-```
-git switch <branch>
-npx expo start --dev-client
-```
-
-**Quando o dev client precisa ser rebuildado** (mesma fronteira do `runtimeVersion`): bump de
-SDK, lib nativa nova, plugin novo, permissao, icone/splash, package id. **Tela, logica, rota,
-estilo e troca de branch nao pedem rebuild** — recarrega e pronto.
-
-⚠️ `expo-dev-client` e **lib nativa**, entao a entrada dele exigiu **bump: 1.1.0 -> 1.2.0**
-(`versionCode` 2 -> 3). Como o `runtimeVersion` segue a politica `appVersion`, **o APK de
-`preview` da 1.1.0 para de receber OTA** — precisa de um build novo de `preview` para voltar
-a receber.
-
-**Subir de SDK (54 -> 57) fica como item planejado**, de preferencia **depois** de fechar a
-migracao NativeWind: sao tres saltos, o React Native vai de 0.81.5 a 0.86, e hoje o gluestack
-v1 ainda convive com o NativeWind — subir agora seria depurar duas coisas ao mesmo tempo.
-
-#### Tres apps no mesmo aparelho (2026-09-06)
-
-O Android identifica app pelo `package`: dois builds com o mesmo id sao o MESMO app, e
-instalar um **desinstala** o outro. Era por isso que nao dava para ter o APK de teste e o de
-producao lado a lado. O `app.config.js` resolve dando sufixo as variantes de teste — o
-`app.json` continua sendo a fonte, o config so troca `package`/`bundleIdentifier` e o nome do
-icone quando `EAS_BUILD_PROFILE` e de variante.
-
-| perfil de build | id | icone | backend | de onde vem o JS |
-|---|---|---|---|---|
-| `development` | `com.vupth.partner.dev` | VUPTH dev | Render | Metro local (`npx expo start --dev-client`) |
-| `preview` | `com.vupth.partner.preview` | VUPTH preview | Render | OTA do push na `dev` |
-| `prod-apk` / `production` | `com.vupth.partner` | vupth parceiros | Railway | OTA do push na `main` |
-
-`prod-apk` existe porque o perfil `production` gera **app-bundle** (formato de loja, nao
-instala no aparelho). Ele estende o `production` — mesmo canal, mesmo backend — so mudando
-para APK com distribuicao interna. **O que vale para a loja continua sendo o `production`.**
-
-⚠️ O perfil `preview` recebe OTA da branch **`dev`**, nao da `main` — quem quiser olhar
-producao usa o `prod-apk`. Confundir os dois foi o que motivou esta tabela.
-
-#### Qual canal fala com qual backend (regra do Andre, 2026-09-06)
-
-**`prod` e o Railway; `staging` e o Render. O que se testa e o Render** — no app pelo Expo/APK
-e na web pelo link que comeca com `dev`.
-
-| Superficie | Canal / branch | `EXPO_PUBLIC_API_ENV` | Backend |
-|---|---|---|---|
-| APK interno de teste | canal `preview` (OTA no push da `dev`) | `dev` | **Render** |
-| App rodando local | sem canal, vale o `.env` | `local` | maquina |
-| Link web de teste | Cloudflare Preview, branch `dev` | `staging` | **Render** |
-| Loja / producao | canal `production` (OTA no push da `main`) | `prod` | **Railway** |
-| Link web de producao | Cloudflare Production, branch `main` | `prod` | **Railway** |
-
-⚠️ **Mudou em 2026-09-06:** o canal `preview` apontava pro **Railway**, e o teste em device
-gravava no banco de **producao**. Agora o QA vive no Render (contas `@teste.com`, ver
-convencao de numeracao por dezena). Tabela viva em [`src/lib/apiEnv.ts`](../lib/apiEnv.ts)
-(`CANAL_PARA_ENV`) e no `eas.json` — os dois mudam juntos, com o teste
-`src/lib/__tests__/apiEnv.test.ts` cobrindo cada canal declarado.
-
-⚠️ **Efeito colateral esperado:** o Render Free hiberna, entao o APK de `preview` agora ve o
-**portao de warmup** (~50s) no primeiro acesso apos ociosidade. Nao e bug.
+- **`expo-dev-client` entrou em 2026-09-06** e levou o partner de **1.1.0 para 1.2.0**
+  (`versionCode` 2 -> 3). Como o `runtimeVersion` segue `appVersion`, **o APK de `preview` da
+  1.1.0 parou de receber OTA** — precisa de build novo para voltar a receber.
+- **Testar PR:** `gh pr checkout <n>` + `npx expo start --dev-client` (ou `--web` para o que
+  for visual). Testa-se a branch **isolada**; depois do merge, roda-se a `dev` uma vez. Sao
+  duas perguntas diferentes: "este PR presta?" e "os dois convivem?".
 
 **Configuracao (feita):**
 - `expo-updates` instalado; `eas update:configure` gravou no `app.json`:
