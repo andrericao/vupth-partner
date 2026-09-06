@@ -1477,6 +1477,27 @@ a receber.
 migracao NativeWind: sao tres saltos, o React Native vai de 0.81.5 a 0.86, e hoje o gluestack
 v1 ainda convive com o NativeWind — subir agora seria depurar duas coisas ao mesmo tempo.
 
+#### Tres apps no mesmo aparelho (2026-09-06)
+
+O Android identifica app pelo `package`: dois builds com o mesmo id sao o MESMO app, e
+instalar um **desinstala** o outro. Era por isso que nao dava para ter o APK de teste e o de
+producao lado a lado. O `app.config.js` resolve dando sufixo as variantes de teste — o
+`app.json` continua sendo a fonte, o config so troca `package`/`bundleIdentifier` e o nome do
+icone quando `EAS_BUILD_PROFILE` e de variante.
+
+| perfil de build | id | icone | backend | de onde vem o JS |
+|---|---|---|---|---|
+| `development` | `com.vupth.partner.dev` | VUPTH dev | Render | Metro local (`npx expo start --dev-client`) |
+| `preview` | `com.vupth.partner.preview` | VUPTH preview | Render | OTA do push na `dev` |
+| `prod-apk` / `production` | `com.vupth.partner` | vupth parceiros | Railway | OTA do push na `main` |
+
+`prod-apk` existe porque o perfil `production` gera **app-bundle** (formato de loja, nao
+instala no aparelho). Ele estende o `production` — mesmo canal, mesmo backend — so mudando
+para APK com distribuicao interna. **O que vale para a loja continua sendo o `production`.**
+
+⚠️ O perfil `preview` recebe OTA da branch **`dev`**, nao da `main` — quem quiser olhar
+producao usa o `prod-apk`. Confundir os dois foi o que motivou esta tabela.
+
 #### Qual canal fala com qual backend (regra do Andre, 2026-09-06)
 
 **`prod` e o Railway; `staging` e o Render. O que se testa e o Render** — no app pelo Expo/APK
