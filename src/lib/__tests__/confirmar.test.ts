@@ -147,3 +147,58 @@ describe("avisar()", () => {
     ).resolves.toBeUndefined();
   });
 });
+
+// O caminho que roda DE VERDADE no navegador: sem `confirmImpl`/`alertaWebImpl`
+// injetados, `confirmar()` e `avisar()` caem nos impls padrao, que falam com o
+// `window`. Todos os testes acima contornam esses dois por injecao — entao a
+// unica coisa que o usuario da web executa de fato ficava descoberta.
+describe("na WEB sem injecao — o impl padrao, que e o que o navegador roda", () => {
+  const janela = globalThis as unknown as { window?: Record<string, unknown> };
+  let confirmOriginal: unknown;
+  let alertOriginal: unknown;
+
+  beforeEach(() => {
+    if (!janela.window) janela.window = {};
+    confirmOriginal = janela.window.confirm;
+    alertOriginal = janela.window.alert;
+  });
+
+  afterEach(() => {
+    if (!janela.window) return;
+    janela.window.confirm = confirmOriginal;
+    janela.window.alert = alertOriginal;
+  });
+
+  it("chama o window.confirm do navegador, com titulo e mensagem juntos", async () => {
+    const confirmDoNavegador = jest.fn(() => true);
+    janela.window!.confirm = confirmDoNavegador;
+
+    const ok = await confirmar(
+      { titulo: "Fechar fila", mensagem: "Ninguem novo entra." },
+      { plataforma: "web" }
+    );
+
+    expect(ok).toBe(true);
+    expect(confirmDoNavegador).toHaveBeenCalledWith("Fechar fila\n\nNinguem novo entra.");
+  });
+
+  it("recusar no navegador NAO executa a acao", async () => {
+    janela.window!.confirm = jest.fn(() => false);
+
+    const ok = await confirmar(
+      { titulo: "Desafiliar", mensagem: "Voce perde o vinculo." },
+      { plataforma: "web" }
+    );
+
+    expect(ok).toBe(false);
+  });
+
+  it("avisar() chama o window.alert do navegador", async () => {
+    const alertDoNavegador = jest.fn();
+    janela.window!.alert = alertDoNavegador;
+
+    await avisar({ titulo: "Tudo certo", mensagem: "Fila reaberta." }, { plataforma: "web" });
+
+    expect(alertDoNavegador).toHaveBeenCalledWith("Tudo certo\n\nFila reaberta.");
+  });
+});
