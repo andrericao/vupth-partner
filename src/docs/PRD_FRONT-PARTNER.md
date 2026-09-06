@@ -1448,6 +1448,35 @@ Atualiza a camada **JavaScript** (telas/logica/fixes) pela internet, sem rebuild
 **Nao** atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK mudam o
 `runtimeVersion` e exigem um **build novo**.
 
+#### Como se testa em device: dev client, nao Expo Go (2026-09-06)
+
+O **Expo Go nao serve mais**: ele e um app da loja que carrega **so o SDK mais novo** (hoje o
+**57**), se atualiza sozinho, e o projeto esta no **54** — entao ele simplesmente nao abre o
+projeto. Alem disso o Expo Go nao entrega **push remoto** desde o SDK 53.
+
+A saida e o **`expo-dev-client`**: um build do PROPRIO app com menu de desenvolvimento e
+lancador embutidos. A camada nativa fica **congelada no SDK do projeto** no momento do build,
+e so muda quando **nos** rebuildarmos — bump de SDK da Expo nao alcanca o aparelho. O fluxo
+fica identico ao de antes, com uma flag a mais:
+
+```
+git switch <branch>
+npx expo start --dev-client
+```
+
+**Quando o dev client precisa ser rebuildado** (mesma fronteira do `runtimeVersion`): bump de
+SDK, lib nativa nova, plugin novo, permissao, icone/splash, package id. **Tela, logica, rota,
+estilo e troca de branch nao pedem rebuild** — recarrega e pronto.
+
+⚠️ `expo-dev-client` e **lib nativa**, entao a entrada dele exigiu **bump: 1.1.0 -> 1.2.0**
+(`versionCode` 2 -> 3). Como o `runtimeVersion` segue a politica `appVersion`, **o APK de
+`preview` da 1.1.0 para de receber OTA** — precisa de um build novo de `preview` para voltar
+a receber.
+
+**Subir de SDK (54 -> 57) fica como item planejado**, de preferencia **depois** de fechar a
+migracao NativeWind: sao tres saltos, o React Native vai de 0.81.5 a 0.86, e hoje o gluestack
+v1 ainda convive com o NativeWind — subir agora seria depurar duas coisas ao mesmo tempo.
+
 #### Qual canal fala com qual backend (regra do Andre, 2026-09-06)
 
 **`prod` e o Railway; `staging` e o Render. O que se testa e o Render** — no app pelo Expo/APK
