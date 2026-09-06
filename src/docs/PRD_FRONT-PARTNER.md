@@ -1448,6 +1448,28 @@ Atualiza a camada **JavaScript** (telas/logica/fixes) pela internet, sem rebuild
 **Nao** atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK mudam o
 `runtimeVersion` e exigem um **build novo**.
 
+#### Qual canal fala com qual backend (regra do Andre, 2026-09-06)
+
+**`prod` e o Railway; `staging` e o Render. O que se testa e o Render** — no app pelo Expo/APK
+e na web pelo link que comeca com `dev`.
+
+| Superficie | Canal / branch | `EXPO_PUBLIC_API_ENV` | Backend |
+|---|---|---|---|
+| APK interno de teste | canal `preview` (OTA no push da `dev`) | `dev` | **Render** |
+| App rodando local | sem canal, vale o `.env` | `local` | maquina |
+| Link web de teste | Cloudflare Preview, branch `dev` | `staging` | **Render** |
+| Loja / producao | canal `production` (OTA no push da `main`) | `prod` | **Railway** |
+| Link web de producao | Cloudflare Production, branch `main` | `prod` | **Railway** |
+
+⚠️ **Mudou em 2026-09-06:** o canal `preview` apontava pro **Railway**, e o teste em device
+gravava no banco de **producao**. Agora o QA vive no Render (contas `@teste.com`, ver
+convencao de numeracao por dezena). Tabela viva em [`src/lib/apiEnv.ts`](../lib/apiEnv.ts)
+(`CANAL_PARA_ENV`) e no `eas.json` — os dois mudam juntos, com o teste
+`src/lib/__tests__/apiEnv.test.ts` cobrindo cada canal declarado.
+
+⚠️ **Efeito colateral esperado:** o Render Free hiberna, entao o APK de `preview` agora ve o
+**portao de warmup** (~50s) no primeiro acesso apos ociosidade. Nao e bug.
+
 **Configuracao (feita):**
 - `expo-updates` instalado; `eas update:configure` gravou no `app.json`:
   `updates.url = https://u.expo.dev/<projectId>` e `runtimeVersion {policy: appVersion}`.

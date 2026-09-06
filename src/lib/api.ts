@@ -4,8 +4,8 @@ import * as Updates from "expo-updates";
 
 import { resolveApiEnv } from "@lib/apiEnv";
 
-// Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
-// testa em device (Andre 2026-08-22).
+// Render = ambiente de TESTE; Railway = PRODUCAO. Quem testa bate no Render:
+// o app via Expo/APK de `preview` e a web pelo link `dev*` (Andre 2026-09-06).
 //
 // `staging` e `dev` sao o MESMO host de proposito: este app batizou de
 // `staging` o que o client batizou de `dev`, e o mesmo `.env` circula entre os

@@ -22,7 +22,7 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "prod"
+        "EXPO_PUBLIC_API_ENV": "dev"
       }
     },
     "production": {
