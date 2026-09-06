@@ -18,6 +18,7 @@ import { BrandButton } from "@components/brand/Button";
 import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
+import { confirmar } from "@lib/confirmar";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 
 import {
@@ -180,26 +181,24 @@ export default function MyServicesScreen() {
     }
   };
 
-  const handleRemoveItem = (svc: { id: string; customName: string }) => {
-    Alert.alert(
-      "Remover serviço",
-      `Deseja remover "${svc.customName}"? Esta ação não pode ser desfeita.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Remover",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await removeMyServiceItem(svc.id);
-              if (editingId === svc.id) cancelEditItem();
-            } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover o serviço."));
-            }
-          },
-        },
-      ]
-    );
+  // ⚠️ `confirmar()` e nao `Alert.alert` com botoes: o react-native-web nao
+  // implementa o Alert, entao na web a caixa nunca aparecia e o toque parecia
+  // nao ter efeito — foi o "botao de remover servico nao funciona" da issue #25.
+  const handleRemoveItem = async (svc: { id: string; customName: string }) => {
+    const ok = await confirmar({
+      titulo: "Remover serviço",
+      mensagem: `Deseja remover "${svc.customName}"? Esta ação não pode ser desfeita.`,
+      confirmar: "Remover",
+      destrutivo: true,
+    });
+    if (!ok) return;
+
+    try {
+      await removeMyServiceItem(svc.id);
+      if (editingId === svc.id) cancelEditItem();
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover o serviço."));
+    }
   };
 
   const handleSubmit = async () => {

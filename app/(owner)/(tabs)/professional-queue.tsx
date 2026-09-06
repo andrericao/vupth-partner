@@ -18,6 +18,7 @@ import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import type { AttendanceInQueue } from "@lib/types";
+import { confirmar, avisar } from "@lib/confirmar";
 
 function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; position: number }) {
   const statusLabel =
@@ -126,33 +127,33 @@ export default function ProfessionalQueueScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     if (!establishmentId || !professionalId) return;
     const name = data?.professionalName ?? professionalName ?? "este profissional";
-    Alert.alert(
-      "Desvincular profissional",
-      `Deseja desvincular ${name} do estabelecimento? Ele deixará de atender aqui.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Desvincular",
-          style: "destructive",
-          onPress: async () => {
-            setIsRemoving(true);
-            try {
-              await removeProfessional(establishmentId, professionalId);
-              Alert.alert("Desvinculado", `${name} foi removido do estabelecimento.`, [
-                { text: "OK", onPress: () => router.navigate("/(owner)/dashboard" as any) },
-              ]);
-            } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desvincular o profissional. Verifique se não há atendimento em andamento."));
-            } finally {
-              setIsRemoving(false);
-            }
-          },
-        },
-      ]
-    );
+    const ok = await confirmar({
+      titulo: "Desvincular profissional",
+      mensagem: `Deseja desvincular ${name} do estabelecimento? Ele deixará de atender aqui.`,
+      confirmar: "Desvincular",
+      destrutivo: true,
+    });
+    if (!ok) return;
+
+    setIsRemoving(true);
+    try {
+      await removeProfessional(establishmentId, professionalId);
+      // O profissional JA FOI desvinculado. Com `Alert.alert` a web nao mostrava
+      // nada e a navegacao nao acontecia — o dono ficava parado na tela de quem
+      // acabara de remover.
+      await avisar({
+        titulo: "Desvinculado",
+        mensagem: `${name} foi removido do estabelecimento.`,
+      });
+      router.navigate("/(owner)/dashboard" as any);
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desvincular o profissional. Verifique se não há atendimento em andamento."));
+    } finally {
+      setIsRemoving(false);
+    }
   };
 
   return (

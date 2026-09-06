@@ -15,6 +15,7 @@ import { NwButton } from "@components/nw/Button";
 import { ChevronLeft, Mail } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
+import { avisar } from "@lib/confirmar";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 
@@ -83,9 +84,15 @@ export default function ForgotPasswordScreen() {
     setIsLoading(true);
     try {
       await resetPassword(email.trim(), code.trim(), password);
-      Alert.alert("Senha alterada", "Sua senha foi redefinida. Entre com a senha nova.", [
-        { text: "Ir para o login", onPress: () => router.replace("/(auth)/login" as any) },
-      ]);
+      // A senha JA FOI trocada aqui. Com `Alert.alert` a web nao mostrava a
+      // caixa, o onPress nunca rodava e o usuario ficava preso no formulario,
+      // sem saber que tinha dado certo.
+      await avisar({
+        titulo: "Senha alterada",
+        mensagem: "Sua senha foi redefinida. Entre com a senha nova.",
+        ok: "Ir para o login",
+      });
+      router.replace("/(auth)/login" as any);
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível redefinir a senha."));
     } finally {

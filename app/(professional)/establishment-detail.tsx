@@ -20,6 +20,7 @@ import {
 } from "@store/establishment.store";
 import { parseApiTime } from "@lib/time";
 import { maskPhone } from "@lib/masks";
+import { avisar } from "@lib/confirmar";
 
 function formatAddress(a: EstablishmentDetail["address"]): string | null {
   if (!a) return null;
@@ -107,16 +108,13 @@ export default function EstablishmentDetailScreen() {
     setIsRequesting(true);
     try {
       await api.post("/professional/me/affiliations", { establishmentId: id });
-      Alert.alert(
-        "Solicitação enviada",
-        `Sua solicitação para ${name} foi enviada. Aguarde a aprovação do proprietário.`,
-        [
-          {
-            text: "OK",
-            onPress: () => router.navigate("/(professional)/queue" as any),
-          },
-        ]
-      );
+      // A solicitacao JA FOI enviada. Sem a caixa na web o profissional
+      // continuava na mesma tela, achava que nao tinha ido, e enviava de novo.
+      await avisar({
+        titulo: "Solicitação enviada",
+        mensagem: `Sua solicitação para ${name} foi enviada. Aguarde a aprovação do proprietário.`,
+      });
+      router.navigate("/(professional)/queue" as any);
     } catch (error: any) {
       Alert.alert(
         "Erro",

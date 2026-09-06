@@ -1106,7 +1106,17 @@ backend auto-rollback homolog/prod).
 
 > **Movidas para [`HANDOFF_CLIENT.md`](./HANDOFF_CLIENT.md)** (C1–C7, tabela consolidada). Sao itens descobertos no front-partner cujo frontend pertence ao **app cliente** (repo `vupth/`, fora do escopo de edicao deste projeto) — registrados la para alinhamento cross-project.
 
----
+### 11.2 O CLIENTE deixa de ver a posicao na fila — MIGRADO PARA O SITE (2026-09-05)
+
+> **O registro vive agora no VUPTH DOCS**, pagina Front-Partner, secao *"Quem ve a posicao na fila"*.
+> A arbitragem que esta secao pedia **foi dada pelo Andre em 05/09** — a escolha e do profissional —,
+> entao a pendencia fechou e o texto saiu daqui pela regra da migracao: *pendencia resolvida, o site
+> passa a ser o unico registro*. **Informacao nova nao entra mais neste arquivo.**
+
+⚠️ **O unico ponto que continua valendo como AVISO DE CODIGO, e por isso fica repetido aqui:**
+o `position` / `initialPosition` **continua vindo do backend e nao pode ser removido do payload**.
+Ele e informacao do PROFISSIONAL — o partner precisa dele para tocar a fila. "Limpar" o campo
+seria economia de bytes que quebraria este app.
 
 ## 12. Features Futuras (Planejamento)
 

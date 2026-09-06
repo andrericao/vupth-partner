@@ -5,7 +5,7 @@ import {
   Pressable,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Alert } from "react-native";
+import {  } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -18,6 +18,7 @@ import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight } from "lucide-react-native";
 import type { ComponentType } from "react";
+import { confirmar } from "@lib/confirmar";
 
 // [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
 // especifica o glifo exato via icon+library do no ("users", "clipboard-list",
@@ -113,36 +114,30 @@ export default function OwnerMenuScreen() {
   const isProfessional = user?.roles?.includes("PROFESSIONAL");
 
   const handleLeaveEstablishment = () => {
-    Alert.alert(
-      "Sair do Estabelecimento",
-      "Você será desvinculado deste estabelecimento. Deseja continuar?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sair do Estabelecimento",
-          style: "destructive",
-          onPress: async () => {
-            resetEstablishment();
-            resetProfessional();
-            router.replace("/(owner)/onboarding/establishment" as any);
-          },
-        },
-      ]
-    );
+    confirmar({
+      titulo: "Sair do Estabelecimento",
+      mensagem: "Você será desvinculado deste estabelecimento. Deseja continuar?",
+      confirmar: "Sair do Estabelecimento",
+      destrutivo: true,
+    }).then((ok) => {
+      if (!ok) return;
+      resetEstablishment();
+      resetProfessional();
+      router.replace("/(owner)/onboarding/establishment" as any);
+    });
   };
 
   const handleLogout = () => {
-    Alert.alert("Sair", "Tem certeza que deseja sair da conta?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Sair",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/(auth)" as any);
-        },
-      },
-    ]);
+    confirmar({
+      titulo: "Sair",
+      mensagem: "Tem certeza que deseja sair da conta?",
+      confirmar: "Sair",
+      destrutivo: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      await logout();
+      router.replace("/(auth)" as any);
+    });
   };
 
   return (

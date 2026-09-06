@@ -23,6 +23,7 @@ import { getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
+import { confirmar } from "@lib/confirmar";
 
 export default function OwnerDashboardScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -94,33 +95,25 @@ export default function OwnerDashboardScreen() {
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "ESTABLISHMENT_NOT_READY") {
-        Alert.alert(
-          "Estabelecimento sem profissional pronto",
-          getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com serviço cadastrado."),
-          [
-            { text: "Cancelar", style: "cancel" },
-            {
-              text: "Adicionar profissional",
-              onPress: () =>
-                router.push({
-                  pathname: "/(owner)/add-professional",
-                  params: { establishmentId: establishment.id },
-                } as any),
-            },
-          ]
-        );
+        confirmar({
+          titulo: "Estabelecimento sem profissional pronto",
+          mensagem: getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com serviço cadastrado."),
+          confirmar: "Adicionar profissional",
+        }).then((ok) => {
+          if (ok)
+            router.push({
+              pathname: "/(owner)/add-professional",
+              params: { establishmentId: establishment.id },
+            } as any);
+        });
       } else if (code === "ESTABLISHMENT_HOURS_REQUIRED") {
-        Alert.alert(
-          "Defina o horário de funcionamento",
-          getApiErrorMessage(error, "Defina o horário de funcionamento do estabelecimento antes de abrir."),
-          [
-            { text: "Cancelar", style: "cancel" },
-            {
-              text: "Definir Horário",
-              onPress: () => router.push("/(owner)/establishment-hours" as any),
-            },
-          ]
-        );
+        confirmar({
+          titulo: "Defina o horário de funcionamento",
+          mensagem: getApiErrorMessage(error, "Defina o horário de funcionamento do estabelecimento antes de abrir."),
+          confirmar: "Definir Horário",
+        }).then((ok) => {
+          if (ok) router.push("/(owner)/establishment-hours" as any);
+        });
       } else if (code === "ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES") {
         Alert.alert(
           "Há atendimentos em andamento",

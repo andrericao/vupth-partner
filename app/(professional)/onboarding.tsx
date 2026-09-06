@@ -20,6 +20,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useEstablishmentStore, EstablishmentSearchResult } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
+import { avisar } from "@lib/confirmar";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -119,11 +120,13 @@ export default function ProfessionalOnboardingScreen() {
     setIsLoading(true);
     try {
       await requestAffiliation(selectedEstablishment.id);
-      Alert.alert(
-        "Solicitação enviada",
-        `Sua solicitação para ${selectedEstablishment.name} foi enviada. Aguarde a aprovação do proprietário.`,
-        [{ text: "OK", onPress: () => router.replace("/(professional)/queue" as any) }]
-      );
+      // A solicitacao JA FOI enviada — sem a caixa na web o profissional
+      // ficava na mesma tela e enviava de novo.
+      await avisar({
+        titulo: "Solicitação enviada",
+        mensagem: `Sua solicitação para ${selectedEstablishment.name} foi enviada. Aguarde a aprovação do proprietário.`,
+      });
+      router.replace("/(professional)/queue" as any);
     } catch (error: any) {
       const code = error?.response?.data?.code;
       if (code === "PROFESSIONAL_ALREADY_AFFILIATED") {

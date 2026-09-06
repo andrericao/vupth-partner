@@ -17,6 +17,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 import { maskMoney, unmaskMoney } from "@lib/masks";
+import { avisar } from "@lib/confirmar";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
@@ -126,9 +127,13 @@ export default function AddServiceScreen() {
 
     try {
       await addServiceItem(establishmentId!, serviceItemType, customName.trim(), finalPrice);
-      Alert.alert("Serviço adicionado", `${customName} — R$ ${finalPrice.toFixed(2)}`, [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      // O servico JA FOI criado — sem a caixa na web a tela nao fechava e o
+      // dono cadastrava o mesmo servico duas vezes.
+      await avisar({
+        titulo: "Serviço adicionado",
+        mensagem: `${customName} — R$ ${finalPrice.toFixed(2)}`,
+      });
+      router.back();
     } catch (error: any) {
       const data = error?.response?.data;
       let msg = "Não foi possível adicionar o serviço.";

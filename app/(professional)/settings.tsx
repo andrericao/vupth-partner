@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -17,6 +17,7 @@ import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
+import { confirmar } from "@lib/confirmar";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -137,17 +138,16 @@ export default function ProfessionalSettingsScreen() {
   }, [loadInvites]);
 
   const handleLogout = () => {
-    Alert.alert("Sair", "Tem certeza que deseja sair da conta?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Sair",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/(auth)" as any);
-        },
-      },
-    ]);
+    confirmar({
+      titulo: "Sair",
+      mensagem: "Tem certeza que deseja sair da conta?",
+      confirmar: "Sair",
+      destrutivo: true,
+    }).then(async (ok) => {
+      if (!ok) return;
+      await logout();
+      router.replace("/(auth)" as any);
+    });
   };
 
   const subtitle =

@@ -10,6 +10,7 @@ import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
 import { mealSignal } from "@lib/meals";
+import { confirmar } from "@lib/confirmar";
 
 // Tela "OPCOES DA FILA" (nav v2, 2026-07-23): o banco no header da Fila NAVEGA
 // para ca (nada de modal — "mais amigavel a tela inteira"). So acoes do dia; o
@@ -91,14 +92,15 @@ export default function QueueOptionsScreen() {
   };
   const toggleQueue = () => {
     if (acceptingNew) {
-      Alert.alert(
-        "Fechar fila",
-        "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Fechar fila", style: "destructive", onPress: () => runToggleQueue(false) },
-        ]
-      );
+      confirmar({
+        titulo: "Fechar fila",
+        mensagem:
+          "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
+        confirmar: "Fechar fila",
+        destrutivo: true,
+      }).then((ok) => {
+        if (ok) runToggleQueue(false);
+      });
     } else {
       // Reabrir e imediato, sem confirmar (acao inofensiva).
       runToggleQueue(true);

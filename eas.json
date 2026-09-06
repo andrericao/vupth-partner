@@ -22,13 +22,25 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "prod"
+        "EXPO_PUBLIC_API_ENV": "dev"
       }
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      },
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "prod"
+      }
+    },
+    "prod-apk": {
+      "extends": "production",
+      "autoIncrement": false,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
       },
       "channel": "production",
       "env": {

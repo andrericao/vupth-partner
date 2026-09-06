@@ -23,6 +23,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { api, getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { useProfessionalStore } from "@store/professional.store";
+import { confirmar } from "@lib/confirmar";
 
 type EstablishmentResult = {
   id: string;
@@ -124,33 +125,28 @@ export default function FindEstablishmentScreen() {
     });
   };
 
-  const handleCancelAffiliation = () => {
+  const handleCancelAffiliation = async () => {
     if (!pendingAffiliationId) return;
-    Alert.alert(
-      "Cancelar solicitação",
-      `Deseja cancelar sua solicitação para ${blockedName ?? "este estabelecimento"}? Você poderá solicitar a outro estabelecimento depois.`,
-      [
-        { text: "Voltar", style: "cancel" },
-        {
-          text: "Cancelar solicitação",
-          style: "destructive",
-          onPress: async () => {
-            setIsCancelling(true);
-            try {
-              await useProfessionalStore.getState().cancelAffiliation(pendingAffiliationId);
-              setPendingAffiliationId(null);
-              setBlockedName(null);
-              setGate("open");
-              await loadAll();
-            } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível cancelar a solicitação."));
-            } finally {
-              setIsCancelling(false);
-            }
-          },
-        },
-      ]
-    );
+    const ok = await confirmar({
+      titulo: "Cancelar solicitação",
+      mensagem: `Deseja cancelar sua solicitação para ${blockedName ?? "este estabelecimento"}? Você poderá solicitar a outro estabelecimento depois.`,
+      confirmar: "Cancelar solicitação",
+      destrutivo: true,
+    });
+    if (!ok) return;
+
+      setIsCancelling(true);
+      try {
+        await useProfessionalStore.getState().cancelAffiliation(pendingAffiliationId);
+        setPendingAffiliationId(null);
+        setBlockedName(null);
+        setGate("open");
+        await loadAll();
+      } catch (error: any) {
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível cancelar a solicitação."));
+      } finally {
+        setIsCancelling(false);
+      }
   };
 
   return (

@@ -1,8 +1,8 @@
 /**
  * Qual backend este bundle fala.
  *
- * Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
- * testa em device (Andre 2026-08-22).
+ * Render = ambiente de TESTE; Railway = PRODUCAO. O Render e o que se testa —
+ * via Expo (app) e pelo link web que comeca com `dev` (Andre 2026-09-06).
  *
  * ⚠️ POR QUE ISTO NAO E SO UM `process.env`
  *
@@ -24,19 +24,24 @@ export type ApiEnv = "local" | "dev" | "staging" | "prod";
 /**
  * Canal do EAS -> ambiente. Mesma tabela do `eas.json` dos dois apps.
  *
- * `preview` aponta pro RAILWAY (producao), nao pro Render, e isso e
- * deliberado: `preview` e o UNICO canal que existe nos dois projetos, os
- * builds do time sao perfil `preview` com distribuicao interna, e e no Railway
- * que o time testa em device (Andre 2026-08-22). Mandar `preview` pro Render
- * significaria que o teste de device nunca bate no backend que eles conferem.
+ * `preview` aponta pro RENDER (branch `dev` do backend) desde 2026-09-06, por
+ * decisao do Andre: **prod e o Railway, staging e o Render**, e o Render e o
+ * que se testa — via Expo no app e pelo link `dev.vupth-partner.pages.dev` na
+ * web. `preview` e o canal do APK de distribuicao interna, ou seja, o canal do
+ * TESTE: ele passa a bater no mesmo backend que o link de teste.
  *
- * ⚠️ A consequencia esta assumida: teste em device grava no banco de
- * PRODUCAO. Se um dia existir um canal so de teste, e aqui que ele entra,
- * apontando pro `dev`.
+ * Ate 2026-08-22 ele apontava pro Railway, com a consequencia assumida de que
+ * teste em device gravava no banco de PRODUCAO. Foi exatamente isso que mudou:
+ * agora o QA (contas `prop_10@teste.com` e afins) vive no Render, e a
+ * producao so recebe o canal `production`.
+ *
+ * ⚠️ Consequencia nova: o Render Free hiberna, entao o APK de `preview` passa
+ * a ver o portao de warmup (`readiness.ts`) no primeiro acesso — ~50s. Isso e
+ * esperado, nao e bug.
  */
 export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
   development: "dev",
-  preview: "prod",
+  preview: "dev",
   production: "prod",
 };
 

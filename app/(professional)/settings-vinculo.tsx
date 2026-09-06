@@ -5,6 +5,7 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
+import { confirmar } from "@lib/confirmar";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): tudo sobre o VINCULO com o estabelecimento
 // em um lugar so — convites pendentes do owner, buscar e desafiliar. Antes
@@ -64,54 +65,48 @@ export default function SettingsVinculoScreen() {
   // R3: confirmacao antes de decidir a vinculacao.
   const handleAcceptInvite = (inv: any) => {
     const nome = inv.establishmentName ?? "este estabelecimento";
-    Alert.alert(
-      "Aceitar vinculação",
-      `Deseja se vincular a ${nome}? Você passara a atender por este estabelecimento.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Aceitar", onPress: () => doAcceptInvite(inv) },
-      ]
-    );
+    confirmar({
+      titulo: "Aceitar vinculação",
+      mensagem: `Deseja se vincular a ${nome}? Você passara a atender por este estabelecimento.`,
+      confirmar: "Aceitar",
+    }).then((ok) => {
+      if (ok) doAcceptInvite(inv);
+    });
   };
 
   const handleRejectInvite = (inv: any) => {
     const nome = inv.establishmentName ?? "este estabelecimento";
-    Alert.alert(
-      "Recusar convite",
-      `Deseja recusar o convite de ${nome}?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Recusar", style: "destructive", onPress: () => doRejectInvite(inv) },
-      ]
-    );
+    confirmar({
+      titulo: "Recusar convite",
+      mensagem: `Deseja recusar o convite de ${nome}?`,
+      confirmar: "Recusar",
+      destrutivo: true,
+    }).then((ok) => {
+      if (ok) doRejectInvite(inv);
+    });
   };
 
-  const handleLeave = () => {
-    Alert.alert(
-      "Desafiliar do estabelecimento",
-      `Você deixará de atender em ${professional?.establishment_name ?? "este estabelecimento"} e não receberá novos clientes na fila. Deseja continuar?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Desafiliar",
-          style: "destructive",
-          onPress: async () => {
-            setIsLeaving(true);
-            try {
-              await leaveEstablishment();
-              Alert.alert(
-                "Desafiliado",
-                "Você não está mais vinculado ao estabelecimento. Busque um novo estabelecimento quando quiser voltar a atender."
-              );
-            } catch (error: any) {
-              Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desafiliar do estabelecimento. Tente novamente."));
-            } finally {
-              setIsLeaving(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleLeave = async () => {
+    const ok = await confirmar({
+      titulo: "Desafiliar do estabelecimento",
+      mensagem: `Você deixará de atender em ${professional?.establishment_name ?? "este estabelecimento"} e não receberá novos clientes na fila. Deseja continuar?`,
+      confirmar: "Desafiliar",
+      destrutivo: true,
+    });
+    if (!ok) return;
+
+      setIsLeaving(true);
+      try {
+        await leaveEstablishment();
+        Alert.alert(
+          "Desafiliado",
+          "Você não está mais vinculado ao estabelecimento. Busque um novo estabelecimento quando quiser voltar a atender."
+        );
+      } catch (error: any) {
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desafiliar do estabelecimento. Tente novamente."));
+      } finally {
+        setIsLeaving(false);
+      }
   };
 
   return (

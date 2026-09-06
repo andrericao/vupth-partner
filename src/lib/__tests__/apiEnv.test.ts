@@ -8,9 +8,10 @@ describe('de qual backend o bundle fala', () => {
   describe('bundle publicado (tem canal)', () => {
     it('o canal decide, e o .env da maquina de quem publicou e IGNORADO', () => {
       expect(resolveApiEnv('production', 'local')).toBe('prod');
-      // `preview` vai pro Railway: e o unico canal que existe e e onde o time
-      // testa em device. Ver CANAL_PARA_ENV.
-      expect(resolveApiEnv('preview', 'local')).toBe('prod');
+      // `preview` vai pro RENDER desde 2026-09-06 (regra do Andre: prod =
+      // Railway, staging = Render, e o Render se testa via Expo e via link
+      // `dev*`). O teste de device deixou de gravar no banco de producao.
+      expect(resolveApiEnv('preview', 'local')).toBe('dev');
       expect(resolveApiEnv('development', 'local')).toBe('dev');
       expect(resolveApiEnv('production', 'dev')).toBe('prod');
     });
