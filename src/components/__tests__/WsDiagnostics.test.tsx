@@ -54,3 +54,27 @@ describe("WsDiagnostics (linha de QA do WebSocket)", () => {
     expect(view.getByText(/handshake 401/)).toBeTruthy();
   });
 });
+
+// O painel e a UNICA janela para o payload da fila em APK (sem DevTools, e com
+// os logs gated por __DEV__). Se estas linhas nao aparecerem, o impasse do
+// "finalizar" continua sem prova.
+describe("WsDiagnostics — snapshot da fila", () => {
+  it("nao mostra nada antes do primeiro snapshot", () => {
+    useWsDiagnosticsStore.getState().reset();
+    const { queryByTestId } = render(<WsDiagnostics />);
+
+    expect(queryByTestId("ws-diag-snapshot-get")).toBeNull();
+    expect(queryByTestId("ws-diag-snapshot-ws")).toBeNull();
+  });
+
+  it("mostra as DUAS origens — e a comparacao entre elas que responde", () => {
+    useWsDiagnosticsStore.getState().reset();
+    useWsDiagnosticsStore.getState().marcarSnapshot("GET", "GET: IN_PROGRESS · Ana · espera 2");
+    useWsDiagnosticsStore.getState().marcarSnapshot("WS", "WS: current_attendance NULO · espera 2");
+
+    const { getByTestId } = render(<WsDiagnostics />);
+
+    expect(getByTestId("ws-diag-snapshot-get").props.children).toContain("IN_PROGRESS");
+    expect(getByTestId("ws-diag-snapshot-ws").props.children).toContain("NULO");
+  });
+});

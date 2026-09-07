@@ -20,6 +20,8 @@ import {
 export function WsDiagnostics() {
   const pub = useWsDiagnosticsStore((s) => s.public);
   const personal = useWsDiagnosticsStore((s) => s.personal);
+  const snapshotGet = useWsDiagnosticsStore((s) => s.snapshotGet);
+  const snapshotWs = useWsDiagnosticsStore((s) => s.snapshotWs);
 
   const headers = pub.headers ?? personal.headers;
   const heartbeat = heartbeatOf(headers);
@@ -50,6 +52,24 @@ export function WsDiagnostics() {
         <Text testID="ws-diag-personal">pessoal {personal.messageCount}</Text>
         {" msg"}
       </Text>
+
+      {/* O snapshot da fila, por origem. Duas linhas que separam "o backend
+          nao manda `current_attendance`" de "o WS apaga o que o GET trouxe" —
+          a pergunta que trava o "finalizar" desde 31/08. Ver snapshotDiag.ts. */}
+      {(snapshotGet || snapshotWs) && (
+        <View style={{ marginTop: 6, alignItems: "center", gap: 1 }}>
+          {snapshotGet && (
+            <Text testID="ws-diag-snapshot-get" style={line}>
+              {snapshotGet.linha}
+            </Text>
+          )}
+          {snapshotWs && (
+            <Text testID="ws-diag-snapshot-ws" style={line}>
+              {snapshotWs.linha}
+            </Text>
+          )}
+        </View>
+      )}
 
       {lastError && (
         <Text style={{ ...line, color: "#B3261E" }}>último erro: {lastError}</Text>
