@@ -1,5 +1,7 @@
 import { Alert, Platform } from "react-native";
 
+import { alertWebInstalado } from "@lib/alertWeb";
+
 // Confirmacao que funciona NAS DUAS PLATAFORMAS.
 //
 // 🔴 Por que existe (issue #25, teste manual de 30/08 na web): "botao de remover
@@ -9,10 +11,17 @@ import { Alert, Platform } from "react-native";
 // botoes**. A caixa nunca aparece, o callback nunca roda, e o toque parece nao
 // ter efeito. E a pior forma de defeito: silenciosa, e so na web.
 //
-// No nativo continua o Alert de sempre. Na web cai no `window.confirm`, que e
-// feio mas e real — e o que importa aqui e a acao acontecer, nao a caixa ser
-// bonita. Uma caixa desenhada por nos seria melhor; ela custa uma tela nova em
-// 22 lugares, e isso e trabalho de design, nao de correcao de bug.
+// No nativo continua o Alert de sempre.
+//
+// ⚠️ ATUALIZADO em 07/09 (A5): a web tambem passa a usar o Alert, porque agora
+// existe um SHIM que o desenha de verdade no navegador (src/lib/alertWeb.ts,
+// instalado no boot). Antes daqui caia no `window.confirm` — real, mas de uma
+// linha so e sem os rotulos escolhidos. Com o shim, os dois lados mostram a
+// MESMA caixa, com os mesmos botoes.
+//
+// O `window.confirm` fica como FALLBACK, para o caso de o shim nao ter sido
+// instalado (sem `document`, export estatico, teste). Melhor uma caixa feia do
+// que uma acao destrutiva que acontece sem perguntar.
 
 type Texto = {
   titulo: string;
@@ -36,7 +45,7 @@ export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
   const rotuloOk = texto.confirmar ?? "Confirmar";
   const rotuloCancelar = texto.cancelar ?? "Cancelar";
 
-  if (plataforma === "web") {
+  if (plataforma === "web" && !alertWebInstalado()) {
     const confirmImpl =
       deps.confirmImpl ??
       ((t: string) => (typeof window !== "undefined" ? window.confirm(t) : false));
@@ -95,7 +104,7 @@ type DepsAviso = {
 export function avisar(texto: TextoAviso, deps: DepsAviso = {}): Promise<void> {
   const plataforma = deps.plataforma ?? Platform.OS;
 
-  if (plataforma === "web") {
+  if (plataforma === "web" && !alertWebInstalado()) {
     const alertaWeb =
       deps.alertaWebImpl ??
       ((t: string) => {

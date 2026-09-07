@@ -19,6 +19,7 @@ import { config } from "../config/gluestack-ui.config";
 import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
+import { instalarAlertWeb } from "@lib/alertWeb";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
@@ -37,6 +38,13 @@ const navTheme = {
   ...DefaultTheme,
   colors: { ...DefaultTheme.colors, background: "#FFFFFF" }, // $brandBackground
 };
+
+// A5: `Alert.alert` nao pinta nada no react-native-web — sao 100 chamadas que
+// ficam MUDAS no navegador. O shim troca o metodo no objeto que o
+// `react-native` exporta, entao pega todas sem tocar em nenhuma. Fica no escopo
+// do modulo, e nao num efeito: um erro mostrado durante o primeiro render
+// chegaria antes de qualquer `useEffect`. No nativo e no-op.
+instalarAlertWeb();
 
 export default function RootLayout() {
   // [marca-vupth] Archivo substitui Poppins em titulos/botoes; Inter segue no

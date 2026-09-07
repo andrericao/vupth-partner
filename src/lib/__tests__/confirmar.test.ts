@@ -1,3 +1,5 @@
+import { Alert } from "react-native";
+
 import { confirmar, avisar } from "../confirmar";
 
 // 🔴 DEFEITO REAL (issue #25, teste manual de 30/08): "botao de remover servico
@@ -200,5 +202,63 @@ describe("na WEB sem injecao — o impl padrao, que e o que o navegador roda", (
     await avisar({ titulo: "Tudo certo", mensagem: "Fila reaberta." }, { plataforma: "web" });
 
     expect(alertDoNavegador).toHaveBeenCalledWith("Tudo certo\n\nFila reaberta.");
+  });
+});
+
+// A5 (07/09): com o SHIM instalado, a web deixa de cair no `window.confirm` e
+// passa a usar o mesmo dialogo do nativo — mesmos botoes, mesmos rotulos. Duas
+// caixas diferentes no mesmo app e divergencia que so aparece quando um usuario
+// reclama.
+describe("na WEB com o shim de Alert instalado", () => {
+  const marcado = Alert as unknown as { __vupthAlertWeb?: boolean };
+
+  beforeEach(() => {
+    marcado.__vupthAlertWeb = true;
+  });
+  afterEach(() => {
+    delete marcado.__vupthAlertWeb;
+  });
+
+  it("confirmar() usa o Alert com os DOIS botoes, nao o window.confirm", async () => {
+    const confirmImpl = jest.fn(() => true);
+    const alert = jest.fn((_t, _m, botoes: any[]) => {
+      botoes.find((b) => b.style !== "cancel")?.onPress?.();
+    });
+
+    const ok = await confirmar(
+      { titulo: "Fechar fila", mensagem: "Ninguém novo entra.", confirmar: "Fechar" },
+      { plataforma: "web", alertImpl: alert as any, confirmImpl }
+    );
+
+    expect(ok).toBe(true);
+    expect(confirmImpl).not.toHaveBeenCalled();
+    expect(alert).toHaveBeenCalled();
+    // Os rotulos escolhidos chegam ao usuario — o window.confirm nao os mostrava.
+    expect(alert.mock.calls[0][2].map((b: any) => b.text)).toEqual(["Cancelar", "Fechar"]);
+  });
+
+  it("avisar() tambem passa pelo Alert", async () => {
+    const alertaWebImpl = jest.fn();
+    const alert = jest.fn((_t, _m, botoes: any[]) => botoes[0].onPress?.());
+
+    await avisar(
+      { titulo: "Tudo certo", mensagem: "Fila reaberta." },
+      { plataforma: "web", alertImpl: alert as any, alertaWebImpl }
+    );
+
+    expect(alertaWebImpl).not.toHaveBeenCalled();
+    expect(alert).toHaveBeenCalled();
+  });
+
+  it("SEM o shim, o fallback do navegador continua valendo", async () => {
+    delete marcado.__vupthAlertWeb;
+    const confirmImpl = jest.fn(() => true);
+
+    await confirmar(
+      { titulo: "Remover", mensagem: "Tem certeza?" },
+      { plataforma: "web", confirmImpl }
+    );
+
+    expect(confirmImpl).toHaveBeenCalled();
   });
 });
