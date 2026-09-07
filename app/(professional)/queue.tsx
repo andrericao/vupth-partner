@@ -30,6 +30,8 @@ import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
+import { SolicitacoesCard } from "@components/SolicitacoesCard";
+import { resumoDeSolicitacoes } from "@lib/cutRequests";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
@@ -596,7 +598,16 @@ export default function ProfessionalQueueScreen() {
   // queryKey do rodape e da tela de Encaixes, entao e um cache so. O WS
   // pessoal (eventos CUT_*, assinado no useQueueSocket) invalida; o refetch
   // de 30s e o fallback p/ socket caido.
-  const { count: pendingCutRequests } = usePendingCutRequests();
+  const {
+    count: pendingCutRequests,
+    pending: pedidosPendentes,
+    nowMs: agoraDosPedidos,
+  } = usePendingCutRequests();
+  // O resumo mora aqui e nao no card: card que calcula nao da pra testar sem
+  // montar tela. O relogio vem do hook — `Date.now()` no render e impuro
+  // (react-hooks/purity), e o "expira em N" tem que medir contra o mesmo
+  // instante que filtrou os expirados. Ver resumoDeSolicitacoes.
+  const resumoSolicitacoes = resumoDeSolicitacoes(pedidosPendentes, agoraDosPedidos);
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
@@ -716,6 +727,17 @@ export default function ProfessionalQueueScreen() {
             }
             onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
             onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
+          />
+        )}
+
+        {/* O pedido de encaixe estava so num ponto de 12px no menu ☰ — e o
+            profissional nao olha o menu, olha a FILA. Fica depois do
+            atendimento em curso (que sempre manda) e ANTES da lista de espera,
+            porque tem relogio proprio: 5 minutos, e some sozinho. */}
+        {resumoSolicitacoes && (
+          <SolicitacoesCard
+            resumo={resumoSolicitacoes}
+            onPress={() => router.push("/(professional)/cut-requests" as any)}
           />
         )}
 

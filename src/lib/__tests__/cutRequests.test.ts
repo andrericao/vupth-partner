@@ -6,6 +6,7 @@ import {
   cutRequestClientName,
   cutRequestTotal,
   isCutRequestEvent,
+  resumoDeSolicitacoes,
 } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
@@ -155,5 +156,80 @@ describe("isCutRequestEvent", () => {
     expect(isCutRequestEvent("")).toBe(false);
     expect(isCutRequestEvent(null)).toBe(false);
     expect(isCutRequestEvent(undefined)).toBe(false);
+  });
+});
+
+// 🔴 ITEM 1 DA LISTA, aberto desde 05/08: "solicitei corte e nada apareceu na
+// tela do profissional". O pedido existe e chega — o que nao existe e presenca:
+// ele so acende um ponto de 12px dentro do menu ☰.
+//
+// Em 07/09 isso deixou de ser incomodo de UI. Com a decisao de que FILA FECHADA
+// CONTINUA ACEITANDO SOLICITACAO, este vira o UNICO caminho do cliente para
+// quem nao esta de expediente — e um pedido que so aparece como um ponto e um
+// pedido perdido, com o cliente esperando resposta que nunca vem.
+//
+// Este resumo e o que o card da Fila mostra. Ele responde tres coisas de uma
+// vez: quantos, quem, e quanto tempo resta no MAIS URGENTE — porque o pedido
+// expira em 5 minutos e a decisao e por pedido, nao pela lista.
+describe("resumoDeSolicitacoes", () => {
+  const pedido = (over: Partial<CutRequestResponse>): CutRequestResponse =>
+    ({
+      id: "r1",
+      status: "PENDING",
+      professional_id: "p1",
+      establishment_id: "e1",
+      client_id: "c1",
+      service_item_ids: ["s1"],
+      expires_at: new Date(NOW + 5 * 60000).toISOString(),
+      ...over,
+    }) as CutRequestResponse;
+
+  it("sem pedidos, nao ha card — silencio e o estado correto", () => {
+    expect(resumoDeSolicitacoes([], NOW)).toBeNull();
+    expect(resumoDeSolicitacoes(null, NOW)).toBeNull();
+  });
+
+  it("um pedido: singular, e o nome de quem pediu", () => {
+    const r = resumoDeSolicitacoes([pedido({ client_name: "Ana" })], NOW)!;
+
+    expect(r.titulo).toBe("1 solicitação de encaixe");
+    expect(r.quem).toBe("Ana");
+    expect(r.expiraEm).toBe(5);
+  });
+
+  it("varios: plural, e o resto vira contagem — nome de todo mundo nao cabe", () => {
+    const r = resumoDeSolicitacoes(
+      [
+        pedido({ id: "r1", client_name: "Ana" }),
+        pedido({ id: "r2", client_name: "Bruno" }),
+        pedido({ id: "r3", client_name: "Caio" }),
+      ],
+      NOW
+    )!;
+
+    expect(r.titulo).toBe("3 solicitações de encaixe");
+    expect(r.quem).toBe("Ana e mais 2");
+  });
+
+  it("o relogio e o do MAIS URGENTE, nao o do primeiro da lista", () => {
+    const r = resumoDeSolicitacoes(
+      [
+        pedido({ id: "r1", expires_at: new Date(NOW + 4 * 60000).toISOString() }),
+        pedido({ id: "r2", expires_at: new Date(NOW + 60000).toISOString() }),
+      ],
+      NOW
+    )!;
+
+    expect(r.expiraEm).toBe(1);
+  });
+
+  it("expirado nao conta — decidir sobre pedido morto e pior que nao ver", () => {
+    const expirado = pedido({ expires_at: new Date(NOW - 60000).toISOString() });
+    expect(resumoDeSolicitacoes([expirado], NOW)).toBeNull();
+  });
+
+  it("sem nome do backend, o fallback nao deixa o card mudo", () => {
+    const r = resumoDeSolicitacoes([pedido({ client_name: null })], NOW)!;
+    expect(r.quem).toBe("Cliente");
   });
 });
