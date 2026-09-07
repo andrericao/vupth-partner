@@ -112,3 +112,24 @@ describe("getPrimeiroCaminhoDoDono", () => {
     );
   });
 });
+
+// Teste de device, 07/09: "ao clicar em adicionar servico ele deve receber uma
+// notificacao de que ira para a area do profissional, e os botoes de troca
+// devem ser apresentados a ele".
+describe("getPrimeiroCaminhoDoDono — o aviso de troca de contexto", () => {
+  it("quem vai navegar leva aviso; quem age na propria tela, nao", () => {
+    expect(getPrimeiroCaminhoDoDono(true).aviso).toBeDefined();
+    expect(getPrimeiroCaminhoDoDono(false).aviso).toBeUndefined();
+  });
+
+  it("o aviso ensina os DOIS caminhos de volta, com os rotulos que existem na tela", () => {
+    const aviso = getPrimeiroCaminhoDoDono(true).aviso!;
+
+    expect(aviso.mensagem).toContain("Área do dono");
+    expect(aviso.mensagem).toContain("Atender como profissional");
+  });
+
+  it("o aviso diz para ONDE se esta indo, nao so que algo vai acontecer", () => {
+    expect(getPrimeiroCaminhoDoDono(true).aviso!.titulo).toMatch(/profissional/i);
+  });
+});

@@ -208,11 +208,16 @@ export default function AddProfessionalScreen() {
             title={primeiroCaminho.title}
             hint={primeiroCaminho.hint}
             selected={!primeiroCaminho.rota && meAsProfessional}
-            onPress={() =>
-              primeiroCaminho.rota
-                ? router.push(primeiroCaminho.rota as any)
-                : setMeAsProfessional(true)
-            }
+            onPress={async () => {
+              if (!primeiroCaminho.rota) {
+                setMeAsProfessional(true);
+                return;
+              }
+              // Trocar de area e trocar de contexto — a barra e o menu mudam.
+              // O aviso (um OK so) explica isso e diz por onde voltar.
+              if (primeiroCaminho.aviso) await avisar(primeiroCaminho.aviso);
+              router.push(primeiroCaminho.rota as any);
+            }}
           />
 
           <PathCard
