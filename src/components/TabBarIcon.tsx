@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import { House, Users, Grid3x3, Hourglass, ChartColumn, User } from "lucide-react-native";
+import { House, Users, List, Hourglass, ChartColumn, User } from "lucide-react-native";
 import type { ComponentType } from "react";
 
 /**
@@ -23,7 +23,19 @@ import type { ComponentType } from "react";
 const ICONS = {
   home: House,
   queues: Users,
-  menu: Grid3x3,
+  // [marca-vupth] DS5.2: era `Grid3x3`, lido do arquivo de design. Grade de
+  // quadrados e a convencao de "todos os apps / launcher" — promete uma grade
+  // de atalhos e entrega uma LISTA agrupada (EQUIPE, NEGOCIO, CONTA). O `list`
+  // diz o que tem dentro.
+  //
+  // Nao virou reticencia, que seria o "Mais" do iOS: `Ellipsis` ja e o botao
+  // "Opcoes da fila" na tela do profissional, e o mesmo glifo nao pode
+  // significar uma ABA e um BOTAO de opcoes no mesmo app.
+  //
+  // ⚠️ Acima de ~185% de fonte a tab bar larga os rotulos (DS4) e sobra so o
+  // icone. A palavra "Menu" nao vai estar la pra desambiguar — o glifo tem de
+  // se virar sozinho.
+  menu: List,
   queue: Users,
   fits: Hourglass,
   reports: ChartColumn,
