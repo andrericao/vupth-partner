@@ -39,7 +39,9 @@ export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "wo
       <Text className="font-body text-[13px] font-medium text-vupth-textPrimary mb-2">
         {label}
       </Text>
-      <View className={`flex-row items-center gap-2 bg-white rounded-xl px-4 h-[50px] ${border}`}>
+      {/* `min-h`, e nao `h`: altura cravada corta o texto digitado quando a
+          fonte do sistema esta ampliada. Ver DS4 no HANDOFF_DESIGN. */}
+      <View className={`flex-row items-center gap-2 bg-white rounded-xl px-4 min-h-[50px] ${border}`}>
         {Icon && <Icon size={18} color="#454745" />}
         <TextInput
           className="flex-1 font-body text-vupth-textPrimary"
