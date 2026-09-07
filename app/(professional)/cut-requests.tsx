@@ -17,6 +17,7 @@ import {
 import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
 import { formatCurrency } from "@utils/summaryCalculations";
+import { EstadoVazio } from "@components/EstadoVazio";
 
 // Tela "Encaixes" (Pencil PROF · 02): mesma feature de C2 (solicitacoes de
 // corte) que ja funcionava dentro de um bottom-sheet em "Opcoes da fila"
@@ -81,12 +82,12 @@ export default function CutRequestsScreen() {
 
         <View className="gap-3">
           {pending.length === 0 ? (
-            <View className="bg-vupth-surface rounded-card p-6 items-center gap-2 mt-2">
-              <Clock size={22} color="#454745" />
-              <Text className="font-body text-sm text-vupth-textSecondary text-center">
-                Nenhum pedido de encaixe no momento.
-              </Text>
-            </View>
+            <EstadoVazio
+              doodle="tempo"
+              titulo="Nenhum pedido de encaixe"
+              texto="Quando alguém pedir para encaixar, o pedido aparece aqui."
+              className="mt-2"
+            />
           ) : (
             pending.map((req) => {
               const mins = minutesToExpire(req.expires_at, nowMs);
