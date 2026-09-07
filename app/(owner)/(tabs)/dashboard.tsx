@@ -24,6 +24,7 @@ import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import type { ProfessionalWithQueue } from "@lib/types";
 import { confirmar } from "@lib/confirmar";
+import { avisoDeAberturaSemProfissional } from "@lib/abertura";
 
 export default function OwnerDashboardScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -86,6 +87,14 @@ export default function OwnerDashboardScreen() {
 
   const setStatus = async (newStatus: string) => {
     if (!establishment || newStatus === status) return;
+
+    // Abrir sem ninguem trabalhando e legitimo (a equipe ainda vai chegar), mas
+    // nao pode ser mudo: o cliente veria a loja aberta e sem quem atenda.
+    // Avisa e deixa seguir — decisao do Andre, 07/09. Ver src/lib/abertura.ts.
+    if (newStatus === "OPEN") {
+      const aviso = avisoDeAberturaSemProfissional(professionals);
+      if (aviso && !(await confirmar(aviso))) return;
+    }
 
     // A validacao de "estabelecimento pronto" (>=1 profissional com >=1 servico)
     // e feita no backend (422 ESTABLISHMENT_NOT_READY). Tentamos abrir e tratamos o erro.
