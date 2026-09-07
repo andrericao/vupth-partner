@@ -47,3 +47,42 @@ export function getPostLoginRoute(
   // isso, isto aqui era um ciclo.
   return "/(auth)";
 }
+
+/**
+ * O PRIMEIRO card da tela "Profissionais" (dono) — o slot que muda de papel.
+ *
+ * Ele tinha so o ramo falso: vivia atras de `!isProfessional` e SUMIA quando o
+ * dono acumulava o perfil profissional. Quem ja atendia entrava na tela e via
+ * apenas "Convidar" e "Ver solicitacoes" — as duas opcoes que dependem de
+ * OUTRA pessoa —, sem porta para o proprio servico. E servico e justamente o
+ * que falta para a loja abrir (teste de device, 06/09).
+ *
+ * Isto NAO contraria a decisao de que servico e do profissional: a porta so
+ * aparece sob `isProfessional`, que e exatamente a condicao da decisao.
+ *
+ * `rota` ausente significa acao LOCAL: a escolha abre o formulario na propria
+ * tela, sem navegar.
+ */
+export type CaminhoDoDono = {
+  testID: string;
+  title: string;
+  hint: string;
+  rota?: string;
+};
+
+export function getPrimeiroCaminhoDoDono(isProfessional: boolean): CaminhoDoDono {
+  if (isProfessional) {
+    return {
+      testID: "path-my-services",
+      title: "Adicionar serviço",
+      hint: "cadastre o que VOCÊ faz — sem serviço a loja não abre",
+      rota: "/(professional)/my-services?from=settings",
+    };
+  }
+
+  return {
+    testID: "path-me",
+    title: "Eu também vou atender",
+    hint: "cria o SEU perfil profissional — você passa a ter fila própria",
+  };
+}
