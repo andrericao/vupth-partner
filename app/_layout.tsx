@@ -1,6 +1,6 @@
 import "../global.css"; // NativeWind (Gluestack v2): habilita as classes Tailwind
 import { useEffect } from "react";
-import { LogBox, Platform } from "react-native";
+import { Alert, LogBox, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Slot } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ import { config } from "../config/gluestack-ui.config";
 import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
-import { instalarAlertWeb } from "@lib/alertWeb";
+import { instalarAlertWeb } from "../web-shims/alert";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
@@ -39,12 +39,16 @@ const navTheme = {
   colors: { ...DefaultTheme.colors, background: "#FFFFFF" }, // $brandBackground
 };
 
-// A5: `Alert.alert` nao pinta nada no react-native-web — sao 100 chamadas que
-// ficam MUDAS no navegador. O shim troca o metodo no objeto que o
-// `react-native` exporta, entao pega todas sem tocar em nenhuma. Fica no escopo
-// do modulo, e nao num efeito: um erro mostrado durante o primeiro render
-// chegaria antes de qualquer `useEffect`. No nativo e no-op.
-instalarAlertWeb();
+// O React Native Web nao implementa `Alert`: a chamada nao falha, nao loga e
+// nao pinta NADA. Eram 100 avisos mudos no navegador — inclusive o motivo de
+// uma acao recusada, que e quando o usuario mais precisa de resposta (A5,
+// achado pelo Front-Client).
+//
+// O patch troca o metodo no objeto que o react-native exporta, entao pega as
+// 100 chamadas existentes E as futuras, sem import novo em tela nenhuma. Roda
+// no boot, antes de qualquer interacao poder disparar um Alert — e antes do
+// primeiro render, que ja pode avisar de erro.
+if (Platform.OS === "web") instalarAlertWeb(Alert);
 
 export default function RootLayout() {
   // [marca-vupth] Archivo substitui Poppins em titulos/botoes; Inter segue no

@@ -1,6 +1,10 @@
 import { Alert, Platform } from "react-native";
 
-import { alertWebInstalado } from "@lib/alertWeb";
+// A flag que o shim do web crava ao instalar (web-shims/alert.js) — mesmo nome
+// do Front-Client, para os dois apps poderem ler o estado um do outro em
+// qualquer investigacao conjunta.
+const alertWebInstalado = () =>
+  (Alert as unknown as { __vupthWebAlert?: boolean }).__vupthWebAlert === true;
 
 // Confirmacao que funciona NAS DUAS PLATAFORMAS.
 //
@@ -14,10 +18,11 @@ import { alertWebInstalado } from "@lib/alertWeb";
 // No nativo continua o Alert de sempre.
 //
 // ⚠️ ATUALIZADO em 07/09 (A5): a web tambem passa a usar o Alert, porque agora
-// existe um SHIM que o desenha de verdade no navegador (src/lib/alertWeb.ts,
-// instalado no boot). Antes daqui caia no `window.confirm` — real, mas de uma
-// linha so e sem os rotulos escolhidos. Com o shim, os dois lados mostram a
-// MESMA caixa, com os mesmos botoes.
+// existe um SHIM que o desenha de verdade no navegador
+// (`web-shims/alert.js`, instalado no boot — implementacao espelhada do
+// Front-Client). Antes daqui caia no `window.confirm` — real, mas de uma linha
+// so, sem os rotulos escolhidos, BLOQUEANTE (trava o event loop) e limitado a
+// dois botoes. Com o shim, os dois lados mostram a MESMA caixa.
 //
 // O `window.confirm` fica como FALLBACK, para o caso de o shim nao ter sido
 // instalado (sem `document`, export estatico, teste). Melhor uma caixa feia do

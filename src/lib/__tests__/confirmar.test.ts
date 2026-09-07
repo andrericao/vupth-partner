@@ -210,13 +210,13 @@ describe("na WEB sem injecao — o impl padrao, que e o que o navegador roda", (
 // caixas diferentes no mesmo app e divergencia que so aparece quando um usuario
 // reclama.
 describe("na WEB com o shim de Alert instalado", () => {
-  const marcado = Alert as unknown as { __vupthAlertWeb?: boolean };
+  const marcado = Alert as unknown as { __vupthWebAlert?: boolean };
 
   beforeEach(() => {
-    marcado.__vupthAlertWeb = true;
+    marcado.__vupthWebAlert = true;
   });
   afterEach(() => {
-    delete marcado.__vupthAlertWeb;
+    delete marcado.__vupthWebAlert;
   });
 
   it("confirmar() usa o Alert com os DOIS botoes, nao o window.confirm", async () => {
@@ -251,7 +251,7 @@ describe("na WEB com o shim de Alert instalado", () => {
   });
 
   it("SEM o shim, o fallback do navegador continua valendo", async () => {
-    delete marcado.__vupthAlertWeb;
+    delete marcado.__vupthWebAlert;
     const confirmImpl = jest.fn(() => true);
 
     await confirmar(
