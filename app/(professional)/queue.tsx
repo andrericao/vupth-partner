@@ -101,7 +101,11 @@ function ServingCard({
             isPaused ? "text-white opacity-90" : "text-vupth-forest opacity-70"
           }`}
         >
-          {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
+          {/* `?? 0`: campo faltando NAO pode derrubar a tela. Foi assim que o
+              app ficou branco no meio de um atendimento (08/09) — a rede local
+              alimentou o card com o payload do `/start`, que nao trazia
+              `totalValue`, e `undefined.toFixed` levou o render junto. */}
+          {formatServices(attendance.services ?? [])} · R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </View>
 
@@ -156,8 +160,8 @@ function QueueRow({
   onMenu: () => void;
 }) {
   const isLate = attendance.status === "LATE";
-  const services = formatServices(attendance.services);
-  const price = `R$ ${attendance.totalValue.toFixed(2)}`;
+  const services = formatServices(attendance.services ?? []);
+  const price = `R$ ${(attendance.totalValue ?? 0).toFixed(2)}`;
 
   return (
     <Pressable

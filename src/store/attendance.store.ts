@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { api } from "@lib/api";
+import { normalizarAtendimento } from "@lib/atendimentoAtual";
 import type {
   AttendanceInProgress,
   AttendanceHistoryItem,
@@ -92,16 +93,19 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   startAttendance: async (attendanceId) => {
     const { data } = await api.patch(`/attendances/${attendanceId}/start`);
-    set({ atendimentoIniciado: data });
+    // NORMALIZA antes de guardar: este payload vai alimentar o card, e o card
+    // fala a lingua do snapshot da fila. Guardar cru foi o que deu tela branca.
+    set({ atendimentoIniciado: normalizarAtendimento({ ...data, id: data?.id ?? attendanceId }) as any });
     return data;
   },
 
   finishAttendance: async (attendanceId) => {
     await api.patch(`/attendances/${attendanceId}/finish`);
-    // A rede local so existe enquanto ha atendimento. Manter depois do fim
-    // seria pior que o defeito que ela conserta: um card fantasma, com botao
-    // que o backend recusa.
-    set((s) => (s.atendimentoIniciado?.id === attendanceId ? { atendimentoIniciado: null } : {}));
+    // Limpa SEMPRE, nao so quando o id casa. Comparar ids dependia de o payload
+    // trazer `id` no formato esperado — e quando nao trazia, sobrava um card
+    // fantasma na tela depois de finalizar. Terminou um atendimento: a rede
+    // local nao serve mais para nada.
+    set({ atendimentoIniciado: null });
   },
 
   pauseAttendance: async (attendanceId) => {
@@ -110,7 +114,7 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   resumeAttendance: async (attendanceId) => {
     const { data } = await api.patch(`/attendances/${attendanceId}/resume`);
-    set({ atendimentoIniciado: data });
+    set({ atendimentoIniciado: normalizarAtendimento({ ...data, id: data?.id ?? attendanceId }) as any });
     return data;
   },
 

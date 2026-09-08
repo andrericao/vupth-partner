@@ -29,3 +29,31 @@ export function escolherAtendimentoAtual(
   if (doServidor) return doServidor;
   return local ?? null;
 }
+
+/**
+ * Traz um atendimento de OUTRA fonte para o formato que a tela desenha.
+ *
+ * 🔴 Existe por causa de uma tela branca que EU causei: liguei a resposta do
+ * `/start` no card sem conferir o formato. O snapshot da fila entrega
+ * `totalValue`/`clientName`; o endpoint pode responder em snake_case — e o card
+ * faz `attendance.totalValue.toFixed(2)` direto. `undefined.toFixed` derruba o
+ * render inteiro, e o app vira tela branca no meio de um atendimento.
+ *
+ * A lição: rede que alimenta a tela com dado de outra fonte precisa falar a
+ * MESMA LÍNGUA da tela — ter o mesmo assunto não basta.
+ *
+ * Sem `id` devolve null: um card sem identidade nao consegue finalizar nem
+ * pausar nada, e existir so para quebrar e pior do que nao existir.
+ */
+export function normalizarAtendimento(bruto: any): AttendanceInQueue | null {
+  if (!bruto?.id) return null;
+
+  return {
+    ...bruto,
+    id: bruto.id,
+    clientName: bruto.clientName ?? bruto.client_name ?? "Cliente",
+    totalValue: Number(bruto.totalValue ?? bruto.total_value ?? 0),
+    services: bruto.services ?? bruto.service_items ?? [],
+    status: bruto.status ?? "IN_PROGRESS",
+  } as AttendanceInQueue;
+}
