@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, type TextInputProps } from "react-native";
+import { View, Text, TextInput, Pressable, Platform, type TextInputProps } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 
@@ -21,7 +21,21 @@ type Props = TextInputProps & {
 // `autoCapitalize` default "words" replica o Input v1 (que embutia isso no
 // InputField): os campos de nome capitalizam sozinhos. Quem nao quer — e-mail,
 // senha, codigo — passa "none", como ja fazem as telas do (auth).
-export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "words", ...rest }: Props) {
+// 🔴 DUAS BORDAS NA WEB (device/navegador, 08/09): "a do formulário e outra
+// onde deve ser digitado, fica espremido; na versão cliente não é assim".
+//
+// A borda desenhada e a da View de fora — uma so. A segunda vem do NAVEGADOR: o
+// `TextInput` do react-native-web e um `<input>` de verdade, que herda a borda e
+// o anel de foco do user-agent. Some no aparelho, aparece na web, e some do
+// campo o espaco que o anel ocupa — dai o "espremido".
+//
+// O app do cliente nao tem isso porque o campo dele vem do Gluestack, que ja
+// aplica o proprio reset de web. O nosso e `TextInput` cru, entao o reset e
+// nosso: `outline` e borda zeradas SO na web, e o estilo do chamador continua
+// por cima (o `rest.style` vem depois).
+const RESET_WEB = Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0, borderWidth: 0 } as const) : null;
+
+export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "words", style, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const [show, setShow] = useState(false);
   const invalid = !!error;
@@ -45,6 +59,7 @@ export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "wo
         {Icon && <Icon size={18} color="#454745" />}
         <TextInput
           className="flex-1 font-body text-vupth-textPrimary"
+          style={[RESET_WEB, style] as TextInputProps["style"]}
           placeholderTextColor="#454745"
           autoCorrect={false}
           autoCapitalize={autoCapitalize}
