@@ -680,6 +680,25 @@ export default function ProfessionalQueueScreen() {
               current={professional?.work_status ? WORK_TO_KEY[professional.work_status] : null}
               onSelect={selectStatus}
             />
+            {/* 🔴 Na WEB nao existe puxar-para-atualizar: o gesto e de dedo, e o
+                RefreshControl do react-native-web nao responde ao mouse. Sem
+                isto, quem usa o navegador nao tinha NENHUMA forma de forcar a
+                atualizacao da fila — so recarregar a pagina inteira e perder o
+                lugar (device, 08/09). No aparelho o gesto continua sendo o
+                caminho, entao o botao nao aparece la. */}
+            {Platform.OS === "web" && (
+              <Pressable
+                onPress={onRefresh}
+                accessibilityRole="button"
+                accessibilityLabel="Atualizar a fila"
+                testID="atualizar-fila"
+                hitSlop={8}
+                disabled={refreshing}
+                className={refreshing ? "opacity-40" : undefined}
+              >
+                <RotateCw size={20} color="#163300" />
+              </Pressable>
+            )}
             {/* Nav v2 (2026-07-23): a reticencia NAVEGA p/ a tela de opcoes
                 (nada de modal — "mais amigavel a tela inteira"). Badge =
                 refeicao na janela + solicitacoes de corte. */}
