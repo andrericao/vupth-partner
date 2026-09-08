@@ -33,6 +33,7 @@ import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
 import { resumoDeSolicitacoes } from "@lib/cutRequests";
 import { escolherAtendimentoAtual } from "@lib/atendimentoAtual";
+import { finalizarAtendimento } from "@lib/finalizar";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
@@ -747,7 +748,13 @@ export default function ProfessionalQueueScreen() {
             attendance={currentAttendance}
             onFinish={() =>
               handleAction(async () => {
-                await finishAttendance(currentAttendance.id);
+                // Pausado nao finaliza (S36): retoma e finaliza, em vez de
+                // deixar o profissional preso num botao que e recusado.
+                await finalizarAtendimento(
+                  currentAttendance.id,
+                  currentAttendance.status === "PAUSED",
+                  { retomar: resumeAttendance, finalizar: finishAttendance }
+                );
                 clearAttendanceStart(currentAttendance.id);
               })
             }

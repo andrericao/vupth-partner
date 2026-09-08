@@ -9,9 +9,10 @@ import {
   Spinner,
   Divider,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl } from "react-native";
+import { Alert, RefreshControl, Platform, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { RotateCw } from "lucide-react-native";
 import { Button } from "@components/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
@@ -19,6 +20,8 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import type { AttendanceInQueue } from "@lib/types";
 import { confirmar, avisar } from "@lib/confirmar";
+import { finalizarAtendimento } from "@lib/finalizar";
+import { useAttendanceStore } from "@store/attendance.store";
 
 function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; position: number }) {
   const statusLabel =
@@ -64,7 +67,17 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
   );
 }
 
-function CurrentAttendanceCard({ attendance }: { attendance: any }) {
+function CurrentAttendanceCard({
+  attendance,
+  onFinish,
+  onPause,
+  ocupado,
+}: {
+  attendance: any;
+  onFinish?: () => void;
+  onPause?: () => void;
+  ocupado?: boolean;
+}) {
   const { formatted } = useElapsedTime(
     attendance.id ?? null,
     attendance.startTime ?? null,
@@ -101,6 +114,39 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
           R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </HStack>
+
+      {/* 🔴 Ate 08/09 este card era so LEITURA: mostrava "ATENDENDO", o
+          cronometro e o valor, e o dono nao tinha o que fazer. Quem demonstra o
+          MVP olhando a fila de um profissional ficava sem saida — o "nao existe
+          opcao de finalizar", relatado tres vezes, era isto aqui. */}
+      {onFinish && (
+        <HStack mt="$3" space="sm">
+          {/* `mt="$0"`: o Button da marca traz `mt="$9"` de default, pensado
+              para o rodape de formulario. Dentro de um card ele abriria um vao. */}
+          <Button
+            flex={1}
+            mt="$0"
+            h={48}
+            title="Finalizar"
+            onPress={onFinish}
+            isDisabled={ocupado}
+          />
+          {onPause && (
+            <Button
+              flex={1}
+              mt="$0"
+              h={48}
+              bg="transparent"
+              borderWidth={2}
+              borderColor="$forest"
+              textColor="$forest"
+              title={attendance.isPaused ? "Retomar" : "Pausar"}
+              onPress={onPause}
+              isDisabled={ocupado}
+            />
+          )}
+        </HStack>
+      )}
     </VStack>
   );
 }
@@ -126,6 +172,51 @@ export default function ProfessionalQueueScreen() {
     await refetch();
     setRefreshing(false);
   }, [refetch]);
+
+  const {
+    finishAttendance, pauseAttendance, resumeAttendance,
+  } = useAttendanceStore();
+  const [agindo, setAgindo] = useState(false);
+
+  // O dono age SOBRE O ATENDIMENTO DE OUTRA PESSOA — por isso pergunta antes,
+  // dizendo de quem e. Sem o nome, "Finalizar?" numa tela que o dono abre por
+  // profissional e ambiguo demais para uma acao que nao tem volta.
+  const agir = async (rotulo: string, executar: () => Promise<unknown>) => {
+    setAgindo(true);
+    try {
+      await executar();
+      await refetch();
+    } catch (error: any) {
+      await avisar({
+        titulo: "Não foi possível " + rotulo,
+        mensagem: getApiErrorMessage(error, "Tente novamente."),
+      });
+    } finally {
+      setAgindo(false);
+    }
+  };
+
+  const encerrar = async (att: any) => {
+    const quem = att?.clientName ?? "o cliente";
+    const ok = await confirmar({
+      titulo: "Finalizar atendimento",
+      mensagem: `Encerrar o atendimento de ${quem}?`,
+      confirmar: "Finalizar",
+    });
+    if (!ok) return;
+    // Pausado nao finaliza (S36): retoma e finaliza. Ver src/lib/finalizar.ts.
+    await agir("finalizar", () =>
+      finalizarAtendimento(att.id, !!att.isPaused, {
+        retomar: resumeAttendance,
+        finalizar: finishAttendance,
+      })
+    );
+  };
+
+  const alternarPausa = async (att: any) =>
+    agir(att?.isPaused ? "retomar" : "pausar", () =>
+      att?.isPaused ? resumeAttendance(att.id) : pauseAttendance(att.id)
+    );
 
   const handleRemove = async () => {
     if (!establishmentId || !professionalId) return;
@@ -167,6 +258,23 @@ export default function ProfessionalQueueScreen() {
         <ScreenHeader
           title={data?.professionalName ?? professionalName ?? "Fila"}
           onBack={() => router.navigate("/(owner)/dashboard" as any)}
+          action={
+            /* Puxar-para-atualizar e gesto de dedo: no navegador o
+               RefreshControl nao responde ao mouse, e esta tela ficava sem
+               NENHUMA forma de atualizar a fila (device, 08/09). */
+            Platform.OS === "web" ? (
+              <Pressable
+                onPress={onRefresh}
+                accessibilityRole="button"
+                accessibilityLabel="Atualizar a fila"
+                testID="atualizar-fila-dono"
+                hitSlop={8}
+                disabled={refreshing}
+              >
+                <RotateCw size={20} color="#163300" />
+              </Pressable>
+            ) : undefined
+          }
         />
 
         {data && (
@@ -206,7 +314,12 @@ export default function ProfessionalQueueScreen() {
             <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Em Atendimento
             </Text>
-            <CurrentAttendanceCard attendance={data.inAttendance} />
+            <CurrentAttendanceCard
+              attendance={data.inAttendance}
+              ocupado={agindo}
+              onFinish={() => encerrar(data.inAttendance)}
+              onPause={() => alternarPausa(data.inAttendance)}
+            />
           </VStack>
         )}
 
