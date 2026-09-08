@@ -20,6 +20,15 @@ type AttendanceState = {
   fetchProfessionalQueue: (professionalId: string, establishmentId: string) => Promise<QueueResponse>;
   addGuestAttendance: (data: { professionalId: string; establishmentId: string; serviceItemIds: string[]; clientName: string }) => Promise<QueueResponse>;
   fetchHistory: (params: { establishmentId?: string; professionalId?: string; status?: string }) => Promise<AttendanceHistoryItem[]>;
+  /**
+   * O atendimento que o backend devolveu no `start`, guardado como REDE.
+   *
+   * O card "ATENDENDO AGORA" dependia so do `current_attendance` do snapshot da
+   * fila; quando esse campo vem vazio durante o IN_PROGRESS, some o card e com
+   * ele o Finalizar — o bloqueio do MVP. Isto nao inventa dado: e a resposta
+   * que o proprio servidor deu ao dizer "comecou".
+   */
+  atendimentoIniciado: AttendanceInProgress | null;
   startAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
   finishAttendance: (attendanceId: string) => Promise<void>;
   pauseAttendance: (attendanceId: string) => Promise<void>;
@@ -36,6 +45,7 @@ type AttendanceState = {
 };
 
 export const useAttendanceStore = create<AttendanceState>((set) => ({
+  atendimentoIniciado: null,
   professionals: [],
   establishmentData: null,
   history: [],
@@ -82,11 +92,16 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   startAttendance: async (attendanceId) => {
     const { data } = await api.patch(`/attendances/${attendanceId}/start`);
+    set({ atendimentoIniciado: data });
     return data;
   },
 
   finishAttendance: async (attendanceId) => {
     await api.patch(`/attendances/${attendanceId}/finish`);
+    // A rede local so existe enquanto ha atendimento. Manter depois do fim
+    // seria pior que o defeito que ela conserta: um card fantasma, com botao
+    // que o backend recusa.
+    set((s) => (s.atendimentoIniciado?.id === attendanceId ? { atendimentoIniciado: null } : {}));
   },
 
   pauseAttendance: async (attendanceId) => {
@@ -95,6 +110,7 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   resumeAttendance: async (attendanceId) => {
     const { data } = await api.patch(`/attendances/${attendanceId}/resume`);
+    set({ atendimentoIniciado: data });
     return data;
   },
 
@@ -117,6 +133,7 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
 
   removeFromQueue: async (attendanceId) => {
     await api.delete(`/professional-queue/${attendanceId}/remove`);
+    set((s) => (s.atendimentoIniciado?.id === attendanceId ? { atendimentoIniciado: null } : {}));
   },
 
   // S4 (backend 2026-07-18): move o atendimento ao indice 0 e empurra os demais,

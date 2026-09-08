@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star } from "lucide-react-native";
+import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -32,6 +32,7 @@ import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/work
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
 import { resumoDeSolicitacoes } from "@lib/cutRequests";
+import { escolherAtendimentoAtual } from "@lib/atendimentoAtual";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
@@ -239,7 +240,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, removeFromQueue, promoteAttendance,
+    markLate, removeFromQueue, promoteAttendance, atendimentoIniciado,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -397,7 +398,13 @@ export default function ProfessionalQueueScreen() {
   }, [meals, profId, data, handleStartMeal, handleSkipMeal, disableMealNudge]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
-  const currentAttendance = myProfessional?.current_attendance;
+  // O snapshot manda; a memoria local do `start` preenche o silencio dele.
+  // Sem esta segunda fonte, um `current_attendance` vazio durante o IN_PROGRESS
+  // apagava o card inteiro — e com ele o Finalizar. Ver escolherAtendimentoAtual.
+  const currentAttendance = escolherAtendimentoAtual(
+    myProfessional?.current_attendance,
+    atendimentoIniciado
+  );
   const waitingList = myProfessional?.waiting_list ?? [];
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
