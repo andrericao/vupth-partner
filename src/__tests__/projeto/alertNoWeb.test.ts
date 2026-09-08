@@ -139,6 +139,18 @@ describe("o Alert do web mostra o que o app tem a dizer", () => {
     expect(LAYOUT).toMatch(/Platform\.OS === "web"/);
   });
 
+  it("o boot monta o host do dialogo NATIVO e instala o patch", () => {
+    // Simetria com a web: la o shim, aqui o modal. Se o host nao estiver na
+    // arvore, o instalador cai no Alert do sistema — feio, mas nunca mudo.
+    const LAYOUT = fs.readFileSync(
+      path.resolve(__dirname, "../../../app/_layout.tsx"),
+      "utf8"
+    );
+
+    expect(LAYOUT).toMatch(/instalarDialogoNativo\(\)/);
+    expect(LAYOUT).toMatch(/<DialogoVupth \/>/);
+  });
+
   it("o confirmar() usa o MESMO dialogo quando o shim esta instalado", () => {
     // Duas caixas diferentes no mesmo app (a nossa e a do navegador) e o tipo
     // de divergencia que so aparece quando um usuario reclama. Este pedaco e

@@ -20,6 +20,8 @@ import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { instalarAlertWeb } from "../web-shims/alert";
+import { instalarDialogoNativo } from "@lib/alertNativo";
+import { DialogoVupth } from "@components/DialogoVupth";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
@@ -49,6 +51,17 @@ const navTheme = {
 // no boot, antes de qualquer interacao poder disparar um Alert — e antes do
 // primeiro render, que ja pode avisar de erro.
 if (Platform.OS === "web") instalarAlertWeb(Alert);
+
+// No NATIVO o Alert e do sistema operacional: nao aceita fonte, cor nem raio, e
+// por isso a caixa do APK ficou pior que a da web depois do A5 ("o modal de
+// aviso na versao web ta melhor que o modal do apk", 08/09). Mesma tatica do
+// shim: troca o metodo, e as 100 chamadas passam a desenhar a caixa da marca —
+// o MESMO desenho, numero por numero.
+//
+// A rede esta no proprio instalador: sem o <DialogoVupth /> montado, ele cai no
+// Alert original. App que troca o dialogo por um modal que ninguem desenha fica
+// MUDO, que e o defeito que acabamos de consertar do outro lado.
+instalarDialogoNativo();
 
 export default function RootLayout() {
   // [marca-vupth] Archivo substitui Poppins em titulos/botoes; Inter segue no
@@ -96,6 +109,10 @@ export default function RootLayout() {
                 degradar para a fonte do sistema, nunca prender o app numa tela
                 de carregamento. Foi o spinner eterno de 2026-08-27. */}
             {fontLoaded || fontError ? <Slot /> : <Loading />}
+            {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
+                nao pode ser coberto por ela. Fica fora do portao das fontes de
+                proposito — erro no boot precisa aparecer mesmo antes delas. */}
+            <DialogoVupth />
           </ThemeProvider>
         </GluestackUIProvider>
       </QueryClientProvider>
