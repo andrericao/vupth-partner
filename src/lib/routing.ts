@@ -102,3 +102,17 @@ export function getPrimeiroCaminhoDoDono(isProfessional: boolean): CaminhoDoDono
     hint: "cria o SEU perfil profissional — você passa a ter fila própria",
   };
 }
+
+/**
+ * A tela "Dados cadastrais" (e-mail, senha, nome, apelido) nasceu dentro da
+ * area do PROFISSIONAL, e o menu do dono mandava "Dados pessoais" para uma tela
+ * de "Em breve" — sendo que e-mail e senha sao do USUARIO, nao do papel, e
+ * sempre existiram (teste de device, 08/09: "isso ja deveria ter sido
+ * implementado").
+ *
+ * A mesma tela passa a servir os dois. Isto diz de onde a pessoa veio, para o
+ * botao voltar nao jogar um dono na area do profissional.
+ */
+export function rotaDeVoltaDosDados(origem?: string | null): string {
+  return origem === "owner" ? "/(owner)/menu" : "/(professional)/settings";
+}

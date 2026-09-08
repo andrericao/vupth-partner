@@ -2,6 +2,7 @@ import {
   getPostLoginRoute,
   getRoleCardRoute,
   getPrimeiroCaminhoDoDono,
+  rotaDeVoltaDosDados,
 } from "../routing";
 
 describe("getPostLoginRoute", () => {
@@ -131,5 +132,18 @@ describe("getPrimeiroCaminhoDoDono — o aviso de troca de contexto", () => {
 
   it("o aviso diz para ONDE se esta indo, nao so que algo vai acontecer", () => {
     expect(getPrimeiroCaminhoDoDono(true).aviso!.titulo).toMatch(/profissional/i);
+  });
+});
+
+describe("rotaDeVoltaDosDados", () => {
+  it("quem veio do menu do dono volta para o menu do dono", () => {
+    expect(rotaDeVoltaDosDados("owner")).toBe("/(owner)/menu");
+  });
+
+  it("sem origem declarada, volta para as Configuracoes do profissional", () => {
+    // O caminho antigo e o default: a tela nasceu la, e todo link existente
+    // continua funcionando sem passar parametro nenhum.
+    expect(rotaDeVoltaDosDados()).toBe("/(professional)/settings");
+    expect(rotaDeVoltaDosDados(null)).toBe("/(professional)/settings");
   });
 });

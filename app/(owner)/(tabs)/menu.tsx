@@ -233,8 +233,8 @@ export default function OwnerMenuScreen() {
               label="Dados pessoais"
               onPress={() =>
                 router.push({
-                  pathname: "/(owner)/coming-soon",
-                  params: { title: "Dados pessoais" },
+                  pathname: "/(professional)/settings-account",
+                  params: { from: "owner" },
                 } as any)
               }
               last={!establishment?.id}
