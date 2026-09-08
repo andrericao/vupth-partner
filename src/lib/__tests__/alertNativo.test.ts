@@ -42,7 +42,10 @@ describe("instalarDialogoNativo", () => {
 
     alvo.alert("Erro", "Sem host");
 
-    expect(original).toHaveBeenCalledWith("Erro", "Sem host", [{ text: "OK" }]);
+    // Repassa os argumentos INTACTOS: a rede nao pode "melhorar" o pedido, so
+    // entregar. Normalizar aqui esconderia a diferenca entre o caminho normal e
+    // o de emergencia justo quando alguem estivesse depurando o de emergencia.
+    expect(original).toHaveBeenCalledWith("Erro", "Sem host", undefined);
     expect(useDialogoStore.getState().atual).toBeNull();
   });
 
