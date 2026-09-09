@@ -9,11 +9,11 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
+  Info,
 } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
-import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { CompletionCard } from "@components/CompletionCard";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
@@ -245,10 +245,18 @@ export default function ProfessionalSettingsScreen() {
           </Text>
         </Pressable>
 
-        {/* O diagnostico de WS mudou de casa: mora dentro do OtaUpdateButton,
-            atras de 7 toques na versao. Estava solto aqui e o usuario final
-            via "falhou o handshake" e a URL do servidor. */}
-        <OtaUpdateButton />
+        {/* Versao, atualizacao e diagnostico saem do RODAPE e viram destino
+            (pedido dele, 09/09: "estao sujando a tela para o usuario"). Quem
+            precisa, entra; quem nao precisa, nem sabe que existe. */}
+        <Grupo label="Sistema">
+          <MenuCard
+            icon={Info}
+            title="Versão do app"
+            hint="atualização e informações técnicas"
+            last
+            onPress={() => router.push("/(professional)/sistema" as any)}
+          />
+        </Grupo>
       </View>
     </ScrollView>
   );

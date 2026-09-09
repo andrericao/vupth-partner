@@ -11,12 +11,13 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
-import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { PendingDot } from "@components/PendingDot";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
-import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight } from "lucide-react-native";
+import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight,
+  Info,
+} from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
 
@@ -258,9 +259,21 @@ export default function OwnerMenuScreen() {
           </Pressable>
         </VStack>
 
-        <VStack flex={1} />
+        <Grupo label="SISTEMA">
+          <MenuItem
+            icon={Info}
+            label="Versão do app"
+            onPress={() =>
+              router.push({
+                pathname: "/(professional)/sistema",
+                params: { from: "owner" },
+              } as any)
+            }
+            last
+          />
+        </Grupo>
 
-        <OtaUpdateButton />
+        <VStack flex={1} />
       </VStack>
     </ScrollView>
   );
