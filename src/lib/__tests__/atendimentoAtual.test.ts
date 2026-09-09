@@ -38,3 +38,45 @@ describe("escolherAtendimentoAtual", () => {
     expect(escolherAtendimentoAtual(pausado, local)).toBe(pausado);
   });
 });
+
+// 🔴 TERCEIRA FONTE (08/09, medido no aparelho pelo painel dos 7 toques): o
+// `current_attendance` vinha NULO logo após iniciar e só aparecia depois. O
+// card não montava, e o profissional era obrigado a PAUSAR para o botão surgir.
+//
+// A hipótese que sobra, e que esta fonte cobre: o atendimento em curso continua
+// dentro da `waiting_list`, com status próprio, em vez de ser movido para o
+// campo. Se for isso, o dado sempre esteve na tela — do lado errado, aparecendo
+// como cliente que ainda espera.
+//
+// Custa nada estar errada: se o backend não fizer isso, a busca não acha nada e
+// tudo segue como antes.
+describe("escolherAtendimentoAtual — a lista de espera como terceira fonte", () => {
+  const emAndamento = { id: "a9", clientName: "Caio", status: "IN_PROGRESS" } as any;
+  const esperando = { id: "a8", clientName: "Dan", status: "SCHEDULED" } as any;
+
+  it("acha o atendimento em curso escondido na lista de espera", () => {
+    expect(escolherAtendimentoAtual(null, null, [esperando, emAndamento])).toBe(emAndamento);
+  });
+
+  it("acha também o PAUSADO — mesmo caso, outro estado", () => {
+    const pausado = { id: "a9", clientName: "Caio", status: "PAUSED" } as any;
+    expect(escolherAtendimentoAtual(null, null, [pausado])).toBe(pausado);
+  });
+
+  it("quem só espera NÃO vira atendimento em curso", () => {
+    expect(escolherAtendimentoAtual(null, null, [esperando])).toBeNull();
+  });
+
+  it("o campo do servidor continua mandando quando existe", () => {
+    expect(escolherAtendimentoAtual(doServidor, null, [emAndamento])).toBe(doServidor);
+  });
+
+  it("a lista vem antes da memória local: é dado do servidor, mais novo", () => {
+    expect(escolherAtendimentoAtual(null, local, [emAndamento])).toBe(emAndamento);
+  });
+
+  it("lista ausente ou vazia não quebra nada", () => {
+    expect(escolherAtendimentoAtual(null, local, [])).toBe(local);
+    expect(escolherAtendimentoAtual(null, local, undefined)).toBe(local);
+  });
+});

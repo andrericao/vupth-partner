@@ -408,9 +408,15 @@ export default function ProfessionalQueueScreen() {
   // apagava o card inteiro — e com ele o Finalizar. Ver escolherAtendimentoAtual.
   const currentAttendance = escolherAtendimentoAtual(
     myProfessional?.current_attendance,
-    atendimentoIniciado
+    atendimentoIniciado,
+    myProfessional?.waiting_list
   );
-  const waitingList = myProfessional?.waiting_list ?? [];
+  // Fora da espera quem ja esta sendo atendido: se o backend deixar o atendimento
+  // em curso dentro da lista (ver escolherAtendimentoAtual), ele apareceria duas
+  // vezes — no card verde e como proximo da fila.
+  const waitingList = (myProfessional?.waiting_list ?? []).filter(
+    (a) => a.id !== currentAttendance?.id
+  );
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
   // DS3 (c) — a fila aceita gente nova? Ausente => aceitando.

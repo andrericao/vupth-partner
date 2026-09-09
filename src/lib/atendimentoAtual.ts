@@ -24,9 +24,24 @@ import type { AttendanceInQueue } from "@lib/types";
  */
 export function escolherAtendimentoAtual(
   doServidor: AttendanceInQueue | null | undefined,
-  local: AttendanceInQueue | null | undefined
+  local: AttendanceInQueue | null | undefined,
+  listaDeEspera?: AttendanceInQueue[] | null
 ): AttendanceInQueue | null {
   if (doServidor) return doServidor;
+
+  // 🔎 Medido no aparelho (08/09): o `current_attendance` vem NULO logo apos
+  // iniciar. A hipotese que esta linha cobre e que o atendimento continua na
+  // LISTA DE ESPERA com status proprio, em vez de ser movido para o campo — ou
+  // seja, o dado sempre esteve na tela, do lado errado, parecendo cliente que
+  // ainda aguarda.
+  //
+  // Vem ANTES da memoria local porque e dado do servidor, e portanto mais novo:
+  // se o cliente foi trocado por outro aparelho, e isto que sabe.
+  const naLista = (listaDeEspera ?? []).find(
+    (a) => a?.status === "IN_PROGRESS" || a?.status === "PAUSED"
+  );
+  if (naLista) return naLista;
+
   return local ?? null;
 }
 
