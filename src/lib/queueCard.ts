@@ -6,7 +6,15 @@
 // "Adiantar" inicia o atendimento na hora (/start); "Promover" (S4, backend
 // 2026-07-18) so reordena ao 1o lugar SEM iniciar (/promote).
 
-export type QueueAction = "iniciar" | "adiantar" | "promover" | "nao-chegou" | "remover";
+export type QueueAction =
+  | "iniciar"
+  | "adiantar"
+  | "promover"
+  | "nao-chegou"
+  | "remover"
+  | "finalizar"
+  | "pausar"
+  | "retomar";
 
 /**
  * Acoes do menu do card, por POSICAO.
@@ -17,7 +25,16 @@ export type QueueAction = "iniciar" | "adiantar" | "promover" | "nao-chegou" | "
  * demais ele continua FORA: a regra atende-primeiro nao admite iniciar do meio
  * da fila (p/ isso existe "Adiantar", que troca a posicao antes de iniciar).
  */
-export function queueMenuActions(isFirst: boolean): QueueAction[] {
+export function queueMenuActions(isFirst: boolean, status?: string | null): QueueAction[] {
+  // 🔴 O menu foi desenhado por POSICAO, e por isso nunca contemplou quem JA
+  // ESTA SENDO ATENDIDO: as cinco acoes originais sao todas sobre quem espera.
+  // Quem esta na cadeira nao tinha entrada nenhuma aqui — e era exatamente por
+  // este menu que o Andre tentava finalizar (09/09). Nenhum diagnostico de dado
+  // acharia isso: o botao nunca existiu para ser mostrado.
+  if (status === "IN_PROGRESS" || status === "PAUSED") {
+    return ["finalizar", status === "PAUSED" ? "retomar" : "pausar", "remover"];
+  }
+
   return isFirst
     ? ["iniciar", "nao-chegou", "remover"]
     : ["adiantar", "promover", "remover"];
@@ -29,6 +46,9 @@ export const QUEUE_ACTION_LABEL: Record<QueueAction, string> = {
   promover: "Promover ao topo",
   "nao-chegou": "Não chegou",
   remover: "Remover",
+  finalizar: "Finalizar atendimento",
+  pausar: "Pausar atendimento",
+  retomar: "Retomar atendimento",
 };
 
 /** Resumo dos servicos para o card (ex.: "Corte + Barba"). */
