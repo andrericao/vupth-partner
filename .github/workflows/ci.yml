@@ -13,8 +13,11 @@ on:
       - ".gitignore"
       - "docs/**"
       - "LICENSE"
+  # PR para dev tambem roda: sem isto o CI so acordava DEPOIS do merge (no push
+  # da dev), e quem descobria a quebra era o auto-rollback, com a dev ja
+  # vermelha. O client ja checa os dois destinos — os gemeos ficam iguais.
   pull_request:
-    branches: [main]
+    branches: [dev, main]
 
 # Pushes em sequencia cancelam os runs anteriores da mesma branch (evita gastar
 # minutos com builds que ja seriam descartados). So o run mais novo sobrevive.

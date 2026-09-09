@@ -86,3 +86,44 @@ export function cutRequestTotal(
 export function isCutRequestEvent(type: string | null | undefined): boolean {
   return !!type && type.startsWith("CUT_");
 }
+
+/**
+ * Resumo dos pedidos pendentes para o card da FILA.
+ *
+ * Item 1 da lista de defeitos, aberto desde 05/08: o pedido chega, mas so
+ * acende um ponto de 12px dentro do menu ☰ — "solicitei corte e nada apareceu
+ * na tela do profissional". Em 07/09 a decisao de que FILA FECHADA CONTINUA
+ * ACEITANDO SOLICITACAO transformou esse canal no UNICO caminho do cliente
+ * para quem nao esta de expediente. Um ponto de 12px, ai, e pedido perdido.
+ *
+ * O resumo responde as tres perguntas que decidem se o profissional larga o
+ * que esta fazendo: QUANTOS, QUEM e QUANTO TEMPO RESTA. O relogio e o do mais
+ * urgente porque o TTL e de 5 minutos e a decisao e por pedido — mostrar a
+ * media, ou o primeiro da lista, esconderia justamente o que vai expirar.
+ *
+ * `null` quando nao ha nada pendente: ausencia de card e o estado correto, e
+ * card vazio na tela mais cheia do app so gasta espaco.
+ */
+export type ResumoSolicitacoes = {
+  titulo: string;
+  quem: string;
+  /** Minutos ate o MAIS urgente expirar. */
+  expiraEm: number;
+};
+
+export function resumoDeSolicitacoes(
+  list: CutRequestResponse[] | null | undefined,
+  nowMs: number
+): ResumoSolicitacoes | null {
+  const ativos = activeCutRequests(list, nowMs);
+  if (ativos.length === 0) return null;
+
+  const primeiro = cutRequestClientName(ativos[0]);
+  const outros = ativos.length - 1;
+
+  return {
+    titulo: `${ativos.length} ${ativos.length === 1 ? "solicitação" : "solicitações"} de encaixe`,
+    quem: outros > 0 ? `${primeiro} e mais ${outros}` : primeiro,
+    expiraEm: Math.min(...ativos.map((r) => minutesToExpire(r.expires_at, nowMs))),
+  };
+}

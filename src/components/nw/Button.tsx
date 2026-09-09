@@ -48,7 +48,11 @@ type Props = Omit<PressableProps, "children"> & {
   textClassName?: string;
 };
 
-const BASE = "h-[54px] rounded-full items-center justify-center px-4";
+// `min-h`, e nao `h`: com a fonte do sistema ampliada (o app honra o ajuste
+// do aparelho — nunca desligamos allowFontScaling), altura cravada CORTA o
+// rotulo dentro do botao. Com altura minima o desenho fica identico no
+// tamanho padrao e cresce em vez de truncar. Ver DS4 no HANDOFF_DESIGN.
+const BASE = "min-h-[54px] rounded-full items-center justify-center px-4";
 // O ghost e o unico que NAO e pilula alta: raio 8, caixa de 10/12 (do desenho).
 const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
 

@@ -47,3 +47,72 @@ export function getPostLoginRoute(
   // isso, isto aqui era um ciclo.
   return "/(auth)";
 }
+
+/**
+ * O PRIMEIRO card da tela "Profissionais" (dono) — o slot que muda de papel.
+ *
+ * Ele tinha so o ramo falso: vivia atras de `!isProfessional` e SUMIA quando o
+ * dono acumulava o perfil profissional. Quem ja atendia entrava na tela e via
+ * apenas "Convidar" e "Ver solicitacoes" — as duas opcoes que dependem de
+ * OUTRA pessoa —, sem porta para o proprio servico. E servico e justamente o
+ * que falta para a loja abrir (teste de device, 06/09).
+ *
+ * Isto NAO contraria a decisao de que servico e do profissional: a porta so
+ * aparece sob `isProfessional`, que e exatamente a condicao da decisao.
+ *
+ * `rota` ausente significa acao LOCAL: a escolha abre o formulario na propria
+ * tela, sem navegar.
+ */
+export type CaminhoDoDono = {
+  testID: string;
+  title: string;
+  hint: string;
+  rota?: string;
+  /**
+   * Mostrado ANTES de navegar. Sair da area do dono para a do profissional e
+   * uma troca de contexto, nao uma tela a mais: a barra muda, o menu muda, e
+   * quem nao percebeu isso acha que "o app pulou para outro lugar". O aviso diz
+   * o que vai acontecer e, principalmente, POR ONDE VOLTAR — os dois botoes de
+   * troca sao "Área do dono" (Configuracoes do profissional) e "Atender como
+   * profissional" (Menu do dono).
+   */
+  aviso?: { titulo: string; mensagem: string };
+};
+
+export function getPrimeiroCaminhoDoDono(isProfessional: boolean): CaminhoDoDono {
+  if (isProfessional) {
+    return {
+      testID: "path-my-services",
+      title: "Adicionar serviço",
+      hint: "cadastre o que VOCÊ faz — sem serviço a loja não abre",
+      rota: "/(professional)/my-services?from=settings",
+      aviso: {
+        titulo: "Você vai para a sua área de profissional",
+        mensagem:
+          "O serviço é SEU, não da loja — por isso o cadastro acontece lá. " +
+          "Para voltar, use “Área do dono” em Configurações; para vir de novo " +
+          "para cá, “Atender como profissional” no Menu.",
+      },
+    };
+  }
+
+  return {
+    testID: "path-me",
+    title: "Eu também vou atender",
+    hint: "cria o SEU perfil profissional — você passa a ter fila própria",
+  };
+}
+
+/**
+ * A tela "Dados cadastrais" (e-mail, senha, nome, apelido) nasceu dentro da
+ * area do PROFISSIONAL, e o menu do dono mandava "Dados pessoais" para uma tela
+ * de "Em breve" — sendo que e-mail e senha sao do USUARIO, nao do papel, e
+ * sempre existiram (teste de device, 08/09: "isso ja deveria ter sido
+ * implementado").
+ *
+ * A mesma tela passa a servir os dois. Isto diz de onde a pessoa veio, para o
+ * botao voltar nao jogar um dono na area do profissional.
+ */
+export function rotaDeVoltaDosDados(origem?: string | null): string {
+  return origem === "owner" ? "/(owner)/menu" : "/(professional)/settings";
+}

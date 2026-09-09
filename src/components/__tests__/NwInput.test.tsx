@@ -38,3 +38,26 @@ describe("NwInput (primitiva NativeWind)", () => {
     expect(view.queryByLabelText("Mostrar senha")).toBeNull();
   });
 });
+
+// 🔴 "duas bordas na web, e fica espremido" (08/09). A segunda borda e do
+// NAVEGADOR — o TextInput do react-native-web e um <input> de verdade, que
+// herda borda e anel de foco do user-agent. O app do cliente nao sofre disso
+// porque o campo dele vem do Gluestack, que ja traz o reset.
+describe("NwInput — a borda que o navegador desenha por cima", () => {
+  const estiloDo = (campo: any) =>
+    (Array.isArray(campo.props.style) ? campo.props.style : [campo.props.style])
+      .filter(Boolean)
+      .reduce((acc: any, e: any) => ({ ...acc, ...e }), {});
+
+  it("no NATIVO nao injeta reset nenhum — o problema nao existe la", () => {
+    const { getByDisplayValue } = render(<NwInput label="E-mail" value="a@b.com" onChangeText={jest.fn()} />);
+    expect(estiloDo(getByDisplayValue("a@b.com")).outlineStyle).toBeUndefined();
+  });
+
+  it("o estilo de quem chama continua valendo por cima do reset", () => {
+    const { getByDisplayValue } = render(
+      <NwInput label="E-mail" value="a@b.com" onChangeText={jest.fn()} style={{ fontSize: 20 }} />
+    );
+    expect(estiloDo(getByDisplayValue("a@b.com")).fontSize).toBe(20);
+  });
+});

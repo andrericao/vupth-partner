@@ -11,6 +11,8 @@ import { needsRefresh } from "@lib/socketAuth";
 import { useUiStore } from "@store/ui.store";
 import { useAuthStore } from "@store/auth.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
+import { useProfessionalStore } from "@store/professional.store";
+import { resumirAtendimento, linhaDoResumo } from "@lib/snapshotDiag";
 
 /**
  * Assina o tempo real da fila de um establishment via STOMP.
@@ -91,10 +93,22 @@ export function useQueueSocket(establishmentId: string | null) {
               const snapshot = JSON.parse(
                 message.body
               ) as EstablishmentWithProfessionals;
+              // ⚠️ Isto SUBSTITUI o cache — nao mescla. Se o broadcast vier
+              // sem `current_attendance`, ele apaga o que o GET trouxe. E a
+              // hipotese aberta do "nao consigo finalizar"; a linha abaixo e o
+              // que permite ver isso no aparelho.
               queryClient.setQueryData(
                 ["professionals-with-queue", establishmentId],
                 snapshot
               );
+              const meuId =
+                useProfessionalStore.getState().professional?.id ?? null;
+              useWsDiagnosticsStore
+                .getState()
+                .marcarSnapshot(
+                  "WS",
+                  linhaDoResumo("WS", resumirAtendimento(snapshot, meuId))
+                );
               queryClient.invalidateQueries({
                 queryKey: ["professional-queue"],
               });

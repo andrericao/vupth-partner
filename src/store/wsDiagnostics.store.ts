@@ -34,9 +34,20 @@ const emptyChannel = (): WsChannelState => ({
   closedAt: null,
 });
 
+/**
+ * Ultima leitura do snapshot da fila, por origem. Existe para responder no
+ * APARELHO a pergunta que trava o "finalizar" desde 31/08: o
+ * `current_attendance` nao vem do backend, ou vem e o WS apaga? (o socket faz
+ * `setQueryData` SEM merge). Ver src/lib/snapshotDiag.ts.
+ */
+export type SnapshotDiag = { linha: string; em: string } | null;
+
 type WsDiagnosticsState = {
   public: WsChannelState;
   personal: WsChannelState;
+  snapshotGet: SnapshotDiag;
+  snapshotWs: SnapshotDiag;
+  marcarSnapshot: (origem: "GET" | "WS", linha: string) => void;
   markConnected: (channel: WsChannel, headers?: Record<string, string>) => void;
   markMessage: (channel: WsChannel) => void;
   markError: (channel: WsChannel, message: string) => void;
@@ -47,6 +58,15 @@ type WsDiagnosticsState = {
 export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
   public: emptyChannel(),
   personal: emptyChannel(),
+  snapshotGet: null,
+  snapshotWs: null,
+
+  marcarSnapshot: (origem, linha) =>
+    set(() =>
+      origem === "GET"
+        ? { snapshotGet: { linha, em: new Date().toISOString() } }
+        : { snapshotWs: { linha, em: new Date().toISOString() } }
+    ),
 
   // Conectar LIMPA o ultimo erro: sem isso, uma falha de handshake no boot (o
   // caso comum — Render hibernado) ficava na tela p/ sempre e o `reconnectDelay`
@@ -84,7 +104,13 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
       [channel]: { ...s[channel], connected: false, closedAt: new Date().toISOString() },
     })),
 
-  reset: () => set({ public: emptyChannel(), personal: emptyChannel() }),
+  reset: () =>
+    set({
+      public: emptyChannel(),
+      personal: emptyChannel(),
+      snapshotGet: null,
+      snapshotWs: null,
+    }),
 }));
 
 /** `heart-beat` que o SERVIDOR respondeu. `0,0` = heartbeat desligado (S17). */

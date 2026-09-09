@@ -10,9 +10,12 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      // Fontes ja carregadas via @expo-google-fonts (mesmas do v1). Archivo
-      // substitui Poppins em heading/display; `mono` pros numeros (fila,
-      // horarios) — precisa bater com config/gluestack-ui.config.ts (fonts).
+      // Os TTFs vem de `assets/fonts/` e sao carregados no `app/_layout.tsx`
+      // — NAO de `@expo-google-fonts`: a Cloudflare Pages apaga node_modules
+      // do deploy e o app publicado ficava num spinner eterno (2026-08-27).
+      // Archivo substitui Poppins em heading/display; `mono` pros numeros
+      // (fila, horarios) — precisa bater com config/gluestack-ui.config.ts.
+      // O nome aqui e a chave do useFonts, entao mexer num lado exige o outro.
       fontFamily: {
         heading: ["Archivo_700Bold"],
         display: ["Archivo_800ExtraBold"],
@@ -57,25 +60,19 @@ module.exports = {
         hero: "24px",
         full: "999px",
       },
-      // Cores da marca espelhando a escala `green` do config/gluestack-ui.config.ts
-      // (FONTE DA VERDADE — paleta "Verde Marca", ancorada em #3b7a3f desde
-      // 2026-07-09). Precisa bater 1:1: durante a migracao as telas do v1 e do
-      // v2 convivem na mesma navegacao, e qualquer desvio aparece como dois
-      // verdes diferentes no app.
+      // A escala `brand-*` (paleta "Verde Marca", ancorada em #3b7a3f desde
+      // 2026-07-09) foi REMOVIDA em 2026-08-31: nenhuma classe do NativeWind
+      // a usava mais. Todo componente `nw/` ja fala a identidade atual, o par
+      // #9FE870 / #163300, que mora em `vupth.*` logo abaixo. As duas unicas
+      // mencoes que sobraram no codigo sao comentarios contando que o token
+      // ANTIGO era usado ali.
+      //
+      // ⚠️ Isto NAO quer dizer que a paleta antiga morreu no app: ela segue
+      // viva nas telas do v1, que sao gluestack e leem `$green500` do
+      // config/gluestack-ui.config.ts — outro caminho, que nao passa por
+      // aqui. Deixar a escala morta neste arquivo so convidava tela nova a
+      // pegar #3b7a3f por engano.
       colors: {
-        brand: {
-          DEFAULT: "#3b7a3f", // = $green500
-          50: "#eef5ee",
-          100: "#d9ead9",
-          200: "#b5d5b6",
-          300: "#8bbd8d",
-          400: "#5c9c60",
-          500: "#3b7a3f",
-          600: "#316635",
-          700: "#26522a",
-          800: "#1c3d1f",
-          900: "#142c17",
-        },
         // Verde dos campos (v1 usava a escala `success` nos inputs/busca).
         success: { 500: "#348352", 950: "#071f11" },
         amber: { 500: "#FFB703", 600: "#d97706", 700: "#b45309" },

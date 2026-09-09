@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { NwInput } from "@components/nw/Input";
@@ -8,6 +8,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
+import { rotaDeVoltaDosDados } from "@lib/routing";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -67,6 +68,12 @@ function FieldCard({
 
 export default function SettingsAccountScreen() {
   const professional = useProfessionalStore((s) => s.professional);
+  // O dono chega aqui pelo menu ("Dados pessoais"). Nome e apelido pertencem ao
+  // PERFIL PROFISSIONAL — quem nao tem um nao vê esses campos, senao a tela
+  // ofereceria editar algo que nao existe. E-mail e senha sao do usuario e
+  // valem para os dois.
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const temPerfilProfissional = !!professional;
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
   const updateNickname = useProfessionalStore((s) => s.updateNickname);
   const user = useAuthStore((s) => s.user);
@@ -201,11 +208,16 @@ export default function SettingsAccountScreen() {
       >
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader
-          title="Dados cadastrais"
-          onBack={() => router.navigate("/(professional)/settings" as any)}
+          title={from === "owner" ? "Dados pessoais" : "Dados cadastrais"}
+          onBack={() => router.navigate(rotaDeVoltaDosDados(from) as any)}
         />
 
           <View className="mt-6 gap-3">
+            {/* Nome e apelido moram no PERFIL PROFISSIONAL. Dono sem esse perfil
+                nao os vê — oferecer edicao de algo inexistente e pior que a tela
+                de "Em breve" que havia aqui antes. */}
+            {temPerfilProfissional && (
+              <>
             <FieldCard
               label="Nome"
               value={professional?.name ?? "—"}
@@ -244,6 +256,8 @@ export default function SettingsAccountScreen() {
                 maxLength={50}
               />
             </FieldCard>
+              </>
+            )}
 
             <FieldCard
               label="E-mail"

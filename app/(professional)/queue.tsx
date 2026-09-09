@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star } from "lucide-react-native";
+import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -26,9 +26,14 @@ import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
+import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
+import { SolicitacoesCard } from "@components/SolicitacoesCard";
+import { resumoDeSolicitacoes } from "@lib/cutRequests";
+import { escolherAtendimentoAtual } from "@lib/atendimentoAtual";
+import { finalizarAtendimento } from "@lib/finalizar";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
@@ -96,7 +101,11 @@ function ServingCard({
             isPaused ? "text-white opacity-90" : "text-vupth-forest opacity-70"
           }`}
         >
-          {formatServices(attendance.services)} · R$ {attendance.totalValue.toFixed(2)}
+          {/* `?? 0`: campo faltando NAO pode derrubar a tela. Foi assim que o
+              app ficou branco no meio de um atendimento (08/09) — a rede local
+              alimentou o card com o payload do `/start`, que nao trazia
+              `totalValue`, e `undefined.toFixed` levou o render junto. */}
+          {formatServices(attendance.services ?? [])} · R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </View>
 
@@ -151,8 +160,8 @@ function QueueRow({
   onMenu: () => void;
 }) {
   const isLate = attendance.status === "LATE";
-  const services = formatServices(attendance.services);
-  const price = `R$ ${attendance.totalValue.toFixed(2)}`;
+  const services = formatServices(attendance.services ?? []);
+  const price = `R$ ${(attendance.totalValue ?? 0).toFixed(2)}`;
 
   return (
     <Pressable
@@ -236,7 +245,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, removeFromQueue, promoteAttendance,
+    markLate, removeFromQueue, promoteAttendance, atendimentoIniciado,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -394,8 +403,20 @@ export default function ProfessionalQueueScreen() {
   }, [meals, profId, data, handleStartMeal, handleSkipMeal, disableMealNudge]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
-  const currentAttendance = myProfessional?.current_attendance;
-  const waitingList = myProfessional?.waiting_list ?? [];
+  // O snapshot manda; a memoria local do `start` preenche o silencio dele.
+  // Sem esta segunda fonte, um `current_attendance` vazio durante o IN_PROGRESS
+  // apagava o card inteiro — e com ele o Finalizar. Ver escolherAtendimentoAtual.
+  const currentAttendance = escolherAtendimentoAtual(
+    myProfessional?.current_attendance,
+    atendimentoIniciado,
+    myProfessional?.waiting_list
+  );
+  // Fora da espera quem ja esta sendo atendido: se o backend deixar o atendimento
+  // em curso dentro da lista (ver escolherAtendimentoAtual), ele apareceria duas
+  // vezes — no card verde e como proximo da fila.
+  const waitingList = (myProfessional?.waiting_list ?? []).filter(
+    (a) => a.id !== currentAttendance?.id
+  );
   const menuIsFirst = !!menuTarget && waitingList[0]?.id === menuTarget.id;
 
   // DS3 (c) — a fila aceita gente nova? Ausente => aceitando.
@@ -595,7 +616,16 @@ export default function ProfessionalQueueScreen() {
   // queryKey do rodape e da tela de Encaixes, entao e um cache so. O WS
   // pessoal (eventos CUT_*, assinado no useQueueSocket) invalida; o refetch
   // de 30s e o fallback p/ socket caido.
-  const { count: pendingCutRequests } = usePendingCutRequests();
+  const {
+    count: pendingCutRequests,
+    pending: pedidosPendentes,
+    nowMs: agoraDosPedidos,
+  } = usePendingCutRequests();
+  // O resumo mora aqui e nao no card: card que calcula nao da pra testar sem
+  // montar tela. O relogio vem do hook — `Date.now()` no render e impuro
+  // (react-hooks/purity), e o "expira em N" tem que medir contra o mesmo
+  // instante que filtrou os expirados. Ver resumoDeSolicitacoes.
+  const resumoSolicitacoes = resumoDeSolicitacoes(pedidosPendentes, agoraDosPedidos);
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
@@ -661,6 +691,25 @@ export default function ProfessionalQueueScreen() {
               current={professional?.work_status ? WORK_TO_KEY[professional.work_status] : null}
               onSelect={selectStatus}
             />
+            {/* 🔴 Na WEB nao existe puxar-para-atualizar: o gesto e de dedo, e o
+                RefreshControl do react-native-web nao responde ao mouse. Sem
+                isto, quem usa o navegador nao tinha NENHUMA forma de forcar a
+                atualizacao da fila — so recarregar a pagina inteira e perder o
+                lugar (device, 08/09). No aparelho o gesto continua sendo o
+                caminho, entao o botao nao aparece la. */}
+            {Platform.OS === "web" && (
+              <Pressable
+                onPress={onRefresh}
+                accessibilityRole="button"
+                accessibilityLabel="Atualizar a fila"
+                testID="atualizar-fila"
+                hitSlop={8}
+                disabled={refreshing}
+                className={refreshing ? "opacity-40" : undefined}
+              >
+                <RotateCw size={20} color="#163300" />
+              </Pressable>
+            )}
             {/* Nav v2 (2026-07-23): a reticencia NAVEGA p/ a tela de opcoes
                 (nada de modal — "mais amigavel a tela inteira"). Badge =
                 refeicao na janela + solicitacoes de corte. */}
@@ -709,12 +758,29 @@ export default function ProfessionalQueueScreen() {
             attendance={currentAttendance}
             onFinish={() =>
               handleAction(async () => {
-                await finishAttendance(currentAttendance.id);
+                // Pausado nao finaliza (S36): retoma e finaliza, em vez de
+                // deixar o profissional preso num botao que e recusado.
+                await finalizarAtendimento(
+                  currentAttendance.id,
+                  currentAttendance.status === "PAUSED",
+                  { retomar: resumeAttendance, finalizar: finishAttendance }
+                );
                 clearAttendanceStart(currentAttendance.id);
               })
             }
             onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
             onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
+          />
+        )}
+
+        {/* O pedido de encaixe estava so num ponto de 12px no menu ☰ — e o
+            profissional nao olha o menu, olha a FILA. Fica depois do
+            atendimento em curso (que sempre manda) e ANTES da lista de espera,
+            porque tem relogio proprio: 5 minutos, e some sozinho. */}
+        {resumoSolicitacoes && (
+          <SolicitacoesCard
+            resumo={resumoSolicitacoes}
+            onPress={() => router.push("/(professional)/cut-requests" as any)}
           />
         )}
 
@@ -841,12 +907,12 @@ export default function ProfessionalQueueScreen() {
               BlocoBloqueio. O `flex-1 items-center justify-center` de antes
               nao centralizava nada (o pai e o conteudo de um ScrollView), so
               empurrava o texto pro meio da largura. */
-          <View className="mt-6 bg-vupth-surface rounded-card p-5 gap-1.5">
-            <Titulo nivel={2}>Nenhum cliente na fila</Titulo>
-            <Text className="font-body text-sm leading-5 text-vupth-textSecondary">
-              Novos clientes aparecerão aqui automaticamente.
-            </Text>
-          </View>
+          <EstadoVazio
+            doodle="fila"
+            titulo="Nenhum cliente na fila"
+            texto="Novos clientes aparecerão aqui automaticamente."
+            className="mt-6"
+          />
         )}
 
       </View>

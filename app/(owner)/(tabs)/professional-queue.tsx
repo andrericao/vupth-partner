@@ -9,9 +9,10 @@ import {
   Spinner,
   Divider,
 } from "@gluestack-ui/themed";
-import { Alert, RefreshControl } from "react-native";
+import { Alert, RefreshControl, Platform, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { RotateCw } from "lucide-react-native";
 import { Button } from "@components/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
@@ -101,6 +102,7 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
           R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </HStack>
+
     </VStack>
   );
 }
@@ -167,6 +169,23 @@ export default function ProfessionalQueueScreen() {
         <ScreenHeader
           title={data?.professionalName ?? professionalName ?? "Fila"}
           onBack={() => router.navigate("/(owner)/dashboard" as any)}
+          action={
+            /* Puxar-para-atualizar e gesto de dedo: no navegador o
+               RefreshControl nao responde ao mouse, e esta tela ficava sem
+               NENHUMA forma de atualizar a fila (device, 08/09). */
+            Platform.OS === "web" ? (
+              <Pressable
+                onPress={onRefresh}
+                accessibilityRole="button"
+                accessibilityLabel="Atualizar a fila"
+                testID="atualizar-fila-dono"
+                hitSlop={8}
+                disabled={refreshing}
+              >
+                <RotateCw size={20} color="#163300" />
+              </Pressable>
+            ) : undefined
+          }
         />
 
         {data && (

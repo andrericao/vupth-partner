@@ -18,7 +18,17 @@ import type { CutRequestResponse } from "@lib/types";
  * O WS pessoal (eventos `CUT_*`, assinado no useQueueSocket) invalida a query;
  * o refetch de 30s e o fallback pra socket caido.
  */
-export function usePendingCutRequests(): { count: number; pending: CutRequestResponse[] } {
+export function usePendingCutRequests(): {
+  count: number;
+  pending: CutRequestResponse[];
+  /**
+   * O MESMO relogio usado para filtrar os expirados. Sai daqui porque quem
+   * mostra "expira em N min" precisa medir contra o mesmo instante — e chamar
+   * `Date.now()` na tela e impuro (react-hooks/purity), a regra que este hook
+   * ja respeitava sozinho.
+   */
+  nowMs: number;
+} {
   const professional = useProfessionalStore((s) => s.professional);
   const fetchCutRequests = useAttendanceStore((s) => s.fetchCutRequests);
 
@@ -42,5 +52,5 @@ export function usePendingCutRequests(): { count: number; pending: CutRequestRes
   });
 
   const pending = activeCutRequests(data, nowMs);
-  return { count: pending.length, pending };
+  return { count: pending.length, pending, nowMs };
 }

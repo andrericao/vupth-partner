@@ -10,6 +10,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
 import { avisar, confirmar } from "@lib/confirmar";
+import { getPrimeiroCaminhoDoDono } from "@lib/routing";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -83,6 +84,10 @@ export default function AddProfessionalScreen() {
       pathname: "/(owner)/invite-professional",
       params: { establishmentId: establishmentId ?? "" },
     } as any);
+
+  // O primeiro card muda de papel conforme o dono ja atenda ou nao — ver
+  // getPrimeiroCaminhoDoDono. Antes ele so existia no caso "ainda nao atende".
+  const primeiroCaminho = getPrimeiroCaminhoDoDono(!!isProfessional);
 
   const goAffiliations = () =>
     router.push({
@@ -198,15 +203,22 @@ export default function AddProfessionalScreen() {
             serviço cadastrado. Há dois caminhos:
           </Text>
 
-          {!isProfessional && (
-            <PathCard
-              testID="path-me"
-              title="Eu também vou atender"
-              hint="cria o SEU perfil profissional — você passa a ter fila própria"
-              selected={meAsProfessional}
-              onPress={() => setMeAsProfessional(true)}
-            />
-          )}
+          <PathCard
+            testID={primeiroCaminho.testID}
+            title={primeiroCaminho.title}
+            hint={primeiroCaminho.hint}
+            selected={!primeiroCaminho.rota && meAsProfessional}
+            onPress={async () => {
+              if (!primeiroCaminho.rota) {
+                setMeAsProfessional(true);
+                return;
+              }
+              // Trocar de area e trocar de contexto — a barra e o menu mudam.
+              // O aviso (um OK so) explica isso e diz por onde voltar.
+              if (primeiroCaminho.aviso) await avisar(primeiroCaminho.aviso);
+              router.push(primeiroCaminho.rota as any);
+            }}
+          />
 
           <PathCard
             testID="path-invite"
@@ -264,7 +276,7 @@ export default function AddProfessionalScreen() {
           {isProfessional && (
             <Text className="font-body text-xs text-vupth-textSecondary mt-2">
               Você já tem perfil profissional nesta loja. Para somar mais gente,
-              convide alguém ou espere uma solicitação de vinculo.
+              convide alguém ou espere uma solicitação de vínculo.
             </Text>
           )}
         </View>
