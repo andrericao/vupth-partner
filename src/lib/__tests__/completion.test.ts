@@ -5,6 +5,7 @@ import {
   hasAnyPending,
   OwnerCompletionInput,
   ProfessionalCompletionInput,
+  lojaPendenteParaProfissional,
 } from "../completion";
 
 const ownerAllFalse: OwnerCompletionInput = {
@@ -164,5 +165,26 @@ describe("hasAnyPending (dot)", () => {
       hasSpecialty: true,
     });
     expect(hasAnyPending(c)).toBe(false);
+  });
+});
+
+describe("lojaPendenteParaProfissional", () => {
+  it("avisa quando EU estou pronto e a LOJA não está", () => {
+    expect(lojaPendenteParaProfissional(true, true)).toBe(true);
+  });
+
+  it("não avisa se o meu cadastro ainda não fechou — um problema de cada vez", () => {
+    expect(lojaPendenteParaProfissional(false, true)).toBe(false);
+  });
+
+  it("não avisa quando a loja está em ordem", () => {
+    expect(lojaPendenteParaProfissional(true, false)).toBe(false);
+  });
+
+  it("🔴 sem a flag do backend, NÃO afirma nada", () => {
+    // Chutar a partir de "loja fechada" transformaria a ação cotidiana do dono
+    // (fechar à noite) em alarme diário — e alarme diário ensina a ignorar.
+    expect(lojaPendenteParaProfissional(true, undefined)).toBe(false);
+    expect(lojaPendenteParaProfissional(true, null)).toBe(false);
   });
 });

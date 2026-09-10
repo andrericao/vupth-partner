@@ -9,6 +9,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { validatePassword } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 type Editing = null | "name" | "nickname" | "email" | "password";
 
@@ -106,6 +107,21 @@ export default function SettingsAccountScreen() {
     setEditing(null);
     setFieldError(null);
   };
+
+  // 🔴 A tela continua MONTADA na pilha ao navegar, entao o que foi digitado
+  // sobrevive — inclusive a SENHA ATUAL e a NOVA, que ficavam vivas na memoria
+  // do app por tempo indefinido (pedido dele, 10/09). Limpa ao SAIR: quem volta
+  // encontra a tela limpa, sem ver o proprio texto sumir na frente.
+  useLimparAoSair(() => {
+    setEditing(null);
+    setFieldError(null);
+    setName("");
+    setNickname("");
+    setEmail("");
+    setCurrentPassword("");
+    setPassword("");
+    setConfirmPassword("");
+  });
 
   const handleSaveName = async () => {
     const value = name.trim();

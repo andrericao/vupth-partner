@@ -4,13 +4,14 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { QueueOptions } from "@components/QueueOptions";
 import { useProfessionalStore } from "@store/professional.store";
+import { viraTrabalhandoAoAbrirFila, fechaFilaAoSair } from "@lib/coerenciaFila";
 import { useIntervalStore, mealName } from "@store/interval.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
 import { mealSignal } from "@lib/meals";
-import { confirmar } from "@lib/confirmar";
+import { confirmar, avisar } from "@lib/confirmar";
 
 // Tela "OPCOES DA FILA" (nav v2, 2026-07-23): o banco no header da Fila NAVEGA
 // para ca (nada de modal — "mais amigavel a tela inteira"). So acoes do dia; o
@@ -52,6 +53,16 @@ export default function QueueOptionsScreen() {
     const wasOpen = data?.open_status === "OPEN";
     try {
       await updateMyStatus(KEY_TO_WORK[next]);
+      // "Fora" com fila aberta nao existe (regra do Andre, 09/09) — mesma
+      // decisao da tela da Fila, aplicada aqui para nao haver duas versoes.
+      if (fechaFilaAoSair(next, acceptingNew)) {
+        await setAcceptingNew(false);
+        await avisar({
+          titulo: "Fila fechada junto",
+          mensagem:
+            "Como você saiu, a fila parou de aceitar novos clientes. Quem já estava esperando continua na lista.",
+        });
+      }
       const fresh = await refetchQueue();
       const nowOpen = fresh.data?.open_status === "OPEN";
       if (!wasOpen && nowOpen && next === "trabalhando") {
@@ -78,8 +89,21 @@ export default function QueueOptionsScreen() {
   // ---- Fechar / reabrir fila (S1 fatia 3) ----
   // accepting_new ausente => tratamos como aceitando (fila aberta).
   const acceptingNew = professional?.accepting_new ?? true;
+  const statusKey = professional?.work_status
+    ? WORK_TO_KEY[professional.work_status]
+    : "trabalhando";
   const runToggleQueue = async (value: boolean) => {
     try {
+      // Mesma regra da tela da Fila, no outro lugar que mexe no mesmo
+      // interruptor: abrir a fila estando "Fora" recriaria o estado que nao
+      // existe. Ver src/lib/coerenciaFila.ts.
+      if (viraTrabalhandoAoAbrirFila(statusKey, value)) {
+        await updateMyStatus("WORKING");
+        await avisar({
+          titulo: "Você voltou para a fila",
+          mensagem: "Abrir a fila marca você como Trabalhando — não dá para receber cliente estando fora.",
+        });
+      }
       await setAcceptingNew(value);
       const fresh = await refetchQueue();
       // Fechar a fila sendo o ultimo dispara auto-OFF => a loja fecha (derivado).

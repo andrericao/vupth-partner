@@ -26,6 +26,7 @@ import {
   getAbsorptionOptions,
   estimateDesiredFromClient,
 } from "@lib/pricing";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 const SERVICE_ITEM_TYPES = [
   { label: "Corte a maquina", value: "CORTE_MAQUINA", specialties: ["BARBER"] },
@@ -99,6 +100,15 @@ export default function MyServicesScreen() {
   const [serviceItemType, setServiceItemType] = useState("");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
+
+  // Mesma regra: sair da tela limpa o que ficou pela metade (10/09).
+  useLimparAoSair(() => {
+    setEditName("");
+    setEditPrice("");
+    setServiceItemType("");
+    setCustomName("");
+    setPrice("");
+  });
   const [absorption, setAbsorption] = useState(0);
   const [nameInvalid, setNameInvalid] = useState(false);
   const [priceInvalid, setPriceInvalid] = useState(false);

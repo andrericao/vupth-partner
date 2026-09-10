@@ -43,3 +43,38 @@ describe("formatServices", () => {
     expect(formatServices([])).toBe("");
   });
 });
+
+// 🔴 O QUE FALTAVA, dito por ele em 09/09: "é só adicionar o botão no modal".
+//
+// Eu passei quatro rodadas atrás do CARD verde, e ele estava usando o MENU do
+// cliente. O menu foi desenhado "por POSIÇÃO, não por status" — e por isso nunca
+// contemplou quem já está sendo atendido: as cinco ações existentes são todas
+// sobre quem ESPERA. Quem está na cadeira não tem entrada nenhuma ali.
+//
+// Nenhum diagnóstico de dado ia achar isso: o menu nunca teve o botão para
+// mostrar.
+describe("queueMenuActions — quem já está sendo atendido", () => {
+  it("EM ATENDIMENTO: finalizar vem primeiro, e pausar ao lado", () => {
+    expect(queueMenuActions(true, "IN_PROGRESS")).toEqual(["finalizar", "pausar", "remover"]);
+  });
+
+  it("PAUSADO: o par vira finalizar + retomar", () => {
+    expect(queueMenuActions(true, "PAUSED")).toEqual(["finalizar", "retomar", "remover"]);
+  });
+
+  it("quem está em atendimento NÃO pode ser 'iniciado' de novo", () => {
+    expect(queueMenuActions(true, "IN_PROGRESS")).not.toContain("iniciar");
+  });
+
+  it("sem status, nada muda — a fila comum segue como sempre foi", () => {
+    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "remover"]);
+    expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
+    expect(queueMenuActions(false, "SCHEDULED")).toEqual(["adiantar", "promover", "remover"]);
+  });
+
+  it("os rótulos novos existem — menu sem texto é menu quebrado", () => {
+    expect(QUEUE_ACTION_LABEL.finalizar).toMatch(/finalizar/i);
+    expect(QUEUE_ACTION_LABEL.pausar).toMatch(/pausar/i);
+    expect(QUEUE_ACTION_LABEL.retomar).toMatch(/retomar/i);
+  });
+});

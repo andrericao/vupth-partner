@@ -13,7 +13,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { confirmar } from "@lib/confirmar";
+import { confirmar, avisar } from "@lib/confirmar";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -34,6 +34,7 @@ import { SolicitacoesCard } from "@components/SolicitacoesCard";
 import { resumoDeSolicitacoes } from "@lib/cutRequests";
 import { escolherAtendimentoAtual } from "@lib/atendimentoAtual";
 import { finalizarAtendimento } from "@lib/finalizar";
+import { fechaFilaAoSair, viraTrabalhandoAoAbrirFila } from "@lib/coerenciaFila";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
 import * as SecureStore from "expo-secure-store";
@@ -421,8 +422,20 @@ export default function ProfessionalQueueScreen() {
 
   // DS3 (c) — a fila aceita gente nova? Ausente => aceitando.
   const aceitandoNovos = professional?.accepting_new ?? true;
+  const statusAtual: StatusKey = professional?.work_status
+    ? WORK_TO_KEY[professional.work_status]
+    : "trabalhando";
   const aplicarAceitando = async (valor: boolean) => {
     try {
+      // A porta de tras da mesma regra: abrir a fila estando "Fora" recriaria o
+      // estado proibido. Abrir a fila implica estar em cena.
+      if (viraTrabalhandoAoAbrirFila(statusAtual, valor)) {
+        await updateMyStatus("WORKING");
+        await avisar({
+          titulo: "Você voltou para a fila",
+          mensagem: "Abrir a fila marca você como Trabalhando — não dá para receber cliente estando fora.",
+        });
+      }
       await setAcceptingNew(valor);
       const fresh = await refetch();
       // Fechar a fila sendo o ultimo dispara auto-OFF no backend => a loja
@@ -484,6 +497,17 @@ export default function ProfessionalQueueScreen() {
     const abertaAntes = data?.open_status === "OPEN";
     try {
       await updateMyStatus(KEY_TO_WORK[next]);
+      // "Fora" com a fila aberta nao existe: e promessa falsa para o cliente,
+      // que le fila aberta como "pode entrar" (regra do Andre, 09/09). Ver
+      // src/lib/coerenciaFila.ts. Intervalo NAO fecha — quem faz intervalo volta.
+      if (fechaFilaAoSair(next, aceitandoNovos)) {
+        await setAcceptingNew(false);
+        await avisar({
+          titulo: "Fila fechada junto",
+          mensagem:
+            "Como você saiu, a fila parou de aceitar novos clientes — ninguém entra numa fila sem quem atenda. Quem já estava esperando continua na lista.",
+        });
+      }
       const fresh = await refetch();
       const aviso = avisoDeLoja(next, abertaAntes, fresh.data?.open_status === "OPEN");
       if (aviso) Alert.alert(aviso.titulo, aviso.texto);
@@ -633,6 +657,18 @@ export default function ProfessionalQueueScreen() {
     else if (action === "promover") confirmPromote(att);
     else if (action === "nao-chegou") confirmLate(att);
     else if (action === "remover") confirmRemove(att);
+    // As tres de quem JA esta na cadeira. Elas nao existiam: o menu era por
+    // posicao, e quem esta sendo atendido nao tem posicao na espera.
+    else if (action === "finalizar")
+      handleAction(async () => {
+        await finalizarAtendimento(att.id, att.status === "PAUSED", {
+          retomar: resumeAttendance,
+          finalizar: finishAttendance,
+        });
+        clearAttendanceStart(att.id);
+      });
+    else if (action === "pausar") handleAction(() => pauseAttendance(att.id));
+    else if (action === "retomar") handleAction(() => resumeAttendance(att.id));
   };
 
   const handleFinishMeal = async (m: Interval) => {
@@ -753,7 +789,15 @@ export default function ProfessionalQueueScreen() {
         )}
 
         {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
+        {/* O card inteiro abre o menu, alem dos botoes: quem tentou finalizar
+            pelo MENU (e nao pelos botoes) tem que achar as acoes onde procurou —
+            foi ali que o Andre procurou por quatro rodadas. */}
         {currentAttendance && (
+          <Pressable
+            onLongPress={() => setMenuTarget(currentAttendance)}
+            accessibilityRole="button"
+            accessibilityLabel={`Opções de ${currentAttendance.clientName}`}
+          >
           <ServingCard
             attendance={currentAttendance}
             onFinish={() =>
@@ -771,6 +815,7 @@ export default function ProfessionalQueueScreen() {
             onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
             onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
           />
+          </Pressable>
         )}
 
         {/* O pedido de encaixe estava so num ponto de 12px no menu ☰ — e o
@@ -972,7 +1017,7 @@ export default function ProfessionalQueueScreen() {
                 <Text className="font-heading text-vupth-textSecondary mb-1">
                   {menuTarget.clientName}
                 </Text>
-                {queueMenuActions(menuIsFirst).map((action) => (
+                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => (
                   <Pressable
                     key={action}
                     accessibilityRole="button"

@@ -9,12 +9,13 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
+  Info,
 } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
-import { OtaUpdateButton } from "@components/OtaUpdateButton";
 import { CompletionCard } from "@components/CompletionCard";
+import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
@@ -104,6 +105,12 @@ export default function ProfessionalSettingsScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const { completion, routeFor } = useProfessionalCompletion();
+  // O anuncio de "ja pode atender" e MODAL, uma vez — a faixa eterna saiu.
+  useAnuncioPronto(
+    "profissional",
+    completion.basic.percent,
+    "Você já pode atender: seu cadastro está completo e você aparece para os clientes."
+  );
 
   const isOwner = user?.roles?.includes("OWNER");
 
@@ -180,7 +187,6 @@ export default function ProfessionalSettingsScreen() {
             faixa. Encaminha para buscar estabelecimento / adicionar serviço. */}
         <CompletionCard
           completion={completion}
-          doneBanner="Cadastro completo — já pode atender!"
           routeFor={routeFor}
         />
 
@@ -245,10 +251,18 @@ export default function ProfessionalSettingsScreen() {
           </Text>
         </Pressable>
 
-        {/* O diagnostico de WS mudou de casa: mora dentro do OtaUpdateButton,
-            atras de 7 toques na versao. Estava solto aqui e o usuario final
-            via "falhou o handshake" e a URL do servidor. */}
-        <OtaUpdateButton />
+        {/* Versao, atualizacao e diagnostico saem do RODAPE e viram destino
+            (pedido dele, 09/09: "estao sujando a tela para o usuario"). Quem
+            precisa, entra; quem nao precisa, nem sabe que existe. */}
+        <Grupo label="Sistema">
+          <MenuCard
+            icon={Info}
+            title="Versão do app"
+            hint="atualização e informações técnicas"
+            last
+            onPress={() => router.push("/(professional)/sistema" as any)}
+          />
+        </Grupo>
       </View>
     </ScrollView>
   );

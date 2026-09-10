@@ -104,3 +104,26 @@ export function professionalCompletion(i: ProfessionalCompletionInput): Completi
   ]);
   return { basic, profile };
 }
+
+/**
+ * O profissional está pronto, mas a LOJA não.
+ *
+ * 🔴 Pedido dele (10/09): "para o cliente deve aparecer, mesmo que ele tenha
+ * completado o perfil no profissional, que falta o estabelecimento completar,
+ * ao menos que existe pendência".
+ *
+ * O profissional fecha o próprio cadastro, vê 100% e conclui que está tudo
+ * certo — enquanto continua invisível para os clientes porque falta algo na
+ * loja, que é do dono. Não há como ele descobrir isso sozinho.
+ *
+ * ⚠️ `undefined` NÃO é pendência: enquanto o backend não mandar a flag, o app
+ * não afirma nada. Chutar "a loja tem pendência" com base em loja fechada
+ * transformaria a ação COTIDIANA do dono (fechar à noite) em alarme diário — e
+ * alarme diário ensina a ignorar alarme.
+ */
+export function lojaPendenteParaProfissional(
+  meuBasicoCompleto: boolean,
+  estabelecimentoPendente: boolean | null | undefined
+): boolean {
+  return meuBasicoCompleto && estabelecimentoPendente === true;
+}

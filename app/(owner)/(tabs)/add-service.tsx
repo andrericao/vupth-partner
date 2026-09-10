@@ -18,6 +18,7 @@ import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 import { avisar } from "@lib/confirmar";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER", serviceType: "BARBER" },
@@ -87,6 +88,13 @@ export default function AddServiceScreen() {
   const [serviceItemType, setServiceItemType] = useState(filteredTypes[0]?.value ?? "CORTE_MAQUINA");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
+
+  // Formulario meio-preenchido nao pode sobreviver a saida da tela (10/09).
+  // Ver src/hooks/useLimparAoSair.ts.
+  useLimparAoSair(() => {
+    setCustomName("");
+    setPrice("");
+  });
   const [absorption, setAbsorption] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
   const [nameInvalid, setNameInvalid] = useState(false);
