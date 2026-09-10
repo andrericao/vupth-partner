@@ -2,6 +2,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { CompletionCard } from "@components/CompletionCard";
+import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 
 type MenuItemProps = {
@@ -28,6 +29,11 @@ export default function EstablishmentDataScreen() {
   // Checklist de prontidao (2 completes) mora aqui, nas Configuracoes — a Home
   // so mostra a faixa. Ver useOwnerCompletion / CompletionCard.
   const { completion, professionalsCount, routeFor } = useOwnerCompletion();
+  useAnuncioPronto(
+    "dono",
+    completion.basic.percent,
+    "O cadastro da loja está completo — você já pode abrir e atender."
+  );
 
   return (
     <ScrollView
@@ -43,7 +49,6 @@ export default function EstablishmentDataScreen() {
 
         <CompletionCard
           completion={completion}
-          doneBanner="Cadastro completo — já pode abrir a loja e atender!"
           routeFor={routeFor}
         />
 

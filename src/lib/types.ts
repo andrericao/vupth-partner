@@ -111,6 +111,19 @@ export type EstablishmentWithProfessionals = {
   is_open?: boolean | null;
   total_in_queue: number;
   available_professionals: number;
+  /**
+   * O cadastro do ESTABELECIMENTO tem pendencia? (pedido ao backend, 10/09.)
+   *
+   * O profissional pode ter o proprio cadastro 100% e mesmo assim nao aparecer
+   * para os clientes, porque falta algo na loja — e hoje ele nao tem como
+   * saber: este snapshot traz nome, aberto/fechado e a lista de profissionais,
+   * nada sobre endereco, horario ou cadastro.
+   *
+   * Decisao do Andre: NAO precisa dizer O QUE falta, basta a flag. Opcional
+   * ate o backend entregar — enquanto vier `undefined`, o app nao afirma nada,
+   * que e melhor do que afirmar errado.
+   */
+  establishment_pending?: boolean | null;
   professionals: ProfessionalWithQueue[];
 };
 

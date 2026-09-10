@@ -1,12 +1,11 @@
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { ChevronRight, Check, CircleCheck } from "lucide-react-native";
+import { ChevronRight, Check } from "lucide-react-native";
 import type { Completion, CompletionTracker } from "@lib/completion";
 
 type Props = {
   completion: Completion;
   /** Texto do banner verde quando o basico chega a 100%. */
-  doneBanner: string;
   /** Rota para completar cada item (por key). undefined = item nao navegavel. */
   routeFor: (key: string) => string | undefined;
 };
@@ -107,7 +106,7 @@ function List({
   );
 }
 
-export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
+export function CompletionCard({ completion, routeFor }: Props) {
   const { basic, profile } = completion;
 
   // Nada a mostrar quando tudo esta completo.
@@ -119,17 +118,12 @@ export function CompletionCard({ completion, doneBanner, routeFor }: Props) {
 
   return (
     <View className="bg-vupth-surface rounded-card p-4 mt-4">
-      {basic.percent === 100 ? (
-        <View className="flex-row items-center gap-3 bg-vupth-forest rounded-xl px-4 py-3.5">
-          <CircleCheck size={22} color="#9FE870" />
-          <View className="flex-1">
-            <Text className="font-heading text-sm text-white">{doneBanner}</Text>
-            <Text className="font-body text-xs text-vupth-greenTint">
-              Pronto para atender — 100%
-            </Text>
-          </View>
-        </View>
-      ) : (
+      {/* 🔴 A faixa verde de "cadastro completo" SAIU em 10/09: ela ficava na
+          tela enquanto o "Perfil completo" nao fechasse — ou seja, quase
+          sempre. Noticia que nao sai de cena vira decoracao, e a pessoa para de
+          ler o card inteiro. O anuncio virou MODAL, uma vez, no momento em que
+          o fato acontece (ver src/lib/anuncioPronto.ts). */}
+      {basic.percent === 100 ? null : (
         <View>
           <View className="flex-row justify-between items-baseline mb-2">
             <Text className="font-heading text-base text-vupth-textPrimary">

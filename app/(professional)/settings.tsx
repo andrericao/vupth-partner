@@ -15,6 +15,7 @@ import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { CompletionCard } from "@components/CompletionCard";
+import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
@@ -104,6 +105,12 @@ export default function ProfessionalSettingsScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const { completion, routeFor } = useProfessionalCompletion();
+  // O anuncio de "ja pode atender" e MODAL, uma vez — a faixa eterna saiu.
+  useAnuncioPronto(
+    "profissional",
+    completion.basic.percent,
+    "Você já pode atender: seu cadastro está completo e você aparece para os clientes."
+  );
 
   const isOwner = user?.roles?.includes("OWNER");
 
@@ -180,7 +187,6 @@ export default function ProfessionalSettingsScreen() {
             faixa. Encaminha para buscar estabelecimento / adicionar serviço. */}
         <CompletionCard
           completion={completion}
-          doneBanner="Cadastro completo — já pode atender!"
           routeFor={routeFor}
         />
 
