@@ -17,11 +17,23 @@ import {
 //
 // RN puro (sem gluestack/NativeWind): a tela que o hospeda ainda e v1, e este
 // componente atravessa a migracao sem retoque.
+// Traducao dos estados para quem le no aparelho. "a chamada nativa falhou" e o
+// texto que o time do client usa do lado deles — mesma frase, para a comparacao
+// entre os dois apps valer.
+const ROTULO_PUSH: Record<string, string> = {
+  "sem-aparelho": "emulador/web — não recebe push",
+  "sem-permissao": "permissão negada no aparelho",
+  falhou: "a chamada nativa falhou",
+  obtido: "token obtido",
+  registrado: "token obtido e registrado",
+};
+
 export function WsDiagnostics() {
   const pub = useWsDiagnosticsStore((s) => s.public);
   const personal = useWsDiagnosticsStore((s) => s.personal);
   const snapshotGet = useWsDiagnosticsStore((s) => s.snapshotGet);
   const snapshotWs = useWsDiagnosticsStore((s) => s.snapshotWs);
+  const push = useWsDiagnosticsStore((s) => s.push);
 
   const headers = pub.headers ?? personal.headers;
   const heartbeat = heartbeatOf(headers);
@@ -69,6 +81,17 @@ export function WsDiagnostics() {
             </Text>
           )}
         </View>
+      )}
+
+      {/* PUSH (A6): a aquisicao do token era silenciosa — o hook engolia a
+          excecao e a tela nao dizia nada. Esta linha separa "o aparelho negou a
+          permissao" de "a chamada nativa falhou", que e o sintoma do Firebase
+          ausente. Ver src/lib/push.ts. */}
+      {push && (
+        <Text testID="ws-diag-push" style={line}>
+          push: {ROTULO_PUSH[push.estado] ?? push.estado}
+          {push.detalhe ? ` · ${push.detalhe}` : ""}
+        </Text>
       )}
 
       {lastError && (

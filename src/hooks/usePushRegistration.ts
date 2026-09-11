@@ -12,6 +12,7 @@ import {
   pushSupported,
 } from "@lib/push";
 import { useAuthStore } from "@store/auth.store";
+import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
 
 // CARGA PREGUICOSA (2026-08-12). O `expo-notifications` nao e mais importado no
 // topo: em ambiente SEM push ele **grita no proprio import** — no Expo Go, desde
@@ -92,14 +93,23 @@ export function usePushRegistration() {
           requestPermissionsAsync: Notifications.requestPermissionsAsync,
           getExpoPushTokenAsync: Notifications.getExpoPushTokenAsync,
           projectId,
+          // O QA precisa VER por que o push nao chegou (A6). Sem isto, o
+          // `catch` abaixo engolia a causa e a tela nao dizia nada.
+          onEstado: (estado, detalhe) =>
+            useWsDiagnosticsStore.getState().marcarPush(estado, detalhe),
         });
         if (!token || cancelled) return;
 
         await registerDevice(token, mapPlatform(Platform.OS));
+        useWsDiagnosticsStore.getState().marcarPush("registrado");
         await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);
         didRegister.current = true;
-      } catch {
-        // best-effort — push nunca deve derrubar o fluxo de login.
+      } catch (erro: any) {
+        // best-effort — push nunca deve derrubar o fluxo de login. Mas agora
+        // deixa rastro: silencio total foi o que manteve o A6 sem diagnostico.
+        useWsDiagnosticsStore
+          .getState()
+          .marcarPush("falhou", erro?.message ?? "erro ao registrar o aparelho");
       }
     })();
 

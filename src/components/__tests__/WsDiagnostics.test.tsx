@@ -78,3 +78,43 @@ describe("WsDiagnostics — snapshot da fila", () => {
     expect(getByTestId("ws-diag-snapshot-ws").props.children).toContain("NULO");
   });
 });
+
+// A6: o painel e a UNICA janela para saber por que o push nao chegou — no APK
+// nao ha DevTools, e o hook engole a excecao de proposito.
+describe("WsDiagnostics — a linha do push", () => {
+  it("nao mostra nada antes de qualquer tentativa", () => {
+    useWsDiagnosticsStore.getState().reset();
+    const { queryByTestId } = render(<WsDiagnostics />);
+
+    expect(queryByTestId("ws-diag-push")).toBeNull();
+  });
+
+  it("traduz 'falhou' para a frase que o time do client tambem usa", () => {
+    // Mesma frase nos dois apps: e o que permite comparar um com o outro sem
+    // traduzir nada no meio.
+    useWsDiagnosticsStore.getState().reset();
+    useWsDiagnosticsStore.getState().marcarPush("falhou", "Default FirebaseApp is not initialized");
+
+    const { getByTestId } = render(<WsDiagnostics />);
+    const texto = getByTestId("ws-diag-push").props.children.join("");
+
+    expect(texto).toContain("a chamada nativa falhou");
+    expect(texto).toContain("FirebaseApp");
+  });
+
+  it("separa permissao negada de falha tecnica", () => {
+    useWsDiagnosticsStore.getState().reset();
+    useWsDiagnosticsStore.getState().marcarPush("sem-permissao", "denied");
+
+    const { getByTestId } = render(<WsDiagnostics />);
+    expect(getByTestId("ws-diag-push").props.children.join("")).toContain("permissão negada");
+  });
+
+  it("diz quando deu certo — o sinal de que o Firebase entrou", () => {
+    useWsDiagnosticsStore.getState().reset();
+    useWsDiagnosticsStore.getState().marcarPush("registrado");
+
+    const { getByTestId } = render(<WsDiagnostics />);
+    expect(getByTestId("ws-diag-push").props.children.join("")).toContain("token obtido");
+  });
+});

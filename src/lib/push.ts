@@ -48,20 +48,51 @@ export type PushEnv = {
   projectId?: string;
 };
 
+/**
+ * Por que a aquisicao terminou assim. Alimenta o painel de diagnostico.
+ *
+ * 🔴 Ate 11/09 tudo isto era silencio: o hook engolia a excecao ("push nunca
+ * deve derrubar o login", e continua verdade) e nada saia na tela. Com o A6
+ * aberto — nenhuma notificacao nos DOIS apps — o QA nao tinha como distinguir
+ * "o aparelho negou a permissao" de "a chamada nativa falhou por falta do
+ * Firebase". Sao causas diferentes, em lugares diferentes, e o sintoma e um so.
+ */
+export type EstadoPush = "sem-aparelho" | "sem-permissao" | "falhou" | "obtido";
+
 export async function acquireExpoPushToken(
-  env: PushEnv
+  env: PushEnv & { onEstado?: (estado: EstadoPush, detalhe?: string) => void }
 ): Promise<string | null> {
+  const relatar = env.onEstado ?? (() => {});
+
   // Emulador/web nao recebem push remoto — nem pede permissao.
-  if (!env.isDevice) return null;
+  if (!env.isDevice) {
+    relatar("sem-aparelho");
+    return null;
+  }
 
   let { status } = await env.getPermissionsAsync();
   if (status !== "granted") {
     status = (await env.requestPermissionsAsync()).status;
   }
-  if (status !== "granted") return null;
+  if (status !== "granted") {
+    relatar("sem-permissao", status);
+    return null;
+  }
 
-  const { data } = await env.getExpoPushTokenAsync({ projectId: env.projectId });
-  return data ?? null;
+  try {
+    const { data } = await env.getExpoPushTokenAsync({ projectId: env.projectId });
+    if (!data) {
+      relatar("falhou", "o Expo respondeu sem token");
+      return null;
+    }
+    relatar("obtido");
+    return data;
+  } catch (erro: any) {
+    // ESTE e o caso do FCM ausente: a chamada nativa estoura. Relata e
+    // RELANCA — quem chama ja trata, e engolir aqui mudaria o comportamento.
+    relatar("falhou", erro?.message ?? "a chamada nativa falhou");
+    throw erro;
+  }
 }
 
 export async function registerDevice(

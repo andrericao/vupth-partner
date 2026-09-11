@@ -176,3 +176,81 @@ describe("registerDevice / unregisterDevice", () => {
     ).resolves.toBeUndefined();
   });
 });
+
+// 🔴 A6: "nenhuma notificação chegou, nos DOIS apps". Durante semanas isso foi
+// investigado no escuro porque a aquisição do token é SILENCIOSA — o hook
+// engole a exceção ("push nunca deve derrubar o login", e continua verdade) e
+// nada sai na tela.
+//
+// O relato de estado separa causas que têm o mesmo sintoma e moram em lugares
+// diferentes: permissão negada é do APARELHO; "a chamada nativa falhou" é o
+// Firebase ausente, que se resolve na CONTA do Expo.
+describe("acquireExpoPushToken — o relato para o painel", () => {
+  const env = (over: any = {}) => ({
+    isDevice: true,
+    getPermissionsAsync: jest.fn(async () => ({ status: "granted" })),
+    requestPermissionsAsync: jest.fn(async () => ({ status: "granted" })),
+    getExpoPushTokenAsync: jest.fn(async () => ({ data: "ExponentPushToken[abc]" })),
+    projectId: "p1",
+    ...over,
+  });
+
+  it("emulador/web: diz que não é aparelho, e nem pede permissão", async () => {
+    const onEstado = jest.fn();
+    const e = env({ isDevice: false, onEstado });
+
+    await acquireExpoPushToken(e as any);
+
+    expect(onEstado).toHaveBeenCalledWith("sem-aparelho");
+    expect(e.getPermissionsAsync).not.toHaveBeenCalled();
+  });
+
+  it("permissão negada: diz isso, e não confunde com falha técnica", async () => {
+    const onEstado = jest.fn();
+    await acquireExpoPushToken(
+      env({
+        onEstado,
+        getPermissionsAsync: async () => ({ status: "denied" }),
+        requestPermissionsAsync: async () => ({ status: "denied" }),
+      }) as any
+    );
+
+    expect(onEstado).toHaveBeenCalledWith("sem-permissao", "denied");
+  });
+
+  it("🔴 a chamada nativa estourando: relata E RELANÇA", async () => {
+    // É o sintoma do Firebase ausente. Relançar importa: quem chama já trata, e
+    // engolir aqui mudaria o comportamento de quem depende do throw.
+    const onEstado = jest.fn();
+    const promessa = acquireExpoPushToken(
+      env({
+        onEstado,
+        getExpoPushTokenAsync: async () => {
+          throw new Error("Default FirebaseApp is not initialized");
+        },
+      }) as any
+    );
+
+    await expect(promessa).rejects.toThrow(/Firebase/);
+    expect(onEstado).toHaveBeenCalledWith("falhou", expect.stringContaining("Firebase"));
+  });
+
+  it("Expo respondendo sem token conta como falha, não como sucesso vazio", async () => {
+    const onEstado = jest.fn();
+    await acquireExpoPushToken(env({ onEstado, getExpoPushTokenAsync: async () => ({ data: null }) }) as any);
+
+    expect(onEstado).toHaveBeenCalledWith("falhou", expect.any(String));
+  });
+
+  it("caminho feliz: diz que obteve", async () => {
+    const onEstado = jest.fn();
+    const token = await acquireExpoPushToken(env({ onEstado }) as any);
+
+    expect(token).toBe("ExponentPushToken[abc]");
+    expect(onEstado).toHaveBeenCalledWith("obtido");
+  });
+
+  it("sem onEstado, nada quebra — o relato é opcional", async () => {
+    await expect(acquireExpoPushToken(env() as any)).resolves.toBeTruthy();
+  });
+});

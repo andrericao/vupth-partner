@@ -42,12 +42,17 @@ const emptyChannel = (): WsChannelState => ({
  */
 export type SnapshotDiag = { linha: string; em: string } | null;
 
+/** Ultimo resultado da aquisicao do token de push. Ver src/lib/push.ts. */
+export type PushDiag = { estado: string; detalhe?: string; em: string } | null;
+
 type WsDiagnosticsState = {
   public: WsChannelState;
   personal: WsChannelState;
   snapshotGet: SnapshotDiag;
   snapshotWs: SnapshotDiag;
+  push: PushDiag;
   marcarSnapshot: (origem: "GET" | "WS", linha: string) => void;
+  marcarPush: (estado: string, detalhe?: string) => void;
   markConnected: (channel: WsChannel, headers?: Record<string, string>) => void;
   markMessage: (channel: WsChannel) => void;
   markError: (channel: WsChannel, message: string) => void;
@@ -60,6 +65,10 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
   personal: emptyChannel(),
   snapshotGet: null,
   snapshotWs: null,
+  push: null,
+
+  marcarPush: (estado, detalhe) =>
+    set({ push: { estado, detalhe, em: new Date().toISOString() } }),
 
   marcarSnapshot: (origem, linha) =>
     set(() =>
@@ -110,6 +119,7 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
       personal: emptyChannel(),
       snapshotGet: null,
       snapshotWs: null,
+      push: null,
     }),
 }));
 
