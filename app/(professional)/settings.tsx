@@ -245,15 +245,10 @@ export default function ProfessionalSettingsScreen() {
         {/* Sair da conta fica solto e em vermelho, fora dos grupos: e a unica
             ação aqui que tira a pessoa do app (Pencil PROF · 04, mesmo padrao
             do menu do dono). */}
-        <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
-          <Text className="font-body text-sm font-semibold text-vupth-danger text-center">
-            Sair da conta
-          </Text>
-        </Pressable>
-
-        {/* Versao, atualizacao e diagnostico saem do RODAPE e viram destino
-            (pedido dele, 09/09: "estao sujando a tela para o usuario"). Quem
-            precisa, entra; quem nao precisa, nem sabe que existe. */}
+        {/* Versao, atualizacao e diagnostico viraram DESTINO (pedido dele,
+            09/09). E este grupo e um item da LISTA, nao rodape: ele estava
+            abaixo do "Sair da conta", que e o fim da tela — la nao se procura
+            configuracao, se procura a saida (correcao dele, 11/09). */}
         <Grupo label="Sistema">
           <MenuCard
             icon={Info}
@@ -263,6 +258,13 @@ export default function ProfessionalSettingsScreen() {
             onPress={() => router.push("/(professional)/sistema" as any)}
           />
         </Grupo>
+
+        <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
+          <Text className="font-body text-sm font-semibold text-vupth-danger text-center">
+            Sair da conta
+          </Text>
+        </Pressable>
+
       </View>
     </ScrollView>
   );
