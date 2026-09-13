@@ -124,6 +124,36 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// 🔴 REFRESH EM VOO UNICO (single-flight). Pedido do Front-Client, 06/09: "os
+// quatro POST /auth/refresh do log de PROD sao deste app".
+//
+// Cada 401 disparava o PROPRIO refresh. O backend ROTACIONA o refresh token, e
+// isso transforma concorrencia em logout: com quatro chamadas simultaneas uma
+// ganha e as outras tomam 401 — e a perdedora, ao cair no catch, APAGA OS
+// TOKENS QUE A VENCEDORA ACABOU DE SALVAR. O usuario era deslogado pela propria
+// renovacao que deu certo.
+//
+// Padrao ESPELHADO do client (src/services/api.ts deles): flag + fila. O
+// primeiro 401 renova; os que chegam enquanto isso entram na fila e reusam o
+// token novo — ou caem todos juntos, se a renovacao falhar. Um logout, nunca
+// uma corrida. Nao ha janela entre o `if (isRefreshing)` e o
+// `isRefreshing = true`: nao existe `await` entre os dois.
+//
+// ⚠️ Uma diferenca DELIBERADA do client: o refresh continua pelo `axios` GLOBAL,
+// nao pelo `api`. Eles tem `isPublicPath` para a rota de auth; nos nao. Pelo
+// `api`, um 401 no proprio refresh entraria nesta fila esperando a si mesmo —
+// deadlock, com o app travado e sem erro nenhum.
+let isRefreshing = false;
+let failedQueue: { resolve: (token: string) => void; reject: (err: unknown) => void }[] = [];
+
+function processQueue(error: unknown, token: string | null) {
+  failedQueue.forEach((p) => {
+    if (error) p.reject(error);
+    else p.resolve(token!);
+  });
+  failedQueue = [];
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -135,40 +165,56 @@ api.interceptors.response.use(
     const errorCode = error.response?.data?.code;
 
     if (
-      error.response?.status === 401 &&
-      errorCode !== "CURRENT_PASSWORD_INVALID" &&
-      !originalRequest._retry
+      error.response?.status !== 401 ||
+      errorCode === "CURRENT_PASSWORD_INVALID" ||
+      originalRequest._retry
     ) {
-      originalRequest._retry = true;
-
-      const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
-      if (!refreshToken) {
-        return Promise.reject(error);
-      }
-
-      try {
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
-          refresh_token: refreshToken,
-        });
-
-        await SecureStore.setItemAsync(
-          "vupth_access_token",
-          data.access_token
-        );
-        await SecureStore.setItemAsync(
-          "vupth_refresh_token",
-          data.refresh_token
-        );
-
-        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-        return api(originalRequest);
-      } catch {
-        await SecureStore.deleteItemAsync("vupth_access_token");
-        await SecureStore.deleteItemAsync("vupth_refresh_token");
-        return Promise.reject(error);
-      }
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    // Ja ha uma renovacao em voo: espera por ela em vez de disparar outra.
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({
+          resolve: (token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          },
+          reject,
+        });
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
+      if (!refreshToken) {
+        // Sem refresh salvo nao ha o que renovar — mas a fila tambem precisa
+        // saber, senao quem esperava fica pendurado para sempre.
+        processQueue(error, null);
+        return Promise.reject(error);
+      }
+
+      const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+        refresh_token: refreshToken,
+      });
+
+      await SecureStore.setItemAsync("vupth_access_token", data.access_token);
+      await SecureStore.setItemAsync("vupth_refresh_token", data.refresh_token);
+
+      originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+      processQueue(null, data.access_token);
+      return api(originalRequest);
+    } catch (refreshError) {
+      processQueue(refreshError, null);
+      await SecureStore.deleteItemAsync("vupth_access_token");
+      await SecureStore.deleteItemAsync("vupth_refresh_token");
+      return Promise.reject(error);
+    } finally {
+      // Sem isto, o primeiro refresh prenderia o app na fila para sempre.
+      isRefreshing = false;
+    }
   }
 );
