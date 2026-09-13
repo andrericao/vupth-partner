@@ -250,6 +250,24 @@ export default function OwnerMenuScreen() {
             )}
           </Grupo>
 
+          {/* Sistema e um GRUPO da lista, na mesma altura de Conta — nao
+              rodape. Estava abaixo do "Sair da conta", que e o fim da tela: la
+              ninguem procura configuracao, procura a saida (correcao dele,
+              11/09). */}
+          <Grupo label="SISTEMA">
+            <MenuItem
+              icon={Info}
+              label="Versão do app"
+              onPress={() =>
+                router.push({
+                  pathname: "/(professional)/sistema",
+                  params: { from: "owner" },
+                } as any)
+              }
+              last
+            />
+          </Grupo>
+
           {/* Sair da conta fica solto e em vermelho: e a unica acao aqui que
               tira a pessoa do app. */}
           <Pressable onPress={handleLogout} py="$2">
@@ -258,20 +276,6 @@ export default function OwnerMenuScreen() {
             </Text>
           </Pressable>
         </VStack>
-
-        <Grupo label="SISTEMA">
-          <MenuItem
-            icon={Info}
-            label="Versão do app"
-            onPress={() =>
-              router.push({
-                pathname: "/(professional)/sistema",
-                params: { from: "owner" },
-              } as any)
-            }
-            last
-          />
-        </Grupo>
 
         <VStack flex={1} />
       </VStack>

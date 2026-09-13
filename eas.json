@@ -12,7 +12,7 @@
       },
       "channel": "development",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "dev"
+        "EXPO_PUBLIC_API_ENV": "staging"
       }
     },
     "preview": {
@@ -22,7 +22,7 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "dev"
+        "EXPO_PUBLIC_API_ENV": "staging"
       }
     },
     "production": {

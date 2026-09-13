@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Check } from "lucide-react-native";
 import type { Completion, CompletionTracker } from "@lib/completion";
+import { PendingDot } from "@components/PendingDot";
 
 type Props = {
   completion: Completion;
@@ -113,8 +114,12 @@ export function CompletionCard({ completion, routeFor }: Props) {
   if (basic.percent === 100 && profile.percent === 100) return null;
 
   const n = basic.pending;
+  // "Toque no que falta" nao e enfeite: e a instrucao que faltava. O card
+  // parecia um RESUMO — e resumo ninguem toca.
   const hint =
-    n === 1 ? "Falta 1 passo para aparecer aos clientes." : `Faltam ${n} passos para aparecer aos clientes.`;
+    n === 1
+      ? "Falta 1 passo para aparecer aos clientes. Toque nele para resolver."
+      : `Faltam ${n} passos para aparecer aos clientes. Toque no que falta para resolver.`;
 
   return (
     <View className="bg-vupth-surface rounded-card p-4 mt-4">
@@ -126,9 +131,17 @@ export function CompletionCard({ completion, routeFor }: Props) {
       {basic.percent === 100 ? null : (
         <View>
           <View className="flex-row justify-between items-baseline mb-2">
-            <Text className="font-heading text-base text-vupth-textPrimary">
-              Pronto para atender
-            </Text>
+            {/* 🔴 O dot entra AQUI porque "alguns usuários não entenderam que
+                o card é clicável" (Andre, 11/09). As linhas sempre navegaram —
+                o que faltava era dizer que havia algo a fazer nelas. Mesmo dot
+                das Configurações: quem já aprendeu o que ele significa num
+                lugar não precisa reaprender no outro. */}
+            <View className="flex-row items-center gap-2">
+              <Text className="font-heading text-base text-vupth-textPrimary">
+                Pronto para atender
+              </Text>
+              <PendingDot />
+            </View>
             <Text className="font-heading text-base text-vupth-forest">
               {basic.percent}%
             </Text>
@@ -143,9 +156,12 @@ export function CompletionCard({ completion, routeFor }: Props) {
         <>
           <View style={{ height: 1, backgroundColor: "#D7DDD3", marginVertical: 14 }} />
           <View className="flex-row justify-between items-baseline mb-2">
-            <Text className="font-heading text-sm text-vupth-textPrimary">
-              Perfil completo
-            </Text>
+            <View className="flex-row items-center gap-2">
+              <Text className="font-heading text-sm text-vupth-textPrimary">
+                Perfil completo
+              </Text>
+              {profile.pending > 0 && <PendingDot />}
+            </View>
             {/* [marca-vupth] Era text-brand-600 — escala ANTIGA (#3b7a3f,
                 pre-marca), único resquício dela neste card (a linha "Pronto
                 para atender" acima já usava vupth-forest). */}
