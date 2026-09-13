@@ -40,8 +40,8 @@ export type ApiEnv = "local" | "dev" | "staging" | "prod";
  * esperado, nao e bug.
  */
 export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
-  development: "dev",
-  preview: "dev",
+  development: "staging",
+  preview: "staging",
   production: "prod",
 };
 
