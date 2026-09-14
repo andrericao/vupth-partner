@@ -109,7 +109,20 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
   },
 
   pauseAttendance: async (attendanceId) => {
-    await api.patch(`/attendances/${attendanceId}/pause`);
+    const { data } = await api.patch(`/attendances/${attendanceId}/pause`);
+    // GRAVA, como `start` e `resume` ja faziam. Sem isto a memoria local ficava
+    // com o status congelado em IN_PROGRESS: com o servidor em silencio, o card
+    // montava por ela dizendo "ATENDENDO AGORA" e oferecendo "Pausar" para um
+    // atendimento JA pausado — e o segundo toque batia num backend que recusa.
+    // A memoria so serve para preencher o silencio se ela souber a verdade.
+    set({
+      atendimentoIniciado: normalizarAtendimento({
+        ...data,
+        id: data?.id ?? attendanceId,
+        status: data?.status ?? "PAUSED",
+      }) as any,
+    });
+    return data;
   },
 
   resumeAttendance: async (attendanceId) => {
