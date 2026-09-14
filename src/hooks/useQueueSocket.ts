@@ -13,6 +13,7 @@ import { useAuthStore } from "@store/auth.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { resumirAtendimento, linhaDoResumo } from "@lib/snapshotDiag";
+import { broadcastApagaAtendimento } from "@lib/broadcastSuspeito";
 
 /**
  * Assina o tempo real da fila de um establishment via STOMP.
@@ -93,14 +94,36 @@ export function useQueueSocket(establishmentId: string | null) {
               const snapshot = JSON.parse(
                 message.body
               ) as EstablishmentWithProfessionals;
-              // ⚠️ Isto SUBSTITUI o cache — nao mescla. Se o broadcast vier
-              // sem `current_attendance`, ele apaga o que o GET trouxe. E a
-              // hipotese aberta do "nao consigo finalizar"; a linha abaixo e o
-              // que permite ver isso no aparelho.
-              queryClient.setQueryData(
-                ["professionals-with-queue", establishmentId],
-                snapshot
+              // `setQueryData` SUBSTITUI o cache, nao mescla. Se o broadcast
+              // vier sem `current_attendance`, ele apaga o que o GET trouxe — o
+              // card nao monta e o Finalizar fica inalcancavel. E a hipotese
+              // aberta do "nao consigo finalizar" desde 31/08.
+              //
+              // Aqui NAO se adivinha: quando o broadcast apaga um atendimento em
+              // curso sem dizer nada sobre ele, a remocao nao e aplicada e o GET
+              // — que e a autoridade — e consultado. Mesclar seria pior: o
+              // broadcast que ENCERRA tambem vem sem o campo, e mesclar deixaria
+              // um card fantasma. Ver `broadcastApagaAtendimento`.
+              const anterior = queryClient.getQueryData<EstablishmentWithProfessionals>(
+                ["professionals-with-queue", establishmentId]
               );
+              const apaga = broadcastApagaAtendimento(anterior, snapshot);
+              if (apaga) {
+                // Registrado no painel dos 7 toques: cada vez que a guarda age e
+                // uma prova de que o broadcast e mais pobre que o GET. Sem isto a
+                // protecao esconderia justamente o defeito que ela contorna.
+                useWsDiagnosticsStore
+                  .getState()
+                  .marcarSnapshot("WS", "WS apagaria o atendimento em curso — GET consultado");
+                queryClient.invalidateQueries({
+                  queryKey: ["professionals-with-queue", establishmentId],
+                });
+              } else {
+                queryClient.setQueryData(
+                  ["professionals-with-queue", establishmentId],
+                  snapshot
+                );
+              }
               const meuId =
                 useProfessionalStore.getState().professional?.id ?? null;
               useWsDiagnosticsStore
