@@ -129,6 +129,13 @@ export default function ProfessionalLayout() {
       <Tabs.Screen name="find-establishment" options={HIDDEN} />
       <Tabs.Screen name="establishment-detail" options={HIDDEN} />
       <Tabs.Screen name="meals" options={HIDDEN} />
+      {/* ⚠️ SEM esta linha a tela vira ABA. O expo-router registra como aba
+          toda tela da pasta que o layout nao declara — e era o unico arquivo
+          aqui que ninguem tinha declarado. O diagnostico do WebSocket mora
+          atras dos 7 toques na versao (em Perfil), nao no rodape: rodape e
+          para o trabalho do dia, e um profissional nao tem o que fazer ali.
+          Relatado pelo Andre no teste de 14/09. */}
+      <Tabs.Screen name="sistema" options={HIDDEN} />
       {/* PILOTO Gluestack v2 (NativeWind) — rota temporaria, remover ao concluir */}
     </Tabs>
   );
