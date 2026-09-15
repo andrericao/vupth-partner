@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
-import { View } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { rotulosCabem } from "@lib/rotulosDaAba";
 import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
@@ -27,6 +28,11 @@ const HIDDEN = { href: null } as const;
 
 export default function ProfessionalLayout() {
   const insets = useSafeAreaInsets();
+  // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
+  // o icone (o que iOS e Android fazem). So funciona porque a pilula do DS5.1
+  // marca a aba ativa sem o rotulo. Ver `rotulosCabem`.
+  const { width, fontScale } = useWindowDimensions();
+  const mostrarRotulo = rotulosCabem(width, fontScale, "profissional");
   const { completion } = useProfessionalCompletion();
   const perfilDot = hasAnyPending(completion);
   const { count: encaixes } = usePendingCutRequests();
@@ -43,6 +49,7 @@ export default function ProfessionalLayout() {
         // 2026-08-26; aqui ha folga (56 de conteudo pra 45 de pilula+rotulo),
         // mas a folga some se alguem crescer o icone ou a fonte.
         tabBarLabelPosition: "below-icon",
+        tabBarShowLabel: mostrarRotulo,
         tabBarStyle: {
           ...tabBarShadow,
           backgroundColor: "#FFFFFF",

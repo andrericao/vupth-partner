@@ -978,7 +978,12 @@ export default function ProfessionalQueueScreen() {
               {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
                   texto; o desenho marca com um icone de informacao. */}
               <Info size={15} color="#454745" />
-              <Text className="font-body text-sm text-vupth-textSecondary">
+              {/* DS4 (opcao A, 31/08): o texto QUEBRA em vez de vazar. Com a
+                  fonte do sistema ampliada ele nao cabe numa linha, e a pilula
+                  tem altura fixa — o icone saia da caixa e a frase era cortada.
+                  `flex-shrink` deixa o texto ceder largura ao icone; sem ele o
+                  Text nao encolhe e empurra o icone pra fora. */}
+              <Text className="font-body text-sm text-vupth-textSecondary flex-shrink text-center">
                 Finalize para iniciar o próximo
               </Text>
             </View>
