@@ -60,7 +60,7 @@ export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "wo
         <TextInput
           className="flex-1 font-body text-vupth-textPrimary"
           style={[RESET_WEB, style] as TextInputProps["style"]}
-          placeholderTextColor="#454745"
+          placeholderTextColor="#6B706B"
           autoCorrect={false}
           autoCapitalize={autoCapitalize}
           secureTextEntry={secure && !show}
