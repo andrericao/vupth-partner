@@ -268,7 +268,7 @@ export default function ProfessionalOnboardingScreen() {
               <TextInput
                 className="flex-1 px-3 font-body text-vupth-forest"
                 placeholder="Nome do estabelecimento"
-                placeholderTextColor="#454745"
+                placeholderTextColor="#6B706B"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}

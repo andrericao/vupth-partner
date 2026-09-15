@@ -97,6 +97,9 @@ module.exports = {
           surfaceAlt: "#E2F6D5",
           textPrimary: "#163300",
           textSecondary: "#454745",
+          // Ver brandTextPlaceholder no gluestack: o campo vazio parecia
+          // preenchido porque o placeholder era textSecondary.
+          textPlaceholder: "#6B706B",
           border: "#D7DDD3",
           danger: "#B3261E",
           dangerTint: "#F7E4E2",
