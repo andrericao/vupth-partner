@@ -1,5 +1,9 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
+import { OtaUpdateButton } from "../OtaUpdateButton";
+
+// jest.mock e icado pelo babel: vale mesmo abaixo do import.
+
 jest.mock("expo-updates", () => ({
   runtimeVersion: "1.3.0",
   channel: "staging",
@@ -9,8 +13,6 @@ jest.mock("expo-updates", () => ({
   fetchUpdateAsync: jest.fn(),
   reloadAsync: jest.fn(),
 }));
-
-import { OtaUpdateButton } from "../OtaUpdateButton";
 
 // O painel dos 7 toques e o mesmo gesto do client (Alexia 21/08) e, desde
 // 16/09, o mesmo conteudo: tempo real + push.
