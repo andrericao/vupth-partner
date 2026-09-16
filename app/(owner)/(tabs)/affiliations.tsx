@@ -153,6 +153,7 @@ export default function OwnerAffiliationsScreen() {
                     isLoading={actionLoading === aff.id}
                     bg="$brandDanger"
                     $active-bg="$brandDanger"
+                    textColor="$white"
                     h="$9"
                     flex={1}
                   />

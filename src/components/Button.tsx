@@ -20,21 +20,24 @@ type ButtonProps = ComponentProps<typeof GlueStackButton> & {
 // e so uma versao mais escura do verde antigo — troca segura, texto branco
 // continua legivel. O par brilhante brandGreen+forest do Pencil ja existe em
 // src/components/brand/Button.tsx, pra telas migradas explicitamente.
+// 🔁 16/09 (Andre): verde com texto forest, como o Button do client e o
+// NwButton primary. Era forest com texto branco — o partner tinha dois botoes
+// principais diferentes, e o client um terceiro jeito de ver o mesmo papel.
 export function Button(props: ButtonProps) {
   return (
     <GlueStackButton
-      bg="$forest"
+      bg="$brandGreen"
       h={54}
       mt="$9"
       rounded="$full"
-      $active-bg="$forestSoft"
+      $active-bg="$brandSuccess"
       disabled={props.isLoading}
       {...props}
     >
       {props.isLoading ? (
-        <ButtonSpinner color="$white" />
+        <ButtonSpinner color={props.textColor ?? "$forest"} />
       ) : (
-        <ButtonText fontFamily="$heading" fontSize="$md" color={props.textColor ?? "$white"}>
+        <ButtonText fontFamily="$heading" fontSize="$md" color={props.textColor ?? "$forest"}>
           {props.title}
         </ButtonText>
       )}
