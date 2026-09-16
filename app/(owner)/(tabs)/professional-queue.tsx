@@ -20,6 +20,10 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import type { AttendanceInQueue } from "@lib/types";
 import { confirmar, avisar } from "@lib/confirmar";
+import { ehMeuAtendimento } from "@lib/meuAtendimento";
+import { finalizarAtendimento } from "@lib/finalizar";
+import { useAttendanceStore } from "@store/attendance.store";
+import { useProfessionalStore } from "@store/professional.store";
 
 function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; position: number }) {
   const statusLabel =
@@ -65,7 +69,32 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
   );
 }
 
-function CurrentAttendanceCard({ attendance }: { attendance: any }) {
+/**
+ * ⚠️ Os botoes aparecem SO quando o atendimento e de quem esta logado — ver
+ * `ehMeuAtendimento`. A tela do dono e LEITURA sobre o trabalho dos outros: os
+ * botoes dados a ela em 08/09 foram revertidos no mesmo dia porque "o dono nao
+ * finaliza nada, quem finaliza e o profissional" (`194af84`).
+ *
+ * Quando o dono E o profissional, isso nao e excecao — o atendimento e dele. E
+ * e o unico caminho que ele tem: quem acumula os dois papeis cai na area do
+ * dono ao logar (`routing.ts`), e a ponte para a area do profissional e um
+ * `router.replace` de MAO UNICA, sem volta.
+ */
+function CurrentAttendanceCard({
+  attendance,
+  meu,
+  onFinish,
+  onPause,
+  onResume,
+  ocupado,
+}: {
+  attendance: any;
+  meu: boolean;
+  onFinish: () => void;
+  onPause: () => void;
+  onResume: () => void;
+  ocupado: boolean;
+}) {
   const { formatted } = useElapsedTime(
     attendance.id ?? null,
     attendance.startTime ?? null,
@@ -103,6 +132,27 @@ function CurrentAttendanceCard({ attendance }: { attendance: any }) {
         </Text>
       </HStack>
 
+      {meu ? (
+        <HStack mt="$4" space="sm">
+          {/* `finalizarAtendimento` (a MESMA do profissional) atravessa o
+              pausado: o backend so aceita `finish` em IN_PROGRESS (S36), entao
+              ela retoma antes. Chamar `finishAttendance` direto aqui recriaria
+              o beco que o 08/09 fechou do outro lado. */}
+          <Button
+            title="Finalizar"
+            onPress={onFinish}
+            isLoading={ocupado}
+            flex={1}
+          />
+          <Button
+            title={attendance.isPaused ? "Retomar" : "Pausar"}
+            variant="outline"
+            onPress={attendance.isPaused ? onResume : onPause}
+            isLoading={ocupado}
+            flex={1}
+          />
+        </HStack>
+      ) : null}
     </VStack>
   );
 }
@@ -122,6 +172,26 @@ export default function ProfessionalQueueScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const removeProfessional = useEstablishmentStore((s) => s.removeProfessional);
+
+  // A REGRA mora numa funcao com nome, nao num ternario aqui: o que decide nao e
+  // a tela, e de quem e o atendimento. Ver `ehMeuAtendimento`.
+  const euLogado = useProfessionalStore((st) => st.professional)?.id;
+  const meuAtendimento = ehMeuAtendimento(professionalId, euLogado);
+  const { finishAttendance, resumeAttendance, pauseAttendance } = useAttendanceStore();
+  const [agindo, setAgindo] = useState(false);
+
+  const agir = async (fn: () => Promise<void>, erro: string) => {
+    if (agindo) return;
+    setAgindo(true);
+    try {
+      await fn();
+      await refetch();
+    } catch (e: any) {
+      avisar({ titulo: "Erro", mensagem: getApiErrorMessage(e, erro) });
+    } finally {
+      setAgindo(false);
+    }
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -225,7 +295,34 @@ export default function ProfessionalQueueScreen() {
             <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
               Em Atendimento
             </Text>
-            <CurrentAttendanceCard attendance={data.inAttendance} />
+            <CurrentAttendanceCard
+              attendance={data.inAttendance}
+              meu={meuAtendimento}
+              ocupado={agindo}
+              onFinish={() =>
+                agir(
+                  () =>
+                    finalizarAtendimento(
+                      (data.inAttendance as any).id,
+                      (data.inAttendance as any).isPaused ?? false,
+                      { retomar: resumeAttendance, finalizar: finishAttendance }
+                    ),
+                  "Não foi possível finalizar o atendimento."
+                )
+              }
+              onPause={() =>
+                agir(
+                  () => pauseAttendance((data.inAttendance as any).id),
+                  "Não foi possível pausar o atendimento."
+                )
+              }
+              onResume={() =>
+                agir(
+                  () => resumeAttendance((data.inAttendance as any).id).then(() => undefined),
+                  "Não foi possível retomar o atendimento."
+                )
+              }
+            />
           </VStack>
         )}
 

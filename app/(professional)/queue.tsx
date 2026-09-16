@@ -115,13 +115,21 @@ function ServingCard({
           lugar.) Botoes sobre card colorido ficam fora das variantes do
           NwButton, que assumem fundo neutro. */}
       <View className="flex-row gap-2.5 mt-4">
+        {/* 🔴 O FINALIZAR ESTAVA INVISIVEL EM ATENDIMENTO (16/09). Sem `variant`, o
+            NwButton usa o `primary`, que ja traz `bg-vupth-green`; o fundo
+            forest vinha por `className` e os DOIS conviviam. O NativeWind nao
+            respeita a ordem escrita — resolve pela folha de estilo, e o verde
+            vencia. Resultado: botao verde, texto verde, sobre o card verde. O
+            botao estava la, clicavel, e ninguem via. Pausado ele reaparecia
+            porque o card vira pessego e o texto vira escuro.
+            Agora a cor vem do VARIANT, sem sobrescrever fundo nenhum:
+            `vupthSecondary` e o Button/Secondary do desenho — fundo forest,
+            rotulo brand-green, "a ancora escura sobre fundo ja colorido". */}
         <NwButton
           title="Finalizar"
           onPress={onFinish}
-          className={`flex-1 h-11 ${
-            isPaused ? "bg-white active:bg-vupth-surface" : "bg-vupth-forest active:bg-vupth-forestSoft"
-          }`}
-          textClassName={isPaused ? "text-vupth-forest" : "text-vupth-green"}
+          variant={isPaused ? "outlineBrand" : "vupthSecondary"}
+          className="flex-1 h-11"
         />
         {isPaused ? (
           <NwButton
@@ -978,7 +986,12 @@ export default function ProfessionalQueueScreen() {
               {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
                   texto; o desenho marca com um icone de informacao. */}
               <Info size={15} color="#454745" />
-              <Text className="font-body text-sm text-vupth-textSecondary">
+              {/* DS4 (opcao A, 31/08): o texto QUEBRA em vez de vazar. Com a
+                  fonte do sistema ampliada ele nao cabe numa linha, e a pilula
+                  tem altura fixa — o icone saia da caixa e a frase era cortada.
+                  `flex-shrink` deixa o texto ceder largura ao icone; sem ele o
+                  Text nao encolhe e empurra o icone pra fora. */}
+              <Text className="font-body text-sm text-vupth-textSecondary flex-shrink text-center">
                 Finalize para iniciar o próximo
               </Text>
             </View>

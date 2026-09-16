@@ -45,6 +45,7 @@ const PARES: [keyof typeof vupth, string][] = [
   ["surfaceAlt", "brandSurfaceAlt"],
   ["textPrimary", "brandTextPrimary"],
   ["textSecondary", "brandTextSecondary"],
+  ["textPlaceholder", "brandTextPlaceholder"],
   ["border", "brandBorder"],
   ["danger", "brandDanger"],
   ["dangerTint", "brandDangerTint"],
@@ -83,6 +84,42 @@ function razao(a: string, b: string): number {
   const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p);
   return (x + 0.05) / (y + 0.05);
 }
+
+describe("campo vazio nao pode parecer preenchido", () => {
+  // 🔴 Andre, 14/09: "campos não ficam vazios em formulários".
+  //
+  // O placeholder era `textSecondary` (#454745) e o texto digitado e forest
+  // (#163300): 1,49:1 ENTRE OS DOIS. E o MESMO numero do DS5.1, com o mesmo par
+  // de cores — dois tons escuros que o olho nao separa. O campo vazio lia como
+  // campo preenchido.
+  //
+  // ⚠️ O codigo estava FIEL ao arquivo de design: o especime do `Input Group`
+  // desenha o placeholder em text-secondary. O defeito nasceu no desenho, nao
+  // na implementacao — por isso a correcao e um TOKEN novo, e nao um hex solto
+  // numa tela.
+  const branco = "#FFFFFF";
+
+  it("o placeholder se separa do texto digitado", () => {
+    // 1,49:1 era o valor que falhou. O piso aqui e o dobro disso.
+    expect(razao(vupth.textPlaceholder, vupth.textPrimary)).toBeGreaterThan(2.5);
+  });
+
+  it("e mesmo assim continua legivel — AA de texto normal", () => {
+    expect(razao(vupth.textPlaceholder, branco)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("nenhuma tela escreve a cor do placeholder na mao", () => {
+    // Hex solto numa tela e como as duas tabelas divergiram da ultima vez.
+    const telas = [
+      "src/components/nw/Input.tsx",
+      "src/components/InputSearch.tsx",
+    ];
+    for (const t of telas) {
+      const src = fs.readFileSync(path.join(ROOT, t), "utf8");
+      expect(src).not.toMatch(/placeholderTextColor="#454745"/);
+    }
+  });
+});
 
 describe("contraste de cada variante do botao", () => {
   // ⚠️ Esta guarda JA FOI uma proibicao literal: "nenhum variant usa

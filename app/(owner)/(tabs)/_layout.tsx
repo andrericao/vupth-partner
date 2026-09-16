@@ -1,9 +1,16 @@
 import { Tabs } from "expo-router";
+import { useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
+import { rotulosCabem } from "@lib/rotulosDaAba";
 
 export default function OwnerTabsLayout() {
   const insets = useSafeAreaInsets();
+  // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
+  // o icone. So funciona porque a pilula do DS5.1 marca a aba ativa sem ele.
+  // O dono aguenta mais que o profissional: tres rotulos curtos, nao quatro.
+  const { width, fontScale } = useWindowDimensions();
+  const mostrarRotulo = rotulosCabem(width, fontScale, "dono");
 
   return (
     <Tabs
@@ -17,6 +24,7 @@ export default function OwnerTabsLayout() {
         // 2026-08-26; aqui ha folga (56 de conteudo pra 45 de pilula+rotulo),
         // mas a folga some se alguem crescer o icone ou a fonte.
         tabBarLabelPosition: "below-icon",
+        tabBarShowLabel: mostrarRotulo,
         tabBarStyle: {
           ...tabBarShadow,
           backgroundColor: "#FFFFFF",

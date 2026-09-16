@@ -16,7 +16,7 @@ export function InputSearch({ textLabel, ...rest }: Props) {
         <Search size={18} color="#163300" />
         <TextInput
           className="flex-1 ml-2 font-body text-vupth-textPrimary"
-          placeholderTextColor="#454745"
+          placeholderTextColor="#6B706B"
           {...rest}
         />
       </View>
