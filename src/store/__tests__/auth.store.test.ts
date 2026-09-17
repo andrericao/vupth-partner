@@ -471,3 +471,61 @@ describe("auth.store", () => {
     });
   });
 });
+
+// Exclusao de conta — bloqueio de publicacao (lojas + LGPD). Contrato do backend
+// (07/08), o mesmo que o client usa: DELETE /profile/delete/me com a senha atual
+// no CORPO; 204 e a conta para de autenticar no request seguinte.
+describe("deleteAccount", () => {
+  beforeEach(() => {
+    mock.reset();
+    jest.clearAllMocks();
+  });
+
+  it("manda a senha no corpo do DELETE e encerra a sessao local", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_push_token" ? "expo-push-abc" : null
+    );
+    mock.onDelete("/profile/delete/me").reply(204);
+    useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+    await useAuthStore.getState().deleteAccount("minha-senha");
+
+    const req = mock.history.delete.find((r) => r.url === "/profile/delete/me")!;
+    expect(JSON.parse(req.data)).toEqual({ current_password: "minha-senha" });
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_access_token");
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_refresh_token");
+    expect(mockProfessionalReset).toHaveBeenCalled();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+
+  it("desregistra o push ANTES de apagar — depois o token ja nao autentica", async () => {
+    const ordem: string[] = [];
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_push_token" ? "expo-push-abc" : null
+    );
+    (unregisterDevice as jest.Mock).mockImplementation(async () => {
+      ordem.push("push");
+    });
+    mock.onDelete("/profile/delete/me").reply(() => {
+      ordem.push("delete");
+      return [204];
+    });
+
+    await useAuthStore.getState().deleteAccount("s");
+
+    expect(ordem).toEqual(["push", "delete"]);
+    // e nao chama /auth/logout com um token que ja morreu
+    expect(mock.history.post.some((r) => r.url === "/auth/logout")).toBe(false);
+  });
+
+  it("senha errada: propaga o erro e a sessao CONTINUA", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    mock.onDelete("/profile/delete/me").reply(401, { code: "CURRENT_PASSWORD_INVALID" });
+    useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+    await expect(useAuthStore.getState().deleteAccount("errada")).rejects.toBeTruthy();
+
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalledWith("vupth_access_token");
+  });
+});
