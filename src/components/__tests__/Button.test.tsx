@@ -1,3 +1,4 @@
+import { fireEvent } from "@testing-library/react-native";
 import { renderWithProvider as render } from "../../test-utils/renderWithProvider";
 import { Button } from "../Button";
 
@@ -14,5 +15,13 @@ describe("Button (gluestack legado)", () => {
     const { getByText } = render(<Button title="X" textColor="#B3261E" />);
     const estilo = [getByText("X").props.style].flat(Infinity);
     expect(estilo).toEqual(expect.arrayContaining([expect.objectContaining({ color: "#B3261E" })]));
+  });
+
+  // No Gluestack v1 o `isDisabled` e so visual: o toque continuava disparando.
+  it("isDisabled bloqueia o toque de verdade", () => {
+    const onPress = jest.fn();
+    const { getByText } = render(<Button title="Salvar" isDisabled onPress={onPress} />);
+    fireEvent.press(getByText("Salvar"));
+    expect(onPress).not.toHaveBeenCalled();
   });
 });

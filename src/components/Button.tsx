@@ -31,8 +31,10 @@ export function Button(props: ButtonProps) {
       mt="$9"
       rounded="$full"
       $active-bg="$brandSuccess"
-      disabled={props.isLoading}
       {...props}
+      // Depois do spread: o `isDisabled` do Gluestack v1 e so visual, e sem o
+      // `disabled` o toque continuava disparando.
+      disabled={props.isLoading || props.isDisabled || props.disabled}
     >
       {props.isLoading ? (
         <ButtonSpinner color={props.textColor ?? "$forest"} />
