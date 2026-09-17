@@ -60,6 +60,9 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   AFFILIATION_NOT_FOUND: "Solicitação de vinculação não encontrada.",
   ESTABLISHMENT_NOT_READY:
     "O estabelecimento precisa de pelo menos um profissional com serviço cadastrado para abrir.",
+  // Horario por dia (S27): semana incompleta, horario faltando ou data passada.
+  BUSINESS_HOURS_INVALID:
+    "Horário inválido: confira os 7 dias e use datas de hoje em diante.",
   ESTABLISHMENT_HOURS_REQUIRED:
     "Defina o horário de funcionamento do estabelecimento antes de abrir.",
   ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:

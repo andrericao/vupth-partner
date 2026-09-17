@@ -5,6 +5,8 @@ import type { EstablishmentDetail } from "@store/establishment.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
 import { ownerCompletion } from "@lib/completion";
 import type { Completion } from "@lib/completion";
+import { buscarHorarios } from "@lib/horariosApi";
+import { temHorarioDefinido } from "@lib/horarioSemanal";
 
 // Fonte unica da completude do DONO — usada pela faixa (Home/dashboard), pelo
 // checklist (Dados do Estabelecimento) e pelo dot (menu). Evita duplicar o
@@ -24,9 +26,14 @@ export function useOwnerCompletion(): {
   const { data: queueData } = useProfessionalsWithQueueQuery(establishmentId);
   const professionals = queueData?.professionals ?? [];
 
+  // A semana (S27). `undefined` = ainda nao chegou; `null` = backend sem a
+  // rota. Nos dois casos o horario unico decide, como antes.
+  const [semana, setSemana] = useState<{ configured: boolean } | null | undefined>(undefined);
+
   useEffect(() => {
     if (!establishmentId || !isFocused) return;
     fetchEstablishmentById(establishmentId).then(setDetail).catch(() => {});
+    buscarHorarios(establishmentId).then(setSemana).catch(() => {});
   }, [establishmentId, isFocused, fetchEstablishmentById]);
 
   // `detail` (GET /establishment/id/{id}) e a fonte FRESCA e completa — traz
@@ -39,9 +46,9 @@ export function useOwnerCompletion(): {
     hasName: !!(detail ? detail.name : establishment?.name),
     hasServiceType: !!(detail ? detail.service_type : establishment?.service_type),
     hasAddress: !!(detail ? detail.address?.neighborhood : establishment?.address?.neighborhood),
-    hasHours: detail
-      ? !!detail.opening_time && !!detail.closing_time
-      : !!establishment?.opening_time && !!establishment?.closing_time,
+    // Com a semana, vale o `configured`: o opening_time agora e o horario DE
+    // HOJE e vem nulo no dia em que a loja fecha (domingo viraria pendencia).
+    hasHours: temHorarioDefinido(semana ?? null, detail ?? establishment ?? null),
     hasProfessionalWithService: professionals.length > 0,
     hasPhone: !!(detail ? detail.phone : establishment?.phone),
     hasInstagram: !!(detail ? detail.instagram : establishment?.instagram),
