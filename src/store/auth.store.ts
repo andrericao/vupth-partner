@@ -26,8 +26,18 @@ type AuthState = {
   resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   refreshToken: () => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: (currentPassword: string) => Promise<void>;
   loadStoredTokens: () => Promise<void>;
 };
+
+async function limparSessaoLocal() {
+  await SecureStore.deleteItemAsync("vupth_access_token");
+  await SecureStore.deleteItemAsync("vupth_refresh_token");
+
+  useEstablishmentStore.getState().reset();
+  useProfessionalStore.getState().reset();
+  useAttendanceStore.getState().reset();
+}
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -143,13 +153,33 @@ export const useAuthStore = create<AuthState>((set) => ({
       await api.post("/auth/logout");
     } catch {}
 
-    await SecureStore.deleteItemAsync("vupth_access_token");
-    await SecureStore.deleteItemAsync("vupth_refresh_token");
+    await limparSessaoLocal();
+    set({ user: null, isAuthenticated: false });
+  },
 
-    useEstablishmentStore.getState().reset();
-    useProfessionalStore.getState().reset();
-    useAttendanceStore.getState().reset();
+  // Exclusao de conta (bloqueio de publicacao: lojas + LGPD). Contrato do
+  // backend de 07/08, o mesmo do client: senha atual no CORPO do DELETE (sem
+  // corpo volta 400). O backend ANONIMIZA: o dado pessoal some e o historico do
+  // atendimento fica, porque ele tambem e do estabelecimento.
+  //
+  // Depois do 204 o token para de autenticar no request seguinte. Por isso o
+  // push e desregistrado ANTES, e o fim da sessao e so local — um
+  // `/auth/logout` agora tomaria 401 e ainda tentaria renovar.
+  // Erro (senha errada, bloqueio 409) sobe para a tela e a sessao continua.
+  deleteAccount: async (currentPassword) => {
+    try {
+      const pushToken = await SecureStore.getItemAsync("vupth_push_token");
+      if (pushToken) await unregisterDevice(pushToken);
+    } catch {}
 
+    await api.delete("/profile/delete/me", {
+      data: { current_password: currentPassword },
+    });
+
+    try {
+      await SecureStore.deleteItemAsync("vupth_push_token");
+    } catch {}
+    await limparSessaoLocal();
     set({ user: null, isAuthenticated: false });
   },
 

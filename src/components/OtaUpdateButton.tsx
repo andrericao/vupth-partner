@@ -3,6 +3,7 @@ import { View, Text, Pressable, Alert } from "react-native";
 import * as Updates from "expo-updates";
 
 import { WsDiagnostics } from "@components/WsDiagnostics";
+import { PushDiagnostics } from "@components/PushDiagnostics";
 import { avisar } from "@lib/confirmar";
 
 // Botao de "puxar atualizacao agora" (OTA). Sem ele, o Expo aplica o update
@@ -64,20 +65,6 @@ export function OtaUpdateButton() {
 
   return (
     <View className="mt-8 items-center gap-3">
-      <Pressable
-        onPress={() => setToques((n) => n + 1)}
-        accessibilityRole="button"
-        accessibilityLabel="Informações da versão"
-        testID="version-line"
-      >
-        {/* Versao em DM Mono: e numero de build, nao prosa. */}
-        <Text className="font-mono text-[10px] text-vupth-textSecondary text-center">
-          {Updates.runtimeVersion ?? "—"} · {Updates.channel ?? "dev"}
-        </Text>
-        <Text className="font-mono text-[10px] text-vupth-textSecondary text-center">
-          {otaInfo}
-        </Text>
-      </Pressable>
 
       <Pressable
         onPress={handleCheckUpdate}
@@ -90,9 +77,24 @@ export function OtaUpdateButton() {
         </Text>
       </Pressable>
 
+      {/* Versao em DM Mono: e numero de build, nao prosa. Abaixo do botao e
+          numa linha so, como no client (16/09). Junta so o que EXISTE: em dev
+          o runtime e o canal vem vazios. */}
+      <Pressable
+        onPress={() => setToques((n) => n + 1)}
+        accessibilityRole="button"
+        accessibilityLabel="Informações da versão"
+        testID="version-line"
+      >
+        <Text className="font-mono text-[10px] text-vupth-textSecondary text-center">
+          {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
+        </Text>
+      </Pressable>
+
       {diagnosticoAberto && (
         <View className="w-full">
           <WsDiagnostics />
+          <PushDiagnostics />
         </View>
       )}
     </View>

@@ -19,6 +19,15 @@ describe("NwButton (primitiva NativeWind)", () => {
     expect(onPress).not.toHaveBeenCalled();
   });
 
+  // Pendencia "isDisabled" (07/08): no Gluestack v1 o isDisabled era so visual.
+  // Aqui o `disabled` vai direto para o Pressable, que bloqueia o toque de fato.
+  it("disabled bloqueia o toque de verdade, nao so na aparencia", () => {
+    const onPress = jest.fn();
+    const view = render(<NwButton title="Salvar" disabled onPress={onPress} />);
+    fireEvent.press(view.getByLabelText("Salvar"));
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
   // [marca-vupth] Variantes da identidade nova (design/marca-dev). Entraram
   // SEM teste; sao o par claro brandGreen+forest, que so pode existir nelas.
   it.each(["vupthPrimary", "vupthSecondary", "vupthOutline"] as const)(

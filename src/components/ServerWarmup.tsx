@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
 import { Smartphone, Store, Scissors, Footprints } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
-import { Center, Text, VStack } from "@gluestack-ui/themed";
+import { Center, Text, VStack, HStack } from "@gluestack-ui/themed";
 import { Button } from "@components/Button";
 
 // Tela do portao de readiness / cold start (ver src/lib/readiness.ts). Enquanto
@@ -24,6 +24,29 @@ const STEPS: { icon: LucideIcon; label: string }[] = [
 ];
 
 const ICON_MS = 800; // tempo por icone (~0.8s)
+
+// 🔁 16/09 — desenho do client (Pencil CLIENT · 23), escolhido pelo Andre para
+// os dois apps: icone num badge redondo greenTint, titulo por passo, legenda do
+// ~50s e pontos de progresso. Antes era so o icone solto + "Preparando
+// servidor...", e os dois apps abriam de jeitos diferentes.
+function Dots({ activeIndex }: { activeIndex: number }) {
+  return (
+    <HStack space="sm" alignItems="center" testID="warmup-dots">
+      {STEPS.map((_, i) => {
+        const active = i === activeIndex;
+        return (
+          <Center
+            key={i}
+            width={active ? 10 : 7}
+            height={active ? 10 : 7}
+            borderRadius="$full"
+            bg={active ? "$brandGreen" : "$brandBorder"}
+          />
+        );
+      })}
+    </HStack>
+  );
+}
 
 function WarmupAnimation() {
   const [index, setIndex] = useState(0);
@@ -92,11 +115,28 @@ function WarmupAnimation() {
   const Icon = STEPS[index].icon;
 
   return (
-    <Animated.View
-      style={{ opacity, transform: [{ scale }, { translateX: shiftX }] }}
-    >
-      <Icon size={56} color={GREEN} />
-    </Animated.View>
+    <VStack alignItems="center" space="lg">
+      <Animated.View style={{ opacity, transform: [{ scale }, { translateX: shiftX }] }}>
+        <Center width={88} height={88} borderRadius="$full" bg="$greenTint">
+          <Icon size={38} color={GREEN} />
+        </Center>
+      </Animated.View>
+      <VStack space="xs" alignItems="center">
+        <Text fontFamily="$display" fontSize={20} letterSpacing={-0.4} color="$forest">
+          {STEPS[index].label}
+        </Text>
+        <Text
+          fontFamily="$body"
+          fontSize="$xs"
+          color="$brandTextSecondary"
+          textAlign="center"
+          w={260}
+        >
+          Preparando servidor — na primeira vez pode levar até ~50s.
+        </Text>
+      </VStack>
+      <Dots activeIndex={index} />
+    </VStack>
   );
 }
 
@@ -107,7 +147,7 @@ type Props = {
 
 export function ServerWarmup({ failed, onRetry }: Props) {
   return (
-    <Center flex={1} px="$8">
+    <Center flex={1} bg="$brandBackground" px={24}>
       <VStack space="lg" alignItems="center">
         {failed ? (
           <>
@@ -120,12 +160,7 @@ export function ServerWarmup({ failed, onRetry }: Props) {
             {onRetry && <Button title="Tentar de novo" onPress={onRetry} />}
           </>
         ) : (
-          <>
-            <WarmupAnimation />
-            <Text fontFamily="$body" fontSize="$md" color="$brandTextSecondary" textAlign="center">
-              Preparando servidor...
-            </Text>
-          </>
+          <WarmupAnimation />
         )}
       </VStack>
     </Center>

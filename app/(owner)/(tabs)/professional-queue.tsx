@@ -147,6 +147,12 @@ function CurrentAttendanceCard({
           <Button
             title={attendance.isPaused ? "Retomar" : "Pausar"}
             variant="outline"
+            // Contornado, como o vupthOutline do profissional: com o Button
+            // verde (16/09), sem isto os dois lado a lado ficavam iguais.
+            bg="transparent"
+            $active-bg="$greenTint"
+            borderWidth="$2"
+            borderColor="$forest"
             onPress={attendance.isPaused ? onResume : onPause}
             isLoading={ocupado}
             flex={1}

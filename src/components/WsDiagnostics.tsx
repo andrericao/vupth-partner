@@ -1,102 +1,140 @@
+import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
+
 import {
   useWsDiagnosticsStore,
   heartbeatOf,
-  principalOf,
+  type WsChannel,
+  type WsChannelState,
 } from "@store/wsDiagnostics.store";
+import { veredictoDoCanal, desdeQuando, type NivelVeredito } from "@lib/diagnosticoVeredito";
 
-// Linha de diagnostico do WebSocket para o QA de DEVICE (plano combinado com o
-// backend, 2026-08-05). Vive em Configuracoes, junto do id do OTA.
+// Painel de diagnostico do tempo real, atras dos 7 toques na versao (tela
+// Sistema). Nasceu como o "Teste 0" do backend (05/08): os logs de WS sao
+// gated por `__DEV__` e o QA roda bundle de OTA, entao o frame CONNECTED
+// precisava virar tela.
 //
-// Existe porque os logs de WS sao gated por `__DEV__` e o QA roda em bundle de
-// OTA (producao) — sem isto, os testes 1-5 viram adivinhacao. O que interessa:
-//   · `heart-beat` que o SERVIDOR respondeu — `0,0` era o S17 (agora fechado);
-//   · `user-name` — ausente significa sessao ANONIMA, que e o sintoma do S14;
-//   · contagem por canal — o publico chegar e o pessoal nao e a assinatura
-//     exata do bug que perseguimos desde 01/08.
+// 🔁 16/09 — mesmo DESENHO do painel do client (Andre: "o sitrep apos os 7
+// toques igual ao da outra equipe"). Antes eram linhas soltas, que nao se
+// comparavam lado a lado com o client. Agora: um cartao, um veredito por canal,
+// as mesmas frases. O que responde cada linha:
+//   Canal pessoal    -> S14: conectou com identidade ou como ANONIMO?
+//   Heartbeat        -> S17: o servidor manda batida ou 0?
+//   Recebidas/ultima -> separa "conectado" de "realmente recebendo".
 //
-// RN puro (sem gluestack/NativeWind): a tela que o hospeda ainda e v1, e este
-// componente atravessa a migracao sem retoque.
-// Traducao dos estados para quem le no aparelho. "a chamada nativa falhou" e o
-// texto que o time do client usa do lado deles — mesma frase, para a comparacao
-// entre os dois apps valer.
-const ROTULO_PUSH: Record<string, string> = {
-  "sem-aparelho": "emulador/web — não recebe push",
-  "sem-permissao": "permissão negada no aparelho",
-  falhou: "a chamada nativa falhou",
-  obtido: "token obtido",
-  registrado: "token obtido e registrado",
+// Diferenca que FICA: no partner os dois canais dividem UMA conexao STOMP (o
+// client abre duas), e o snapshot da fila (GET x WS) so existe aqui.
+
+const PONTO: Record<NivelVeredito, string> = {
+  ok: "bg-vupth-forest",
+  warn: "bg-vupth-warning",
+  bad: "bg-vupth-danger",
+  idle: "bg-vupth-textSecondary",
 };
 
-export function WsDiagnostics() {
-  const pub = useWsDiagnosticsStore((s) => s.public);
-  const personal = useWsDiagnosticsStore((s) => s.personal);
-  const snapshotGet = useWsDiagnosticsStore((s) => s.snapshotGet);
-  const snapshotWs = useWsDiagnosticsStore((s) => s.snapshotWs);
-  const push = useWsDiagnosticsStore((s) => s.push);
+const FUNDO: Record<NivelVeredito, string> = {
+  ok: "bg-vupth-greenTint",
+  warn: "bg-vupth-warning",
+  bad: "bg-vupth-dangerTint",
+  idle: "bg-white",
+};
 
-  const headers = pub.headers ?? personal.headers;
-  const heartbeat = heartbeatOf(headers);
-  const principal = principalOf(headers);
-  const connected = pub.connected || personal.connected;
-  const lastError = pub.lastError ?? personal.lastError;
-
-  // $brandTextSecondary. Era #a3a3a3 (2,5:1 no branco) — ilegivel pro QA em
-  // device, que e justamente quem le esta linha.
-  const line = { color: "#454745", fontSize: 11, textAlign: "center" as const };
+function Canal({
+  canal,
+  rotulo,
+  estado,
+  agora,
+}: {
+  canal: WsChannel;
+  rotulo: string;
+  estado: WsChannelState;
+  agora: number;
+}) {
+  const veredito = veredictoDoCanal(canal, estado);
+  const heartbeat = heartbeatOf(estado.headers);
 
   return (
-    <View style={{ marginTop: 12, alignItems: "center", gap: 2 }}>
-      <Text testID="ws-diag-status" style={line}>
-        WS {connected ? "conectado" : "desconectado"}
+    <View className="gap-1" testID={`ws-diag-${canal}`}>
+      <View className="flex-row items-center gap-2">
+        <View className={`w-2 h-2 rounded-full ${PONTO[veredito.level]}`} />
+        <Text className="font-heading text-sm text-vupth-forest">{rotulo}</Text>
+      </View>
+      <View className={`rounded-lg px-3 py-2 ${FUNDO[veredito.level]}`}>
+        <Text
+          testID={`ws-diag-${canal}-veredito`}
+          className={`font-body text-xs ${
+            veredito.level === "idle" ? "text-vupth-textSecondary" : "text-vupth-forest"
+          }`}
+        >
+          {veredito.message}
+        </Text>
+      </View>
+      <Text testID={`ws-diag-${canal}-contagem`} className="font-body text-xs text-vupth-textSecondary">
+        {`${estado.messageCount} recebidas · última ${desdeQuando(estado.lastMessageAt, agora)}`}
         {heartbeat ? ` · heart-beat ${heartbeat}` : ""}
       </Text>
 
-      {connected && (
-        <Text style={line}>
-          {principal ? `sessão autenticada (${principal.slice(0, 8)})` : "sessão ANONIMA — sem user-name"}
+      {/* O MOTIVO da falha — sem ele o painel diz so "falhou o handshake". */}
+      {estado.lastError && (
+        <Text testID={`ws-diag-${canal}-error`} className="font-body text-xs text-vupth-danger">
+          {estado.lastError}
         </Text>
       )}
+    </View>
+  );
+}
 
-      <Text style={line}>
-        <Text testID="ws-diag-public">fila {pub.messageCount}</Text>
-        {" · "}
-        <Text testID="ws-diag-personal">pessoal {personal.messageCount}</Text>
-        {" msg"}
-      </Text>
+export function WsDiagnostics() {
+  const pub = useWsDiagnosticsStore((s) => s.public);
+  const pessoal = useWsDiagnosticsStore((s) => s.personal);
+  const snapshotGet = useWsDiagnosticsStore((s) => s.snapshotGet);
+  const snapshotWs = useWsDiagnosticsStore((s) => s.snapshotWs);
 
-      {/* O snapshot da fila, por origem. Duas linhas que separam "o backend
-          nao manda `current_attendance`" de "o WS apaga o que o GET trouxe" —
-          a pergunta que trava o "finalizar" desde 31/08. Ver snapshotDiag.ts. */}
-      {(snapshotGet || snapshotWs) && (
-        <View style={{ marginTop: 6, alignItems: "center", gap: 1 }}>
-          {snapshotGet && (
-            <Text testID="ws-diag-snapshot-get" style={line}>
-              {snapshotGet.linha}
-            </Text>
-          )}
-          {snapshotWs && (
-            <Text testID="ws-diag-snapshot-ws" style={line}>
-              {snapshotWs.linha}
-            </Text>
-          )}
-        </View>
-      )}
+  // Tempo relativo ("há 12s") sem tick congelaria na hora em que a tela abriu.
+  const [agora, setAgora] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setAgora(Date.now()), 5000);
+    return () => clearInterval(id);
+  }, []);
 
-      {/* PUSH (A6): a aquisicao do token era silenciosa — o hook engolia a
-          excecao e a tela nao dizia nada. Esta linha separa "o aparelho negou a
-          permissao" de "a chamada nativa falhou", que e o sintoma do Firebase
-          ausente. Ver src/lib/push.ts. */}
-      {push && (
-        <Text testID="ws-diag-push" style={line}>
-          push: {ROTULO_PUSH[push.estado] ?? push.estado}
-          {push.detalhe ? ` · ${push.detalhe}` : ""}
+  return (
+    <View className="mt-8 gap-3" testID="ws-diagnostics">
+      <View>
+        <Text className="font-heading text-base text-vupth-forest mb-1">
+          Tempo real (diagnóstico)
         </Text>
-      )}
+        <Text className="font-body text-xs text-vupth-textSecondary">
+          Estado da conexão que traz a fila sem precisar recarregar.
+        </Text>
+      </View>
 
-      {lastError && (
-        <Text style={{ ...line, color: "#B3261E" }}>último erro: {lastError}</Text>
-      )}
+      <View className="bg-vupth-surface rounded-card p-4 gap-4">
+        <Canal canal="personal" rotulo="Canal pessoal (seus avisos)" estado={pessoal} agora={agora} />
+        <View className="h-px bg-vupth-border" />
+        <Canal canal="public" rotulo="Fila do estabelecimento" estado={pub} agora={agora} />
+
+        {/* O snapshot da fila, por origem: separa "o backend nao manda
+            `current_attendance`" de "o WS apaga o que o GET trouxe" — a
+            pergunta do "finalizar" desde 31/08. Ver snapshotDiag.ts. */}
+        {(snapshotGet || snapshotWs) && (
+          <>
+            <View className="h-px bg-vupth-border" />
+            <View className="gap-1">
+              <Text className="font-heading text-sm text-vupth-forest">Snapshot da fila</Text>
+              {snapshotGet && (
+                <Text testID="ws-diag-snapshot-get" className="font-mono text-xs text-vupth-textSecondary">
+                  {snapshotGet.linha}
+                </Text>
+              )}
+              {snapshotWs && (
+                <Text testID="ws-diag-snapshot-ws" className="font-mono text-xs text-vupth-textSecondary">
+                  {snapshotWs.linha}
+                </Text>
+              )}
+            </View>
+          </>
+        )}
+      </View>
     </View>
   );
 }

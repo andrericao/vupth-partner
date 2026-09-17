@@ -45,12 +45,26 @@ export type SnapshotDiag = { linha: string; em: string } | null;
 /** Ultimo resultado da aquisicao do token de push. Ver src/lib/push.ts. */
 export type PushDiag = { estado: string; detalhe?: string; em: string } | null;
 
+/** O backend ficou sabendo do aparelho? (POST /devices) */
+export type EnvioAoBackend = "nao-tentado" | "ok" | "falhou";
+
 type WsDiagnosticsState = {
   public: WsChannelState;
   personal: WsChannelState;
   snapshotGet: SnapshotDiag;
   snapshotWs: SnapshotDiag;
   push: PushDiag;
+  /**
+   * O token INTEIRO, para o diagnostico manual: com ele da pra mandar um push
+   * pela ferramenta do Expo e separar "o backend nao envia" de "o Expo nao
+   * entrega". So em memoria (o store nao e persistido); a tela so revela sob
+   * toque. Espelho do client (12/09).
+   */
+  pushToken: string | null;
+  pushEnvio: EnvioAoBackend;
+  pushErroEnvio: string | null;
+  marcarToken: (token: string) => void;
+  marcarEnvio: (envio: EnvioAoBackend, erro?: string) => void;
   marcarSnapshot: (origem: "GET" | "WS", linha: string) => void;
   marcarPush: (estado: string, detalhe?: string) => void;
   markConnected: (channel: WsChannel, headers?: Record<string, string>) => void;
@@ -66,6 +80,12 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
   snapshotGet: null,
   snapshotWs: null,
   push: null,
+  pushToken: null,
+  pushEnvio: "nao-tentado",
+  pushErroEnvio: null,
+
+  marcarToken: (token) => set({ pushToken: token }),
+  marcarEnvio: (envio, erro) => set({ pushEnvio: envio, pushErroEnvio: erro ?? null }),
 
   marcarPush: (estado, detalhe) =>
     set({ push: { estado, detalhe, em: new Date().toISOString() } }),
@@ -120,6 +140,9 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
       snapshotGet: null,
       snapshotWs: null,
       push: null,
+      pushToken: null,
+      pushEnvio: "nao-tentado",
+      pushErroEnvio: null,
     }),
 }));
 

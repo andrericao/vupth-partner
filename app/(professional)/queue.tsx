@@ -132,18 +132,21 @@ function ServingCard({
           className="flex-1 h-11"
         />
         {isPaused ? (
+          // Era branco sobre pessego (~1,6:1 de contraste — ilegivel) e com o
+          // mesmo conflito de fundo do Finalizar. O vazado forest le em
+          // qualquer um dos dois cards.
           <NwButton
             title="Retomar"
             onPress={onResume}
-            className="flex-1 h-11 bg-transparent border-2 border-white active:bg-vupth-accentPeach"
-            textClassName="text-white"
+            variant="vupthOutline"
+            className="flex-1 h-11"
           />
         ) : (
           <NwButton
             title="Pausar"
             onPress={onPause}
-            className="flex-1 h-11 bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint"
-            textClassName="text-vupth-forest"
+            variant="vupthOutline"
+            className="flex-1 h-11"
           />
         )}
       </View>
@@ -921,10 +924,14 @@ export default function ProfessionalQueueScreen() {
                 {activeMeal.durationMinutes}min previstos
               </Text>
             </View>
+            {/* Faixa pessego = fundo ja colorido: e o caso do Button/Secondary
+                do desenho. Antes o fundo vinha por className e brigava com o
+                verde do `primary` — o mesmo conflito que escondia o Finalizar. */}
             <NwButton
               title="Encerrar"
               onPress={() => handleFinishMeal(activeMeal)}
-              className="h-9 px-4 bg-vupth-accentPeach active:bg-vupth-accentPeach"
+              variant="vupthSecondary"
+              className="h-9 px-4"
             />
           </View>
         )}

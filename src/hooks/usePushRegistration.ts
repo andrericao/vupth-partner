@@ -99,8 +99,18 @@ export function usePushRegistration() {
             useWsDiagnosticsStore.getState().marcarPush(estado, detalhe),
         });
         if (!token || cancelled) return;
+        useWsDiagnosticsStore.getState().marcarToken(token);
 
-        await registerDevice(token, mapPlatform(Platform.OS));
+        try {
+          await registerDevice(token, mapPlatform(Platform.OS));
+        } catch (erro: any) {
+          // "Token obtido, backend nao sabe" e um caso a parte no painel.
+          useWsDiagnosticsStore
+            .getState()
+            .marcarEnvio("falhou", erro?.message ?? "erro ao registrar o aparelho");
+          throw erro;
+        }
+        useWsDiagnosticsStore.getState().marcarEnvio("ok");
         useWsDiagnosticsStore.getState().marcarPush("registrado");
         await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);
         didRegister.current = true;

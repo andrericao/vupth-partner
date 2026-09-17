@@ -79,3 +79,33 @@ describe("leitura dos headers (o discriminador do diagnostico)", () => {
     expect(principalOf(null)).toBeNull();
   });
 });
+
+// Token e envio ao backend: o que o cartao "Push" precisa para separar "o
+// backend nao envia" de "o Expo nao entrega" (espelho do client, 12/09).
+describe("wsDiagnostics.store — token e envio do push", () => {
+  beforeEach(() => useWsDiagnosticsStore.getState().reset());
+
+  it("comeca sem token e com envio nao tentado", () => {
+    const s = useWsDiagnosticsStore.getState();
+    expect(s.pushToken).toBeNull();
+    expect(s.pushEnvio).toBe("nao-tentado");
+    expect(s.pushErroEnvio).toBeNull();
+  });
+
+  it("guarda o token e o resultado do envio", () => {
+    useWsDiagnosticsStore.getState().marcarToken("ExponentPushToken[x]");
+    useWsDiagnosticsStore.getState().marcarEnvio("falhou", "500");
+    const s = useWsDiagnosticsStore.getState();
+    expect(s.pushToken).toBe("ExponentPushToken[x]");
+    expect(s.pushEnvio).toBe("falhou");
+    expect(s.pushErroEnvio).toBe("500");
+  });
+
+  it("reset limpa tudo", () => {
+    useWsDiagnosticsStore.getState().marcarToken("t");
+    useWsDiagnosticsStore.getState().marcarEnvio("ok");
+    useWsDiagnosticsStore.getState().reset();
+    expect(useWsDiagnosticsStore.getState().pushToken).toBeNull();
+    expect(useWsDiagnosticsStore.getState().pushEnvio).toBe("nao-tentado");
+  });
+});
