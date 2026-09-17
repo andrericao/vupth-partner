@@ -36,13 +36,51 @@ export function clearAttendanceStart(id: string) {
   SecureStore.deleteItemAsync(keyFor(id)).catch(() => {});
 }
 
+/**
+ * Segundos de atendimento: relogio menos o tempo pausado. Nunca negativo.
+ * Puro, para o A4 poder ser testado sem timer.
+ */
+export function segundosDecorridos(startMs: number, agoraMs: number, pausadoMs: number): number {
+  return Math.max(0, Math.floor((agoraMs - startMs - pausadoMs) / 1000));
+}
+
+/**
+ * 🔴 A4 (backend, 16/09): pausado, o cronometro tem de PARAR. Ele contava
+ * "agora − inicio": enquanto pausado o intervalo parava, mas qualquer
+ * re-renderizacao mostrava o numero maior, e ao retomar o tempo da pausa
+ * entrava na conta de vez.
+ *
+ * Agora o tempo pausado e descontado. Ele e medido AQUI (os segundos de cada
+ * pausa, somados) e tem como piso o `pausedTimeMinutes` que o backend manda —
+ * que cobre o caso de reabrir o app no meio de uma pausa, quando o acumulado
+ * local se perde, e o de a pausa ter comecado em outro aparelho.
+ */
 export function useElapsedTime(
   attendanceId: string | null,
   startTime: string | null,
-  isPaused: boolean
+  isPaused: boolean,
+  pausedTimeMinutes?: number | null
 ) {
   const [elapsed, setElapsed] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Pausas ja fechadas (ms) e o inicio da pausa em curso.
+  const pausadoRef = useRef(0);
+  const pausaAtualRef = useRef<number | null>(null);
+
+  // Escrita de ref fora do render (regra do react-hooks/refs).
+  useEffect(() => {
+    pausadoRef.current = 0;
+    pausaAtualRef.current = null;
+  }, [attendanceId]);
+
+  useEffect(() => {
+    if (isPaused) {
+      pausaAtualRef.current = Date.now();
+    } else if (pausaAtualRef.current !== null) {
+      pausadoRef.current += Date.now() - pausaAtualRef.current;
+      pausaAtualRef.current = null;
+    }
+  }, [isPaused]);
 
   useEffect(() => {
     if (intervalRef.current) {
@@ -59,8 +97,18 @@ export function useElapsedTime(
     let cancelled = false;
     resolveStartMs(attendanceId, startTime).then((startMs) => {
       if (cancelled) return;
-      const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
+      const tick = () => {
+        const agora = Date.now();
+        const emCurso = pausaAtualRef.current === null ? 0 : agora - pausaAtualRef.current;
+        const pausadoMs = Math.max(
+          pausadoRef.current + emCurso,
+          (pausedTimeMinutes ?? 0) * 60_000
+        );
+        setElapsed(segundosDecorridos(startMs, agora, pausadoMs));
+      };
       tick();
+      // Pausado o numero nao muda (o desconto cresce junto), entao nao ha por
+      // que manter o intervalo de 1s rodando.
       if (!isPaused) intervalRef.current = setInterval(tick, 1000);
     });
 
@@ -68,7 +116,7 @@ export function useElapsedTime(
       cancelled = true;
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [attendanceId, startTime, isPaused]);
+  }, [attendanceId, startTime, isPaused, pausedTimeMinutes]);
 
   const minutes = Math.floor(elapsed / 60);
   const seconds = elapsed % 60;

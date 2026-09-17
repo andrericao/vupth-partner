@@ -98,7 +98,8 @@ function CurrentAttendanceCard({
   const { formatted } = useElapsedTime(
     attendance.id ?? null,
     attendance.startTime ?? null,
-    attendance.isPaused ?? false
+    attendance.isPaused ?? false,
+    attendance.pausedTimeMinutes ?? null
   );
 
   return (
