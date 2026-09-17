@@ -53,18 +53,9 @@ export default function FindEstablishmentScreen() {
     try {
       // A busca de AFILIACAO precisa achar TODOS os estabelecimentos, inclusive os
       // CLOSED — loja recem-criada nasce fechada, e um dono novo tem que ser achado.
-      //
-      // ⚠️ `includeAll=true` ficou REDUNDANTE (backend, 06/09): o GET /establishment
-      // passou a devolver todas as lojas ativas por padrao, com as abertas primeiro.
-      // O corte "so OPEN" que este parametro contornava nao existe mais.
-      //
-      // Ele FICA de proposito, ate a mudanca estar confirmada em PRODUCAO: o pedido
-      // deles diz "em staging a partir do proximo deploy de dev". Tirar antes disso
-      // faria um dono recem-criado sumir desta busca no app de producao — e o
-      // parametro continua aceito, entao mante-lo nao custa nada.
-      const { data } = await api.get("/establishment", {
-        params: { includeAll: true },
-      });
+      // Desde 06/09 (confirmado em producao em 17/09) o GET /establishment ja
+      // devolve todas as lojas ativas por padrao, com as abertas primeiro.
+      const { data } = await api.get("/establishment");
       setResults(data);
       setHasSearched(true);
     } catch {} finally {
@@ -110,7 +101,7 @@ export default function FindEstablishmentScreen() {
     setHasSearched(true);
     try {
       const { data } = await api.get("/establishment", {
-        params: { name: search.trim(), includeAll: true },
+        params: { name: search.trim() },
       });
       setResults(data);
     } catch (error: any) {
