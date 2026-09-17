@@ -122,9 +122,52 @@ describe("calculatePricing", () => {
     }
   });
 
+  // REGRA DO ANDRE (16/09): a taxa entra POR CIMA do que o profissional quer
+  // receber (R$ 10 + 6% = R$ 10,60) e o preco sobe ate o X,90 seguinte
+  // (R$ 10,90). A divisao nasce aqui e fica gravada — ninguem recalcula 6%
+  // sobre os R$ 10,90 depois.
   it("valores concretos em 0% (cliente paga tudo)", () => {
-    expect(calculatePricing(30, 0)).toEqual({ clientPrice: 31.9, proReceives: 30, platformFee: 1.9 });
-    expect(calculatePricing(50, 0)).toEqual({ clientPrice: 52.9, proReceives: 50, platformFee: 2.9 });
-    expect(calculatePricing(100, 0)).toEqual({ clientPrice: 105.9, proReceives: 100, platformFee: 5.9 });
+    expect(calculatePricing(10, 0)).toEqual({
+      clientPrice: 10.9, proReceives: 10, platformFee: 0.9, intermediaryFee: 0.4, appFee: 0.5,
+    });
+    expect(calculatePricing(30, 0)).toMatchObject({ clientPrice: 31.9, proReceives: 30 });
+    expect(calculatePricing(50, 0)).toMatchObject({ clientPrice: 53.9, proReceives: 50 });
+    expect(calculatePricing(100, 0)).toMatchObject({ clientPrice: 106.9, proReceives: 100 });
+  });
+
+  it("nunca arredonda para BAIXO: cliente >= digitado + a parte da taxa que e dele", () => {
+    for (let c = 500; c <= 50000; c += 37) {
+      const p = c / 100;
+      getAbsorptionOptions(p).forEach((pct) => {
+        const r = calculatePricing(p, pct);
+        const parteDoCliente = p * 0.06 * (1 - pct / 100);
+        expect(r.clientPrice + 1e-9).toBeGreaterThanOrEqual(p + parteDoCliente);
+      });
+    }
+  });
+
+  it("valor que ja cai em X,90 nao sobe mais um real (ruido de ponto flutuante)", () => {
+    // 15 x 1,06 = 15,90 — em float vira 15,900000000000002.
+    expect(calculatePricing(15, 0).clientPrice).toBe(15.9);
+  });
+
+  it("as tres partes somam o preco do cliente, centavo a centavo, e nenhuma e negativa", () => {
+    for (let c = 500; c <= 50000; c += 37) {
+      const p = c / 100;
+      getAbsorptionOptions(p).forEach((pct) => {
+        const r = calculatePricing(p, pct);
+        const soma = Math.round((r.proReceives + r.intermediaryFee + r.appFee) * 100);
+        expect(soma).toBe(Math.round(r.clientPrice * 100));
+        expect(r.intermediaryFee).toBeGreaterThanOrEqual(0);
+        // o app fica com pelo menos os 2% (menos 1 centavo de arredondamento)
+        expect(Math.round(r.appFee * 100)).toBeGreaterThanOrEqual(Math.round(p * 2) - 1);
+      });
+    }
+  });
+
+  it("intermediador = 4% do valor digitado", () => {
+    expect(calculatePricing(100, 0).intermediaryFee).toBe(4);
+    expect(calculatePricing(100, 100).intermediaryFee).toBe(4);
+    expect(calculatePricing(31.3, 0).intermediaryFee).toBe(1.25); // 1,252 -> 1,25
   });
 });
