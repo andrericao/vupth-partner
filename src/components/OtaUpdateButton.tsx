@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import { View, Text, Pressable, Alert, Platform } from "react-native";
 import * as Updates from "expo-updates";
 
 import { WsDiagnostics } from "@components/WsDiagnostics";
@@ -66,16 +66,20 @@ export function OtaUpdateButton() {
   return (
     <View className="mt-8 items-center gap-3">
 
-      <Pressable
-        onPress={handleCheckUpdate}
-        className="flex-row items-center bg-vupth-surface rounded-full px-4 py-3 active:opacity-70"
-        accessibilityRole="button"
-        testID="check-update"
-      >
-        <Text className="font-heading text-[13px] text-vupth-forest">
-          {isChecking ? "Verificando..." : "Verificar atualização"}
-        </Text>
-      </Pressable>
+      {/* No navegador nao existe OTA: a versao nova chega em qualquer navegacao,
+          e o botao so levaria a um erro (Andre, 18/09). */}
+      {Platform.OS !== "web" && (
+        <Pressable
+          onPress={handleCheckUpdate}
+          className="flex-row items-center bg-vupth-surface rounded-full px-4 py-3 active:opacity-70"
+          accessibilityRole="button"
+          testID="check-update"
+        >
+          <Text className="font-heading text-[13px] text-vupth-forest">
+            {isChecking ? "Verificando..." : "Verificar atualização"}
+          </Text>
+        </Pressable>
+      )}
 
       {/* Versao em DM Mono: e numero de build, nao prosa. Abaixo do botao e
           numa linha so, como no client (16/09). Junta so o que EXISTE: em dev

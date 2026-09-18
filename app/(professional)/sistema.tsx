@@ -1,4 +1,4 @@
-import { View, ScrollView, Text, Platform } from "react-native";
+import { View, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -19,6 +19,11 @@ import { rotaDeVoltaDosDados } from "@lib/routing";
 // O diagnóstico de WebSocket continua atrás dos 7 toques na versão (decisão da
 // Alexia, 21/08): o usuário final não pode ver "falhou o handshake" e a URL do
 // servidor.
+//
+// 🔴 Andre, 18/09: no NAVEGADOR esta tela não explica mais a diferença com o
+// app. Lá qualquer navegação já carrega a versão nova, então o botão de
+// atualizar e o texto do Ctrl+Shift+R eram conversa sobre o meio, não
+// informação. Fica o que é pertinente: versão, canal e data/hora do lançamento.
 export default function SistemaScreen() {
   const { from } = useLocalSearchParams<{ from?: string }>();
 
@@ -35,15 +40,6 @@ export default function SistemaScreen() {
           <OtaUpdateButton />
         </View>
 
-        {Platform.OS === "web" && (
-          <View className="mt-6 bg-vupth-surface rounded-card p-4">
-            <Text className="font-body text-[13px] leading-5 text-vupth-textSecondary">
-              No navegador não existe atualização por dentro do app: o site é substituído a cada
-              publicação. Para garantir que está na versão nova, recarregue a página segurando{" "}
-              <Text className="font-heading text-vupth-forest">Ctrl+Shift+R</Text>.
-            </Text>
-          </View>
-        )}
       </View>
     </ScrollView>
   );
