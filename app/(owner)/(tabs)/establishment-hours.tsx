@@ -194,8 +194,8 @@ export default function EstablishmentHoursScreen() {
               <View className="gap-3">
                 <Text className="font-heading text-lg text-vupth-forest">Semana</Text>
                 <Text className="font-body text-sm text-vupth-textSecondary">
-                  Vale para todas as semanas. Fechar depois de abrir (22:00 – 02:00) termina no dia
-                  seguinte; abrir e fechar no mesmo horário é 24 horas.
+                  Vale para todas as semanas. Fechar depois de abrir (22:00 às 02:00) vira o dia;
+                  abrir e fechar no mesmo horário é 24 horas.
                 </Text>
                 {semana.map((d) => (
                   <DiaDaSemanaLinha key={d.day} dia={d} onChange={trocarDia} />

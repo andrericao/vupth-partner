@@ -122,9 +122,9 @@ describe("erroDoDia / validarSemana", () => {
 describe("descreverHorario", () => {
   it.each([
     [{ closed: true }, "Fechado"],
-    [{ closed: false, opens: "08:00", closes: "18:00" }, "08:00 – 18:00"],
+    [{ closed: false, opens: "08:00", closes: "18:00" }, "08:00 às 18:00"],
     [{ closed: false, opens: "09:00", closes: "09:00" }, "24 horas"],
-    [{ closed: false, opens: "22:00", closes: "02:00" }, "22:00 – 02:00 (termina no dia seguinte)"],
+    [{ closed: false, opens: "22:00", closes: "02:00" }, "22:00 às 02:00 (vira o dia)"],
   ])("%j -> %s", (h, esperado) => {
     expect(descreverHorario(h)).toBe(esperado);
   });
