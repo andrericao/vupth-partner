@@ -85,7 +85,7 @@ describe("ListaDeExcecoes", () => {
       />
     );
     expect(getByText("21/09/2026")).toBeTruthy();
-    expect(getByText("10:00 – 14:00")).toBeTruthy();
+    expect(getByText("10:00 às 14:00")).toBeTruthy();
     expect(getByText("Fechado")).toBeTruthy();
     fireEvent.press(getByLabelText("Remover 28/09/2026"));
     expect(onRemover).toHaveBeenCalledWith("2026-09-28");

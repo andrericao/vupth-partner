@@ -51,7 +51,8 @@
     "backgroundColor": "#FFFFFF",
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "lang": "pt-BR"
     }
   }
 }

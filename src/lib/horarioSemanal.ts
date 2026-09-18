@@ -116,11 +116,14 @@ export function validarSemana(dias: DiaSemanal[]): string | null {
   return null;
 }
 
+// As frases sao as MESMAS do client (decisao do Andre, 17/09): o cliente e o
+// profissional leem a mesma coisa sobre a mesma loja. Ver
+// src/domain/establishment/horarios.ts no repo do client.
 export function descreverHorario(h: HorarioDoDia): string {
   if (h.closed) return "Fechado";
   if (h.opens && h.opens === h.closes) return "24 horas";
-  const base = `${h.opens} – ${h.closes}`;
-  if (h.opens && h.closes && h.closes < h.opens) return `${base} (termina no dia seguinte)`;
+  const base = `${h.opens} às ${h.closes}`;
+  if (h.opens && h.closes && h.closes < h.opens) return `${base} (vira o dia)`;
   return base;
 }
 

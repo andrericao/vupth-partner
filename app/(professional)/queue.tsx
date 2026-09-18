@@ -59,7 +59,10 @@ function ServingCard({
   const { formatted } = useElapsedTime(
     attendance.id,
     (attendance as any).startTime ?? null,
-    isPaused
+    isPaused,
+    // A4: o backend manda o total pausado (em minutos) e ele e o piso do
+    // desconto — cobre reabrir o app no meio de uma pausa.
+    (attendance as any).pausedTimeMinutes ?? null
   );
 
   return (
