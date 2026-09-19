@@ -20,6 +20,7 @@ import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { instalarAlertWeb } from "../web-shims/alert";
+import { pedirParaNaoTraduzir } from "@lib/naoTraduzir";
 import { instalarDialogoNativo } from "@lib/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
 
@@ -51,6 +52,12 @@ const navTheme = {
 // no boot, antes de qualquer interacao poder disparar um Alert — e antes do
 // primeiro render, que ja pode avisar de erro.
 if (Platform.OS === "web") instalarAlertWeb(Alert);
+
+// 🔴 E pede ao navegador para NAO traduzir (ver src/lib/naoTraduzir.ts): a
+// traducao automatica reescreve o DOM por baixo do React e quebra o campo
+// controlado — R$ 60,00 chegava ao calculo como R$ 0,06. No boot, antes do
+// primeiro render, que e antes de o navegador decidir traduzir.
+if (Platform.OS === "web") pedirParaNaoTraduzir();
 
 // No NATIVO o Alert e do sistema operacional: nao aceita fonte, cor nem raio, e
 // por isso a caixa do APK ficou pior que a da web depois do A5 ("o modal de
