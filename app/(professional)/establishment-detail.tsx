@@ -14,6 +14,8 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { BrandButton } from "@components/brand/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
+import { buscarHorarios } from "@lib/horariosApi";
+import { resumoDoDia, hojeIso } from "@lib/horarioSemanal";
 import {
   useEstablishmentStore,
   EstablishmentDetail,
@@ -72,6 +74,10 @@ export default function EstablishmentDetailScreen() {
   const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
+  // O horario DO DIA, com as frases do client (ver resumoDoDia). O par
+  // `opening_time`/`closing_time` que esta tela usava e o horario de HOJE e vem
+  // nulo no dia em que a loja fecha — a linha sumia em vez de dizer que fechou.
+  const [resumo, setResumo] = useState<{ hoje: string; reabre: string | null } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -87,6 +93,13 @@ export default function EstablishmentDetailScreen() {
         if (active) setIsLoading(false);
       }
     })();
+    buscarHorarios(id)
+      .then((h) => {
+        if (active && h) setResumo(resumoDoDia(h, hojeIso()));
+      })
+      .catch(() => {
+        // backend sem a rota da semana: fica o par unico abaixo.
+      });
     return () => {
       active = false;
     };
@@ -189,7 +202,12 @@ export default function EstablishmentDetailScreen() {
           ) : (
             <VStack mt="$6" space="md">
               <DetailRow label="Endereço" value={address} />
-              <DetailRow label="Horário" value={hours} />
+              <DetailRow
+                label="Horário"
+                value={
+                  resumo ? [resumo.hoje, resumo.reabre].filter(Boolean).join("\n") : hours
+                }
+              />
               <DetailRow label="Telefone" value={phone} />
               <DetailRow label="Instagram" value={instagram} />
             </VStack>
