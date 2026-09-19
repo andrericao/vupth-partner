@@ -1,3 +1,4 @@
+
 import {
   VStack,
   HStack,
@@ -6,6 +7,7 @@ import {
   ScrollView,
 } from "@gluestack-ui/themed";
 import {  } from "react-native";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -104,6 +106,9 @@ function Grupo({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function OwnerMenuScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   const establishment = useEstablishmentStore((s) => s.establishment);
   const resetEstablishment = useEstablishmentStore((s) => s.reset);
   const resetProfessional = useProfessionalStore((s) => s.reset);
@@ -143,6 +148,7 @@ export default function OwnerMenuScreen() {
 
   return (
     <ScrollView
+        ref={rolagemRef}
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
