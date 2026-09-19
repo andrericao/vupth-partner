@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import {
   VStack,
   HStack,
@@ -149,6 +150,9 @@ function ProfessionalCard({ professional, establishmentId }: { professional: Pro
 }
 
 export default function OwnerQueuesScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   // Filas virou ABA — e aba nao recebe parametro de rota. O `establishmentId`
   // do param so existe quando a tela e aberta empilhada (ex.: pelo card do
   // dashboard); no acesso pela aba ele vem VAZIO, e sem o fallback pro store a
@@ -170,6 +174,7 @@ export default function OwnerQueuesScreen() {
 
   return (
     <ScrollView
+        ref={rolagemRef}
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}

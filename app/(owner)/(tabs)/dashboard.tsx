@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import {
   VStack,
   Heading,
@@ -27,6 +28,9 @@ import { confirmar } from "@lib/confirmar";
 import { avisoDeAberturaSemProfissional } from "@lib/abertura";
 
 export default function OwnerDashboardScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   const establishment = useEstablishmentStore((s) => s.establishment);
   const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
   const fetchMine = useEstablishmentStore((s) => s.fetchMine);
@@ -162,6 +166,7 @@ export default function OwnerDashboardScreen() {
 
   return (
     <ScrollView
+        ref={rolagemRef}
       w="$full"
       bg="$brandBackground"
       contentContainerStyle={{ flexGrow: 1 }}

@@ -10,6 +10,7 @@ import {
   isoParaBr,
   hojeIso,
   temHorarioDefinido,
+  resumoDoDia,
   type DiaSemanal,
 } from "@lib/horarioSemanal";
 
@@ -169,5 +170,72 @@ describe("temHorarioDefinido", () => {
     expect(temHorarioDefinido(null, { opening_time: "08:00", closing_time: "18:00" })).toBe(true);
     expect(temHorarioDefinido(null, { opening_time: null, closing_time: "18:00" })).toBe(false);
     expect(temHorarioDefinido(null, null)).toBe(false);
+  });
+});
+
+// A tela que o profissional ve antes de pedir vinculo mostra o horario DO DIA.
+// As frases sao as do client (mandadas por eles em 17/09), letra por letra:
+// "Hoje, 08:00 às 18:00" · "Fechada hoje" · "Reabre amanhã, 09:00" · "Reabre
+// sábado, 09:00". Duas regras: o "reabre" só lê `upcoming` (dias já resolvidos),
+// senão promete um sábado que a exceção fechou; e `configured: false` não
+// mostra linha nenhuma.
+describe("resumoDoDia", () => {
+  const dia = (date: string, day: any, over: any = {}) => ({
+    date, day, closed: false, opens: "08:00", closes: "18:00", exception: false, ...over,
+  });
+  const loja = (upcoming: any[], configured = true) =>
+    ({ configured, weekly: [], exceptions: [], upcoming });
+
+  it("loja sem horario definido: nada", () => {
+    expect(resumoDoDia(loja([], false), "2026-09-19")).toBeNull();
+  });
+
+  it("hoje aberta: a faixa do dia", () => {
+    const r = resumoDoDia(loja([dia("2026-09-19", "SATURDAY")]), "2026-09-19");
+    expect(r).toEqual({ hoje: "Hoje, 08:00 às 18:00", reabre: null });
+  });
+
+  it("hoje 24 horas e hoje virando o dia usam as mesmas palavras da semana", () => {
+    expect(
+      resumoDoDia(loja([dia("2026-09-19", "SATURDAY", { opens: "09:00", closes: "09:00" })]), "2026-09-19")?.hoje
+    ).toBe("Hoje, 24 horas");
+    expect(
+      resumoDoDia(loja([dia("2026-09-19", "SATURDAY", { opens: "22:00", closes: "02:00" })]), "2026-09-19")?.hoje
+    ).toBe("Hoje, 22:00 às 02:00 (vira o dia)");
+  });
+
+  it("hoje fechada: 'Fechada hoje' e o reabre de AMANHA", () => {
+    const r = resumoDoDia(
+      loja([
+        dia("2026-09-19", "SATURDAY", { closed: true, opens: null, closes: null }),
+        dia("2026-09-20", "SUNDAY", { opens: "09:00", closes: "13:00" }),
+      ]),
+      "2026-09-19"
+    );
+    expect(r).toEqual({ hoje: "Fechada hoje", reabre: "Reabre amanhã, 09:00" });
+  });
+
+  it("fechada hoje e amanha: o reabre diz o DIA DA SEMANA, em minuscula", () => {
+    const r = resumoDoDia(
+      loja([
+        dia("2026-09-19", "FRIDAY", { closed: true, opens: null, closes: null }),
+        dia("2026-09-20", "SATURDAY", { closed: true, opens: null, closes: null }),
+        dia("2026-09-21", "MONDAY", { opens: "10:00", closes: "19:00" }),
+      ]),
+      "2026-09-19"
+    );
+    expect(r).toEqual({ hoje: "Fechada hoje", reabre: "Reabre segunda, 10:00" });
+  });
+
+  it("fechada e sem nenhum dia aberto a frente: sem promessa", () => {
+    const r = resumoDoDia(
+      loja([dia("2026-09-19", "SATURDAY", { closed: true, opens: null, closes: null })]),
+      "2026-09-19"
+    );
+    expect(r).toEqual({ hoje: "Fechada hoje", reabre: null });
+  });
+
+  it("hoje nao esta no upcoming: nada (nao inventa pela semana)", () => {
+    expect(resumoDoDia(loja([dia("2026-09-20", "SUNDAY")]), "2026-09-19")).toBeNull();
   });
 });

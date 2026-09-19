@@ -177,3 +177,40 @@ export function temHorarioDefinido(
   if (semana) return semana.configured;
   return !!loja?.opening_time && !!loja?.closing_time;
 }
+
+/** O dia seguinte a uma data ISO, em ISO. */
+function amanhaDe(iso: string): string {
+  const [a, m, d] = iso.split("-").map(Number);
+  const dt = new Date(a, m - 1, d + 1);
+  return hojeIso(dt);
+}
+
+/**
+ * O horario de HOJE da loja, para a tela que o profissional ve antes de pedir
+ * vinculo — e as MESMAS frases do client (mandadas por eles em 17/09), porque o
+ * cliente e o profissional leem a mesma coisa sobre a mesma loja.
+ *
+ * `null` quando a loja ainda nao definiu horario (`configured: false`) ou quando
+ * hoje nao esta em `upcoming`: melhor nao dizer nada do que chutar pela semana,
+ * que ignoraria uma excecao de data.
+ *
+ * O "reabre" so le `upcoming` (dias JA RESOLVIDOS pelo backend). Deduzir da
+ * semana prometeria um sabado que a excecao fechou.
+ */
+export function resumoDoDia(
+  h: HorariosDaLoja,
+  hoje: string
+): { hoje: string; reabre: string | null } | null {
+  if (!h.configured) return null;
+  const doDia = h.upcoming.find((u) => u.date === hoje);
+  if (!doDia) return null;
+
+  if (!doDia.closed) return { hoje: `Hoje, ${descreverHorario(doDia)}`, reabre: null };
+
+  const proximoAberto = h.upcoming.find((u) => u.date > hoje && !u.closed && u.opens);
+  if (!proximoAberto) return { hoje: "Fechada hoje", reabre: null };
+
+  const quando =
+    proximoAberto.date === amanhaDe(hoje) ? "amanhã" : nomeDoDia(proximoAberto.day).toLowerCase();
+  return { hoje: "Fechada hoje", reabre: `Reabre ${quando}, ${proximoAberto.opens}` };
+}

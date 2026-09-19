@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import { View, Text, ScrollView, RefreshControl, Alert } from "react-native";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +27,9 @@ import { EstadoVazio } from "@components/EstadoVazio";
 // modal"). Store/logica identicas; so o layout e novo. Acessada pela linha
 // "Solicitacoes" em Opcoes da fila (so aparece com pedido pendente).
 export default function CutRequestsScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
@@ -68,6 +72,7 @@ export default function CutRequestsScreen() {
 
   return (
     <ScrollView
+        ref={rolagemRef}
       className="flex-1 w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -99,6 +100,9 @@ function Grupo({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export default function ProfessionalSettingsScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
@@ -162,7 +166,8 @@ export default function ProfessionalSettingsScreen() {
     "Complete seu cadastro para atender";
 
   return (
-    <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+    <ScrollView
+        ref={rolagemRef} className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
       {/* [marca-vupth] Cabecalho proprio (Pencil PROF · 04): forest + avatar
           com iniciais + nome. Substitui o Header padrao nesta tela — o .pen
           não repete a barra VUPTH/icone de papel aqui, o avatar já identifica

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
@@ -251,6 +252,9 @@ function QueueRow({
 }
 
 export default function ProfessionalQueueScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
@@ -722,6 +726,7 @@ export default function ProfessionalQueueScreen() {
           raiz da tela), sem ele a lista cresceria com o conteudo e empurraria a
           barra fixa do rodape para fora da tela. */}
       <ScrollView
+        ref={rolagemRef}
         className="flex-1 w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}

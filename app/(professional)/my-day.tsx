@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import { useIsFocused } from "@react-navigation/native";
 import {
   VStack,
@@ -89,6 +90,9 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
 }
 
 export default function MyDayScreen() {
+  // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
+  const rolagemRef = useVoltarAoTopo();
+
   const professional = useProfessionalStore((s) => s.professional);
   const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
@@ -177,6 +181,7 @@ export default function MyDayScreen() {
 
   return (
     <ScrollView
+        ref={rolagemRef}
       w="$full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
