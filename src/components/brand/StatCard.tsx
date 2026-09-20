@@ -1,4 +1,4 @@
-import { VStack, Text } from "@gluestack-ui/themed";
+import { View, Text } from "react-native";
 
 /**
  * Card de numero (fila, receita, atendimentos...).
@@ -27,24 +27,20 @@ type Props = {
 
 export function StatCard({ label, value, hero = false, flex }: Props) {
   return (
-    <VStack
-      flex={flex}
-      bg={hero ? "$brandGreen" : "$brandSurface"}
-      p="$4"
-      borderRadius="$card"
+    <View
+      testID="stat-card"
+      style={flex ? { flex } : undefined}
+      className={`p-4 rounded-card ${hero ? "bg-vupth-green" : "bg-vupth-surface"}`}
     >
-      {/* `$display` (Archivo ExtraBold) e o token de NUMERO da marca. */}
-      <Text fontFamily="$display" fontSize={26} color="$forest">
-        {value}
-      </Text>
+      {/* `font-display` (Archivo ExtraBold) e o token de NUMERO da marca. */}
+      <Text className="font-display text-[26px] text-vupth-forest">{value}</Text>
       <Text
-        fontFamily="$body"
-        fontSize="$xs"
-        color={hero ? "$forest" : "$brandTextSecondary"}
-        mt="$1"
+        className={`font-body text-xs mt-1 ${
+          hero ? "text-vupth-forest" : "text-vupth-textSecondary"
+        }`}
       >
         {label}
       </Text>
-    </VStack>
+    </View>
   );
 }
