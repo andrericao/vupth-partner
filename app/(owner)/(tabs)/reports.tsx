@@ -1,14 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import {
-  VStack,
-  HStack,
-  Text,
-  Pressable,
-  ScrollView,
-  Divider,
-} from "@gluestack-ui/themed";
+import { View, Text, Pressable, ScrollView, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
-import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -80,72 +72,65 @@ export default function OwnerReportsScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$12" px="$4">
+      <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Relatórios"
           subtitle={establishment?.name ?? undefined}
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
 
-        <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary" mt="$6" mb="$2">
-          Agora
-        </Text>
-        <HStack space="md">
+        <Text className="font-heading text-vupth-textSecondary mt-6 mb-2">Agora</Text>
+        <View className="flex-row gap-4">
           {/* "Na fila" so vira heroi quando HA fila: zero e a ausencia de
               fila, não o número que importa (mesma regra do dashboard). */}
           <StatCard flex={1} label="Na fila" value={String(totalInQueue)} hero={totalInQueue > 0} />
           <StatCard flex={1} label="Profissionais disponíveis" value={String(availableProfs)} />
-        </HStack>
+        </View>
 
-        <HStack mt="$6" space="sm">
+        <View className="flex-row gap-2 mt-6">
           {periods.map((p) => (
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$forest" : "$brandSurface"}
-              py="$2"
-              px="$4"
-              borderRadius="$full"
-              flexShrink={0}
+              className={`py-2 px-4 rounded-full shrink-0 ${
+                period === p.key ? "bg-vupth-forest" : "bg-vupth-surface"
+              }`}
             >
               <Text
                 numberOfLines={1}
-                fontFamily="$body"
-                color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
-                textAlign="center"
-                fontSize="$sm"
+                className={`font-body text-sm text-center ${
+                  period === p.key ? "text-vupth-green" : "text-vupth-textSecondary"
+                }`}
               >
                 {p.label}
               </Text>
             </Pressable>
           ))}
-        </HStack>
+        </View>
 
         <ExpedienteCard />
 
         {errorMsg && (
-          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
-            <Text fontFamily="$body" color="$brandDanger" textAlign="center">
-              {errorMsg}
-            </Text>
-          </VStack>
+          <View className="bg-vupth-surface p-4 rounded-card mt-4">
+            <Text className="font-body text-vupth-danger text-center">{errorMsg}</Text>
+          </View>
         )}
 
         {isLoading ? (
-          <VStack mt="$6">
+          <View className="mt-6">
             <SkeletonList count={2} />
-          </VStack>
+          </View>
         ) : (
           <>
             {/* Receita e o heroi da secao do periodo — o unico numero em
                 dinheiro, e o que o dono abre o relatório pra ver. Vem PRIMEIRO
                 pelo mesmo motivo (mesma ordem do relatório do profissional). */}
-            <HStack space="md" mt="$4">
+            <View className="flex-row gap-4 mt-4">
               <StatCard
                 flex={1}
                 label="Receita"
@@ -153,76 +138,72 @@ export default function OwnerReportsScreen() {
                 hero
               />
               <StatCard flex={1} label="Atendimentos" value={String(report?.totalAttendances ?? 0)} />
-            </HStack>
+            </View>
 
-            <HStack space="md" mt="$3">
+            <View className="flex-row gap-4 mt-3">
               <StatCard
                 flex={1}
                 label="Duração média"
                 value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
               />
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$display" fontSize={16} color="$forest">
+              <View className="flex-1 bg-vupth-surface p-4 rounded-card">
+                <Text className="font-display text-base text-vupth-forest">
                   {report?.topProfessional ?? "—"}
                 </Text>
-                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
-                  destaque
-                </Text>
-              </VStack>
-            </HStack>
+                <Text className="font-body text-xs text-vupth-textSecondary mt-1">destaque</Text>
+              </View>
+            </View>
 
-            <Divider my="$6" />
+            <View className="h-px bg-vupth-border my-6" />
 
-            <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary" mb="$3">
-              Por profissional
-            </Text>
+            <Text className="font-heading text-vupth-textSecondary mb-3">Por profissional</Text>
 
             {liveProfs.length === 0 ? (
-              <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$4">
+              <Text className="font-body text-vupth-textSecondary text-center mt-4">
                 Nenhum profissional vinculado
               </Text>
             ) : (
-              <VStack space="sm">
+              <View className="gap-2">
                 {liveProfs.map((p) => {
                   const r = revById[p.id] ?? { revenue: 0, attendances: 0 };
                   return (
-                    <VStack key={p.id} bg="$brandSurface" p="$4" borderRadius="$card">
-                      <HStack justifyContent="space-between" alignItems="center">
-                        <VStack flex={1}>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-                            {p.name}
-                          </Text>
-                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+                    <View key={p.id} className="bg-vupth-surface p-4 rounded-card">
+                      <View className="flex-row justify-between items-center">
+                        <View className="flex-1">
+                          <Text className="font-heading text-vupth-forest">{p.name}</Text>
+                          <Text className="font-body text-xs text-vupth-textSecondary">
                             {p.specialty || "Sem especialidade"}
                           </Text>
-                        </VStack>
-                        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
+                        </View>
+                        <Text className="font-heading text-vupth-forest">
                           R$ {r.revenue.toFixed(2)}
                         </Text>
-                      </HStack>
+                      </View>
 
-                      <HStack mt="$3" space="md">
-                        <VStack flex={1}>
-                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">Na fila</Text>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary">{p.queue_count}</Text>
-                        </VStack>
-                        <VStack flex={1}>
-                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">Espera</Text>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary">{p.estimated_wait_minutes} min</Text>
-                        </VStack>
-                        <VStack flex={1}>
-                          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">Finalizados</Text>
-                          <Text fontFamily="$heading" fontWeight="$bold" color="$brandTextSecondary">{r.attendances}</Text>
-                        </VStack>
-                      </HStack>
-                    </VStack>
+                      <View className="flex-row gap-4 mt-3">
+                        <View className="flex-1">
+                          <Text className="font-body text-xs text-vupth-textSecondary">Na fila</Text>
+                          <Text className="font-heading text-vupth-textSecondary">{p.queue_count}</Text>
+                        </View>
+                        <View className="flex-1">
+                          <Text className="font-body text-xs text-vupth-textSecondary">Espera</Text>
+                          <Text className="font-heading text-vupth-textSecondary">
+                            {p.estimated_wait_minutes} min
+                          </Text>
+                        </View>
+                        <View className="flex-1">
+                          <Text className="font-body text-xs text-vupth-textSecondary">Finalizados</Text>
+                          <Text className="font-heading text-vupth-textSecondary">{r.attendances}</Text>
+                        </View>
+                      </View>
+                    </View>
                   );
                 })}
-              </VStack>
+              </View>
             )}
           </>
         )}
-      </VStack>
+      </View>
     </ScrollView>
   );
 }

@@ -1,17 +1,9 @@
 import { useState } from "react";
-import {
-  VStack,
-  HStack,
-  FormControl,
-  Text,
-  ScrollView,
-} from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
-import { BrandButton } from "@components/brand/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskPhone, unmask } from "@lib/masks";
@@ -19,10 +11,10 @@ import { maskPhone, unmask } from "@lib/masks";
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
     <>
-      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$3">
-        {label}
-      </Text>
-      <Text fontFamily="$heading" fontWeight="$bold" color={value ? "$forest" : "$brandTextSecondary"} mt="$0.5">
+      <Text className="font-body text-sm text-vupth-textSecondary mt-3">{label}</Text>
+      <Text
+        className={`font-heading mt-0.5 ${value ? "text-vupth-forest" : "text-vupth-textSecondary"}`}
+      >
         {value || "—"}
       </Text>
     </>
@@ -75,82 +67,75 @@ export default function EstablishmentRegistrationScreen() {
       style={{ flex: 1 }}
     >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} pb="$12" px="$4">
+        <View className="flex-1 pb-12 px-4">
           <ScreenHeader
-          title="Dados cadastrais"
-          onBack={() => router.navigate("/(owner)/establishment-data" as any)}
-        />
+            title="Dados cadastrais"
+            onBack={() => router.navigate("/(owner)/establishment-data" as any)}
+          />
 
-          <VStack mt="$6" space="md">
-            <VStack bg="$brandSurface" p="$4" borderRadius="$card">
-              {editing ? (
-                <FormControl>
-                  <Input
-                    textLabel="Nome do estabelecimento"
-                    placeholder="Nome do estabelecimento"
-                    messageError=""
-                    value={nameValue}
-                    onChangeText={setNameValue}
-                    autoCapitalize="words"
+          <View className="mt-6 bg-vupth-surface p-4 rounded-card">
+            {editing ? (
+              <>
+                <NwInput
+                  label="Nome do estabelecimento"
+                  placeholder="Nome do estabelecimento"
+                  value={nameValue}
+                  onChangeText={setNameValue}
+                  autoCapitalize="words"
+                />
+                <NwInput
+                  label="Telefone (opcional)"
+                  placeholder="(11) 99999-0000"
+                  value={phoneValue}
+                  onChangeText={(t) => setPhoneValue(maskPhone(t))}
+                  keyboardType="phone-pad"
+                  autoCapitalize="none"
+                />
+                <NwInput
+                  label="Instagram (opcional)"
+                  placeholder="@seuestabelecimento"
+                  value={instagramValue}
+                  onChangeText={setInstagramValue}
+                  autoCapitalize="none"
+                />
+                <View className="flex-row gap-2">
+                  <NwButton
+                    title="Cancelar"
+                    onPress={() => setEditing(false)}
+                    variant="secondary"
+                    className="flex-1 h-9 mt-0"
                   />
-                  <Input
-                    textLabel="Telefone (opcional)"
-                    placeholder="(11) 99999-0000"
-                    messageError=""
-                    value={phoneValue}
-                    onChangeText={(t) => setPhoneValue(maskPhone(t))}
-                    keyboardType="phone-pad"
-                    autoCapitalize="none"
+                  <NwButton
+                    title="Salvar"
+                    onPress={handleSave}
+                    isLoading={isSaving}
+                    className="flex-1 h-9 mt-0"
                   />
-                  <Input
-                    textLabel="Instagram (opcional)"
-                    placeholder="@seuestabelecimento"
-                    messageError=""
-                    value={instagramValue}
-                    onChangeText={setInstagramValue}
-                    autoCapitalize="none"
-                  />
-                  <HStack space="sm">
-                    <Button
-                      title="Cancelar"
-                      onPress={() => setEditing(false)}
-                      bg="$brandBorder"
-                      textColor="$brandTextSecondary"
-                      h="$9"
-                      flex={1}
-                    />
-                    <BrandButton
-                      title="Salvar"
-                      onPress={handleSave}
-                      isLoading={isSaving}
-                      h="$9"
-                      flex={1}
-                    />
-                  </HStack>
-                </FormControl>
-              ) : (
-                <>
-                  <Field label="Nome do estabelecimento" value={establishment?.name} />
-                  <Field label="Telefone" value={establishment?.phone ? maskPhone(establishment.phone) : null} />
-                  <Field label="Instagram" value={establishment?.instagram} />
-                  <Button
-                    title="Editar"
-                    onPress={startEdit}
-                    bg="$brandBorder"
-                    textColor="$brandTextSecondary"
-                    h="$9"
-                    mt="$4"
-                  />
-                </>
-              )}
-            </VStack>
-          </VStack>
-        </VStack>
+                </View>
+              </>
+            ) : (
+              <>
+                <Field label="Nome do estabelecimento" value={establishment?.name} />
+                <Field
+                  label="Telefone"
+                  value={establishment?.phone ? maskPhone(establishment.phone) : null}
+                />
+                <Field label="Instagram" value={establishment?.instagram} />
+                <NwButton
+                  title="Editar"
+                  onPress={startEdit}
+                  variant="secondary"
+                  className="h-9 mt-4"
+                />
+              </>
+            )}
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -1,21 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  VStack,
-  HStack,
+  View,
   Text,
   ScrollView,
-  Input as GluestackInput,
-  InputField,
-  InputSlot,
-  InputIcon,
-  SearchIcon,
-  CloseIcon,
-} from "@gluestack-ui/themed";
+  TextInput,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Search, X } from "lucide-react-native";
 import { SkeletonList } from "@components/Skeleton";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { BrandButton } from "@components/brand/Button";
+import { NwButton } from "@components/nw/Button";
 import {
   useEstablishmentStore,
   type ProfessionalSearchResult,
@@ -81,101 +79,97 @@ export default function InviteProfessionalScreen() {
       style={{ flex: 1 }}
     >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <VStack flex={1} pb="$12" px="$4">
+        <View className="flex-1 pb-12 px-4">
           <ScreenHeader
             title="Convidar profissional"
             subtitle="Busque pelo nome e envie o convite. O profissional precisa aceitar."
             onBack={() => router.navigate("/(owner)/menu" as any)}
           />
 
-          <GluestackInput
-            h="$12"
-            borderWidth="$1"
-            borderColor="$forest"
-            borderRadius="$md"
-            $focus-borderWidth="$2"
-            mb="$4"
-          >
-            <InputField
+          {/* O ícone à direita TROCA de papel: com texto digitado ele limpa a
+              busca; vazio, ele dispara. É o mesmo campo de antes, sem o
+              Gluestack. */}
+          <View className="flex-row items-center h-12 mb-4 px-3 rounded-md border border-vupth-forest bg-white">
+            <TextInput
+              className="flex-1 font-body text-vupth-forest"
               placeholder="Nome do profissional"
+              placeholderTextColor="#6B706B"
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={() => runSearch(search)}
-              color="$forest"
-              fontFamily="$body"
               autoCorrect={false}
               returnKeyType="search"
             />
-            <InputSlot
-              pr="$3"
+            <Pressable
               onPress={
                 search.trim()
-                  ? () => { setSearch(""); runSearch(""); }
+                  ? () => {
+                      setSearch("");
+                      runSearch("");
+                    }
                   : () => runSearch(search)
               }
+              accessibilityRole="button"
+              accessibilityLabel={search.trim() ? "Limpar busca" : "Buscar"}
+              className="pl-3"
             >
-              <InputIcon
-                as={search.trim() ? CloseIcon : SearchIcon}
-                color={search.trim() ? "$brandTextSecondary" : "$forest"}
-              />
-            </InputSlot>
-          </GluestackInput>
+              {search.trim() ? (
+                <X size={18} color="#454745" />
+              ) : (
+                <Search size={18} color="#163300" />
+              )}
+            </Pressable>
+          </View>
 
           {isSearching && (
-            <VStack mt="$4">
+            <View className="mt-4">
               <SkeletonList count={3} />
-            </VStack>
+            </View>
           )}
 
           {!isSearching && results.length === 0 && (
-            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$8">
+            <Text className="font-body text-vupth-textSecondary text-center mt-8">
               Nenhum profissional encontrado
             </Text>
           )}
 
-          <VStack space="sm">
+          <View className="gap-2">
             {results.map((p) => {
               const invited = invitedIds.includes(p.id);
               return (
-                <HStack
+                <View
                   key={p.id}
-                  bg="$brandSurface"
-                  p="$3"
-                  borderRadius="$card"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  className="flex-row items-center justify-between bg-vupth-surface p-3 rounded-card"
                 >
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
+                  <View className="flex-1">
+                    <Text className="font-heading text-vupth-forest">
                       {p.name ?? "Profissional"}
                       {p.nickname ? ` (${p.nickname})` : ""}
                     </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+                    <Text className="font-body text-xs text-vupth-textSecondary">
                       {p.specialty ?? "Sem especialidade"}
                     </Text>
-                  </VStack>
+                  </View>
                   {invited ? (
-                    <Text fontFamily="$body" fontSize="$sm" color="$forest">
-                      Convite enviado
-                    </Text>
+                    <Text className="font-body text-sm text-vupth-forest">Convite enviado</Text>
                   ) : (
-                    <BrandButton
+                    <NwButton
                       title="Convidar"
                       onPress={() => handleInvite(p)}
                       isLoading={invitingId === p.id}
-                      h="$9"
+                      className="h-9 px-4 mt-0"
                     />
                   )}
-                </HStack>
+                </View>
               );
             })}
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

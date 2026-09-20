@@ -1,18 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  VStack,
-  HStack,
-  Text,
-  ScrollView,
-  Badge,
-  BadgeText,
-} from "@gluestack-ui/themed";
+import { View, Text, ScrollView, Alert, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
-import { Alert, RefreshControl } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { Button } from "@components/Button";
-import { BrandButton } from "@components/brand/Button";
+import { NwButton } from "@components/nw/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 
 type Affiliation = {
@@ -89,12 +80,12 @@ export default function OwnerAffiliationsScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$12" px="$4">
+      <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Solicitações"
           subtitle="Profissionais que pediram para se vincular ao seu estabelecimento."
@@ -102,100 +93,88 @@ export default function OwnerAffiliationsScreen() {
         />
 
         {isLoading && (
-          <VStack mt="$6">
+          <View className="mt-6">
             <SkeletonList count={3} />
-          </VStack>
+          </View>
         )}
 
         {!isLoading && pending.length === 0 && resolved.length === 0 && (
-          <VStack alignItems="center" mt="$12">
-            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
+          <View className="items-center mt-12">
+            <Text className="font-body text-vupth-textSecondary text-center">
               Nenhuma solicitação recebida ainda.
             </Text>
-            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$2" fontSize="$sm">
+            <Text className="font-body text-sm text-vupth-textSecondary text-center mt-2">
               Profissionais podem buscar seu estabelecimento pelo nome e solicitar vinculação.
             </Text>
-          </VStack>
+          </View>
         )}
 
         {pending.length > 0 && (
-          <VStack mb="$4">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
+          <View className="mb-4">
+            <Text className="font-heading text-vupth-textSecondary mb-2">
               Pendentes ({pending.length})
             </Text>
             {pending.map((aff) => (
-              <VStack
+              /* A borda âmbar é o que separa o pendente do histórico: pede ação. */
+              <View
                 key={aff.id}
-                bg="$brandSurface"
-                p="$4"
-                borderRadius="$md"
-                borderWidth="$1"
-                borderColor="$brandWarning"
-                mb="$2"
+                className="bg-vupth-surface p-4 rounded-md border border-vupth-warning mb-2"
               >
-                <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-                  {aff.professionalName}
-                </Text>
-                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
+                <Text className="font-heading text-vupth-forest">{aff.professionalName}</Text>
+                <Text className="font-body text-xs text-vupth-textSecondary mt-1">
                   {aff.type === "REQUEST" ? "Solicitou vinculação" : "Convite enviado"}
                 </Text>
-                <HStack mt="$3" space="sm">
-                  <BrandButton
+                <View className="flex-row gap-2 mt-3">
+                  <NwButton
                     title="Aceitar"
                     onPress={() => handleAccept(aff)}
                     isLoading={actionLoading === aff.id}
-                    h="$9"
-                    flex={1}
+                    className="flex-1 h-9 mt-0"
                   />
-                  <Button
+                  <NwButton
                     title="Rejeitar"
                     onPress={() => handleReject(aff)}
                     isLoading={actionLoading === aff.id}
-                    bg="$brandDanger"
-                    $active-bg="$brandDanger"
-                    textColor="$white"
-                    h="$9"
-                    flex={1}
+                    variant="danger"
+                    className="flex-1 h-9 mt-0"
                   />
-                </HStack>
-              </VStack>
+                </View>
+              </View>
             ))}
-          </VStack>
+          </View>
         )}
 
         {resolved.length > 0 && (
-          <VStack>
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
-              Historico
-            </Text>
+          <View>
+            <Text className="font-heading text-vupth-textSecondary mb-2">Historico</Text>
             {resolved.map((aff) => (
-              <HStack
+              <View
                 key={aff.id}
-                py="$3"
-                px="$4"
-                bg="$brandSurface"
-                borderRadius="$card"
-                mb="$2"
-                justifyContent="space-between"
-                alignItems="center"
+                className="flex-row items-center justify-between py-3 px-4 bg-vupth-surface rounded-card mb-2"
               >
-                <Text fontFamily="$body" color="$forest">
-                  {aff.professionalName}
-                </Text>
-                <Badge
-                  action={aff.status === "ACCEPTED" ? "success" : "error"}
-                  variant="solid"
-                  borderRadius="$md"
+                <Text className="font-body text-vupth-forest">{aff.professionalName}</Text>
+                <View
+                  className={`px-3 py-1 rounded-md ${
+                    aff.status === "ACCEPTED" ? "bg-vupth-greenTint" : "bg-vupth-dangerTint"
+                  }`}
                 >
-                  <BadgeText fontSize="$xs">
-                    {aff.status === "ACCEPTED" ? "Aceito" : aff.status === "REJECTED" ? "Rejeitado" : "Cancelado"}
-                  </BadgeText>
-                </Badge>
-              </HStack>
+                  <Text
+                    className={`font-body text-xs ${
+                      aff.status === "ACCEPTED" ? "text-vupth-forest" : "text-vupth-danger"
+                    }`}
+                  >
+                    {aff.status === "ACCEPTED"
+                      ? "Aceito"
+                      : aff.status === "REJECTED"
+                        ? "Rejeitado"
+                        : "Cancelado"}
+                  </Text>
+                </View>
+              </View>
             ))}
-          </VStack>
+          </View>
         )}
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
