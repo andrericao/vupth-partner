@@ -1,17 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 
-import {
-  VStack,
-  HStack,
-  Text,
-  Badge,
-  BadgeText,
-  ScrollView,
-  Pressable,
-  Divider,
-} from "@gluestack-ui/themed";
+import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
-import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useAttendanceStore } from "@store/attendance.store";
@@ -19,59 +9,53 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Finalizado", color: "$forest" },
-  CANCELLED: { label: "Cancelado", color: "$brandDanger" },
-  IN_PROGRESS: { label: "Em andamento", color: "$forest" },
-  PAUSED: { label: "Pausado", color: "$brandWarning" },
-  SCHEDULED: { label: "Agendado", color: "$brandTextSecondary" },
+// Selo do status: as tres familias que a tela distingue — concluido (verde),
+// recusado (vermelho) e "ainda acontecendo" (neutro). O Badge do Gluestack
+// pintava por `action`; aqui a classe diz a mesma coisa.
+const STATUS_LABELS: Record<string, { label: string; selo: string; texto: string }> = {
+  FINISHED: { label: "Finalizado", selo: "bg-vupth-greenTint", texto: "text-vupth-forest" },
+  CANCELLED: { label: "Cancelado", selo: "bg-vupth-dangerTint", texto: "text-vupth-danger" },
+  IN_PROGRESS: { label: "Em andamento", selo: "bg-vupth-greenTint", texto: "text-vupth-forest" },
+  PAUSED: { label: "Pausado", selo: "bg-vupth-accentPeach", texto: "text-vupth-forest" },
+  SCHEDULED: { label: "Agendado", selo: "bg-white", texto: "text-vupth-textSecondary" },
 };
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$brandTextSecondary" };
+  const statusInfo = STATUS_LABELS[item.status] ?? {
+    label: item.status,
+    selo: "bg-white",
+    texto: "text-vupth-textSecondary",
+  };
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <VStack
-      bg="$brandSurface"
-      p="$4"
-      borderRadius="$card"
-      mb="$3"
-    >
-      <HStack justifyContent="space-between" alignItems="center">
-        <VStack flex={1}>
-          <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-            {item.clientName}
-          </Text>
-          <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+    <View className="bg-vupth-surface p-4 rounded-card mb-3">
+      <View className="flex-row justify-between items-center">
+        <View className="flex-1">
+          <Text className="font-heading text-vupth-forest">{item.clientName}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary">
             Prof: {item.professionalName}
           </Text>
-        </VStack>
-        <Badge
-          action={item.status === "FINISHED" ? "success" : item.status === "CANCELLED" ? "error" : "info"}
-          variant="solid"
-          borderRadius="$md"
-        >
-          <BadgeText fontSize="$xs">{statusInfo.label}</BadgeText>
-        </Badge>
-      </HStack>
+        </View>
+        <View className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
+          <Text className={`font-body text-xs ${statusInfo.texto}`}>{statusInfo.label}</Text>
+        </View>
+      </View>
 
-      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
+      <Text className="font-body text-xs text-vupth-textSecondary mt-1">
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
 
-      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
-        {item.services.map((s) => s.customName).join(", ")}
+      <Text className="font-body text-sm text-vupth-textSecondary mt-1">
+        {item.services.map((sv) => sv.customName).join(", ")}
       </Text>
 
-      <HStack mt="$2" justifyContent="flex-end">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-          R$ {item.totalValue.toFixed(2)}
-        </Text>
-      </HStack>
-    </VStack>
+      <View className="flex-row justify-end mt-2">
+        <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
+      </View>
+    </View>
   );
 }
 
@@ -131,89 +115,84 @@ export default function OwnerAttendancesScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$12" px="$4">
+      <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Atendimentos"
           subtitle={establishment?.name ?? undefined}
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
 
-        <HStack mt="$4" space="sm" mb="$4">
+        <View className="flex-row gap-2 mt-4 mb-4">
           {filters.map((f) => (
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$forest" : "$brandSurface"}
-              py="$2"
-              px="$4"
-              borderRadius="$full"
-              flexShrink={0}
+              className={`py-2 px-4 rounded-full shrink-0 ${
+                filter === f.key ? "bg-vupth-forest" : "bg-vupth-surface"
+              }`}
             >
               <Text
                 numberOfLines={1}
-                fontFamily="$body"
-                color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
-                textAlign="center"
-                fontSize="$sm"
+                className={`font-body text-sm text-center ${
+                  filter === f.key ? "text-vupth-green" : "text-vupth-textSecondary"
+                }`}
               >
                 {f.label}
               </Text>
             </Pressable>
           ))}
-        </HStack>
+        </View>
 
         {isLoading && (
-          <VStack mt="$6">
+          <View className="mt-6">
             <SkeletonList count={3} />
-          </VStack>
+          </View>
         )}
 
         {errorMsg && (
-          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
-            <Text fontFamily="$body" color="$brandDanger" textAlign="center">
-              {errorMsg}
-            </Text>
-            <Pressable onPress={loadHistory} mt="$2">
-              <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
+          <View className="bg-vupth-surface p-4 rounded-card mt-4">
+            <Text className="font-body text-vupth-danger text-center">{errorMsg}</Text>
+            <Pressable onPress={loadHistory} className="mt-2">
+              <Text className="font-body text-sm text-vupth-forest text-center">
                 Tentar novamente
               </Text>
             </Pressable>
-          </VStack>
+          </View>
         )}
 
         {loaded && !errorMsg && history.length > 0 && (
-          <VStack bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$greenTint" mb="$4">
-            <HStack justifyContent="space-between" alignItems="center">
-              <Text fontFamily="$body" fontSize="$sm" color="$forest">
+          <View className="bg-vupth-greenTint p-3 rounded-card mb-4">
+            <View className="flex-row justify-between items-center">
+              <Text className="font-body text-sm text-vupth-forest">
                 {history.length} atendimento{history.length !== 1 ? "s" : ""}
               </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
+              <Text className="font-heading text-vupth-forest">
                 R$ {totalRevenue.toFixed(2)}
               </Text>
-            </HStack>
-          </VStack>
+            </View>
+          </View>
         )}
 
         {loaded && !errorMsg && history.length === 0 && (
-          <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$12">
+          <Text className="font-body text-vupth-textSecondary text-center mt-12">
             Nenhum atendimento encontrado
           </Text>
         )}
 
         {loaded && !errorMsg && history.length > 0 && (
-          <VStack>
-            <Divider mb="$4" />
+          <View>
+            <View className="h-px bg-vupth-border mb-4" />
             {history.map((item) => (
               <AttendanceHistoryCard key={item.id} item={item} />
             ))}
-          </VStack>
+          </View>
         )}
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
