@@ -1,21 +1,18 @@
 import { useState, useCallback, useEffect } from "react";
 import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
 import {
-  VStack,
-  Heading,
+  View,
   Text,
-  HStack,
-  Badge,
-  BadgeText,
-  Divider,
   ScrollView,
   Pressable,
-} from "@gluestack-ui/themed";
-import { Alert, RefreshControl, BackHandler } from "react-native";
+  Alert,
+  RefreshControl,
+  BackHandler,
+} from "react-native";
 import { ChevronRight, Moon, Pause } from "lucide-react-native";
 import { router } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
-import { BrandButton } from "@components/brand/Button";
+import { NwButton } from "@components/nw/Button";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -148,32 +145,30 @@ export default function OwnerDashboardScreen() {
 
   if (!establishment) {
     return (
-      <VStack flex={1} pb="$6" px="$4">
+      <View className="flex-1 pb-6 px-4">
         <ScreenHeader title="Meu estabelecimento" />
-        <VStack flex={1} alignItems="center" justifyContent="center">
-          <Text fontFamily="$body" color="$brandTextSecondary">
+        <View className="flex-1 items-center justify-center">
+          <Text className="font-body text-vupth-textSecondary">
             Nenhum estabelecimento encontrado.
           </Text>
-          <BrandButton
+          <NwButton
             title="Criar estabelecimento"
             onPress={() => router.push("/(owner)/onboarding/establishment" as any)}
-            mt="$9"
           />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     );
   }
 
   return (
     <ScrollView
-        ref={rolagemRef}
-      w="$full"
-      bg="$brandBackground"
+      ref={rolagemRef}
+      className="w-full bg-white"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$6" px="$4" bg="$brandBackground">
+      <View className="flex-1 pb-6 px-4 bg-white">
         {/* O nome da loja E o titulo desta tela, e o status a acao do canto —
             entao viram title/subtitle/action do cabecalho, em vez de um bloco
             proprio com margem propria embaixo de um Header vazio. */}
@@ -182,21 +177,26 @@ export default function OwnerDashboardScreen() {
           subtitle={serviceTypeLabel(establishment.service_type)}
           action={
             /* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
-               `$border` cinza sobre fundo claro a pilula sumia. */
-            <VStack
-              bg={isOpen ? "$brandGreen" : status === "TEMPORARILY_CLOSED" ? "$brandWarning" : "$brandBorder"}
-              borderRadius="$full"
-              px="$3"
-              py="$1.5"
+               cinza da borda sobre fundo claro a pilula sumia. */
+            <View
+              className={`rounded-full px-3 py-1.5 ${
+                isOpen
+                  ? "bg-vupth-green"
+                  : status === "TEMPORARILY_CLOSED"
+                    ? "bg-vupth-warning"
+                    : "bg-vupth-border"
+              }`}
             >
               <Text
-                fontFamily="$display"
-                fontSize={11}
-                color={isOpen || status === "TEMPORARILY_CLOSED" ? "$forest" : "$brandTextSecondary"}
+                className={`font-display text-[11px] ${
+                  isOpen || status === "TEMPORARILY_CLOSED"
+                    ? "text-vupth-forest"
+                    : "text-vupth-textSecondary"
+                }`}
               >
                 {badge.label}
               </Text>
-            </VStack>
+            </View>
           }
         />
 
@@ -210,149 +210,118 @@ export default function OwnerDashboardScreen() {
             pras filas, no lugar do botão ambar "Ver Filas" que competia com
             tudo.
 
-            [marca-vupth] O verde-marca e ACENTO, não cor de "clicavel". O
-            Pencil usa 1-2 elementos brand-green por tela contra 3-8 em
-            surface (PROF · 03: 1 verde, 8 surface) — quando tudo e verde,
-            nada e. Com a fila VAZIA não há destaque a dar (zero e a ausencia
-            de fila, não o número que importa), entao o card fica neutro e o
-            verde sobra pra única ação da tela. Com gente na fila ele reassume
-            o acento e as ações viram texto discreto. */}
-        <HStack mt="$5" space="md">
+            [marca-vupth] O verde-marca e ACENTO, não cor de "clicavel". Com a
+            fila VAZIA não há destaque a dar (zero e a ausencia de fila, não o
+            número que importa), entao o card fica neutro e o verde sobra pra
+            única ação da tela. */}
+        <View className="flex-row gap-4 mt-5">
           <Pressable
-            flex={1}
             onPress={() =>
               router.push({
                 pathname: "/(owner)/queues",
                 params: { establishmentId: establishment.id },
               } as any)
             }
-            bg={totalInQueue > 0 ? "$brandGreen" : "$brandSurface"}
-            p="$4"
-            borderRadius="$card"
+            className={`flex-1 p-4 rounded-card ${
+              totalInQueue > 0 ? "bg-vupth-green" : "bg-vupth-surface"
+            }`}
           >
-            <HStack justifyContent="space-between" alignItems="flex-start">
-              <Text fontFamily="$display" fontSize={32} color="$forest">
-                {totalInQueue}
-              </Text>
+            <View className="flex-row justify-between items-start">
+              <Text className="font-display text-[32px] text-vupth-forest">{totalInQueue}</Text>
               <ChevronRight size={18} color="#163300" />
-            </HStack>
+            </View>
             <Text
-              fontFamily="$body"
-              fontSize="$xs"
-              fontWeight="$semibold"
-              color={totalInQueue > 0 ? "$forest" : "$brandTextSecondary"}
-              mt="$1"
+              className={`font-body text-xs mt-1 ${
+                totalInQueue > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+              }`}
             >
               na fila agora
             </Text>
           </Pressable>
 
-          <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-            <Text fontFamily="$display" fontSize={32} color="$forest">
+          <View className="flex-1 bg-vupth-surface p-4 rounded-card">
+            <Text className="font-display text-[32px] text-vupth-forest">
               {queueData?.available_professionals ?? 0}
             </Text>
-            <Text
-              fontFamily="$body"
-              fontSize="$xs"
-              fontWeight="$semibold"
-              color="$brandTextSecondary"
-              mt="$1"
-            >
+            <Text className="font-body text-xs text-vupth-textSecondary mt-1">
               profissionais ativos
             </Text>
-          </VStack>
-        </HStack>
+          </View>
+        </View>
 
         {/* Abrir e a unica acao de PESO aqui: e o que destrava o dia. Encerrar
             e pausar viraram texto discreto — não sao erros nem perigo, sao o
             fim normal do expediente (e "fechar" em vermelho fazia parecer que
             o dono estava fechando o NEGOCIO). */}
         {!isOpen ? (
-          <VStack mt="$5">
-            {/* [marca-vupth] Era bg="$forest" (par forest+branco, fora da id): o
-                Button/Primary do Pencil e brandGreen+forest. BrandButton já
-                nasce nesse par — sem overrides de cor. */}
-            <BrandButton
+          <View className="mt-5">
+            <NwButton
               title={status === "TEMPORARILY_CLOSED" ? "Reabrir agora" : "Abrir estabelecimento"}
               onPress={() => setStatus("OPEN")}
               isLoading={isToggling}
             />
-          </VStack>
+          </View>
         ) : (
-          <VStack mt="$5" space="sm">
-            <HStack justifyContent="space-between" alignItems="center">
-              <Pressable
-                onPress={() => {
-                  if (hasActiveWork) {
-                    Alert.alert(
-                      "Ainda tem gente na fila",
-                      "Use 'Pausar entrada' para não receber novos clientes e terminar quem já está esperando.",
-                    );
-                    return;
-                  }
-                  setStatus("CLOSED");
-                }}
-                disabled={isToggling}
-              >
-                <HStack space="xs" alignItems="center">
-                  <Moon size={15} color="#454745" />
-                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandTextSecondary">
-                    Encerrar o dia
-                  </Text>
-                </HStack>
-              </Pressable>
+          <View className="mt-5 flex-row justify-between items-center">
+            <Pressable
+              onPress={() => {
+                if (hasActiveWork) {
+                  Alert.alert(
+                    "Ainda tem gente na fila",
+                    "Use 'Pausar entrada' para não receber novos clientes e terminar quem já está esperando."
+                  );
+                  return;
+                }
+                setStatus("CLOSED");
+              }}
+              disabled={isToggling}
+            >
+              <View className="flex-row items-center gap-1">
+                <Moon size={15} color="#454745" />
+                <Text className="font-body text-sm text-vupth-textSecondary">Encerrar o dia</Text>
+              </View>
+            </Pressable>
 
-              <Pressable
-                onPress={() => setStatus("TEMPORARILY_CLOSED")}
-                disabled={isToggling}
-              >
-                <HStack space="xs" alignItems="center">
-                  <Pause size={15} color="#454745" />
-                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandTextSecondary">
-                    Pausar entrada
-                  </Text>
-                </HStack>
-              </Pressable>
-            </HStack>
-          </VStack>
+            <Pressable onPress={() => setStatus("TEMPORARILY_CLOSED")} disabled={isToggling}>
+              <View className="flex-row items-center gap-1">
+                <Pause size={15} color="#454745" />
+                <Text className="font-body text-sm text-vupth-textSecondary">Pausar entrada</Text>
+              </View>
+            </Pressable>
+          </View>
         )}
 
-        <Divider my="$6" />
+        <View className="h-px bg-vupth-border my-6" />
 
-        <HStack justifyContent="space-between" alignItems="center" mb="$3">
-          <Heading size="lg" fontFamily="$heading">
-            Profissionais
-          </Heading>
-          <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="font-heading text-lg text-vupth-forest">Profissionais</Text>
+          <Text className="font-body text-sm text-vupth-textSecondary">
             {professionals.length} cadastrado{professionals.length !== 1 ? "s" : ""}
           </Text>
-        </HStack>
+        </View>
 
         {professionals.length === 0 ? (
-          // [marca-vupth] Card do estado vazio no `surface` da marca (era
-          // coolGray + borda cinza, paleta neutra generica) e o botao em
-          // OUTLINE: e acao terciaria dentro de um placeholder, nao pode ter
-          // o mesmo peso do "Reabrir agora" logo acima — eram duas pilulas
-          // verde-marca identicas na mesma tela.
-          <VStack bg="$brandSurface" p="$4" borderRadius="$card" alignItems="center">
-            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center">
+          // O botao vai em OUTLINE: e acao terciaria dentro de um placeholder,
+          // nao pode ter o mesmo peso do "Reabrir agora" logo acima — eram duas
+          // pilulas verde-marca identicas na mesma tela.
+          <View className="bg-vupth-surface p-4 rounded-card items-center">
+            <Text className="font-body text-vupth-textSecondary text-center">
               Nenhum profissional vinculado
             </Text>
-            <BrandButton
+            <NwButton
               title="Adicionar profissional"
-              variant="outline"
+              variant="vupthOutline"
               onPress={() =>
                 router.push({
                   pathname: "/(owner)/add-professional",
                   params: { establishmentId: establishment.id },
                 } as any)
               }
-              mt="$3"
-              h="$10"
+              className="mt-3 h-10"
             />
-          </VStack>
+          </View>
         ) : (
-          <VStack space="sm">
+          <View className="gap-2">
             {professionals.map((prof) => (
               <Pressable
                 key={prof.id}
@@ -366,39 +335,43 @@ export default function OwnerDashboardScreen() {
                     },
                   } as any)
                 }
-                bg="$brandSurface"
-                py="$4"
-                px="$4"
-                borderRadius="$card"
-                $active-bg="$brandSurface"
+                className="bg-vupth-surface py-4 px-4 rounded-card"
               >
-                <HStack justifyContent="space-between" alignItems="center">
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-                      {prof.name}
-                    </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+                <View className="flex-row justify-between items-center">
+                  <View className="flex-1">
+                    <Text className="font-heading text-vupth-forest">{prof.name}</Text>
+                    <Text className="font-body text-xs text-vupth-textSecondary">
                       {prof.specialty ?? "Sem especialidade"}
                     </Text>
-                  </VStack>
-                  <VStack alignItems="flex-end">
-                    <Badge
-                      action={prof.queue_count > 0 ? "success" : "muted"}
-                      variant="solid"
-                      borderRadius="$md"
+                  </View>
+                  <View className="items-end">
+                    <View
+                      className={`px-3 py-1 rounded-md ${
+                        prof.queue_count > 0 ? "bg-vupth-greenTint" : "bg-white"
+                      }`}
                     >
-                      <BadgeText fontSize="$xs">{prof.queue_count} na fila</BadgeText>
-                    </Badge>
-                    <Text fontFamily="$body" fontSize="$xs" color={prof.is_available ? "$forest" : "$brandTextSecondary"} mt="$1">
+                      <Text
+                        className={`font-body text-xs ${
+                          prof.queue_count > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+                        }`}
+                      >
+                        {prof.queue_count} na fila
+                      </Text>
+                    </View>
+                    <Text
+                      className={`font-body text-xs mt-1 ${
+                        prof.is_available ? "text-vupth-forest" : "text-vupth-textSecondary"
+                      }`}
+                    >
                       {prof.is_available ? "Disponivel" : "Indisponivel"}
                     </Text>
-                  </VStack>
-                </HStack>
+                  </View>
+                </View>
               </Pressable>
             ))}
-          </VStack>
+          </View>
         )}
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
