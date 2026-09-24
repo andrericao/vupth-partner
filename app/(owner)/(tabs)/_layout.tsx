@@ -14,6 +14,12 @@ export default function OwnerTabsLayout() {
 
   return (
     <Tabs
+      // Voltar = a aba visitada ANTES, e nao a primeira (Andre, 24/09: na web,
+      // o voltar da tela Sistema caia na Fila). O padrao do React Navigation e
+      // "firstRoute", e as telas ocultas daqui (Sistema, Dados cadastrais, Meus
+      // Servicos...) sao ABAS — pelo historico, todas voltavam ao inicio.
+      // Travado em voltarNasAbas.test.ts.
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
