@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
+import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -102,6 +103,7 @@ function Grupo({ label, children }: { label: string; children: ReactNode }) {
 export default function ProfessionalSettingsScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const pilula = usePilulaTopo(rolagemRef);
 
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
@@ -166,111 +168,116 @@ export default function ProfessionalSettingsScreen() {
     "Complete seu cadastro para atender";
 
   return (
-    <ScrollView
-        ref={rolagemRef} className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      {/* [marca-vupth] Cabecalho proprio (Pencil PROF · 04): forest + avatar
-          com iniciais + nome. Substitui o Header padrao nesta tela — o .pen
-          não repete a barra VUPTH/icone de papel aqui, o avatar já identifica
-          quem esta logado. */}
-      <View
-        className="bg-vupth-forest items-center px-4 pb-7"
-        style={{ paddingTop: insets.top + 24 }}
-      >
-        <View className="w-[72px] h-[72px] rounded-full bg-vupth-green items-center justify-center">
-          <Text className="font-display text-2xl text-vupth-forest">
-            {initials(professional?.name)}
-          </Text>
-        </View>
-        <Text className="font-display text-xl text-white mt-3">
-          {professional?.name ?? "Profissional"}
-        </Text>
-        <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
-      </View>
-
-      <View className="flex-1 py-6 px-4 gap-5">
-        {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
-            faixa. Encaminha para buscar estabelecimento / adicionar serviço. */}
-        <CompletionCard
-          completion={completion}
-          routeFor={routeFor}
-        />
-
-        {/* Quem acumula os dois papeis troca de area por aqui — mesmo padrao
-            do menu do dono (menu.tsx "Atender como profissional"). Fica FORA
-            dos grupos porque não e configuracao, e mudar de contexto. */}
-        {isOwner && (
-          <Pressable
-            onPress={() => router.replace("/(owner)/dashboard" as any)}
-            className="flex-row items-center gap-3 bg-vupth-greenTint rounded-card px-4 py-3.5"
-          >
-            <ArrowLeftRight size={19} color="#163300" />
-            <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
-              Área do dono
+    <View style={{ flex: 1 }}>
+      <ScrollView
+          ref={rolagemRef}
+          onScroll={pilula.onScroll}
+          scrollEventThrottle={64} className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        {/* [marca-vupth] Cabecalho proprio (Pencil PROF · 04): forest + avatar
+            com iniciais + nome. Substitui o Header padrao nesta tela — o .pen
+            não repete a barra VUPTH/icone de papel aqui, o avatar já identifica
+            quem esta logado. */}
+        <View
+          className="bg-vupth-forest items-center px-4 pb-7"
+          style={{ paddingTop: insets.top + 24 }}
+        >
+          <View className="w-[72px] h-[72px] rounded-full bg-vupth-green items-center justify-center">
+            <Text className="font-display text-2xl text-vupth-forest">
+              {initials(professional?.name)}
             </Text>
-            <ChevronRight size={16} color="#163300" />
-          </Pressable>
-        )}
-
-        <Grupo label="Atendimento">
-          <MenuCard
-            icon={Scissors}
-            title="Meus serviços"
-            hint="preços e duração do que você oferece"
-            dot={servicosDot}
-            onPress={() => router.push("/(professional)/my-services?from=settings" as any)}
-          />
-          <MenuCard
-            icon={Utensils}
-            title="Refeições"
-            hint="horários + aviso na hora (ligar/desligar)"
-            last
-            onPress={() => router.push("/(professional)/meals?from=settings" as any)}
-          />
-        </Grupo>
-
-        <Grupo label="Conta">
-          <MenuCard
-            icon={User}
-            title="Dados cadastrais"
-            hint="nome, apelido, e-mail, senha"
-            dot={dadosDot}
-            onPress={() => router.push("/(professional)/settings-account" as any)}
-          />
-          <MenuCard
-            icon={LinkIcon}
-            title="Vínculo"
-            hint={professional?.establishment_name ?? "não vinculado — buscar estabelecimento"}
-            badge={pendingInvites}
-            dot={vinculoDot}
-            last
-            onPress={() => router.push("/(professional)/settings-vinculo" as any)}
-          />
-        </Grupo>
-
-        {/* Sair da conta fica solto e em vermelho, fora dos grupos: e a unica
-            ação aqui que tira a pessoa do app (Pencil PROF · 04, mesmo padrao
-            do menu do dono). */}
-        {/* Versao, atualizacao e diagnostico viraram DESTINO (pedido dele,
-            09/09). E este grupo e um item da LISTA, nao rodape: ele estava
-            abaixo do "Sair da conta", que e o fim da tela — la nao se procura
-            configuracao, se procura a saida (correcao dele, 11/09). */}
-        <Grupo label="Sistema">
-          <MenuCard
-            icon={Info}
-            title="Versão do app"
-            hint="atualização e informações técnicas"
-            last
-            onPress={() => router.push("/(professional)/sistema" as any)}
-          />
-        </Grupo>
-
-        <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
-          <Text className="font-body text-sm font-semibold text-vupth-danger text-center">
-            Sair da conta
+          </View>
+          <Text className="font-display text-xl text-white mt-3">
+            {professional?.name ?? "Profissional"}
           </Text>
-        </Pressable>
-
-      </View>
-    </ScrollView>
+          <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
+        </View>
+  
+        <View className="flex-1 py-6 px-4 gap-5">
+          {/* Checklist de prontidao (2 completes) mora aqui — a Home so mostra a
+              faixa. Encaminha para buscar estabelecimento / adicionar serviço. */}
+          <CompletionCard
+            completion={completion}
+            routeFor={routeFor}
+          />
+  
+          {/* Quem acumula os dois papeis troca de area por aqui — mesmo padrao
+              do menu do dono (menu.tsx "Atender como profissional"). Fica FORA
+              dos grupos porque não e configuracao, e mudar de contexto. */}
+          {isOwner && (
+            <Pressable
+              onPress={() => router.replace("/(owner)/dashboard" as any)}
+              className="flex-row items-center gap-3 bg-vupth-greenTint rounded-card px-4 py-3.5"
+            >
+              <ArrowLeftRight size={19} color="#163300" />
+              <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
+                Área do dono
+              </Text>
+              <ChevronRight size={16} color="#163300" />
+            </Pressable>
+          )}
+  
+          <Grupo label="Atendimento">
+            <MenuCard
+              icon={Scissors}
+              title="Meus serviços"
+              hint="preços e duração do que você oferece"
+              dot={servicosDot}
+              onPress={() => router.push("/(professional)/my-services?from=settings" as any)}
+            />
+            <MenuCard
+              icon={Utensils}
+              title="Refeições"
+              hint="horários + aviso na hora (ligar/desligar)"
+              last
+              onPress={() => router.push("/(professional)/meals?from=settings" as any)}
+            />
+          </Grupo>
+  
+          <Grupo label="Conta">
+            <MenuCard
+              icon={User}
+              title="Dados cadastrais"
+              hint="nome, apelido, e-mail, senha"
+              dot={dadosDot}
+              onPress={() => router.push("/(professional)/settings-account" as any)}
+            />
+            <MenuCard
+              icon={LinkIcon}
+              title="Vínculo"
+              hint={professional?.establishment_name ?? "não vinculado — buscar estabelecimento"}
+              badge={pendingInvites}
+              dot={vinculoDot}
+              last
+              onPress={() => router.push("/(professional)/settings-vinculo" as any)}
+            />
+          </Grupo>
+  
+          {/* Sair da conta fica solto e em vermelho, fora dos grupos: e a unica
+              ação aqui que tira a pessoa do app (Pencil PROF · 04, mesmo padrao
+              do menu do dono). */}
+          {/* Versao, atualizacao e diagnostico viraram DESTINO (pedido dele,
+              09/09). E este grupo e um item da LISTA, nao rodape: ele estava
+              abaixo do "Sair da conta", que e o fim da tela — la nao se procura
+              configuracao, se procura a saida (correcao dele, 11/09). */}
+          <Grupo label="Sistema">
+            <MenuCard
+              icon={Info}
+              title="Versão do app"
+              hint="atualização e informações técnicas"
+              last
+              onPress={() => router.push("/(professional)/sistema" as any)}
+            />
+          </Grupo>
+  
+          <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
+            <Text className="font-body text-sm font-semibold text-vupth-danger text-center">
+              Sair da conta
+            </Text>
+          </Pressable>
+  
+        </View>
+      </ScrollView>
+      <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+    </View>
   );
 }

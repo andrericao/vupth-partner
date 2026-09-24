@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
+import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { useIsFocused } from "@react-navigation/native";
 import {
   VStack,
@@ -12,7 +13,7 @@ import {
   ScrollView,
   Divider,
 } from "@gluestack-ui/themed";
-import { RefreshControl } from "react-native";
+import { RefreshControl, View } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
@@ -92,6 +93,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
 export default function MyDayScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const pilula = usePilulaTopo(rolagemRef);
 
   const professional = useProfessionalStore((s) => s.professional);
   const isFocused = useIsFocused();
@@ -180,192 +182,197 @@ export default function MyDayScreen() {
   ];
 
   return (
-    <ScrollView
-        ref={rolagemRef}
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <VStack flex={1} pb="$12" px="$4">
-        {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
-            conceito interno da tela ("MEU DIA", que uniu Relatórios +
-            Atendimentos); "Relatórios" ficou só no rotulo da aba, mais curto
-            pra caber no rodape. */}
-        <ScreenHeader
-          title="Seu dia"
-          onBack={() => router.navigate("/(professional)/queue" as any)}
-        />
-
-        <HStack mt="$6" space="sm">
-          {periods.map((p) => (
-            <Pressable
-              key={p.key}
-              onPress={() => setPeriod(p.key)}
-              bg={period === p.key ? "$forest" : "$brandSurface"}
-              py="$2"
-              px="$4"
-              borderRadius="$full"
-              flexShrink={0}
-            >
-              <Text
-                numberOfLines={1}
-                fontFamily="$body"
-                color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
-                textAlign="center"
-                fontSize="$sm"
+    <View style={{ flex: 1 }}>
+      <ScrollView
+          ref={rolagemRef}
+          onScroll={pilula.onScroll}
+          scrollEventThrottle={64}
+        w="$full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <VStack flex={1} pb="$12" px="$4">
+          {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
+              conceito interno da tela ("MEU DIA", que uniu Relatórios +
+              Atendimentos); "Relatórios" ficou só no rotulo da aba, mais curto
+              pra caber no rodape. */}
+          <ScreenHeader
+            title="Seu dia"
+            onBack={() => router.navigate("/(professional)/queue" as any)}
+          />
+  
+          <HStack mt="$6" space="sm">
+            {periods.map((p) => (
+              <Pressable
+                key={p.key}
+                onPress={() => setPeriod(p.key)}
+                bg={period === p.key ? "$forest" : "$brandSurface"}
+                py="$2"
+                px="$4"
+                borderRadius="$full"
+                flexShrink={0}
               >
-                {p.label}
-              </Text>
-            </Pressable>
-          ))}
-        </HStack>
-
-        <ExpedienteCard />
-
-        <Divider my="$6" />
-
-        {period === "day" && (
-          <HStack space="md" mb="$4">
-            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                Na fila agora
-              </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                {queueCount}
-              </Text>
-            </VStack>
-            <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                Espera estimada
-              </Text>
-              <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                {waitMinutes} min
-              </Text>
-            </VStack>
-          </HStack>
-        )}
-
-        {reportLoading ? (
-          <VStack mt="$2">
-            <SkeletonList count={2} />
-          </VStack>
-        ) : (
-          <VStack space="md">
-            {/* [marca-vupth] Receita virou o card-heroi (brandGreen, primeira
-                posição) — o Pencil (PROF · 03) da esse tratamento pro
-                faturado, o único número em dinheiro da tela. Era greenTint
-                (tom fraco) na segunda posição, com o valor MENOR que o dos
-                outros cards (2xl vs 3xl) — inconsistente pro card que deveria
-                pesar mais, não menos. */}
-            <HStack space="md">
-              <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$forest">
-                  Receita
+                <Text
+                  numberOfLines={1}
+                  fontFamily="$body"
+                  color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
+                  textAlign="center"
+                  fontSize="$sm"
+                >
+                  {p.label}
                 </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                  R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
-                </Text>
-              </VStack>
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                  Atendimentos
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                  {report?.totalAttendances ?? 0}
-                </Text>
-              </VStack>
-            </HStack>
-
-            <HStack space="md">
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                  Duracao media
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$forest">
-                  {Math.round(report?.avgDurationMinutes ?? 0)} min
-                </Text>
-              </VStack>
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                  Serviço mais feito
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$forest">
-                  {humanizeService(report?.topService ?? null)}
-                </Text>
-              </VStack>
-            </HStack>
-
-            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" textAlign="center" mt="$2">
-              {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
-              atendimentos finalizados
-            </Text>
-          </VStack>
-        )}
-
-        <Divider my="$6" />
-
-        <Heading size="lg" fontFamily="$heading" mb="$3">
-          Historico
-        </Heading>
-
-        <HStack space="sm" mb="$4">
-          {filters.map((f) => (
-            <Pressable
-              key={f.key}
-              onPress={() => setFilter(f.key)}
-              bg={filter === f.key ? "$forest" : "$brandSurface"}
-              py="$2"
-              px="$4"
-              borderRadius="$full"
-              flexShrink={0}
-            >
-              <Text
-                numberOfLines={1}
-                fontFamily="$body"
-                color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
-                textAlign="center"
-                fontSize="$sm"
-              >
-                {f.label}
-              </Text>
-            </Pressable>
-          ))}
-        </HStack>
-
-        {historyLoading && (
-          <VStack mt="$2">
-            <SkeletonList count={3} />
-          </VStack>
-        )}
-
-        {historyError && (
-          <VStack bg="$brandWarning" p="$4" borderRadius="$card" mt="$2">
-            <Text fontFamily="$body" color="$forest" textAlign="center">
-              {historyError}
-            </Text>
-            <Pressable onPress={loadHistory} mt="$2">
-              <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
-                Tentar novamente
-              </Text>
-            </Pressable>
-          </VStack>
-        )}
-
-        {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
-          <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$6">
-            Nenhum atendimento encontrado
-          </Text>
-        )}
-
-        {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
-          <VStack>
-            {history.map((item) => (
-              <AttendanceHistoryCard key={item.id} item={item} />
+              </Pressable>
             ))}
-          </VStack>
-        )}
-      </VStack>
-    </ScrollView>
+          </HStack>
+  
+          <ExpedienteCard />
+  
+          <Divider my="$6" />
+  
+          {period === "day" && (
+            <HStack space="md" mb="$4">
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                  Na fila agora
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
+                  {queueCount}
+                </Text>
+              </VStack>
+              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                  Espera estimada
+                </Text>
+                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
+                  {waitMinutes} min
+                </Text>
+              </VStack>
+            </HStack>
+          )}
+  
+          {reportLoading ? (
+            <VStack mt="$2">
+              <SkeletonList count={2} />
+            </VStack>
+          ) : (
+            <VStack space="md">
+              {/* [marca-vupth] Receita virou o card-heroi (brandGreen, primeira
+                  posição) — o Pencil (PROF · 03) da esse tratamento pro
+                  faturado, o único número em dinheiro da tela. Era greenTint
+                  (tom fraco) na segunda posição, com o valor MENOR que o dos
+                  outros cards (2xl vs 3xl) — inconsistente pro card que deveria
+                  pesar mais, não menos. */}
+              <HStack space="md">
+                <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card">
+                  <Text fontFamily="$body" fontSize="$sm" color="$forest">
+                    Receita
+                  </Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
+                    R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
+                  </Text>
+                </VStack>
+                <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                    Atendimentos
+                  </Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
+                    {report?.totalAttendances ?? 0}
+                  </Text>
+                </VStack>
+              </HStack>
+  
+              <HStack space="md">
+                <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                    Duracao media
+                  </Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$forest">
+                    {Math.round(report?.avgDurationMinutes ?? 0)} min
+                  </Text>
+                </VStack>
+                <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
+                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
+                    Serviço mais feito
+                  </Text>
+                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$forest">
+                    {humanizeService(report?.topService ?? null)}
+                  </Text>
+                </VStack>
+              </HStack>
+  
+              <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" textAlign="center" mt="$2">
+                {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
+                atendimentos finalizados
+              </Text>
+            </VStack>
+          )}
+  
+          <Divider my="$6" />
+  
+          <Heading size="lg" fontFamily="$heading" mb="$3">
+            Historico
+          </Heading>
+  
+          <HStack space="sm" mb="$4">
+            {filters.map((f) => (
+              <Pressable
+                key={f.key}
+                onPress={() => setFilter(f.key)}
+                bg={filter === f.key ? "$forest" : "$brandSurface"}
+                py="$2"
+                px="$4"
+                borderRadius="$full"
+                flexShrink={0}
+              >
+                <Text
+                  numberOfLines={1}
+                  fontFamily="$body"
+                  color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
+                  textAlign="center"
+                  fontSize="$sm"
+                >
+                  {f.label}
+                </Text>
+              </Pressable>
+            ))}
+          </HStack>
+  
+          {historyLoading && (
+            <VStack mt="$2">
+              <SkeletonList count={3} />
+            </VStack>
+          )}
+  
+          {historyError && (
+            <VStack bg="$brandWarning" p="$4" borderRadius="$card" mt="$2">
+              <Text fontFamily="$body" color="$forest" textAlign="center">
+                {historyError}
+              </Text>
+              <Pressable onPress={loadHistory} mt="$2">
+                <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
+                  Tentar novamente
+                </Text>
+              </Pressable>
+            </VStack>
+          )}
+  
+          {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
+            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$6">
+              Nenhum atendimento encontrado
+            </Text>
+          )}
+  
+          {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
+            <VStack>
+              {history.map((item) => (
+                <AttendanceHistoryCard key={item.id} item={item} />
+              ))}
+            </VStack>
+          )}
+        </VStack>
+      </ScrollView>
+      <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+    </View>
   );
 }

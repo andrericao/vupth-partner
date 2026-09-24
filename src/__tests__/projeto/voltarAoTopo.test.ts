@@ -30,3 +30,15 @@ describe("tocar na aba ativa volta ao topo", () => {
     expect(src).toMatch(/<ScrollView[\s\S]{0,400}?ref=\{rolagemRef\}/);
   });
 });
+
+// 24/09 (Andre): além do toque na aba ativa, a pílula "↑ Voltar ao topo" —
+// que surge ao descer. As mesmas 7 abas.
+describe("a pílula voltar ao topo está nas abas", () => {
+  it.each(ABAS)("%s mostra a pílula e liga a rolagem nela", (arquivo) => {
+    const src = fs.readFileSync(path.join(RAIZ, arquivo), "utf8");
+    expect(src).toContain("usePilulaTopo(rolagemRef)");
+    expect(src).toMatch(/<PilulaVoltarAoTopo[^>]*visivel=\{pilula\.visivel\}/);
+    expect(src).toMatch(/onScroll=\{pilula\.onScroll\}/);
+  });
+});
+

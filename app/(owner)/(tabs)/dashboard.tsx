@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
+import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import {
   View,
   Text,
@@ -27,6 +28,7 @@ import { avisoDeAberturaSemProfissional } from "@lib/abertura";
 export default function OwnerDashboardScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const pilula = usePilulaTopo(rolagemRef);
 
   const establishment = useEstablishmentStore((s) => s.establishment);
   const updateOpenStatus = useEstablishmentStore((s) => s.updateOpenStatus);
@@ -161,217 +163,222 @@ export default function OwnerDashboardScreen() {
   }
 
   return (
-    <ScrollView
-      ref={rolagemRef}
-      className="w-full bg-white"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <View className="flex-1 pb-6 px-4 bg-white">
-        {/* O nome da loja E o titulo desta tela, e o status a acao do canto —
-            entao viram title/subtitle/action do cabecalho, em vez de um bloco
-            proprio com margem propria embaixo de um Header vazio. */}
-        <ScreenHeader
-          title={establishment.name}
-          subtitle={serviceTypeLabel(establishment.service_type)}
-          action={
-            /* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
-               cinza da borda sobre fundo claro a pilula sumia. */
-            <View
-              className={`rounded-full px-3 py-1.5 ${
-                isOpen
-                  ? "bg-vupth-green"
-                  : status === "TEMPORARILY_CLOSED"
-                    ? "bg-vupth-warning"
-                    : "bg-vupth-border"
-              }`}
-            >
-              <Text
-                className={`font-display text-[11px] ${
-                  isOpen || status === "TEMPORARILY_CLOSED"
-                    ? "text-vupth-forest"
-                    : "text-vupth-textSecondary"
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        ref={rolagemRef}
+          onScroll={pilula.onScroll}
+          scrollEventThrottle={64}
+        className="w-full bg-white"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View className="flex-1 pb-6 px-4 bg-white">
+          {/* O nome da loja E o titulo desta tela, e o status a acao do canto —
+              entao viram title/subtitle/action do cabecalho, em vez de um bloco
+              proprio com margem propria embaixo de um Header vazio. */}
+          <ScreenHeader
+            title={establishment.name}
+            subtitle={serviceTypeLabel(establishment.service_type)}
+            action={
+              /* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
+                 cinza da borda sobre fundo claro a pilula sumia. */
+              <View
+                className={`rounded-full px-3 py-1.5 ${
+                  isOpen
+                    ? "bg-vupth-green"
+                    : status === "TEMPORARILY_CLOSED"
+                      ? "bg-vupth-warning"
+                      : "bg-vupth-border"
                 }`}
               >
-                {badge.label}
-              </Text>
-            </View>
-          }
-        />
-
-        <ReadinessFaixa
-          completion={completion}
-          targetRoute={`/(owner)/establishment-data?establishmentId=${establishmentId ?? ""}`}
-          goalNoun="aparecer aos clientes"
-        />
-
-        {/* Os dois numeros que o dono abre o app pra ver. A fila e o CAMINHO
-            pras filas, no lugar do botão ambar "Ver Filas" que competia com
-            tudo.
-
-            [marca-vupth] O verde-marca e ACENTO, não cor de "clicavel". Com a
-            fila VAZIA não há destaque a dar (zero e a ausencia de fila, não o
-            número que importa), entao o card fica neutro e o verde sobra pra
-            única ação da tela. */}
-        <View className="flex-row gap-4 mt-5">
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/(owner)/queues",
-                params: { establishmentId: establishment.id },
-              } as any)
+                <Text
+                  className={`font-display text-[11px] ${
+                    isOpen || status === "TEMPORARILY_CLOSED"
+                      ? "text-vupth-forest"
+                      : "text-vupth-textSecondary"
+                  }`}
+                >
+                  {badge.label}
+                </Text>
+              </View>
             }
-            className={`flex-1 p-4 rounded-card ${
-              totalInQueue > 0 ? "bg-vupth-green" : "bg-vupth-surface"
-            }`}
-          >
-            <View className="flex-row justify-between items-start">
-              <Text className="font-display text-[32px] text-vupth-forest">{totalInQueue}</Text>
-              <ChevronRight size={18} color="#163300" />
-            </View>
-            <Text
-              className={`font-body text-xs mt-1 ${
-                totalInQueue > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
-              }`}
-            >
-              na fila agora
-            </Text>
-          </Pressable>
-
-          <View className="flex-1 bg-vupth-surface p-4 rounded-card">
-            <Text className="font-display text-[32px] text-vupth-forest">
-              {queueData?.available_professionals ?? 0}
-            </Text>
-            <Text className="font-body text-xs text-vupth-textSecondary mt-1">
-              profissionais ativos
-            </Text>
-          </View>
-        </View>
-
-        {/* Abrir e a unica acao de PESO aqui: e o que destrava o dia. Encerrar
-            e pausar viraram texto discreto — não sao erros nem perigo, sao o
-            fim normal do expediente (e "fechar" em vermelho fazia parecer que
-            o dono estava fechando o NEGOCIO). */}
-        {!isOpen ? (
-          <View className="mt-5">
-            <NwButton
-              title={status === "TEMPORARILY_CLOSED" ? "Reabrir agora" : "Abrir estabelecimento"}
-              onPress={() => setStatus("OPEN")}
-              isLoading={isToggling}
-            />
-          </View>
-        ) : (
-          <View className="mt-5 flex-row justify-between items-center">
+          />
+  
+          <ReadinessFaixa
+            completion={completion}
+            targetRoute={`/(owner)/establishment-data?establishmentId=${establishmentId ?? ""}`}
+            goalNoun="aparecer aos clientes"
+          />
+  
+          {/* Os dois numeros que o dono abre o app pra ver. A fila e o CAMINHO
+              pras filas, no lugar do botão ambar "Ver Filas" que competia com
+              tudo.
+  
+              [marca-vupth] O verde-marca e ACENTO, não cor de "clicavel". Com a
+              fila VAZIA não há destaque a dar (zero e a ausencia de fila, não o
+              número que importa), entao o card fica neutro e o verde sobra pra
+              única ação da tela. */}
+          <View className="flex-row gap-4 mt-5">
             <Pressable
-              onPress={() => {
-                if (hasActiveWork) {
-                  Alert.alert(
-                    "Ainda tem gente na fila",
-                    "Use 'Pausar entrada' para não receber novos clientes e terminar quem já está esperando."
-                  );
-                  return;
-                }
-                setStatus("CLOSED");
-              }}
-              disabled={isToggling}
-            >
-              <View className="flex-row items-center gap-1">
-                <Moon size={15} color="#454745" />
-                <Text className="font-body text-sm text-vupth-textSecondary">Encerrar o dia</Text>
-              </View>
-            </Pressable>
-
-            <Pressable onPress={() => setStatus("TEMPORARILY_CLOSED")} disabled={isToggling}>
-              <View className="flex-row items-center gap-1">
-                <Pause size={15} color="#454745" />
-                <Text className="font-body text-sm text-vupth-textSecondary">Pausar entrada</Text>
-              </View>
-            </Pressable>
-          </View>
-        )}
-
-        <View className="h-px bg-vupth-border my-6" />
-
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="font-heading text-lg text-vupth-forest">Profissionais</Text>
-          <Text className="font-body text-sm text-vupth-textSecondary">
-            {professionals.length} cadastrado{professionals.length !== 1 ? "s" : ""}
-          </Text>
-        </View>
-
-        {professionals.length === 0 ? (
-          // O botao vai em OUTLINE: e acao terciaria dentro de um placeholder,
-          // nao pode ter o mesmo peso do "Reabrir agora" logo acima — eram duas
-          // pilulas verde-marca identicas na mesma tela.
-          <View className="bg-vupth-surface p-4 rounded-card items-center">
-            <Text className="font-body text-vupth-textSecondary text-center">
-              Nenhum profissional vinculado
-            </Text>
-            <NwButton
-              title="Adicionar profissional"
-              variant="vupthOutline"
               onPress={() =>
                 router.push({
-                  pathname: "/(owner)/add-professional",
+                  pathname: "/(owner)/queues",
                   params: { establishmentId: establishment.id },
                 } as any)
               }
-              className="mt-3 h-10"
-            />
-          </View>
-        ) : (
-          <View className="gap-2">
-            {professionals.map((prof) => (
-              <Pressable
-                key={prof.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(owner)/professional-queue",
-                    params: {
-                      professionalId: prof.id,
-                      establishmentId: establishment.id,
-                      professionalName: prof.name,
-                    },
-                  } as any)
-                }
-                className="bg-vupth-surface py-4 px-4 rounded-card"
+              className={`flex-1 p-4 rounded-card ${
+                totalInQueue > 0 ? "bg-vupth-green" : "bg-vupth-surface"
+              }`}
+            >
+              <View className="flex-row justify-between items-start">
+                <Text className="font-display text-[32px] text-vupth-forest">{totalInQueue}</Text>
+                <ChevronRight size={18} color="#163300" />
+              </View>
+              <Text
+                className={`font-body text-xs mt-1 ${
+                  totalInQueue > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+                }`}
               >
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-1">
-                    <Text className="font-heading text-vupth-forest">{prof.name}</Text>
-                    <Text className="font-body text-xs text-vupth-textSecondary">
-                      {prof.specialty ?? "Sem especialidade"}
-                    </Text>
-                  </View>
-                  <View className="items-end">
-                    <View
-                      className={`px-3 py-1 rounded-md ${
-                        prof.queue_count > 0 ? "bg-vupth-greenTint" : "bg-white"
-                      }`}
-                    >
-                      <Text
-                        className={`font-body text-xs ${
-                          prof.queue_count > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
-                        }`}
-                      >
-                        {prof.queue_count} na fila
-                      </Text>
-                    </View>
-                    <Text
-                      className={`font-body text-xs mt-1 ${
-                        prof.is_available ? "text-vupth-forest" : "text-vupth-textSecondary"
-                      }`}
-                    >
-                      {prof.is_available ? "Disponivel" : "Indisponivel"}
-                    </Text>
-                  </View>
+                na fila agora
+              </Text>
+            </Pressable>
+  
+            <View className="flex-1 bg-vupth-surface p-4 rounded-card">
+              <Text className="font-display text-[32px] text-vupth-forest">
+                {queueData?.available_professionals ?? 0}
+              </Text>
+              <Text className="font-body text-xs text-vupth-textSecondary mt-1">
+                profissionais ativos
+              </Text>
+            </View>
+          </View>
+  
+          {/* Abrir e a unica acao de PESO aqui: e o que destrava o dia. Encerrar
+              e pausar viraram texto discreto — não sao erros nem perigo, sao o
+              fim normal do expediente (e "fechar" em vermelho fazia parecer que
+              o dono estava fechando o NEGOCIO). */}
+          {!isOpen ? (
+            <View className="mt-5">
+              <NwButton
+                title={status === "TEMPORARILY_CLOSED" ? "Reabrir agora" : "Abrir estabelecimento"}
+                onPress={() => setStatus("OPEN")}
+                isLoading={isToggling}
+              />
+            </View>
+          ) : (
+            <View className="mt-5 flex-row justify-between items-center">
+              <Pressable
+                onPress={() => {
+                  if (hasActiveWork) {
+                    Alert.alert(
+                      "Ainda tem gente na fila",
+                      "Use 'Pausar entrada' para não receber novos clientes e terminar quem já está esperando."
+                    );
+                    return;
+                  }
+                  setStatus("CLOSED");
+                }}
+                disabled={isToggling}
+              >
+                <View className="flex-row items-center gap-1">
+                  <Moon size={15} color="#454745" />
+                  <Text className="font-body text-sm text-vupth-textSecondary">Encerrar o dia</Text>
                 </View>
               </Pressable>
-            ))}
+  
+              <Pressable onPress={() => setStatus("TEMPORARILY_CLOSED")} disabled={isToggling}>
+                <View className="flex-row items-center gap-1">
+                  <Pause size={15} color="#454745" />
+                  <Text className="font-body text-sm text-vupth-textSecondary">Pausar entrada</Text>
+                </View>
+              </Pressable>
+            </View>
+          )}
+  
+          <View className="h-px bg-vupth-border my-6" />
+  
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="font-heading text-lg text-vupth-forest">Profissionais</Text>
+            <Text className="font-body text-sm text-vupth-textSecondary">
+              {professionals.length} cadastrado{professionals.length !== 1 ? "s" : ""}
+            </Text>
           </View>
-        )}
-      </View>
-    </ScrollView>
+  
+          {professionals.length === 0 ? (
+            // O botao vai em OUTLINE: e acao terciaria dentro de um placeholder,
+            // nao pode ter o mesmo peso do "Reabrir agora" logo acima — eram duas
+            // pilulas verde-marca identicas na mesma tela.
+            <View className="bg-vupth-surface p-4 rounded-card items-center">
+              <Text className="font-body text-vupth-textSecondary text-center">
+                Nenhum profissional vinculado
+              </Text>
+              <NwButton
+                title="Adicionar profissional"
+                variant="vupthOutline"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/add-professional",
+                    params: { establishmentId: establishment.id },
+                  } as any)
+                }
+                className="mt-3 h-10"
+              />
+            </View>
+          ) : (
+            <View className="gap-2">
+              {professionals.map((prof) => (
+                <Pressable
+                  key={prof.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(owner)/professional-queue",
+                      params: {
+                        professionalId: prof.id,
+                        establishmentId: establishment.id,
+                        professionalName: prof.name,
+                      },
+                    } as any)
+                  }
+                  className="bg-vupth-surface py-4 px-4 rounded-card"
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-1">
+                      <Text className="font-heading text-vupth-forest">{prof.name}</Text>
+                      <Text className="font-body text-xs text-vupth-textSecondary">
+                        {prof.specialty ?? "Sem especialidade"}
+                      </Text>
+                    </View>
+                    <View className="items-end">
+                      <View
+                        className={`px-3 py-1 rounded-md ${
+                          prof.queue_count > 0 ? "bg-vupth-greenTint" : "bg-white"
+                        }`}
+                      >
+                        <Text
+                          className={`font-body text-xs ${
+                            prof.queue_count > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+                          }`}
+                        >
+                          {prof.queue_count} na fila
+                        </Text>
+                      </View>
+                      <Text
+                        className={`font-body text-xs mt-1 ${
+                          prof.is_available ? "text-vupth-forest" : "text-vupth-textSecondary"
+                        }`}
+                      >
+                        {prof.is_available ? "Disponivel" : "Indisponivel"}
+                      </Text>
+                    </View>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+      <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+    </View>
   );
 }

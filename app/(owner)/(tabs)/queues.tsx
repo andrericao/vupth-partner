@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
+import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { Star } from "lucide-react-native";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -135,6 +136,7 @@ function ProfessionalCard({
 export default function OwnerQueuesScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const pilula = usePilulaTopo(rolagemRef);
 
   // Filas virou ABA — e aba nao recebe parametro de rota. O `establishmentId`
   // do param so existe quando a tela e aberta empilhada (ex.: pelo card do
@@ -156,61 +158,66 @@ export default function OwnerQueuesScreen() {
   const professionals = data?.professionals ?? [];
 
   return (
-    <ScrollView
-      ref={rolagemRef}
-      className="w-full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <View className="flex-1 pb-8 px-4">
-        {/* Sem botao de voltar: virou raiz de aba. O subtitulo carrega o total
-            que antes ocupava dois cartões de número — o dono já ve a contagem
-            por profissional logo abaixo, entao repetir o agregado em destaque
-            só empurrava a lista pra baixo. */}
-        <ScreenHeader
-          title="Filas"
-          subtitle={
-            data
-              ? data.total_in_queue === 0
-                ? "Ninguém esperando agora"
-                : `${data.total_in_queue} ${data.total_in_queue === 1 ? "pessoa esperando" : "pessoas esperando"} agora`
-              : "Carregando..."
-          }
-        />
-
-        {isLoading && !data && (
-          <View className="mt-6">
-            <SkeletonList count={3} />
-          </View>
-        )}
-
-        {professionals.map((prof) => (
-          <ProfessionalCard
-            key={prof.id}
-            professional={prof}
-            establishmentId={establishmentId ?? ""}
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        ref={rolagemRef}
+          onScroll={pilula.onScroll}
+          scrollEventThrottle={64}
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View className="flex-1 pb-8 px-4">
+          {/* Sem botao de voltar: virou raiz de aba. O subtitulo carrega o total
+              que antes ocupava dois cartões de número — o dono já ve a contagem
+              por profissional logo abaixo, entao repetir o agregado em destaque
+              só empurrava a lista pra baixo. */}
+          <ScreenHeader
+            title="Filas"
+            subtitle={
+              data
+                ? data.total_in_queue === 0
+                  ? "Ninguém esperando agora"
+                  : `${data.total_in_queue} ${data.total_in_queue === 1 ? "pessoa esperando" : "pessoas esperando"} agora`
+                : "Carregando..."
+            }
           />
-        ))}
-
-        {!isLoading && professionals.length === 0 && (
-          <View className="items-center mt-12">
-            <Text className="font-body text-vupth-textSecondary text-center">
-              Nenhum profissional cadastrado
-            </Text>
-            <NwButton
-              title="Adicionar profissional"
-              onPress={() =>
-                router.push({
-                  pathname: "/(owner)/add-professional",
-                  params: { establishmentId: establishmentId ?? "" },
-                } as any)
-              }
-              className="mt-4"
+  
+          {isLoading && !data && (
+            <View className="mt-6">
+              <SkeletonList count={3} />
+            </View>
+          )}
+  
+          {professionals.map((prof) => (
+            <ProfessionalCard
+              key={prof.id}
+              professional={prof}
+              establishmentId={establishmentId ?? ""}
             />
-          </View>
-        )}
-      </View>
-    </ScrollView>
+          ))}
+  
+          {!isLoading && professionals.length === 0 && (
+            <View className="items-center mt-12">
+              <Text className="font-body text-vupth-textSecondary text-center">
+                Nenhum profissional cadastrado
+              </Text>
+              <NwButton
+                title="Adicionar profissional"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(owner)/add-professional",
+                    params: { establishmentId: establishmentId ?? "" },
+                  } as any)
+                }
+                className="mt-4"
+              />
+            </View>
+          )}
+        </View>
+      </ScrollView>
+      <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+    </View>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
+import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
@@ -259,6 +260,7 @@ function QueueRow({
 export default function ProfessionalQueueScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const pilula = usePilulaTopo(rolagemRef);
 
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
@@ -730,271 +732,276 @@ export default function ProfessionalQueueScreen() {
       {/* flex-1 e obrigatorio aqui: como ScrollView virou FILHO (antes era a
           raiz da tela), sem ele a lista cresceria com o conteudo e empurraria a
           barra fixa do rodape para fora da tela. */}
-      <ScrollView
-        ref={rolagemRef}
-        className="flex-1 w-full"
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-      <View className="flex-1 pb-12 px-4">
-        {/* O banco de opcoes vira `action` do cabecalho — antes era um bloco
-            proprio com margem propria embaixo do Header. */}
-        <ScreenHeader
-          title="Fila"
-          action={
-            <View className="flex-row items-center gap-2">
-            {/* DS3 — a pilula do proprio status. Ate aqui o `work_status` so
-                existia dentro da tela de Opcoes: era preciso ABRIR o menu pra
-                descobrir se voce estava trabalhando. */}
-            <StatusPill
-              current={professional?.work_status ? WORK_TO_KEY[professional.work_status] : null}
-              onSelect={selectStatus}
-            />
-            {/* 🔴 Na WEB nao existe puxar-para-atualizar: o gesto e de dedo, e o
-                RefreshControl do react-native-web nao responde ao mouse. Sem
-                isto, quem usa o navegador nao tinha NENHUMA forma de forcar a
-                atualizacao da fila — so recarregar a pagina inteira e perder o
-                lugar (device, 08/09). No aparelho o gesto continua sendo o
-                caminho, entao o botao nao aparece la. */}
-            {Platform.OS === "web" && (
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          ref={rolagemRef}
+          onScroll={pilula.onScroll}
+          scrollEventThrottle={64}
+          className="flex-1 w-full"
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+        <View className="flex-1 pb-12 px-4">
+          {/* O banco de opcoes vira `action` do cabecalho — antes era um bloco
+              proprio com margem propria embaixo do Header. */}
+          <ScreenHeader
+            title="Fila"
+            action={
+              <View className="flex-row items-center gap-2">
+              {/* DS3 — a pilula do proprio status. Ate aqui o `work_status` so
+                  existia dentro da tela de Opcoes: era preciso ABRIR o menu pra
+                  descobrir se voce estava trabalhando. */}
+              <StatusPill
+                current={professional?.work_status ? WORK_TO_KEY[professional.work_status] : null}
+                onSelect={selectStatus}
+              />
+              {/* 🔴 Na WEB nao existe puxar-para-atualizar: o gesto e de dedo, e o
+                  RefreshControl do react-native-web nao responde ao mouse. Sem
+                  isto, quem usa o navegador nao tinha NENHUMA forma de forcar a
+                  atualizacao da fila — so recarregar a pagina inteira e perder o
+                  lugar (device, 08/09). No aparelho o gesto continua sendo o
+                  caminho, entao o botao nao aparece la. */}
+              {Platform.OS === "web" && (
+                <Pressable
+                  onPress={onRefresh}
+                  accessibilityRole="button"
+                  accessibilityLabel="Atualizar a fila"
+                  testID="atualizar-fila"
+                  hitSlop={8}
+                  disabled={refreshing}
+                  className={refreshing ? "opacity-40" : undefined}
+                >
+                  <RotateCw size={20} color="#163300" />
+                </Pressable>
+              )}
+              {/* Nav v2 (2026-07-23): a reticencia NAVEGA p/ a tela de opcoes
+                  (nada de modal — "mais amigavel a tela inteira"). Badge =
+                  refeicao na janela + solicitacoes de corte. */}
               <Pressable
-                onPress={onRefresh}
-                accessibilityRole="button"
-                accessibilityLabel="Atualizar a fila"
-                testID="atualizar-fila"
-                hitSlop={8}
-                disabled={refreshing}
-                className={refreshing ? "opacity-40" : undefined}
-              >
-                <RotateCw size={20} color="#163300" />
-              </Pressable>
-            )}
-            {/* Nav v2 (2026-07-23): a reticencia NAVEGA p/ a tela de opcoes
-                (nada de modal — "mais amigavel a tela inteira"). Badge =
-                refeicao na janela + solicitacoes de corte. */}
-            <Pressable
-            onPress={() => router.push("/(professional)/queue-options" as any)}
-            accessibilityRole="button"
-            accessibilityLabel="Opções da fila"
-            hitSlop={8}
-            className="w-10 h-10 rounded-xl bg-vupth-surface items-center justify-center active:bg-vupth-greenTint"
-          >
-            {/* Era um BANCO — quebra-galho do Andre, nunca escolha de arte, e
-                marcado como provisorio na doc desde sempre. Banco nao diz
-                "opcoes": nada no desenho sugeria status, refeicoes ou fechar
-                fila, que e o que mora atras deste botao. Vira reticencia, que
-                e o que o proprio time chamava de "mais opcoes". */}
-            <Ellipsis size={22} color="#163300" />
-            {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
-                DENTRO do menu — a pendência de cadastro ficou de fora porque o
-                dot dela mora na aba Configurações (levar ao lugar certo). */}
-            <View style={{ position: "absolute", top: -5, right: -5 }}>
-              <NotificationBadge
-                testID="menu-dot"
-                count={queueMenuCount({
-                  pendingRequests: pendingCutRequests,
-                  mealPending: currentMealSignal != null,
-                })}
-              />
-            </View>
-          </Pressable>
-            </View>
-          }
-        />
-
-        {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
-          <View className="flex-row items-center gap-1.5 mt-1">
-            <Star size={13} color="#454745" fill="#454745" />
-            <Text className="font-body text-sm text-vupth-textSecondary">
-              {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
-            </Text>
-          </View>
-        )}
-
-        {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
-        {/* O card inteiro abre o menu, alem dos botoes: quem tentou finalizar
-            pelo MENU (e nao pelos botoes) tem que achar as acoes onde procurou —
-            foi ali que o Andre procurou por quatro rodadas. */}
-        {currentAttendance && (
-          <Pressable
-            // Toque simples TAMBEM abre (Andre, 24/09): so segurar ninguem
-            // descobria — "nem eu sabia". Os botoes de dentro (Pausar,
-            // Finalizar) continuam agindo sozinhos: o toque vai ao mais fundo.
-            onPress={() => setMenuTarget(currentAttendance)}
-            onLongPress={() => setMenuTarget(currentAttendance)}
-            accessibilityRole="button"
-            accessibilityLabel={`Opções de ${currentAttendance.clientName}`}
-            accessibilityHint="Abre Finalizar, Pausar e Remover"
-          >
-          <ServingCard
-            attendance={currentAttendance}
-            onFinish={() =>
-              handleAction(async () => {
-                // Pausado nao finaliza (S36): retoma e finaliza, em vez de
-                // deixar o profissional preso num botao que e recusado.
-                await finalizarAtendimento(
-                  currentAttendance.id,
-                  currentAttendance.status === "PAUSED",
-                  { retomar: resumeAttendance, finalizar: finishAttendance }
-                );
-                clearAttendanceStart(currentAttendance.id);
-              })
+              onPress={() => router.push("/(professional)/queue-options" as any)}
+              accessibilityRole="button"
+              accessibilityLabel="Opções da fila"
+              hitSlop={8}
+              className="w-10 h-10 rounded-xl bg-vupth-surface items-center justify-center active:bg-vupth-greenTint"
+            >
+              {/* Era um BANCO — quebra-galho do Andre, nunca escolha de arte, e
+                  marcado como provisorio na doc desde sempre. Banco nao diz
+                  "opcoes": nada no desenho sugeria status, refeicoes ou fechar
+                  fila, que e o que mora atras deste botao. Vira reticencia, que
+                  e o que o proprio time chamava de "mais opcoes". */}
+              <Ellipsis size={22} color="#163300" />
+              {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
+                  DENTRO do menu — a pendência de cadastro ficou de fora porque o
+                  dot dela mora na aba Configurações (levar ao lugar certo). */}
+              <View style={{ position: "absolute", top: -5, right: -5 }}>
+                <NotificationBadge
+                  testID="menu-dot"
+                  count={queueMenuCount({
+                    pendingRequests: pendingCutRequests,
+                    mealPending: currentMealSignal != null,
+                  })}
+                />
+              </View>
+            </Pressable>
+              </View>
             }
-            onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
-            onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
           />
-          </Pressable>
-        )}
-
-        {/* O pedido de encaixe estava so num ponto de 12px no menu ☰ — e o
-            profissional nao olha o menu, olha a FILA. Fica depois do
-            atendimento em curso (que sempre manda) e ANTES da lista de espera,
-            porque tem relogio proprio: 5 minutos, e some sozinho. */}
-        {resumoSolicitacoes && (
-          <SolicitacoesCard
-            resumo={resumoSolicitacoes}
-            onPress={() => router.push("/(professional)/cut-requests" as any)}
-          />
-        )}
-
-        {/* BLOQUEIO vem primeiro: vinculado, mas o backend nao o lista na
-            fila por nao ter servico. Era o ULTIMO bloco do arquivo, abaixo de
-            tudo — sendo que quando ele aparece nao ha mais nada na tela. */}
-        {semServico && (
-          <View className="mt-4">
-            <BlocoBloqueio
-              titulo="Você ainda não aparece para os clientes"
-              texto="Você está vinculado, mas precisa de pelo menos um serviço cadastrado para entrar na fila e receber clientes."
-              acao="Adicionar serviço"
-              rota="/(professional)/my-services?from=queue"
+  
+          {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
+            <View className="flex-row items-center gap-1.5 mt-1">
+              <Star size={13} color="#454745" fill="#454745" />
+              <Text className="font-body text-sm text-vupth-textSecondary">
+                {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
+              </Text>
+            </View>
+          )}
+  
+          {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
+          {/* O card inteiro abre o menu, alem dos botoes: quem tentou finalizar
+              pelo MENU (e nao pelos botoes) tem que achar as acoes onde procurou —
+              foi ali que o Andre procurou por quatro rodadas. */}
+          {currentAttendance && (
+            <Pressable
+              // Toque simples TAMBEM abre (Andre, 24/09): so segurar ninguem
+              // descobria — "nem eu sabia". Os botoes de dentro (Pausar,
+              // Finalizar) continuam agindo sozinhos: o toque vai ao mais fundo.
+              onPress={() => setMenuTarget(currentAttendance)}
+              onLongPress={() => setMenuTarget(currentAttendance)}
+              accessibilityRole="button"
+              accessibilityLabel={`Opções de ${currentAttendance.clientName}`}
+              accessibilityHint="Abre Finalizar, Pausar e Remover"
+            >
+            <ServingCard
+              attendance={currentAttendance}
+              onFinish={() =>
+                handleAction(async () => {
+                  // Pausado nao finaliza (S36): retoma e finaliza, em vez de
+                  // deixar o profissional preso num botao que e recusado.
+                  await finalizarAtendimento(
+                    currentAttendance.id,
+                    currentAttendance.status === "PAUSED",
+                    { retomar: resumeAttendance, finalizar: finishAttendance }
+                  );
+                  clearAttendanceStart(currentAttendance.id);
+                })
+              }
+              onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
+              onResume={() => handleAction(() => resumeAttendance(currentAttendance.id))}
             />
-          </View>
-        )}
-
-        {/* A faixa de prontidao NAO acumula com o bloqueio. Nesta tela ela so
-            pode estar cobrando um passo — "1+ servico" —, ja que "vinculado"
-            e pre-requisito para chegar aqui. Ou seja: quando o bloqueio acima
-            aparece, os dois cartoes dizem A MESMA COISA, e o de cima diz de
-            forma mais vaga ("falta 1 passo") do que o de baixo, que nomeia o
-            passo e leva direto a ele. */}
-        {!semServico && (
-          <ReadinessFaixa
-            completion={completion}
-            targetRoute="/(professional)/settings"
-            goalNoun="atender clientes"
-          />
-        )}
-
-        {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
-            chips — liberam tela para a fila e para o botao fixo do rodape. */}
-        {myProfessional && (
-          <View className="flex-row gap-2 mt-4 items-center">
-            <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
-              <Users size={13} color="#163300" />
-              <Text className="font-heading text-xs text-vupth-forest">
-                {myProfessional.queue_count} na fila
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
-              <Clock size={13} color="#163300" />
-              <Text className="font-heading text-xs text-vupth-forest">
-                {myProfessional.estimated_wait_minutes} min
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {isLoading && !data && (
-          <View className="mt-6">
-            <SkeletonList count={3} />
-          </View>
-        )}
-
-        {waitingList.length > 0 && (
-          <View className="mt-6">
-            <Titulo nivel={2} className="mb-2">
-              Lista de Espera ({waitingList.length})
-            </Titulo>
-            {waitingList.map((att, idx) => (
-              <QueueRow
-                key={att.id}
-                attendance={att}
-                position={idx + 1}
-                isFirst={idx === 0}
-                onMenu={() => setMenuTarget(att)}
+            </Pressable>
+          )}
+  
+          {/* O pedido de encaixe estava so num ponto de 12px no menu ☰ — e o
+              profissional nao olha o menu, olha a FILA. Fica depois do
+              atendimento em curso (que sempre manda) e ANTES da lista de espera,
+              porque tem relogio proprio: 5 minutos, e some sozinho. */}
+          {resumoSolicitacoes && (
+            <SolicitacoesCard
+              resumo={resumoSolicitacoes}
+              onPress={() => router.push("/(professional)/cut-requests" as any)}
+            />
+          )}
+  
+          {/* BLOQUEIO vem primeiro: vinculado, mas o backend nao o lista na
+              fila por nao ter servico. Era o ULTIMO bloco do arquivo, abaixo de
+              tudo — sendo que quando ele aparece nao ha mais nada na tela. */}
+          {semServico && (
+            <View className="mt-4">
+              <BlocoBloqueio
+                titulo="Você ainda não aparece para os clientes"
+                texto="Você está vinculado, mas precisa de pelo menos um serviço cadastrado para entrar na fila e receber clientes."
+                acao="Adicionar serviço"
+                rota="/(professional)/my-services?from=queue"
               />
-            ))}
-          </View>
-        )}
-
-        {/* Refeicoes sairam da tela (foram p/ o menu, design 2026-07-20). Fica
-            só a faixa da refeição EM ANDAMENTO, porque "Encerrar" precisa estar
-            a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
-        {activeMeal && (
-          <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-card">
-            <UtensilsCrossed size={17} color="#163300" />
-            <View className="flex-1">
-              <Text className="font-heading text-sm text-vupth-forest">
-                {mealName(activeMeal.description)} em andamento
-              </Text>
-              <Text className="font-body text-xs text-vupth-textSecondary">
-                {activeMeal.durationMinutes}min previstos
-              </Text>
             </View>
-            {/* Faixa pessego = fundo ja colorido: e o caso do Button/Secondary
-                do desenho. Antes o fundo vinha por className e brigava com o
-                verde do `primary` — o mesmo conflito que escondia o Finalizar. */}
-            <NwButton
-              title="Encerrar"
-              onPress={() => handleFinishMeal(activeMeal)}
-              variant="vupthSecondary"
-              className="h-9 px-4"
+          )}
+  
+          {/* A faixa de prontidao NAO acumula com o bloqueio. Nesta tela ela so
+              pode estar cobrando um passo — "1+ servico" —, ja que "vinculado"
+              e pre-requisito para chegar aqui. Ou seja: quando o bloqueio acima
+              aparece, os dois cartoes dizem A MESMA COISA, e o de cima diz de
+              forma mais vaga ("falta 1 passo") do que o de baixo, que nomeia o
+              passo e leva direto a ele. */}
+          {!semServico && (
+            <ReadinessFaixa
+              completion={completion}
+              targetRoute="/(professional)/settings"
+              goalNoun="atender clientes"
             />
-          </View>
-        )}
-
-        {/* DS3 (c) — a chave de "aceitando novos" fica no PE da lista, nao no
-            cabecalho: nao e um estado meu (isso e a pilula), e uma propriedade
-            da fila — e a decisao nasce olhando o fim dela. */}
-        {!isLoading && myProfessional && (
-          <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
-        )}
-
-        {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao
-            mais frequente do dia e estava enterrada tres toques adentro, no
-            mesmo lugar do status. Vive ABAIXO da lista, porque e sobre ela que
-            se age, e em `ghost` pra nao brigar com o "Iniciar proximo" fixo do
-            rodape — dois botoes cheios na mesma tela e uma escolha, nao uma
-            acao. Aparece tambem com a fila vazia, que e quando o cliente que
-            chega andando importa mais. */}
-        {!isLoading && myProfessional && (
-          <NwButton
-            title="Adicionar cliente"
-            variant="vupthGhost"
-            onPress={() => router.push("/(professional)/add-guest" as any)}
-            className="self-start mt-3"
-            icon={<UserPlus size={16} color="#163300" />}
-          />
-        )}
-
-        {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
-          /* VAZIO nao e BLOQUEIO: aqui esta tudo certo, so nao ha ninguem
-              ainda — e nao ha o que o profissional possa fazer a respeito.
-              Entao vem em `surface`, sem acento e sem acao, ao contrario do
-              BlocoBloqueio. O `flex-1 items-center justify-center` de antes
-              nao centralizava nada (o pai e o conteudo de um ScrollView), so
-              empurrava o texto pro meio da largura. */
-          <EstadoVazio
-            doodle="fila"
-            titulo="Nenhum cliente na fila"
-            texto="Novos clientes aparecerão aqui automaticamente."
-            className="mt-6"
-          />
-        )}
-
+          )}
+  
+          {/* Metricas COMPACTAS (design 2026-07-18): os 2 cards verdes viraram
+              chips — liberam tela para a fila e para o botao fixo do rodape. */}
+          {myProfessional && (
+            <View className="flex-row gap-2 mt-4 items-center">
+              <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
+                <Users size={13} color="#163300" />
+                <Text className="font-heading text-xs text-vupth-forest">
+                  {myProfessional.queue_count} na fila
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
+                <Clock size={13} color="#163300" />
+                <Text className="font-heading text-xs text-vupth-forest">
+                  {myProfessional.estimated_wait_minutes} min
+                </Text>
+              </View>
+            </View>
+          )}
+  
+          {isLoading && !data && (
+            <View className="mt-6">
+              <SkeletonList count={3} />
+            </View>
+          )}
+  
+          {waitingList.length > 0 && (
+            <View className="mt-6">
+              <Titulo nivel={2} className="mb-2">
+                Lista de Espera ({waitingList.length})
+              </Titulo>
+              {waitingList.map((att, idx) => (
+                <QueueRow
+                  key={att.id}
+                  attendance={att}
+                  position={idx + 1}
+                  isFirst={idx === 0}
+                  onMenu={() => setMenuTarget(att)}
+                />
+              ))}
+            </View>
+          )}
+  
+          {/* Refeicoes sairam da tela (foram p/ o menu, design 2026-07-20). Fica
+              só a faixa da refeição EM ANDAMENTO, porque "Encerrar" precisa estar
+              a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
+          {activeMeal && (
+            <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-card">
+              <UtensilsCrossed size={17} color="#163300" />
+              <View className="flex-1">
+                <Text className="font-heading text-sm text-vupth-forest">
+                  {mealName(activeMeal.description)} em andamento
+                </Text>
+                <Text className="font-body text-xs text-vupth-textSecondary">
+                  {activeMeal.durationMinutes}min previstos
+                </Text>
+              </View>
+              {/* Faixa pessego = fundo ja colorido: e o caso do Button/Secondary
+                  do desenho. Antes o fundo vinha por className e brigava com o
+                  verde do `primary` — o mesmo conflito que escondia o Finalizar. */}
+              <NwButton
+                title="Encerrar"
+                onPress={() => handleFinishMeal(activeMeal)}
+                variant="vupthSecondary"
+                className="h-9 px-4"
+              />
+            </View>
+          )}
+  
+          {/* DS3 (c) — a chave de "aceitando novos" fica no PE da lista, nao no
+              cabecalho: nao e um estado meu (isso e a pilula), e uma propriedade
+              da fila — e a decisao nasce olhando o fim dela. */}
+          {!isLoading && myProfessional && (
+            <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
+          )}
+  
+          {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao
+              mais frequente do dia e estava enterrada tres toques adentro, no
+              mesmo lugar do status. Vive ABAIXO da lista, porque e sobre ela que
+              se age, e em `ghost` pra nao brigar com o "Iniciar proximo" fixo do
+              rodape — dois botoes cheios na mesma tela e uma escolha, nao uma
+              acao. Aparece tambem com a fila vazia, que e quando o cliente que
+              chega andando importa mais. */}
+          {!isLoading && myProfessional && (
+            <NwButton
+              title="Adicionar cliente"
+              variant="vupthGhost"
+              onPress={() => router.push("/(professional)/add-guest" as any)}
+              className="self-start mt-3"
+              icon={<UserPlus size={16} color="#163300" />}
+            />
+          )}
+  
+          {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (
+            /* VAZIO nao e BLOQUEIO: aqui esta tudo certo, so nao ha ninguem
+                ainda — e nao ha o que o profissional possa fazer a respeito.
+                Entao vem em `surface`, sem acento e sem acao, ao contrario do
+                BlocoBloqueio. O `flex-1 items-center justify-center` de antes
+                nao centralizava nada (o pai e o conteudo de um ScrollView), so
+                empurrava o texto pro meio da largura. */
+            <EstadoVazio
+              doodle="fila"
+              titulo="Nenhum cliente na fila"
+              texto="Novos clientes aparecerão aqui automaticamente."
+              className="mt-6"
+            />
+          )}
+  
+        </View>
+        </ScrollView>
+        <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
       </View>
-      </ScrollView>
 
       {/* Botao FIXO do rodape (design 2026-07-18): o unico "start", e sempre
           atende o 1o da fila. Com atendimento em andamento ele vira uma DICA —
