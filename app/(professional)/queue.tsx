@@ -86,13 +86,18 @@ function ServingCard({
             {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
           </Text>
         </View>
-        {/* Cronometro em DM Mono: numero que muda a cada segundo nao pode
-            dancar de largura a cada digito. */}
-        <Text
-          className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-forest"}`}
-        >
-          {formatted}
-        </Text>
+        <View className="flex-row items-center gap-2">
+          {/* Cronometro em DM Mono: numero que muda a cada segundo nao pode
+              dancar de largura a cada digito. */}
+          <Text
+            className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-forest"}`}
+          >
+            {formatted}
+          </Text>
+          {/* O sinal de que o card tem MAIS opcoes (Remover, alem dos botoes).
+              Sem ele o menu existia e ninguem o achava (Andre, 24/09). */}
+          <Ellipsis size={18} color={isPaused ? "#FFFFFF" : "#163300"} />
+        </View>
       </View>
 
       <View className="mt-3 gap-1">
@@ -813,9 +818,14 @@ export default function ProfessionalQueueScreen() {
             foi ali que o Andre procurou por quatro rodadas. */}
         {currentAttendance && (
           <Pressable
+            // Toque simples TAMBEM abre (Andre, 24/09): so segurar ninguem
+            // descobria — "nem eu sabia". Os botoes de dentro (Pausar,
+            // Finalizar) continuam agindo sozinhos: o toque vai ao mais fundo.
+            onPress={() => setMenuTarget(currentAttendance)}
             onLongPress={() => setMenuTarget(currentAttendance)}
             accessibilityRole="button"
             accessibilityLabel={`Opções de ${currentAttendance.clientName}`}
+            accessibilityHint="Abre Finalizar, Pausar e Remover"
           >
           <ServingCard
             attendance={currentAttendance}
