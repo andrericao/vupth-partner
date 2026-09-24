@@ -4,6 +4,9 @@ export type AttendanceStatus =
   | "PAUSED"
   | "FINISHED"
   | "CANCELLED"
+  // A LOJA tirou o cliente da fila (backend, 18/09) — CANCELLED ficou so para o
+  // cliente que desistiu. Ver src/lib/statusAtendimento.ts.
+  | "REMOVED"
   | "LATE";
 
 export type AttendanceServiceItem = {

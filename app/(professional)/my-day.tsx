@@ -7,13 +7,11 @@ import {
   HStack,
   Heading,
   Text,
-  Badge,
-  BadgeText,
   Pressable,
   ScrollView,
   Divider,
 } from "@gluestack-ui/themed";
-import { RefreshControl, View } from "react-native";
+import { RefreshControl, View, View as RNView, Text as RNText } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
@@ -24,6 +22,7 @@ import { useProfessionalStore, type ProfessionalReport } from "@store/profession
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { periodRange } from "@lib/time";
+import { seloDoStatus } from "@lib/statusAtendimento";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
@@ -33,15 +32,8 @@ import { periodRange } from "@lib/time";
 //   aceita datas (so professionalId/status), entao nao fingimos um filtro de
 //   periodo que o backend nao faz.
 type Period = "day" | "week" | "month";
-type Filter = "ALL" | "FINISHED" | "CANCELLED";
+type Filter = "ALL" | "FINISHED" | "CANCELLED" | "REMOVED";
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Finalizado", color: "$forest" },
-  CANCELLED: { label: "Cancelado", color: "$brandDanger" },
-  IN_PROGRESS: { label: "Em andamento", color: "$forest" },
-  PAUSED: { label: "Pausado", color: "$brandWarning" },
-  SCHEDULED: { label: "Agendado", color: "$brandTextSecondary" },
-};
 
 function humanizeService(value: string | null): string {
   if (!value) return "—";
@@ -53,7 +45,9 @@ function humanizeService(value: string | null): string {
 }
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? { label: item.status, color: "$brandTextSecondary" };
+  // Rotulo e cor vem da lib compartilhada com Atendimentos do dono —
+  // inclusive o REMOVED (a loja retirou), que antes cairia cru na tela.
+  const statusInfo = seloDoStatus(item.status);
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
@@ -63,13 +57,9 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
           {item.clientName}
         </Text>
-        <Badge
-          action={item.status === "FINISHED" ? "success" : item.status === "CANCELLED" ? "error" : "info"}
-          variant="solid"
-          borderRadius="$md"
-        >
-          <BadgeText fontSize="$xs">{statusInfo.label}</BadgeText>
-        </Badge>
+        <RNView className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
+          <RNText className={`font-body text-xs ${statusInfo.texto}`}>{statusInfo.label}</RNText>
+        </RNView>
       </HStack>
 
       <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
@@ -179,6 +169,8 @@ export default function MyDayScreen() {
     { key: "ALL", label: "Todos" },
     { key: "FINISHED", label: "Finalizados" },
     { key: "CANCELLED", label: "Cancelados" },
+    // A loja retirou (backend, 18/09) — separado de quem desistiu.
+    { key: "REMOVED", label: "Retirados" },
   ];
 
   return (
