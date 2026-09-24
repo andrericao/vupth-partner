@@ -31,6 +31,9 @@ export function Button(props: ButtonProps) {
       mt="$9"
       rounded="$full"
       $active-bg="$brandSuccess"
+      // O $brandSuccess e o MESMO verde do fundo: sem a opacidade o toque
+      // nao aparecia (Andre, 24/09).
+      $active-opacity={0.7}
       {...props}
       // Depois do spread: o `isDisabled` do Gluestack v1 e so visual, e sem o
       // `disabled` o toque continuava disparando.

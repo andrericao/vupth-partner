@@ -35,6 +35,9 @@ export function BrandButton({
       rounded="$full"
       bg={bg}
       $active-bg={variant === "primary" ? "$brandSuccess" : variant === "secondary" ? "$brandSurfaceAlt" : "transparent"}
+      // O $brandSuccess e o MESMO verde do fundo: sem a opacidade o toque
+      // nao aparecia (Andre, 24/09).
+      $active-opacity={0.7}
       borderWidth={isOutline ? "$2" : "$0"}
       borderColor="$forest"
       isDisabled={isDisabled}
