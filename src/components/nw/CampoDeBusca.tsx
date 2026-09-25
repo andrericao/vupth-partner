@@ -8,16 +8,19 @@ type Props = {
   onChangeText: (texto: string) => void;
   onBuscar: () => void;
   onLimpar: () => void;
+  /** testID do campo de texto (roteiros do Maestro). */
+  testID?: string;
 };
 
-// Campo de busca das telas "Buscar estabelecimento" e "Convidar profissional".
+// Campo de busca das telas "Buscar estabelecimento" (as duas: a do onboarding
+// e a das Configuracoes) e "Convidar profissional".
 // 🔴 Andre, 25/09: "espreme as letras". As duas copias tinham `h-12` cravado e
 // TextInput sem o reset de web — o `<input>` do navegador trazia borda e anel de
 // foco proprios e roubava a altura (o mesmo do login em 08/09, ver nw/Input).
 // Aqui: `min-h`, o reset do NwInput, e UMA copia.
 //
 // O icone da direita TROCA de papel: com texto ele limpa; vazio, ele busca.
-export function CampoDeBusca({ value, placeholder, onChangeText, onBuscar, onLimpar }: Props) {
+export function CampoDeBusca({ value, placeholder, onChangeText, onBuscar, onLimpar, testID }: Props) {
   const temTexto = !!value.trim();
   return (
     <View
@@ -34,6 +37,7 @@ export function CampoDeBusca({ value, placeholder, onChangeText, onBuscar, onLim
         onSubmitEditing={onBuscar}
         autoCorrect={false}
         returnKeyType="search"
+        testID={testID}
       />
       <Pressable
         onPress={temTexto ? onLimpar : onBuscar}
