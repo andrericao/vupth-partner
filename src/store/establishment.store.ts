@@ -84,7 +84,17 @@ export type EstablishmentReport = {
   avgDurationMinutes: number;
   topService: string | null;
   topProfessional: string | null;
-  professionals: { id: string; name: string; revenue: number; attendances: number }[];
+  professionals: {
+    id: string;
+    name: string;
+    revenue: number;
+    attendances: number;
+    netRevenue?: number | null;
+  }[];
+  /** Receita sem as Taxas Vupth. Ausente em backend antigo. */
+  netRevenue?: number | null;
+  /** Atendimentos de servico sem divisao — ficam fora do netRevenue. */
+  attendancesWithoutSplit?: number;
 };
 
 type ProfessionalResponse = {
@@ -173,7 +183,7 @@ type EstablishmentState = {
     establishmentId: string,
     serviceItemType: string,
     customName: string,
-    price: number
+    split: { price: number; pro_receives: number; base_price: number }
   ) => Promise<ServiceItemResponse>;
   addAddress: (
     establishmentId: string,
@@ -253,10 +263,10 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     return data;
   },
 
-  addServiceItem: async (establishmentId, serviceItemType, customName, price) => {
+  addServiceItem: async (establishmentId, serviceItemType, customName, split) => {
     const { data } = await api.post(
       `/establishment/${establishmentId}/service-items`,
-      { serviceItemType, customName, price }
+      { serviceItemType, customName, ...split }
     );
 
     return data;

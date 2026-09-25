@@ -14,6 +14,7 @@ import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriod
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
+import { avisoSemSplit } from "@lib/split";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
@@ -235,10 +236,13 @@ export default function MyDayScreen() {
               {/* [marca-vupth] Receita e o card-heroi (brandGreen, primeira
                   posição) — o Pencil (PROF · 03) da esse tratamento pro
                   faturado, o único número em dinheiro da tela. */}
+              {/* Relatorio SEM os 6% (bloqueava a publicacao): o heroi e o que
+                  o profissional recebeu. Backend antigo sem `netRevenue` cai no
+                  total, como antes. Rotulos a validar com o Design. */}
               <View className="flex-row gap-3">
                 <Numero
-                  rotulo="Receita"
-                  valor={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`}
+                  rotulo={report?.netRevenue != null ? "Você recebeu" : "Receita"}
+                  valor={`R$ ${Number(report?.netRevenue ?? report?.totalRevenue ?? 0).toFixed(2)}`}
                   destaque
                 />
                 <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
@@ -256,6 +260,19 @@ export default function MyDayScreen() {
                   tamanho="text-md"
                 />
               </View>
+
+              {report?.netRevenue != null && (
+                <Text className="font-body text-xs text-vupth-textSecondary">
+                  Clientes pagaram R$ {Number(report?.totalRevenue ?? 0).toFixed(2)} (com as Taxas Vupth).
+                </Text>
+              )}
+              {avisoSemSplit(report?.attendancesWithoutSplit) && (
+                <View className="bg-vupth-warning p-3 rounded-card">
+                  <Text className="font-body text-xs text-vupth-forest">
+                    {avisoSemSplit(report?.attendancesWithoutSplit)}
+                  </Text>
+                </View>
+              )}
 
               <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
                 {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •

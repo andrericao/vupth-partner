@@ -8,6 +8,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { StatCard } from "@components/brand/StatCard";
+import { avisoSemSplit } from "@lib/split";
 
 type Period = Periodo;
 
@@ -41,9 +42,11 @@ export default function OwnerReportsScreen() {
   const availableProfs = queue?.available_professionals ?? 0;
 
   // Breakdown do relatorio por profissional, indexado por id.
-  const revById = (report?.professionals ?? []).reduce<Record<string, { revenue: number; attendances: number }>>(
+  const revById = (report?.professionals ?? []).reduce<
+    Record<string, { revenue: number; attendances: number; netRevenue?: number | null }>
+  >(
     (acc, p) => {
-      acc[p.id] = { revenue: p.revenue, attendances: p.attendances };
+      acc[p.id] = { revenue: p.revenue, attendances: p.attendances, netRevenue: p.netRevenue };
       return acc;
     },
     {}
@@ -140,6 +143,14 @@ export default function OwnerReportsScreen() {
               </View>
             </View>
 
+            {avisoSemSplit(report?.attendancesWithoutSplit) && (
+              <View className="bg-vupth-warning p-3 rounded-card mt-3">
+                <Text className="font-body text-xs text-vupth-forest">
+                  {avisoSemSplit(report?.attendancesWithoutSplit)}
+                </Text>
+              </View>
+            )}
+
             <View className="h-px bg-vupth-border my-6" />
 
             <Text className="font-heading text-vupth-textSecondary mb-3">Por profissional</Text>
@@ -161,9 +172,18 @@ export default function OwnerReportsScreen() {
                             {p.specialty || "Sem especialidade"}
                           </Text>
                         </View>
-                        <Text className="font-heading text-vupth-forest">
-                          R$ {r.revenue.toFixed(2)}
-                        </Text>
+                        <View className="items-end">
+                          <Text className="font-heading text-vupth-forest">
+                            R$ {r.revenue.toFixed(2)}
+                          </Text>
+                          {/* O que o profissional recebeu, sem as Taxas Vupth
+                              — a base da comissao. Rotulo a validar com o Design. */}
+                          {r.netRevenue != null && (
+                            <Text className="font-body text-xs text-vupth-textSecondary">
+                              recebe R$ {r.netRevenue.toFixed(2)}
+                            </Text>
+                          )}
+                        </View>
                       </View>
 
                       <View className="flex-row gap-4 mt-3">

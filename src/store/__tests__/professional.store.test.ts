@@ -514,7 +514,7 @@ describe("professional.store", () => {
       useProfessionalStore.setState({ professional: null });
 
       await expect(
-        useProfessionalStore.getState().addMyServiceItem("CORTE_MAQUINA", "Corte", 40)
+        useProfessionalStore.getState().addMyServiceItem("CORTE_MAQUINA", "Corte", { price: 40.9, pro_receives: 38, base_price: 38 })
       ).rejects.toThrow("Professional not found");
     });
 
@@ -525,13 +525,15 @@ describe("professional.store", () => {
 
       const out = await useProfessionalStore
         .getState()
-        .addMyServiceItem("CORTE_MAQUINA", "Corte", 40);
+        .addMyServiceItem("CORTE_MAQUINA", "Corte", { price: 40.9, pro_receives: 38, base_price: 38 });
 
       expect(mock.history.post[0].url).toBe("/professional-queue/prof-uuid-1/add-service-items");
       expect(JSON.parse(mock.history.post[0].data)).toEqual({
         serviceItemType: "CORTE_MAQUINA",
         customName: "Corte",
-        price: 40,
+        price: 40.9,
+        pro_receives: 38,
+        base_price: 38,
       });
       expect(out).toEqual(created);
     });

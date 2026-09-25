@@ -18,11 +18,11 @@ import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { maskMoney, unmaskMoney } from "@lib/masks";
+import { corpoDoSplit, precoParaEditar } from "@lib/split";
 
 import {
   calculatePricing,
   getAbsorptionOptions,
-  estimateDesiredFromClient,
   type PricingResult,
 } from "@lib/pricing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
@@ -224,15 +224,21 @@ export default function MyServicesScreen() {
     setRefreshing(false);
   }, [fetchMe, fetchMyServices]);
 
-  const startEditItem = (svc: { id: string; customName: string; price: number }) => {
+  const startEditItem = (svc: {
+    id: string;
+    customName: string;
+    price: number;
+    base_price?: number | null;
+    pro_receives?: number | null;
+  }) => {
     setShowForm(false);
     setEditingId(svc.id);
     setEditName(svc.customName);
-    // svc.price = clientPrice salvo. Reconstruimos o preco-base (a 0% absorcao)
-    // para o input "voce recebe" e o preview reaparecerem coerentes.
-    const base = estimateDesiredFromClient(svc.price);
-    setEditPrice(maskMoney(String(Math.round(base * 100))));
-    setEditAbsorption(0);
+    // Com a divisao gravada, volta o digitado e a absorcao escolhidos. Servico
+    // legado: estima o digitado pelo preco (salvar grava a divisao).
+    const { digitado, absorcao } = precoParaEditar(svc);
+    setEditPrice(maskMoney(String(Math.round(digitado * 100))));
+    setEditAbsorption(absorcao);
   };
 
   const cancelEditItem = () => {
@@ -248,12 +254,14 @@ export default function MyServicesScreen() {
       Alert.alert("Dados inválidos", "Informe um nome e um preco maior que zero.");
       return;
     }
-    // Preco salvo = total que o cliente paga (digitado + taxas conforme absorcao),
-    // com a estetica X,90 — igual ao cadastro.
-    const newPrice = editPricing ? editPricing.clientPrice : editPriceNum;
+    // Preco do cliente + a divisao gravada, sempre juntos: price sozinho
+    // apagaria a divisao no backend.
     setIsEditSaving(true);
     try {
-      await updateMyServiceItem(itemId, { customName: trimmed, price: newPrice });
+      await updateMyServiceItem(itemId, {
+        customName: trimmed,
+        ...corpoDoSplit(editPriceNum, editAbsorption),
+      });
       cancelEditItem();
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o serviço."));
@@ -304,15 +312,12 @@ export default function MyServicesScreen() {
 
     setIsLoading(true);
 
-    // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
-    const finalPrice = pricing ? pricing.clientPrice : priceNum;
+    // Preco do cliente + a divisao gravada (contrato de 18/09).
+    const split = corpoDoSplit(priceNum, absorption);
+    const finalPrice = split.price;
 
     try {
-      await addMyServiceItem(
-        serviceItemType,
-        customName.trim(),
-        finalPrice
-      );
+      await addMyServiceItem(serviceItemType, customName.trim(), split);
       Alert.alert("Serviço adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
       setShowForm(false);
       setServiceItemType("");

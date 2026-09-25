@@ -38,6 +38,11 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/senha atual/i);
   });
 
+  it("SERVICE_PRICE_SPLIT_INVALID (422 da divisao do preco) => frase sobre o preço", () => {
+    const err = { response: { status: 422, data: { code: "SERVICE_PRICE_SPLIT_INVALID" } } };
+    expect(getApiErrorMessage(err, "fallback")).toMatch(/Taxas Vupth/);
+  });
+
   it("código desconhecido, com fieldErrors => lista campo: msg (uma por linha)", () => {
     const err = {
       response: { data: { code: "SOMETHING_ELSE", fieldErrors: { email: "inválido", senha: "curta" } } },

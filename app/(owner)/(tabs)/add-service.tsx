@@ -17,6 +17,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 import { maskMoney, unmaskMoney } from "@lib/masks";
+import { corpoDoSplit } from "@lib/split";
 import { avisar } from "@lib/confirmar";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
@@ -131,10 +132,12 @@ export default function AddServiceScreen() {
     setIsLoading(true);
 
     // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
-    const finalPrice = calculatePricing(priceNum, absorption).clientPrice;
+    // Preco do cliente + a divisao gravada (contrato de 18/09).
+    const split = corpoDoSplit(priceNum, absorption);
+    const finalPrice = split.price;
 
     try {
-      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), finalPrice);
+      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), split);
       // O servico JA FOI criado — sem a caixa na web a tela nao fechava e o
       // dono cadastrava o mesmo servico duas vezes.
       await avisar({
