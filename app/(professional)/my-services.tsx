@@ -395,6 +395,7 @@ export default function MyServicesScreen() {
                       placeholder="Ex: Corte Social"
                       value={editName}
                       onChangeText={setEditName}
+                      testID="edit-service-name"
                     />
                     <NwInput
                       label="Tempo do serviço (min)"
@@ -402,6 +403,7 @@ export default function MyServicesScreen() {
                       value={editMinutes}
                       onChangeText={(t) => setEditMinutes(mascaraMinutos(t))}
                       keyboardType="number-pad"
+                      testID="edit-service-minutes"
                     />
                     <NwInput
                       label="Seu preço — você recebe"
@@ -409,6 +411,7 @@ export default function MyServicesScreen() {
                       value={editPrice}
                       onChangeText={(t) => setEditPrice(maskMoney(t))}
                       keyboardType="number-pad"
+                      testID="edit-service-price"
                     />
 
                     {editPricing && (
@@ -505,6 +508,7 @@ export default function MyServicesScreen() {
                   setCustomName(t);
                   if (nameInvalid) setNameInvalid(false);
                 }}
+                testID="service-name"
               />
 
               {/* O tempo entra na previsao da fila (backend); sem ele, 30 min. */}
@@ -514,6 +518,7 @@ export default function MyServicesScreen() {
                 value={minutes}
                 onChangeText={(t) => setMinutes(mascaraMinutos(t))}
                 keyboardType="number-pad"
+                testID="service-minutes"
               />
 
               <NwInput
@@ -526,6 +531,7 @@ export default function MyServicesScreen() {
                   if (priceInvalid) setPriceInvalid(false);
                 }}
                 keyboardType="number-pad"
+                testID="service-price"
               />
 
               {pricing && (

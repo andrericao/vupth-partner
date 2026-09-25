@@ -1,0 +1,14 @@
+# Sai da conta pela aba Perfil e volta a tela de papeis.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+- runFlow: fechar_aviso.yaml
+- scrollUntilVisible:
+    element: "Sair da conta"
+    direction: DOWN
+- tapOn: "Sair da conta"
+- runFlow: confirmar.yaml
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 20000

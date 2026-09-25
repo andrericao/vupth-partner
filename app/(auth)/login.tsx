@@ -127,6 +127,7 @@ export default function LoginScreen() {
             <NwButton
               title={isLoading ? "Entrando..." : "Entrar"}
               onPress={handleSubmit}
+              testID="login-submit"
             />
             {/* "Criar conta" vira LINK: entrar e o que esta tela pede, e dois
                 botoes de peso parecido fazem quem já tem conta hesitar. */}

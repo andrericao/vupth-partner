@@ -1,49 +1,51 @@
 #!/bin/bash
-# Setup para testes E2E com Maestro
-# Uso: bash .maestro/setup.sh
+# Prepara a bateria do Maestro (roteiro: .maestro/bateria_completa.yaml).
+#
+# Uso:  bash .maestro/setup.sh
+#
+# Precisa de: celular com "Depuracao USB" ligada, conectado no cabo, com o APK
+# de PREVIEW instalado (com.vupth.partner.preview — aponta para o staging).
+# O Maestro ja esta em ~/.maestro/bin.
 
-export PATH="$PATH:$HOME/Android/Sdk/platform-tools"
+export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
+API="https://vupth-backend-ia.onrender.com"
 
-echo "=== VUPTH Partner — Maestro E2E Setup ==="
+echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 
-# 1. Verificar celular conectado
-DEVICE=$(adb devices | grep -v "List" | grep "device" | head -1)
+# 1. Celular conectado
+DEVICE=$(adb devices | grep -w "device" | head -1)
 if [ -z "$DEVICE" ]; then
-  echo "ERRO: Nenhum dispositivo conectado. Plugue o cabo USB e habilite depuração USB."
+  echo "ERRO: nenhum celular. Ligue a Depuracao USB, conecte o cabo e aceite o aviso no celular."
   exit 1
 fi
-echo "Dispositivo: $DEVICE"
+echo "Celular: $DEVICE"
 
-# 2. Redirecionar porta do backend
-adb reverse tcp:8080 tcp:8080
-echo "adb reverse tcp:8080 tcp:8080 — OK"
+# 2. APK de preview instalado
+if ! adb shell pm list packages | grep -q "com.vupth.partner.preview"; then
+  echo "ERRO: o APK de preview (com.vupth.partner.preview) nao esta instalado."
+  exit 1
+fi
+echo "APK de preview: OK"
 
-# 3. Desabilitar autocorrect/spell checker do Android (Maestro inputText usa o IME)
+# 3. Teclado sem corretor (o Maestro digita pelo teclado do aparelho)
 adb shell settings put secure spell_checker_enabled 0
 adb shell settings put secure show_ime_with_hard_keyboard 1
-echo "Spell checker desabilitado — OK"
+echo "Corretor desligado: OK"
 
-# 4. Verificar backend
-BACKEND=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
-if [ "$BACKEND" != "200" ]; then
-  echo "AVISO: Backend não respondeu em localhost:8080 (code=$BACKEND). Certifique-se que está rodando."
-else
-  echo "Backend respondendo — OK"
-fi
-
-# 5. Verificar Maestro
-if ! command -v maestro &> /dev/null; then
-  echo "ERRO: Maestro não encontrado. Instale: curl -Ls 'https://get.maestro.mobile.dev' | bash"
+# 4. Acordar o staging (Render dorme; o primeiro pedido leva ~50 s)
+echo -n "Acordando o staging"
+for i in $(seq 1 30); do
+  CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$API/actuator/health/readiness")
+  if [ "$CODE" = "200" ]; then echo " — pronto"; break; fi
+  echo -n "."
+  sleep 3
+done
+if [ "$CODE" != "200" ]; then
+  echo ""
+  echo "ERRO: o staging nao respondeu (ultimo codigo: $CODE)."
   exit 1
 fi
-echo "Maestro $(maestro --version) — OK"
 
 echo ""
-echo "=== Setup completo! ==="
-echo "Certifique-se que o Expo Go está aberto no celular com o app partner carregado."
-echo ""
-echo "Para rodar todos os testes:"
-echo "  maestro test .maestro/flows/"
-echo ""
-echo "Para rodar um teste específico:"
-echo "  maestro test .maestro/flows/01_register_owner.yaml"
+echo "Tudo pronto. Rode:"
+echo "  maestro test -e APP_ID=com.vupth.partner.preview -e API=$API -e SENHA=Teste@123 .maestro/bateria_completa.yaml"

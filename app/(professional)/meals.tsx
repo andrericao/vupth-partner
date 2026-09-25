@@ -350,6 +350,7 @@ export default function MealsScreen() {
           <View className="mt-4">
             <LinhaComInterruptor
               rotulo="Aviso na hora da refeição"
+              testID="interruptor-aviso-refeicao"
               descricao={
                 mealNudgeOff
                   ? "Desligado — o lembrete aparece só nas Opções da fila (bolinha + contagem)."

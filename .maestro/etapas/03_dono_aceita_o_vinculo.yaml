@@ -1,0 +1,34 @@
+# O dono ve o numero da solicitacao (aba Menu, Profissionais, Ver
+# solicitacoes) e aceita. QA 17.2.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 30000
+- extendedWaitUntil:
+    visible:
+      id: "tab-badge-menu"
+    timeout: 70000
+- tapOn:
+    id: "aba-menu"
+- assertVisible:
+    id: "menu-badge-profissionais"
+- tapOn: "Profissionais"
+- assertVisible:
+    id: "path-requests-badge"
+- tapOn:
+    id: "path-requests"
+- extendedWaitUntil:
+    visible: ${output.PROF}
+    timeout: 20000
+- tapOn: "Aceitar"
+- runFlow: ../apoio/fechar_aviso.yaml
+- tapOn:
+    id: "aba-menu"
+- assertNotVisible:
+    id: "menu-badge-profissionais"
+- runFlow: ../apoio/sair_dono.yaml

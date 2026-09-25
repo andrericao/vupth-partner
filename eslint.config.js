@@ -7,6 +7,8 @@ module.exports = defineConfig([
     // `.claude/` guarda worktrees de agente — uma COPIA inteira do repo,
     // parada em outro commit. Sem ignorar, o lint reprova por arquivo que
     // nem existe nesta branch.
-    ignores: ['coverage/', '.expo/', 'node_modules/', '.claude/', 'dist/', 'web-build/'],
+    // .maestro/scripts roda no JS do Maestro (globais http, json, output), nao
+    // no app — fora do lint.
+    ignores: ['coverage/', '.expo/', 'node_modules/', '.claude/', 'dist/', 'web-build/', '.maestro/'],
   },
 ]);

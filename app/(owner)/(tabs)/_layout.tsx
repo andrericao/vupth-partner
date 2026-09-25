@@ -61,6 +61,7 @@ export default function OwnerTabsLayout() {
         name="dashboard"
         options={{
           title: "Início",
+          tabBarButtonTestID: "aba-inicio",
           tabBarIcon: ({ focused }) => <TabBarIcon name="home" focused={focused} />,
         }}
       />
@@ -71,6 +72,7 @@ export default function OwnerTabsLayout() {
         name="queues"
         options={{
           title: "Filas",
+          tabBarButtonTestID: "aba-filas",
           tabBarIcon: ({ focused }) => <TabBarIcon name="queues" focused={focused} />,
         }}
       />
@@ -78,6 +80,7 @@ export default function OwnerTabsLayout() {
         name="menu"
         options={{
           title: "Menu",
+          tabBarButtonTestID: "aba-menu",
           tabBarIcon: ({ focused }) => (
             <View>
               <TabBarIcon name="menu" focused={focused} />

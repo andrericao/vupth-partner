@@ -1,0 +1,59 @@
+# O dono cria a conta, a loja (Barbearia) e o horario: 24 horas nos 7 dias,
+# para a loja poder abrir a qualquer hora em que a bateria rodar.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/cadastrar.yaml
+    env:
+      PAPEL: owner
+      EMAIL: ${output.EMAIL_DONO}
+- extendedWaitUntil:
+    visible: "Dados da loja"
+    timeout: 30000
+- tapOn: "Ex: João Silva"
+- inputText: "Dono ${output.TAG}"
+- tapOn: "Rei do Corte LTDA"
+- inputText: ${output.LOJA}
+- hideKeyboard
+- tapOn: "Barbearia"
+- tapOn: "Criar estabelecimento"
+- extendedWaitUntil:
+    visible: "Você também vai atender?"
+    timeout: 20000
+- scrollUntilVisible:
+    element: "Não, apenas proprietário"
+    direction: DOWN
+- tapOn: "Não, apenas proprietário"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+
+# Horario: segunda 00:00-00:00 (= 24 horas) e o mesmo nos outros dias.
+- tapOn:
+    id: "aba-menu"
+- tapOn: "Dados do estabelecimento"
+- tapOn: "Horário de Funcionamento"
+- extendedWaitUntil:
+    visible: "Semana"
+    timeout: 20000
+- tapOn: "Segunda abre"
+- inputText: "0000"
+- tapOn: "Segunda fecha"
+- inputText: "0000"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Usar o horário de segunda nos dias abertos"
+    direction: DOWN
+- tapOn: "Usar o horário de segunda nos dias abertos"
+- scrollUntilVisible:
+    element: "Salvar semana"
+    direction: DOWN
+- tapOn: "Salvar semana"
+- extendedWaitUntil:
+    visible: "Horário salvo"
+    timeout: 20000
+- runFlow: ../apoio/fechar_aviso.yaml
+- scrollUntilVisible:
+    element: "24 horas"
+    direction: DOWN
+- runFlow: ../apoio/sair_dono.yaml

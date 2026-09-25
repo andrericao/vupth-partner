@@ -80,6 +80,7 @@ export default function ProfessionalLayout() {
         name="queue"
         options={{
           title: "Fila",
+          tabBarButtonTestID: "aba-fila",
           tabBarIcon: ({ focused }) => <TabBarIcon name="queue" focused={focused} />,
         }}
       />
@@ -87,6 +88,7 @@ export default function ProfessionalLayout() {
         name="cut-requests"
         options={{
           title: "Encaixes",
+          tabBarButtonTestID: "aba-encaixes",
           tabBarIcon: ({ focused }) => (
             <View>
               <TabBarIcon name="fits" focused={focused} />
@@ -104,6 +106,7 @@ export default function ProfessionalLayout() {
         name="my-day"
         options={{
           title: "Relatórios",
+          tabBarButtonTestID: "aba-relatorios",
           tabBarIcon: ({ focused }) => <TabBarIcon name="reports" focused={focused} />,
         }}
       />
@@ -113,6 +116,7 @@ export default function ProfessionalLayout() {
           // Pencil chama de "Perfil" (era "Configuracoes", sem acento). A tela
           // de destino ja e o perfil: avatar, nome e vinculo no topo.
           title: "Perfil",
+          tabBarButtonTestID: "aba-perfil",
           tabBarIcon: ({ focused }) => (
             <View>
               <TabBarIcon name="profile" focused={focused} />

@@ -1,0 +1,17 @@
+# Cria a conta a partir da tela de papeis. env: PAPEL (owner|professional), EMAIL
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "role-${PAPEL}"
+- tapOn:
+    id: "register-email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "register-password"
+- inputText: ${SENHA}
+- tapOn:
+    id: "register-confirm-password"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "register-submit"

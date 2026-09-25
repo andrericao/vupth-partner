@@ -1,0 +1,97 @@
+# O profissional vinculado: Perfil sem o codigo da especialidade (QA 19.1),
+# servico com tempo e preco (QA 18.3/18.4), refeicao e o interruptor do aviso
+# (QA 19.5), e entra em Trabalhando — o que abre a loja.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_PROF}
+- extendedWaitUntil:
+    visible:
+      id: "aba-perfil"
+    timeout: 30000
+
+# Perfil: so o nome da loja, sem "NAIL_TECH"
+- tapOn:
+    id: "aba-perfil"
+- runFlow: ../apoio/fechar_aviso.yaml
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+- assertNotVisible: ".*NAIL_TECH.*"
+
+# Servico: 45 min, R$ 30,00, depois editado para 60 min
+- tapOn: "Meus serviços"
+- tapOn: "Adicionar serviço"
+- tapOn:
+    id: "service-name"
+- eraseText: 40
+- inputText: "Manicure ${output.TAG}"
+- tapOn:
+    id: "service-minutes"
+- eraseText: 5
+- inputText: "45"
+- tapOn:
+    id: "service-price"
+- inputText: "3000"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Adicionar serviço"
+    direction: DOWN
+- tapOn: "Adicionar serviço"
+- runFlow: ../apoio/fechar_aviso.yaml
+- extendedWaitUntil:
+    visible: ".*45min.*"
+    timeout: 20000
+- tapOn: "Editar"
+- tapOn:
+    id: "edit-service-minutes"
+- eraseText: 5
+- inputText: "60"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Salvar"
+    direction: DOWN
+- tapOn: "Salvar"
+- extendedWaitUntil:
+    visible: ".*60min.*"
+    timeout: 20000
+
+# Refeicao e o interruptor do aviso
+- tapOn:
+    id: "aba-perfil"
+- tapOn: "Refeições"
+- tapOn: "Adicionar refeição"
+- tapOn: "Ex: Almoço"
+- inputText: "Almoco"
+- tapOn: "12:00"
+- inputText: "0400"
+- tapOn: "60"
+- inputText: "30"
+- hideKeyboard
+- tapOn: "Todos os dias"
+- scrollUntilVisible:
+    element: "Adicionar"
+    direction: DOWN
+- tapOn: "Adicionar"
+- extendedWaitUntil:
+    visible: "Almoco"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: "interruptor-aviso-refeicao"
+    direction: DOWN
+- tapOn:
+    id: "interruptor-aviso-refeicao"
+- assertVisible: "Desligado.*"
+- tapOn:
+    id: "interruptor-aviso-refeicao"
+- assertVisible: "Ligado.*"
+
+# Trabalhando: a loja abre com a chegada do primeiro profissional
+- runFlow:
+    file: ../apoio/status.yaml
+    env:
+      STATUS: trabalhando
+- assertVisible: "Você está: Trabalhando.*"

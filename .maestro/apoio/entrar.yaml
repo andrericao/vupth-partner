@@ -1,0 +1,14 @@
+# Entra com uma conta existente a partir da tela de papeis. env: EMAIL
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "go-login"
+- tapOn:
+    id: "login-email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "login-password"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
