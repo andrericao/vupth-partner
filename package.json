@@ -126,5 +126,8 @@
         "eslint-config-expo"
       ]
     }
+  },
+  "engines": {
+    "node": ">=20.19.4"
   }
 }
