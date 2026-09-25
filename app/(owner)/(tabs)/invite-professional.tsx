@@ -3,13 +3,11 @@ import {
   View,
   Text,
   ScrollView,
-  TextInput,
-  Pressable,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Search, X } from "lucide-react-native";
+import { CampoDeBusca } from "@components/nw/CampoDeBusca";
 import { SkeletonList } from "@components/Skeleton";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -91,40 +89,16 @@ export default function InviteProfessionalScreen() {
             onBack={() => router.navigate("/(owner)/menu" as any)}
           />
 
-          {/* O ícone à direita TROCA de papel: com texto digitado ele limpa a
-              busca; vazio, ele dispara. É o mesmo campo de antes, sem o
-              Gluestack. */}
-          <View className="flex-row items-center h-12 mb-4 px-3 rounded-md border border-vupth-forest bg-white">
-            <TextInput
-              className="flex-1 font-body text-vupth-forest"
-              placeholder="Nome do profissional"
-              placeholderTextColor="#6B706B"
-              value={search}
-              onChangeText={setSearch}
-              onSubmitEditing={() => runSearch(search)}
-              autoCorrect={false}
-              returnKeyType="search"
-            />
-            <Pressable
-              onPress={
-                search.trim()
-                  ? () => {
-                      setSearch("");
-                      runSearch("");
-                    }
-                  : () => runSearch(search)
-              }
-              accessibilityRole="button"
-              accessibilityLabel={search.trim() ? "Limpar busca" : "Buscar"}
-              className="pl-3"
-            >
-              {search.trim() ? (
-                <X size={18} color="#454745" />
-              ) : (
-                <Search size={18} color="#163300" />
-              )}
-            </Pressable>
-          </View>
+          <CampoDeBusca
+            value={search}
+            placeholder="Nome do profissional"
+            onChangeText={setSearch}
+            onBuscar={() => runSearch(search)}
+            onLimpar={() => {
+              setSearch("");
+              runSearch("");
+            }}
+          />
 
           {isSearching && (
             <View className="mt-4">

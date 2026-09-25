@@ -33,7 +33,7 @@ type Props = TextInputProps & {
 // aplica o proprio reset de web. O nosso e `TextInput` cru, entao o reset e
 // nosso: `outline` e borda zeradas SO na web, e o estilo do chamador continua
 // por cima (o `rest.style` vem depois).
-const RESET_WEB = Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0, borderWidth: 0 } as const) : null;
+export const RESET_WEB = Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0, borderWidth: 0 } as const) : null;
 
 export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "words", style, ...rest }: Props) {
   const [focused, setFocused] = useState(false);

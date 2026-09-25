@@ -4,13 +4,13 @@ import {
   Text,
   Pressable,
   ScrollView,
-  TextInput,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Search, X, ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
+import { CampoDeBusca } from "@components/nw/CampoDeBusca";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -203,40 +203,17 @@ export default function FindEstablishmentScreen() {
                 Encontre um estabelecimento e solicite vinculação.
               </Text>
 
-              {/* O ícone da direita TROCA de papel: limpa quando há texto, busca
-                  quando está vazio. */}
-              <View className="flex-row items-center h-12 mb-4 px-3 rounded-md border border-vupth-forest bg-white">
-                <TextInput
-                  className="flex-1 font-body text-vupth-forest"
-                  placeholder="Nome do estabelecimento"
-                  placeholderTextColor="#6B706B"
-                  value={search}
-                  onChangeText={setSearch}
-                  onSubmitEditing={handleSearch}
-                  autoCorrect={false}
-                  returnKeyType="search"
-                />
-                <Pressable
-                  onPress={
-                    search.trim()
-                      ? () => {
-                          setSearch("");
-                          setResults([]);
-                          setHasSearched(false);
-                        }
-                      : handleSearch
-                  }
-                  accessibilityRole="button"
-                  accessibilityLabel={search.trim() ? "Limpar busca" : "Buscar"}
-                  className="pl-3"
-                >
-                  {search.trim() ? (
-                    <X size={18} color="#454745" />
-                  ) : (
-                    <Search size={18} color="#163300" />
-                  )}
-                </Pressable>
-              </View>
+              <CampoDeBusca
+                value={search}
+                placeholder="Nome do estabelecimento"
+                onChangeText={setSearch}
+                onBuscar={handleSearch}
+                onLimpar={() => {
+                  setSearch("");
+                  setResults([]);
+                  setHasSearched(false);
+                }}
+              />
 
               {isSearching && (
                 <View className="mt-4">
