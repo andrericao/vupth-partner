@@ -23,7 +23,7 @@ import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { queueMenuCount } from "@lib/notifications";
 import { NotificationBadge } from "@components/NotificationBadge";
-import { isMealNudgeDisabled, setMealNudgeDisabled } from "@lib/mealNudge";
+import { isMealNudgeDisabled, setMealNudgeDisabled, devePerguntarRefeicao } from "@lib/mealNudge";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
@@ -351,8 +351,11 @@ export default function ProfessionalQueueScreen() {
   // Nudge do almoco/janta: so avisa DENTRO de uma janela curta apos o horario
   // previsto (nao o dia inteiro) e no maximo UMA vez por refeicao/dia
   // (persistido em SecureStore — antes reaparecia a cada abertura do app).
+  // E so para quem esta trabalhando numa loja aberta (Andre, 25/09) — ver
+  // devePerguntarRefeicao.
+  const perguntaRefeicao = devePerguntarRefeicao(professional?.work_status, data);
   useEffect(() => {
-    if (!profId) return;
+    if (!profId || !perguntaRefeicao) return;
     let cancelled = false;
 
     (async () => {
@@ -426,7 +429,7 @@ export default function ProfessionalQueueScreen() {
     return () => {
       cancelled = true;
     };
-  }, [meals, profId, data, handleStartMeal, handleSkipMeal, disableMealNudge]);
+  }, [meals, profId, data, perguntaRefeicao, handleStartMeal, handleSkipMeal, disableMealNudge]);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   // O snapshot manda; a memoria local do `start` preenche o silencio dele.
