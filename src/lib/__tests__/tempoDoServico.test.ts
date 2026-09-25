@@ -1,4 +1,4 @@
-import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO } from "@lib/tempoDoServico";
+import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO, rotuloDoTempo } from "@lib/tempoDoServico";
 
 // Editar o tempo de cada servico (fila do partner, 25/09). O backend ja aceita
 // `estimatedMinutes` no POST e no PATCH e usa o valor na previsao da fila; sem
@@ -24,5 +24,17 @@ describe("tempo do servico", () => {
     expect(lerMinutos("4")).toBeNull();
     expect(lerMinutos("481")).toBeNull();
     expect(lerMinutos("0")).toBeNull();
+  });
+});
+
+// O backend grava o tempo mas (25/09) nao o devolve na resposta do servico.
+// Sem o campo, a lista mostrava "• min". Sem numero, nao mostra nada.
+describe("rotuloDoTempo", () => {
+  it("com minutos: ' • 45min'", () => {
+    expect(rotuloDoTempo(45)).toBe(" • 45min");
+  });
+  it("sem o campo: nada", () => {
+    expect(rotuloDoTempo(undefined)).toBe("");
+    expect(rotuloDoTempo(null)).toBe("");
   });
 });

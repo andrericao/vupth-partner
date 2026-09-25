@@ -14,3 +14,8 @@ export function lerMinutos(texto: string): number | null {
   if (isNaN(n) || n < MIN || n > MAX) return null;
   return n;
 }
+
+/** " • 45min" para a lista; vazio quando o backend nao devolve o tempo. */
+export function rotuloDoTempo(minutos: number | null | undefined): string {
+  return typeof minutos === "number" && minutos > 0 ? ` • ${minutos}min` : "";
+}

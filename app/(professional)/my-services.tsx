@@ -19,7 +19,7 @@ import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 import { corpoDoSplit, precoParaEditar } from "@lib/split";
-import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO } from "@lib/tempoDoServico";
+import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO, rotuloDoTempo } from "@lib/tempoDoServico";
 
 import {
   calculatePricing,
@@ -447,7 +447,8 @@ export default function MyServicesScreen() {
                     <View className="flex-1">
                       <Text className="font-heading text-vupth-forest">{svc.customName}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
-                        {humanizeServiceType(svc.serviceItemType)} • {svc.estimatedMinutes}min
+                        {humanizeServiceType(svc.serviceItemType)}
+                        {rotuloDoTempo(svc.estimatedMinutes)}
                       </Text>
                       <View className="flex-row gap-3 mt-1">
                         <Pressable onPress={() => startEditItem(svc)} accessibilityRole="button" hitSlop={6}>
