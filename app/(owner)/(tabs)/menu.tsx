@@ -16,6 +16,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { PendingDot } from "@components/PendingDot";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
+import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight,
@@ -118,6 +119,7 @@ export default function OwnerMenuScreen() {
   const logout = useAuthStore((s) => s.logout);
   const { completion } = useOwnerCompletion();
   const hasPending = hasAnyPending(completion);
+  const solicitacoes = useSolicitacoesDeVinculo(establishment?.id);
 
   const isProfessional = user?.roles?.includes("PROFESSIONAL");
 
@@ -200,6 +202,7 @@ export default function OwnerMenuScreen() {
                   icon={Users}
                   label="Profissionais"
                   hint="adicionar, convidar e ver solicitações"
+                  badge={solicitacoes}
                   onPress={() =>
                     router.push({
                       pathname: "/(owner)/add-professional",

@@ -11,6 +11,8 @@ import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
 import { avisar, confirmar } from "@lib/confirmar";
 import { getPrimeiroCaminhoDoDono } from "@lib/routing";
+import { NotificationBadge } from "@components/NotificationBadge";
+import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -32,12 +34,15 @@ function PathCard({
   onPress,
   selected,
   testID,
+  badge = 0,
 }: {
   title: string;
   hint: string;
   onPress: () => void;
   selected?: boolean;
   testID?: string;
+  /** Pendencias que esperam o dono neste caminho (solicitacoes de vinculo). */
+  badge?: number;
 }) {
   return (
     <Pressable
@@ -55,6 +60,7 @@ function PathCard({
           <Text className="font-heading text-vupth-forest">{title}</Text>
           <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
         </View>
+        <NotificationBadge count={badge} testID={testID ? `${testID}-badge` : undefined} />
         <Text className="font-body text-lg text-vupth-textSecondary ml-2">{"›"}</Text>
       </View>
     </Pressable>
@@ -63,6 +69,7 @@ function PathCard({
 
 export default function AddProfessionalScreen() {
   const { establishmentId } = useLocalSearchParams<{ establishmentId: string }>();
+  const solicitacoes = useSolicitacoesDeVinculo(establishmentId);
   const user = useAuthStore((s) => s.user);
   const isProfessional = user?.roles?.includes("PROFESSIONAL");
 
@@ -231,6 +238,7 @@ export default function AddProfessionalScreen() {
             testID="path-requests"
             title="Ver solicitações"
             hint="quem já pediu para trabalhar na sua loja"
+            badge={solicitacoes}
             onPress={goAffiliations}
           />
 

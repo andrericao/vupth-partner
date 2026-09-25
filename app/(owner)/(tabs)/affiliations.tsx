@@ -5,6 +5,8 @@ import { useLocalSearchParams, router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { api, getApiErrorMessage } from "@lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { chaveDosVinculos } from "@hooks/useSolicitacoesDeVinculo";
 
 type Affiliation = {
   id: string;
@@ -23,6 +25,7 @@ export default function OwnerAffiliationsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const fetchAffiliations = useCallback(async () => {
     if (!establishmentId) return;
@@ -31,12 +34,14 @@ export default function OwnerAffiliationsScreen() {
         `/establishment/${establishmentId}/affiliations`
       );
       setAffiliations(data);
+      // O badge do Menu le a mesma lista: acompanha o que esta na tela.
+      queryClient.setQueryData(chaveDosVinculos(establishmentId), data);
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível carregar as solicitações."));
     } finally {
       setIsLoading(false);
     }
-  }, [establishmentId]);
+  }, [establishmentId, queryClient]);
 
   useEffect(() => {
     // fetch on-mount; sinaliza isLoading (padrao de carregamento).
