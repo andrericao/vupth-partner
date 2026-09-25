@@ -15,14 +15,15 @@ import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
 import { avisoSemSplit } from "@lib/split";
+import { paramsDoHistorico } from "@lib/historicoDoPeriodo";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
 // - O seletor de PERIODO (Hoje/Semana/Mes) governa o RESUMO (GET
 //   /professional/me/reports?dateFrom&dateTo).
-// - O HISTORICO usa os proprios filtros de STATUS: o GET /attendances nao
-//   aceita datas (so professionalId/status), entao nao fingimos um filtro de
-//   periodo que o backend nao faz.
+// - O HISTORICO segue o MESMO periodo (desde 25/09: o GET /attendances aceita
+//   dateFrom/dateTo, e sem datas ele trazia a vida inteira a cada foco) e tem
+//   os proprios filtros de STATUS.
 type Period = Periodo;
 type Filter = "ALL" | "FINISHED" | "CANCELLED" | "REMOVED";
 
@@ -146,16 +147,14 @@ export default function MyDayScreen() {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      const params: Record<string, string> = { professionalId: professional.id };
-      if (filter !== "ALL") params.status = filter;
-      await fetchHistory(params);
+      await fetchHistory(paramsDoHistorico(professional.id, filter, period));
       setHistoryLoaded(true);
     } catch (error: any) {
       setHistoryError(getApiErrorMessage(error, "Não foi possível carregar os atendimentos."));
     } finally {
       setHistoryLoading(false);
     }
-  }, [professional?.id, filter, fetchHistory]);
+  }, [professional?.id, filter, period, fetchHistory]);
 
   // RECARREGA AO FOCAR (feedback de device 2026-08-11): "iniciei o atendimento,
   // na Fila aparecia 'atendendo agora' e aqui continuava AGENDADO". A causa e
@@ -308,7 +307,11 @@ export default function MyDayScreen() {
 
           {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
             <Text className="font-body text-vupth-textSecondary text-center mt-6">
-              Nenhum atendimento encontrado
+              {period === "day"
+                ? "Nenhum atendimento hoje"
+                : period === "week"
+                  ? "Nenhum atendimento nos últimos 7 dias"
+                  : "Nenhum atendimento nos últimos 30 dias"}
             </Text>
           )}
 

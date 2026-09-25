@@ -99,10 +99,11 @@ export function isoDate(d: Date): string {
 
 /** Janela de datas (inclusiva) para o periodo dos relatorios. */
 export function periodRange(
-  period: "day" | "week" | "month"
+  period: "day" | "week" | "month",
+  agora: Date = new Date()
 ): { dateFrom: string; dateTo: string } {
-  const to = new Date();
-  const from = new Date();
+  const to = new Date(agora);
+  const from = new Date(agora);
   if (period === "week") from.setDate(from.getDate() - 6);
   else if (period === "month") from.setDate(from.getDate() - 29);
   return { dateFrom: isoDate(from), dateTo: isoDate(to) };
