@@ -69,14 +69,19 @@ type ProfessionalState = {
   acceptAffiliation: (affiliationId: string) => Promise<void>;
   rejectAffiliation: (affiliationId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
-  addMyServiceItem: (serviceItemType: string, customName: string, split: SplitDoPreco) => Promise<any>;
+  addMyServiceItem: (
+    serviceItemType: string,
+    customName: string,
+    split: SplitDoPreco,
+    estimatedMinutes?: number
+  ) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
   updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
   setAcceptingNew: (value: boolean) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (
     itemId: string,
-    changes: { customName?: string } & Partial<SplitDoPreco>
+    changes: { customName?: string; estimatedMinutes?: number } & Partial<SplitDoPreco>
   ) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
   fetchMyServices: () => Promise<void>;
@@ -184,13 +189,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     await api.patch(`/affiliations/${affiliationId}/reject`);
   },
 
-  addMyServiceItem: async (serviceItemType, customName, split) => {
+  addMyServiceItem: async (serviceItemType, customName, split, estimatedMinutes) => {
     const prof = get().professional;
     if (!prof) throw new Error("Professional not found");
 
     const { data } = await api.post(
       `/professional-queue/${prof.id}/add-service-items`,
-      { serviceItemType, customName, ...split }
+      { serviceItemType, customName, ...split, ...(estimatedMinutes ? { estimatedMinutes } : {}) }
     );
     return data;
   },

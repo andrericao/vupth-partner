@@ -19,6 +19,7 @@ import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 import { corpoDoSplit, precoParaEditar } from "@lib/split";
+import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO } from "@lib/tempoDoServico";
 
 import {
   calculatePricing,
@@ -163,6 +164,7 @@ export default function MyServicesScreen() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editMinutes, setEditMinutes] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editAbsorption, setEditAbsorption] = useState(0);
   const [isEditSaving, setIsEditSaving] = useState(false);
@@ -171,6 +173,7 @@ export default function MyServicesScreen() {
   const [serviceItemType, setServiceItemType] = useState("");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
+  const [minutes, setMinutes] = useState(String(MINUTOS_PADRAO));
 
   // Mesma regra: sair da tela limpa o que ficou pela metade (10/09).
   useLimparAoSair(() => {
@@ -179,6 +182,8 @@ export default function MyServicesScreen() {
     setServiceItemType("");
     setCustomName("");
     setPrice("");
+    setEditMinutes("");
+    setMinutes(String(MINUTOS_PADRAO));
   });
   const [absorption, setAbsorption] = useState(0);
   const [nameInvalid, setNameInvalid] = useState(false);
@@ -228,12 +233,14 @@ export default function MyServicesScreen() {
     id: string;
     customName: string;
     price: number;
+    estimatedMinutes?: number;
     base_price?: number | null;
     pro_receives?: number | null;
   }) => {
     setShowForm(false);
     setEditingId(svc.id);
     setEditName(svc.customName);
+    setEditMinutes(String(svc.estimatedMinutes ?? MINUTOS_PADRAO));
     // Com a divisao gravada, volta o digitado e a absorcao escolhidos. Servico
     // legado: estima o digitado pelo preco (salvar grava a divisao).
     const { digitado, absorcao } = precoParaEditar(svc);
@@ -254,12 +261,18 @@ export default function MyServicesScreen() {
       Alert.alert("Dados inválidos", "Informe um nome e um preco maior que zero.");
       return;
     }
+    const minutosEdit = lerMinutos(editMinutes);
+    if (minutosEdit == null) {
+      Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
+      return;
+    }
     // Preco do cliente + a divisao gravada, sempre juntos: price sozinho
     // apagaria a divisao no backend.
     setIsEditSaving(true);
     try {
       await updateMyServiceItem(itemId, {
         customName: trimmed,
+        estimatedMinutes: minutosEdit,
         ...corpoDoSplit(editPriceNum, editAbsorption),
       });
       cancelEditItem();
@@ -309,6 +322,11 @@ export default function MyServicesScreen() {
       Alert.alert("Selecione o tipo", "Escolha o tipo de serviço antes de adicionar.");
       return;
     }
+    const minutos = lerMinutos(minutes);
+    if (minutos == null) {
+      Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -317,12 +335,13 @@ export default function MyServicesScreen() {
     const finalPrice = split.price;
 
     try {
-      await addMyServiceItem(serviceItemType, customName.trim(), split);
+      await addMyServiceItem(serviceItemType, customName.trim(), split, minutos);
       Alert.alert("Serviço adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
       setShowForm(false);
       setServiceItemType("");
       setCustomName("");
       setPrice("");
+      setMinutes(String(MINUTOS_PADRAO));
       setAbsorption(0);
       await fetchMyServices();
     } catch (error: any) {
@@ -376,6 +395,13 @@ export default function MyServicesScreen() {
                       placeholder="Ex: Corte Social"
                       value={editName}
                       onChangeText={setEditName}
+                    />
+                    <NwInput
+                      label="Tempo do serviço (min)"
+                      placeholder="30"
+                      value={editMinutes}
+                      onChangeText={(t) => setEditMinutes(mascaraMinutos(t))}
+                      keyboardType="number-pad"
                     />
                     <NwInput
                       label="Seu preço — você recebe"
@@ -479,6 +505,15 @@ export default function MyServicesScreen() {
                   setCustomName(t);
                   if (nameInvalid) setNameInvalid(false);
                 }}
+              />
+
+              {/* O tempo entra na previsao da fila (backend); sem ele, 30 min. */}
+              <NwInput
+                label="Tempo do serviço (min)"
+                placeholder="30"
+                value={minutes}
+                onChangeText={(t) => setMinutes(mascaraMinutos(t))}
+                keyboardType="number-pad"
               />
 
               <NwInput

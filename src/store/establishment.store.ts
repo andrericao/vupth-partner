@@ -183,7 +183,8 @@ type EstablishmentState = {
     establishmentId: string,
     serviceItemType: string,
     customName: string,
-    split: { price: number; pro_receives: number; base_price: number }
+    split: { price: number; pro_receives: number; base_price: number },
+    estimatedMinutes?: number
   ) => Promise<ServiceItemResponse>;
   addAddress: (
     establishmentId: string,
@@ -263,10 +264,10 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     return data;
   },
 
-  addServiceItem: async (establishmentId, serviceItemType, customName, split) => {
+  addServiceItem: async (establishmentId, serviceItemType, customName, split, estimatedMinutes) => {
     const { data } = await api.post(
       `/establishment/${establishmentId}/service-items`,
-      { serviceItemType, customName, ...split }
+      { serviceItemType, customName, ...split, ...(estimatedMinutes ? { estimatedMinutes } : {}) }
     );
 
     return data;

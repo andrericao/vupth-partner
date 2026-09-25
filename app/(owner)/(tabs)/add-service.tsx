@@ -18,6 +18,7 @@ import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 import { corpoDoSplit } from "@lib/split";
+import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO } from "@lib/tempoDoServico";
 import { avisar } from "@lib/confirmar";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
@@ -89,12 +90,14 @@ export default function AddServiceScreen() {
   const [serviceItemType, setServiceItemType] = useState(filteredTypes[0]?.value ?? "CORTE_MAQUINA");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
+  const [minutes, setMinutes] = useState(String(MINUTOS_PADRAO));
 
   // Formulario meio-preenchido nao pode sobreviver a saida da tela (10/09).
   // Ver src/hooks/useLimparAoSair.ts.
   useLimparAoSair(() => {
     setCustomName("");
     setPrice("");
+    setMinutes(String(MINUTOS_PADRAO));
   });
   const [absorption, setAbsorption] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
@@ -128,16 +131,20 @@ export default function AddServiceScreen() {
       Alert.alert("Faltou preencher", `Informe ${faltam}.`);
       return;
     }
+    const minutos = lerMinutos(minutes);
+    if (minutos == null) {
+      Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
+      return;
+    }
 
     setIsLoading(true);
 
-    // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
     // Preco do cliente + a divisao gravada (contrato de 18/09).
     const split = corpoDoSplit(priceNum, absorption);
     const finalPrice = split.price;
 
     try {
-      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), split);
+      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), split, minutos);
       // O servico JA FOI criado — sem a caixa na web a tela nao fechava e o
       // dono cadastrava o mesmo servico duas vezes.
       await avisar({
@@ -230,6 +237,15 @@ export default function AddServiceScreen() {
                 if (nameInvalid) setNameInvalid(false);
               }}
               testID="service-custom-name"
+            />
+
+            {/* O tempo entra na previsao da fila (backend); sem ele, 30 min. */}
+            <NwInput
+              label="Tempo do serviço (min)"
+              placeholder="30"
+              value={minutes}
+              onChangeText={(t) => setMinutes(mascaraMinutos(t))}
+              keyboardType="number-pad"
             />
 
             <NwInput
