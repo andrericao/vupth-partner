@@ -1,8 +1,6 @@
 import { ReactElement } from "react";
 import { render } from "@testing-library/react-native";
-import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
-import { config } from "../../config/gluestack-ui.config";
 
 // Metricas de um aparelho com entalhe. Fora do teste quem entrega isso e o
 // sistema; aqui precisa ser fixo, senao qualquer componente que leia
@@ -13,12 +11,10 @@ const METRICAS = initialWindowMetrics ?? {
   insets: { top: 47, left: 0, right: 0, bottom: 34 },
 };
 
-// Render RNTL envolto no GluestackUIProvider (mesmo `config` do app/_layout) e
-// no SafeAreaProvider, que o cabecalho e as folhas de baixo exigem.
+// Render RNTL envolto no SafeAreaProvider, que o cabecalho e as folhas de baixo
+// exigem. (O GluestackUIProvider saiu em 25/09, com a ultima tela do v1.)
 export function renderWithProvider(ui: ReactElement) {
   return render(
-    <SafeAreaProvider initialMetrics={METRICAS}>
-      <GluestackUIProvider config={config}>{ui}</GluestackUIProvider>
-    </SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={METRICAS}>{ui}</SafeAreaProvider>
   );
 }

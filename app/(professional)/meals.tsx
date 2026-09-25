@@ -1,20 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  VStack,
-  HStack,
-  FormControl,
-  Heading,
+  View,
   Text,
   Pressable,
-  Divider,
   ScrollView,
-} from "@gluestack-ui/themed";
-import { Alert, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  RefreshControl,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
-import { BrandButton } from "@components/brand/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -189,215 +187,180 @@ export default function MealsScreen() {
       style={{ flex: 1 }}
     >
       <ScrollView
-        w="$full"
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <VStack flex={1} pb="$12" px="$4">
+        <View className="flex-1 pb-12 px-4">
           <ScreenHeader
             title="Refeições"
             subtitle="Entram no cálculo da fila. O horário é previsão — você inicia a refeição na tela da fila."
             onBack={() => router.navigate(backTarget as any)}
           />
 
-          <VStack mt="$6" space="sm">
+          <View className="mt-6 gap-2">
             {meals.map((m) =>
               editingId === m.intervalId ? (
-                <VStack
+                <View
                   key={m.intervalId}
-                  bg="$brandSurface"
-                  p="$3"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor="$forest"
+                  className="bg-vupth-surface p-3 rounded-md border border-vupth-forest"
                 >
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest" mb="$2">
-                    {mealName(m.description)}
-                  </Text>
-                  <FormControl>
-                    <HStack space="md">
-                      <VStack flex={1}>
-                        <Input
-                          textLabel="Horário (HH:MM)"
-                          placeholder="12:00"
-                          messageError=""
-                          value={editTime}
-                          onChangeText={(t) => setEditTime(maskTime(t))}
-                          keyboardType="number-pad"
-                        />
-                      </VStack>
-                      <VStack flex={1}>
-                        <Input
-                          textLabel="Duracao (min)"
-                          placeholder="60"
-                          messageError=""
-                          value={editDuration}
-                          onChangeText={(t) => setEditDuration(t.replace(/\D/g, "").slice(0, 3))}
-                          keyboardType="number-pad"
-                        />
-                      </VStack>
-                    </HStack>
-                  </FormControl>
-                  <HStack space="sm" mt="$1">
-                    <Button
+                  <Text className="font-heading text-vupth-forest mb-2">{mealName(m.description)}</Text>
+                  <View className="flex-row gap-3">
+                    <View className="flex-1">
+                      <NwInput
+                        label="Horário (HH:MM)"
+                        placeholder="12:00"
+                        value={editTime}
+                        onChangeText={(t) => setEditTime(maskTime(t))}
+                        keyboardType="number-pad"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <NwInput
+                        label="Duracao (min)"
+                        placeholder="60"
+                        value={editDuration}
+                        onChangeText={(t) => setEditDuration(t.replace(/\D/g, "").slice(0, 3))}
+                        keyboardType="number-pad"
+                      />
+                    </View>
+                  </View>
+                  <View className="flex-row gap-2 mt-1">
+                    <NwButton
                       title="Cancelar"
+                      variant="secondary"
                       onPress={() => setEditingId(null)}
-                      bg="$brandBorder"
-                      textColor="$brandTextSecondary"
-                      h="$9"
-                      flex={1}
+                      className="flex-1"
                     />
-                    <BrandButton
+                    <NwButton
                       title="Salvar"
                       onPress={() => handleSaveEdit(m.intervalId)}
                       isLoading={isSaving}
-                      h="$9"
-                      flex={1}
+                      className="flex-1"
                     />
-                  </HStack>
-                </VStack>
+                  </View>
+                </View>
               ) : (
-                <HStack
+                <View
                   key={m.intervalId}
-                  bg="$brandSurface"
-                  p="$3"
-                  borderRadius="$card"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  className="flex-row items-center justify-between bg-vupth-surface p-3 rounded-card"
                 >
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-                      {mealName(m.description)}
-                    </Text>
-                    <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+                  <View className="flex-1">
+                    <Text className="font-heading text-vupth-forest">{mealName(m.description)}</Text>
+                    <Text className="font-body text-xs text-vupth-textSecondary">
                       {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min •{" "}
                       {patternLabel(m.recurrencePattern)}
                       {m.status === "ACTIVE" ? " • em andamento" : ""}
                     </Text>
-                    <HStack space="md" mt="$1">
-                      <Pressable onPress={() => startEdit(m)}>
-                        <Text fontFamily="$body" fontSize="$xs" color="$forest">
-                          Editar
-                        </Text>
+                    <View className="flex-row gap-3 mt-1">
+                      <Pressable onPress={() => startEdit(m)} accessibilityRole="button" hitSlop={6}>
+                        <Text className="font-body text-xs text-vupth-forest">Editar</Text>
                       </Pressable>
-                      <Pressable onPress={() => handleRemove(m)}>
-                        <Text fontFamily="$body" fontSize="$xs" color="$brandDanger">
-                          Remover
-                        </Text>
+                      <Pressable onPress={() => handleRemove(m)} accessibilityRole="button" hitSlop={6}>
+                        <Text className="font-body text-xs text-vupth-danger">Remover</Text>
                       </Pressable>
-                    </HStack>
-                  </VStack>
-                </HStack>
+                    </View>
+                  </View>
+                </View>
               )
             )}
 
             {meals.length === 0 && (
-              <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$2">
+              <Text className="font-body text-vupth-textSecondary text-center mt-2">
                 Nenhuma refeição cadastrada
               </Text>
             )}
-          </VStack>
+          </View>
 
           {!showAdd ? (
-            <BrandButton title="Adicionar refeição" onPress={() => { setEditingId(null); setShowAdd(true); }} mt="$6" />
+            <NwButton
+              title="Adicionar refeição"
+              onPress={() => {
+                setEditingId(null);
+                setShowAdd(true);
+              }}
+              className="mt-6"
+            />
           ) : (
-            <VStack mt="$6">
-              <Divider mb="$4" />
-              <Heading size="lg" fontFamily="$heading" mb="$3">
-                Nova Refeição
-              </Heading>
-              <FormControl>
-                <Input
-                  textLabel="Nome"
-                  placeholder="Ex: Almoço"
-                  messageError=""
-                  value={addDesc}
-                  onChangeText={setAddDesc}
-                />
-                <HStack space="md">
-                  <VStack flex={1}>
-                    <Input
-                      textLabel="Horário (HH:MM)"
-                      placeholder="12:00"
-                      messageError=""
-                      value={addTime}
-                      onChangeText={(t) => setAddTime(maskTime(t))}
-                      keyboardType="number-pad"
-                    />
-                  </VStack>
-                  <VStack flex={1}>
-                    <Input
-                      textLabel="Duracao (min)"
-                      placeholder="60"
-                      messageError=""
-                      value={addDuration}
-                      onChangeText={(t) => setAddDuration(t.replace(/\D/g, "").slice(0, 3))}
-                      keyboardType="number-pad"
-                    />
-                  </VStack>
-                </HStack>
-              </FormControl>
+            <View className="mt-6">
+              <View className="h-px bg-vupth-border mb-4" />
+              <Text className="font-heading text-xl text-vupth-forest mb-3">Nova Refeição</Text>
+              <NwInput label="Nome" placeholder="Ex: Almoço" value={addDesc} onChangeText={setAddDesc} />
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <NwInput
+                    label="Horário (HH:MM)"
+                    placeholder="12:00"
+                    value={addTime}
+                    onChangeText={(t) => setAddTime(maskTime(t))}
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View className="flex-1">
+                  <NwInput
+                    label="Duracao (min)"
+                    placeholder="60"
+                    value={addDuration}
+                    onChangeText={(t) => setAddDuration(t.replace(/\D/g, "").slice(0, 3))}
+                    keyboardType="number-pad"
+                  />
+                </View>
+              </View>
 
-              <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mb="$2">
-                Recorrencia
-              </Text>
-              <HStack space="xs" mb="$4" flexWrap="wrap">
+              <Text className="font-body text-sm text-vupth-textSecondary mb-2">Recorrencia</Text>
+              <View className="flex-row flex-wrap gap-1 mb-4">
                 {PATTERNS.map((p) => {
                   const selected = addPattern === p.value;
                   return (
                     <Pressable
                       key={p.value}
                       onPress={() => setAddPattern(p.value)}
-                      bg={selected ? "$forest" : "$white"}
-                      py="$1.5"
-                      px="$3"
-                      borderRadius="$full"
-                      borderWidth="$1"
-                      borderColor={selected ? "$forest" : "$brandBorder"}
-                      mb="$1"
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
+                      className={`py-1.5 px-3 rounded-full border mb-1 ${
+                        selected ? "bg-vupth-forest border-vupth-forest" : "bg-white border-vupth-border"
+                      }`}
                     >
-                      <Text fontFamily="$body" fontSize="$xs" color={selected ? "$white" : "$brandTextSecondary"}>
+                      <Text
+                        className={`font-body text-xs ${selected ? "text-white" : "text-vupth-textSecondary"}`}
+                      >
                         {p.label}
                       </Text>
                     </Pressable>
                   );
                 })}
-              </HStack>
+              </View>
 
-              <BrandButton title="Adicionar" onPress={handleAdd} isLoading={isSaving} mt="$9" />
-              <Button
+              <NwButton title="Adicionar" onPress={handleAdd} isLoading={isSaving} className="mt-4" />
+              {/* Cancelar e a metade negativa de uma escolha, nao destruicao:
+                  vai de `secondary` (regra do NwButton), nao de vermelho. */}
+              <NwButton
                 title="Cancelar"
+                variant="secondary"
                 onPress={() => setShowAdd(false)}
-                bg="transparent"
-                $active-bg="$brandSurface"
-                borderWidth="$1"
-                borderColor="$brandDanger"
-                textColor="$brandDanger"
+                className="mt-3"
               />
-            </VStack>
+            </View>
           )}
 
-          <VStack bg="$brandSurface" p="$4" borderRadius="$card" mt="$4">
-            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-              Aviso na hora da refeição
-            </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
+          <View className="bg-vupth-surface p-4 rounded-card mt-4">
+            <Text className="font-body text-sm text-vupth-textSecondary">Aviso na hora da refeição</Text>
+            <Text className="font-body text-xs text-vupth-textSecondary mt-1">
               {mealNudgeOff
                 ? "Desligado — o lembrete aparece só nas Opções da fila (bolinha + contagem)."
                 : "Ligado — um aviso aparece na tela no horário da refeição."}
             </Text>
-            <Button
+            <NwButton
               title={mealNudgeOff ? "Ligar aviso" : "Desligar aviso"}
+              variant="outlineBrand"
               onPress={toggleMealNudge}
-              bg="$brandBorder"
-              textColor="$brandTextSecondary"
-              h="$9"
-              mt="$2"
+              className="mt-3"
             />
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -2,16 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { useIsFocused } from "@react-navigation/native";
-import {
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  Pressable,
-  ScrollView,
-  Divider,
-} from "@gluestack-ui/themed";
-import { RefreshControl, View, View as RNView, Text as RNText } from "react-native";
+import { RefreshControl, View, Text, Pressable, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
@@ -52,31 +43,68 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <VStack bg="$brandSurface" p="$4" borderRadius="$card" mb="$3">
-      <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-          {item.clientName}
-        </Text>
-        <RNView className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
-          <RNText className={`font-body text-xs ${statusInfo.texto}`}>{statusInfo.label}</RNText>
-        </RNView>
-      </HStack>
+    <View className="bg-vupth-surface p-4 rounded-card mb-3">
+      <View className="flex-row items-center justify-between">
+        <Text className="font-heading text-vupth-forest">{item.clientName}</Text>
+        <View className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
+          <Text className={`font-body text-xs ${statusInfo.texto}`}>{statusInfo.label}</Text>
+        </View>
+      </View>
 
-      <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$1">
+      <Text className="font-body text-xs text-vupth-textSecondary mt-1">
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
 
-      <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
+      <Text className="font-body text-sm text-vupth-textSecondary mt-1">
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
-      <HStack mt="$2" justifyContent="flex-end">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-          R$ {item.totalValue.toFixed(2)}
-        </Text>
-      </HStack>
-    </VStack>
+      <View className="flex-row justify-end mt-2">
+        <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
+      </View>
+    </View>
+  );
+}
+
+/** Chip de escolha (periodo e filtro). Escolhido: forest com texto verde. */
+function Chip({ label, ativo, onPress }: { label: string; ativo: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: ativo }}
+      className={`py-2 px-4 rounded-full active:opacity-70 ${ativo ? "bg-vupth-forest" : "bg-vupth-surface"}`}
+    >
+      <Text
+        numberOfLines={1}
+        className={`font-body text-sm text-center ${ativo ? "text-vupth-green" : "text-vupth-textSecondary"}`}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Card de numero do resumo. `destaque` = o card-heroi (receita). */
+function Numero({
+  rotulo,
+  valor,
+  tamanho = "text-xxl",
+  destaque = false,
+}: {
+  rotulo: string;
+  valor: string | number;
+  tamanho?: string;
+  destaque?: boolean;
+}) {
+  return (
+    <View className={`flex-1 p-4 rounded-card ${destaque ? "bg-vupth-green" : "bg-vupth-surface"}`}>
+      <Text className={`font-body text-sm ${destaque ? "text-vupth-forest" : "text-vupth-textSecondary"}`}>
+        {rotulo}
+      </Text>
+      <Text className={`font-heading ${tamanho} text-vupth-forest`}>{valor}</Text>
+    </View>
   );
 }
 
@@ -176,15 +204,15 @@ export default function MyDayScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
-          ref={rolagemRef}
-          onScroll={pilula.onScroll}
-          scrollEventThrottle={64}
-        w="$full"
+        ref={rolagemRef}
+        onScroll={pilula.onScroll}
+        scrollEventThrottle={64}
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <VStack flex={1} pb="$12" px="$4">
+        <View className="flex-1 pb-12 px-4">
           {/* [marca-vupth] Titulo do Pencil (PROF · 03) e "Seu dia" — bate com o
               conceito interno da tela ("MEU DIA", que uniu Relatórios +
               Atendimentos); "Relatórios" ficou só no rotulo da aba, mais curto
@@ -193,176 +221,101 @@ export default function MyDayScreen() {
             title="Seu dia"
             onBack={() => router.navigate("/(professional)/queue" as any)}
           />
-  
-          <HStack mt="$6" space="sm">
+
+          <View className="flex-row flex-wrap gap-2 mt-6">
             {periods.map((p) => (
-              <Pressable
-                key={p.key}
-                onPress={() => setPeriod(p.key)}
-                bg={period === p.key ? "$forest" : "$brandSurface"}
-                py="$2"
-                px="$4"
-                borderRadius="$full"
-                flexShrink={0}
-              >
-                <Text
-                  numberOfLines={1}
-                  fontFamily="$body"
-                  color={period === p.key ? "$brandGreen" : "$brandTextSecondary"}
-                  textAlign="center"
-                  fontSize="$sm"
-                >
-                  {p.label}
-                </Text>
-              </Pressable>
+              <Chip key={p.key} label={p.label} ativo={period === p.key} onPress={() => setPeriod(p.key)} />
             ))}
-          </HStack>
-  
+          </View>
+
           <ExpedienteCard />
-  
-          <Divider my="$6" />
-  
+
+          <View className="h-px bg-vupth-border my-6" />
+
           {period === "day" && (
-            <HStack space="md" mb="$4">
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                  Na fila agora
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                  {queueCount}
-                </Text>
-              </VStack>
-              <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                  Espera estimada
-                </Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                  {waitMinutes} min
-                </Text>
-              </VStack>
-            </HStack>
+            <View className="flex-row gap-3 mb-4">
+              <Numero rotulo="Na fila agora" valor={queueCount} />
+              <Numero rotulo="Espera estimada" valor={`${waitMinutes} min`} />
+            </View>
           )}
-  
+
           {reportLoading ? (
-            <VStack mt="$2">
+            <View className="mt-2">
               <SkeletonList count={2} />
-            </VStack>
+            </View>
           ) : (
-            <VStack space="md">
-              {/* [marca-vupth] Receita virou o card-heroi (brandGreen, primeira
+            <View className="gap-3">
+              {/* [marca-vupth] Receita e o card-heroi (brandGreen, primeira
                   posição) — o Pencil (PROF · 03) da esse tratamento pro
-                  faturado, o único número em dinheiro da tela. Era greenTint
-                  (tom fraco) na segunda posição, com o valor MENOR que o dos
-                  outros cards (2xl vs 3xl) — inconsistente pro card que deveria
-                  pesar mais, não menos. */}
-              <HStack space="md">
-                <VStack flex={1} bg="$brandGreen" p="$4" borderRadius="$card">
-                  <Text fontFamily="$body" fontSize="$sm" color="$forest">
-                    Receita
-                  </Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                    R$ {Number(report?.totalRevenue ?? 0).toFixed(2)}
-                  </Text>
-                </VStack>
-                <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                    Atendimentos
-                  </Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$3xl" color="$forest">
-                    {report?.totalAttendances ?? 0}
-                  </Text>
-                </VStack>
-              </HStack>
-  
-              <HStack space="md">
-                <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                    Duracao media
-                  </Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$xl" color="$forest">
-                    {Math.round(report?.avgDurationMinutes ?? 0)} min
-                  </Text>
-                </VStack>
-                <VStack flex={1} bg="$brandSurface" p="$4" borderRadius="$card">
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                    Serviço mais feito
-                  </Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" fontSize="$md" color="$forest">
-                    {humanizeService(report?.topService ?? null)}
-                  </Text>
-                </VStack>
-              </HStack>
-  
-              <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" textAlign="center" mt="$2">
+                  faturado, o único número em dinheiro da tela. */}
+              <View className="flex-row gap-3">
+                <Numero
+                  rotulo="Receita"
+                  valor={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`}
+                  destaque
+                />
+                <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
+              </View>
+
+              <View className="flex-row gap-3">
+                <Numero
+                  rotulo="Duracao media"
+                  valor={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
+                  tamanho="text-xl"
+                />
+                <Numero
+                  rotulo="Serviço mais feito"
+                  valor={humanizeService(report?.topService ?? null)}
+                  tamanho="text-md"
+                />
+              </View>
+
+              <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
                 {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
                 atendimentos finalizados
               </Text>
-            </VStack>
+            </View>
           )}
-  
-          <Divider my="$6" />
-  
-          <Heading size="lg" fontFamily="$heading" mb="$3">
-            Historico
-          </Heading>
-  
-          <HStack space="sm" mb="$4">
+
+          <View className="h-px bg-vupth-border my-6" />
+
+          <Text className="font-heading text-xl text-vupth-forest mb-3">Historico</Text>
+
+          <View className="flex-row flex-wrap gap-2 mb-4">
             {filters.map((f) => (
-              <Pressable
-                key={f.key}
-                onPress={() => setFilter(f.key)}
-                bg={filter === f.key ? "$forest" : "$brandSurface"}
-                py="$2"
-                px="$4"
-                borderRadius="$full"
-                flexShrink={0}
-              >
-                <Text
-                  numberOfLines={1}
-                  fontFamily="$body"
-                  color={filter === f.key ? "$brandGreen" : "$brandTextSecondary"}
-                  textAlign="center"
-                  fontSize="$sm"
-                >
-                  {f.label}
-                </Text>
-              </Pressable>
+              <Chip key={f.key} label={f.label} ativo={filter === f.key} onPress={() => setFilter(f.key)} />
             ))}
-          </HStack>
-  
+          </View>
+
           {historyLoading && (
-            <VStack mt="$2">
+            <View className="mt-2">
               <SkeletonList count={3} />
-            </VStack>
+            </View>
           )}
-  
+
           {historyError && (
-            <VStack bg="$brandWarning" p="$4" borderRadius="$card" mt="$2">
-              <Text fontFamily="$body" color="$forest" textAlign="center">
-                {historyError}
-              </Text>
-              <Pressable onPress={loadHistory} mt="$2">
-                <Text fontFamily="$body" color="$forest" textAlign="center" fontSize="$sm">
-                  Tentar novamente
-                </Text>
+            <View className="bg-vupth-warning p-4 rounded-card mt-2">
+              <Text className="font-body text-vupth-forest text-center">{historyError}</Text>
+              <Pressable onPress={loadHistory} accessibilityRole="button" className="mt-2 active:opacity-70">
+                <Text className="font-body text-sm text-vupth-forest text-center">Tentar novamente</Text>
               </Pressable>
-            </VStack>
+            </View>
           )}
-  
+
           {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
-            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" mt="$6">
+            <Text className="font-body text-vupth-textSecondary text-center mt-6">
               Nenhum atendimento encontrado
             </Text>
           )}
-  
+
           {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
-            <VStack>
+            <View>
               {history.map((item) => (
                 <AttendanceHistoryCard key={item.id} item={item} />
               ))}
-            </VStack>
+            </View>
           )}
-        </VStack>
+        </View>
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
     </View>

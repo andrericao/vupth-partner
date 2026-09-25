@@ -1,19 +1,18 @@
 import { useState, useCallback } from "react";
 import {
-  VStack,
-  HStack,
+  View,
   Text,
-  Badge,
-  BadgeText,
   ScrollView,
-  Spinner,
-  Divider,
-} from "@gluestack-ui/themed";
-import { Alert, RefreshControl, Platform, Pressable } from "react-native";
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  Platform,
+  Pressable,
+} from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { RotateCw } from "lucide-react-native";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 import { useElapsedTime } from "@hooks/useElapsedTime";
 import { useProfessionalQueue } from "@hooks/useProfessionalQueue";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -33,39 +32,23 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
         ? "Pausado"
         : `#${position}`;
   const statusColor =
-    attendance.status === "IN_PROGRESS"
-      ? "$forest"
-      : attendance.status === "PAUSED"
-        ? "$brandWarning"
-        : "$forest";
+    attendance.status === "PAUSED" ? "text-vupth-warning" : "text-vupth-forest";
 
   return (
-    <HStack
-      py="$3"
-      px="$4"
-      bg="$brandSurface"
-      borderRadius="$card"
-      mb="$2"
-      justifyContent="space-between"
-      alignItems="center"
-    >
-      <VStack flex={1}>
-        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-          {attendance.clientName}
-        </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+    <View className="flex-row items-center justify-between py-3 px-4 bg-vupth-surface rounded-card mb-2">
+      <View className="flex-1">
+        <Text className="font-heading text-vupth-forest">{attendance.clientName}</Text>
+        <Text className="font-body text-xs text-vupth-textSecondary">
           {attendance.services.map((s) => s.customName).join(", ")}
         </Text>
-      </VStack>
-      <VStack alignItems="flex-end">
-        <Text fontFamily="$body" fontSize="$sm" color={statusColor} fontWeight="$bold">
-          {statusLabel}
-        </Text>
-        <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
+      </View>
+      <View className="items-end">
+        <Text className={`font-body text-sm font-bold ${statusColor}`}>{statusLabel}</Text>
+        <Text className="font-body text-xs text-vupth-textSecondary">
           R$ {attendance.totalValue.toFixed(2)}
         </Text>
-      </VStack>
-    </HStack>
+      </View>
+    </View>
   );
 }
 
@@ -103,64 +86,45 @@ function CurrentAttendanceCard({
   );
 
   return (
-    <VStack
-      bg="$greenTint"
-      p="$4"
-      borderRadius="$card"
-      borderWidth="$1"
-      borderColor="$greenTint"
-      mb="$4"
-    >
-      <HStack justifyContent="space-between" alignItems="center">
-        <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
-          {attendance.clientName}
-        </Text>
-        <Badge action="success" variant="solid" borderRadius="$md">
-          <BadgeText fontSize="$xs">
+    <View className="bg-vupth-greenTint p-4 rounded-card mb-4">
+      <View className="flex-row items-center justify-between">
+        <Text className="font-heading text-lg text-vupth-forest">{attendance.clientName}</Text>
+        {/* O Badge success do v1: fundo #EDFCF2, texto #2A7948 (config/theme/Badge.ts). */}
+        <View className="bg-[#EDFCF2] border border-[#66B584] rounded-md px-2 py-0.5">
+          <Text className="font-body text-xs font-bold text-[#2A7948]">
             {attendance.isPaused ? "PAUSADO" : "ATENDENDO"}
-          </BadgeText>
-        </Badge>
-      </HStack>
-      <Text fontFamily="$body" fontSize="$sm" color="$forest" mt="$1">
+          </Text>
+        </View>
+      </View>
+      <Text className="font-body text-sm text-vupth-forest mt-1">
         {attendance.services?.map((s: any) => s.customName).join(", ")}
       </Text>
-      <HStack mt="$2" justifyContent="space-between">
-        <Text fontFamily="$body" fontSize="$sm" color="$forest">
-          Tempo: {formatted}
-        </Text>
-        <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
+      <View className="flex-row justify-between mt-2">
+        <Text className="font-body text-sm text-vupth-forest">Tempo: {formatted}</Text>
+        <Text className="font-heading text-vupth-forest">
           R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
-      </HStack>
+      </View>
 
       {meu ? (
-        <HStack mt="$4" space="sm">
+        <View className="flex-row gap-2 mt-4">
           {/* `finalizarAtendimento` (a MESMA do profissional) atravessa o
               pausado: o backend so aceita `finish` em IN_PROGRESS (S36), entao
               ela retoma antes. Chamar `finishAttendance` direto aqui recriaria
               o beco que o 08/09 fechou do outro lado. */}
-          <Button
-            title="Finalizar"
-            onPress={onFinish}
-            isLoading={ocupado}
-            flex={1}
-          />
-          <Button
+          <NwButton title="Finalizar" onPress={onFinish} isLoading={ocupado} className="flex-1" />
+          {/* Contornado, como o do profissional: os dois lado a lado nao podem
+              ser iguais. */}
+          <NwButton
             title={attendance.isPaused ? "Retomar" : "Pausar"}
-            variant="outline"
-            // Contornado, como o vupthOutline do profissional: com o Button
-            // verde (16/09), sem isto os dois lado a lado ficavam iguais.
-            bg="transparent"
-            $active-bg="$greenTint"
-            borderWidth="$2"
-            borderColor="$forest"
+            variant="vupthOutline"
             onPress={attendance.isPaused ? onResume : onPause}
             isLoading={ocupado}
-            flex={1}
+            className="flex-1"
           />
-        </HStack>
+        </View>
       ) : null}
-    </VStack>
+    </View>
   );
 }
 
@@ -237,12 +201,12 @@ export default function ProfessionalQueueScreen() {
 
   return (
     <ScrollView
-      w="$full"
+      className="w-full"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <VStack flex={1} pb="$12" px="$4">
+      <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title={data?.professionalName ?? professionalName ?? "Fila"}
           onBack={() => router.navigate("/(owner)/dashboard" as any)}
@@ -267,41 +231,35 @@ export default function ProfessionalQueueScreen() {
 
         {data && (
           <>
-            <Text fontFamily="$body" color="$brandTextSecondary" mt="$1">
-              {data.establishmentName}
-            </Text>
+            <Text className="font-body text-vupth-textSecondary mt-1">{data.establishmentName}</Text>
 
-            <HStack mt="$4" space="md" mb="$4">
-              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$greenTint">
-                <Text fontFamily="$body" fontSize="$xs" color="$forest">Na fila</Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
-                  {data.size}
-                </Text>
-              </VStack>
-              <VStack flex={1} bg="$greenTint" p="$3" borderRadius="$card" borderWidth="$1" borderColor="$blue200">
-                <Text fontFamily="$body" fontSize="$xs" color="$blue700">Espera total</Text>
-                <Text fontFamily="$heading" fontWeight="$bold" fontSize="$2xl" color="$forest">
+            <View className="flex-row gap-3 my-4">
+              <View className="flex-1 bg-vupth-greenTint p-3 rounded-card">
+                <Text className="font-body text-xs text-vupth-forest">Na fila</Text>
+                <Text className="font-heading text-xl text-vupth-forest">{data.size}</Text>
+              </View>
+              <View className="flex-1 bg-vupth-greenTint p-3 rounded-card border border-blue-200">
+                <Text className="font-body text-xs text-blue-700">Espera total</Text>
+                <Text className="font-heading text-xl text-vupth-forest">
                   {data.totalRemainingMinutes} min
                 </Text>
-              </VStack>
-            </HStack>
+              </View>
+            </View>
 
-            <Divider mb="$4" />
+            <View className="h-px bg-vupth-border mb-4" />
           </>
         )}
 
         {isLoading && !data && (
-          <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Spinner color="$forest" size="large" />
-            <Text fontFamily="$body" color="$brandTextSecondary" mt="$4">Carregando fila...</Text>
-          </VStack>
+          <View className="flex-1 items-center justify-center mt-12">
+            <ActivityIndicator color="#163300" size="large" />
+            <Text className="font-body text-vupth-textSecondary mt-4">Carregando fila...</Text>
+          </View>
         )}
 
         {data?.inAttendance && (
-          <VStack mb="$2">
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
-              Em Atendimento
-            </Text>
+          <View className="mb-2">
+            <Text className="font-heading text-vupth-textSecondary mb-2">Em Atendimento</Text>
             <CurrentAttendanceCard
               attendance={data.inAttendance}
               meu={meuAtendimento}
@@ -330,41 +288,37 @@ export default function ProfessionalQueueScreen() {
                 )
               }
             />
-          </VStack>
+          </View>
         )}
 
         {data && data.attendancesInQueue.length > 0 && (
-          <VStack>
-            <Text fontFamily="$heading" fontWeight="$bold" mb="$2" color="$brandTextSecondary">
+          <View>
+            <Text className="font-heading text-vupth-textSecondary mb-2">
               Lista de Espera ({data.attendancesInQueue.length})
             </Text>
             {data.attendancesInQueue.map((att, i) => (
               <QueueItem key={att.id} attendance={att} position={i + 1} />
             ))}
-          </VStack>
+          </View>
         )}
 
         {data && !data.inAttendance && data.attendancesInQueue.length === 0 && (
-          <VStack flex={1} alignItems="center" justifyContent="center" mt="$12">
-            <Text fontFamily="$body" color="$brandTextSecondary" textAlign="center" fontSize="$lg">
+          <View className="flex-1 items-center justify-center mt-12">
+            <Text className="font-body text-lg text-vupth-textSecondary text-center">
               Nenhum cliente na fila
             </Text>
-          </VStack>
+          </View>
         )}
 
-        <Divider my="$6" />
+        <View className="h-px bg-vupth-border my-6" />
 
-        <Button
+        <NwButton
           title="Desvincular profissional"
+          variant="outlineDanger"
           onPress={handleRemove}
           isLoading={isRemoving}
-          bg="transparent"
-          borderWidth="$1"
-          borderColor="$brandDanger"
-          textColor="$brandDanger"
-          $active-bg="$brandSurface"
         />
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
