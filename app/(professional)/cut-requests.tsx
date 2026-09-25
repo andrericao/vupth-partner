@@ -3,7 +3,7 @@ import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, RefreshControl, Alert } from "react-native";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock } from "lucide-react-native";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -11,6 +11,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import {
   activeCutRequests,
+  releDepoisDeDecidir,
   minutesToExpire,
   cutRequestServices,
   cutRequestClientName,
@@ -35,6 +36,8 @@ export default function CutRequestsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
+  const fetchMe = useProfessionalStore((s) => s.fetchMe);
+  const queryClient = useQueryClient();
 
   const establishmentId = professional?.establishment_id ?? null;
   const profId = professional?.id;
@@ -65,6 +68,12 @@ export default function CutRequestsScreen() {
       // Sem Date.now() aqui (react-hooks/purity barra fora do queryFn): o
       // refetch ja reexecuta o queryFn abaixo, que atualiza nowMs sozinho.
       await refetch();
+      // Aceitar muda o status (vira Trabalhando) e a fila: sem reler, a pilula
+      // seguia "Fora" (Andre, 25/09).
+      await releDepoisDeDecidir(accept, {
+        releStatus: fetchMe,
+        invalidar: (chave) => queryClient.invalidateQueries({ queryKey: chave }),
+      });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível decidir a solicitação."));
     } finally {

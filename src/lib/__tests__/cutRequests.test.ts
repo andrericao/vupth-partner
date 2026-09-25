@@ -1,5 +1,6 @@
 import {
   activeCutRequests,
+  releDepoisDeDecidir,
   minutesToExpire,
   cutRequestServices,
   cutRequestTitle,
@@ -231,5 +232,38 @@ describe("resumoDeSolicitacoes", () => {
   it("sem nome do backend, o fallback nao deixa o card mudo", () => {
     const r = resumoDeSolicitacoes([pedido({ client_name: null })], NOW)!;
     expect(r.quem).toBe("Cliente");
+  });
+});
+
+// 🔴 Andre, 25/09: aceitou o encaixe com a fila fechada e continuou "Fora" na
+// tela. O backend diz (26/08) que aceitar ja poe o profissional em WORKING — mas
+// o app so relia a lista de encaixes. Aceitar tem que reler o proprio status e
+// a fila; recusar nao muda nada alem da lista.
+describe("releDepoisDeDecidir", () => {
+  const montar = () => ({
+    releStatus: jest.fn(async () => undefined),
+    invalidar: jest.fn(),
+  });
+
+  it("aceitar: rele o status e as filas", async () => {
+    const f = montar();
+    await releDepoisDeDecidir(true, f);
+    expect(f.releStatus).toHaveBeenCalledTimes(1);
+    expect(f.invalidar).toHaveBeenCalledWith(["professionals-with-queue"]);
+    expect(f.invalidar).toHaveBeenCalledWith(["professional-queue"]);
+  });
+
+  it("recusar: nada alem da lista", async () => {
+    const f = montar();
+    await releDepoisDeDecidir(false, f);
+    expect(f.releStatus).not.toHaveBeenCalled();
+    expect(f.invalidar).not.toHaveBeenCalled();
+  });
+
+  it("falha ao reler o status nao desfaz o aceite (as filas relem igual)", async () => {
+    const f = montar();
+    f.releStatus.mockRejectedValueOnce(new Error("rede"));
+    await expect(releDepoisDeDecidir(true, f)).resolves.toBeUndefined();
+    expect(f.invalidar).toHaveBeenCalledTimes(2);
   });
 });
