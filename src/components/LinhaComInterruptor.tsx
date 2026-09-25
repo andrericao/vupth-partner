@@ -8,9 +8,8 @@ type Props = {
 };
 
 // Preferencia liga/desliga: rotulo e explicacao a esquerda, interruptor a
-// direita. Trilho verde da marca quando ligado, borda quando desligado; bolinha
-// forest/branca. Primeira aparicao de um interruptor no app (25/09) — cores
-// avisadas ao Design.
+// direita. As MESMAS cores do interruptor do horario da loja (HorarioSemana):
+// trilho verde da marca ligado, borda desligado, bolinha branca.
 export function LinhaComInterruptor({ rotulo, descricao, ligado, onMudar }: Props) {
   return (
     <View className="flex-row items-center gap-3 bg-vupth-surface p-4 rounded-card">
@@ -26,7 +25,7 @@ export function LinhaComInterruptor({ rotulo, descricao, ligado, onMudar }: Prop
         value={ligado}
         onValueChange={onMudar}
         trackColor={{ false: "#D7DDD3", true: "#9FE870" }}
-        thumbColor={ligado ? "#163300" : "#FFFFFF"}
+        thumbColor="#FFFFFF"
         ios_backgroundColor="#D7DDD3"
       />
     </View>
