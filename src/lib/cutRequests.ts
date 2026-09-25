@@ -127,3 +127,26 @@ export function resumoDeSolicitacoes(
     expiraEm: Math.min(...ativos.map((r) => minutesToExpire(r.expires_at, nowMs))),
   };
 }
+
+/**
+ * O que reler depois de decidir um encaixe. Aceitar poe o profissional em
+ * WORKING no backend (confirmado por eles em 26/08) e muda a fila — entao
+ * aceitar rele o proprio status e as filas. Recusar so mexe na lista de
+ * encaixes, que a tela ja rele.
+ *
+ * O status e best-effort: se a releitura falhar, o aceite ja aconteceu e o
+ * proximo polling acerta. Nao vira erro na tela.
+ */
+export async function releDepoisDeDecidir(
+  aceitou: boolean,
+  deps: { releStatus: () => Promise<void>; invalidar: (chave: string[]) => void }
+): Promise<void> {
+  if (!aceitou) return;
+  try {
+    await deps.releStatus();
+  } catch {
+    // ver acima
+  }
+  deps.invalidar(["professionals-with-queue"]);
+  deps.invalidar(["professional-queue"]);
+}

@@ -1,8 +1,11 @@
 import { Tabs } from "expo-router";
-import { useWindowDimensions } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
 import { rotulosCabem } from "@lib/rotulosDaAba";
+import { NotificationBadge } from "@components/NotificationBadge";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 
 export default function OwnerTabsLayout() {
   const insets = useSafeAreaInsets();
@@ -11,9 +14,19 @@ export default function OwnerTabsLayout() {
   // O dono aguenta mais que o profissional: tres rotulos curtos, nao quatro.
   const { width, fontScale } = useWindowDimensions();
   const mostrarRotulo = rotulosCabem(width, fontScale, "dono");
+  // Solicitacao de vinculo parada (Andre, 25/09: "nenhum dot aponta para
+  // ela"). O numero sobe ate a aba porque o dono vive no Inicio, nao no Menu.
+  const establishmentId = useEstablishmentStore((s) => s.establishment?.id);
+  const solicitacoes = useSolicitacoesDeVinculo(establishmentId);
 
   return (
     <Tabs
+      // Voltar = a aba visitada ANTES, e nao a primeira (Andre, 24/09: na web,
+      // o voltar da tela Sistema caia na Fila). O padrao do React Navigation e
+      // "firstRoute", e as telas ocultas daqui (Sistema, Dados cadastrais, Meus
+      // Servicos...) sao ABAS — pelo historico, todas voltavam ao inicio.
+      // Travado em voltarNasAbas.test.ts.
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
@@ -65,7 +78,14 @@ export default function OwnerTabsLayout() {
         name="menu"
         options={{
           title: "Menu",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="menu" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <View>
+              <TabBarIcon name="menu" focused={focused} />
+              <View style={{ position: "absolute", top: -6, right: -12 }}>
+                <NotificationBadge count={solicitacoes} testID="tab-badge-menu" />
+              </View>
+            </View>
+          ),
         }}
       />
       <Tabs.Screen name="add-professional" options={{ href: null }} />

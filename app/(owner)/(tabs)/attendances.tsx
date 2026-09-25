@@ -8,24 +8,12 @@ import { useAttendanceStore } from "@store/attendance.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-
-// Selo do status: as tres familias que a tela distingue — concluido (verde),
-// recusado (vermelho) e "ainda acontecendo" (neutro). O Badge do Gluestack
-// pintava por `action`; aqui a classe diz a mesma coisa.
-const STATUS_LABELS: Record<string, { label: string; selo: string; texto: string }> = {
-  FINISHED: { label: "Finalizado", selo: "bg-vupth-greenTint", texto: "text-vupth-forest" },
-  CANCELLED: { label: "Cancelado", selo: "bg-vupth-dangerTint", texto: "text-vupth-danger" },
-  IN_PROGRESS: { label: "Em andamento", selo: "bg-vupth-greenTint", texto: "text-vupth-forest" },
-  PAUSED: { label: "Pausado", selo: "bg-vupth-accentPeach", texto: "text-vupth-forest" },
-  SCHEDULED: { label: "Agendado", selo: "bg-white", texto: "text-vupth-textSecondary" },
-};
+import { seloDoStatus } from "@lib/statusAtendimento";
 
 function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
-  const statusInfo = STATUS_LABELS[item.status] ?? {
-    label: item.status,
-    selo: "bg-white",
-    texto: "text-vupth-textSecondary",
-  };
+  // Rotulo e cor vem da lib compartilhada com o Meu dia — inclusive o REMOVED
+  // (a loja retirou), que antes cairia cru na tela.
+  const statusInfo = seloDoStatus(item.status);
   const date = new Date(item.scheduledTime);
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
@@ -59,7 +47,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
   );
 }
 
-type Filter = "ALL" | "FINISHED" | "CANCELLED";
+type Filter = "ALL" | "FINISHED" | "CANCELLED" | "REMOVED";
 
 export default function OwnerAttendancesScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -107,6 +95,8 @@ export default function OwnerAttendancesScreen() {
     { key: "ALL", label: "Todos" },
     { key: "FINISHED", label: "Finalizados" },
     { key: "CANCELLED", label: "Cancelados" },
+    // A loja retirou (backend, 18/09) — separado de quem desistiu.
+    { key: "REMOVED", label: "Retirados" },
   ];
 
   const totalRevenue = history

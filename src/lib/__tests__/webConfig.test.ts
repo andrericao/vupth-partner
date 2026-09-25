@@ -87,3 +87,33 @@ describe("caminho web — a saida do build nao pode contaminar as ferramentas", 
     expect(tsconfig.exclude).toContain("dist");
   });
 });
+
+// 🔴 Andre, 25/09: o Xiaomi ainda oferecia traduzir. O pedido de "nao traduzir"
+// feito no boot (naoTraduzir.ts) chega DEPOIS de o navegador decidir. Na pagina
+// unica, o Expo usa o `public/index.html` do projeto como modelo (webTemplate.js
+// do @expo/cli) — e ali o pedido vai no HTML que o servidor entrega.
+describe("caminho web — nao traduzir desde o primeiro byte", () => {
+  const html = read("public/index.html");
+
+  it("marca a pagina como nao traduzivel na tag <html>", () => {
+    expect(html).toMatch(/<html[^>]*\btranslate="no"/);
+    expect(html).toMatch(/<html[^>]*\bclass="notranslate"/);
+  });
+
+  it("tem a meta do Google no <head>", () => {
+    expect(html).toContain('<meta name="google" content="notranslate"');
+  });
+
+  it("mantem os marcadores que o Expo preenche (idioma e titulo) e o #root", () => {
+    expect(html).toContain('lang="%LANG_ISO_CODE%"');
+    expect(html).toContain("%WEB_TITLE%");
+    expect(html).toContain('<div id="root"></div>');
+  });
+
+  it("cada marcador aparece UMA vez (o Expo troca so a primeira ocorrencia)", () => {
+    // Aconteceu no build local de 25/09: o comentario do topo citava os
+    // marcadores, o Expo trocou o do comentario e o `lang` saiu literal.
+    expect(html.split("%LANG_ISO_CODE%")).toHaveLength(2);
+    expect(html.split("%WEB_TITLE%")).toHaveLength(2);
+  });
+});

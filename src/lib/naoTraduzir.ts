@@ -16,6 +16,10 @@
 // build local de 19/09, o arquivo nao tinha efeito nenhum. Entao o pedido e
 // feito no boot, na propria pagina.
 //
+// Desde 25/09 o pedido principal mora no `public/index.html` (o modelo que a
+// pagina unica usa): o boot chegava depois de o navegador decidir, e o Xiaomi
+// seguia oferecendo traduzir. Isto aqui fica como reforco.
+//
 // Isto NAO substitui desmarcar "traduzir sempre" nas configuracoes do site:
 // essa preferencia e do navegador e nenhuma pagina a apaga.
 export function pedirParaNaoTraduzir(doc?: Document | null): boolean {

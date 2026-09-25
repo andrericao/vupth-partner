@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useVoltarAoTopo } from "@hooks/useVoltarAoTopo";
+import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, RefreshControl, Alert } from "react-native";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock } from "lucide-react-native";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -10,6 +11,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import {
   activeCutRequests,
+  releDepoisDeDecidir,
   minutesToExpire,
   cutRequestServices,
   cutRequestClientName,
@@ -29,10 +31,13 @@ import { EstadoVazio } from "@components/EstadoVazio";
 export default function CutRequestsScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const pilula = usePilulaTopo(rolagemRef);
 
   const professional = useProfessionalStore((s) => s.professional);
   const myServices = useProfessionalStore((s) => s.myServices);
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
+  const fetchMe = useProfessionalStore((s) => s.fetchMe);
+  const queryClient = useQueryClient();
 
   const establishmentId = professional?.establishment_id ?? null;
   const profId = professional?.id;
@@ -63,6 +68,12 @@ export default function CutRequestsScreen() {
       // Sem Date.now() aqui (react-hooks/purity barra fora do queryFn): o
       // refetch ja reexecuta o queryFn abaixo, que atualiza nowMs sozinho.
       await refetch();
+      // Aceitar muda o status (vira Trabalhando) e a fila: sem reler, a pilula
+      // seguia "Fora" (Andre, 25/09).
+      await releDepoisDeDecidir(accept, {
+        releStatus: fetchMe,
+        invalidar: (chave) => queryClient.invalidateQueries({ queryKey: chave }),
+      });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível decidir a solicitação."));
     } finally {
@@ -71,92 +82,97 @@ export default function CutRequestsScreen() {
   };
 
   return (
-    <ScrollView
-        ref={rolagemRef}
-      className="flex-1 w-full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
-    >
-      <View className="flex-1 pb-12 px-4">
-        <ScreenHeader
-          title="Encaixes"
-          subtitle="Sem resposta, o pedido é negado sozinho."
-          onBack={() => router.back()}
-        />
-
-        <View className="gap-3">
-          {pending.length === 0 ? (
-            <EstadoVazio
-              doodle="tempo"
-              titulo="Nenhum pedido de encaixe"
-              texto="Quando alguém pedir para encaixar, o pedido aparece aqui."
-              className="mt-2"
-            />
-          ) : (
-            pending.map((req) => {
-              const mins = minutesToExpire(req.expires_at, nowMs);
-              const urgent = mins <= 2;
-              const who = cutRequestClientName(req);
-              const services = cutRequestServices(req.service_item_ids, myServices);
-              const total = cutRequestTotal(req.service_item_ids, myServices);
-              const time = hhmmFromIso(req.created_at);
-              const busy = busyId === req.id;
-
-              return (
-                <View
-                  key={req.id}
-                  className="bg-vupth-surface rounded-card p-4 gap-3"
-                >
-                  <View className="flex-row items-start justify-between">
-                    <View className="flex-1 pr-3">
-                      <Text className="font-display text-base text-vupth-forest">{who}</Text>
-                      <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
-                        {services}
-                        {total > 0 ? ` · ${formatCurrency(total)}` : ""}
-                      </Text>
-                    </View>
-                    <View
-                      className={`flex-row items-center gap-1 px-2.5 h-6 rounded-full ${
-                        urgent ? "bg-vupth-danger" : "bg-white border border-vupth-border"
-                      }`}
-                    >
-                      <Clock size={12} color={urgent ? "#FFFFFF" : "#454745"} />
-                      <Text
-                        className={`font-mono text-[11px] ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
+    <View style={{ flex: 1 }}>
+      <ScrollView
+          ref={rolagemRef}
+          onScroll={pilula.onScroll}
+          scrollEventThrottle={64}
+        className="flex-1 w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
+      >
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader
+            title="Encaixes"
+            subtitle="Sem resposta, o pedido é negado sozinho."
+            onBack={() => router.back()}
+          />
+  
+          <View className="gap-3">
+            {pending.length === 0 ? (
+              <EstadoVazio
+                doodle="tempo"
+                titulo="Nenhum pedido de encaixe"
+                texto="Quando alguém pedir para encaixar, o pedido aparece aqui."
+                className="mt-2"
+              />
+            ) : (
+              pending.map((req) => {
+                const mins = minutesToExpire(req.expires_at, nowMs);
+                const urgent = mins <= 2;
+                const who = cutRequestClientName(req);
+                const services = cutRequestServices(req.service_item_ids, myServices);
+                const total = cutRequestTotal(req.service_item_ids, myServices);
+                const time = hhmmFromIso(req.created_at);
+                const busy = busyId === req.id;
+  
+                return (
+                  <View
+                    key={req.id}
+                    className="bg-vupth-surface rounded-card p-4 gap-3"
+                  >
+                    <View className="flex-row items-start justify-between">
+                      <View className="flex-1 pr-3">
+                        <Text className="font-display text-base text-vupth-forest">{who}</Text>
+                        <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
+                          {services}
+                          {total > 0 ? ` · ${formatCurrency(total)}` : ""}
+                        </Text>
+                      </View>
+                      <View
+                        className={`flex-row items-center gap-1 px-2.5 h-6 rounded-full ${
+                          urgent ? "bg-vupth-danger" : "bg-white border border-vupth-border"
+                        }`}
                       >
-                        {mins} min
+                        <Clock size={12} color={urgent ? "#FFFFFF" : "#454745"} />
+                        <Text
+                          className={`font-mono text-[11px] ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
+                        >
+                          {mins} min
+                        </Text>
+                      </View>
+                    </View>
+  
+                    {time && (
+                      <Text className="font-body text-[11px] text-vupth-textSecondary">
+                        Pediu às {time} · entra no fim da sua fila
                       </Text>
+                    )}
+  
+                    <View className="flex-row gap-2">
+                      <NwButton
+                        title="Recusar"
+                        variant="secondary"
+                        className="flex-1 h-9 mt-0"
+                        disabled={busy}
+                        onPress={() => decide(req.id, false)}
+                      />
+                      <NwButton
+                        title="Aceitar"
+                        className="flex-1 h-9 mt-0"
+                        disabled={busy}
+                        onPress={() => decide(req.id, true)}
+                      />
                     </View>
                   </View>
-
-                  {time && (
-                    <Text className="font-body text-[11px] text-vupth-textSecondary">
-                      Pediu às {time} · entra no fim da sua fila
-                    </Text>
-                  )}
-
-                  <View className="flex-row gap-2">
-                    <NwButton
-                      title="Recusar"
-                      variant="secondary"
-                      className="flex-1 h-9 mt-0"
-                      disabled={busy}
-                      onPress={() => decide(req.id, false)}
-                    />
-                    <NwButton
-                      title="Aceitar"
-                      className="flex-1 h-9 mt-0"
-                      disabled={busy}
-                      onPress={() => decide(req.id, true)}
-                    />
-                  </View>
-                </View>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+      <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+    </View>
   );
 }

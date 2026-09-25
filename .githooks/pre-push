@@ -8,6 +8,9 @@
 #
 set -e
 
+# Node >= 20.19.4 antes de tudo (o do sistema pode ser o 18). Ver o arquivo.
+. "$(dirname "$0")/node-certo.sh"
+
 echo "──────────────────────────────────────────────"
 echo "[pre-push] 1/4  lint (eslint --max-warnings 0)"
 echo "──────────────────────────────────────────────"

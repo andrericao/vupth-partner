@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import {
-  VStack,
-  HStack,
-  Heading,
+  View,
   Text,
   ScrollView,
-  Spinner,
-  Box,
-} from "@gluestack-ui/themed";
-import { Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { BrandButton } from "@components/brand/Button";
+import { NwButton } from "@components/nw/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { buscarHorarios } from "@lib/horariosApi";
@@ -47,18 +47,12 @@ function formatHours(open: string | null, close: string | null): string | null {
 
 function DetailRow({ label, value }: { label: string; value: string | null }) {
   return (
-    <VStack>
-      <Text fontFamily="$heading" fontWeight="$bold" fontSize="$sm" color="$brandTextSecondary">
-        {label}
-      </Text>
-      <Text
-        fontFamily="$body"
-        color={value ? "$brandTextSecondary" : "$brandTextSecondary"}
-        mt="$1"
-      >
+    <View>
+      <Text className="font-heading text-sm text-vupth-textSecondary">{label}</Text>
+      <Text className="font-body text-vupth-textSecondary mt-1">
         {value ?? "Não informado"}
       </Text>
-    </VStack>
+    </View>
   );
 }
 
@@ -147,81 +141,61 @@ export default function EstablishmentDetailScreen() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack flex={1} pb="$12" px="$4">
+        <View className="flex-1 pb-12 px-4">
           <ScreenHeader title={name} onBack={() => router.back()} />
 
           {detail?.url_image ? (
             <Image
               source={{ uri: detail.url_image }}
-              style={{
-                width: "100%",
-                height: 192,
-                borderRadius: 12,
-                marginTop: 16,
-              }}
+              style={{ width: "100%", height: 192, borderRadius: 12, marginTop: 16 }}
               resizeMode="cover"
             />
           ) : (
-            <Box
-              mt="$4"
-              h="$48"
-              borderRadius="$xl"
-              bg="$brandSurface"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text fontFamily="$body" color="$brandTextSecondary">
-                Sem foto
-              </Text>
-            </Box>
+            <View className="mt-4 h-48 rounded-xl bg-vupth-surface items-center justify-center">
+              <Text className="font-body text-vupth-textSecondary">Sem foto</Text>
+            </View>
           )}
 
-          <HStack mt="$6" alignItems="center" justifyContent="space-between">
-            <Heading size="2xl" fontFamily="$heading" flex={1}>
-              {name}
-            </Heading>
+          <View className="flex-row items-center justify-between mt-6">
+            <Text className="flex-1 font-heading text-2xl text-vupth-forest">{name}</Text>
             <Text
-              fontFamily="$body"
-              fontSize="$sm"
-              color={isOpen ? "$forest" : "$brandTextSecondary"}
+              className={`font-body text-sm ${
+                isOpen ? "text-vupth-forest" : "text-vupth-textSecondary"
+              }`}
             >
               {isOpen ? "Aberto" : "Fechado"}
             </Text>
-          </HStack>
+          </View>
 
           {serviceType ? (
-            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" mt="$1">
-              {serviceType}
-            </Text>
+            <Text className="font-body text-sm text-vupth-textSecondary mt-1">{serviceType}</Text>
           ) : null}
 
           {isLoading ? (
-            <VStack alignItems="center" mt="$8">
-              <Spinner color="$forest" size="large" />
-            </VStack>
+            <View className="items-center mt-8">
+              <ActivityIndicator size="large" color="#163300" />
+            </View>
           ) : (
-            <VStack mt="$6" space="md">
+            <View className="mt-6 gap-4">
               <DetailRow label="Endereço" value={address} />
               <DetailRow
                 label="Horário"
-                value={
-                  resumo ? [resumo.hoje, resumo.reabre].filter(Boolean).join("\n") : hours
-                }
+                value={resumo ? [resumo.hoje, resumo.reabre].filter(Boolean).join("\n") : hours}
               />
               <DetailRow label="Telefone" value={phone} />
               <DetailRow label="Instagram" value={instagram} />
-            </VStack>
+            </View>
           )}
 
-          <Box flex={1} />
+          <View className="flex-1" />
 
-          <BrandButton
+          <NwButton
             title="Solicitar vinculação"
             onPress={handleRequestAffiliation}
             isLoading={isRequesting}
-            mt="$8"
+            className="mt-8"
           />
-        </VStack>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

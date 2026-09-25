@@ -21,3 +21,21 @@ export async function setMealNudgeDisabled(disabled: boolean): Promise<void> {
     await SecureStore.deleteItemAsync(KEY);
   }
 }
+
+/**
+ * O popup de refeicao so pergunta a quem esta TRABALHANDO numa loja ABERTA.
+ * Andre, 25/09: "o estabelecimento fechado, o profissional fora e com fila
+ * fechada — o app perguntou se eu iria jantar". Refeicao e pausa do trabalho;
+ * sem trabalho, a pergunta nao existe.
+ *
+ * "Aberta" e a de fato: `is_open` quando vem (OPEN dentro do horario), senao o
+ * `open_status` (backend antigo). Sem status ou sem a fila: silencio.
+ */
+export function devePerguntarRefeicao(
+  workStatus: string | null | undefined,
+  loja: { open_status?: string | null; is_open?: boolean | null } | null | undefined
+): boolean {
+  if (workStatus !== "WORKING" || !loja) return false;
+  if (loja.open_status !== "OPEN") return false;
+  return loja.is_open !== false;
+}

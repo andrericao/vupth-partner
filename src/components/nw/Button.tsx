@@ -62,23 +62,28 @@ const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
 // primarios diferentes: o do desenho e o legado. Como a estrutura nao muda (mesma
 // pilula, mesma altura), alinhar e seguro; e as chamadas sobre fundo colorido ja
 // sobrescrevem o bg por `className`, entao nao dependem deste valor.
+// 🔴 PRESSIONADO VISIVEL (Andre, 24/09: "o botao pausar e finalizar nao
+// mostram que foram clicados"). Existia, mas nao se via: forest -> forestSoft
+// e quase a mesma cor, e green -> success e a MESMA (#9FE870). Agora todo
+// variant perde opacidade ao toque — perceptivel sobre qualquer fundo — e os
+// vazados ainda ganham um tom de fundo. Travado em toqueVisivel.test.ts.
 const BOX: Record<Variant, string> = {
-  primary: "bg-vupth-green active:bg-vupth-success",
-  secondary: "bg-vupth-surface active:bg-vupth-border",
-  danger: "bg-vupth-danger active:opacity-80",
-  outlineBrand: "bg-white border border-vupth-forest active:bg-vupth-surface",
-  outlineDanger: "bg-transparent border border-vupth-danger active:opacity-80",
+  primary: "bg-vupth-green active:opacity-70",
+  secondary: "bg-vupth-surface active:bg-vupth-border active:opacity-80",
+  danger: "bg-vupth-danger active:opacity-70",
+  outlineBrand: "bg-white border border-vupth-forest active:bg-vupth-greenTint active:opacity-80",
+  outlineDanger: "bg-transparent border border-vupth-danger active:bg-vupth-dangerTint active:opacity-80",
   // `vupthPrimary` ficou IDENTICO ao primary depois do alinhamento acima —
   // mantido como apelido pra nao quebrar quem ja chamava por ele.
-  vupthPrimary: "bg-vupth-green active:bg-vupth-success",
+  vupthPrimary: "bg-vupth-green active:opacity-70",
   // [marca-vupth] CORRIGIDO 2026-08-26. Estava `greenTint` com texto forest,
   // que nao e o Button/Secondary do desenho — la ele e o INVERSO do primary:
   // fundo `$forest`, rotulo e icone `$brand-green`. E a ancora escura do
   // sistema, o unico botao que segura peso sobre um fundo ja colorido.
   // Zero chamadas fora do proprio teste, entao a correcao nao tem raio.
-  vupthSecondary: "bg-vupth-forest active:bg-vupth-forestSoft",
-  vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint",
-  vupthGhost: "bg-transparent active:bg-vupth-surface",
+  vupthSecondary: "bg-vupth-forest active:opacity-70",
+  vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint active:opacity-80",
+  vupthGhost: "bg-transparent active:bg-vupth-surface active:opacity-80",
 };
 
 const LABEL: Record<Variant, string> = {
