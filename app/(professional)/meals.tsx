@@ -13,6 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { LinhaComInterruptor } from "@components/LinhaComInterruptor";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -346,18 +347,18 @@ export default function MealsScreen() {
             </View>
           )}
 
-          <View className="bg-vupth-surface p-4 rounded-card mt-4">
-            <Text className="font-body text-sm text-vupth-textSecondary">Aviso na hora da refeição</Text>
-            <Text className="font-body text-xs text-vupth-textSecondary mt-1">
-              {mealNudgeOff
-                ? "Desligado — o lembrete aparece só nas Opções da fila (bolinha + contagem)."
-                : "Ligado — um aviso aparece na tela no horário da refeição."}
-            </Text>
-            <NwButton
-              title={mealNudgeOff ? "Ligar aviso" : "Desligar aviso"}
-              variant="outlineBrand"
-              onPress={toggleMealNudge}
-              className="mt-3"
+          <View className="mt-4">
+            <LinhaComInterruptor
+              rotulo="Aviso na hora da refeição"
+              descricao={
+                mealNudgeOff
+                  ? "Desligado — o lembrete aparece só nas Opções da fila (bolinha + contagem)."
+                  : "Ligado — um aviso aparece na tela no horário da refeição."
+              }
+              ligado={!mealNudgeOff}
+              onMudar={(ligado) => {
+                if (ligado === mealNudgeOff) toggleMealNudge();
+              }}
             />
           </View>
         </View>
