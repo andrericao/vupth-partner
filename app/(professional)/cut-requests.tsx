@@ -37,6 +37,7 @@ export default function CutRequestsScreen() {
   const myServices = useProfessionalStore((s) => s.myServices);
   const { acceptCutRequest, refuseCutRequest, fetchCutRequests } = useAttendanceStore();
   const fetchMe = useProfessionalStore((s) => s.fetchMe);
+  const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
   const queryClient = useQueryClient();
 
   const establishmentId = professional?.establishment_id ?? null;
@@ -68,10 +69,11 @@ export default function CutRequestsScreen() {
       // Sem Date.now() aqui (react-hooks/purity barra fora do queryFn): o
       // refetch ja reexecuta o queryFn abaixo, que atualiza nowMs sozinho.
       await refetch();
-      // Aceitar muda o status (vira Trabalhando) e a fila: sem reler, a pilula
-      // seguia "Fora" (Andre, 25/09).
+      // Aceitar poe o profissional em Trabalhando e muda a fila (Andre, 25/09).
       await releDepoisDeDecidir(accept, {
         releStatus: fetchMe,
+        statusAtual: () => useProfessionalStore.getState().professional?.work_status,
+        ficarTrabalhando: () => updateMyStatus("WORKING"),
         invalidar: (chave) => queryClient.invalidateQueries({ queryKey: chave }),
       });
     } catch (error: any) {

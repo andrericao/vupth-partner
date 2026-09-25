@@ -235,33 +235,41 @@ describe("resumoDeSolicitacoes", () => {
   });
 });
 
-// 🔴 Andre, 25/09: aceitou o encaixe com a fila fechada e continuou "Fora" na
-// tela. O backend diz (26/08) que aceitar ja poe o profissional em WORKING — mas
-// o app so relia a lista de encaixes. Aceitar tem que reler o proprio status e
-// a fila; recusar nao muda nada alem da lista.
+// 🔴 Andre, 25/09 (duas vezes): aceitou o encaixe e continuou "Fora". Aceitar
+// rele o status e, se nao veio Trabalhando, o app faz a troca.
 describe("releDepoisDeDecidir", () => {
-  const montar = () => ({
+  const montar = (statusDepois: string) => ({
     releStatus: jest.fn(async () => undefined),
+    statusAtual: jest.fn(() => statusDepois),
+    ficarTrabalhando: jest.fn(async () => undefined),
     invalidar: jest.fn(),
   });
 
-  it("aceitar: rele o status e as filas", async () => {
-    const f = montar();
+  it("aceitar com o backend ja trocando: so rele status e filas", async () => {
+    const f = montar("WORKING");
     await releDepoisDeDecidir(true, f);
     expect(f.releStatus).toHaveBeenCalledTimes(1);
+    expect(f.ficarTrabalhando).not.toHaveBeenCalled();
     expect(f.invalidar).toHaveBeenCalledWith(["professionals-with-queue"]);
     expect(f.invalidar).toHaveBeenCalledWith(["professional-queue"]);
   });
 
+  it("aceitar e o status seguir Fora: o app poe Trabalhando", async () => {
+    const f = montar("OFF");
+    await releDepoisDeDecidir(true, f);
+    expect(f.ficarTrabalhando).toHaveBeenCalledTimes(1);
+  });
+
   it("recusar: nada alem da lista", async () => {
-    const f = montar();
+    const f = montar("OFF");
     await releDepoisDeDecidir(false, f);
     expect(f.releStatus).not.toHaveBeenCalled();
+    expect(f.ficarTrabalhando).not.toHaveBeenCalled();
     expect(f.invalidar).not.toHaveBeenCalled();
   });
 
-  it("falha ao reler o status nao desfaz o aceite (as filas relem igual)", async () => {
-    const f = montar();
+  it("falha ao reler nao desfaz o aceite (as filas relem igual)", async () => {
+    const f = montar("OFF");
     f.releStatus.mockRejectedValueOnce(new Error("rede"));
     await expect(releDepoisDeDecidir(true, f)).resolves.toBeUndefined();
     expect(f.invalidar).toHaveBeenCalledTimes(2);
