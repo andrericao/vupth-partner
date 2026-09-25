@@ -9,10 +9,10 @@ import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useAttendanceStore } from "@store/attendance.store";
-import { useProfessionalStore, type ProfessionalReport } from "@store/professional.store";
+import { useProfessionalStore } from "@store/professional.store";
+import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { periodRange } from "@lib/time";
 import { seloDoStatus } from "@lib/statusAtendimento";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
@@ -22,7 +22,7 @@ import { seloDoStatus } from "@lib/statusAtendimento";
 // - O HISTORICO usa os proprios filtros de STATUS: o GET /attendances nao
 //   aceita datas (so professionalId/status), entao nao fingimos um filtro de
 //   periodo que o backend nao faz.
-type Period = "day" | "week" | "month";
+type Period = Periodo;
 type Filter = "ALL" | "FINISHED" | "CANCELLED" | "REMOVED";
 
 
@@ -121,8 +121,13 @@ export default function MyDayScreen() {
   const { data } = useQueuePolling(professional?.establishment_id ?? null);
 
   const [period, setPeriod] = useState<Period>("day");
-  const [report, setReport] = useState<ProfessionalReport | null>(null);
-  const [reportLoading, setReportLoading] = useState(false);
+  // O resumo de cada periodo fica guardado: voltar a aba pinta o numero na
+  // hora e atualiza por tras (fila do partner, 25/09).
+  const {
+    dados: report,
+    carregando: reportLoading,
+    recarregar: loadReport,
+  } = useRelatorioDoPeriodo("profissional", professional?.id, period, fetchMyReport);
 
   const [filter, setFilter] = useState<Filter>("ALL");
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -133,18 +138,6 @@ export default function MyDayScreen() {
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const queueCount = myProfessional?.queue_count ?? 0;
   const waitMinutes = myProfessional?.estimated_wait_minutes ?? 0;
-
-  const loadReport = useCallback(async () => {
-    setReportLoading(true);
-    try {
-      const { dateFrom, dateTo } = periodRange(period);
-      setReport(await fetchMyReport(dateFrom, dateTo));
-    } catch {
-      setReport(null);
-    } finally {
-      setReportLoading(false);
-    }
-  }, [period, fetchMyReport]);
 
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const loadHistory = useCallback(async () => {
@@ -169,12 +162,6 @@ export default function MyDayScreen() {
   // entao o fetch on-mount rodava uma vez so e a lista envelhecia calada (o
   // "depois de um tempo atualizou" era outra remontagem). Com `isFocused` na
   // dependencia, voltar p/ Relatorios busca de novo.
-  useEffect(() => {
-    if (!isFocused) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadReport();
-  }, [loadReport, isFocused]);
-
   useEffect(() => {
     if (!isFocused) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect

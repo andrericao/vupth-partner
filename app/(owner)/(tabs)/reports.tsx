@@ -1,16 +1,15 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
-import { getApiErrorMessage } from "@lib/api";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import { ExpedienteCard } from "@components/ExpedienteCard";
-import { periodRange } from "@lib/time";
 import { StatCard } from "@components/brand/StatCard";
 
-type Period = "day" | "week" | "month";
+type Period = Periodo;
 
 export default function OwnerReportsScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -18,32 +17,19 @@ export default function OwnerReportsScreen() {
   const { data: queue, refetch } = useQueuePolling(establishment?.id ?? null);
 
   const [period, setPeriod] = useState<Period>("day");
-  const [report, setReport] = useState<EstablishmentReport | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const loadReport = useCallback(async () => {
-    if (!establishment?.id) return;
-    setIsLoading(true);
-    setErrorMsg(null);
-    try {
-      const { dateFrom, dateTo } = periodRange(period);
-      setReport(await fetchReport(establishment.id, dateFrom, dateTo));
-    } catch (error: any) {
-      setErrorMsg(getApiErrorMessage(error, "Não foi possível carregar o relatório."));
-      setReport(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [establishment?.id, period, fetchReport]);
-
-  useEffect(() => {
-    // fetch on-mount/periodo; sinaliza isLoading (padrao de carregamento).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadReport();
-  }, [loadReport]);
+  // O ultimo relatorio de cada periodo fica guardado: voltar a tela pinta o
+  // numero na hora e atualiza por tras (fila do partner, 25/09).
+  const establishmentId = establishment?.id ?? null;
+  const {
+    dados: report,
+    carregando: isLoading,
+    erro: errorMsg,
+    recarregar: loadReport,
+  } = useRelatorioDoPeriodo("dono", establishmentId, period, (de, ate) =>
+    fetchReport(establishmentId!, de, ate)
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
