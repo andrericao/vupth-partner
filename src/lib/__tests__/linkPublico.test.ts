@@ -56,11 +56,17 @@ describe("compartilharLink", () => {
 
 describe("compartilharLink — caminhos padrao do navegador", () => {
   const texto = { titulo: "Minha loja", mensagem: "Entre na fila:" };
-  const nav = globalThis.navigator as any;
-  const antes = { share: nav?.share, clipboard: nav?.clipboard };
+  // O Node 20 (CI ate 26/09) nao tem `navigator` global; o 22 tem. O teste
+  // cria um proprio e devolve o original no fim.
+  const original = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  let nav: any;
+  beforeEach(() => {
+    nav = {};
+    Object.defineProperty(globalThis, "navigator", { value: nav, configurable: true, writable: true });
+  });
   afterEach(() => {
-    nav.share = antes.share;
-    Object.defineProperty(nav, "clipboard", { value: antes.clipboard, configurable: true });
+    if (original) Object.defineProperty(globalThis, "navigator", original);
+    else delete (globalThis as any).navigator;
   });
 
   it("usa o navigator.share quando o navegador tem", async () => {
