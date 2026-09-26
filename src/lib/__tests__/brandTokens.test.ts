@@ -1,73 +1,56 @@
 import fs from "fs";
 import path from "path";
 
-// GUARDA DA MARCA (branch design/marca-dev, 2026-08-12).
+// GUARDA DA MARCA (2026-08-12; revista em 25/09).
 //
-// Os dois arquivos de tema trazem, cada um, um comentario dizendo que os tokens
-// "precisam bater 1:1". Comentario nao quebra build — este teste quebra.
-//
-// Por que importa: durante a migracao, telas v1 (gluestack, props $token) e v2
-// (NativeWind, className) convivem NA MESMA navegacao. Se as duas tabelas
-// divergirem, o app mostra DOIS TONS da mesma cor e ninguem descobre por
-// typecheck — foi exatamente a armadilha que ja custou retrabalho em 2026-07-29
-// (o tailwind nasceu no teal antigo enquanto o gluestack ja era verde marca).
+// Ate 25/09 este teste comparava o tailwind com o tema do Gluestack, porque
+// telas das duas geracoes conviviam na mesma navegacao e dois tons da mesma
+// cor apareciam sem ninguem perceber. A migracao terminou e o Gluestack saiu;
+// agora a tabela abaixo prende os tokens aos VALORES DO ARQUIVO DE DESIGN
+// (Pencil, tokens `brand*`), os mesmos do app do client. Mudou um hex? Mude
+// aqui junto — de proposito, para a troca ser uma decisao e nao um acidente.
 
 const ROOT = path.resolve(__dirname, "../../..");
 
 // tailwind e CJS puro: da p/ exigir de verdade.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const tailwind = require(path.join(ROOT, "tailwind.config.js"));
-const gluestackSource = fs.readFileSync(
-  path.join(ROOT, "config/gluestack-ui.config.ts"),
-  "utf8"
-);
 
-/** Le `nome: '#HEX'` do arquivo do gluestack (fonte da verdade do v1). */
-function gluestackToken(name: string): string | null {
-  const m = gluestackSource.match(new RegExp(`\\b${name}:\\s*'(#[0-9A-Fa-f]{3,8})'`));
-  return m ? m[1].toUpperCase() : null;
-}
-
-// tailwind `vupth.<chave>` -> gluestack `<token>`. Os nomes diferem de
-// proposito (o gluestack precisa de prefixo p/ nao colidir na raiz), entao o
-// mapa e explicito: se alguem renomear de um lado so, o teste acusa.
-const PARES: [keyof typeof vupth, string][] = [
-  ["green", "brandGreen"],
-  ["forest", "forest"],
-  ["forestSoft", "forestSoft"],
-  ["greenTint", "greenTint"],
-  ["accentBlue", "accentBlue"],
-  ["accentPeach", "accentPeach"],
-  ["accentPink", "accentPink"],
-  ["accentPlum", "accentPlum"],
-  ["background", "brandBackground"],
-  ["surface", "brandSurface"],
-  ["surfaceAlt", "brandSurfaceAlt"],
-  ["textPrimary", "brandTextPrimary"],
-  ["textSecondary", "brandTextSecondary"],
-  ["textPlaceholder", "brandTextPlaceholder"],
-  ["border", "brandBorder"],
-  ["danger", "brandDanger"],
-  ["dangerTint", "brandDangerTint"],
-  ["warning", "brandWarning"],
-  ["success", "brandSuccess"],
-];
+const DESENHO: Record<string, string> = {
+  green: "#9FE870",
+  forest: "#163300",
+  forestSoft: "#223D0D",
+  greenTint: "#E2F6D5",
+  accentBlue: "#A0E1E1",
+  accentPeach: "#FFC091",
+  accentPink: "#FFD7EF",
+  accentPlum: "#260A2F",
+  background: "#FFFFFF",
+  surface: "#F3F5F1",
+  surfaceAlt: "#E2F6D5",
+  textPrimary: "#163300",
+  textSecondary: "#454745",
+  textPlaceholder: "#6B706B",
+  border: "#D7DDD3",
+  danger: "#B3261E",
+  dangerTint: "#F7E4E2",
+  warning: "#FFC091",
+  success: "#9FE870",
+};
 
 const vupth: Record<string, string> = tailwind.theme.extend.colors.vupth;
 
-describe("tokens da marca — tailwind x gluestack tem de bater 1:1", () => {
-  it.each(PARES)("vupth.%s == %s do gluestack", (tw, gs) => {
-    const esperado = vupth[tw as string]?.toUpperCase();
-    expect(esperado).toBeDefined();
-    expect(gluestackToken(gs)).toBe(esperado);
+describe("tokens da marca — os valores do arquivo de design", () => {
+  it.each(Object.entries(DESENHO))("vupth.%s == %s", (token, hex) => {
+    expect(vupth[token]?.toUpperCase()).toBe(hex);
   });
 
-  it("nenhum token da marca ficou so de um lado", () => {
-    const noTailwind = Object.keys(vupth).sort();
-    const mapeados = PARES.map(([tw]) => tw as string).sort();
-    // Token novo no tailwind sem par no gluestack = "dois tons" esperando
-    // acontecer; o teste obriga a atualizar os dois no MESMO commit.
-    expect(noTailwind).toEqual(mapeados);
+  it("nenhum token novo sem passar por aqui", () => {
+    expect(Object.keys(vupth).sort()).toEqual(Object.keys(DESENHO).sort());
+  });
+
+  it("o tema do Gluestack nao volta (a migracao terminou em 25/09)", () => {
+    expect(fs.existsSync(path.join(ROOT, "config/gluestack-ui.config.ts"))).toBe(false);
   });
 });
 
