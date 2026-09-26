@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { Avatar } from "@components/Avatar";
+import { useMinhaFoto } from "@hooks/useMinhaFoto";
+import { trocarFotoDePerfil, escolherFoto, enviarFoto, removerFoto } from "@lib/fotoDePerfil";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
 import { linkDoProfissional } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
@@ -23,7 +26,7 @@ import { CompletionCard } from "@components/CompletionCard";
 import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
-import { confirmar } from "@lib/confirmar";
+import { confirmar, avisar, escolherOpcao } from "@lib/confirmar";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -46,14 +49,6 @@ type CardProps = {
   onPress: () => void;
 };
 
-function initials(name?: string | null): string {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  const first = parts[0][0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
-}
 
 // Escopo de MODULO (licao do segfault do tsc: componente definido dentro do
 // componente estourava a inferencia e remonta a subarvore a cada render).
@@ -110,6 +105,7 @@ export default function ProfessionalSettingsScreen() {
 
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
+  const minhaFoto = useMinhaFoto();
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -182,11 +178,35 @@ export default function ProfessionalSettingsScreen() {
           className="bg-vupth-forest items-center px-4 pb-7"
           style={{ paddingTop: insets.top + 24 }}
         >
-          <View className="w-[72px] h-[72px] rounded-full bg-vupth-green items-center justify-center">
-            <Text className="font-display text-2xl text-vupth-forest">
-              {initials(professional?.name)}
-            </Text>
-          </View>
+          {/* Foto de perfil (S22): o cliente ve esta foto na fila da loja.
+              Tocar escolhe/troca/remove. */}
+          <Avatar
+            nome={professional?.name}
+            uri={minhaFoto.uri}
+            rotulo={minhaFoto.uri ? "Trocar foto de perfil" : "Adicionar foto de perfil"}
+            testID="avatar-perfil"
+            onPress={() =>
+              trocarFotoDePerfil(!!minhaFoto.uri, {
+                perguntar: () =>
+                  escolherOpcao({
+                    titulo: "Foto de perfil",
+                    mensagem: "O cliente vê esta foto na fila da loja.",
+                    opcoes: [
+                      { texto: "Remover foto", valor: "remover" as const, destrutivo: true },
+                      { texto: "Escolher outra", valor: "escolher" as const },
+                    ],
+                  }),
+                escolher: () => escolherFoto(),
+                enviar: (uri) => enviarFoto(uri),
+                remover: removerFoto,
+                aoMudar: minhaFoto.trocar,
+                avisar: (mensagem) => avisar({ titulo: "Foto de perfil", mensagem }),
+              })
+            }
+          />
+          <Text className="font-body text-xs text-vupth-green mt-2">
+            {minhaFoto.uri ? "Tocar para trocar a foto" : "Tocar para pôr sua foto"}
+          </Text>
           <Text className="font-display text-xl text-white mt-3">
             {professional?.name ?? "Profissional"}
           </Text>

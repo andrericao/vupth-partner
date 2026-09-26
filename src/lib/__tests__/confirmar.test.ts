@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 
-import { confirmar, avisar } from "../confirmar";
+import { escolherOpcao, confirmar, avisar } from "../confirmar";
 
 // 🔴 DEFEITO REAL (issue #25, teste manual de 30/08): "botao de remover servico
 // nao funciona" e "o botao de aceitar novos nao funciona" — os dois na WEB.
@@ -260,5 +260,69 @@ describe("na WEB com o shim de Alert instalado", () => {
     );
 
     expect(confirmImpl).toHaveBeenCalled();
+  });
+});
+
+// Tres opcoes (ex.: foto de perfil — Cancelar / Remover / Escolher outra). O
+// shim da web e o DialogoVupth desenham quantos botoes vierem; so a web SEM o
+// shim (window.confirm, dois botoes) degrada para a opcao principal.
+describe("escolherOpcao()", () => {
+  const opcoes = [
+    { texto: "Remover foto", valor: "remover" as const, destrutivo: true },
+    { texto: "Escolher outra", valor: "escolher" as const },
+  ];
+
+  it("no aparelho: um botao por opcao + Cancelar, e devolve a escolhida", async () => {
+    const alertImpl = jest.fn((_t: string, _m?: string, botoes?: any[]) => botoes![2].onPress());
+    const r = await escolherOpcao({ titulo: "Foto", mensagem: "m", opcoes }, { plataforma: "android", alertImpl });
+    expect(r).toBe("escolher");
+    const botoes = alertImpl.mock.calls[0][2]!;
+    expect(botoes.map((b: any) => b.text)).toEqual(["Cancelar", "Remover foto", "Escolher outra"]);
+    expect(botoes[1].style).toBe("destructive");
+  });
+
+  it("Cancelar devolve null", async () => {
+    const alertImpl = jest.fn((_t: string, _m?: string, botoes?: any[]) => botoes![0].onPress());
+    const r = await escolherOpcao({ titulo: "Foto", mensagem: "m", opcoes }, { plataforma: "ios", alertImpl });
+    expect(r).toBeNull();
+  });
+
+  it("web sem o shim: pergunta so a opcao principal (a ultima)", async () => {
+    const confirmImpl = jest.fn((_t: string) => true);
+    const r = await escolherOpcao({ titulo: "Foto", mensagem: "m", opcoes }, { plataforma: "web", confirmImpl });
+    expect(r).toBe("escolher");
+    expect(confirmImpl.mock.calls[0][0]).toContain("Escolher outra");
+  });
+
+  it("web sem o shim, caixa bloqueada: null (na duvida, nao age)", async () => {
+    const r = await escolherOpcao(
+      { titulo: "Foto", mensagem: "m", opcoes },
+      {
+        plataforma: "web",
+        confirmImpl: () => {
+          throw new Error("bloqueado");
+        },
+      }
+    );
+    expect(r).toBeNull();
+  });
+
+  it("web sem o shim e sem confirmImpl: usa o window.confirm", async () => {
+    const original = window.confirm;
+    window.confirm = jest.fn(() => true);
+    try {
+      const r = await escolherOpcao({ titulo: "Foto", mensagem: "m", opcoes }, { plataforma: "web" });
+      expect(r).toBe("escolher");
+    } finally {
+      window.confirm = original;
+    }
+  });
+
+  it("web sem o shim, recusado: null", async () => {
+    const r = await escolherOpcao(
+      { titulo: "Foto", mensagem: "m", opcoes },
+      { plataforma: "web", confirmImpl: () => false }
+    );
+    expect(r).toBeNull();
   });
 });
