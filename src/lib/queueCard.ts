@@ -55,3 +55,13 @@ export const QUEUE_ACTION_LABEL: Record<QueueAction, string> = {
 export function formatServices(services: { customName: string }[]): string {
   return services.map((s) => s.customName).join(" + ");
 }
+
+/**
+ * O que acontece ao marcar "Nao chegou" — regra do backend de 26/09
+ * (e328629): atraso 1 e 2 trocam de lugar com o proximo; no 3o o cliente leva
+ * multa de R$ 5,00 e vai para o fim da fila. O app nao sabe em qual atraso o
+ * cliente esta, entao diz a regra inteira.
+ */
+export function mensagemDoAtraso(nome: string): string {
+  return `${nome} troca de lugar com o próximo e continua na fila. No 3º atraso, vai para o fim da fila e leva multa de R$ 5,00. Continuar?`;
+}

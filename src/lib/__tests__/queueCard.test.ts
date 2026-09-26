@@ -1,4 +1,4 @@
-import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCard";
+import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCard";
 
 describe("queueMenuActions", () => {
   it("1o da vez: não chegou + remover (sem adiantar)", () => {
@@ -76,5 +76,16 @@ describe("queueMenuActions — quem já está sendo atendido", () => {
     expect(QUEUE_ACTION_LABEL.finalizar).toMatch(/finalizar/i);
     expect(QUEUE_ACTION_LABEL.pausar).toMatch(/pausar/i);
     expect(QUEUE_ACTION_LABEL.retomar).toMatch(/retomar/i);
+  });
+});
+
+// Regra dos atrasos refeita pelo backend em 26/09 (e328629): atraso 1 e 2 troca
+// de lugar com o proximo; no 3o, multa de R$ 5,00 e o cliente vai para o FIM da
+// fila. O "Nao compareceu" saiu. O profissional precisa saber disso ao marcar.
+describe("mensagemDoAtraso", () => {
+  it("explica a troca de lugar e o que acontece no 3o atraso", () => {
+    const m = mensagemDoAtraso("Ana");
+    expect(m).toMatch(/Ana troca de lugar com o próximo/);
+    expect(m).toMatch(/3º atraso.*fim da fila.*R\$ 5,00/);
   });
 });

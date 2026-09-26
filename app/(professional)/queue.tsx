@@ -18,7 +18,7 @@ import { getApiErrorMessage } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
-import { queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
+import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
 import { queueMenuCount } from "@lib/notifications";
@@ -632,7 +632,7 @@ export default function ProfessionalQueueScreen() {
   const confirmLate = async (att: AttendanceInQueue) => {
     const ok = await confirmar({
       titulo: "Cliente não chegou",
-      mensagem: `${att.clientName} cai uma posição e o próximo passa a ser o primeiro. Continuar?`,
+      mensagem: mensagemDoAtraso(att.clientName),
     });
     if (ok) handleAction(() => markLate(att.id));
   };
