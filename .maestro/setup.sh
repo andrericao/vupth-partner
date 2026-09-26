@@ -32,7 +32,18 @@ adb shell settings put secure spell_checker_enabled 0
 adb shell settings put secure show_ime_with_hard_keyboard 1
 echo "Corretor desligado: OK"
 
-# 4. Acordar o staging (Render dorme; o primeiro pedido leva ~50 s)
+# 4. Sem o preenchimento automatico do Google. Andre, 25/09: o Google ofereceu
+#    o login de uma conta ja salva por cima do campo e a bateria se perdeu. O
+#    servico de autofill do aparelho e desligado durante o teste; o valor de
+#    antes fica guardado e o restaurar.sh o devolve.
+ANTES=$(adb shell settings get secure autofill_service | tr -d '\r')
+if [ "$ANTES" != "null" ] && [ -n "$ANTES" ]; then
+  echo "$ANTES" > "$(dirname "$0")/.autofill_antes"
+fi
+adb shell settings put secure autofill_service null
+echo "Preenchimento automatico desligado: OK (ao terminar: bash .maestro/restaurar.sh)"
+
+# 5. Acordar o staging (Render dorme; o primeiro pedido leva ~50 s)
 echo -n "Acordando o staging"
 for i in $(seq 1 30); do
   CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$API/actuator/health/readiness")
@@ -48,4 +59,7 @@ fi
 
 echo ""
 echo "Tudo pronto. Rode:"
+echo ""
 echo "  maestro test -e APP_ID=com.vupth.partner.preview -e API=$API -e SENHA=Teste@123 .maestro/bateria_completa.yaml"
+echo ""
+echo "Ao terminar, devolva o preenchimento automatico:  bash .maestro/restaurar.sh"
