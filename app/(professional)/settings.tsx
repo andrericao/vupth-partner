@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { LinhaComInterruptor } from "@components/LinhaComInterruptor";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { trocarFotoDePerfil, escolherFoto, enviarFoto, removerFoto } from "@lib/fotoDePerfil";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
 import { copiarComAviso } from "@lib/copiar";
 import { linkDoProfissional } from "@lib/linkPublico";
-import { API_ENV } from "@lib/api";
+import { API_ENV, getApiErrorMessage } from "@lib/api";
 import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
@@ -107,6 +108,7 @@ export default function ProfessionalSettingsScreen() {
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const minhaFoto = useMinhaFoto();
+  const setOperationMode = useProfessionalStore((s) => s.setOperationMode);
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -290,6 +292,30 @@ export default function ProfessionalSettingsScreen() {
             )}
           </Grupo>
   
+          {/* Fila ou so agenda (D9; backend 8e6c00f): por profissional. Troca
+              so antes do 1o cliente da fila de hoje — depois o backend recusa
+              (409 OPERATION_MODE_LOCKED) e a mensagem explica. */}
+          {professional?.establishment_id && (
+            <LinhaComInterruptor
+              rotulo="Só agenda"
+              descricao={
+                professional.operation_mode === "AGENDA_ONLY"
+                  ? "Ligado — o cliente só agenda horário com você; ninguém entra na fila na hora."
+                  : "Desligado — você atende pela fila (e quem agenda entra nela na hora marcada)."
+              }
+              ligado={professional.operation_mode === "AGENDA_ONLY"}
+              onMudar={(ligado) =>
+                setOperationMode(ligado ? "AGENDA_ONLY" : "QUEUE").catch((error) =>
+                  avisar({
+                    titulo: "Modo de atendimento",
+                    mensagem: getApiErrorMessage(error, "Não foi possível mudar o modo."),
+                  })
+                )
+              }
+              testID="interruptor-so-agenda"
+            />
+          )}
+
           <Grupo label="Conta">
             <MenuCard
               icon={User}

@@ -25,6 +25,8 @@ type Professional = {
    * (`accepting_new`). Ausente => tratamos como true (aceitando).
    */
   accepting_new?: boolean | null;
+  /** Fila ou so agenda (backend 8e6c00f). Ausente = fila. */
+  operation_mode?: "QUEUE" | "AGENDA_ONLY";
   message: string;
 };
 
@@ -77,6 +79,7 @@ type ProfessionalState = {
   ) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
   updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
+  setOperationMode: (mode: "QUEUE" | "AGENDA_ONLY") => Promise<void>;
   setAcceptingNew: (value: boolean) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (
@@ -103,6 +106,7 @@ function normalizeProfessional(data: any): Professional {
     is_available: data.is_available ?? data.isAvailable ?? true,
     work_status: data.work_status ?? data.workStatus ?? null,
     accepting_new: data.accepting_new ?? data.acceptingNew ?? null,
+    operation_mode: data.operation_mode ?? data.operationMode ?? "QUEUE",
     message: data.message ?? "",
   };
 }
@@ -218,6 +222,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   // S1 fatia 3: "fechar fila" (value=false) / reabrir (value=true). Drena — quem
   // ja esta segue; ao terminar o ultimo o backend poe OFF sozinho (e a loja
   // fecha se for o ultimo). O fetchMe re-le accepting_new + work_status do /me.
+  // Modo por profissional (8e6c00f): so troca antes do 1o cliente do dia; depois
+  // o backend responde 409 OPERATION_MODE_LOCKED e o erro sobe para a tela.
+  setOperationMode: async (mode) => {
+    await api.patch("/professional/me/operation-mode", { mode });
+    await get().fetchMe();
+  },
+
   setAcceptingNew: async (value) => {
     await api.patch("/professional/me/accepting-new", { value });
     await get().fetchMe();

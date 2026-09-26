@@ -38,6 +38,11 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/senha atual/i);
   });
 
+  it("OPERATION_MODE_LOCKED (so agenda depois do 1o cliente) => explica quando da para trocar", () => {
+    const err = { response: { status: 409, data: { code: "OPERATION_MODE_LOCKED" } } };
+    expect(getApiErrorMessage(err, "fallback")).toMatch(/começo do expediente/);
+  });
+
   it("SERVICE_PRICE_SPLIT_INVALID (422 da divisao do preco) => frase sobre o preço", () => {
     const err = { response: { status: 422, data: { code: "SERVICE_PRICE_SPLIT_INVALID" } } };
     expect(getApiErrorMessage(err, "fallback")).toMatch(/Taxas Vupth/);
