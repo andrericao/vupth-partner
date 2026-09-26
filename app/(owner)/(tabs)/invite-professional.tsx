@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { nomeDaEspecialidade } from "@lib/especialidade";
 import {
   View,
   Text,
@@ -126,7 +127,7 @@ export default function InviteProfessionalScreen() {
                       {p.nickname ? ` (${p.nickname})` : ""}
                     </Text>
                     <Text className="font-body text-xs text-vupth-textSecondary">
-                      {p.specialty ?? "Sem especialidade"}
+                      {nomeDaEspecialidade(p.specialty) || "Sem especialidade"}
                     </Text>
                   </View>
                   {invited ? (

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { nomeDaEspecialidade } from "@lib/especialidade";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
@@ -62,7 +63,7 @@ function ProfessionalCard({
           <View className="flex-1">
             <Text className="font-heading text-vupth-forest">{professional.name}</Text>
             <Text className="font-body text-sm text-vupth-textSecondary">
-              {professional.specialty ?? ""}
+              {nomeDaEspecialidade(professional.specialty)}
             </Text>
             {ratingLabel(professional.rating_average, professional.rating_count) && (
               <View className="flex-row items-center gap-1 mt-0.5">

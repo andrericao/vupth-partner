@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { nomeDaEspecialidade } from "@lib/especialidade";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import {
@@ -346,7 +347,7 @@ export default function OwnerDashboardScreen() {
                     <View className="flex-1">
                       <Text className="font-heading text-vupth-forest">{prof.name}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
-                        {prof.specialty ?? "Sem especialidade"}
+                        {nomeDaEspecialidade(prof.specialty) || "Sem especialidade"}
                       </Text>
                     </View>
                     <View className="items-end">
