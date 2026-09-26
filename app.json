@@ -17,6 +17,14 @@
           "cameraPermission": "O Vupth usa a câmera para você tirar a foto de perfil que os clientes veem.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Vupth usa a sua localização para registrar onde fica a loja e ela aparecer para os clientes próximos.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isIosBackgroundLocationEnabled": false
+        }
       ]
     ],
     "userInterfaceStyle": "light",
