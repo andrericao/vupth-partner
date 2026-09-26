@@ -113,14 +113,14 @@ describe("o Alert do web mostra o que o app tem a dizer", () => {
     expect(botaoSolido).not.toMatch(/(?<!min-)height:\s*54px/);
   });
 
-  it("cancel e destructive sao VAZADOS, como no Button do app", () => {
+  it("vazados levam a borda 1,5 forest do desenho (a hierarquia e a do pesoDoBotao)", () => {
+    // Era "cancel e destructive sempre vazados, borda 2" — a deducao que o
+    // Design corrigiu em 14/09. Ver caixaIgualNosDoisLados.test.ts.
     alertWeb("Titulo", "Msg", [{ text: "Ok" }]);
     const css = document.getElementById("vupth-alert-style")!.textContent!;
-    for (const estilo of ["cancel", "destructive"]) {
-      const bloco = css.slice(css.indexOf(`[data-style="${estilo}"] {`));
-      expect(bloco.slice(0, 200)).toContain("background: transparent");
-      expect(bloco.slice(0, 200)).toContain("border: 2px solid");
-    }
+    const bloco = css.slice(css.indexOf('[data-peso="vazado"],'));
+    expect(bloco.slice(0, 200)).toContain("background: transparent");
+    expect(bloco.slice(0, 200)).toContain("border: 1.5px solid #163300");
   });
 
   it("instalar troca o metodo do Alert, e nao instala duas vezes", () => {

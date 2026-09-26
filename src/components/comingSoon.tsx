@@ -1,5 +1,4 @@
-import { Alert, TouchableOpacity } from "react-native";
-import { Center, VStack, Text, Box } from "@gluestack-ui/themed";
+import { Alert, Pressable, View, Text } from "react-native";
 import { ArrowLeft, Clock } from "lucide-react-native";
 
 // Placeholder para funcionalidades cujo BACKEND ainda nao existe: a UI ja fica
@@ -17,26 +16,24 @@ export function comingSoon(feature = "Essa funcionalidade") {
 // filesystem case-insensitive (bug ja visto aqui).
 export function ComingSoon({ title, onBack }: { title: string; onBack: () => void }) {
   return (
-    <Center flex={1} bg="$brandBackground" px="$8">
-      <TouchableOpacity
+    <View className="flex-1 items-center justify-center bg-white px-8">
+      <Pressable
         onPress={onBack}
-        style={{ position: "absolute", top: 60, left: 20 }}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+        className="absolute top-[60px] left-5 bg-vupth-greenTint rounded-full p-2.5 active:opacity-70"
       >
-        <Box bg="$greenTint" borderRadius="$full" p="$2.5">
-          <ArrowLeft size={20} color="#163300" />
-        </Box>
-      </TouchableOpacity>
-      <VStack alignItems="center" space="md">
-        <Center width={72} height={72} borderRadius="$full" bg="$greenTint">
+        <ArrowLeft size={20} color="#163300" />
+      </Pressable>
+      <View className="items-center gap-3">
+        <View className="w-[72px] h-[72px] rounded-full bg-vupth-greenTint items-center justify-center">
           <Clock size={32} color="#163300" />
-        </Center>
-        <Text fontFamily="$display" fontSize="$xl" color="$forest" textAlign="center">
-          {title}
-        </Text>
-        <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" textAlign="center">
+        </View>
+        <Text className="font-display text-xl text-vupth-forest text-center">{title}</Text>
+        <Text className="font-body text-sm text-vupth-textSecondary text-center">
           Essa parte ainda está em construção.{"\n"}Em breve por aqui.
         </Text>
-      </VStack>
-    </Center>
+      </View>
+    </View>
   );
 }

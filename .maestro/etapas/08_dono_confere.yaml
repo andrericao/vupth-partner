@@ -1,0 +1,43 @@
+# O dono confere: Filas, Relatorios com o recebido por profissional (QA 18.3),
+# Atendimentos com o filtro Retirados, e a tela Sistema.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 30000
+- tapOn:
+    id: "aba-filas"
+- extendedWaitUntil:
+    visible: ${output.PROF}
+    timeout: 20000
+
+- tapOn:
+    id: "aba-menu"
+- tapOn: "Relatórios"
+- scrollUntilVisible:
+    element: "recebe R\\$.*"
+    direction: DOWN
+
+- tapOn:
+    id: "aba-menu"
+- tapOn: "Atendimentos"
+- tapOn: "Retirados"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE2}
+    timeout: 20000
+
+- tapOn:
+    id: "aba-menu"
+- scrollUntilVisible:
+    element: "Versão do app"
+    direction: DOWN
+- tapOn: "Versão do app"
+- extendedWaitUntil:
+    visible:
+      id: "version-line"
+    timeout: 20000
+- runFlow: ../apoio/sair_dono.yaml

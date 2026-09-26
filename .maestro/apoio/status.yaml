@@ -1,0 +1,12 @@
+# Troca o status do profissional pela pilula da Fila. env: STATUS
+# (trabalhando | intervalo | indisponivel). Fecha os avisos que a troca abre
+# ("Loja aberta", "Fila fechada junto", "Loja fechada").
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+- tapOn: "(Você está: .*|Definir seu status)"
+- tapOn:
+    id: "status-${STATUS}"
+- runFlow: fechar_aviso.yaml
+- runFlow: fechar_aviso.yaml

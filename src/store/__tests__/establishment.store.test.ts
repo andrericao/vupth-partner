@@ -263,7 +263,11 @@ describe("establishment.store", () => {
 
       const result = await useEstablishmentStore
         .getState()
-        .addServiceItem("estab-uuid-1", "CORTE_MAQUINA", "Corte Simples", 35.0);
+        .addServiceItem("estab-uuid-1", "CORTE_MAQUINA", "Corte Simples", {
+          price: 35.9,
+          pro_receives: 33.5,
+          base_price: 33.5,
+        });
 
       expect(mock.history.post[0].url).toBe(
         "/establishment/estab-uuid-1/service-items"
@@ -271,7 +275,10 @@ describe("establishment.store", () => {
       expect(JSON.parse(mock.history.post[0].data)).toEqual({
         serviceItemType: "CORTE_MAQUINA",
         customName: "Corte Simples",
-        price: 35.0,
+        // A divisao gravada vai junto (contrato de 18/09, snake_case do backend).
+        price: 35.9,
+        pro_receives: 33.5,
+        base_price: 33.5,
       });
       expect(result).toEqual(serviceResponse);
     });

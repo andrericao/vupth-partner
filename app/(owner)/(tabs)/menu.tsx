@@ -1,12 +1,5 @@
 
-import {
-  VStack,
-  HStack,
-  Text,
-  Pressable,
-  ScrollView,
-} from "@gluestack-ui/themed";
-import { View } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { router } from "expo-router";
@@ -15,6 +8,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { PendingDot } from "@components/PendingDot";
+import { NotificationBadge } from "@components/NotificationBadge";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
@@ -36,7 +30,6 @@ type MenuItemProps = {
   hint?: string;
   icon: LucideIconType;
   onPress: () => void;
-  color?: string;
   dot?: boolean;
   /** Contagem que pede acao (ex.: solicitacoes pendentes). */
   badge?: number;
@@ -49,40 +42,35 @@ function MenuItem({
   hint,
   icon: Icon,
   onPress,
-  color = "$forest",
   dot = false,
   badge,
   last = false,
 }: MenuItemProps) {
   return (
     <>
-      <Pressable onPress={onPress} py="$3.5" px="$4" $active-bg="$brandSurface">
-        <HStack alignItems="center" space="md">
-          <Icon size={19} color="#163300" />
-          <VStack flex={1}>
-            <HStack alignItems="center" space="sm">
-              <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color={color}>
-                {label}
-              </Text>
-              {dot && <PendingDot />}
-            </HStack>
-            {hint && (
-              <Text fontFamily="$body" fontSize="$2xs" color="$brandTextSecondary" mt="$0.5">
-                {hint}
-              </Text>
-            )}
-          </VStack>
-          {badge != null && badge > 0 && (
-            <VStack bg="$brandDanger" borderRadius="$full" px="$2" py="$0.5">
-              <Text fontFamily="$display" fontSize={10} color="$white">
-                {badge}
-              </Text>
-            </VStack>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        className="flex-row items-center gap-3 px-4 py-3.5 active:bg-vupth-greenTint"
+      >
+        <Icon size={19} color="#163300" />
+        <View className="flex-1">
+          <View className="flex-row items-center gap-2">
+            <Text className="font-body text-sm font-semibold text-vupth-forest">{label}</Text>
+            {dot && <PendingDot />}
+          </View>
+          {hint && (
+            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
           )}
-          <ChevronRight size={16} color="#454745" />
-        </HStack>
+        </View>
+        {/* O mesmo badge das Configuracoes do profissional (1..9, depois "9+"). */}
+        {badge != null && badge > 0 && (
+          <NotificationBadge count={badge} testID={`menu-badge-${label.toLowerCase()}`} />
+        )}
+        <ChevronRight size={16} color="#454745" />
       </Pressable>
-      {!last && <VStack height={1} bg="$border" />}
+      {!last && <View className="h-px bg-vupth-border" />}
     </>
   );
 }
@@ -90,20 +78,12 @@ function MenuItem({
 /** Bloco de itens sob um rotulo — o agrupamento e o que tira o menu do "tudo igual". */
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <VStack space="sm">
-      <Text
-        fontFamily="$body"
-        fontSize={11}
-        fontWeight="$bold"
-        letterSpacing={0.8}
-        color="$brandTextSecondary"
-      >
+    <View className="gap-2">
+      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
         {label}
       </Text>
-      <VStack bg="$brandSurface" borderRadius="$card" overflow="hidden">
-        {children}
-      </VStack>
-    </VStack>
+      <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
+    </View>
   );
 }
 
@@ -153,41 +133,39 @@ export default function OwnerMenuScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
-          ref={rolagemRef}
-          onScroll={pilula.onScroll}
-          scrollEventThrottle={64}
-        w="$full"
+        ref={rolagemRef}
+        onScroll={pilula.onScroll}
+        scrollEventThrottle={64}
+        className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack flex={1} pb="$6" px="$4">
+        <View className="flex-1 pb-6 px-4">
           <ScreenHeader
             title={establishment?.name ?? "Meu estabelecimento"}
             subtitle={serviceTypeLabel(establishment?.service_type)}
           />
   
-          <VStack space="xl">
+          <View className="gap-5">
             {/* Quem acumula os dois papeis troca de area por aqui. Fica FORA dos
                 grupos porque não e configuracao — e mudar de contexto. */}
             {isProfessional && (
               <Pressable
                 onPress={() => router.replace("/(professional)/queue" as any)}
-                bg="$greenTint"
-                borderRadius="$card"
-                py="$3.5"
-                px="$4"
+                accessibilityRole="button"
+                className="bg-vupth-greenTint rounded-card py-3.5 px-4 active:opacity-80"
               >
-                <HStack alignItems="center" space="md">
+                <View className="flex-row items-center gap-3">
                   {/* Sem equivalente no Pencil (elemento so do app, pra quem
                       acumula os dois papeis) — lucide por consistencia com o
                       resto do menu, já que os outros ícones deixaram de ser
                       Ionicons. */}
                   <ArrowLeftRight size={19} color="#163300" />
-                  <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$forest" flex={1}>
+                  <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
                     Atender como profissional
                   </Text>
                   <ChevronRight size={16} color="#163300" />
-                </HStack>
+                </View>
               </Pressable>
             )}
   
@@ -284,15 +262,15 @@ export default function OwnerMenuScreen() {
   
             {/* Sair da conta fica solto e em vermelho: e a unica acao aqui que
                 tira a pessoa do app. */}
-            <Pressable onPress={handleLogout} py="$2">
-              <Text fontFamily="$body" fontSize="$sm" fontWeight="$semibold" color="$brandDanger">
-                Sair da conta
-              </Text>
+            <Pressable
+              onPress={handleLogout}
+              accessibilityRole="button"
+              className="py-2 self-start active:opacity-70"
+            >
+              <Text className="font-body text-sm font-semibold text-vupth-danger">Sair da conta</Text>
             </Pressable>
-          </VStack>
-  
-          <VStack flex={1} />
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
     </View>

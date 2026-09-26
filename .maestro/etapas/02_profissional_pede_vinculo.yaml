@@ -1,0 +1,39 @@
+# O profissional (manicure) cria a conta e pede vinculo a loja do dono.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/cadastrar.yaml
+    env:
+      PAPEL: professional
+      EMAIL: ${output.EMAIL_PROF}
+- extendedWaitUntil:
+    visible: "Cadastro profissional"
+    timeout: 30000
+- tapOn:
+    id: "professional-name"
+- inputText: ${output.PROF}
+- hideKeyboard
+- tapOn: "Manicure"
+- tapOn: "Continuar"
+- extendedWaitUntil:
+    visible: "Onde você vai atender?"
+    timeout: 20000
+- tapOn: "Numa loja que já existe"
+- tapOn:
+    id: "search-establishment"
+- inputText: ${output.LOJA}
+- pressKey: Enter
+- hideKeyboard
+# O nome da loja tambem esta no campo de busca: toca no CARTAO do resultado.
+- extendedWaitUntil:
+    visible:
+      id: "establishment-card"
+    timeout: 20000
+- tapOn:
+    id: "establishment-card"
+- tapOn: "Solicitar vinculação"
+- extendedWaitUntil:
+    visible: "Solicitação enviada"
+    timeout: 20000
+- runFlow: ../apoio/fechar_aviso.yaml
+- runFlow: ../apoio/sair_profissional.yaml

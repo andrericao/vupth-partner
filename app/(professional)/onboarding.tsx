@@ -3,18 +3,17 @@ import {
   View,
   Text,
   ScrollView,
-  TextInput,
   Pressable,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { X, Search } from "lucide-react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { CampoDeBusca } from "@components/nw/CampoDeBusca";
 import { OnboardingPathChoice } from "@components/OnboardingPathChoice";
 import { useProfessionalStore } from "@store/professional.store";
 import { useEstablishmentStore, EstablishmentSearchResult } from "@store/establishment.store";
@@ -48,7 +47,6 @@ export default function ProfessionalOnboardingScreen() {
   const [isLoading, setIsLoading] = useState(false);
   // So p/ engrossar a borda do campo de busca no foco (o v1 fazia via
   // $focus-borderWidth do gluestack).
-  const [searchFocused, setSearchFocused] = useState(false);
 
   const registerProfessional = useProfessionalStore((s) => s.register);
   const requestAffiliation = useProfessionalStore((s) => s.requestAffiliation);
@@ -260,44 +258,17 @@ export default function ProfessionalOnboardingScreen() {
               Busque o estabelecimento onde você vai trabalhar.
             </Text>
 
-            <View
-              className={`flex-row items-center h-12 rounded-md mb-4 pr-3 ${
-                searchFocused ? "border-2 border-vupth-forest" : "border border-vupth-forest"
-              }`}
-            >
-              <TextInput
-                className="flex-1 px-3 font-body text-vupth-forest"
-                placeholder="Nome do estabelecimento"
-                placeholderTextColor="#6B706B"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSubmitEditing={handleSearch}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                autoCorrect={false}
-                returnKeyType="search"
-                testID="search-establishment"
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={searchQuery.trim() ? "Limpar busca" : "Buscar"}
-                hitSlop={8}
-                onPress={
-                  searchQuery.trim()
-                    ? () => {
-                        setSearchQuery("");
-                        setSearchResults([]);
-                      }
-                    : handleSearch
-                }
-              >
-                {searchQuery.trim() ? (
-                  <X size={18} color="#454745" />
-                ) : (
-                  <Search size={18} color="#163300" />
-                )}
-              </Pressable>
-            </View>
+            <CampoDeBusca
+              value={searchQuery}
+              placeholder="Nome do estabelecimento"
+              onChangeText={setSearchQuery}
+              onBuscar={handleSearch}
+              onLimpar={() => {
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+              testID="search-establishment"
+            />
 
             {isSearching && <ActivityIndicator size="large" color="#163300" />}
 

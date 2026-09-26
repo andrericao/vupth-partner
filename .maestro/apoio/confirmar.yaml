@@ -1,0 +1,9 @@
+# Confirma a caixa de CONFIRMACAO (Cancelar = botao 0, a acao = botao 1).
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible:
+      id: "dialogo-botao-1"
+    timeout: 15000
+- tapOn:
+    id: "dialogo-botao-1"

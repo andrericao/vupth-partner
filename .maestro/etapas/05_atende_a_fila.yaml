@@ -1,0 +1,45 @@
+# Dois clientes entram na fila pela API. O profissional inicia o primeiro, pausa
+# e retoma pelo menu do card verde (QA 16.1), finaliza, e remove o segundo
+# (Retirado, QA 16.5).
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../scripts/clientes_na_fila.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+      QTD: "2"
+- tapOn:
+    id: "aba-fila"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE1}
+    timeout: 60000
+- assertVisible: ${output.CLIENTE2}
+
+- tapOn: "Iniciar próximo"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+
+# Pausar e retomar pelo menu do card verde (um toque abre)
+- tapOn: "Opções de ${output.CLIENTE1}"
+- tapOn: "Pausar atendimento"
+- extendedWaitUntil:
+    visible: "Retomar"
+    timeout: 20000
+- tapOn: "Retomar"
+- extendedWaitUntil:
+    visible: "Pausar"
+    timeout: 20000
+- tapOn: "Finalizar"
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE1}
+    timeout: 20000
+
+# O segundo sai pela loja: Remover
+- tapOn: "Opções de ${output.CLIENTE2}"
+- tapOn: "Remover"
+- runFlow: ../apoio/confirmar.yaml
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE2}
+    timeout: 20000

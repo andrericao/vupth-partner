@@ -1,0 +1,41 @@
+# Fora: a fila fecha e a loja fecha junto. Um cliente pede encaixe pela API;
+# o profissional aceita e passa a Trabalhando (QA 19.2). Depois atende e sai.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/status.yaml
+    env:
+      STATUS: indisponivel
+- assertVisible: "Você está: Fora.*"
+- runScript:
+    file: ../scripts/pedido_de_encaixe.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+- tapOn:
+    id: "aba-encaixes"
+- extendedWaitUntil:
+    visible: ".*${output.CLIENTE_ENCAIXE}.*"
+    timeout: 60000
+- tapOn: "Aceitar"
+- tapOn:
+    id: "aba-fila"
+- extendedWaitUntil:
+    visible: "Você está: Trabalhando.*"
+    timeout: 20000
+- extendedWaitUntil:
+    visible: ${output.CLIENTE_ENCAIXE}
+    timeout: 30000
+- tapOn: "Iniciar próximo"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+- tapOn: "Finalizar"
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE_ENCAIXE}
+    timeout: 20000
+- runFlow:
+    file: ../apoio/status.yaml
+    env:
+      STATUS: indisponivel
+- runFlow: ../apoio/sair_profissional.yaml

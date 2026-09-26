@@ -34,13 +34,23 @@ type ServiceItem = {
   customName: string;
   price: number;
   estimatedMinutes: number;
+  /** Divisao gravada (contrato de 18/09). Nulos = servico legado, sem divisao. */
+  pro_receives?: number | null;
+  base_price?: number | null;
 };
+
+/** Divisao do preco enviada no cadastro/edicao (ver src/lib/split.ts). */
+export type SplitDoPreco = { price: number; pro_receives: number; base_price: number };
 
 export type ProfessionalReport = {
   totalAttendances: number;
   totalRevenue: number;
   avgDurationMinutes: number;
   topService: string | null;
+  /** O que o profissional recebeu, sem as Taxas Vupth. Ausente em backend antigo. */
+  netRevenue?: number | null;
+  /** Atendimentos de servico sem divisao — ficam fora do netRevenue. */
+  attendancesWithoutSplit?: number;
 };
 
 type ProfessionalState = {
@@ -59,12 +69,20 @@ type ProfessionalState = {
   acceptAffiliation: (affiliationId: string) => Promise<void>;
   rejectAffiliation: (affiliationId: string) => Promise<void>;
   setProfessional: (data: Professional) => Promise<void>;
-  addMyServiceItem: (serviceItemType: string, customName: string, price: number) => Promise<any>;
+  addMyServiceItem: (
+    serviceItemType: string,
+    customName: string,
+    split: SplitDoPreco,
+    estimatedMinutes?: number
+  ) => Promise<any>;
   updateMyProfile: (changes: { name?: string; specialty?: string }) => Promise<void>;
   updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
   setAcceptingNew: (value: boolean) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
-  updateMyServiceItem: (itemId: string, changes: { customName?: string; price?: number }) => Promise<void>;
+  updateMyServiceItem: (
+    itemId: string,
+    changes: { customName?: string; estimatedMinutes?: number } & Partial<SplitDoPreco>
+  ) => Promise<void>;
   removeMyServiceItem: (itemId: string) => Promise<void>;
   fetchMyServices: () => Promise<void>;
   fetchMyReport: (dateFrom?: string, dateTo?: string) => Promise<ProfessionalReport>;
@@ -171,13 +189,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
     await api.patch(`/affiliations/${affiliationId}/reject`);
   },
 
-  addMyServiceItem: async (serviceItemType, customName, price) => {
+  addMyServiceItem: async (serviceItemType, customName, split, estimatedMinutes) => {
     const prof = get().professional;
     if (!prof) throw new Error("Professional not found");
 
     const { data } = await api.post(
       `/professional-queue/${prof.id}/add-service-items`,
-      { serviceItemType, customName, price }
+      { serviceItemType, customName, ...split, ...(estimatedMinutes ? { estimatedMinutes } : {}) }
     );
     return data;
   },

@@ -1,16 +1,16 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useQueuePolling } from "@hooks/useQueuePolling";
-import { useEstablishmentStore, type EstablishmentReport } from "@store/establishment.store";
-import { getApiErrorMessage } from "@lib/api";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import { ExpedienteCard } from "@components/ExpedienteCard";
-import { periodRange } from "@lib/time";
 import { StatCard } from "@components/brand/StatCard";
+import { avisoSemSplit } from "@lib/split";
 
-type Period = "day" | "week" | "month";
+type Period = Periodo;
 
 export default function OwnerReportsScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -18,32 +18,19 @@ export default function OwnerReportsScreen() {
   const { data: queue, refetch } = useQueuePolling(establishment?.id ?? null);
 
   const [period, setPeriod] = useState<Period>("day");
-  const [report, setReport] = useState<EstablishmentReport | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const loadReport = useCallback(async () => {
-    if (!establishment?.id) return;
-    setIsLoading(true);
-    setErrorMsg(null);
-    try {
-      const { dateFrom, dateTo } = periodRange(period);
-      setReport(await fetchReport(establishment.id, dateFrom, dateTo));
-    } catch (error: any) {
-      setErrorMsg(getApiErrorMessage(error, "Não foi possível carregar o relatório."));
-      setReport(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [establishment?.id, period, fetchReport]);
-
-  useEffect(() => {
-    // fetch on-mount/periodo; sinaliza isLoading (padrao de carregamento).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadReport();
-  }, [loadReport]);
+  // O ultimo relatorio de cada periodo fica guardado: voltar a tela pinta o
+  // numero na hora e atualiza por tras (fila do partner, 25/09).
+  const establishmentId = establishment?.id ?? null;
+  const {
+    dados: report,
+    carregando: isLoading,
+    erro: errorMsg,
+    recarregar: loadReport,
+  } = useRelatorioDoPeriodo("dono", establishmentId, period, (de, ate) =>
+    fetchReport(establishmentId!, de, ate)
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -55,9 +42,11 @@ export default function OwnerReportsScreen() {
   const availableProfs = queue?.available_professionals ?? 0;
 
   // Breakdown do relatorio por profissional, indexado por id.
-  const revById = (report?.professionals ?? []).reduce<Record<string, { revenue: number; attendances: number }>>(
+  const revById = (report?.professionals ?? []).reduce<
+    Record<string, { revenue: number; attendances: number; netRevenue?: number | null }>
+  >(
     (acc, p) => {
-      acc[p.id] = { revenue: p.revenue, attendances: p.attendances };
+      acc[p.id] = { revenue: p.revenue, attendances: p.attendances, netRevenue: p.netRevenue };
       return acc;
     },
     {}
@@ -154,6 +143,14 @@ export default function OwnerReportsScreen() {
               </View>
             </View>
 
+            {avisoSemSplit(report?.attendancesWithoutSplit) && (
+              <View className="bg-vupth-warning p-3 rounded-card mt-3">
+                <Text className="font-body text-xs text-vupth-forest">
+                  {avisoSemSplit(report?.attendancesWithoutSplit)}
+                </Text>
+              </View>
+            )}
+
             <View className="h-px bg-vupth-border my-6" />
 
             <Text className="font-heading text-vupth-textSecondary mb-3">Por profissional</Text>
@@ -175,9 +172,18 @@ export default function OwnerReportsScreen() {
                             {p.specialty || "Sem especialidade"}
                           </Text>
                         </View>
-                        <Text className="font-heading text-vupth-forest">
-                          R$ {r.revenue.toFixed(2)}
-                        </Text>
+                        <View className="items-end">
+                          <Text className="font-heading text-vupth-forest">
+                            R$ {r.revenue.toFixed(2)}
+                          </Text>
+                          {/* O que o profissional recebeu, sem as Taxas Vupth
+                              — a base da comissao. Rotulo a validar com o Design. */}
+                          {r.netRevenue != null && (
+                            <Text className="font-body text-xs text-vupth-textSecondary">
+                              recebe R$ {r.netRevenue.toFixed(2)}
+                            </Text>
+                          )}
+                        </View>
                       </View>
 
                       <View className="flex-row gap-4 mt-3">

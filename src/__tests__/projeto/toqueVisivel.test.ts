@@ -22,9 +22,10 @@ describe("todo botão mostra que foi tocado", () => {
     for (const l of linhas) expect(l).toMatch(/active:opacity-\d+/);
   });
 
-  it("os botões antigos (Gluestack) também", () => {
+  it("os botões antigos (Gluestack) saíram — não há um segundo botão para esquecer", () => {
+    // Migração concluída em 25/09: o NwButton é o único botão do app.
     for (const f of ["src/components/Button.tsx", "src/components/brand/Button.tsx"]) {
-      expect(ler(f)).toMatch(/\$active-opacity=\{0\.\d+\}/);
+      expect(fs.existsSync(path.join(RAIZ, f))).toBe(false);
     }
   });
 });

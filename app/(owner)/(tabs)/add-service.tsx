@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 import {
-  VStack,
-  HStack,
-  FormControl,
-  ScrollView,
+  View,
   Text,
   Pressable,
-} from "@gluestack-ui/themed";
-import { router, useLocalSearchParams } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { ScreenHeader } from "@components/ScreenHeader";
-import { Input } from "@components/Input";
-import { BrandButton } from "@components/brand/Button";
+import { NwInput } from "@components/nw/Input";
+import { NwButton } from "@components/nw/Button";
 import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { calculatePricing, getAbsorptionOptions } from "@lib/pricing";
 import { maskMoney, unmaskMoney } from "@lib/masks";
+import { corpoDoSplit } from "@lib/split";
+import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO } from "@lib/tempoDoServico";
 import { avisar } from "@lib/confirmar";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
@@ -88,12 +90,14 @@ export default function AddServiceScreen() {
   const [serviceItemType, setServiceItemType] = useState(filteredTypes[0]?.value ?? "CORTE_MAQUINA");
   const [customName, setCustomName] = useState("");
   const [price, setPrice] = useState("");
+  const [minutes, setMinutes] = useState(String(MINUTOS_PADRAO));
 
   // Formulario meio-preenchido nao pode sobreviver a saida da tela (10/09).
   // Ver src/hooks/useLimparAoSair.ts.
   useLimparAoSair(() => {
     setCustomName("");
     setPrice("");
+    setMinutes(String(MINUTOS_PADRAO));
   });
   const [absorption, setAbsorption] = useState(0);
   const [showPricing, setShowPricing] = useState(false);
@@ -127,14 +131,20 @@ export default function AddServiceScreen() {
       Alert.alert("Faltou preencher", `Informe ${faltam}.`);
       return;
     }
+    const minutos = lerMinutos(minutes);
+    if (minutos == null) {
+      Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
+      return;
+    }
 
     setIsLoading(true);
 
-    // Preco salvo e o total que o cliente paga (digitado + taxas conforme absorcao)
-    const finalPrice = calculatePricing(priceNum, absorption).clientPrice;
+    // Preco do cliente + a divisao gravada (contrato de 18/09).
+    const split = corpoDoSplit(priceNum, absorption);
+    const finalPrice = split.price;
 
     try {
-      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), finalPrice);
+      await addServiceItem(establishmentId!, serviceItemType, customName.trim(), split, minutos);
       // O servico JA FOI criado — sem a caixa na web a tela nao fechava e o
       // dono cadastrava o mesmo servico duas vezes.
       await avisar({
@@ -168,70 +178,59 @@ export default function AddServiceScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-    <ScrollView
-      w="$full"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <VStack flex={1} pb="$12" px="$4">
-        <ScreenHeader
-          title="Novo serviço"
-          onBack={() => router.navigate("/(owner)/menu" as any)}
-        />
+      <ScrollView
+        className="w-full"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="flex-1 pb-12 px-4">
+          <ScreenHeader title="Novo serviço" onBack={() => router.navigate("/(owner)/menu" as any)} />
 
-        <VStack flex={1}>
-
-          <Text fontFamily="$body" mb="$2" color="$brandTextSecondary">
-            Especialidade do profissional
-          </Text>
-          <VStack space="xs" mb="$4">
-            {SPECIALTIES.map((s) => {
-              const isSelected = specialty === s.value;
-              return (
-                <Pressable
-                  key={s.value}
-                  onPress={() => handleSpecialtyChange(s.value)}
-                  bg={isSelected ? "$forest" : "$brandSurface"}
-                  py="$2"
-                  px="$4"
-                  borderRadius="$md"
-                  borderWidth="$1"
-                  borderColor={isSelected ? "$forest" : "$brandBorder"}
-                >
-                  <Text
-                    fontFamily="$body"
-                    color={isSelected ? "$white" : "$brandTextSecondary"}
-                    textAlign="center"
-                    fontSize="$sm"
+          <View className="flex-1">
+            <Text className="font-body text-vupth-textSecondary mb-2">Especialidade do profissional</Text>
+            <View className="gap-1 mb-4">
+              {SPECIALTIES.map((s) => {
+                const isSelected = specialty === s.value;
+                return (
+                  <Pressable
+                    key={s.value}
+                    onPress={() => handleSpecialtyChange(s.value)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    className={`py-2 px-4 rounded-md border active:opacity-80 ${
+                      isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
+                    }`}
                   >
-                    {s.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </VStack>
+                    <Text
+                      className={`font-body text-sm text-center ${
+                        isSelected ? "text-white" : "text-vupth-textSecondary"
+                      }`}
+                    >
+                      {s.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <Text fontFamily="$body" mb="$2" color="$brandTextSecondary">
-            Tipo de serviço
-          </Text>
-          {/* [#11] grade de chips com icone (substitui a lista de pilulas).
-              Tocar substitui o nome no formulario. */}
-          <ServiceTypeGrid
-            items={filteredTypes}
-            selected={serviceItemType}
-            onSelect={(it) => {
-              setServiceItemType(it.value);
-              setCustomName(it.label);
-              setNameInvalid(false);
-            }}
-          />
+            <Text className="font-body text-vupth-textSecondary mb-2">Tipo de serviço</Text>
+            {/* [#11] grade de chips com icone (substitui a lista de pilulas).
+                Tocar substitui o nome no formulario. */}
+            <ServiceTypeGrid
+              items={filteredTypes}
+              selected={serviceItemType}
+              onSelect={(it) => {
+                setServiceItemType(it.value);
+                setCustomName(it.label);
+                setNameInvalid(false);
+              }}
+            />
 
-          <FormControl isInvalid={nameInvalid}>
-            <Input
-              textLabel="Nome personalizado"
+            <NwInput
+              label="Nome personalizado"
               placeholder="Ex: Corte Social"
-              messageError="Digite um nome para o serviço"
+              error={nameInvalid ? "Digite um nome para o serviço" : ""}
               value={customName}
               onChangeText={(t) => {
                 setCustomName(t);
@@ -239,13 +238,20 @@ export default function AddServiceScreen() {
               }}
               testID="service-custom-name"
             />
-          </FormControl>
 
-          <FormControl isInvalid={priceInvalid}>
-            <Input
-              textLabel="Preço"
+            {/* O tempo entra na previsao da fila (backend); sem ele, 30 min. */}
+            <NwInput
+              label="Tempo do serviço (min)"
+              placeholder="30"
+              value={minutes}
+              onChangeText={(t) => setMinutes(mascaraMinutos(t))}
+              keyboardType="number-pad"
+            />
+
+            <NwInput
+              label="Preço"
               placeholder="R$ 35,00"
-              messageError="Digite um preço válido — ex: R$ 35,00"
+              error={priceInvalid ? "Digite um preço válido — ex: R$ 35,00" : ""}
               value={price}
               onChangeText={(t) => {
                 setPrice(maskMoney(t));
@@ -253,94 +259,94 @@ export default function AddServiceScreen() {
               }}
               keyboardType="number-pad"
             />
-          </FormControl>
 
-          <Pressable
-            onPress={() => setShowPricing(!showPricing)}
-            bg="$brandSurface"
-            p="$3"
-            borderRadius="$md"
-            mb="$3"
-            borderWidth="$1"
-            borderColor={showPricing ? "$forest" : "$brandBorder"}
-          >
-            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-              {showPricing ? "▼" : "▶"} Politica de preco (preview)
-            </Text>
-            <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary">
-              Simule como ficara com taxas + arredondamento R$X,90
-            </Text>
-          </Pressable>
+            <Pressable
+              onPress={() => setShowPricing(!showPricing)}
+              accessibilityRole="button"
+              className={`bg-vupth-surface p-3 rounded-md mb-3 border active:opacity-80 ${
+                showPricing ? "border-vupth-forest" : "border-vupth-border"
+              }`}
+            >
+              <Text className="font-body text-sm text-vupth-textSecondary">
+                {showPricing ? "▼" : "▶"} Politica de preco (preview)
+              </Text>
+              <Text className="font-body text-xs text-vupth-textSecondary">
+                Simule como ficara com taxas + arredondamento R$X,90
+              </Text>
+            </Pressable>
 
-          {showPricing && unmaskMoney(price) > 0 && (() => {
-            const priceNum = unmaskMoney(price);
-            const options = getAbsorptionOptions(priceNum);
-            const pricing = calculatePricing(priceNum, absorption);
-            const labels: Record<number, string> = {
-              0: "Cliente paga tudo",
-              25: "Pro paga 25%",
-              50: "Metade cada",
-              75: "Pro paga 75%",
-              100: "Pro paga tudo",
-            };
-            return (
-              <VStack bg="$brandSurface" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$brandBorder" mb="$3">
-                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mb="$2">
-                  Quem absorve as Taxas Vupth (6%)?
-                </Text>
-                <HStack space="xs" mb="$3" flexWrap="wrap">
-                  {options.map((pct) => (
-                    <Pressable
-                      key={pct}
-                      onPress={() => setAbsorption(pct)}
-                      bg={absorption === pct ? "$forest" : "$white"}
-                      py="$1.5"
-                      px="$3"
-                      borderRadius="$full"
-                      borderWidth="$1"
-                      borderColor={absorption === pct ? "$forest" : "$brandBorder"}
-                      mb="$1"
-                    >
-                      <Text fontFamily="$body" fontSize="$xs" color={absorption === pct ? "$white" : "$brandTextSecondary"}>
-                        {labels[pct] ?? `${pct}%`}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </HStack>
-                <HStack justifyContent="space-between" mb="$1">
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">Cliente paga:</Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest" fontSize="$lg">
-                    R$ {pricing.clientPrice.toFixed(2)}
+            {showPricing && unmaskMoney(price) > 0 && (() => {
+              const priceNum = unmaskMoney(price);
+              const options = getAbsorptionOptions(priceNum);
+              const pricing = calculatePricing(priceNum, absorption);
+              const labels: Record<number, string> = {
+                0: "Cliente paga tudo",
+                25: "Pro paga 25%",
+                50: "Metade cada",
+                75: "Pro paga 75%",
+                100: "Pro paga tudo",
+              };
+              return (
+                <View className="bg-vupth-surface p-4 rounded-md border border-vupth-border mb-3">
+                  <Text className="font-body text-xs text-vupth-textSecondary mb-2">
+                    Quem absorve as Taxas Vupth (6%)?
                   </Text>
-                </HStack>
-                <HStack justifyContent="space-between" mb="$1">
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">Pro recebe:</Text>
-                  <Text fontFamily="$heading" fontWeight="$bold" color="$forest">
-                    R$ {pricing.proReceives.toFixed(2)}
+                  <View className="flex-row flex-wrap gap-1 mb-3">
+                    {options.map((pct) => {
+                      const ativo = absorption === pct;
+                      return (
+                        <Pressable
+                          key={pct}
+                          onPress={() => setAbsorption(pct)}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: ativo }}
+                          className={`py-1.5 px-3 rounded-full border mb-1 ${
+                            ativo ? "bg-vupth-forest border-vupth-forest" : "bg-white border-vupth-border"
+                          }`}
+                        >
+                          <Text
+                            className={`font-body text-xs ${ativo ? "text-white" : "text-vupth-textSecondary"}`}
+                          >
+                            {labels[pct] ?? `${pct}%`}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <View className="flex-row justify-between mb-1">
+                    <Text className="font-body text-sm text-vupth-textSecondary">Cliente paga:</Text>
+                    <Text className="font-heading text-lg text-vupth-forest">
+                      R$ {pricing.clientPrice.toFixed(2)}
+                    </Text>
+                  </View>
+                  <View className="flex-row justify-between mb-1">
+                    <Text className="font-body text-sm text-vupth-textSecondary">Pro recebe:</Text>
+                    <Text className="font-heading text-vupth-forest">
+                      R$ {pricing.proReceives.toFixed(2)}
+                    </Text>
+                  </View>
+                  <View className="flex-row justify-between">
+                    <Text className="font-body text-sm text-vupth-textSecondary">Taxas Vupth:</Text>
+                    <Text className="font-body text-sm text-vupth-textSecondary">
+                      R$ {pricing.platformFee.toFixed(2)}
+                    </Text>
+                  </View>
+                  <Text className="font-body text-xs text-vupth-textSecondary mt-3">
+                    * O preco salvo do servico e o total pago pelo cliente
                   </Text>
-                </HStack>
-                <HStack justifyContent="space-between">
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">Taxas Vupth:</Text>
-                  <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary">
-                    R$ {pricing.platformFee.toFixed(2)}
-                  </Text>
-                </HStack>
-                <Text fontFamily="$body" fontSize="$xs" color="$brandTextSecondary" mt="$3">
-                  * O preco salvo do servico e o total pago pelo cliente
-                </Text>
-              </VStack>
-            );
-          })()}
+                </View>
+              );
+            })()}
 
-          <BrandButton
-            title="Adicionar serviço"
-            onPress={handleSubmit}
-            isLoading={isLoading}
-            mt="$9"
-          />
-        </VStack>
-      </VStack>
-    </ScrollView>
+            <NwButton
+              title="Adicionar serviço"
+              onPress={handleSubmit}
+              isLoading={isLoading}
+              className="mt-9"
+            />
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

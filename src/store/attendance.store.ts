@@ -20,7 +20,13 @@ type AttendanceState = {
   fetchQueue: (establishmentId: string) => Promise<void>;
   fetchProfessionalQueue: (professionalId: string, establishmentId: string) => Promise<QueueResponse>;
   addGuestAttendance: (data: { professionalId: string; establishmentId: string; serviceItemIds: string[]; clientName: string }) => Promise<QueueResponse>;
-  fetchHistory: (params: { establishmentId?: string; professionalId?: string; status?: string }) => Promise<AttendanceHistoryItem[]>;
+  fetchHistory: (params: {
+    establishmentId?: string;
+    professionalId?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }) => Promise<AttendanceHistoryItem[]>;
   /**
    * O atendimento que o backend devolveu no `start`, guardado como REDE.
    *

@@ -1,0 +1,24 @@
+# Relatorios do profissional: o liquido ("Você recebeu", QA 18.3), o historico
+# de HOJE (QA 19.3) com Finalizado e Retirado, e o filtro Retirados (QA 16.5).
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-relatorios"
+- extendedWaitUntil:
+    visible: "Seu dia"
+    timeout: 20000
+- extendedWaitUntil:
+    visible: "Você recebeu"
+    timeout: 20000
+- scrollUntilVisible:
+    element: ${output.CLIENTE1}
+    direction: DOWN
+- assertVisible: "Finalizado"
+- scrollUntilVisible:
+    element: "Retirados"
+    direction: UP
+- tapOn: "Retirados"
+- scrollUntilVisible:
+    element: ${output.CLIENTE2}
+    direction: DOWN
+- assertVisible: "Retirado"

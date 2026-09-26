@@ -129,21 +129,27 @@ export function resumoDeSolicitacoes(
 }
 
 /**
- * O que reler depois de decidir um encaixe. Aceitar poe o profissional em
- * WORKING no backend (confirmado por eles em 26/08) e muda a fila — entao
- * aceitar rele o proprio status e as filas. Recusar so mexe na lista de
- * encaixes, que a tela ja rele.
+ * O que fazer depois de decidir um encaixe. Aceitar poe o profissional em
+ * TRABALHANDO (Andre, 25/09: "quando aceitar um pedido de encaixe, seu status
+ * deve mudar para trabalhando") e muda a fila. O backend diz fazer a troca
+ * (26/08), mas o teste de 25/09 mostrou "Fora" depois do aceite — entao o app
+ * rele o status e, se nao veio Trabalhando, pede a troca ele mesmo.
  *
- * O status e best-effort: se a releitura falhar, o aceite ja aconteceu e o
- * proximo polling acerta. Nao vira erro na tela.
+ * Tudo best-effort: o aceite ja aconteceu; falha aqui nao vira erro na tela.
  */
 export async function releDepoisDeDecidir(
   aceitou: boolean,
-  deps: { releStatus: () => Promise<void>; invalidar: (chave: string[]) => void }
+  deps: {
+    releStatus: () => Promise<void>;
+    statusAtual: () => string | null | undefined;
+    ficarTrabalhando: () => Promise<void>;
+    invalidar: (chave: string[]) => void;
+  }
 ): Promise<void> {
   if (!aceitou) return;
   try {
     await deps.releStatus();
+    if (deps.statusAtual() !== "WORKING") await deps.ficarTrabalhando();
   } catch {
     // ver acima
   }

@@ -50,6 +50,10 @@ export const api = axios.create({
 
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
+  // 422 da divisao do preco (contrato de 18/09): a conta nao fechou com a regra
+  // das Taxas Vupth — ou o servico ainda e da regra antiga.
+  SERVICE_PRICE_SPLIT_INVALID:
+    "O preço não fechou com a regra das Taxas Vupth. Confira o valor e salve de novo.",
   AFFILIATION_ALREADY_PENDING:
     "Você já tem uma solicitação de vinculação pendente para este estabelecimento. Aguarde a resposta do proprietário.",
   PROFESSIONAL_ALREADY_AFFILIATED:

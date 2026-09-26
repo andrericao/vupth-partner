@@ -510,11 +510,22 @@ describe("professional.store", () => {
   });
 
   describe("addMyServiceItem", () => {
+    it("manda o tempo do servico quando informado (estimatedMinutes)", async () => {
+      useProfessionalStore.setState({ professional: REGISTER_RESPONSE });
+      mock.onPost("/professional-queue/prof-uuid-1/add-service-items").reply(201, {});
+
+      await useProfessionalStore
+        .getState()
+        .addMyServiceItem("BARBA", "Barba", { price: 20.9, pro_receives: 19, base_price: 19 }, 45);
+
+      expect(JSON.parse(mock.history.post[0].data).estimatedMinutes).toBe(45);
+    });
+
     it("lanca quando não há professional carregado", async () => {
       useProfessionalStore.setState({ professional: null });
 
       await expect(
-        useProfessionalStore.getState().addMyServiceItem("CORTE_MAQUINA", "Corte", 40)
+        useProfessionalStore.getState().addMyServiceItem("CORTE_MAQUINA", "Corte", { price: 40.9, pro_receives: 38, base_price: 38 })
       ).rejects.toThrow("Professional not found");
     });
 
@@ -525,13 +536,15 @@ describe("professional.store", () => {
 
       const out = await useProfessionalStore
         .getState()
-        .addMyServiceItem("CORTE_MAQUINA", "Corte", 40);
+        .addMyServiceItem("CORTE_MAQUINA", "Corte", { price: 40.9, pro_receives: 38, base_price: 38 });
 
       expect(mock.history.post[0].url).toBe("/professional-queue/prof-uuid-1/add-service-items");
       expect(JSON.parse(mock.history.post[0].data)).toEqual({
         serviceItemType: "CORTE_MAQUINA",
         customName: "Corte",
-        price: 40,
+        price: 40.9,
+        pro_receives: 38,
+        base_price: 38,
       });
       expect(out).toEqual(created);
     });

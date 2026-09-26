@@ -1,4 +1,4 @@
-import "../global.css"; // NativeWind (Gluestack v2): habilita as classes Tailwind
+import "../global.css"; // NativeWind: habilita as classes Tailwind
 import { useEffect } from "react";
 import { Alert, LogBox, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -8,8 +8,6 @@ import { queryClient } from "@lib/queryClient";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, DefaultTheme } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
-import { GluestackUIProvider } from "@gluestack-ui/themed";
-import { config } from "../config/gluestack-ui.config";
 // ⚠️ As fontes vem de `assets/fonts/`, NAO de `@expo-google-fonts`.
 // A Cloudflare Pages EXCLUI `node_modules` do deploy, por design — e o
 // `expo export --platform web` grava os assets espelhando o caminho de origem,
@@ -104,24 +102,22 @@ export default function RootLayout() {
     // o off-white apagava.
     <SafeAreaProvider style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <QueryClientProvider client={queryClient}>
-        <GluestackUIProvider config={config}>
-          {/* ThemeProvider ENVOLVE o Slot: e ele que pinta o fundo das telas
-              (ver `navTheme` acima). Sem isso o navegador usava o cinza
-              #F2F2F2 do tema padrao, por cima do branco do SafeAreaProvider. */}
-          <ThemeProvider value={navTheme}>
-            {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
-                style="dark" = icones escuros (visiveis sobre fundo claro). */}
-            <StatusBar style="dark" backgroundColor="#FFFFFF" />
-            {/* O erro entra no portao de proposito: fonte que nao carrega deve
-                degradar para a fonte do sistema, nunca prender o app numa tela
-                de carregamento. Foi o spinner eterno de 2026-08-27. */}
-            {fontLoaded || fontError ? <Slot /> : <Loading />}
-            {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
-                nao pode ser coberto por ela. Fica fora do portao das fontes de
-                proposito — erro no boot precisa aparecer mesmo antes delas. */}
-            <DialogoVupth />
-          </ThemeProvider>
-        </GluestackUIProvider>
+        {/* ThemeProvider ENVOLVE o Slot: e ele que pinta o fundo das telas
+            (ver `navTheme` acima). Sem isso o navegador usava o cinza
+            #F2F2F2 do tema padrao, por cima do branco do SafeAreaProvider. */}
+        <ThemeProvider value={navTheme}>
+          {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
+              style="dark" = icones escuros (visiveis sobre fundo claro). */}
+          <StatusBar style="dark" backgroundColor="#FFFFFF" />
+          {/* O erro entra no portao de proposito: fonte que nao carrega deve
+              degradar para a fonte do sistema, nunca prender o app numa tela
+              de carregamento. Foi o spinner eterno de 2026-08-27. */}
+          {fontLoaded || fontError ? <Slot /> : <Loading />}
+          {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
+              nao pode ser coberto por ela. Fica fora do portao das fontes de
+              proposito — erro no boot precisa aparecer mesmo antes delas. */}
+          <DialogoVupth />
+        </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );

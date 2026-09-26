@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, Pressable } from "react-native";
@@ -163,9 +164,7 @@ export default function ProfessionalSettingsScreen() {
     });
   };
 
-  const subtitle =
-    [professional?.specialty, professional?.establishment_name].filter(Boolean).join(" · ") ||
-    "Complete seu cadastro para atender";
+  const subtitle = subtituloDasConfiguracoes(professional);
 
   return (
     <View style={{ flex: 1 }}>

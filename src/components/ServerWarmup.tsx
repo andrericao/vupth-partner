@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Animated, AccessibilityInfo, Easing } from "react-native";
+import { Animated, AccessibilityInfo, Easing, View, Text } from "react-native";
 import { Smartphone, Store, Scissors, Footprints } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
-import { Center, Text, VStack, HStack } from "@gluestack-ui/themed";
-import { Button } from "@components/Button";
+import { NwButton } from "@components/nw/Button";
 
 // Tela do portao de readiness / cold start (ver src/lib/readiness.ts). Enquanto
 // o backend acorda (Render Free, ~50s), seguramos o app aqui — login/cadastro
@@ -31,20 +30,17 @@ const ICON_MS = 800; // tempo por icone (~0.8s)
 // servidor...", e os dois apps abriam de jeitos diferentes.
 function Dots({ activeIndex }: { activeIndex: number }) {
   return (
-    <HStack space="sm" alignItems="center" testID="warmup-dots">
+    <View className="flex-row items-center gap-2" testID="warmup-dots">
       {STEPS.map((_, i) => {
         const active = i === activeIndex;
         return (
-          <Center
+          <View
             key={i}
-            width={active ? 10 : 7}
-            height={active ? 10 : 7}
-            borderRadius="$full"
-            bg={active ? "$brandGreen" : "$brandBorder"}
+            className={`rounded-full ${active ? "w-2.5 h-2.5 bg-vupth-green" : "w-[7px] h-[7px] bg-vupth-border"}`}
           />
         );
       })}
-    </HStack>
+    </View>
   );
 }
 
@@ -115,28 +111,20 @@ function WarmupAnimation() {
   const Icon = STEPS[index].icon;
 
   return (
-    <VStack alignItems="center" space="lg">
+    <View className="items-center gap-4">
       <Animated.View style={{ opacity, transform: [{ scale }, { translateX: shiftX }] }}>
-        <Center width={88} height={88} borderRadius="$full" bg="$greenTint">
+        <View className="w-[88px] h-[88px] rounded-full bg-vupth-greenTint items-center justify-center">
           <Icon size={38} color={GREEN} />
-        </Center>
+        </View>
       </Animated.View>
-      <VStack space="xs" alignItems="center">
-        <Text fontFamily="$display" fontSize={20} letterSpacing={-0.4} color="$forest">
-          {STEPS[index].label}
-        </Text>
-        <Text
-          fontFamily="$body"
-          fontSize="$xs"
-          color="$brandTextSecondary"
-          textAlign="center"
-          w={260}
-        >
+      <View className="items-center gap-1">
+        <Text className="font-display text-xl text-vupth-forest">{STEPS[index].label}</Text>
+        <Text className="font-body text-xs text-vupth-textSecondary text-center w-[260px]">
           Preparando servidor — na primeira vez pode levar até ~50s.
         </Text>
-      </VStack>
+      </View>
       <Dots activeIndex={index} />
-    </VStack>
+    </View>
   );
 }
 
@@ -147,22 +135,24 @@ type Props = {
 
 export function ServerWarmup({ failed, onRetry }: Props) {
   return (
-    <Center flex={1} bg="$brandBackground" px={24}>
-      <VStack space="lg" alignItems="center">
+    <View className="flex-1 items-center justify-center bg-white px-6">
+      <View className="items-center gap-4 w-full">
         {failed ? (
           <>
-            <Text fontFamily="$heading" fontSize="$lg" color="$brandTextSecondary" textAlign="center">
+            <Text className="font-heading text-lg text-vupth-textSecondary text-center">
               Não foi possível conectar ao servidor
             </Text>
-            <Text fontFamily="$body" fontSize="$sm" color="$brandTextSecondary" textAlign="center">
+            <Text className="font-body text-sm text-vupth-textSecondary text-center">
               O servidor pode estar iniciando. Tente novamente em alguns segundos.
             </Text>
-            {onRetry && <Button title="Tentar de novo" onPress={onRetry} />}
+            {onRetry && (
+              <NwButton title="Tentar de novo" onPress={onRetry} className="self-stretch mt-5" />
+            )}
           </>
         ) : (
           <WarmupAnimation />
         )}
-      </VStack>
-    </Center>
+      </View>
+    </View>
   );
 }

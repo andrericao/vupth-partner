@@ -22,26 +22,25 @@
 // loop, e o `onPress` do botao roda depois do bundle inteiro parar) e nao
 // suportam mais de dois botoes. Varios Alert do app tem tres.
 //
-// O VISUAL SEGUE O APP, e cada numero aqui foi COPIADO da fonte, nao escolhido:
+// O VISUAL E O DO DESENHO — os MESMOS numeros do DialogoVupth (a caixa do app),
+// lidos pelo Design nos quatro "MODAL ·" do arquivo (resposta de 14/09):
 //
-//   backdrop rgba(0,0,0,.45) e padding 24 ....... mesmo do client
-//   card branco, raio 20 ......................... tailwind.config.js radii.card
-//   botao pilula, altura MINIMA 54 .............. src/components/nw/Button.tsx
-//   solido #9FE870 com texto #163300 ............ Button.tsx vupthPrimary (nunca
-//                                                 texto branco: brandGreen e
-//                                                 claro demais)
-//   cancel e destructive VAZADOS ................ Button.tsx vupthOutline
-//                                                 (border-2, fundo transparente)
-//   titulo/botao Archivo, corpo Inter ........... tailwind fontFamily heading/body
-//   greenTint #E2F6D5 no hover .................. tailwind vupth.greenTint
+//   fundo forest a 45% (nao preto) ............. rgba(22,51,0,.45) = #16330073
+//   respiro lateral 24 · card raio 20, padding 22, gap 16
+//   titulo Archivo 800, 18, ls -0.4 · corpo Inter 14/20, text-secondary
+//   botoes empilhados, pilula de altura MINIMA 54, borda do vazado 1,5 forest
 //
-// ⚠️ Altura MINIMA, nao cravada: o app honra o ajuste de fonte do aparelho, e
-// caixa travada corta o rotulo quando a fonte cresce (DS4 — foi exatamente o
-// defeito que o PR #28 consertou nos botoes).
+// A HIERARQUIA vem da mesma regra do app (src/lib/pesoDoBotao.ts, espelhada em
+// `pesoWeb` abaixo): com acao destrutiva na caixa, o CANCELAR e o solido e o
+// destrutivo e vazado com o rotulo em vermelho; sem ela, o confirmar e o solido.
 //
-// Sem tema escuro: o app nao tem um. Inventar aqui criaria divergencia com as
-// telas. O refinamento fino e da equipe de design — quando vier, muda so este
-// arquivo e as 100 chamadas seguem iguais.
+// 🔴 25/09 (Andre: "a caixa do app deve ser igual a da web"): este arquivo
+// tinha ficado com os valores da primeira deducao (fundo preto, padding 24,
+// corpo 16, borda 2, destrutivo com borda vermelha). Travado em
+// src/__tests__/projeto/caixaIgualNosDoisLados.test.ts.
+//
+// ⚠️ Altura MINIMA, nao cravada: caixa travada corta o rotulo quando a fonte
+// cresce (DS4).
 
 const Z_INDEX = 99999;
 
@@ -53,43 +52,52 @@ function criarEstilo() {
     .vupth-alert-backdrop {
       position: fixed; inset: 0; z-index: ${Z_INDEX};
       display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,.45); padding: 24px;
+      background: rgba(22,51,0,.45); padding: 0 24px;
     }
     .vupth-alert-box {
       background: #FFFFFF; color: #163300;
-      border-radius: 20px; padding: 24px;
-      max-width: 420px; width: 100%;
-      box-shadow: 0 4px 16px rgba(22,51,0,.08);
+      border-radius: 20px; padding: 22px;
+      display: flex; flex-direction: column; gap: 16px;
+      max-width: 420px; width: 100%; box-sizing: border-box;
       font-family: Inter_400Regular, system-ui, -apple-system, sans-serif;
     }
     .vupth-alert-title {
-      font-family: Archivo_700Bold, Inter_700Bold, system-ui, sans-serif;
-      font-size: 18px; color: #163300; margin: 0 0 12px;
+      font-family: Archivo_800ExtraBold, Archivo_700Bold, system-ui, sans-serif;
+      font-size: 18px; letter-spacing: -0.4px; color: #163300; margin: 0;
     }
     .vupth-alert-msg {
-      font-size: 16px; line-height: 1.45; color: #454745;
-      margin: 0; white-space: pre-wrap;
+      font-size: 14px; line-height: 20px; color: #454745;
+      margin: 0; white-space: pre-wrap; max-height: 260px; overflow-y: auto;
     }
-    .vupth-alert-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .vupth-alert-actions { display: flex; flex-direction: column; gap: 12px; }
     .vupth-alert-btn {
-      font-family: Archivo_700Bold, Inter_700Bold, system-ui, sans-serif;
+      font-family: Archivo_700Bold, system-ui, sans-serif;
       font-size: 16px; cursor: pointer;
       min-height: 54px; padding: 8px 24px;
       border-radius: 9999px; border: 0;
       background: #9FE870; color: #163300;
     }
-    .vupth-alert-btn:hover { background: #8AD95C; }
-    .vupth-alert-btn[data-style="cancel"] {
-      background: transparent; color: #163300; border: 2px solid #163300;
+    .vupth-alert-btn[data-peso="solido"]:hover { opacity: .85; }
+    .vupth-alert-btn[data-peso="vazado"],
+    .vupth-alert-btn[data-peso="vazado-perigo"] {
+      background: transparent; border: 1.5px solid #163300;
     }
-    .vupth-alert-btn[data-style="cancel"]:hover { background: #E2F6D5; }
-    .vupth-alert-btn[data-style="destructive"] {
-      background: transparent; color: #B3261E; border: 2px solid #B3261E;
-    }
-    .vupth-alert-btn[data-style="destructive"]:hover { background: #F7E4E2; }
+    .vupth-alert-btn[data-peso="vazado-perigo"] { color: #B3261E; }
+    .vupth-alert-btn[data-peso="vazado"]:hover,
+    .vupth-alert-btn[data-peso="vazado-perigo"]:hover { background: #E2F6D5; }
     .vupth-alert-btn:focus-visible { outline: 2px solid #163300; outline-offset: 2px; }
   `;
   document.head.appendChild(style);
+}
+
+// A regra de src/lib/pesoDoBotao.ts, em JS (este arquivo nao passa pelo
+// TypeScript). O teste de paridade compara as duas em todos os casos.
+export function pesoWeb(buttons, i) {
+  const estilo = buttons[i]?.style ?? "default";
+  if (estilo === "destructive") return "vazado-perigo";
+  const temDestrutivo = buttons.some((b) => b?.style === "destructive");
+  if (temDestrutivo) return estilo === "cancel" ? "solido" : "vazado";
+  return estilo === "cancel" ? "vazado" : "solido";
 }
 
 // Mesma normalizacao do React Native: sem botoes, vira um "OK" sozinho.
@@ -148,11 +156,12 @@ export function alertWeb(title, message, buttons, options) {
     fechar(botaoCancelar?.onPress ?? options?.onDismiss);
   }
 
-  lista.forEach((b) => {
+  lista.forEach((b, i) => {
     const btn = document.createElement("button");
     btn.className = "vupth-alert-btn";
     btn.type = "button";
     if (b?.style) btn.dataset.style = b.style;
+    btn.dataset.peso = pesoWeb(lista, i);
     btn.textContent = b?.text ?? "OK";
     btn.onclick = () => fechar(b?.onPress);
     acoes.appendChild(btn);

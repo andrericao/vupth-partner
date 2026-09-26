@@ -168,7 +168,7 @@ export default function RegisterScreen() {
           </View>
 
           <View className="flex-1 justify-end gap-4 mt-8">
-            <NwButton title="Criar conta" onPress={handleSubmit} isLoading={isLoading} />
+            <NwButton title="Criar conta" onPress={handleSubmit} isLoading={isLoading} testID="register-submit" />
             <View className="flex-row justify-center items-center gap-1.5">
               <Text className="font-body text-[13px] text-vupth-textSecondary">Já é cadastrado?</Text>
               <Pressable

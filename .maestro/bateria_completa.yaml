@@ -1,0 +1,43 @@
+# ════════════════════════════════════════════════════════════════════════════
+# BATERIA COMPLETA do partner — Maestro, no APK de PREVIEW, contra o STAGING
+# (Render). Decisao do Andre, 25/09: "prefiro com render, mas a bateria deve ser
+# completa".
+#
+#   bash .maestro/setup.sh                      # celular, teclado e servidor
+#   (o setup.sh imprime o comando do maestro test, com as variaveis)
+#
+# Cada rodada cria contas NOVAS (sufixo = hora da rodada), entao pode repetir a
+# vontade. Os clientes nao vem do app do client: entram na fila e pedem encaixe
+# pela API do staging (scripts/), com contas client_<tag>_*@teste.com.
+#
+# As etapas dependem umas das outras (uma cria o que a proxima usa), por isso
+# e UM roteiro que chama as oito em ordem.
+# ════════════════════════════════════════════════════════════════════════════
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- evalScript: ${output.TAG = String(Date.now()).slice(-6)}
+- evalScript: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
+- evalScript: ${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}
+- evalScript: ${output.LOJA = 'Loja M' + output.TAG}
+- evalScript: ${output.PROF = 'Prof' + output.TAG}
+
+# O app abre na tela "preparando servidor" ate o staging responder (~50 s se
+# ele estava dormindo). O setup.sh ja o acorda; aqui so esperamos.
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 120000
+
+- runFlow: etapas/01_dono_cadastra_a_loja.yaml
+- runFlow: etapas/02_profissional_pede_vinculo.yaml
+- runFlow: etapas/03_dono_aceita_o_vinculo.yaml
+- runFlow: etapas/04_profissional_monta_o_atendimento.yaml
+- runFlow: etapas/05_atende_a_fila.yaml
+- runFlow: etapas/06_meu_dia.yaml
+- runFlow: etapas/07_encaixe.yaml
+- runFlow: etapas/08_dono_confere.yaml
