@@ -13,12 +13,13 @@ import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
-import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Share2,
+import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Share2, Copy,
   Info,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
+import { copiarComAviso } from "@lib/copiar";
 import { linkDaLoja } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
 
@@ -219,6 +220,11 @@ export default function OwnerMenuScreen() {
                       mensagem: "Entre na fila da nossa loja pelo Vupth:",
                     })
                   }
+                />
+                <MenuItem
+                  icon={Copy}
+                  label="Copiar o link da loja"
+                  onPress={() => copiarComAviso(linkDaLoja(API_ENV, establishment.id), "Link da loja")}
                 />
                 <MenuItem
                   icon={Store}
