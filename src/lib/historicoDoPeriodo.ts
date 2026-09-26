@@ -15,3 +15,12 @@ export function paramsDoHistorico(
   if (filtro !== "ALL") params.status = filtro;
   return params;
 }
+
+/**
+ * O chip do historico SEM filtro de status. Era "Todos", e ao lado de "Nenhum
+ * atendimento hoje" parecia prometer a vida inteira (Andre, 26/09). Diz o
+ * periodo que a lista de fato mostra.
+ */
+export function rotuloDoFiltroSemStatus(periodo: "day" | "week" | "month"): string {
+  return periodo === "day" ? "Hoje" : periodo === "week" ? "7 dias" : "30 dias";
+}

@@ -1,4 +1,4 @@
-import { paramsDoHistorico } from "@lib/historicoDoPeriodo";
+import { paramsDoHistorico, rotuloDoFiltroSemStatus } from "@lib/historicoDoPeriodo";
 
 // Desempenho do Meu dia (Andre, 25/09): o historico buscava TODOS os
 // atendimentos do profissional, desde sempre, a cada foco da aba. O backend ja
@@ -22,5 +22,18 @@ describe("paramsDoHistorico", () => {
 
   it("com filtro de status, o status vai junto", () => {
     expect(paramsDoHistorico("p1", "REMOVED", "day", hoje).status).toBe("REMOVED");
+  });
+});
+
+// Andre, 26/09: o chip "Todos" ficava marcado e a lista dizia "Nenhum
+// atendimento hoje" — "Todos" lia como "desde sempre". O chip sem filtro de
+// status passa a dizer o PERIODO que a lista mostra.
+describe("rotuloDoFiltroSemStatus", () => {
+  it.each([
+    ["day", "Hoje"],
+    ["week", "7 dias"],
+    ["month", "30 dias"],
+  ] as const)("%s -> %s", (periodo, rotulo) => {
+    expect(rotuloDoFiltroSemStatus(periodo)).toBe(rotulo);
   });
 });
