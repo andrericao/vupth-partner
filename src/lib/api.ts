@@ -29,6 +29,8 @@ const canalDoBundle = (() => {
   }
 })();
 const env = resolveApiEnv(canalDoBundle, process.env.EXPO_PUBLIC_API_ENV);
+/** O ambiente em que este bundle roda (links publicos seguem o mesmo). */
+export const API_ENV = env;
 const BASE_URL = API_URLS[env];
 
 // URL do WebSocket STOMP. http→ws, https→wss.

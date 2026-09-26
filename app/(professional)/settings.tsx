@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { compartilharComAviso } from "@lib/compartilharComAviso";
+import { linkDoProfissional } from "@lib/linkPublico";
+import { API_ENV } from "@lib/api";
 import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
@@ -12,8 +15,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info,
-} from "lucide-react-native";
+  Info, Share2 } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -227,9 +229,28 @@ export default function ProfessionalSettingsScreen() {
               icon={Utensils}
               title="Refeições"
               hint="horários + aviso na hora (ligar/desligar)"
-              last
+              last={!professional?.establishment_id}
               onPress={() => router.push("/(professional)/meals?from=settings" as any)}
             />
+            {/* O link publico do profissional (pagina do Client, 26/09): abre a
+                loja ja nos servicos dele. So com vinculo — sem loja nao ha pagina. */}
+            {professional?.establishment_id && (
+              <MenuCard
+                icon={Share2}
+                title="Compartilhar meu link"
+                hint="seus clientes entram na sua fila por ele"
+                last
+                onPress={() =>
+                  compartilharComAviso(
+                    linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
+                    {
+                      titulo: professional.establishment_name ?? "Minha fila",
+                      mensagem: "Entre na minha fila pelo Vupth:",
+                    }
+                  )
+                }
+              />
+            )}
           </Grupo>
   
           <Grupo label="Conta">

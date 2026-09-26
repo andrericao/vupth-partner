@@ -13,11 +13,14 @@ import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
-import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight,
+import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Share2,
   Info,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
+import { compartilharComAviso } from "@lib/compartilharComAviso";
+import { linkDaLoja } from "@lib/linkPublico";
+import { API_ENV } from "@lib/api";
 
 // [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
 // especifica o glifo exato via icon+library do no ("users", "clipboard-list",
@@ -205,6 +208,18 @@ export default function OwnerMenuScreen() {
                 last={!establishment?.id}
               />
               {establishment?.id && (
+                <>
+                <MenuItem
+                  icon={Share2}
+                  label="Compartilhar a loja"
+                  hint="o link abre a sua loja para os clientes"
+                  onPress={() =>
+                    compartilharComAviso(linkDaLoja(API_ENV, establishment.id), {
+                      titulo: establishment.name ?? "Minha loja",
+                      mensagem: "Entre na fila da nossa loja pelo Vupth:",
+                    })
+                  }
+                />
                 <MenuItem
                   icon={Store}
                   label="Dados do estabelecimento"
@@ -217,6 +232,7 @@ export default function OwnerMenuScreen() {
                   }
                   last
                 />
+                </>
               )}
             </Grupo>
   
