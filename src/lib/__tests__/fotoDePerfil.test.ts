@@ -97,41 +97,42 @@ describe("enviarFoto / removerFoto", () => {
 
 describe("trocarFotoDePerfil", () => {
   const base = () => ({
-    perguntar: jest.fn(async () => "escolher" as const),
-    escolher: jest.fn(async () => ({ uri: "file:///r.jpg" })),
+    perguntar: jest.fn(async (_t: boolean) => "galeria" as any),
+    escolher: jest.fn(async (_o: string) => ({ uri: "file:///r.jpg" }) as any),
     enviar: jest.fn(async () => "https://pub/r.jpg"),
     remover: jest.fn(async () => undefined),
     aoMudar: jest.fn(),
     avisar: jest.fn(async () => undefined),
   });
 
-  it("sem foto: vai direto a galeria e sobe", async () => {
+  it("pergunta de onde vem (sabendo se ja ha foto) e sobe a escolhida", async () => {
     const d = base();
+    d.perguntar.mockResolvedValue("camera");
     await trocarFotoDePerfil(false, d);
-    expect(d.perguntar).not.toHaveBeenCalled();
-    expect(d.enviar).toHaveBeenCalledWith("file:///r.jpg");
+    expect(d.perguntar).toHaveBeenCalledWith(false);
+    expect(d.escolher).toHaveBeenCalledWith("camera");
     expect(d.aoMudar).toHaveBeenCalledWith("https://pub/r.jpg");
   });
 
-  it("com foto: pergunta; remover apaga e limpa", async () => {
+  it("remover apaga e limpa", async () => {
     const d = base();
-    d.perguntar.mockResolvedValue("remover" as any);
+    d.perguntar.mockResolvedValue("remover");
     await trocarFotoDePerfil(true, d);
     expect(d.remover).toHaveBeenCalled();
     expect(d.aoMudar).toHaveBeenCalledWith(null);
   });
 
-  it("com foto e a pessoa cancelou: nada", async () => {
+  it("cancelou a pergunta: nada", async () => {
     const d = base();
-    d.perguntar.mockResolvedValue(null as any);
+    d.perguntar.mockResolvedValue(null);
     await trocarFotoDePerfil(true, d);
     expect(d.escolher).not.toHaveBeenCalled();
     expect(d.remover).not.toHaveBeenCalled();
   });
 
-  it("desistiu na galeria: nada sobe", async () => {
+  it("desistiu na galeria/camera: nada sobe", async () => {
     const d = base();
-    d.escolher.mockResolvedValue(null as any);
+    d.escolher.mockResolvedValue(null);
     await trocarFotoDePerfil(false, d);
     expect(d.enviar).not.toHaveBeenCalled();
   });
@@ -144,11 +145,33 @@ describe("trocarFotoDePerfil", () => {
     expect(d.avisar).toHaveBeenCalledWith(expect.stringMatching(/indisponível/));
   });
 
-  it("sem permissao da galeria: avisa o motivo", async () => {
+  it("sem permissao: avisa o motivo", async () => {
     const d = base();
-    d.escolher.mockRejectedValue(new Error("Permita o acesso à galeria para escolher a foto."));
+    d.escolher.mockRejectedValue(new Error("Permita o acesso à câmera para tirar a foto."));
     await trocarFotoDePerfil(false, d);
-    expect(d.avisar).toHaveBeenCalledWith(expect.stringMatching(/galeria/));
+    expect(d.avisar).toHaveBeenCalledWith(expect.stringMatching(/câmera/));
+  });
+});
+
+describe("escolherFoto pela camera", () => {
+  const camera = (resultado: any, permitido = true) => ({
+    requestMediaLibraryPermissionsAsync: jest.fn(),
+    launchImageLibraryAsync: jest.fn(),
+    requestCameraPermissionsAsync: jest.fn(async () => ({ granted: permitido })),
+    launchCameraAsync: jest.fn(async () => resultado),
+  });
+  const reduzir = jest.fn(async () => ({ uri: "file:///r.jpg" }));
+
+  it("pede a permissao da camera, tira, recorta e reduz", async () => {
+    const p = camera({ canceled: false, assets: [{ uri: "file:///c.jpg" }] });
+    await expect(escolherFoto({ origem: "camera", picker: p as any, reduzir })).resolves.toEqual({ uri: "file:///r.jpg" });
+    expect(p.launchCameraAsync).toHaveBeenCalledWith(expect.objectContaining({ allowsEditing: true, aspect: [1, 1] }));
+    expect(p.launchImageLibraryAsync).not.toHaveBeenCalled();
+  });
+
+  it("sem permissao da camera: o motivo certo", async () => {
+    const p = camera({}, false);
+    await expect(escolherFoto({ origem: "camera", picker: p as any, reduzir })).rejects.toThrow(/câmera/);
   });
 });
 

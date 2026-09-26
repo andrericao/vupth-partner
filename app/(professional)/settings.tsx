@@ -3,6 +3,7 @@ import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { trocarFotoDePerfil, escolherFoto, enviarFoto, removerFoto } from "@lib/fotoDePerfil";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
+import { copiarComAviso } from "@lib/copiar";
 import { linkDoProfissional } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
 import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
@@ -18,7 +19,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2 } from "lucide-react-native";
+  Info, Share2, Copy } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -187,16 +188,19 @@ export default function ProfessionalSettingsScreen() {
             testID="avatar-perfil"
             onPress={() =>
               trocarFotoDePerfil(!!minhaFoto.uri, {
-                perguntar: () =>
+                perguntar: (temFoto) =>
                   escolherOpcao({
                     titulo: "Foto de perfil",
                     mensagem: "O cliente vê esta foto na fila da loja.",
                     opcoes: [
-                      { texto: "Remover foto", valor: "remover" as const, destrutivo: true },
-                      { texto: "Escolher outra", valor: "escolher" as const },
+                      ...(temFoto
+                        ? [{ texto: "Remover foto", valor: "remover" as const, destrutivo: true }]
+                        : []),
+                      { texto: "Escolher da galeria", valor: "galeria" as const },
+                      { texto: "Tirar foto", valor: "camera" as const },
                     ],
                   }),
-                escolher: () => escolherFoto(),
+                escolher: (origem) => escolherFoto({ origem }),
                 enviar: (uri) => enviarFoto(uri),
                 remover: removerFoto,
                 aoMudar: minhaFoto.trocar,
@@ -259,7 +263,6 @@ export default function ProfessionalSettingsScreen() {
                 icon={Share2}
                 title="Compartilhar meu link"
                 hint="seus clientes entram na sua fila por ele"
-                last
                 onPress={() =>
                   compartilharComAviso(
                     linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
@@ -267,6 +270,20 @@ export default function ProfessionalSettingsScreen() {
                       titulo: professional.establishment_name ?? "Minha fila",
                       mensagem: "Entre na minha fila pelo Vupth:",
                     }
+                  )
+                }
+              />
+            )}
+            {professional?.establishment_id && (
+              <MenuCard
+                icon={Copy}
+                title="Copiar meu link"
+                hint="para colar numa bio ou numa conversa"
+                last
+                onPress={() =>
+                  copiarComAviso(
+                    linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
+                    "Seu link"
                   )
                 }
               />

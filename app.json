@@ -14,7 +14,7 @@
         "expo-image-picker",
         {
           "photosPermission": "O Vupth usa suas fotos para você escolher a foto de perfil que os clientes veem.",
-          "cameraPermission": false,
+          "cameraPermission": "O Vupth usa a câmera para você tirar a foto de perfil que os clientes veem.",
           "microphonePermission": false
         }
       ]
