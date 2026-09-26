@@ -63,7 +63,8 @@ describe("professional.store", () => {
       });
 
       const state = useProfessionalStore.getState();
-      expect(state.professional).toEqual(REGISTER_RESPONSE);
+      // normalizeProfessional completa o modo: ausente = fila.
+      expect(state.professional).toEqual({ ...REGISTER_RESPONSE, operation_mode: "QUEUE" });
       expect(state.professional?.establishment_id).toBeNull();
       expect(state.isLoading).toBe(false);
     });
@@ -400,6 +401,35 @@ describe("professional.store", () => {
       await expect(
         useProfessionalStore.getState().updateMyStatus("WORKING")
       ).rejects.toThrow();
+    });
+  });
+
+  // Modo por profissional (contrato do backend 8e6c00f, D9): fila ou so agenda.
+  // Troca so antes do 1o cliente do dia — depois, 409 OPERATION_MODE_LOCKED.
+  describe("setOperationMode (fila x so agenda)", () => {
+    it("PATCH operation-mode e re-le o modo no /me", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/operation-mode").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, operation_mode: "AGENDA_ONLY" });
+
+      await useProfessionalStore.getState().setOperationMode("AGENDA_ONLY");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ mode: "AGENDA_ONLY" });
+      expect(useProfessionalStore.getState().professional?.operation_mode).toBe("AGENDA_ONLY");
+    });
+
+    it("sem o campo no /me: tratado como fila (QUEUE)", async () => {
+      mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);
+      await useProfessionalStore.getState().fetchMe();
+      expect(useProfessionalStore.getState().professional?.operation_mode).toBe("QUEUE");
+    });
+
+    it("409 OPERATION_MODE_LOCKED sobe para a tela", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me/operation-mode").reply(409, { code: "OPERATION_MODE_LOCKED" });
+      await expect(useProfessionalStore.getState().setOperationMode("QUEUE")).rejects.toMatchObject({
+        response: { status: 409 },
+      });
     });
   });
 

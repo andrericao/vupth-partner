@@ -196,6 +196,9 @@ type EstablishmentState = {
       city: string;
       state: string;
       zipCode: string;
+      /** Posicao do aparelho ("Usar minha localizacao"); os dois juntos ou nenhum. */
+      latitude?: number;
+      longitude?: number;
     }
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;

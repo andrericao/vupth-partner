@@ -2,14 +2,30 @@
   "expo": {
     "name": "vupth parceiros",
     "slug": "vupth-partner",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "scheme": "vupth-partner",
     "icon": "./assets/icon.png",
     "plugins": [
       "expo-font",
       "expo-router",
       "expo-secure-store",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Vupth usa suas fotos para você escolher a foto de perfil que os clientes veem.",
+          "cameraPermission": "O Vupth usa a câmera para você tirar a foto de perfil que os clientes veem.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Vupth usa a sua localização para registrar onde fica a loja e ela aparecer para os clientes próximos.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isIosBackgroundLocationEnabled": false
+        }
+      ]
     ],
     "userInterfaceStyle": "light",
     "ios": {
@@ -17,7 +33,7 @@
     },
     "android": {
       "package": "com.vupth.partner",
-      "versionCode": 4,
+      "versionCode": 5,
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",

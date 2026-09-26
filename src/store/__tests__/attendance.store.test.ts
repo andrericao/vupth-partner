@@ -421,24 +421,10 @@ describe("attendance.store", () => {
     });
   });
 
-  describe("noShow", () => {
-    it("calls PATCH /attendances/{id}/no-show", async () => {
-      mock.onPatch("/attendances/att-uuid-1/no-show").reply(200);
-
-      await useAttendanceStore.getState().noShow("att-uuid-1");
-
-      expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/no-show");
-    });
-
-    it("rejects on 400 (atendimento não está em LATE)", async () => {
-      mock.onPatch("/attendances/att-uuid-1/no-show").reply(400, {
-        message: "Invalid status",
-      });
-
-      await expect(
-        useAttendanceStore.getState().noShow("att-uuid-1")
-      ).rejects.toThrow();
-    });
+  // O "Nao compareceu" saiu no backend em 26/09 (e328629): a rota responde 410
+  // NO_SHOW_REMOVED. O profissional so marca "atrasado"; a store nao oferece mais.
+  it("nao existe mais noShow (regra dos 3 atrasos, 26/09)", () => {
+    expect((useAttendanceStore.getState() as any).noShow).toBeUndefined();
   });
 
   describe("promoteAttendance", () => {

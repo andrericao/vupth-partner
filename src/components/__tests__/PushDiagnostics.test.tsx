@@ -4,6 +4,9 @@ import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
 
 const TOKEN = "ExponentPushToken[abcdefghijkl]";
 
+const mockCopiar = jest.fn(async () => undefined);
+jest.mock("@lib/copiar", () => ({ copiarComAviso: (...a: unknown[]) => mockCopiar(...(a as [])) }));
+
 // Espelho do cartao "Push" do client. A ordem das linhas e a ordem em que as
 // coisas falham: a primeira que nao estiver OK e onde parou.
 describe("PushDiagnostics", () => {
@@ -31,6 +34,16 @@ describe("PushDiagnostics", () => {
     fireEvent.press(getByText(/…efghijkl · toque p\/ ver/));
     const inteiro = getByText(TOKEN);
     expect(inteiro.props.selectable).toBe(true);
+  });
+
+  it("o token revelado tem o botao de copiar (build 1.4.0)", () => {
+    const s = useWsDiagnosticsStore.getState();
+    s.marcarPush("obtido");
+    s.marcarToken(TOKEN);
+    const { getByText } = render(<PushDiagnostics />);
+    fireEvent.press(getByText(/…efghijkl · toque p\/ ver/));
+    fireEvent.press(getByText("Copiar token"));
+    expect(mockCopiar).toHaveBeenCalledWith(TOKEN, "Token");
   });
 
   it("diz se o backend sabe do aparelho", () => {

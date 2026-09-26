@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { nomeDaEspecialidade } from "@lib/especialidade";
 import { View, Text, Pressable, ScrollView, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
 import { router } from "expo-router";
@@ -169,7 +170,7 @@ export default function OwnerReportsScreen() {
                         <View className="flex-1">
                           <Text className="font-heading text-vupth-forest">{p.name}</Text>
                           <Text className="font-body text-xs text-vupth-textSecondary">
-                            {p.specialty || "Sem especialidade"}
+                            {nomeDaEspecialidade(p.specialty) || "Sem especialidade"}
                           </Text>
                         </View>
                         <View className="items-end">

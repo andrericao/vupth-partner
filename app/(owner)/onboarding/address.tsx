@@ -17,6 +17,8 @@ import { getApiErrorMessage } from "@lib/api";
 import { maskCEP, unmask } from "@lib/masks";
 import { lookupCep } from "@lib/cep";
 import { avisar } from "@lib/confirmar";
+import { pegarLocalizacao, preencherVazios } from "@lib/localizacao";
+import { MapPin } from "lucide-react-native";
 
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -33,6 +35,34 @@ export default function AddressScreen() {
   const [isInvalid, setIsInvalid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+  // "Usar minha localizacao" (build 1.4.0): a coordenada vai junto com o
+  // endereco — sem ela a loja some da busca por proximidade (S25).
+  const [coordenada, setCoordenada] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [localizando, setLocalizando] = useState(false);
+
+  const usarMinhaLocalizacao = async () => {
+    setLocalizando(true);
+    try {
+      const { coordenada: c, endereco } = await pegarLocalizacao();
+      setCoordenada(c);
+      if (endereco) {
+        const r = preencherVazios(
+          { street, number, neighborhood, city, state, zipCode },
+          { ...endereco, zipCode: maskCEP(endereco.zipCode) }
+        );
+        setStreet(r.street);
+        setNumber(r.number);
+        setNeighborhood(r.neighborhood);
+        setCity(r.city);
+        setState(r.state);
+        setZipCode(r.zipCode);
+      }
+    } catch (error: any) {
+      await avisar({ titulo: "Localização", mensagem: error?.message ?? "Não foi possível ler a localização." });
+    } finally {
+      setLocalizando(false);
+    }
+  };
 
   // Read-back: ao abrir, busca o endereco ja salvo (GET /establishment/id/{id},
   // que retorna `address`) e pre-preenche o form — assim o endereco "aparece"
@@ -109,6 +139,7 @@ export default function AddressScreen() {
         city: city.trim(),
         state: state.trim(),
         zipCode: unmask(zipCode),
+        ...(coordenada ?? {}),
       });
       // O endereco JA FOI salvo — sem a caixa na web o dono ficava no
       // formulario sem saber, e salvava de novo.
@@ -144,6 +175,17 @@ export default function AddressScreen() {
           />
 
           <View className="flex-1 w-full">
+
+            {/* Estando na loja, um toque: a posicao exata e o endereco do lugar
+                (so preenche o que ainda esta vazio). */}
+            <NwButton
+              title={coordenada ? "Localização registrada ✓" : "Usar minha localização"}
+              variant="vupthOutline"
+              icon={<MapPin size={18} color="#163300" />}
+              onPress={usarMinhaLocalizacao}
+              isLoading={localizando}
+              className="mb-4"
+            />
 
             <NwInput
               label="CEP"

@@ -94,6 +94,8 @@ export type ProfessionalWithQueue = {
   // por seguranca; o front so exibe quando ha avaliacoes (ver src/lib/rating.ts).
   rating_average?: number | null;
   rating_count?: number | null;
+  /** Foto de perfil (S22, 46f1f74). Nula sem foto. */
+  profile_image_url?: string | null;
 };
 
 export type EstablishmentWithProfessionals = {

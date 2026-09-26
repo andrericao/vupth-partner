@@ -3,6 +3,7 @@ import { View, Text, Pressable } from "react-native";
 
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
 import { sufixoDoToken } from "@lib/diagnosticoVeredito";
+import { copiarComAviso } from "@lib/copiar";
 
 // Cartao "Push" do painel dos 7 toques — ESPELHO do PushDiagnostics do client
 // (16/09), com as mesmas frases, para os dois apps serem comparados lado a lado
@@ -62,13 +63,19 @@ export function PushDiagnostics() {
             </Pressable>
           )}
           {mostrarToken && token && (
-            // Token INTEIRO e selecionavel: segurar abre o "copiar" do sistema.
-            // Botao de copiar exigiria `expo-clipboard` (nativo = build novo);
-            // assim chega por OTA no APK instalado.
-            <View className="bg-white rounded p-2">
+            // Token INTEIRO, selecionavel e com o botao de copiar (build 1.4.0,
+            // expo-clipboard).
+            <View className="bg-white rounded p-2 gap-2">
               <Text selectable className="font-mono text-xs text-vupth-forest">
                 {token}
               </Text>
+              <Pressable
+                onPress={() => copiarComAviso(token, "Token")}
+                accessibilityRole="button"
+                className="self-start active:opacity-70"
+              >
+                <Text className="font-body text-xs font-semibold text-vupth-forest">Copiar token</Text>
+              </Pressable>
             </View>
           )}
           {push.detalhe && <Linha rotulo="detalhe" valor={push.detalhe} ok={false} />}

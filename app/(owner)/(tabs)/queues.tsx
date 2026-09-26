@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react";
+import { Avatar } from "@components/Avatar";
+import { nomeDaEspecialidade } from "@lib/especialidade";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
@@ -58,11 +60,12 @@ function ProfessionalCard({
   return (
     <View className="bg-vupth-surface rounded-card mb-3 overflow-hidden">
       <Pressable onPress={() => setExpanded(!expanded)} className="py-3 px-4">
-        <View className="flex-row justify-between items-center">
+        <View className="flex-row justify-between items-center gap-3">
+          <Avatar nome={professional.name} uri={professional.profile_image_url} tamanho={40} />
           <View className="flex-1">
             <Text className="font-heading text-vupth-forest">{professional.name}</Text>
             <Text className="font-body text-sm text-vupth-textSecondary">
-              {professional.specialty ?? ""}
+              {nomeDaEspecialidade(professional.specialty)}
             </Text>
             {ratingLabel(professional.rating_average, professional.rating_count) && (
               <View className="flex-row items-center gap-1 mt-0.5">

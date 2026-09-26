@@ -582,6 +582,21 @@ describe("establishment.store", () => {
       expect(JSON.parse(mock.history.post[0].data)).toEqual(addr);
       expect(out).toMatchObject({ id: "addr-1", neighborhood: "Centro" });
     });
+
+    it("com 'Usar minha localizacao', a coordenada vai junto (build 1.4.0)", async () => {
+      mock.onPost("/establishments/estab-uuid-1/addresses").reply(201, { id: "addr-2" });
+      await useEstablishmentStore.getState().addAddress("estab-uuid-1", {
+        street: "Rua A",
+        number: "10",
+        neighborhood: "Centro",
+        city: "Sao Paulo",
+        state: "SP",
+        zipCode: "01001000",
+        latitude: -23.5613,
+        longitude: -46.6565,
+      });
+      expect(JSON.parse(mock.history.post[0].data)).toMatchObject({ latitude: -23.5613, longitude: -46.6565 });
+    });
   });
 
   describe("restoreEstablishment", () => {

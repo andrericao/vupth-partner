@@ -15,7 +15,7 @@ import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
 import { avisoSemSplit } from "@lib/split";
-import { paramsDoHistorico } from "@lib/historicoDoPeriodo";
+import { paramsDoHistorico, rotuloDoFiltroSemStatus } from "@lib/historicoDoPeriodo";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
@@ -181,7 +181,7 @@ export default function MyDayScreen() {
   ];
 
   const filters: { key: Filter; label: string }[] = [
-    { key: "ALL", label: "Todos" },
+    { key: "ALL", label: rotuloDoFiltroSemStatus(period) },
     { key: "FINISHED", label: "Finalizados" },
     { key: "CANCELLED", label: "Cancelados" },
     // A loja retirou (backend, 18/09) — separado de quem desistiu.

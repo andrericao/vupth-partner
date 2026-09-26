@@ -130,3 +130,48 @@ export function avisar(texto: TextoAviso, deps: DepsAviso = {}): Promise<void> {
     ]);
   });
 }
+
+// ---------------------------------------------------------------------------
+
+type Opcao<T> = { texto: string; valor: T; destrutivo?: boolean };
+
+/**
+ * Pergunta com MAIS de uma acao (alem do Cancelar) — ex.: a foto de perfil:
+ * "Remover foto" / "Escolher outra". Devolve o `valor` escolhido, ou null.
+ *
+ * Pela mesma costura do `confirmar()`: no aparelho o DialogoVupth e, na web,
+ * o shim desenham quantos botoes vierem. So a web SEM o shim cai no
+ * `window.confirm` (dois botoes) — ai pergunta apenas a opcao principal, a
+ * ULTIMA da lista (o padrao do iOS que o app segue).
+ */
+export function escolherOpcao<T>(
+  texto: { titulo: string; mensagem: string; opcoes: Opcao<T>[] },
+  deps: Deps = {}
+): Promise<T | null> {
+  const plataforma = deps.plataforma ?? Platform.OS;
+  const principal = texto.opcoes[texto.opcoes.length - 1];
+
+  if (plataforma === "web" && !alertWebInstalado()) {
+    const confirmImpl =
+      deps.confirmImpl ??
+      ((t: string) => (typeof window !== "undefined" ? window.confirm(t) : false));
+    try {
+      const ok = confirmImpl(`${texto.titulo}\n\n${texto.mensagem}\n\n${principal.texto}?`) === true;
+      return Promise.resolve(ok ? principal.valor : null);
+    } catch {
+      return Promise.resolve(null);
+    }
+  }
+
+  const alertImpl = deps.alertImpl ?? Alert.alert;
+  return new Promise<T | null>((resolve) => {
+    alertImpl(texto.titulo, texto.mensagem, [
+      { text: "Cancelar", style: "cancel", onPress: () => resolve(null) },
+      ...texto.opcoes.map((o) => ({
+        text: o.texto,
+        style: (o.destrutivo ? "destructive" : "default") as "destructive" | "default",
+        onPress: () => resolve(o.valor),
+      })),
+    ]);
+  });
+}
