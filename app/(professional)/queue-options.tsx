@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { View, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { QueueOptions } from "@components/QueueOptions";
+import { ModoDeFuncionamento, type Modo } from "@components/ModoDeFuncionamento";
 import { useProfessionalStore } from "@store/professional.store";
 import { viraTrabalhandoAoAbrirFila, fechaFilaAoSair } from "@lib/coerenciaFila";
 import { useIntervalStore, mealName } from "@store/interval.store";
@@ -20,6 +21,23 @@ export default function QueueOptionsScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
   const setAcceptingNew = useProfessionalStore((s) => s.setAcceptingNew);
+  const setOperationMode = useProfessionalStore((s) => s.setOperationMode);
+  const [trocandoModo, setTrocandoModo] = useState(false);
+  // Fila e agenda x so agenda (D9; 8e6c00f), decidido antes de atender (Andre,
+  // 26/09). Depois do 1o cliente do dia o backend responde 409 e a frase explica.
+  const escolherModo = async (modo: Modo) => {
+    setTrocandoModo(true);
+    try {
+      await setOperationMode(modo);
+    } catch (error: any) {
+      await avisar({
+        titulo: "Funcionamento",
+        mensagem: getApiErrorMessage(error, "Não foi possível mudar o funcionamento."),
+      });
+    } finally {
+      setTrocandoModo(false);
+    }
+  };
   const intervals = useIntervalStore((s) => s.intervals);
   const fetchIntervals = useIntervalStore((s) => s.fetchIntervals);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
@@ -160,6 +178,16 @@ export default function QueueOptionsScreen() {
           pendingRequests={pendingCutRequests}
           onOpenRequests={() => router.push("/(professional)/cut-requests" as any)}
         />
+
+        {professional?.establishment_id && (
+          <View className="mt-6">
+            <ModoDeFuncionamento
+              atual={professional.operation_mode ?? "QUEUE"}
+              onEscolher={escolherModo}
+              ocupado={trocandoModo}
+            />
+          </View>
+        )}
       </View>
     </ScrollView>
   );

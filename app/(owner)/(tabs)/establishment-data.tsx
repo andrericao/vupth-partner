@@ -1,4 +1,12 @@
+import { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { FotoEditavel } from "@components/FotoEditavel";
+import { CompartilharPerfil } from "@components/CompartilharPerfil";
+import { useEstablishmentStore } from "@store/establishment.store";
+import { editarFoto, rotaDaFotoDaLoja } from "@lib/fotoDePerfil";
+import { escolherOpcao, avisar } from "@lib/confirmar";
+import { linkDaLoja } from "@lib/linkPublico";
+import { API_ENV } from "@lib/api";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { CompletionCard } from "@components/CompletionCard";
@@ -29,6 +37,14 @@ export default function EstablishmentDataScreen() {
   // Checklist de prontidao (2 completes) mora aqui, nas Configuracoes — a Home
   // so mostra a faixa. Ver useOwnerCompletion / CompletionCard.
   const { completion, professionalsCount, routeFor } = useOwnerCompletion();
+  const establishment = useEstablishmentStore((s) => s.establishment);
+  // A foto da loja (Andre, 26/09) — url_image, que ate aqui ninguem preenchia.
+  const [fotoDaLoja, setFotoDaLoja] = useState<string | null>(establishment?.url_image ?? null);
+  const aoMudarFoto = (uri: string | null) => {
+    setFotoDaLoja(uri);
+    const atual = useEstablishmentStore.getState().establishment;
+    if (atual) useEstablishmentStore.setState({ establishment: { ...atual, url_image: uri } });
+  };
   useAnuncioPronto(
     "dono",
     completion.basic.percent,
@@ -46,6 +62,35 @@ export default function EstablishmentDataScreen() {
           title="Dados do estabelecimento"
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
+
+        {/* Foto da loja com o selo de camera, e o link publico com o copiar ao
+            lado (Andre, 26/09). */}
+        {establishment?.id && (
+          <View className="mt-2 mb-4 gap-4">
+            <FotoEditavel
+              nome={establishment.name}
+              uri={fotoDaLoja}
+              rotulo={fotoDaLoja ? "Trocar foto da loja" : "Pôr foto da loja"}
+              testID="foto-loja"
+              onEditar={() =>
+                editarFoto({
+                  temFoto: !!fotoDaLoja,
+                  rota: rotaDaFotoDaLoja(establishment.id),
+                  aoMudar: aoMudarFoto,
+                  titulo: "Foto da loja",
+                  perguntar: escolherOpcao,
+                  avisar,
+                })
+              }
+            />
+            <CompartilharPerfil
+              rotulo="Compartilhar a loja"
+              link={linkDaLoja(API_ENV, establishment.id)}
+              titulo={establishment.name ?? "Minha loja"}
+              mensagem="Entre na fila da nossa loja pelo Vupth:"
+            />
+          </View>
+        )}
 
         <CompletionCard
           completion={completion}

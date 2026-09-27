@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { LinhaComInterruptor } from "@components/LinhaComInterruptor";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
-import { trocarFotoDePerfil, escolherFoto, enviarFoto, removerFoto } from "@lib/fotoDePerfil";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
-import { copiarComAviso } from "@lib/copiar";
 import { linkDoProfissional } from "@lib/linkPublico";
-import { API_ENV, getApiErrorMessage } from "@lib/api";
+import { API_ENV } from "@lib/api";
 import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
@@ -20,7 +17,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Copy } from "lucide-react-native";
+  Info, Share2 } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -28,7 +25,7 @@ import { CompletionCard } from "@components/CompletionCard";
 import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
-import { confirmar, avisar, escolherOpcao } from "@lib/confirmar";
+import { confirmar } from "@lib/confirmar";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -108,7 +105,6 @@ export default function ProfessionalSettingsScreen() {
   const insets = useSafeAreaInsets();
   const professional = useProfessionalStore((s) => s.professional);
   const minhaFoto = useMinhaFoto();
-  const setOperationMode = useProfessionalStore((s) => s.setOperationMode);
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -181,38 +177,32 @@ export default function ProfessionalSettingsScreen() {
           className="bg-vupth-forest items-center px-4 pb-7"
           style={{ paddingTop: insets.top + 24 }}
         >
-          {/* Foto de perfil (S22): o cliente ve esta foto na fila da loja.
-              Tocar escolhe/troca/remove. */}
-          <Avatar
-            nome={professional?.name}
-            uri={minhaFoto.uri}
-            rotulo={minhaFoto.uri ? "Trocar foto de perfil" : "Adicionar foto de perfil"}
-            testID="avatar-perfil"
-            onPress={() =>
-              trocarFotoDePerfil(!!minhaFoto.uri, {
-                perguntar: (temFoto) =>
-                  escolherOpcao({
-                    titulo: "Foto de perfil",
-                    mensagem: "O cliente vê esta foto na fila da loja.",
-                    opcoes: [
-                      ...(temFoto
-                        ? [{ texto: "Remover foto", valor: "remover" as const, destrutivo: true }]
-                        : []),
-                      { texto: "Escolher da galeria", valor: "galeria" as const },
-                      { texto: "Tirar foto", valor: "camera" as const },
-                    ],
-                  }),
-                escolher: (origem) => escolherFoto({ origem }),
-                enviar: (uri) => enviarFoto(uri),
-                remover: removerFoto,
-                aoMudar: minhaFoto.trocar,
-                avisar: (mensagem) => avisar({ titulo: "Foto de perfil", mensagem }),
-              })
-            }
-          />
-          <Text className="font-body text-xs text-vupth-green mt-2">
-            {minhaFoto.uri ? "Tocar para trocar a foto" : "Tocar para pôr sua foto"}
-          </Text>
+          {/* A foto se edita em Dados cadastrais (Andre, 26/09); aqui so aparece.
+              O icone de compartilhar fica no canto do cabecalho. */}
+          <Avatar nome={professional?.name} uri={minhaFoto.uri} testID="avatar-perfil" />
+          {/* Compartilhar o link publico: um icone no canto do Perfil (Andre, 26/09).
+              So com vinculo — sem loja nao ha pagina. */}
+          {professional?.establishment_id && (
+            <Pressable
+              onPress={() =>
+                compartilharComAviso(
+                  linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
+                  {
+                    titulo: professional.establishment_name ?? "Minha fila",
+                    mensagem: "Entre na minha fila pelo Vupth:",
+                  }
+                )
+              }
+              accessibilityRole="button"
+              accessibilityLabel="Compartilhar meu perfil"
+              testID="compartilhar-perfil-topo"
+              hitSlop={10}
+              className="absolute right-4 active:opacity-70"
+              style={{ top: insets.top + 16 }}
+            >
+              <Share2 size={22} color="#9FE870" />
+            </Pressable>
+          )}
           <Text className="font-display text-xl text-white mt-3">
             {professional?.name ?? "Profissional"}
           </Text>
@@ -255,67 +245,11 @@ export default function ProfessionalSettingsScreen() {
               icon={Utensils}
               title="Refeições"
               hint="horários + aviso na hora (ligar/desligar)"
-              last={!professional?.establishment_id}
+              last
               onPress={() => router.push("/(professional)/meals?from=settings" as any)}
             />
-            {/* O link publico do profissional (pagina do Client, 26/09): abre a
-                loja ja nos servicos dele. So com vinculo — sem loja nao ha pagina. */}
-            {professional?.establishment_id && (
-              <MenuCard
-                icon={Share2}
-                title="Compartilhar meu link"
-                hint="seus clientes entram na sua fila por ele"
-                onPress={() =>
-                  compartilharComAviso(
-                    linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
-                    {
-                      titulo: professional.establishment_name ?? "Minha fila",
-                      mensagem: "Entre na minha fila pelo Vupth:",
-                    }
-                  )
-                }
-              />
-            )}
-            {professional?.establishment_id && (
-              <MenuCard
-                icon={Copy}
-                title="Copiar meu link"
-                hint="para colar numa bio ou numa conversa"
-                last
-                onPress={() =>
-                  copiarComAviso(
-                    linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
-                    "Seu link"
-                  )
-                }
-              />
-            )}
           </Grupo>
   
-          {/* Fila ou so agenda (D9; backend 8e6c00f): por profissional. Troca
-              so antes do 1o cliente da fila de hoje — depois o backend recusa
-              (409 OPERATION_MODE_LOCKED) e a mensagem explica. */}
-          {professional?.establishment_id && (
-            <LinhaComInterruptor
-              rotulo="Só agenda"
-              descricao={
-                professional.operation_mode === "AGENDA_ONLY"
-                  ? "Ligado — o cliente só agenda horário com você; ninguém entra na fila na hora."
-                  : "Desligado — você atende pela fila (e quem agenda entra nela na hora marcada)."
-              }
-              ligado={professional.operation_mode === "AGENDA_ONLY"}
-              onMudar={(ligado) =>
-                setOperationMode(ligado ? "AGENDA_ONLY" : "QUEUE").catch((error) =>
-                  avisar({
-                    titulo: "Modo de atendimento",
-                    mensagem: getApiErrorMessage(error, "Não foi possível mudar o modo."),
-                  })
-                )
-              }
-              testID="interruptor-so-agenda"
-            />
-          )}
-
           <Grupo label="Conta">
             <MenuCard
               icon={User}

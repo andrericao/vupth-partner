@@ -6,7 +6,13 @@ import { NwButton } from "@components/nw/Button";
 import { NwInput } from "@components/nw/Input";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
-import { getApiErrorMessage } from "@lib/api";
+import { getApiErrorMessage, API_ENV } from "@lib/api";
+import { FotoEditavel } from "@components/FotoEditavel";
+import { CompartilharPerfil } from "@components/CompartilharPerfil";
+import { useMinhaFoto } from "@hooks/useMinhaFoto";
+import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
+import { escolherOpcao, avisar } from "@lib/confirmar";
+import { linkDoProfissional } from "@lib/linkPublico";
 import { validatePassword } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
@@ -77,6 +83,7 @@ export default function SettingsAccountScreen() {
   // valem para os dois.
   const { from } = useLocalSearchParams<{ from?: string }>();
   const temPerfilProfissional = !!professional;
+  const minhaFoto = useMinhaFoto();
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
   const updateNickname = useProfessionalStore((s) => s.updateNickname);
   const user = useAuthStore((s) => s.user);
@@ -250,6 +257,35 @@ export default function SettingsAccountScreen() {
           title={from === "owner" ? "Dados pessoais" : "Dados cadastrais"}
           onBack={() => router.navigate(rotaDeVoltaDosDados(from) as any)}
         />
+
+          {/* A foto (S22) e o link publico moram aqui (Andre, 26/09): foto com o
+              selo de camera no canto; compartilhar com o copiar ao lado. */}
+          <View className="mt-4 items-center gap-2">
+            <FotoEditavel
+              nome={professional?.name}
+              uri={minhaFoto.uri}
+              rotulo={minhaFoto.uri ? "Trocar foto de perfil" : "Pôr foto de perfil"}
+              testID="foto-perfil"
+              onEditar={() =>
+                editarFoto({
+                  temFoto: !!minhaFoto.uri,
+                  rota: ROTA_DO_PERFIL,
+                  aoMudar: minhaFoto.trocar,
+                  perguntar: escolherOpcao,
+                  avisar,
+                })
+              }
+            />
+          </View>
+          {professional?.establishment_id && (
+            <View className="mt-4">
+              <CompartilharPerfil
+                link={linkDoProfissional(API_ENV, professional.establishment_id, professional.id)}
+                titulo={professional.establishment_name ?? "Minha fila"}
+                mensagem="Entre na minha fila pelo Vupth:"
+              />
+            </View>
+          )}
 
           <View className="mt-6 gap-3">
             {/* Nome e apelido moram no PERFIL PROFISSIONAL. Dono sem esse perfil

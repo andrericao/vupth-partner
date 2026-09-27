@@ -1,9 +1,12 @@
+import * as ImagePicker from "expo-image-picker";
 import {
   mensagemDoErroDaFoto,
   escolherFoto,
   enviarFoto,
   removerFoto,
   trocarFotoDePerfil,
+  rotaDaFotoDaLoja,
+  editarFoto,
 } from "@lib/fotoDePerfil";
 
 // Foto de perfil (S22). Contrato do backend (46f1f74, em staging 25/09):
@@ -254,5 +257,63 @@ describe("web: reducao que falha e erros sem mensagem", () => {
     // Neste arquivo o getApiErrorMessage e mockado e devolve o fallback; no app
     // de verdade, sem resposta, ele diz "Sem conexao com o servidor".
     expect(avisar).toHaveBeenCalledWith("Não foi possível salvar a foto.");
+  });
+});
+
+// Foto da LOJA (Andre, 26/09): mesma mecanica, outra rota — pedida ao Backend.
+describe("foto da loja", () => {
+  beforeEach(() => {
+    mockPut.mockReset();
+    mockDelete.mockReset();
+  });
+
+  it("sobe na rota da loja e aceita a resposta com url_image", async () => {
+    mockPut.mockResolvedValue({ data: { url_image: "https://pub/loja.jpg" } });
+    const url = await enviarFoto("file:///l.jpg", { plataforma: "android", rota: rotaDaFotoDaLoja("e1") });
+    expect(mockPut.mock.calls[0][0]).toBe("/establishment/e1/photo");
+    expect(url).toBe("https://pub/loja.jpg");
+  });
+
+  it("remover na rota da loja", async () => {
+    mockDelete.mockResolvedValue({});
+    await removerFoto(rotaDaFotoDaLoja("e1"));
+    expect(mockDelete).toHaveBeenCalledWith("/establishment/e1/photo");
+  });
+
+  it("enquanto o servidor nao tem a rota (404/405): frase clara", () => {
+    expect(mensagemDoErroDaFoto({ response: { status: 404 } })).toMatch(/servidor não tem essa opção/);
+    expect(mensagemDoErroDaFoto({ response: { status: 405 } })).toMatch(/servidor não tem essa opção/);
+  });
+});
+
+describe("editarFoto", () => {
+  it("monta a pergunta (com Remover so se ja ha foto) e usa a rota dada", async () => {
+    const perguntar = jest.fn(async () => "remover" as const);
+    const aoMudar = jest.fn();
+    mockDelete.mockResolvedValue({});
+    await editarFoto({
+      temFoto: true,
+      rota: "/establishment/e1/photo",
+      aoMudar,
+      titulo: "Foto da loja",
+      perguntar,
+      avisar: jest.fn(async () => undefined),
+    });
+    const pergunta = (perguntar.mock.calls[0] as any)[0];
+    expect(pergunta.titulo).toBe("Foto da loja");
+    expect(pergunta.opcoes.map((o: any) => o.valor)).toEqual(["remover", "galeria", "camera"]);
+    expect(mockDelete).toHaveBeenCalledWith("/establishment/e1/photo");
+    expect(aoMudar).toHaveBeenCalledWith(null);
+  });
+
+  it("sem foto: nao oferece remover; o erro vai para o aviso com o titulo", async () => {
+    const perguntar = jest.fn(async () => "galeria" as const);
+    const avisar = jest.fn(async () => undefined);
+    jest
+      .spyOn(ImagePicker, "requestMediaLibraryPermissionsAsync")
+      .mockResolvedValue({ granted: false } as any);
+    await editarFoto({ temFoto: false, rota: "/profile/me/photo", aoMudar: jest.fn(), perguntar, avisar });
+    expect((perguntar.mock.calls[0] as any)[0].opcoes.map((o: any) => o.valor)).toEqual(["galeria", "camera"]);
+    expect(avisar).toHaveBeenCalledWith(expect.objectContaining({ titulo: "Foto de perfil" }));
   });
 });
