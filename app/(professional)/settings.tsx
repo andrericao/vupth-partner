@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { TamanhoDaLetra } from "@components/TamanhoDaLetra";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
@@ -89,7 +90,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
 function Grupo({ label, children }: { label: string; children: ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
+      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
       <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
@@ -276,6 +277,9 @@ export default function ProfessionalSettingsScreen() {
               09/09). E este grupo e um item da LISTA, nao rodape: ele estava
               abaixo do "Sair da conta", que e o fim da tela — la nao se procura
               configuracao, se procura a saida (correcao dele, 11/09). */}
+          {/* Tamanho da letra (Andre, 26/09, igual ao Client). */}
+          <TamanhoDaLetra />
+
           <Grupo label="Sistema">
             <MenuCard
               icon={Info}

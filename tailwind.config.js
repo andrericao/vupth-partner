@@ -39,14 +39,30 @@ module.exports = {
       // `xl` muda de 20 para 22 (4 usos), e `md`/`xxl`/`xxxl` sao novos.
       // `text-base`, `text-2xl` e `text-3xl` seguem existindo mas estao FORA
       // da escala — migrar. Ver src/docs/DESIGN.md.
+      // "Tamanho da letra" (Andre, 26/09): cada tamanho le uma VARIAVEL CSS,
+      // definida no layout raiz por `vars(varsDaFonte(passo))` (src/lib/fonte.ts).
+      // No passo Normal os valores sao exatamente os de antes (ver o teste).
       fontSize: {
-        xs: ["12px", { lineHeight: "16px" }],
-        sm: ["14px", { lineHeight: "20px" }],
-        md: ["16px", { lineHeight: "22px" }],
-        lg: ["18px", { lineHeight: "24px" }],
-        xl: ["22px", { lineHeight: "26px", letterSpacing: "-0.5px" }],
-        xxl: ["28px", { lineHeight: "32px", letterSpacing: "-1px" }],
-        xxxl: ["34px", { lineHeight: "38px", letterSpacing: "-1.5px" }],
+        xs: ["var(--text-xs)", { lineHeight: "var(--lh-xs)" }],
+        sm: ["var(--text-sm)", { lineHeight: "var(--lh-sm)" }],
+        md: ["var(--text-md)", { lineHeight: "var(--lh-md)" }],
+        base: ["var(--text-base)", { lineHeight: "var(--lh-base)" }],
+        lg: ["var(--text-lg)", { lineHeight: "var(--lh-lg)" }],
+        xl: ["var(--text-xl)", { lineHeight: "var(--lh-xl)", letterSpacing: "-0.5px" }],
+        "2xl": ["var(--text-2xl)", { lineHeight: "var(--lh-2xl)" }],
+        xxl: ["var(--text-xxl)", { lineHeight: "var(--lh-xxl)", letterSpacing: "-1px" }],
+        "3xl": ["var(--text-3xl)", { lineHeight: "var(--lh-3xl)" }],
+        xxxl: ["var(--text-xxxl)", { lineHeight: "var(--lh-xxxl)", letterSpacing: "-1.5px" }],
+        // Tamanhos soltos que as telas usavam como text-[13px]: agora text-f13.
+        f10: "var(--f10)",
+        f11: "var(--f11)",
+        f13: "var(--f13)",
+        f14: "var(--f14)",
+        f15: "var(--f15)",
+        f22: "var(--f22)",
+        f26: "var(--f26)",
+        f30: "var(--f30)",
+        f32: "var(--f32)",
       },
       // ═══ RAIO ═══ tambem da tabela de variaveis. `card` (20) e `hero` (24)
       // sao tokens proprios do arquivo, alem da escala sm/md/lg/xl. Hoje ha 26

@@ -18,7 +18,7 @@ export function ExpedienteCard() {
         <View className="flex-row justify-between items-center mb-1">
           <Text className="font-body text-xs text-vupth-textSecondary">Expediente</Text>
           <View className="bg-vupth-warning rounded-full px-2 py-0.5">
-            <Text className="text-[10px] text-vupth-forest">EM BREVE</Text>
+            <Text className="text-f10 text-vupth-forest">EM BREVE</Text>
           </View>
         </View>
         {/* [marca-vupth] Placeholder no textSecondary: a paleta nao tem um tom

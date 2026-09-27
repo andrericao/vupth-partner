@@ -194,7 +194,7 @@ export default function OwnerDashboardScreen() {
                 }`}
               >
                 <Text
-                  className={`font-display text-[11px] ${
+                  className={`font-display text-f11 ${
                     isOpen || status === "TEMPORARILY_CLOSED"
                       ? "text-vupth-forest"
                       : "text-vupth-textSecondary"
@@ -233,7 +233,7 @@ export default function OwnerDashboardScreen() {
               }`}
             >
               <View className="flex-row justify-between items-start">
-                <Text className="font-display text-[32px] text-vupth-forest">{totalInQueue}</Text>
+                <Text className="font-display text-f32 text-vupth-forest">{totalInQueue}</Text>
                 <ChevronRight size={18} color="#163300" />
               </View>
               <Text
@@ -246,7 +246,7 @@ export default function OwnerDashboardScreen() {
             </Pressable>
   
             <View className="flex-1 bg-vupth-surface p-4 rounded-card">
-              <Text className="font-display text-[32px] text-vupth-forest">
+              <Text className="font-display text-f32 text-vupth-forest">
                 {queueData?.available_professionals ?? 0}
               </Text>
               <Text className="font-body text-xs text-vupth-textSecondary mt-1">

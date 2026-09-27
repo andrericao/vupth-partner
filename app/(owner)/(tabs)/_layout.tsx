@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { fs } from "@store/fonte.store";
 import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
@@ -52,8 +53,8 @@ export default function OwnerTabsLayout() {
         },
         tabBarLabelStyle: {
           fontFamily: "Inter_400Regular",
-          fontSize: 12,
-          lineHeight: 16,
+          fontSize: fs(12),
+          lineHeight: fs(16),
         },
       }}
     >

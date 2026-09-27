@@ -77,10 +77,10 @@ export default function LoginScreen() {
           </Pressable>
 
           <View className="mt-10 gap-2">
-            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+            <Text className="font-display text-f13 tracking-[2px] text-vupth-forest">
               VUPTH
             </Text>
-            <Text className="font-display text-[30px] text-vupth-forest">Entrar</Text>
+            <Text className="font-display text-f30 text-vupth-forest">Entrar</Text>
           </View>
 
           <View className="mt-8">
@@ -112,7 +112,7 @@ export default function LoginScreen() {
               onPress={() => router.push("/(auth)/forgot-password" as any)}
               className="self-end mt-1"
             >
-              <Text className="font-body text-[13px] text-vupth-forest font-semibold">
+              <Text className="font-body text-f13 text-vupth-forest font-semibold">
                 Esqueci minha senha
               </Text>
             </Pressable>
@@ -132,11 +132,11 @@ export default function LoginScreen() {
             {/* "Criar conta" vira LINK: entrar e o que esta tela pede, e dois
                 botoes de peso parecido fazem quem já tem conta hesitar. */}
             <View className="flex-row justify-center items-center gap-1.5">
-              <Text className="font-body text-[13px] text-vupth-textSecondary">
+              <Text className="font-body text-f13 text-vupth-textSecondary">
                 Não possui cadastro?
               </Text>
               <Pressable onPress={() => router.push("/(auth)")} testID="go-register">
-                <Text className="font-heading text-[13px] text-vupth-forest">
+                <Text className="font-heading text-f13 text-vupth-forest">
                   Criar conta
                 </Text>
               </Pressable>

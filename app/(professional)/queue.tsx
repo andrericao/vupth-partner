@@ -80,7 +80,7 @@ function ServingCard({
               sinalizaria movimento que não esta acontecendo. */}
           <LiveDot size={7} color={isPaused ? "#FFFFFF" : "#163300"} pulsing={!isPaused} />
           <Text
-            className={`font-heading text-[10px] tracking-widest ${
+            className={`font-heading text-f10 tracking-widest ${
               isPaused ? "text-white" : "text-vupth-forest"
             }`}
           >
@@ -103,7 +103,7 @@ function ServingCard({
 
       <View className="mt-3 gap-1">
         <Text
-          className={`font-display text-[22px] ${isPaused ? "text-white" : "text-vupth-forest"}`}
+          className={`font-display text-f22 ${isPaused ? "text-white" : "text-vupth-forest"}`}
         >
           {attendance.clientName}
         </Text>

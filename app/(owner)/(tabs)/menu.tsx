@@ -1,5 +1,6 @@
 
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { TamanhoDaLetra } from "@components/TamanhoDaLetra";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { router } from "expo-router";
@@ -79,7 +80,7 @@ function MenuItem({
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
+      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
         {label}
       </Text>
       <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
@@ -248,6 +249,9 @@ export default function OwnerMenuScreen() {
                 rodape. Estava abaixo do "Sair da conta", que e o fim da tela: la
                 ninguem procura configuracao, procura a saida (correcao dele,
                 11/09). */}
+            {/* Tamanho da letra (Andre, 26/09, igual ao Client). */}
+            <TamanhoDaLetra />
+
             <Grupo label="SISTEMA">
               <MenuItem
                 icon={Info}

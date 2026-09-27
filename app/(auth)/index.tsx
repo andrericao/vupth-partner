@@ -60,13 +60,13 @@ export default function RoleChoiceScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View className="px-4 gap-3 mb-12">
-        <Text className="font-display text-[15px] tracking-[2px] text-vupth-forest">
+        <Text className="font-display text-f15 tracking-[2px] text-vupth-forest">
           VUPTH
         </Text>
-        <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+        <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
           {isAuthenticated ? "O que você quer criar?" : "Como você vai usar o Vupth?"}
         </Text>
-        <Text className="font-body text-[15px] text-vupth-textSecondary">
+        <Text className="font-body text-f15 text-vupth-textSecondary">
           {isAuthenticated
             ? "É a mesma conta que você já usa — não precisa criar outra."
             : "Escolha seu papel para começar."}
@@ -112,9 +112,9 @@ export default function RoleChoiceScreen() {
           o que fechava o ciclo. */}
       {!isAuthenticated && (
         <View className="px-4 mt-8 flex-row justify-center items-center gap-1.5">
-          <Text className="font-body text-[13px] text-vupth-textSecondary">Já tem conta?</Text>
+          <Text className="font-body text-f13 text-vupth-textSecondary">Já tem conta?</Text>
           <Pressable onPress={() => router.push("/(auth)/login" as any)} testID="go-login">
-            <Text className="font-heading text-[13px] text-vupth-forest">Entrar</Text>
+            <Text className="font-heading text-f13 text-vupth-forest">Entrar</Text>
           </Pressable>
         </View>
       )}

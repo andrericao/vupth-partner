@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { fs } from "@store/fonte.store";
 import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { rotulosCabem } from "@lib/rotulosDaAba";
@@ -71,7 +72,7 @@ export default function ProfessionalLayout() {
         },
         tabBarLabelStyle: {
           fontFamily: "Inter_400Regular",
-          fontSize: 11,
+          fontSize: fs(11),
           lineHeight: 15,
         },
       }}
