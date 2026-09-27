@@ -32,11 +32,17 @@ type Picker = Pick<
 export type OrigemDaFoto = "galeria" | "camera";
 
 async function reduzirPadrao(uri: string): Promise<{ uri: string }> {
-  const r = await manipulateAsync(uri, [{ resize: { width: LADO } }], {
-    compress: QUALIDADE,
-    format: SaveFormat.JPEG,
-  });
-  return { uri: r.uri };
+  try {
+    const r = await manipulateAsync(uri, [{ resize: { width: LADO } }], {
+      compress: QUALIDADE,
+      format: SaveFormat.JPEG,
+    });
+    return { uri: r.uri };
+  } catch {
+    // Na web a reducao roda num canvas do navegador e pode falhar (Andre,
+    // 26/09). Sobe a original: se passar de 2 MB, o backend diz com clareza.
+    return { uri };
+  }
 }
 
 /**
@@ -96,6 +102,17 @@ export async function removerFoto(): Promise<void> {
 }
 
 /**
+ * Resposta do servidor -> a frase do contrato; falha de rede (axios sem
+ * resposta) -> "sem conexao"; erro nosso com mensagem (permissao) -> ela; e o
+ * resto (ex.: o Event sem mensagem que a web devolve) -> "preparar a foto".
+ */
+function fraseDoErro(error: any): string {
+  if (error?.response || error?.isAxiosError) return mensagemDoErroDaFoto(error);
+  if (typeof error?.message === "string" && error.message) return error.message;
+  return "Não foi possível preparar a foto. Tente outra imagem.";
+}
+
+/**
  * O toque na foto do Perfil: pergunta de onde vem a foto (camera ou galeria) e,
  * se ja ha uma, oferece remover. Erros viram UMA frase — inclusive o 503 de
  * storage ainda nao configurado, que nao e culpa de quem tocou.
@@ -123,6 +140,6 @@ export async function trocarFotoDePerfil(
     if (!foto) return;
     deps.aoMudar(await deps.enviar(foto.uri));
   } catch (error: any) {
-    await deps.avisar(error?.response ? mensagemDoErroDaFoto(error) : error?.message ?? mensagemDoErroDaFoto(error));
+    await deps.avisar(fraseDoErro(error));
   }
 }

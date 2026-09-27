@@ -207,3 +207,52 @@ describe("reducao padrao e envio na web", () => {
     }
   });
 });
+
+// 🔴 Andre, 26/09, na web: escolheu a foto e ao salvar apareceu "sem conexao
+// com o servidor". O servidor estava bem (upload testado no staging, R2 ok).
+// Na web a reducao roda no navegador (canvas) e, quando falha, rejeita com um
+// Event sem `message` — que caia na frase de "sem conexao".
+describe("web: reducao que falha e erros sem mensagem", () => {
+  it("se a reducao falhar, sobe a foto original (o backend confere o tamanho)", async () => {
+    const { manipulateAsync } = jest.requireMock("expo-image-manipulator");
+    manipulateAsync.mockRejectedValueOnce({ type: "error" });
+    const picker = {
+      requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ granted: true })),
+      launchImageLibraryAsync: jest.fn(async () => ({ canceled: false, assets: [{ uri: "blob:http://x/orig" }] })),
+    };
+    await expect(escolherFoto({ picker: picker as any })).resolves.toEqual({ uri: "blob:http://x/orig" });
+  });
+
+  it("erro sem resposta e sem mensagem nao vira 'sem conexao'", async () => {
+    const avisar = jest.fn(async () => undefined);
+    await trocarFotoDePerfil(false, {
+      perguntar: async () => "galeria",
+      escolher: async () => {
+        throw { type: "error" };
+      },
+      enviar: jest.fn(),
+      remover: jest.fn(),
+      aoMudar: jest.fn(),
+      avisar,
+    });
+    expect(avisar).toHaveBeenCalledWith(expect.stringMatching(/preparar a foto/));
+    expect(avisar).not.toHaveBeenCalledWith(expect.stringMatching(/conex/i));
+  });
+
+  it("falha de rede de verdade (axios sem resposta) vai para a frase da API", async () => {
+    const avisar = jest.fn(async () => undefined);
+    await trocarFotoDePerfil(false, {
+      perguntar: async () => "galeria",
+      escolher: async () => ({ uri: "x" }),
+      enviar: async () => {
+        throw { isAxiosError: true, message: "Network Error" };
+      },
+      remover: jest.fn(),
+      aoMudar: jest.fn(),
+      avisar,
+    });
+    // Neste arquivo o getApiErrorMessage e mockado e devolve o fallback; no app
+    // de verdade, sem resposta, ele diz "Sem conexao com o servidor".
+    expect(avisar).toHaveBeenCalledWith("Não foi possível salvar a foto.");
+  });
+});
