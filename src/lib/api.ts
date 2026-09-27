@@ -108,6 +108,12 @@ export function getApiErrorMessage(error: any, fallback: string): string {
     return ERROR_MESSAGES_PT[code];
   }
 
+  // Erro interno (5xx) sem codigo conhecido: a mensagem e do servidor para o
+  // servidor (ex.: NullPointerException, 26/09) — nao e frase para o usuario.
+  if (error.response.status >= 500) {
+    return "O servidor teve um problema e não conseguiu concluir. Tente de novo em instantes — se continuar, avise o suporte.";
+  }
+
   if (data?.fieldErrors) {
     return Object.entries(data.fieldErrors)
       .map(([field, msg]) => `${field}: ${msg}`)

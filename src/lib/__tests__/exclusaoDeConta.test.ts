@@ -30,7 +30,11 @@ describe("mensagemDaExclusao", () => {
     expect(mensagemDaExclusao(new Error("Network Error"))).toMatch(/Sem conexao/);
   });
 
-  it("outro erro com mensagem do backend", () => {
-    expect(mensagemDaExclusao(erro(500, { message: "falhou" }))).toBe("falhou");
+  it("outro erro com mensagem do backend (4xx)", () => {
+    expect(mensagemDaExclusao(erro(422, { message: "falhou" }))).toBe("falhou");
+  });
+
+  it("erro interno (500): frase de servidor, nao a mensagem crua (26/09)", () => {
+    expect(mensagemDaExclusao(erro(500, { message: "NullPointerException" }))).toMatch(/servidor teve um problema/);
   });
 });
