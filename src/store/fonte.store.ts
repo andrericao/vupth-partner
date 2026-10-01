@@ -31,3 +31,13 @@ export const useFonteStore = create<FonteState>((set) => ({
 export function fs(tamanho: number): number {
   return tamanho + useFonteStore.getState().passo;
 }
+
+/**
+ * O mesmo `fs`, mas que REDESENHA o componente quando o passo muda. Use dentro
+ * de componentes; o layout nao remonta a arvore (remontar levaria a pessoa de
+ * volta a tela inicial).
+ */
+export function useFs(): (tamanho: number) => number {
+  const passo = useFonteStore((s) => s.passo);
+  return (tamanho: number) => tamanho + passo;
+}

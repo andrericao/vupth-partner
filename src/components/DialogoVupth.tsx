@@ -1,5 +1,5 @@
 import { Modal, View, Text, Pressable, ScrollView } from "react-native";
-import { fs } from "@store/fonte.store";
+import { useFs } from "@store/fonte.store";
 import { useEffect } from "react";
 
 import { useDialogoStore } from "@store/dialogo.store";
@@ -37,6 +37,7 @@ const DANGER = "#B3261E";
 const TEXT_SECONDARY = "#454745";
 
 export function DialogoVupth() {
+  const fs = useFs();
   const atual = useDialogoStore((s) => s.atual);
   const responder = useDialogoStore((s) => s.responder);
   const marcarHost = useDialogoStore((s) => s.marcarHost);

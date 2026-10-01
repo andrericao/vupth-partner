@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { TamanhoDaLetra } from "@components/TamanhoDaLetra";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
@@ -18,7 +17,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2 } from "lucide-react-native";
+  Info, Share2, Palette } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -277,10 +276,13 @@ export default function ProfessionalSettingsScreen() {
               09/09). E este grupo e um item da LISTA, nao rodape: ele estava
               abaixo do "Sair da conta", que e o fim da tela — la nao se procura
               configuracao, se procura a saida (correcao dele, 11/09). */}
-          {/* Tamanho da letra (Andre, 26/09, igual ao Client). */}
-          <TamanhoDaLetra />
-
           <Grupo label="Sistema">
+            <MenuCard
+              icon={Palette}
+              title="Aparência"
+              hint="tema e tamanho da fonte"
+              onPress={() => router.push("/(professional)/aparencia" as any)}
+            />
             <MenuCard
               icon={Info}
               title="Versão do app"

@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import { fs } from "@store/fonte.store";
+import { useFs } from "@store/fonte.store";
 import { badgeLabel } from "@lib/notifications";
 
 // Badge vermelho com CONTAGEM (1..9, depois "9+"). Substitui o dot mudo do
@@ -12,6 +12,7 @@ type Props = {
 };
 
 export function NotificationBadge({ count, testID = "notification-badge" }: Props) {
+  const fs = useFs();
   const label = badgeLabel(count);
   if (!label) return null;
 

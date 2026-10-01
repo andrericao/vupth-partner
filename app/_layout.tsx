@@ -88,9 +88,10 @@ export default function RootLayout() {
   // Push: registra o device quando autenticado e trata o toque na notificacao.
   usePushRegistration();
 
-  // "Tamanho da letra" (Andre, 26/09, igual ao Client): o passo escolhido vira
-  // as variaveis de tamanho que as classes de texto leem (src/lib/fonte.ts). A
-  // `key` remonta a arvore para os tamanhos escritos em style (fs) acompanharem.
+  // "Tamanho da fonte" (Andre, 26/09, igual ao Client): o passo escolhido vira
+  // as variaveis de tamanho que as classes de texto leem (src/lib/fonte.ts). Sem
+  // remontar a arvore: remontar levaria a pessoa de volta a tela inicial — os
+  // tamanhos escritos em style acompanham pelo useFs.
   const passoDaFonte = useFonteStore((s) => s.passo);
   const restaurarFonte = useFonteStore((s) => s.restaurar);
   useEffect(() => {
@@ -124,7 +125,7 @@ export default function RootLayout() {
           {/* O erro entra no portao de proposito: fonte que nao carrega deve
               degradar para a fonte do sistema, nunca prender o app numa tela
               de carregamento. Foi o spinner eterno de 2026-08-27. */}
-          <View key={passoDaFonte} style={[{ flex: 1 }, vars(varsDaFonte(passoDaFonte))]}>
+          <View style={[{ flex: 1 }, vars(varsDaFonte(passoDaFonte))]}>
             {fontLoaded || fontError ? <Slot /> : <Loading />}
             {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
                 nao pode ser coberto por ela. Fica fora do portao das fontes de

@@ -1,6 +1,5 @@
 
 import { View, Text, Pressable, ScrollView } from "react-native";
-import { TamanhoDaLetra } from "@components/TamanhoDaLetra";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { router } from "expo-router";
@@ -14,7 +13,7 @@ import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
-import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight,
+import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
   Info,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
@@ -249,10 +248,15 @@ export default function OwnerMenuScreen() {
                 rodape. Estava abaixo do "Sair da conta", que e o fim da tela: la
                 ninguem procura configuracao, procura a saida (correcao dele,
                 11/09). */}
-            {/* Tamanho da letra (Andre, 26/09, igual ao Client). */}
-            <TamanhoDaLetra />
-
             <Grupo label="SISTEMA">
+              <MenuItem
+                icon={Palette}
+                label="Aparência"
+                hint="tema e tamanho da fonte"
+                onPress={() =>
+                  router.push({ pathname: "/(professional)/aparencia", params: { from: "owner" } } as any)
+                }
+              />
               <MenuItem
                 icon={Info}
                 label="Versão do app"

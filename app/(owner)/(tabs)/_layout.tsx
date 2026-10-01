@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { fs } from "@store/fonte.store";
+import { useFs } from "@store/fonte.store";
 import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
@@ -9,6 +9,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 
 export default function OwnerTabsLayout() {
+  const fs = useFs();
   const insets = useSafeAreaInsets();
   // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
   // o icone. So funciona porque a pilula do DS5.1 marca a aba ativa sem ele.
