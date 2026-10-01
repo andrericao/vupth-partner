@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import type * as ImagePicker from "expo-image-picker";
+import { carregarImagePicker, carregarImageManipulator, SEM_MODULO } from "@lib/modulosNativos";
 import { api, getApiErrorMessage } from "@lib/api";
 
 // Foto de perfil (S22). O backend recebe o arquivo e guarda no Cloudflare R2
@@ -36,9 +36,11 @@ export type OrigemDaFoto = "galeria" | "camera";
 
 async function reduzirPadrao(uri: string): Promise<{ uri: string }> {
   try {
-    const r = await manipulateAsync(uri, [{ resize: { width: LADO } }], {
+    const M = carregarImageManipulator();
+    if (!M) return { uri }; // binario sem o modulo: sobe a original
+    const r = await M.manipulateAsync(uri, [{ resize: { width: LADO } }], {
       compress: QUALIDADE,
-      format: SaveFormat.JPEG,
+      format: M.SaveFormat.JPEG,
     });
     return { uri: r.uri };
   } catch {
@@ -60,7 +62,8 @@ export async function escolherFoto(
     reduzir?: (uri: string) => Promise<{ uri: string }>;
   } = {}
 ): Promise<{ uri: string } | null> {
-  const picker = deps.picker ?? ImagePicker;
+  const picker = deps.picker ?? carregarImagePicker();
+  if (!picker) throw new Error(SEM_MODULO);
   const reduzir = deps.reduzir ?? reduzirPadrao;
   const camera = deps.origem === "camera";
 
