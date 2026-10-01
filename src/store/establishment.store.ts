@@ -13,6 +13,8 @@ type Establishment = {
   owner_id: string;
   phone?: string | null;
   instagram?: string | null;
+  /** Foto da loja (Andre, 26/09). Nula sem foto. */
+  url_image?: string | null;
   opening_time?: string | null;
   closing_time?: string | null;
   /**
@@ -125,6 +127,7 @@ function normalizeEstablishment(data: any): Establishment {
     owner_id: data.owner_id ?? data.ownerId ?? "",
     phone: data.phone ?? null,
     instagram: data.instagram ?? null,
+    url_image: data.url_image ?? data.urlImage ?? null,
     opening_time: data.opening_time ?? data.openingTime ?? null,
     closing_time: data.closing_time ?? data.closingTime ?? null,
     address: normalizeAddress(data.address),

@@ -15,6 +15,9 @@ export function mensagemDoErroDaFoto(error: any): string {
   if (status === 503 || code === "STORAGE_NOT_CONFIGURED") {
     return "O envio de foto está indisponível no momento. Tente de novo mais tarde.";
   }
+  if (status === 404 || status === 405) {
+    return "A foto ainda não pode ser enviada — o servidor não tem essa opção ainda.";
+  }
   if (code === "INVALID_PROFILE_PHOTO") {
     return "Use uma foto JPG, PNG ou WebP de até 2 MB.";
   }
@@ -32,11 +35,17 @@ type Picker = Pick<
 export type OrigemDaFoto = "galeria" | "camera";
 
 async function reduzirPadrao(uri: string): Promise<{ uri: string }> {
-  const r = await manipulateAsync(uri, [{ resize: { width: LADO } }], {
-    compress: QUALIDADE,
-    format: SaveFormat.JPEG,
-  });
-  return { uri: r.uri };
+  try {
+    const r = await manipulateAsync(uri, [{ resize: { width: LADO } }], {
+      compress: QUALIDADE,
+      format: SaveFormat.JPEG,
+    });
+    return { uri: r.uri };
+  } catch {
+    // Na web a reducao roda num canvas do navegador e pode falhar (Andre,
+    // 26/09). Sobe a original: se passar de 2 MB, o backend diz com clareza.
+    return { uri };
+  }
 }
 
 /**
@@ -74,7 +83,7 @@ export async function escolherFoto(
 /** Sobe a foto ja reduzida; devolve a URL publica nova. */
 export async function enviarFoto(
   uri: string,
-  deps: { plataforma?: typeof Platform.OS } = {}
+  deps: { plataforma?: typeof Platform.OS; rota?: string } = {}
 ): Promise<string> {
   const plataforma = deps.plataforma ?? Platform.OS;
   const corpo = new FormData();
@@ -85,14 +94,34 @@ export async function enviarFoto(
   } else {
     corpo.append("file", { uri, name: "foto.jpg", type: "image/jpeg" } as any);
   }
-  const { data } = await api.put("/profile/me/photo", corpo, {
+  const { data } = await api.put(deps.rota ?? ROTA_DO_PERFIL, corpo, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return data.profile_image_url;
+  return data.profile_image_url ?? data.url_image;
 }
 
-export async function removerFoto(): Promise<void> {
-  await api.delete("/profile/me/photo");
+export async function removerFoto(rota: string = ROTA_DO_PERFIL): Promise<void> {
+  await api.delete(rota);
+}
+
+/** Foto do profissional/usuario (contrato 46f1f74). */
+export const ROTA_DO_PERFIL = "/profile/me/photo";
+
+/**
+ * Foto da LOJA (pedido do Andre, 26/09). A rota foi pedida ao Backend no mesmo
+ * formato da do perfil; ate existir, o 404/405 vira "ainda nao disponivel".
+ */
+export const rotaDaFotoDaLoja = (establishmentId: string) => `/establishment/${establishmentId}/photo`;
+
+/**
+ * Resposta do servidor -> a frase do contrato; falha de rede (axios sem
+ * resposta) -> "sem conexao"; erro nosso com mensagem (permissao) -> ela; e o
+ * resto (ex.: o Event sem mensagem que a web devolve) -> "preparar a foto".
+ */
+function fraseDoErro(error: any): string {
+  if (error?.response || error?.isAxiosError) return mensagemDoErroDaFoto(error);
+  if (typeof error?.message === "string" && error.message) return error.message;
+  return "Não foi possível preparar a foto. Tente outra imagem.";
 }
 
 /**
@@ -123,6 +152,43 @@ export async function trocarFotoDePerfil(
     if (!foto) return;
     deps.aoMudar(await deps.enviar(foto.uri));
   } catch (error: any) {
-    await deps.avisar(error?.response ? mensagemDoErroDaFoto(error) : error?.message ?? mensagemDoErroDaFoto(error));
+    await deps.avisar(fraseDoErro(error));
   }
+}
+
+/**
+ * O toque na foto com as caixas do app: pergunta a origem (camera/galeria, e
+ * remover se ja ha foto), sobe na `rota` e avisa o erro. Usado na foto do
+ * perfil (Dados cadastrais) e na da loja (Dados do estabelecimento).
+ */
+export function editarFoto(a: {
+  temFoto: boolean;
+  rota: string;
+  aoMudar: (uri: string | null) => void;
+  titulo?: string;
+  perguntar: (texto: {
+    titulo: string;
+    mensagem: string;
+    opcoes: { texto: string; valor: OrigemDaFoto | "remover"; destrutivo?: boolean }[];
+  }) => Promise<OrigemDaFoto | "remover" | null>;
+  avisar: (texto: { titulo: string; mensagem: string }) => Promise<void>;
+}): Promise<void> {
+  const titulo = a.titulo ?? "Foto de perfil";
+  return trocarFotoDePerfil(a.temFoto, {
+    perguntar: (temFoto) =>
+      a.perguntar({
+        titulo,
+        mensagem: "O cliente vê esta foto no app.",
+        opcoes: [
+          ...(temFoto ? [{ texto: "Remover foto", valor: "remover" as const, destrutivo: true }] : []),
+          { texto: "Escolher da galeria", valor: "galeria" as const },
+          { texto: "Tirar foto", valor: "camera" as const },
+        ],
+      }),
+    escolher: (origem) => escolherFoto({ origem }),
+    enviar: (uri) => enviarFoto(uri, { rota: a.rota }),
+    remover: () => removerFoto(a.rota),
+    aoMudar: a.aoMudar,
+    avisar: (mensagem) => a.avisar({ titulo, mensagem }),
+  });
 }

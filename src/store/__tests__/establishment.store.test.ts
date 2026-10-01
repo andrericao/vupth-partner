@@ -63,7 +63,8 @@ describe("establishment.store", () => {
       });
 
       const state = useEstablishmentStore.getState();
-      expect(state.establishment).toEqual(ESTABLISHMENT_RESPONSE);
+      // normalizeEstablishment completa a foto da loja: ausente = null.
+      expect(state.establishment).toEqual({ ...ESTABLISHMENT_RESPONSE, url_image: null });
       expect(state.error).toBeNull();
     });
 

@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { View, Text, Pressable, Alert, Platform } from "react-native";
 import * as Updates from "expo-updates";
+import Constants from "expo-constants";
+// A versao do app.json e a fonte (runtimeVersion segue a appVersion); no
+// jest e em alguns bundles web o expoConfig vem vazio.
+import appJson from "../../app.json";
+import { linhaDaVersao } from "@lib/linhaDaVersao";
 
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { PushDiagnostics } from "@components/PushDiagnostics";
@@ -53,15 +58,16 @@ export function OtaUpdateButton() {
     }
   };
 
-  // Id do OTA + data/hora de publicacao (Updates.createdAt) = o "horario do
-  // ultimo push". Espelhado do front-client (Settings.tsx).
-  const otaInfo = Updates.updateId
-    ? `OTA ${Updates.updateId.slice(0, 8)}${
-        Updates.createdAt
-          ? ` · ${Updates.createdAt.toLocaleDateString()} ${Updates.createdAt.toLocaleTimeString()}`
-          : ""
-      }`
-    : "bundle embutido (nenhum OTA aplicado)";
+  // Versao + data: do OTA no aparelho, do build na web (ver linhaDaVersao).
+  const versao = linhaDaVersao({
+    plataforma: Platform.OS,
+    versaoApp: Constants.expoConfig?.version ?? appJson.expo.version,
+    updates: Updates,
+    dataDoBuild: process.env.EXPO_PUBLIC_BUILD_TIME ?? null,
+  });
+  // Os 7 toques (diagnostico de WS e push) sao do APK: na web nao ha push nem
+  // o que diagnosticar ali (Andre, 26/09).
+  const semDiagnostico = Platform.OS === "web";
 
   return (
     <View className="mt-8 items-center gap-3">
@@ -86,16 +92,17 @@ export function OtaUpdateButton() {
           o runtime e o canal vem vazios. */}
       <Pressable
         onPress={() => setToques((n) => n + 1)}
+        disabled={semDiagnostico}
         accessibilityRole="button"
         accessibilityLabel="Informações da versão"
         testID="version-line"
       >
         <Text className="font-mono text-[10px] text-vupth-textSecondary text-center">
-          {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
+          {versao}
         </Text>
       </Pressable>
 
-      {diagnosticoAberto && (
+      {diagnosticoAberto && !semDiagnostico && (
         <View className="w-full">
           <WsDiagnostics />
           <PushDiagnostics />
