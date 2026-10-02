@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
@@ -10,6 +10,12 @@ import {
   mapPlatform,
   notificationRoute,
   pushSupported,
+  ehDeDecisao,
+  avisoDoPush,
+  tocouNoOk,
+  CATEGORIA_CIENCIA,
+  ACAO_OK,
+  CANAL_ALTA,
 } from "@lib/push";
 import { useAuthStore } from "@store/auth.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
@@ -43,8 +49,11 @@ export const PUSH_TOKEN_KEY = "vupth_push_token";
 // push simplesmente nao funciona ate existir um build com o modulo nativo.
 try {
   Notifications?.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
+    // Com o app aberto, a de CIENCIA vira aviso com "OK" (listener abaixo) — o
+    // banner diria a mesma coisa duas vezes. A de DECISAO segue com o banner:
+    // a tela dela (modal do pedido de corte, "quer fechar?") ja abre sozinha.
+    handleNotification: async (notificacao) => ({
+      shouldShowBanner: ehDeDecisao(notificacao.request.content.data?.type),
       shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: false,
@@ -66,13 +75,52 @@ export function usePushRegistration() {
       // try/catch pega o throw SINCRONO (modulo nativo ausente); o .catch pega a
       // rejeicao da promise. Sem os dois, um binario velho quebraria aqui.
       try {
+        // HIGH (Andre, 02/10): aparece no topo na hora, sem esperar. O Backend
+        // manda o push com prioridade alta; o canal precisa acompanhar.
         Notifications.setNotificationChannelAsync("default", {
           name: "default",
-          importance: Notifications.AndroidImportance.DEFAULT,
+          importance: Notifications.AndroidImportance.HIGH,
+        }).catch(() => {});
+        // ⚠️ O Android NAO muda a importancia de um canal que ja existe: quem
+        // instalou antes segue com o "default" em DEFAULT. O canal "alta" nasce
+        // HIGH em todo aparelho — o Backend passa a mandar channelId "alta".
+        Notifications.setNotificationChannelAsync(CANAL_ALTA, {
+          name: "Avisos",
+          importance: Notifications.AndroidImportance.HIGH,
         }).catch(() => {});
       } catch {
         // binario sem o modulo nativo de push.
       }
+    }
+  }, []);
+
+  // O botao "OK" na propria notificacao (app fechado): so fecha, nao abre o app.
+  // Aparece quando o push vem com categoryId "CIENCIA" (Backend).
+  useEffect(() => {
+    if (!Notifications) return;
+    try {
+      Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
+        { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+    } catch {
+      // binario sem o modulo nativo de push.
+    }
+  }, []);
+
+  // Push de ciencia com o app aberto -> aviso com "OK" (Andre, 02/10; igual ao
+  // Client, 52076672). O de decisao fica com o banner e a tela dele.
+  useEffect(() => {
+    if (!Notifications) return;
+    try {
+      const sub = Notifications.addNotificationReceivedListener((notificacao) => {
+        const conteudo = notificacao.request.content;
+        if (ehDeDecisao(conteudo.data?.type)) return;
+        const aviso = avisoDoPush(conteudo);
+        if (aviso) Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "OK" }]);
+      });
+      return () => sub.remove();
+    } catch {
+      // binario sem o modulo nativo de push — sem aviso.
     }
   }, []);
 
@@ -141,6 +189,11 @@ export function usePushRegistration() {
     try {
       const sub = Notifications.addNotificationResponseReceivedListener(
         (response) => {
+          // "OK" so fecha a notificacao — nao navega.
+          if (tocouNoOk(response)) {
+            Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
+            return;
+          }
           const data = response.notification.request.content.data;
           const route = notificationRoute(data);
           if (route) router.push(route as any);
