@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { SkeletonTexto } from "@components/Skeleton";
 import { View, Text, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -154,14 +155,22 @@ export default function SettingsVinculoScreen() {
 
         <View className="mt-6 bg-vupth-surface p-4 rounded-lg border border-vupth-border">
           <Text className="font-body text-sm text-vupth-textSecondary">Estabelecimento</Text>
-          <Text
-            className={`font-heading mt-1 ${
-              professional?.establishment_name ? "text-vupth-forest" : "text-vupth-textSecondary"
-            }`}
-          >
-            {professional?.establishment_name ?? "Não vinculado"}
-          </Text>
-          {!professional?.establishment_id ? (
+          {/* Sem o perfil ainda nao se sabe se ha vinculo: skeleton (e nenhum
+              botao), nao "Não vinculado" — Andre, 02/10. */}
+          {!professional ? (
+            <View className="mt-2">
+              <SkeletonTexto largura={140} altura={16} testID="vinculo-carregando" />
+            </View>
+          ) : (
+            <Text
+              className={`font-heading mt-1 ${
+                professional.establishment_name ? "text-vupth-forest" : "text-vupth-textSecondary"
+              }`}
+            >
+              {professional.establishment_name ?? "Não vinculado"}
+            </Text>
+          )}
+          {!professional ? null : !professional.establishment_id ? (
             <NwButton
               title="Buscar estabelecimento"
               onPress={() => router.push("/(professional)/find-establishment" as any)}

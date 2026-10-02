@@ -95,6 +95,7 @@
       "src/components/BenchIcon.tsx",
       "src/components/FotoRemota.tsx",
       "src/components/FotoEditavel.tsx",
+      "src/components/Skeleton.tsx",
       "!src/**/__tests__/**",
       "!src/**/*.d.ts",
       "!src/lib/types.ts",

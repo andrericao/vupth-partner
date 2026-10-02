@@ -70,3 +70,35 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
     </View>
   );
 }
+
+/**
+ * A forma de UM texto enquanto o dado nao chega (Andre, 02/10: "Profissional"
+ * no lugar do nome parecia erro). Nunca um texto generico que pareca dado.
+ * `escuro` = sobre o fundo forest (cabecalho do Perfil).
+ */
+export function SkeletonTexto({
+  largura,
+  altura = 14,
+  escuro = false,
+  testID = "skeleton-texto",
+}: {
+  largura: number | string;
+  altura?: number;
+  escuro?: boolean;
+  testID?: string;
+}) {
+  const opacity = usePulse();
+  return (
+    <Animated.View
+      testID={testID}
+      accessibilityLabel="Carregando"
+      style={{
+        width: largura as any,
+        height: altura,
+        borderRadius: 8,
+        backgroundColor: escuro ? "rgba(255,255,255,0.22)" : BASE,
+        opacity,
+      }}
+    />
+  );
+}

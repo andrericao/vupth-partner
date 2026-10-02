@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { SkeletonTexto } from "@components/Skeleton";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
@@ -203,10 +204,19 @@ export default function ProfessionalSettingsScreen() {
               <Share2 size={22} color="#9FE870" />
             </Pressable>
           )}
-          <Text className="font-display text-xl text-white mt-3">
-            {professional?.name ?? "Profissional"}
-          </Text>
-          <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
+          {/* Sem o perfil ainda: skeleton, nunca "Profissional" — com conta ja
+              criada o texto generico parecia erro (Andre, 02/10). */}
+          {professional ? (
+            <>
+              <Text className="font-display text-xl text-white mt-3">{professional.name}</Text>
+              <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
+            </>
+          ) : (
+            <View className="items-center mt-3 gap-2">
+              <SkeletonTexto largura={160} altura={22} escuro testID="perfil-nome-carregando" />
+              <SkeletonTexto largura={120} altura={12} escuro />
+            </View>
+          )}
         </View>
   
         <View className="flex-1 py-6 px-4 gap-5">
