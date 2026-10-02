@@ -23,7 +23,9 @@ appId: ${APP_ID}
     id: "search-establishment"
 - inputText: ${output.LOJA}
 - pressKey: Enter
-- hideKeyboard
+# Sem hideKeyboard aqui: o Enter ja fecha o teclado, e o hideKeyboard do Maestro
+# sem teclado aberto vira VOLTAR no Android — a busca voltava para "Onde voce
+# vai atender?" e o cartao nunca aparecia (rodada de 02/10).
 # O nome da loja tambem esta no campo de busca: toca no CARTAO do resultado.
 - extendedWaitUntil:
     visible:
