@@ -20,7 +20,10 @@ import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
-import { mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN } from "@lib/meals";
+import {
+  mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN,
+  refeicoesDoDia, rotuloRefeicaoIniciada, refeicaoCruzada, duracaoDoAtendimento,
+} from "@lib/meals";
 import { queueMenuCount } from "@lib/notifications";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { isMealNudgeDisabled, setMealNudgeDisabled, devePerguntarRefeicao } from "@lib/mealNudge";
@@ -279,7 +282,8 @@ export default function ProfessionalQueueScreen() {
   const startInterval = useIntervalStore((s) => s.startInterval);
   const finishInterval = useIntervalStore((s) => s.finishInterval);
   const skipInterval = useIntervalStore((s) => s.skipInterval);
-  const meals = intervals.filter((i) => i.type === "RECURRENT");
+  // Modelo B: a refeicao suprimida hoje (passou do inicio maximo) some do dia.
+  const meals = refeicoesDoDia(intervals.filter((i) => i.type === "RECURRENT"));
 
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
@@ -613,6 +617,25 @@ export default function ProfessionalQueueScreen() {
     // Inicio direto (sem confirmacao) so quando e o 1o da fila E ninguem esta em
     // atendimento. Nos demais casos confirma (vai finalizar o atual e/ou furar a fila).
     if (!runningName && !advance) {
+      // Modelo B (spec 28/06): fila continua e este atendimento cruzaria o
+      // horario da refeicao -> adiantar (refeicao agora) ou adiar (depois dele).
+      // Sem cruzamento a refeicao encaixa sozinha; fora da janela o backend suprime.
+      const agora = new Date();
+      const nowMin = agora.getHours() * 60 + agora.getMinutes();
+      const duracao = duracaoDoAtendimento(att);
+      const cruzada = refeicaoCruzada(meals, nowMin, duracao);
+      if (cruzada) {
+        const nome = mealName(cruzada.description);
+        const adiantar = await confirmar({
+          titulo: `${nome} às ${parseApiTime(cruzada.fixedStartTime)}`,
+          mensagem: `O atendimento de ${att.clientName} (~${duracao}min) passa do horário do ${nome.toLowerCase()}. Adiantar: ${nome.toLowerCase()} agora (${cruzada.durationMinutes}min) e ${att.clientName} depois. Adiar: atende ${att.clientName} e o ${nome.toLowerCase()} vem em seguida.`,
+          confirmar: `Adiantar ${nome.toLowerCase()}`,
+          cancelar: "Adiar",
+        });
+        if (adiantar) handleStartMeal(cruzada);
+        else doStart();
+        return;
+      }
       doStart();
       return;
     }
@@ -947,7 +970,9 @@ export default function ProfessionalQueueScreen() {
                   {mealName(activeMeal.description)} em andamento
                 </Text>
                 <Text className="font-body text-xs text-vupth-textSecondary">
-                  {activeMeal.durationMinutes}min previstos
+                  {[rotuloRefeicaoIniciada(activeMeal), `${activeMeal.durationMinutes}min previstos`]
+                    .filter(Boolean)
+                    .join(" • ")}
                 </Text>
               </View>
               {/* Faixa pessego = fundo ja colorido: e o caso do Button/Secondary

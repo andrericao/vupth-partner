@@ -68,6 +68,7 @@ export default function MealsScreen() {
   const updateInterval = useIntervalStore((s) => s.updateInterval);
   const deleteInterval = useIntervalStore((s) => s.deleteInterval);
   const createRecurring = useIntervalStore((s) => s.createRecurring);
+  const startNextInterval = useIntervalStore((s) => s.startNextInterval);
 
   const meals = intervals.filter((i) => i.type === "RECURRENT");
 
@@ -128,6 +129,27 @@ export default function MealsScreen() {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar a refeição."));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Modelo B: "Iniciar refeicao" comeca a proxima nao feita, nao pulada e nao
+  // suprimida — quem escolhe e o backend (almoco suprimido as 17:30 -> janta).
+  const temRefeicaoAtiva = meals.some((m) => m.status === "ACTIVE");
+  const [iniciando, setIniciando] = useState(false);
+  const handleStartNext = async () => {
+    setIniciando(true);
+    try {
+      await startNextInterval(profId);
+    } catch (error: any) {
+      const nenhuma = error?.response?.status === 409;
+      Alert.alert(
+        nenhuma ? "Nenhuma refeição para iniciar" : "Erro",
+        nenhuma
+          ? "As refeições de hoje já foram feitas, puladas ou passaram do horário."
+          : getApiErrorMessage(error, "Não foi possível iniciar a refeição.")
+      );
+    } finally {
+      setIniciando(false);
     }
   };
 
@@ -197,7 +219,7 @@ export default function MealsScreen() {
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader
             title="Refeições"
-            subtitle="Entram no cálculo da fila. O horário é previsão — você inicia a refeição na tela da fila."
+            subtitle="Entram no cálculo da fila. O horário é previsão — a refeição começa quando você inicia (aqui ou no aviso da fila)."
             onBack={() => router.navigate(backTarget as any)}
           />
 
@@ -255,6 +277,8 @@ export default function MealsScreen() {
                       {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min •{" "}
                       {patternLabel(m.recurrencePattern)}
                       {m.status === "ACTIVE" ? " • em andamento" : ""}
+                      {/* Modelo B: passou do inicio maximo sem iniciar -> saiu do dia. */}
+                      {m.suppressedToday ? " • hoje passou do horário" : ""}
                     </Text>
                     <View className="flex-row gap-3 mt-1">
                       <Pressable onPress={() => startEdit(m)} accessibilityRole="button" hitSlop={6}>
@@ -276,9 +300,19 @@ export default function MealsScreen() {
             )}
           </View>
 
+          {!temRefeicaoAtiva && meals.length > 0 && (
+            <NwButton
+              title="Iniciar refeição agora"
+              onPress={handleStartNext}
+              isLoading={iniciando}
+              className="mt-6"
+            />
+          )}
+
           {!showAdd ? (
             <NwButton
               title="Adicionar refeição"
+              variant="secondary"
               onPress={() => {
                 setEditingId(null);
                 setShowAdd(true);

@@ -11,7 +11,7 @@ import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
-import { mealSignal } from "@lib/meals";
+import { mealSignal, refeicoesDoDia } from "@lib/meals";
 import { confirmar, avisar } from "@lib/confirmar";
 
 // Tela "OPCOES DA FILA" (nav v2, 2026-07-23): o banco no header da Fila NAVEGA
@@ -150,7 +150,8 @@ export default function QueueOptionsScreen() {
   };
 
   // ---- Refeicoes (sinal + rotulo) ----
-  const meals = intervals.filter((i) => i.type === "RECURRENT");
+  // Modelo B: a suprimida hoje nao acende o dot nem vira a "proxima".
+  const meals = refeicoesDoDia(intervals.filter((i) => i.type === "RECURRENT"));
   const currentMealSignal = mealSignal(meals, new Date().getHours() * 60 + new Date().getMinutes());
   const nextMeal = meals.find((m) => m.status === "SCHEDULED") ?? null;
   const mealLabel = nextMeal
