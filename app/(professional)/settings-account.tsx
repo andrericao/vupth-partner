@@ -11,7 +11,7 @@ import { FotoEditavel } from "@components/FotoEditavel";
 import { CompartilharPerfil } from "@components/CompartilharPerfil";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
-import { escolherOpcao, avisar } from "@lib/confirmar";
+import { avisar } from "@lib/confirmar";
 import { linkDoProfissional } from "@lib/linkPublico";
 import { validatePassword } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
@@ -266,12 +266,12 @@ export default function SettingsAccountScreen() {
               uri={minhaFoto.uri}
               rotulo={minhaFoto.uri ? "Trocar foto de perfil" : "Pôr foto de perfil"}
               testID="foto-perfil"
-              onEditar={() =>
+              onEscolher={(acao) =>
                 editarFoto({
                   temFoto: !!minhaFoto.uri,
                   rota: ROTA_DO_PERFIL,
                   aoMudar: minhaFoto.trocar,
-                  perguntar: escolherOpcao,
+                  perguntar: async () => acao,
                   avisar,
                 })
               }

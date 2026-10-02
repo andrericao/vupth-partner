@@ -1,39 +1,97 @@
-import { View, Pressable } from "react-native";
-import { Camera } from "lucide-react-native";
+import { useState } from "react";
+import { View, Text, Pressable, Modal } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Camera, Image as ImageIcon, Trash2 } from "lucide-react-native";
 import { Avatar } from "@components/Avatar";
+import type { OrigemDaFoto } from "@lib/fotoDePerfil";
+
+export type AcaoDaFoto = OrigemDaFoto | "remover";
 
 type Props = {
   nome?: string | null;
   uri?: string | null;
-  onEditar: () => void;
+  onEscolher: (acao: AcaoDaFoto) => void;
   tamanho?: number;
   /** "Trocar foto de perfil", "Trocar foto da loja"… */
   rotulo: string;
   testID?: string;
 };
 
-// Foto com o selo de edicao no canto inferior direito — o padrao de mercado
-// (Instagram, WhatsApp, iFood): a foto grande e um circulo pequeno com a camera.
-// Pedido do Andre (26/09): "o link de edicao deve ser apenas uma caneta/camera
-// no canto inferior da foto". Toda a foto e tocavel; o selo so indica.
-export function FotoEditavel({ nome, uri, onEditar, tamanho = 96, rotulo, testID = "foto-editavel" }: Props) {
+// Foto editavel como nas redes sociais (Instagram, WhatsApp). Andre, 02/10: o
+// selo sozinho parecia o icone de "crop" e ele nao percebeu que era o botao.
+// Agora: a foto tocavel com o selo de camera, "Editar foto" escrito embaixo, e
+// o toque abre uma folha de baixo com Tirar foto · Escolher da galeria ·
+// Remover foto. O recorte vem depois da escolha (no seletor do sistema).
+export function FotoEditavel({ nome, uri, onEscolher, tamanho = 96, rotulo, testID = "foto-editavel" }: Props) {
+  const [aberta, setAberta] = useState(false);
+  const insets = useSafeAreaInsets();
   const selo = Math.round(tamanho * 0.32);
+
+  const escolher = (acao: AcaoDaFoto) => {
+    setAberta(false);
+    onEscolher(acao);
+  };
+
+  const opcoes: { acao: AcaoDaFoto; texto: string; Icone: typeof Camera; destrutiva?: boolean }[] = [
+    { acao: "camera", texto: "Tirar foto", Icone: Camera },
+    { acao: "galeria", texto: "Escolher da galeria", Icone: ImageIcon },
+    ...(uri ? [{ acao: "remover" as const, texto: "Remover foto", Icone: Trash2, destrutiva: true }] : []),
+  ];
+
   return (
-    <Pressable
-      onPress={onEditar}
-      accessibilityRole="button"
-      accessibilityLabel={rotulo}
-      testID={testID}
-      className="self-center active:opacity-80"
-    >
-      <Avatar nome={nome} uri={uri} tamanho={tamanho} testID={`${testID}-avatar`} />
-      <View
-        testID={`${testID}-selo`}
-        className="absolute bg-vupth-forest items-center justify-center border-2 border-white"
-        style={{ width: selo, height: selo, borderRadius: selo / 2, right: 0, bottom: 0 }}
+    <View className="self-center items-center">
+      <Pressable
+        onPress={() => setAberta(true)}
+        accessibilityRole="button"
+        accessibilityLabel={rotulo}
+        testID={testID}
+        className="active:opacity-80"
       >
-        <Camera size={Math.round(selo * 0.5)} color="#9FE870" />
-      </View>
-    </Pressable>
+        <Avatar nome={nome} uri={uri} tamanho={tamanho} testID={`${testID}-avatar`} />
+        <View
+          testID={`${testID}-selo`}
+          className="absolute bg-vupth-forest items-center justify-center border-2 border-white"
+          style={{ width: selo, height: selo, borderRadius: selo / 2, right: 0, bottom: 0 }}
+        >
+          <Camera size={Math.round(selo * 0.5)} color="#9FE870" />
+        </View>
+      </Pressable>
+      <Pressable onPress={() => setAberta(true)} hitSlop={8} testID={`${testID}-editar`} className="mt-2 active:opacity-70">
+        <Text className="font-heading text-sm text-vupth-forest">{uri ? "Editar foto" : "Pôr foto"}</Text>
+      </Pressable>
+
+      <Modal visible={aberta} transparent animationType="slide" onRequestClose={() => setAberta(false)}>
+        <View className="flex-1 justify-end">
+          <Pressable
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
+            onPress={() => setAberta(false)}
+            accessibilityLabel="Fechar opções da foto"
+          />
+          <View className="bg-vupth-background rounded-t-hero p-4 gap-1" style={{ paddingBottom: insets.bottom + 24 }}>
+            {opcoes.map(({ acao, texto, Icone, destrutiva }) => (
+              <Pressable
+                key={acao}
+                testID={`${testID}-${acao}`}
+                accessibilityRole="button"
+                onPress={() => escolher(acao)}
+                className="flex-row items-center gap-3 py-3.5 px-3 rounded-card active:bg-vupth-surface"
+              >
+                <Icone size={20} color={destrutiva ? "#B3261E" : "#163300"} />
+                <Text className={`font-body text-md flex-1 ${destrutiva ? "text-vupth-danger" : "text-vupth-textPrimary"}`}>
+                  {texto}
+                </Text>
+              </Pressable>
+            ))}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setAberta(false)}
+              className="items-center py-3.5 mt-1 rounded-card active:bg-vupth-surface"
+            >
+              <Text className="font-heading text-md text-vupth-textSecondary">Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
