@@ -10,9 +10,10 @@ describe("Avatar", () => {
 
   it("com foto: a imagem, sem as iniciais", () => {
     render(<Avatar nome="Ana" uri="https://pub.r2.dev/profile/a.jpg" testID="avatar" />);
-    expect(screen.getByTestId("avatar-foto").props.source).toEqual({
-      uri: "https://pub.r2.dev/profile/a.jpg",
-    });
+    // O expo-image (FotoRemota) entrega a fonte como lista; o Image do RN, como objeto.
+    expect([screen.getByTestId("avatar-foto").props.source].flat()).toEqual([
+      { uri: "https://pub.r2.dev/profile/a.jpg" },
+    ]);
     expect(screen.queryByText("A")).toBeNull();
   });
 

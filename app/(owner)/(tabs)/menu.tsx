@@ -142,7 +142,8 @@ export default function OwnerMenuScreen() {
       >
         <View className="flex-1 pb-6 px-4">
           <ScreenHeader
-            title={establishment?.name ?? "Meu estabelecimento"}
+            title={establishment?.name ?? ""}
+            carregando={!establishment?.name}
             subtitle={serviceTypeLabel(establishment?.service_type)}
           />
   

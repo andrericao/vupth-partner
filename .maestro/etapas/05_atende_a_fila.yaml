@@ -9,37 +9,121 @@ appId: ${APP_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
       TAG: ${output.TAG}
       QTD: "2"
+    label: "05.01 · script clientes_na_fila"
 - tapOn:
     id: "aba-fila"
+    label: "05.02 · toca em aba-fila"
 - extendedWaitUntil:
     visible: ${output.CLIENTE1}
     timeout: 60000
-- assertVisible: ${output.CLIENTE2}
+    label: "05.03 · espera ${output.CLIENTE1}"
+- assertVisible:
+    text: ${output.CLIENTE2}
+    label: "05.04 · confere ${output.CLIENTE2}"
 
-- tapOn: "Iniciar próximo"
+- tapOn:
+    text: "Iniciar próximo"
+    label: "05.05 · toca em Iniciar próximo"
 - extendedWaitUntil:
     visible: "Finalizar"
     timeout: 20000
+    label: "05.06 · espera Finalizar"
 
 # Pausar e retomar pelo menu do card verde (um toque abre)
-- tapOn: "Opções de ${output.CLIENTE1}"
-- tapOn: "Pausar atendimento"
+- tapOn:
+    text: "Opções de ${output.CLIENTE1}"
+    label: "05.07 · toca em Opções de ${output.CLIENTE1}"
+- tapOn:
+    text: "Pausar atendimento"
+    label: "05.08 · toca em Pausar atendimento"
 - extendedWaitUntil:
     visible: "Retomar"
     timeout: 20000
-- tapOn: "Retomar"
+    label: "05.09 · espera Retomar"
+- tapOn:
+    text: "Retomar"
+    label: "05.10 · toca em Retomar"
 - extendedWaitUntil:
     visible: "Pausar"
     timeout: 20000
-- tapOn: "Finalizar"
+    label: "05.11 · espera Pausar"
+- tapOn:
+    text: "Finalizar"
+    label: "05.12 · toca em Finalizar"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE1}
     timeout: 20000
+    label: "05.13 · espera"
 
 # O segundo sai pela loja: Remover
-- tapOn: "Opções de ${output.CLIENTE2}"
-- tapOn: "Remover"
-- runFlow: ../apoio/confirmar.yaml
+- tapOn:
+    text: "Opções de ${output.CLIENTE2}"
+    label: "05.14 · toca em Opções de ${output.CLIENTE2}"
+- tapOn:
+    text: "Remover"
+    label: "05.15 · toca em Remover"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "05.16 · roda confirmar"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE2}
     timeout: 20000
+    label: "05.17 · espera"
+
+# Fluxos criticos (DEC-7): Opcoes da fila — Intervalo e volta, Fechar fila
+# (confirma) e Reabrir. Termina em Trabalhando, com a fila aberta.
+- tapOn:
+    text: "Opções da fila"
+    label: "05.18 · toca em Opções da fila"
+- tapOn:
+    text: "Intervalo"
+    label: "05.19 · toca em Intervalo"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.20 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Você está: Intervalo.*"
+    timeout: 20000
+    label: "05.21 · espera Você está: Intervalo"
+- tapOn:
+    text: "Trabalhando"
+    label: "05.22 · toca em Trabalhando"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.23 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Você está: Trabalhando.*"
+    timeout: 20000
+    label: "05.24 · espera Você está: Trabalhando"
+- tapOn:
+    text: "Fechar fila"
+    label: "05.25 · toca em Fechar fila"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "05.26 · confirma Fechar fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.27 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Reabrir fila"
+    timeout: 20000
+    label: "05.28 · espera Reabrir fila"
+- tapOn:
+    text: "Reabrir fila"
+    label: "05.29 · toca em Reabrir fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.30 · roda fechar_aviso"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.31 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Fechar fila"
+    timeout: 20000
+    label: "05.32 · espera Fechar fila (fila aberta)"
+- assertVisible:
+    text: "Você está: Trabalhando.*"
+    label: "05.33 · confere Você está: Trabalhando"
+- tapOn:
+    id: "aba-fila"
+    label: "05.34 · toca em aba-fila"

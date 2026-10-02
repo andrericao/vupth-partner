@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Titulo } from "@components/Titulo";
+import { SkeletonTexto } from "@components/Skeleton";
 import { BackHandler, View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,6 +17,8 @@ type Props = {
    * (Fila, Início, Menu...), que nao tem para onde voltar.
    */
   onBack?: () => void;
+  /** O dado do titulo ainda nao chegou: skeleton no lugar (nunca o texto generico). */
+  carregando?: boolean;
   /** Acao no canto direito, alinhada ao titulo (ex.: badge, "Agora não"). */
   action?: ReactNode;
 };
@@ -49,7 +52,7 @@ type Props = {
  * topo. Padding lateral segue com a tela, porque o conteudo abaixo varia
  * (lista full-bleed x formulario).
  */
-export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
+export function ScreenHeader({ title, subtitle, onBack, action, carregando = false }: Props) {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -95,9 +98,15 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
         {/* h1 da tela: e o UNICO titulo de nivel 1 que o app emite, e todas
             as telas passam por aqui — por isso a semantica mora no
             ScreenHeader e nao em cada tela. */}
-        <Titulo nivel={1} numberOfLines={2} className="flex-1 mt-[4px]">
-          {title}
-        </Titulo>
+        {carregando ? (
+          <View className="flex-1 mt-[10px]">
+            <SkeletonTexto largura="60%" altura={22} testID="screen-header-carregando" />
+          </View>
+        ) : (
+          <Titulo nivel={1} numberOfLines={2} className="flex-1 mt-[4px]">
+            {title}
+          </Titulo>
+        )}
 
         {/* A acao ocupa uma faixa de 40 e se centra nela — a mesma altura do
             botao redondo do voltar. Sem isso, com a linha ancorada no topo

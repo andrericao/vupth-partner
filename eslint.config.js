@@ -11,4 +11,22 @@ module.exports = defineConfig([
     // no app — fora do lint.
     ignores: ['coverage/', '.expo/', 'node_modules/', '.claude/', 'dist/', 'web-build/', '.maestro/'],
   },
+  {
+    // scripts/ roda no Node (catraca da cobertura) e o teste dele no jest. Os
+    // globais vao listados aqui — o pacote `globals` so vem por tabela.
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        __dirname: 'readonly',
+        require: 'readonly',
+        module: 'writable',
+        process: 'readonly',
+        console: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        jest: 'readonly',
+      },
+    },
+  },
 ]);

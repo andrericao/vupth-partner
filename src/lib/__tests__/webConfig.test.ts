@@ -117,3 +117,22 @@ describe("caminho web — nao traduzir desde o primeiro byte", () => {
     expect(html.split("%WEB_TITLE%")).toHaveLength(2);
   });
 });
+
+describe("caminho web — cabecalhos (melhorias de 02/10, mesmo formato do Client)", () => {
+  const headers = read("public/_headers");
+
+  it("GPS e camera valem para a nossa origem — localizacao da loja e foto pela camera", () => {
+    expect(headers).toMatch(/Permissions-Policy: geolocation=\(self\), camera=\(self\), microphone=\(\)/);
+  });
+
+  it("os bundles com hash ficam um ano no cache; o index.html e conferido a cada visita", () => {
+    expect(headers).toMatch(/\/_expo\/static\/\*\n  Cache-Control: public, max-age=31536000, immutable/);
+    expect(headers).toMatch(/\n\/\n  Cache-Control: no-cache/);
+    expect(headers).toMatch(/\/index\.html\n  Cache-Control: no-cache/);
+  });
+
+  it("o /* nao leva Cache-Control — o Pages juntaria com o immutable", () => {
+    const blocoGeral = headers.split(/\n\/_expo/)[0];
+    expect(blocoGeral).not.toMatch(/^\s+Cache-Control:/m);
+  });
+});

@@ -6,38 +6,59 @@ appId: ${APP_ID}
     file: ../apoio/entrar.yaml
     env:
       EMAIL: ${output.EMAIL_DONO}
+    label: "08.01 · roda entrar"
 - extendedWaitUntil:
     visible: ${output.LOJA}
     timeout: 30000
+    label: "08.02 · espera ${output.LOJA}"
 - tapOn:
     id: "aba-filas"
+    label: "08.03 · toca em aba-filas"
 - extendedWaitUntil:
     visible: ${output.PROF}
     timeout: 20000
+    label: "08.04 · espera ${output.PROF}"
 
 - tapOn:
     id: "aba-menu"
-- tapOn: "Relatórios"
+    label: "08.05 · toca em aba-menu"
+- tapOn:
+    text: "Relatórios"
+    label: "08.06 · toca em Relatórios"
 - scrollUntilVisible:
     element: "recebe R\\$.*"
     direction: DOWN
+    label: "08.07 · rola ate recebe R$…"
 
 - tapOn:
     id: "aba-menu"
-- tapOn: "Atendimentos"
-- tapOn: "Retirados"
+    label: "08.08 · toca em aba-menu"
+- tapOn:
+    text: "Atendimentos"
+    label: "08.09 · toca em Atendimentos"
+- tapOn:
+    text: "Retirados"
+    label: "08.10 · toca em Retirados"
 - extendedWaitUntil:
     visible: ${output.CLIENTE2}
     timeout: 20000
+    label: "08.11 · espera ${output.CLIENTE2}"
 
 - tapOn:
     id: "aba-menu"
+    label: "08.12 · toca em aba-menu"
 - scrollUntilVisible:
     element: "Versão do app"
     direction: DOWN
-- tapOn: "Versão do app"
+    label: "08.13 · rola ate Versão do app"
+- tapOn:
+    text: "Versão do app"
+    label: "08.14 · toca em Versão do app"
 - extendedWaitUntil:
     visible:
       id: "version-line"
     timeout: 20000
-- runFlow: ../apoio/sair_dono.yaml
+    label: "08.15 · espera version-line"
+- runFlow:
+    file: ../apoio/sair_dono.yaml
+    label: "08.16 · roda sair_dono"

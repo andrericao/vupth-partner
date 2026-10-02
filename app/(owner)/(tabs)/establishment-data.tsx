@@ -4,7 +4,7 @@ import { FotoEditavel } from "@components/FotoEditavel";
 import { CompartilharPerfil } from "@components/CompartilharPerfil";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { editarFoto, rotaDaFotoDaLoja } from "@lib/fotoDePerfil";
-import { escolherOpcao, avisar } from "@lib/confirmar";
+import { avisar } from "@lib/confirmar";
 import { linkDaLoja } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
 import { router } from "expo-router";
@@ -80,13 +80,13 @@ export default function EstablishmentDataScreen() {
               uri={fotoDaLoja}
               rotulo={fotoDaLoja ? "Trocar foto da loja" : "Pôr foto da loja"}
               testID="foto-loja"
-              onEditar={() =>
+              onEscolher={(acao) =>
                 editarFoto({
                   temFoto: !!fotoDaLoja,
                   rota: rotaDaFotoDaLoja(establishment.id),
                   aoMudar: aoMudarFoto,
                   titulo: "Foto da loja",
-                  perguntar: escolherOpcao,
+                  perguntar: async () => acao,
                   avisar,
                 })
               }

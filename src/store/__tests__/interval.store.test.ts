@@ -123,4 +123,23 @@ describe("interval.store", () => {
       expect(mock.history.patch[0].url).toBe(`${BASE}/int-1/skip`);
     });
   });
+
+  describe("startNextInterval (Modelo B)", () => {
+    it("PATCH .../next/start — o backend escolhe a proxima nao feita, nao pulada e nao suprimida", async () => {
+      mock.onPatch(`${BASE}/next/start`).reply(200, {});
+      mock.onGet(BASE).reply(200, []);
+
+      await useIntervalStore.getState().startNextInterval(PROF);
+
+      expect(mock.history.patch[0].url).toBe(`${BASE}/next/start`);
+      expect(mock.history.get).toHaveLength(1);
+    });
+
+    it("409 INTERVAL_CONFLICT (nenhuma para iniciar) sobe para a tela", async () => {
+      mock.onPatch(`${BASE}/next/start`).reply(409, { code: "INTERVAL_CONFLICT" });
+
+      await expect(useIntervalStore.getState().startNextInterval(PROF)).rejects.toBeTruthy();
+      expect(mock.history.get).toHaveLength(0);
+    });
+  });
 });

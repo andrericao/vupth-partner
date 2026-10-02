@@ -9,6 +9,12 @@ import {
   unregisterDevice,
   type PushEnv,
   pushSupported,
+  ehDeDecisao,
+  avisoDoPush,
+  tocouNoOk,
+  CATEGORIA_CIENCIA,
+  ACAO_OK,
+  CANAL_ALERTAS,
 } from "../push";
 
 jest.mock("expo-secure-store", () => ({
@@ -252,5 +258,34 @@ describe("acquireExpoPushToken — o relato para o painel", () => {
 
   it("sem onEstado, nada quebra — o relato é opcional", async () => {
     await expect(acquireExpoPushToken(env() as any)).resolves.toBeTruthy();
+  });
+});
+
+// notificacao-de-ciencia (Andre, 02/10): a que so informa ganha um jeito de
+// fechar (OK); a de decisao segue com a tela dela.
+describe("notificacao de ciencia", () => {
+  it("decisao: pedido de corte e o 'quer fechar?' — o resto e ciencia", () => {
+    expect(ehDeDecisao("CUT_REQUESTED")).toBe(true);
+    expect(ehDeDecisao("CLOSING_PROMPT")).toBe(true);
+    expect(ehDeDecisao("ATTENDANCE_CANCELLED")).toBe(false);
+    expect(ehDeDecisao("CUT_EXPIRED")).toBe(false);
+    expect(ehDeDecisao(undefined)).toBe(false);
+  });
+
+  it("com o app aberto, a de ciencia vira aviso com o titulo e o texto", () => {
+    expect(avisoDoPush({ title: "Cliente desistiu", body: "Ana saiu da fila" })).toEqual({
+      titulo: "Cliente desistiu",
+      mensagem: "Ana saiu da fila",
+    });
+    expect(avisoDoPush({ title: null, body: "Oi" })).toEqual({ titulo: "VUPTH", mensagem: "Oi" });
+    expect(avisoDoPush({ title: " ", body: "" })).toBeNull();
+    expect(avisoDoPush({})).toBeNull();
+  });
+
+  it("o botao OK da notificacao so fecha — nao abre tela", () => {
+    expect(CATEGORIA_CIENCIA).toBe("CIENCIA");
+    expect(CANAL_ALERTAS).toBe("alertas");
+    expect(tocouNoOk({ actionIdentifier: ACAO_OK })).toBe(true);
+    expect(tocouNoOk({ actionIdentifier: "expo.modules.notifications.actions.DEFAULT" })).toBe(false);
   });
 });

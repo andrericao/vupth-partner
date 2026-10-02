@@ -10,6 +10,7 @@
     "build:web": "EXPO_PUBLIC_BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) expo export --platform web",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "cobertura:catraca": "node scripts/catraca-cobertura.js",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "prepare": "git config core.hooksPath .githooks || true"
@@ -25,6 +26,7 @@
     "expo-dev-client": "~6.0.21",
     "expo-device": "~8.0.10",
     "expo-font": "~14.0.12",
+    "expo-image": "~3.0.11",
     "expo-image-manipulator": "~14.0.8",
     "expo-image-picker": "~17.0.11",
     "expo-linking": "~8.0.12",
@@ -92,6 +94,9 @@
       "src/components/ReadinessFaixa.tsx",
       "src/components/QueueOptions.tsx",
       "src/components/BenchIcon.tsx",
+      "src/components/FotoRemota.tsx",
+      "src/components/FotoEditavel.tsx",
+      "src/components/Skeleton.tsx",
       "!src/**/__tests__/**",
       "!src/**/*.d.ts",
       "!src/lib/types.ts",
@@ -106,12 +111,13 @@
     "coverageReporters": [
       "text-summary",
       "text",
-      "lcov"
+      "lcov",
+      "json-summary"
     ],
     "coverageThreshold": {
       "global": {
         "statements": 98,
-        "branches": 88,
+        "branches": 91,
         "functions": 98,
         "lines": 99
       }

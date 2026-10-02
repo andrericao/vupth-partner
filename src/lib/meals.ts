@@ -1,4 +1,6 @@
-import { parseApiTime } from "@lib/time";
+import { parseApiTime, hhmmFromIso } from "@lib/time";
+import { MINUTOS_PADRAO } from "@lib/tempoDoServico";
+import { mealName } from "@store/interval.store";
 
 // Sinal de refeicao. Andre 2026-07-20:
 //   - acende **30min ANTES** do horario (dar tempo de decidir);
@@ -65,4 +67,54 @@ export function isMealDue(
   windowMin: number = MEAL_NUDGE_WINDOW_MIN
 ): boolean {
   return mealSignal(meals, nowMinutes, leadMin, windowMin) !== null;
+}
+
+// ---------------------------------------------------------------------------
+// Refeicoes — Modelo B (janela flexivel, spec de 28/06; Backend b728005).
+// O backend e a fonte da verdade: ele decide a supressao (passou do inicio
+// maximo sem iniciar -> `suppressedToday`) e qual refeicao o "iniciar" comeca
+// (`/next/start`). O front so esconde a suprimida e pergunta adiantar/adiar.
+
+/** Quanto a refeicao pode comecar ANTES do alvo (inicioMin = alvo - isto). */
+export const ADIANTAMENTO_MAX_MIN = 15;
+
+/** As refeicoes que ainda contam hoje — a suprimida some do dia. */
+export function refeicoesDoDia<T extends { suppressedToday?: boolean | null }>(meals: T[]): T[] {
+  return meals.filter((m) => m.suppressedToday !== true);
+}
+
+/** "Almoço começou às HH:MM" ("iniciado" erraria o genero da Janta) pela hora real de inicio, ou null. */
+export function rotuloRefeicaoIniciada(m: { description: string; startTime: string | null }): string | null {
+  const hora = hhmmFromIso(m.startTime);
+  return hora ? `${mealName(m.description)} começou às ${hora}` : null;
+}
+
+/** Duracao prevista do atendimento: soma dos servicos (padrao do backend se nao houver). */
+export function duracaoDoAtendimento(att: { services: { estimatedMinutes: number }[] }): number {
+  const total = att.services.reduce((soma, s) => soma + (s.estimatedMinutes > 0 ? s.estimatedMinutes : 0), 0);
+  return total > 0 ? total : MINUTOS_PADRAO;
+}
+
+type RefeicaoAgendada = MealLike & { suppressedToday?: boolean | null };
+
+/**
+ * A refeicao que o atendimento que vai comecar AGORA cruzaria (fila continua,
+ * sem buraco): comeca antes do alvo, termina depois dele, e ja estamos dentro
+ * do adiantamento permitido. E o caso do popup adiantar/adiar; fora dele a
+ * refeicao encaixa sozinha (ou o backend a suprime).
+ */
+export function refeicaoCruzada<T extends RefeicaoAgendada>(
+  meals: T[],
+  nowMinutes: number,
+  duracaoMin: number,
+  adiantamentoMax: number = ADIANTAMENTO_MAX_MIN
+): T | null {
+  for (const m of refeicoesDoDia(meals)) {
+    if (m.status !== "SCHEDULED") continue;
+    const t = parseApiTime(m.fixedStartTime);
+    if (!t) continue;
+    const alvo = hhmmToMinutes(t);
+    if (nowMinutes < alvo && nowMinutes + duracaoMin > alvo && nowMinutes >= alvo - adiantamentoMax) return m;
+  }
+  return null;
 }

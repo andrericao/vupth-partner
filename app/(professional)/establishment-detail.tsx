@@ -5,12 +5,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { FotoRemota } from "@components/FotoRemota";
 import { NwButton } from "@components/nw/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
@@ -145,10 +145,9 @@ export default function EstablishmentDetailScreen() {
           <ScreenHeader title={name} onBack={() => router.back()} />
 
           {detail?.url_image ? (
-            <Image
-              source={{ uri: detail.url_image }}
+            <FotoRemota
+              uri={detail.url_image}
               style={{ width: "100%", height: 192, borderRadius: 12, marginTop: 16 }}
-              resizeMode="cover"
             />
           ) : (
             <View className="mt-4 h-48 rounded-xl bg-vupth-surface items-center justify-center">

@@ -13,6 +13,7 @@ type Clipboard = typeof import("expo-clipboard");
 type Location = typeof import("expo-location");
 type ImagePicker = typeof import("expo-image-picker");
 type ImageManipulator = typeof import("expo-image-manipulator");
+type ExpoImage = typeof import("expo-image");
 
 function tentar<T>(carregar: () => T): T | null {
   try {
@@ -27,6 +28,15 @@ export const carregarLocation = (): Location | null => tentar(() => require("exp
 export const carregarImagePicker = (): ImagePicker | null => tentar(() => require("expo-image-picker"));
 export const carregarImageManipulator = (): ImageManipulator | null =>
   tentar(() => require("expo-image-manipulator"));
+
+// expo-image (melhoria de 02/10): o require do JS pode passar num binario sem o
+// ExpoImage e a falha so aparecer ao desenhar. Pergunta-se ao expo-modules-core
+// antes — ausente, null, e a FotoRemota cai no Image do RN (sem cache em disco).
+export const carregarExpoImage = (): ExpoImage | null =>
+  tentar(() => {
+    const { requireOptionalNativeModule } = require("expo-modules-core");
+    return requireOptionalNativeModule("ExpoImage") ? require("expo-image") : null;
+  });
 
 /** A frase quando o aparelho ainda nao tem o modulo. */
 export const SEM_MODULO = "Esta função precisa da versão nova do app. Atualize o app para usá-la.";

@@ -6,34 +6,63 @@ appId: ${APP_ID}
     env:
       PAPEL: professional
       EMAIL: ${output.EMAIL_PROF}
+    label: "02.01 · roda cadastrar"
 - extendedWaitUntil:
     visible: "Cadastro profissional"
     timeout: 30000
+    label: "02.02 · espera Cadastro profissional"
 - tapOn:
     id: "professional-name"
-- inputText: ${output.PROF}
-- hideKeyboard
-- tapOn: "Manicure"
-- tapOn: "Continuar"
+    label: "02.03 · toca em professional-name"
+- inputText:
+    text: ${output.PROF}
+    label: "02.04 · digita ${output.PROF}"
+- hideKeyboard:
+    label: "02.05 · fecha o teclado"
+- tapOn:
+    text: "Manicure"
+    label: "02.06 · toca em Manicure"
+- tapOn:
+    text: "Continuar"
+    label: "02.07 · toca em Continuar"
 - extendedWaitUntil:
     visible: "Onde você vai atender?"
     timeout: 20000
-- tapOn: "Numa loja que já existe"
+    label: "02.08 · espera Onde você vai atender?"
+- tapOn:
+    text: "Numa loja que já existe"
+    label: "02.09 · toca em Numa loja que já existe"
 - tapOn:
     id: "search-establishment"
-- inputText: ${output.LOJA}
-- pressKey: Enter
-- hideKeyboard
+    label: "02.10 · toca em search-establishment"
+- inputText:
+    text: ${output.LOJA}
+    label: "02.11 · digita ${output.LOJA}"
+- pressKey:
+    key: Enter
+    label: "02.12 · tecla Enter"
+# Sem hideKeyboard aqui: o Enter ja fecha o teclado, e o hideKeyboard do Maestro
+# sem teclado aberto vira VOLTAR no Android — a busca voltava para "Onde voce
+# vai atender?" e o cartao nunca aparecia (rodada de 02/10).
 # O nome da loja tambem esta no campo de busca: toca no CARTAO do resultado.
 - extendedWaitUntil:
     visible:
       id: "establishment-card"
     timeout: 20000
+    label: "02.13 · espera establishment-card"
 - tapOn:
     id: "establishment-card"
-- tapOn: "Solicitar vinculação"
+    label: "02.14 · toca em establishment-card"
+- tapOn:
+    text: "Solicitar vinculação"
+    label: "02.15 · toca em Solicitar vinculação"
 - extendedWaitUntil:
     visible: "Solicitação enviada"
     timeout: 20000
-- runFlow: ../apoio/fechar_aviso.yaml
-- runFlow: ../apoio/sair_profissional.yaml
+    label: "02.16 · espera Solicitação enviada"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "02.17 · roda fechar_aviso"
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "02.18 · roda sair_profissional"

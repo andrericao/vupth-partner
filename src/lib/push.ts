@@ -126,3 +126,42 @@ export function pushSupported(env: {
   if (env.executionEnvironment === "storeClient") return false; // Expo Go
   return true;
 }
+
+// ---------------------------------------------------------------------------
+// Notificacao de ciencia (Andre, 02/10): a que so INFORMA ganha um jeito de
+// fechar — "OK"; a de DECISAO segue com a tela dela (o modal de aceitar/recusar
+// o pedido de corte, o "quer fechar?"). Mesmo comportamento do Client
+// (52076672): com o app aberto, a de ciencia vira aviso com OK.
+
+/** Pushes que pedem uma decisao do profissional — o app ja tem a tela delas. */
+const PUSH_DE_DECISAO = new Set(["CUT_REQUESTED", "CLOSING_PROMPT"]);
+
+export function ehDeDecisao(type: unknown): boolean {
+  return typeof type === "string" && PUSH_DE_DECISAO.has(type);
+}
+
+/** O push com o app aberto vira aviso; sem texto nenhum, nao ha o que mostrar. */
+export function avisoDoPush(conteudo: {
+  title?: string | null;
+  body?: string | null;
+}): { titulo: string; mensagem: string } | null {
+  const titulo = (conteudo.title ?? "").trim();
+  const mensagem = (conteudo.body ?? "").trim();
+  if (!titulo && !mensagem) return null;
+  return { titulo: titulo || "VUPTH", mensagem };
+}
+
+/**
+ * Categoria com o botao "OK" na propria notificacao (app fechado). So aparece
+ * quando o Backend manda `categoryId: "CIENCIA"` no push — pedido em Solicitadas.
+ */
+export const CATEGORIA_CIENCIA = "CIENCIA";
+export const ACAO_OK = "OK";
+
+/** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Client (o "default" antigo nao sobe de importancia). */
+export const CANAL_ALERTAS = "alertas";
+
+/** O toque foi no botao OK: so fecha a notificacao, nao abre tela. */
+export function tocouNoOk(resposta: { actionIdentifier: string }): boolean {
+  return resposta.actionIdentifier === ACAO_OK;
+}

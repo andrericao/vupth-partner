@@ -26,6 +26,8 @@ export type Interval = {
   description: string;
   fixedStartTime: string | null;
   recurrencePattern: string | null;
+  /** Modelo B: passou do inicio maximo hoje sem iniciar e saiu do dia. So vem no GET. */
+  suppressedToday?: boolean | null;
 };
 
 type RecurringInput = {
@@ -50,6 +52,7 @@ type IntervalState = {
   updateInterval: (professionalId: string, intervalId: string, changes: UpdateInput) => Promise<void>;
   deleteInterval: (professionalId: string, intervalId: string) => Promise<void>;
   startInterval: (professionalId: string, intervalId: string) => Promise<void>;
+  startNextInterval: (professionalId: string) => Promise<void>;
   finishInterval: (professionalId: string, intervalId: string) => Promise<void>;
   skipInterval: (professionalId: string, intervalId: string) => Promise<void>;
   reset: () => void;
@@ -92,6 +95,14 @@ export const useIntervalStore = create<IntervalState>((set, get) => ({
 
   startInterval: async (professionalId, intervalId) => {
     await api.patch(`${basePath(professionalId)}/${intervalId}/start`);
+    await get().fetchIntervals(professionalId);
+  },
+
+  // "Iniciar refeicao" do Modelo B: o backend comeca a proxima nao feita, nao
+  // pulada e nao suprimida (almoco suprimido as 17:30 -> comeca a janta). Sem
+  // nenhuma: 409 INTERVAL_CONFLICT, que a tela mostra.
+  startNextInterval: async (professionalId) => {
+    await api.patch(`${basePath(professionalId)}/next/start`);
     await get().fetchIntervals(professionalId);
   },
 
