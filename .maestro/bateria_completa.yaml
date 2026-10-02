@@ -19,25 +19,53 @@ env:
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
 ---
-- evalScript: ${output.TAG = String(Date.now()).slice(-6)}
-- evalScript: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
-- evalScript: ${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}
-- evalScript: ${output.LOJA = 'Loja M' + output.TAG}
-- evalScript: ${output.PROF = 'Prof' + output.TAG}
+- evalScript:
+    script: ${output.TAG = String(Date.now()).slice(-6)}
+    label: "00.01 · calcula a etiqueta da rodada (TAG)"
+- evalScript:
+    script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
+    label: "00.02 · calcula o e-mail do dono"
+- evalScript:
+    script: ${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}
+    label: "00.03 · calcula o e-mail do profissional"
+- evalScript:
+    script: ${output.LOJA = 'Loja M' + output.TAG}
+    label: "00.04 · calcula o nome da loja"
+- evalScript:
+    script: ${output.PROF = 'Prof' + output.TAG}
+    label: "00.05 · calcula o nome do profissional"
 
 # O app abre na tela "preparando servidor" ate o staging responder (~50 s se
 # ele estava dormindo). O setup.sh ja o acorda; aqui so esperamos.
 - launchApp:
     clearState: true
+    label: "00.06 · abre o app"
 - extendedWaitUntil:
     visible: "Como você vai usar o Vupth?"
     timeout: 120000
+    label: "00.07 · espera Como você vai usar o Vupth?"
 
-- runFlow: etapas/01_dono_cadastra_a_loja.yaml
-- runFlow: etapas/02_profissional_pede_vinculo.yaml
-- runFlow: etapas/03_dono_aceita_o_vinculo.yaml
-- runFlow: etapas/04_profissional_monta_o_atendimento.yaml
-- runFlow: etapas/05_atende_a_fila.yaml
-- runFlow: etapas/06_meu_dia.yaml
-- runFlow: etapas/07_encaixe.yaml
-- runFlow: etapas/08_dono_confere.yaml
+- runFlow:
+    file: etapas/01_dono_cadastra_a_loja.yaml
+    label: "00.08 · roda 01_dono_cadastra_a_loja"
+- runFlow:
+    file: etapas/02_profissional_pede_vinculo.yaml
+    label: "00.09 · roda 02_profissional_pede_vinculo"
+- runFlow:
+    file: etapas/03_dono_aceita_o_vinculo.yaml
+    label: "00.10 · roda 03_dono_aceita_o_vinculo"
+- runFlow:
+    file: etapas/04_profissional_monta_o_atendimento.yaml
+    label: "00.11 · roda 04_profissional_monta_o_atendimento"
+- runFlow:
+    file: etapas/05_atende_a_fila.yaml
+    label: "00.12 · roda 05_atende_a_fila"
+- runFlow:
+    file: etapas/06_meu_dia.yaml
+    label: "00.13 · roda 06_meu_dia"
+- runFlow:
+    file: etapas/07_encaixe.yaml
+    label: "00.14 · roda 07_encaixe"
+- runFlow:
+    file: etapas/08_dono_confere.yaml
+    label: "00.15 · roda 08_dono_confere"

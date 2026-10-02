@@ -6,36 +6,56 @@ appId: ${APP_ID}
     file: ../apoio/status.yaml
     env:
       STATUS: indisponivel
-- assertVisible: "Você está: Fora.*"
+    label: "07.01 · roda status"
+- assertVisible:
+    text: "Você está: Fora.*"
+    label: "07.02 · confere Você está: Fora…"
 - runScript:
     file: ../scripts/pedido_de_encaixe.js
     env:
       EMAIL_PROF: ${output.EMAIL_PROF}
       TAG: ${output.TAG}
+    label: "07.03 · script pedido_de_encaixe"
 - tapOn:
     id: "aba-encaixes"
+    label: "07.04 · toca em aba-encaixes"
 - extendedWaitUntil:
     visible: ".*${output.CLIENTE_ENCAIXE}.*"
     timeout: 60000
-- tapOn: "Aceitar"
+    label: "07.05 · espera …${output.CLIENTE_ENCAIXE}…"
+- tapOn:
+    text: "Aceitar"
+    label: "07.06 · toca em Aceitar"
 - tapOn:
     id: "aba-fila"
+    label: "07.07 · toca em aba-fila"
 - extendedWaitUntil:
     visible: "Você está: Trabalhando.*"
     timeout: 20000
+    label: "07.08 · espera Você está: Trabalhando…"
 - extendedWaitUntil:
     visible: ${output.CLIENTE_ENCAIXE}
     timeout: 30000
-- tapOn: "Iniciar próximo"
+    label: "07.09 · espera ${output.CLIENTE_ENCAIXE}"
+- tapOn:
+    text: "Iniciar próximo"
+    label: "07.10 · toca em Iniciar próximo"
 - extendedWaitUntil:
     visible: "Finalizar"
     timeout: 20000
-- tapOn: "Finalizar"
+    label: "07.11 · espera Finalizar"
+- tapOn:
+    text: "Finalizar"
+    label: "07.12 · toca em Finalizar"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE_ENCAIXE}
     timeout: 20000
+    label: "07.13 · espera"
 - runFlow:
     file: ../apoio/status.yaml
     env:
       STATUS: indisponivel
-- runFlow: ../apoio/sair_profissional.yaml
+    label: "07.14 · roda status"
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "07.15 · roda sair_profissional"

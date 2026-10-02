@@ -4,21 +4,33 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "aba-relatorios"
+    label: "06.01 · toca em aba-relatorios"
 - extendedWaitUntil:
     visible: "Seu dia"
     timeout: 20000
+    label: "06.02 · espera Seu dia"
 - extendedWaitUntil:
     visible: "Você recebeu"
     timeout: 20000
+    label: "06.03 · espera Você recebeu"
 - scrollUntilVisible:
     element: ${output.CLIENTE1}
     direction: DOWN
-- assertVisible: "Finalizado"
+    label: "06.04 · rola ate ${output.CLIENTE1}"
+- assertVisible:
+    text: "Finalizado"
+    label: "06.05 · confere Finalizado"
 - scrollUntilVisible:
     element: "Retirados"
     direction: UP
-- tapOn: "Retirados"
+    label: "06.06 · rola ate Retirados"
+- tapOn:
+    text: "Retirados"
+    label: "06.07 · toca em Retirados"
 - scrollUntilVisible:
     element: ${output.CLIENTE2}
     direction: DOWN
-- assertVisible: "Retirado"
+    label: "06.08 · rola ate ${output.CLIENTE2}"
+- assertVisible:
+    text: "Retirado"
+    label: "06.09 · confere Retirado"
