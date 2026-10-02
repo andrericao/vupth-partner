@@ -1,5 +1,6 @@
 # O dono ve o numero da solicitacao (aba Menu, Profissionais, Ver
-# solicitacoes) e aceita. QA 17.2.
+# solicitacoes) e aceita. QA 17.2. Depois recusa um segundo profissional e o
+# convida pela busca (fluxos criticos, DEC-7).
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -47,6 +48,67 @@ appId: ${APP_ID}
 - assertNotVisible:
     id: "menu-badge-profissionais"
     label: "03.13 · confere que nao tem menu-badge-profissionais"
+
+# Fluxos criticos (DEC-7): um segundo profissional pede vinculo pela API; o
+# dono RECUSA e depois o CONVIDA pela busca.
+- runScript:
+    file: ../scripts/vinculo_para_recusar.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+    label: "03.14 · script vinculo_para_recusar"
+- tapOn:
+    text: "Profissionais"
+    label: "03.15 · toca em Profissionais"
+- tapOn:
+    id: "path-requests"
+    label: "03.16 · toca em path-requests"
+- extendedWaitUntil:
+    visible: ${output.PROF_RECUSADO}
+    timeout: 20000
+    label: "03.17 · espera ${output.PROF_RECUSADO}"
+- tapOn:
+    text: "Rejeitar"
+    label: "03.18 · toca em Rejeitar"
+- extendedWaitUntil:
+    visible: "Rejeitado"
+    timeout: 20000
+    label: "03.19 · espera Rejeitado (historico)"
+- assertNotVisible:
+    text: "Rejeitar"
+    label: "03.20 · confere que nao tem pendente"
+- back:
+    label: "03.21 · volta para Profissionais"
+- tapOn:
+    id: "path-invite"
+    label: "03.22 · toca em Convidar um profissional"
+- tapOn:
+    text: "Nome do profissional"
+    label: "03.23 · toca na busca"
+- inputText:
+    text: ${output.PROF_RECUSADO}
+    label: "03.24 · digita ${output.PROF_RECUSADO}"
+# Sem hideKeyboard: o Enter fecha o teclado (ver etapa 02).
+- pressKey:
+    key: Enter
+    label: "03.25 · tecla Enter"
+- extendedWaitUntil:
+    visible: "Convidar"
+    timeout: 20000
+    label: "03.26 · espera o botao Convidar"
+- tapOn:
+    text: "Convidar"
+    label: "03.27 · toca em Convidar"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "03.28 · fecha o aviso Convite enviado"
+- extendedWaitUntil:
+    visible: "Convite enviado"
+    timeout: 20000
+    label: "03.29 · espera Convite enviado"
+- tapOn:
+    id: "aba-menu"
+    label: "03.30 · toca em aba-menu"
 - runFlow:
     file: ../apoio/sair_dono.yaml
-    label: "03.14 · roda sair_dono"
+    label: "03.31 · roda sair_dono"

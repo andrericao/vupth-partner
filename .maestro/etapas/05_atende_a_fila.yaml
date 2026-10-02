@@ -69,3 +69,61 @@ appId: ${APP_ID}
     notVisible: ${output.CLIENTE2}
     timeout: 20000
     label: "05.17 · espera"
+
+# Fluxos criticos (DEC-7): Opcoes da fila — Intervalo e volta, Fechar fila
+# (confirma) e Reabrir. Termina em Trabalhando, com a fila aberta.
+- tapOn:
+    text: "Opções da fila"
+    label: "05.18 · toca em Opções da fila"
+- tapOn:
+    text: "Intervalo"
+    label: "05.19 · toca em Intervalo"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.20 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Você está: Intervalo.*"
+    timeout: 20000
+    label: "05.21 · espera Você está: Intervalo"
+- tapOn:
+    text: "Trabalhando"
+    label: "05.22 · toca em Trabalhando"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.23 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Você está: Trabalhando.*"
+    timeout: 20000
+    label: "05.24 · espera Você está: Trabalhando"
+- tapOn:
+    text: "Fechar fila"
+    label: "05.25 · toca em Fechar fila"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "05.26 · confirma Fechar fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.27 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Reabrir fila"
+    timeout: 20000
+    label: "05.28 · espera Reabrir fila"
+- tapOn:
+    text: "Reabrir fila"
+    label: "05.29 · toca em Reabrir fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.30 · roda fechar_aviso"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.31 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: "Fechar fila"
+    timeout: 20000
+    label: "05.32 · espera Fechar fila (fila aberta)"
+- assertVisible:
+    text: "Você está: Trabalhando.*"
+    label: "05.33 · confere Você está: Trabalhando"
+- tapOn:
+    id: "aba-fila"
+    label: "05.34 · toca em aba-fila"

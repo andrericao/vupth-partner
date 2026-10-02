@@ -1,5 +1,6 @@
-# Fora: a fila fecha e a loja fecha junto. Um cliente pede encaixe pela API;
-# o profissional aceita e passa a Trabalhando (QA 19.2). Depois atende e sai.
+# Fora: a fila fecha e a loja fecha junto. Um cliente pede encaixe pela API e o
+# profissional RECUSA (fluxo critico, DEC-7); outro pede, o profissional aceita
+# e passa a Trabalhando (QA 19.2). Depois atende e sai.
 appId: ${APP_ID}
 ---
 - runFlow:
@@ -15,47 +16,68 @@ appId: ${APP_ID}
     env:
       EMAIL_PROF: ${output.EMAIL_PROF}
       TAG: ${output.TAG}
-    label: "07.03 · script pedido_de_encaixe"
+      QUEM: Recusado
+    label: "07.03 · script pedido_de_encaixe (o que sera recusado)"
 - tapOn:
     id: "aba-encaixes"
     label: "07.04 · toca em aba-encaixes"
 - extendedWaitUntil:
+    visible: ".*${output.CLIENTE_RECUSADO}.*"
+    timeout: 60000
+    label: "07.05 · espera …${output.CLIENTE_RECUSADO}…"
+- tapOn:
+    text: "Recusar"
+    label: "07.06 · toca em Recusar"
+- extendedWaitUntil:
+    notVisible: ".*${output.CLIENTE_RECUSADO}.*"
+    timeout: 20000
+    label: "07.07 · espera o pedido sumir"
+- assertVisible:
+    text: "Nenhum pedido de encaixe"
+    label: "07.08 · confere a lista vazia"
+- runScript:
+    file: ../scripts/pedido_de_encaixe.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+    label: "07.09 · script pedido_de_encaixe (o que sera aceito)"
+- extendedWaitUntil:
     visible: ".*${output.CLIENTE_ENCAIXE}.*"
     timeout: 60000
-    label: "07.05 · espera …${output.CLIENTE_ENCAIXE}…"
+    label: "07.10 · espera …${output.CLIENTE_ENCAIXE}…"
 - tapOn:
     text: "Aceitar"
-    label: "07.06 · toca em Aceitar"
+    label: "07.11 · toca em Aceitar"
 - tapOn:
     id: "aba-fila"
-    label: "07.07 · toca em aba-fila"
+    label: "07.12 · toca em aba-fila"
 - extendedWaitUntil:
     visible: "Você está: Trabalhando.*"
     timeout: 20000
-    label: "07.08 · espera Você está: Trabalhando…"
+    label: "07.13 · espera Você está: Trabalhando…"
 - extendedWaitUntil:
     visible: ${output.CLIENTE_ENCAIXE}
     timeout: 30000
-    label: "07.09 · espera ${output.CLIENTE_ENCAIXE}"
+    label: "07.14 · espera ${output.CLIENTE_ENCAIXE}"
 - tapOn:
     text: "Iniciar próximo"
-    label: "07.10 · toca em Iniciar próximo"
+    label: "07.15 · toca em Iniciar próximo"
 - extendedWaitUntil:
     visible: "Finalizar"
     timeout: 20000
-    label: "07.11 · espera Finalizar"
+    label: "07.16 · espera Finalizar"
 - tapOn:
     text: "Finalizar"
-    label: "07.12 · toca em Finalizar"
+    label: "07.17 · toca em Finalizar"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE_ENCAIXE}
     timeout: 20000
-    label: "07.13 · espera"
+    label: "07.18 · espera"
 - runFlow:
     file: ../apoio/status.yaml
     env:
       STATUS: indisponivel
-    label: "07.14 · roda status"
+    label: "07.19 · roda status"
 - runFlow:
     file: ../apoio/sair_profissional.yaml
-    label: "07.15 · roda sair_profissional"
+    label: "07.20 · roda sair_profissional"
