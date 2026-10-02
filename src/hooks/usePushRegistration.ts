@@ -15,7 +15,7 @@ import {
   tocouNoOk,
   CATEGORIA_CIENCIA,
   ACAO_OK,
-  CANAL_ALTA,
+  CANAL_ALERTAS,
 } from "@lib/push";
 import { useAuthStore } from "@store/auth.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
@@ -82,9 +82,9 @@ export function usePushRegistration() {
           importance: Notifications.AndroidImportance.HIGH,
         }).catch(() => {});
         // ⚠️ O Android NAO muda a importancia de um canal que ja existe: quem
-        // instalou antes segue com o "default" em DEFAULT. O canal "alta" nasce
-        // HIGH em todo aparelho — o Backend passa a mandar channelId "alta".
-        Notifications.setNotificationChannelAsync(CANAL_ALTA, {
+        // instalou antes segue com o "default" em DEFAULT. O canal "alertas" nasce
+        // HIGH em todo aparelho — o Backend passa a mandar channelId "alertas".
+        Notifications.setNotificationChannelAsync(CANAL_ALERTAS, {
           name: "Avisos",
           importance: Notifications.AndroidImportance.HIGH,
         }).catch(() => {});

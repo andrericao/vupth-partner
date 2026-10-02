@@ -14,7 +14,7 @@ import {
   tocouNoOk,
   CATEGORIA_CIENCIA,
   ACAO_OK,
-  CANAL_ALTA,
+  CANAL_ALERTAS,
 } from "../push";
 
 jest.mock("expo-secure-store", () => ({
@@ -284,7 +284,7 @@ describe("notificacao de ciencia", () => {
 
   it("o botao OK da notificacao so fecha — nao abre tela", () => {
     expect(CATEGORIA_CIENCIA).toBe("CIENCIA");
-    expect(CANAL_ALTA).toBe("alta");
+    expect(CANAL_ALERTAS).toBe("alertas");
     expect(tocouNoOk({ actionIdentifier: ACAO_OK })).toBe(true);
     expect(tocouNoOk({ actionIdentifier: "expo.modules.notifications.actions.DEFAULT" })).toBe(false);
   });

@@ -158,8 +158,8 @@ export function avisoDoPush(conteudo: {
 export const CATEGORIA_CIENCIA = "CIENCIA";
 export const ACAO_OK = "OK";
 
-/** Canal Android HIGH novo (o "default" antigo nao sobe de importancia). */
-export const CANAL_ALTA = "alta";
+/** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Client (o "default" antigo nao sobe de importancia). */
+export const CANAL_ALERTAS = "alertas";
 
 /** O toque foi no botao OK: so fecha a notificacao, nao abre tela. */
 export function tocouNoOk(resposta: { actionIdentifier: string }): boolean {
