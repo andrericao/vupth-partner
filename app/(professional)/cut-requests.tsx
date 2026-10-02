@@ -139,7 +139,7 @@ export default function CutRequestsScreen() {
                       >
                         <Clock size={12} color={urgent ? "#FFFFFF" : "#454745"} />
                         <Text
-                          className={`font-mono text-[11px] ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
+                          className={`font-mono text-f11 ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
                         >
                           {mins} min
                         </Text>
@@ -147,7 +147,7 @@ export default function CutRequestsScreen() {
                     </View>
   
                     {time && (
-                      <Text className="font-body text-[11px] text-vupth-textSecondary">
+                      <Text className="font-body text-f11 text-vupth-textSecondary">
                         Pediu às {time} · entra no fim da sua fila
                       </Text>
                     )}

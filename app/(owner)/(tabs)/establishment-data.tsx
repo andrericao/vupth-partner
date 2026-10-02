@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { FotoEditavel } from "@components/FotoEditavel";
 import { CompartilharPerfil } from "@components/CompartilharPerfil";
@@ -40,6 +40,14 @@ export default function EstablishmentDataScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   // A foto da loja (Andre, 26/09) — url_image, que ate aqui ninguem preenchia.
   const [fotoDaLoja, setFotoDaLoja] = useState<string | null>(establishment?.url_image ?? null);
+  // A lista /mine pode nao trazer a foto: o detalhe traz (urlImage/url_image).
+  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
+  useEffect(() => {
+    if (!establishment?.id) return;
+    fetchEstablishmentById(establishment.id)
+      .then((d) => setFotoDaLoja((atual) => atual ?? d.url_image ?? null))
+      .catch(() => {});
+  }, [establishment?.id, fetchEstablishmentById]);
   const aoMudarFoto = (uri: string | null) => {
     setFotoDaLoja(uri);
     const atual = useEstablishmentStore.getState().establishment;

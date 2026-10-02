@@ -118,7 +118,7 @@ export function ScreenHeader({ title, subtitle, onBack, action }: Props) {
       {subtitle ? (
         <Text
           numberOfLines={2}
-          className={`font-body text-[13px] text-vupth-textSecondary mt-1 ${onBack ? "ml-[52px]" : ""}`}
+          className={`font-body text-f13 text-vupth-textSecondary mt-1 ${onBack ? "ml-[52px]" : ""}`}
         >
           {subtitle}
         </Text>

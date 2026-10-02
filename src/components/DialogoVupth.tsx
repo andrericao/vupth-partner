@@ -1,4 +1,5 @@
 import { Modal, View, Text, Pressable, ScrollView } from "react-native";
+import { useFs } from "@store/fonte.store";
 import { useEffect } from "react";
 
 import { useDialogoStore } from "@store/dialogo.store";
@@ -36,6 +37,7 @@ const DANGER = "#B3261E";
 const TEXT_SECONDARY = "#454745";
 
 export function DialogoVupth() {
+  const fs = useFs();
   const atual = useDialogoStore((s) => s.atual);
   const responder = useDialogoStore((s) => s.responder);
   const marcarHost = useDialogoStore((s) => s.marcarHost);
@@ -84,7 +86,7 @@ export function DialogoVupth() {
           <Text
             style={{
               fontFamily: "Archivo_800ExtraBold",
-              fontSize: 18,
+              fontSize: fs(18),
               letterSpacing: -0.4,
               color: FOREST,
             }}
@@ -99,8 +101,8 @@ export function DialogoVupth() {
               <Text
                 style={{
                   fontFamily: "Inter_400Regular",
-                  fontSize: 14,
-                  lineHeight: 20,
+                  fontSize: fs(14),
+                  lineHeight: fs(20),
                   color: TEXT_SECONDARY,
                 }}
               >
@@ -135,7 +137,7 @@ export function DialogoVupth() {
                   <Text
                     style={{
                       fontFamily: "Archivo_700Bold",
-                      fontSize: 16,
+                      fontSize: fs(16),
                       color: perigo ? DANGER : FOREST,
                     }}
                   >

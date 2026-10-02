@@ -1,4 +1,4 @@
-import * as Clipboard from "expo-clipboard";
+import { carregarClipboard } from "@lib/modulosNativos";
 import { avisar } from "@lib/confirmar";
 
 /**
@@ -7,6 +7,9 @@ import { avisar } from "@lib/confirmar";
  */
 export async function copiarComAviso(texto: string, oQue: string): Promise<void> {
   try {
+    // Carregado na hora: sem o modulo no binario, cai no "copie a mao".
+    const Clipboard = carregarClipboard();
+    if (!Clipboard) throw new Error("sem modulo");
     await Clipboard.setStringAsync(texto);
     await avisar({ titulo: `${oQue} copiado`, mensagem: texto });
   } catch {

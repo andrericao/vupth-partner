@@ -42,8 +42,8 @@ function Opcao({
         <Icone size={20} color="#163300" />
       </View>
       <View className="flex-1">
-        <Text className="font-heading text-[15px] text-vupth-forest">{titulo}</Text>
-        <Text className="font-body text-[13px] text-vupth-textSecondary mt-0.5">{descricao}</Text>
+        <Text className="font-heading text-f15 text-vupth-forest">{titulo}</Text>
+        <Text className="font-body text-f13 text-vupth-textSecondary mt-0.5">{descricao}</Text>
       </View>
     </Pressable>
   );

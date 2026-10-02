@@ -33,7 +33,7 @@ export function StatCard({ label, value, hero = false, flex }: Props) {
       className={`p-4 rounded-card ${hero ? "bg-vupth-green" : "bg-vupth-surface"}`}
     >
       {/* `font-display` (Archivo ExtraBold) e o token de NUMERO da marca. */}
-      <Text className="font-display text-[26px] text-vupth-forest">{value}</Text>
+      <Text className="font-display text-f26 text-vupth-forest">{value}</Text>
       <Text
         className={`font-body text-xs mt-1 ${
           hero ? "text-vupth-forest" : "text-vupth-textSecondary"

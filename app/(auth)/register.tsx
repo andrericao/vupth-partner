@@ -96,10 +96,10 @@ export default function RegisterScreen() {
               cliquei no lugar certo?". Sem papel (link direto), cai no
               generico. */}
           <View className="mt-10 gap-2">
-            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+            <Text className="font-display text-f13 tracking-[2px] text-vupth-forest">
               VUPTH
             </Text>
-            <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+            <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
               {role === "owner"
                 ? "Criar conta de dono"
                 : role === "professional"
@@ -170,12 +170,12 @@ export default function RegisterScreen() {
           <View className="flex-1 justify-end gap-4 mt-8">
             <NwButton title="Criar conta" onPress={handleSubmit} isLoading={isLoading} testID="register-submit" />
             <View className="flex-row justify-center items-center gap-1.5">
-              <Text className="font-body text-[13px] text-vupth-textSecondary">Já é cadastrado?</Text>
+              <Text className="font-body text-f13 text-vupth-textSecondary">Já é cadastrado?</Text>
               <Pressable
                 onPress={() => router.push(`/(auth)/login?role=${role ?? ""}` as any)}
                 testID="go-login"
               >
-                <Text className="font-heading text-[13px] text-vupth-forest">Entrar</Text>
+                <Text className="font-heading text-f13 text-vupth-forest">Entrar</Text>
               </Pressable>
             </View>
           </View>

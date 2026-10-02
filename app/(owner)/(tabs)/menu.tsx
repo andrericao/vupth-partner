@@ -13,7 +13,7 @@ import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
-import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight,
+import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
   Info,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
@@ -79,7 +79,7 @@ function MenuItem({
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
+      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
         {label}
       </Text>
       <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
@@ -249,6 +249,14 @@ export default function OwnerMenuScreen() {
                 ninguem procura configuracao, procura a saida (correcao dele,
                 11/09). */}
             <Grupo label="SISTEMA">
+              <MenuItem
+                icon={Palette}
+                label="Aparência"
+                hint="tema e tamanho da fonte"
+                onPress={() =>
+                  router.push({ pathname: "/(professional)/aparencia", params: { from: "owner" } } as any)
+                }
+              />
               <MenuItem
                 icon={Info}
                 label="Versão do app"

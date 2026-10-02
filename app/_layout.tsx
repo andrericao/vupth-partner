@@ -1,6 +1,7 @@
 import "../global.css"; // NativeWind: habilita as classes Tailwind
 import { useEffect } from "react";
-import { Alert, LogBox, Platform } from "react-native";
+import { Alert, LogBox, Platform, View } from "react-native";
+import { vars } from "nativewind";
 import { StatusBar } from "expo-status-bar";
 import { Slot } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -21,6 +22,8 @@ import { instalarAlertWeb } from "../web-shims/alert";
 import { pedirParaNaoTraduzir } from "@lib/naoTraduzir";
 import { instalarDialogoNativo } from "@lib/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
+import { useFonteStore } from "@store/fonte.store";
+import { varsDaFonte } from "@lib/fonte";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
@@ -85,6 +88,16 @@ export default function RootLayout() {
   // Push: registra o device quando autenticado e trata o toque na notificacao.
   usePushRegistration();
 
+  // "Tamanho da fonte" (Andre, 26/09, igual ao Client): o passo escolhido vira
+  // as variaveis de tamanho que as classes de texto leem (src/lib/fonte.ts). Sem
+  // remontar a arvore: remontar levaria a pessoa de volta a tela inicial — os
+  // tamanhos escritos em style acompanham pelo useFs.
+  const passoDaFonte = useFonteStore((s) => s.passo);
+  const restaurarFonte = useFonteStore((s) => s.restaurar);
+  useEffect(() => {
+    restaurarFonte();
+  }, [restaurarFonte]);
+
   useEffect(() => {
     if (Platform.OS === "android") {
       // Com edge-to-edge, setBackgroundColorAsync nao e suportado (vira no-op e
@@ -112,11 +125,13 @@ export default function RootLayout() {
           {/* O erro entra no portao de proposito: fonte que nao carrega deve
               degradar para a fonte do sistema, nunca prender o app numa tela
               de carregamento. Foi o spinner eterno de 2026-08-27. */}
-          {fontLoaded || fontError ? <Slot /> : <Loading />}
-          {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
-              nao pode ser coberto por ela. Fica fora do portao das fontes de
-              proposito — erro no boot precisa aparecer mesmo antes delas. */}
-          <DialogoVupth />
+          <View style={[{ flex: 1 }, vars(varsDaFonte(passoDaFonte))]}>
+            {fontLoaded || fontError ? <Slot /> : <Loading />}
+            {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
+                nao pode ser coberto por ela. Fica fora do portao das fontes de
+                proposito — erro no boot precisa aparecer mesmo antes delas. */}
+            <DialogoVupth />
+          </View>
         </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

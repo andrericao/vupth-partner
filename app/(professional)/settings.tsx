@@ -17,7 +17,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2 } from "lucide-react-native";
+  Info, Share2, Palette } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -89,7 +89,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
 function Grupo({ label, children }: { label: string; children: ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-[11px] font-bold tracking-wider text-vupth-textSecondary">
+      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
       <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
@@ -277,6 +277,12 @@ export default function ProfessionalSettingsScreen() {
               abaixo do "Sair da conta", que e o fim da tela — la nao se procura
               configuracao, se procura a saida (correcao dele, 11/09). */}
           <Grupo label="Sistema">
+            <MenuCard
+              icon={Palette}
+              title="Aparência"
+              hint="tema e tamanho da fonte"
+              onPress={() => router.push("/(professional)/aparencia" as any)}
+            />
             <MenuCard
               icon={Info}
               title="Versão do app"

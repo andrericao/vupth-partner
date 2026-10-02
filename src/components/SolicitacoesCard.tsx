@@ -41,7 +41,7 @@ export function SolicitacoesCard({ resumo, onPress }: Props) {
         <Titulo nivel={2}>{resumo.titulo}</Titulo>
       </View>
 
-      <Text className="font-body text-[14px] text-vupth-forest">{resumo.quem}</Text>
+      <Text className="font-body text-f14 text-vupth-forest">{resumo.quem}</Text>
 
       <View className="flex-row items-center justify-between mt-1">
         {/* O relogio e do MAIS urgente: e ele que decide se da tempo. */}
@@ -51,7 +51,7 @@ export function SolicitacoesCard({ resumo, onPress }: Props) {
             : `expira em ${resumo.expiraEm} min`}
         </Text>
         <View className="flex-row items-center gap-1">
-          <Text className="font-heading text-[13px] text-vupth-forest">Ver solicitações</Text>
+          <Text className="font-heading text-f13 text-vupth-forest">Ver solicitações</Text>
           <ArrowRight size={15} color="#163300" />
         </View>
       </View>

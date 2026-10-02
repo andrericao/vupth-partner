@@ -1,4 +1,5 @@
-import * as Location from "expo-location";
+import type * as Location from "expo-location";
+import { carregarLocation, SEM_MODULO } from "@lib/modulosNativos";
 
 // "Usar minha localizacao" no endereco da loja (build 1.4.0). Sem coordenada a
 // loja some da busca por proximidade (S25); o backend aceita latitude e
@@ -56,7 +57,8 @@ type Dep = Pick<
 export async function pegarLocalizacao(
   deps: { location?: Dep } = {}
 ): Promise<{ coordenada: { latitude: number; longitude: number }; endereco: EnderecoSugerido | null }> {
-  const L = deps.location ?? Location;
+  const L = deps.location ?? carregarLocation();
+  if (!L) throw new Error(SEM_MODULO);
   const permissao = await L.requestForegroundPermissionsAsync();
   if (!permissao.granted) {
     throw new Error("Permita o acesso à localização para usar a posição da loja.");

@@ -125,13 +125,13 @@ export default function ForgotPasswordScreen() {
               recuperando a senha, esta criando uma nova. Mesma decisão do app
               do cliente. */}
           <View className="mt-10 gap-2">
-            <Text className="font-display text-[13px] tracking-[2px] text-vupth-forest">
+            <Text className="font-display text-f13 tracking-[2px] text-vupth-forest">
               VUPTH
             </Text>
-            <Text className="font-display text-[30px] leading-[32px] text-vupth-forest">
+            <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
               {step === "email" ? "Esqueceu a senha?" : "Nova senha"}
             </Text>
-            <Text className="font-body text-[15px] text-vupth-textSecondary">
+            <Text className="font-body text-f15 text-vupth-textSecondary">
               {step === "email"
                 ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
                 : "Use o código que enviamos e escolha uma senha nova."}

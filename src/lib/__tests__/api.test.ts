@@ -38,6 +38,27 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/senha atual/i);
   });
 
+  // 🔴 Andre, 26/09: ao abrir a fila e ao mudar para Fora, a tela mostrou
+  // "NullPointerException: Cannot invoke ... because candidate is null" — um
+  // erro interno do servidor (500), com a mensagem crua do Java. Erro 5xx sem
+  // codigo conhecido nao e frase para o usuario.
+  it("500 sem codigo conhecido: frase de servidor, nunca a mensagem crua", () => {
+    const err = {
+      response: {
+        status: 500,
+        data: { message: 'NullPointerException: Cannot invoke "java.time.OffsetDateTime.isBefore"' },
+      },
+    };
+    const m = getApiErrorMessage(err, "fallback");
+    expect(m).toMatch(/servidor teve um problema/);
+    expect(m).not.toMatch(/NullPointer/);
+  });
+
+  it("5xx com codigo conhecido continua usando a traducao do codigo", () => {
+    const err = { response: { status: 503, data: { code: "OPERATION_MODE_LOCKED" } } };
+    expect(getApiErrorMessage(err, "fallback")).toMatch(/começo do expediente/);
+  });
+
   it("OPERATION_MODE_LOCKED (so agenda depois do 1o cliente) => explica quando da para trocar", () => {
     const err = { response: { status: 409, data: { code: "OPERATION_MODE_LOCKED" } } };
     expect(getApiErrorMessage(err, "fallback")).toMatch(/começo do expediente/);

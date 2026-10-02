@@ -70,7 +70,7 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
           />
         </View>
 
-        <Text className="font-body text-[11px] font-semibold text-vupth-forest mt-2.5">
+        <Text className="font-body text-f11 font-semibold text-vupth-forest mt-2.5">
           {passos} para {goalNoun}.
         </Text>
       </Pressable>

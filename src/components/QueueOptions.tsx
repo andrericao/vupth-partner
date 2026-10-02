@@ -56,7 +56,7 @@ const STATUS: {
 // alem do anti-padrao React de remontar a subarvore).
 function Section({ title }: { title: string }) {
   return (
-    <Text className="font-heading text-[10px] text-vupth-textSecondary tracking-widest mt-5 mb-2">
+    <Text className="font-heading text-f10 text-vupth-textSecondary tracking-widest mt-5 mb-2">
       {title.toUpperCase()}
     </Text>
   );

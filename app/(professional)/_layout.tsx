@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { useFs } from "@store/fonte.store";
 import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { rotulosCabem } from "@lib/rotulosDaAba";
@@ -27,6 +28,7 @@ import { hasAnyPending } from "@lib/completion";
 const HIDDEN = { href: null } as const;
 
 export default function ProfessionalLayout() {
+  const fs = useFs();
   const insets = useSafeAreaInsets();
   // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
   // o icone (o que iOS e Android fazem). So funciona porque a pilula do DS5.1
@@ -71,7 +73,7 @@ export default function ProfessionalLayout() {
         },
         tabBarLabelStyle: {
           fontFamily: "Inter_400Regular",
-          fontSize: 11,
+          fontSize: fs(11),
           lineHeight: 15,
         },
       }}
@@ -153,6 +155,7 @@ export default function ProfessionalLayout() {
           para o trabalho do dia, e um profissional nao tem o que fazer ali.
           Relatado pelo Andre no teste de 14/09. */}
       <Tabs.Screen name="sistema" options={HIDDEN} />
+      <Tabs.Screen name="aparencia" options={HIDDEN} />
       {/* PILOTO Gluestack v2 (NativeWind) — rota temporaria, remover ao concluir */}
     </Tabs>
   );

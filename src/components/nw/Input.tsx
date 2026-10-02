@@ -50,7 +50,7 @@ export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "wo
 
   return (
     <View className="mb-3 w-full">
-      <Text className="font-body text-[13px] font-medium text-vupth-textPrimary mb-2">
+      <Text className="font-body text-f13 font-medium text-vupth-textPrimary mb-2">
         {label}
       </Text>
       {/* `min-h`, e nao `h`: altura cravada corta o texto digitado quando a
