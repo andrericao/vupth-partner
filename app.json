@@ -2,7 +2,7 @@
   "expo": {
     "name": "vupth parceiros",
     "slug": "vupth-partner",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "scheme": "vupth-partner",
     "icon": "./assets/icon.png",
     "plugins": [
@@ -33,7 +33,7 @@
     },
     "android": {
       "package": "com.vupth.partner",
-      "versionCode": 5,
+      "versionCode": 6,
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",

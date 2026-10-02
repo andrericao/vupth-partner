@@ -1,4 +1,5 @@
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { FotoRemota } from "@components/FotoRemota";
 
 /** "Ana Maria Souza" -> "AS"; sem nome -> "?". */
 export function iniciais(nome?: string | null): string {
@@ -24,7 +25,7 @@ type Props = {
 export function Avatar({ nome, uri, tamanho = 72, onPress, rotulo, testID = "avatar" }: Props) {
   const estilo = { width: tamanho, height: tamanho, borderRadius: tamanho / 2 };
   const conteudo = uri ? (
-    <Image testID={`${testID}-foto`} source={{ uri }} style={estilo} accessibilityIgnoresInvertColors />
+    <FotoRemota testID={`${testID}-foto`} uri={uri} style={estilo} />
   ) : (
     <View style={estilo} className="bg-vupth-green items-center justify-center">
       <Text className="font-display text-vupth-forest" style={{ fontSize: tamanho * 0.33 }}>
