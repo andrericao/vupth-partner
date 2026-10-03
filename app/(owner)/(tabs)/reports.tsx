@@ -103,7 +103,7 @@ export default function OwnerReportsScreen() {
           ))}
         </View>
 
-        <ExpedienteCard />
+        <ExpedienteCard periodo={period} workdays={report?.workdays} />
 
         {errorMsg && (
           <View className="bg-vupth-surface p-4 rounded-card mt-4">
