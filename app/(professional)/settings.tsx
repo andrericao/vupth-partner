@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette } from "lucide-react-native";
+  Info, Share2, Palette, Store } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -274,9 +274,20 @@ export default function ProfessionalSettingsScreen() {
               hint={professional?.establishment_name ?? "não vinculado — buscar estabelecimento"}
               badge={pendingInvites}
               dot={vinculoDot}
-              last
+              last={!!isOwner}
               onPress={() => router.push("/(professional)/settings-vinculo" as any)}
             />
+            {/* S23 (PAR-7): a porta do profissional que abre a propria loja.
+                Quem ja e dono troca de area pelo "Área do dono", acima. */}
+            {!isOwner && (
+              <MenuCard
+                icon={Store}
+                title="Abrir meu estabelecimento"
+                hint="cadastre a sua loja — você vira dono também"
+                last
+                onPress={() => router.push("/(owner)/onboarding/establishment?from=professional" as any)}
+              />
+            )}
           </Grupo>
   
           {/* Sair da conta fica solto e em vermelho, fora dos grupos: e a unica
