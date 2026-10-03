@@ -11,9 +11,12 @@ var esperados = String(typeof COMMIT === "undefined" ? "" : COMMIT)
   .filter(function (c) { return c; });
 var instalado = String(typeof INSTALADO === "undefined" ? "" : INSTALADO).trim();
 
+// Rodada fora do setup.sh (maestro test direto): sem o esperado, nao ha o que
+// conferir — avisa e segue, em vez de parar a bateria (Client parou assim, 03/10).
 if (!esperados.length) {
-  throw new Error("faltou o commit esperado: rode pelo setup.sh (bash .maestro/setup.sh), que acha o commit sozinho");
-}
+  console.log("AVISO: sem COMMIT esperado (rodada fora do setup.sh) — versao nao conferida; instalado: " + (instalado || "(sem commit)"));
+  output.COMMIT_CONFERIDO = "";
+} else {
 var confere = esperados.some(function (esperado) {
   return instalado && (instalado.indexOf(esperado) === 0 || esperado.indexOf(instalado) === 0);
 });
@@ -24,3 +27,4 @@ if (!confere) {
   );
 }
 output.COMMIT_CONFERIDO = instalado;
+}
