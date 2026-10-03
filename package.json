@@ -98,6 +98,7 @@
       "src/components/FotoEditavel.tsx",
       "src/components/Skeleton.tsx",
     "src/components/ExpedienteCard.tsx",
+      "src/components/CommitDoCodigo.tsx",
       "!src/**/__tests__/**",
       "!src/**/*.d.ts",
       "!src/lib/types.ts",

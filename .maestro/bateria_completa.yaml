@@ -18,6 +18,7 @@ env:
   APP_ID: com.vupth.partner.preview
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
+  COMMIT: ""
 ---
 - evalScript:
     script: ${output.TAG = String(Date.now()).slice(-6)}
@@ -45,27 +46,47 @@ env:
     timeout: 120000
     label: "00.07 · espera Como você vai usar o Vupth?"
 
+# Confere a versao antes de tudo (Andre, 03/10). O clearState apaga o OTA que
+# o aparelho tinha: a 1a abertura roda o bundle do APK e baixa o OTA por tras;
+# a 2a abertura o aplica. So entao o commit do rodape e o do codigo novo.
+- stopApp:
+    label: "00.08 · fecha o app (o OTA baixado entra na proxima abertura)"
+- launchApp:
+    label: "00.09 · abre o app de novo"
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 120000
+    label: "00.10 · espera Como você vai usar o Vupth?"
+- copyTextFrom:
+    id: "app-commit"
+    label: "00.11 · le o commit do app (rodape da entrada)"
+- runScript:
+    file: scripts/confere_versao.js
+    env:
+      INSTALADO: ${maestro.copiedText}
+    label: "00.12 · confere a versão: o commit instalado é o ${COMMIT}?"
+
 - runFlow:
     file: etapas/01_dono_cadastra_a_loja.yaml
-    label: "00.08 · roda 01_dono_cadastra_a_loja"
+    label: "00.13 · roda 01_dono_cadastra_a_loja"
 - runFlow:
     file: etapas/02_profissional_pede_vinculo.yaml
-    label: "00.09 · roda 02_profissional_pede_vinculo"
+    label: "00.14 · roda 02_profissional_pede_vinculo"
 - runFlow:
     file: etapas/03_dono_aceita_o_vinculo.yaml
-    label: "00.10 · roda 03_dono_aceita_o_vinculo"
+    label: "00.15 · roda 03_dono_aceita_o_vinculo"
 - runFlow:
     file: etapas/04_profissional_monta_o_atendimento.yaml
-    label: "00.11 · roda 04_profissional_monta_o_atendimento"
+    label: "00.16 · roda 04_profissional_monta_o_atendimento"
 - runFlow:
     file: etapas/05_atende_a_fila.yaml
-    label: "00.12 · roda 05_atende_a_fila"
+    label: "00.17 · roda 05_atende_a_fila"
 - runFlow:
     file: etapas/06_meu_dia.yaml
-    label: "00.13 · roda 06_meu_dia"
+    label: "00.18 · roda 06_meu_dia"
 - runFlow:
     file: etapas/07_encaixe.yaml
-    label: "00.14 · roda 07_encaixe"
+    label: "00.19 · roda 07_encaixe"
 - runFlow:
     file: etapas/08_dono_confere.yaml
-    label: "00.15 · roda 08_dono_confere"
+    label: "00.20 · roda 08_dono_confere"
