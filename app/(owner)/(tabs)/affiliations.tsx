@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { View, Text, ScrollView, Alert, RefreshControl } from "react-native";
 import { SkeletonList } from "@components/Skeleton";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, useFocusEffect, router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { api, getApiErrorMessage } from "@lib/api";
@@ -43,11 +43,13 @@ export default function OwnerAffiliationsScreen() {
     }
   }, [establishmentId, queryClient]);
 
-  useEffect(() => {
-    // fetch on-mount; sinaliza isLoading (padrao de carregamento).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchAffiliations();
-  }, [fetchAffiliations]);
+  // A tela e uma aba escondida: fica montada depois da primeira visita. Rele a
+  // cada vez que ganha o foco — senao um pedido novo nao aparece ao voltar.
+  useFocusEffect(
+    useCallback(() => {
+      fetchAffiliations();
+    }, [fetchAffiliations])
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
