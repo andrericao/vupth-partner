@@ -2,6 +2,7 @@ import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import type { DiaDeExpediente } from "@lib/expediente";
+import type { LocationStatus } from "@lib/pontoNoMapa";
 
 const STORAGE_KEY = "vupth_establishment";
 
@@ -54,6 +55,10 @@ export type EstablishmentAddress = {
   city: string | null;
   state: string | null;
   zipCode: string | null;
+  /** Ja virou ponto no mapa? (loja-sem-coordenada, BAK d215d5a). Opcional. */
+  locationStatus?: LocationStatus;
+  /** O id que o PATCH do endereco recebe — so quando o backend o expoe. */
+  addressId?: string;
 };
 
 // Detalhe rico do estabelecimento (GET /establishment/id/{id}) — usado na tela
@@ -149,6 +154,9 @@ function normalizeAddress(a: any): EstablishmentAddress | null {
     city: a.city ?? null,
     state: a.state ?? null,
     zipCode: a.zipCode ?? a.zip_code ?? null,
+    // Opcionais: so entram quando o backend manda (o toEqual dos antigos segue).
+    ...(a.locationStatus ? { locationStatus: a.locationStatus } : {}),
+    ...(a.addressId ? { addressId: a.addressId } : {}),
   };
 }
 
@@ -206,6 +214,22 @@ type EstablishmentState = {
       latitude?: number;
       longitude?: number;
     }
+  ) => Promise<any>;
+  /** Corrige o endereco ja salvo (PATCH): so os campos que mudaram. */
+  updateAddress: (
+    establishmentId: string,
+    addressId: string,
+    changes: Partial<{
+      street: string;
+      number: string;
+      complement: string;
+      neighborhood: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      latitude: number;
+      longitude: number;
+    }>
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
   fetchEstablishmentById: (id: string) => Promise<EstablishmentDetail>;
@@ -286,6 +310,14 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     const { data } = await api.post(
       `/establishments/${establishmentId}/addresses`,
       address
+    );
+    return data;
+  },
+
+  updateAddress: async (establishmentId, addressId, changes) => {
+    const { data } = await api.patch(
+      `/establishments/${establishmentId}/addresses/${addressId}`,
+      changes
     );
     return data;
   },

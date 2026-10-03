@@ -22,6 +22,7 @@ import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { AvisoLojaSemPonto } from "@components/AvisoLojaSemPonto";
 import type { ProfessionalWithQueue } from "@lib/types";
 import { confirmar } from "@lib/confirmar";
 import { avisoDeAberturaSemProfissional } from "@lib/abertura";
@@ -58,6 +59,11 @@ export default function OwnerDashboardScreen() {
     const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
     return () => handler.remove();
   }, [isFocused]);
+
+  // loja-sem-coordenada: o PENDING do endereco vira LOCATED/UNRESOLVED em segundos.
+  const relerLoja = useCallback(() => {
+    fetchMine().catch(() => {});
+  }, [fetchMine]);
 
   const status = establishment?.open_status ?? "CLOSED";
   const isOpen = status === "OPEN";
@@ -211,6 +217,8 @@ export default function OwnerDashboardScreen() {
             targetRoute={`/(owner)/establishment-data?establishmentId=${establishmentId ?? ""}`}
             goalNoun="aparecer aos clientes"
           />
+
+          <AvisoLojaSemPonto endereco={establishment.address} onReler={relerLoja} />
   
           {/* Os dois numeros que o dono abre o app pra ver. A fila e o CAMINHO
               pras filas, no lugar do botão ambar "Ver Filas" que competia com

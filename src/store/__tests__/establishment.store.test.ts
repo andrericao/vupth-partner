@@ -320,6 +320,21 @@ describe("establishment.store", () => {
       expect(useEstablishmentStore.getState().establishment?.address?.neighborhood).toBe("Centro");
     });
 
+    it("loja-sem-coordenada: guarda o locationStatus e o addressId quando o backend manda", async () => {
+      mock.onGet("/establishment/mine").reply(200, [
+        {
+          ...ESTABLISHMENT_RESPONSE,
+          address: { street: "Rua A", locationStatus: "UNRESOLVED", addressId: "addr-9" },
+        },
+      ]);
+
+      await useEstablishmentStore.getState().fetchMine();
+
+      const a = useEstablishmentStore.getState().establishment?.address;
+      expect(a?.locationStatus).toBe("UNRESOLVED");
+      expect(a?.addressId).toBe("addr-9");
+    });
+
     it("sem address no /mine, o campo fica null (não inventa endereço)", async () => {
       mock.onGet("/establishment/mine").reply(200, [ESTABLISHMENT_RESPONSE]);
 
@@ -558,6 +573,21 @@ describe("establishment.store", () => {
       expect(detail.instagram).toBeNull();
       expect(detail.opening_time).toBeNull();
       expect(detail.address).toBeNull();
+    });
+  });
+
+  describe("updateAddress", () => {
+    it("PATCH /establishments/{id}/addresses/{addressId} so com o que mudou", async () => {
+      mock
+        .onPatch("/establishments/estab-uuid-1/addresses/addr-1")
+        .reply(200, { addressId: "addr-1", locationStatus: "LOCATED" });
+
+      const out = await useEstablishmentStore
+        .getState()
+        .updateAddress("estab-uuid-1", "addr-1", { latitude: -23.5613, longitude: -46.6565 });
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ latitude: -23.5613, longitude: -46.6565 });
+      expect(out).toMatchObject({ locationStatus: "LOCATED" });
     });
   });
 
