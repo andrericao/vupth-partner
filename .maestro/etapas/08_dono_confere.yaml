@@ -18,6 +18,21 @@ appId: ${APP_ID}
     visible: ${output.PROF}
     timeout: 20000
     label: "08.04 · espera ${output.PROF}"
+# maestro-maximo (2a fatia): a fila do profissional pelo olhar do dono
+- tapOn:
+    text: ${output.PROF}
+    label: "08.25 · abre a fila de ${output.PROF}"
+- extendedWaitUntil:
+    visible:
+      id: "atualizar-fila-dono"
+    timeout: 20000
+    label: "08.26 · espera a fila do profissional"
+- scrollUntilVisible:
+    element: "Desvincular profissional"
+    direction: DOWN
+    label: "08.27 · confere Desvincular profissional (sem tocar)"
+- back:
+    label: "08.28 · volta para Filas"
 
 - tapOn:
     id: "aba-menu"
@@ -92,6 +107,29 @@ appId: ${APP_ID}
       id: "foto-loja-camera"
     timeout: 10000
     label: "08.23 · foto-da-loja · a folha fechou"
+
+# maestro-maximo (2a fatia): Dados cadastrais e Endereco da loja (so olhar)
+- tapOn:
+    text: "Dados Cadastrais"
+    label: "08.29 · toca em Dados Cadastrais"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+    label: "08.30 · espera ${output.LOJA} nos dados cadastrais"
+- back:
+    label: "08.31 · volta para Dados do estabelecimento"
+- tapOn:
+    text: "Endereço"
+    label: "08.32 · toca em Endereco"
+- extendedWaitUntil:
+    visible: "Endereço da loja"
+    timeout: 20000
+    label: "08.33 · espera Endereco da loja"
+- assertVisible:
+    text: "(Usar minha localização|Localização registrada ✓)"
+    label: "08.34 · confere o botao da localizacao"
+- back:
+    label: "08.35 · volta para Dados do estabelecimento"
 
 - runFlow:
     file: ../apoio/sair_dono.yaml
