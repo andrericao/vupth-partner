@@ -15,6 +15,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
+import { vinculoNaLojaNova } from "@lib/lojaPropria";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -42,33 +43,52 @@ export default function AlsoProfessionalScreen() {
 
   const alreadyProfessional = user?.roles?.includes("PROFESSIONAL");
 
+  // Ja profissional (S23, PAR-7): sem loja, vincula direto; atendendo em
+  // OUTRA loja, pergunta — trocar tira a pessoa da fila de la. Antes a troca
+  // era silenciosa.
+  const nomeDaLojaNova = useEstablishmentStore((s) => s.establishment?.name);
+  const [lojaAtual, setLojaAtual] = useState<string | null>(null);
+  const [trocando, setTrocando] = useState(false);
+
   useEffect(() => {
     if (!alreadyProfessional || !establishmentId) return;
 
-    const ensureAffiliation = async () => {
+    const decidir = async () => {
       try {
         const { data } = await api.get("/professional/me");
-        const currentEstId = data.establishment_id ?? data.establishmentId;
+        const atual = data.establishment_id ?? data.establishmentId;
+        const caminho = vinculoNaLojaNova(atual, establishmentId);
 
-        if (currentEstId === establishmentId) {
-          router.replace("/(owner)/dashboard" as any);
+        if (caminho === "perguntar") {
+          setLojaAtual(data.establishment_name ?? data.establishmentName ?? "a loja de agora");
           return;
         }
-
-        if (currentEstId) {
-          await useProfessionalStore.getState().switchEstablishment(establishmentId);
-        } else {
+        if (caminho === "vincular") {
           await useProfessionalStore.getState().affiliate(establishmentId);
+          await refreshToken();
         }
-        await refreshToken();
       } catch {}
       router.replace("/(owner)/dashboard" as any);
     };
 
-    ensureAffiliation();
+    decidir();
     // refreshToken e estavel (Zustand); roda so ao entrar com esses params.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alreadyProfessional, establishmentId]);
+
+  const atenderNaLojaNova = async () => {
+    setTrocando(true);
+    try {
+      await useProfessionalStore.getState().switchEstablishment(establishmentId);
+      await refreshToken();
+      router.replace("/(owner)/dashboard" as any);
+    } catch (error: any) {
+      // 409 com atendimento em andamento: a mensagem do Backend diz o porque.
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível trocar de loja. Tente de novo."));
+    } finally {
+      setTrocando(false);
+    }
+  };
 
   useEffect(() => {
     if (!paramName) {
@@ -149,6 +169,38 @@ export default function AlsoProfessionalScreen() {
   const handleNo = () => {
     router.replace("/(owner)/dashboard" as any);
   };
+
+  if (alreadyProfessional && lojaAtual) {
+    return (
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <View className="flex-1 pb-6 px-4">
+          <ScreenHeader
+            title="Onde você vai atender?"
+            subtitle={`Hoje você atende em ${lojaAtual}.`}
+            onBack={() => router.replace("/(owner)/dashboard" as any)}
+          />
+          <Text className="font-body text-sm text-vupth-textSecondary mb-6">
+            Para atender {nomeDaLojaNova ? `em ${nomeDaLojaNova}` : "na sua loja nova"}, você deixa de atender em {lojaAtual}.
+            Dá para decidir depois, em Perfil → Vínculo.
+          </Text>
+          <View className="gap-3">
+            <NwButton
+              title={nomeDaLojaNova ? `Atender em ${nomeDaLojaNova}` : "Atender na loja nova"}
+              onPress={atenderNaLojaNova}
+              isLoading={trocando}
+              testID="atender-na-loja-nova"
+            />
+            <NwButton
+              title={`Continuar em ${lojaAtual}`}
+              variant="vupthOutline"
+              onPress={() => router.replace("/(owner)/dashboard" as any)}
+              testID="continuar-na-loja-atual"
+            />
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (alreadyProfessional) return null;
 

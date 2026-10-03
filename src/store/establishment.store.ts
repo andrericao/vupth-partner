@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+import type { DiaDeExpediente } from "@lib/expediente";
 
 const STORAGE_KEY = "vupth_establishment";
 
@@ -97,6 +98,8 @@ export type EstablishmentReport = {
   netRevenue?: number | null;
   /** Atendimentos de servico sem divisao — ficam fora do netRevenue. */
   attendancesWithoutSplit?: number;
+  /** Expediente por dia (contrato de 03/10). Ausente em backend antigo. */
+  workdays?: DiaDeExpediente[];
 };
 
 type ProfessionalResponse = {

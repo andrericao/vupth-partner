@@ -29,3 +29,13 @@ export function needsRefresh(
   if (!payload?.exp) return true;
   return payload.exp * 1000 - nowMs <= skewMs;
 }
+
+/**
+ * O backend recusou o CONNECT por token invalido (frame ERROR com
+ * `message: INVALID_TOKEN`, C16)? Ai a proxima tentativa renova o token mesmo
+ * que o `exp` ainda nao tenha chegado (ex.: token revogado) — sem isso o
+ * `reconnectDelay` reenviaria o mesmo token para sempre.
+ */
+export function tokenRecusado(message: string | null | undefined): boolean {
+  return !!message && message.includes("INVALID_TOKEN");
+}

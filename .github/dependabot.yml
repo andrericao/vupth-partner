@@ -4,6 +4,11 @@
 # ⚠️ Expo, React Native e React sobem JUNTOS e com o Client e o Backend (acordo
 # entre equipes, SDK por aparelho no Expo Go) — por isso ficam de fora das
 # atualizacoes de versao. Alerta de seguranca continua chegando para eles.
+#
+# ESLint so sobe de major junto com o eslint-config-expo: o eslint-plugin-react
+# que ele traz quebra no ESLint 10 (context.getFilename removido) — PR #58.
+# TypeScript 7 (PR #56): ts-jest e typescript-eslint ainda nao rodam nele.
+# Testing Library 14 (PR #57): render virou assincrono — migrar todas as suites.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -21,6 +26,12 @@ updates:
       - dependency-name: react-native
       - dependency-name: "react-native-*"
       - dependency-name: "@react-native/*"
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@testing-library/react-native"
+        update-types: ["version-update:semver-major"]
     groups:
       menores:
         update-types: [minor, patch]

@@ -215,7 +215,7 @@ export default function MyDayScreen() {
             ))}
           </View>
 
-          <ExpedienteCard />
+          <ExpedienteCard periodo={period} workdays={report?.workdays} />
 
           <View className="h-px bg-vupth-border my-6" />
 

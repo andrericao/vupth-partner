@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   View,
   ScrollView,
@@ -15,9 +15,15 @@ import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
+import { useProfessionalStore } from "@store/professional.store";
+import { voltaDoCadastroDaLoja } from "@lib/lojaPropria";
 
 export default function EstablishmentScreen() {
-  const [ownerName, setOwnerName] = useState("");
+  // from=professional: o profissional abrindo a propria loja pelo Perfil (S23).
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  // Quem ja e profissional ja disse o nome: o campo vem preenchido.
+  const nomeDoProfissional = useProfessionalStore((s) => s.professional?.name);
+  const [ownerName, setOwnerName] = useState(nomeDoProfissional ?? "");
   const [name, setName] = useState("");
   const [serviceType, setServiceType] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
@@ -80,7 +86,7 @@ export default function EstablishmentScreen() {
           <ScreenHeader
             title="Dados da loja"
             subtitle="É assim que os clientes vão te encontrar."
-            onBack={() => router.navigate("/(owner)/dashboard" as any)}
+            onBack={() => router.navigate(voltaDoCadastroDaLoja(from) as any)}
           />
 
           <View className="flex-1 w-full">
