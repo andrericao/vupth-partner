@@ -7,7 +7,7 @@ import { WS_URL } from "@lib/api";
 import type { EstablishmentWithProfessionals, QueueNotification } from "@lib/types";
 import { isCutRequestEvent } from "@lib/cutRequests";
 import { isClosingPromptEvent } from "@lib/closing";
-import { needsRefresh } from "@lib/socketAuth";
+import { needsRefresh, tokenRecusado } from "@lib/socketAuth";
 import { useUiStore } from "@store/ui.store";
 import { useAuthStore } from "@store/auth.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
@@ -32,6 +32,9 @@ export function useQueueSocket(establishmentId: string | null) {
 
     let active = true;
     let client: Client | null = null;
+    // Ligado quando o backend recusa o CONNECT (INVALID_TOKEN): a proxima
+    // tentativa renova mesmo com o `exp` ainda valido.
+    let renovarNaProxima = false;
 
     (async () => {
       const topic = `/topic/establishment/${establishmentId}/queue`;
@@ -56,7 +59,8 @@ export function useQueueSocket(establishmentId: string | null) {
         // sem receber mais nada em /user/queue/notifications.
         beforeConnect: async () => {
           let token = await SecureStore.getItemAsync("vupth_access_token");
-          if (needsRefresh(token)) {
+          if (renovarNaProxima || needsRefresh(token)) {
+            renovarNaProxima = false;
             // Best-effort: se o refresh falhar (offline, refresh vencido), a
             // conexao segue com o que houver — o interceptor do axios trata a
             // sessao morta no proximo request HTTP.
@@ -165,6 +169,7 @@ export function useQueueSocket(establishmentId: string | null) {
         },
         onStompError: (frame) => {
           const msg = frame.headers?.message ?? "STOMP error";
+          if (tokenRecusado(msg)) renovarNaProxima = true;
           useWsDiagnosticsStore.getState().markError("public", msg);
           useWsDiagnosticsStore.getState().markError("personal", msg);
           if (__DEV__) console.log("[ws] STOMP error:", msg);

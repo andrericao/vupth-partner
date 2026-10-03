@@ -1,4 +1,4 @@
-import { needsRefresh } from "@lib/socketAuth";
+import { needsRefresh, tokenRecusado } from "@lib/socketAuth";
 
 // Monta um JWT falso so com o `exp` (o decodeToken le o payload base64 do meio).
 function tokenExpiringAt(epochSeconds: number): string {
@@ -41,5 +41,17 @@ describe("needsRefresh (token do socket)", () => {
     const t = tokenExpiringAt(NOW / 1000 + 5 * 60); // +5min
     expect(needsRefresh(t, NOW, 60_000)).toBe(false); // margem 1min
     expect(needsRefresh(t, NOW, 10 * 60_000)).toBe(true); // margem 10min
+  });
+});
+
+describe("tokenRecusado (CONNECT recusado pelo backend)", () => {
+  it("reconhece o INVALID_TOKEN do frame ERROR", () => {
+    expect(tokenRecusado("INVALID_TOKEN")).toBe(true);
+    expect(tokenRecusado("Erro: INVALID_TOKEN no CONNECT")).toBe(true);
+  });
+
+  it("outros erros (ou nenhum) nao forcam renovacao", () => {
+    expect(tokenRecusado("STOMP error")).toBe(false);
+    expect(tokenRecusado(undefined)).toBe(false);
   });
 });
