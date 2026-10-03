@@ -8,6 +8,8 @@ import { NwInput } from "@components/nw/Input";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
+import { confirmar } from "@lib/confirmar";
+import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
 
 // 1a tela convertida p/ NativeWind (Gluestack v2, migracao faseada). A LOGICA e
 // identica ao v1 — so a apresentacao trocou (RN + className + nw/Input +
@@ -44,9 +46,21 @@ export default function LoginScreen() {
       const route = getPostLoginRoute(roles, intent);
       router.replace(route as any);
     } catch (error: any) {
-      const status = error?.response?.status;
-      if (status === 401) {
-        Alert.alert("Erro", "E-mail ou senha inválidos");
+      // Contrato de 03/10 (fd9a3af): e-mail sem conta, senha errada e o limite
+      // de tentativas chegam separados.
+      const erro = classificarErroDeAcesso(error);
+      if (erro.tipo === "sem-conta") {
+        const criar = await confirmar({
+          titulo: "Não há conta com este e-mail",
+          mensagem: "Confira o e-mail ou crie uma conta nova.",
+          confirmar: "Criar conta",
+          cancelar: "Corrigir e-mail",
+        });
+        if (criar) router.push(rotaDoCadastro(role) as any);
+      } else if (erro.tipo === "senha-errada") {
+        Alert.alert("Erro", "Senha incorreta");
+      } else if (erro.tipo === "espera") {
+        Alert.alert("Espere um pouco", erro.mensagem);
       } else {
         Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível fazer login. Tente novamente."));
       }

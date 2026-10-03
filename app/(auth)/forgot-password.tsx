@@ -15,13 +15,15 @@ import { NwButton } from "@components/nw/Button";
 import { ChevronLeft, Mail } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
-import { avisar } from "@lib/confirmar";
+import { avisar, confirmar } from "@lib/confirmar";
+import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 
 // Esqueci minha senha (S7, backend fatia 1 2026-07-20).
-// Passo 1: e-mail -> POST /auth/forgot-password (SEMPRE 200 — anti-enumeracao:
-//   o texto de sucesso nao pode afirmar que o e-mail existe).
+// Passo 1: e-mail -> POST /auth/forgot-password. Desde 03/10 (fd9a3af) o e-mail
+//   sem conta volta 404 EMAIL_NOT_FOUND, e o 200 confirma que o codigo saiu;
+//   429 com Retry-After quando passa do limite de tentativas.
 // Passo 2: codigo de 6 digitos + nova senha -> POST /auth/reset-password
 //   (codigo vale 15min, uso unico, max 5 tentativas; erros RESET_CODE_INVALID/
 //   RESET_CODE_EXPIRED traduzidos no getApiErrorMessage).
@@ -59,14 +61,26 @@ export default function ForgotPasswordScreen() {
     setIsLoading(true);
     try {
       await forgotPassword(value);
-      // Sempre 200 (anti-enumeracao) — por isso o texto e "SE estiver cadastrado".
       Alert.alert(
         "Código enviado",
-        "Se este e-mail estiver cadastrado, você receberá um código de 6 dígitos. Ele vale por 15 minutos."
+        `Enviamos um código de 6 dígitos para ${value}. Ele vale por 15 minutos.`
       );
       setStep("code");
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível enviar o código."));
+      const erro = classificarErroDeAcesso(error);
+      if (erro.tipo === "sem-conta") {
+        const criar = await confirmar({
+          titulo: "Não há conta com este e-mail",
+          mensagem: "Confira o e-mail ou crie uma conta nova.",
+          confirmar: "Criar conta",
+          cancelar: "Corrigir e-mail",
+        });
+        if (criar) router.push(rotaDoCadastro(undefined) as any);
+      } else if (erro.tipo === "espera") {
+        Alert.alert("Espere um pouco", erro.mensagem);
+      } else {
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível enviar o código."));
+      }
     } finally {
       setIsLoading(false);
     }

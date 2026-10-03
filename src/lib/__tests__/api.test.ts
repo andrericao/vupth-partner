@@ -59,6 +59,13 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/começo do expediente/);
   });
 
+  it("EMAIL_NOT_FOUND e TOO_MANY_REQUESTS (acesso, 03/10) => textos de reserva", () => {
+    const semConta = { response: { status: 404, data: { code: "EMAIL_NOT_FOUND" } } };
+    const espera = { response: { status: 429, data: { code: "TOO_MANY_REQUESTS" } } };
+    expect(getApiErrorMessage(semConta, "fallback")).toBe("Não há conta com este e-mail.");
+    expect(getApiErrorMessage(espera, "fallback")).toMatch(/Muitas tentativas/);
+  });
+
   it("OPERATION_MODE_LOCKED (so agenda depois do 1o cliente) => explica quando da para trocar", () => {
     const err = { response: { status: 409, data: { code: "OPERATION_MODE_LOCKED" } } };
     expect(getApiErrorMessage(err, "fallback")).toMatch(/começo do expediente/);

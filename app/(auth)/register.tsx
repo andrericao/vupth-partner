@@ -8,6 +8,7 @@ import { ChevronLeft, Mail, Lock } from "lucide-react-native";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
+import { segundosDeEspera, textoDaEspera } from "@lib/erroDeAcesso";
 import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 
@@ -62,6 +63,8 @@ export default function RegisterScreen() {
         Alert.alert("Erro de validação", msg);
       } else if (error?.response?.status === 409) {
         Alert.alert("Erro", "Este e-mail já está cadastrado");
+      } else if (error?.response?.status === 429) {
+        Alert.alert("Espere um pouco", textoDaEspera(segundosDeEspera(error)));
       } else {
         Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível criar a conta. Tente novamente."));
       }
