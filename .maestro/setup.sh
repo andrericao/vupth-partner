@@ -91,11 +91,17 @@ fi
 LOGS="$RAIZ/.maestro/logs"
 RODADA="$LOGS/$(date +%Y-%m-%d_%H%M%S)"
 mkdir -p "$RODADA"
+adb logcat -b crash -c 2>/dev/null
 echo "Rodando a bateria — logs em .maestro/logs/$(basename "$RODADA")"
 echo ""
 "${CMD[@]}" --debug-output "$RODADA" --flatten-debug-output --test-output-dir "$RODADA" \
   "$RAIZ/.maestro/bateria_completa.yaml" 2>&1 | tee "$RODADA/saida.txt"
 RESULTADO=${PIPESTATUS[0]}
+
+# O travamento do Android (crash buffer), que o Maestro sozinho nao captura
+# (orquestrador, 03/10). So fica o arquivo se houve crash na rodada.
+adb logcat -d -b crash > "$RODADA/crash.txt" 2>/dev/null
+[ -s "$RODADA/crash.txt" ] || rm -f "$RODADA/crash.txt"
 
 bash "$RAIZ/.maestro/restaurar.sh"
 
@@ -105,6 +111,6 @@ if [ "$RESULTADO" = "0" ]; then
   echo "Bateria VERDE — logs apagados."
 else
   find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
-  echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (saida.txt + prints)."
+  echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (saida.txt, prints e crash.txt se o app travou)."
 fi
 exit "$RESULTADO"
