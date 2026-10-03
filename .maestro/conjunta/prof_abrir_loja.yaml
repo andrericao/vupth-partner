@@ -1,0 +1,59 @@
+# O profissional abre a propria loja pelo Perfil (abrir-meu-estabelecimento).
+# env: DONO (nome do dono), LOJA_NOVA, ESCOLHA (nova = Atender na loja nova;
+# atual = Continuar na loja de agora). Sem loja, o app vincula direto na nova.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+    label: "PJ7.01 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ7.02 · fecha o aviso, se houver"
+- scrollUntilVisible:
+    element: "Abrir meu estabelecimento"
+    direction: DOWN
+    label: "PJ7.03 · rola ate Abrir meu estabelecimento"
+- tapOn:
+    text: "Abrir meu estabelecimento"
+    label: "PJ7.04 · toca em Abrir meu estabelecimento"
+- tapOn:
+    text: "Ex: João Silva"
+    label: "PJ7.05 · toca no nome do dono"
+- inputText:
+    text: ${DONO}
+    label: "PJ7.06 · digita ${DONO}"
+- tapOn:
+    text: "Rei do Corte LTDA"
+    label: "PJ7.07 · toca no nome da loja"
+- inputText:
+    text: ${LOJA_NOVA}
+    label: "PJ7.08 · digita ${LOJA_NOVA}"
+- hideKeyboard:
+    label: "PJ7.09 · fecha o teclado"
+- tapOn:
+    text: "Barbearia"
+    label: "PJ7.10 · toca em Barbearia"
+- tapOn:
+    text: "Criar estabelecimento"
+    label: "PJ7.11 · toca em Criar estabelecimento"
+- runFlow:
+    when:
+      true: ${ESCOLHA == 'nova'}
+    commands:
+      - extendedWaitUntil:
+          visible: "Onde você vai atender?"
+          timeout: 30000
+      - tapOn: "(Atender em .*|Atender na loja nova)"
+    label: "PJ7.12 · escolhe atender na loja nova"
+- runFlow:
+    when:
+      true: ${ESCOLHA == 'atual'}
+    commands:
+      - extendedWaitUntil:
+          visible: "Onde você vai atender?"
+          timeout: 30000
+      - tapOn: "Continuar em .*"
+    label: "PJ7.13 · escolhe continuar na loja de agora"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ7.14 · fecha o aviso, se houver"

@@ -1,0 +1,24 @@
+# Liga ou desliga o "so agenda" (Funcionamento, em Opcoes da fila). So troca
+# antes do 1o cliente do dia (409 OPERATION_MODE_LOCKED). env: MODO
+# (AGENDA_ONLY = so agenda; QUEUE = fila e agenda)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+    label: "PJ3.01 · toca em aba-fila"
+- tapOn:
+    text: "Opções da fila"
+    label: "PJ3.02 · toca em Opcoes da fila"
+- scrollUntilVisible:
+    element:
+      id: "modo-${MODO}"
+    direction: DOWN
+    label: "PJ3.03 · rola ate modo-${MODO}"
+- tapOn:
+    id: "modo-${MODO}"
+    label: "PJ3.04 · escolhe ${MODO}"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ3.05 · fecha o aviso, se houver (o 409 aparece aqui)"
+- back:
+    label: "PJ3.06 · volta para a Fila"

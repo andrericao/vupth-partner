@@ -1,0 +1,39 @@
+# Edita o tempo do 1o servico do profissional (tempo-do-servico: o Client ve o
+# novo na hora). env: MINUTOS
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+    label: "PJ4.01 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ4.02 · fecha o aviso, se houver"
+- tapOn:
+    text: "Meus serviços"
+    label: "PJ4.03 · toca em Meus servicos"
+- tapOn:
+    text: "Editar"
+    index: 0
+    label: "PJ4.04 · toca em Editar (1o servico)"
+- tapOn:
+    id: "edit-service-minutes"
+    label: "PJ4.05 · toca no tempo"
+- eraseText:
+    charactersToErase: 5
+    label: "PJ4.06 · apaga o tempo"
+- inputText:
+    text: ${MINUTOS}
+    label: "PJ4.07 · digita ${MINUTOS}"
+- hideKeyboard:
+    label: "PJ4.08 · fecha o teclado"
+- scrollUntilVisible:
+    element: "Salvar"
+    direction: DOWN
+    label: "PJ4.09 · rola ate Salvar"
+- tapOn:
+    text: "Salvar"
+    label: "PJ4.10 · toca em Salvar"
+- extendedWaitUntil:
+    visible: ".*${MINUTOS}min.*"
+    timeout: 20000
+    label: "PJ4.11 · espera …${MINUTOS}min…"
