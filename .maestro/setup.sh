@@ -87,6 +87,17 @@ if [ "$1" = "--so-preparar" ]; then
   exit 0
 fi
 
+# 7a. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10): duas
+#     sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
+#     "device not found". Client e Partner usam o mesmo celular.
+OUTRA=$(pgrep -af "^java .*maestro.cli.AppKt test")
+if [ -n "$OUTRA" ]; then
+  echo "ERRO: ja ha uma bateria do Maestro rodando neste computador — espere ela terminar:"
+  echo "$OUTRA" | cut -c1-160
+  bash "$RAIZ/.maestro/restaurar.sh"
+  exit 1
+fi
+
 # 7. Roda a bateria, com os logs na pasta do projeto (logs-da-bateria-na-pasta)
 LOGS="$RAIZ/.maestro/logs"
 RODADA="$LOGS/$(date +%Y-%m-%d_%H%M%S)"
@@ -94,9 +105,26 @@ mkdir -p "$RODADA"
 adb logcat -b crash -c 2>/dev/null
 echo "Rodando a bateria — logs em .maestro/logs/$(basename "$RODADA")"
 echo ""
+# Vigia do adb: a cada 2 s confere o aparelho; se sumir, anota a hora e quem
+# estava usando o adb/Maestro naquele instante (adb.txt) — para achar a causa.
+SERIAL=$(adb get-serialno 2>/dev/null | tr -d '\r')
+(
+  while sleep 2; do
+    if [ "$(adb -s "$SERIAL" get-state 2>/dev/null | tr -d '\r')" != "device" ]; then
+      {
+        echo "=== $(date +%H:%M:%S) o aparelho $SERIAL saiu do adb ==="
+        adb devices -l
+        ps -eo pid,lstart,cmd | grep -E "adb|maestro|scrcpy|studio|gradle" | grep -v grep | cut -c1-200
+      } >> "$RODADA/adb.txt" 2>&1
+    fi
+  done
+) &
+VIGIA=$!
+
 "${CMD[@]}" --debug-output "$RODADA" --flatten-debug-output --test-output-dir "$RODADA" \
   "$RAIZ/.maestro/bateria_completa.yaml" 2>&1 | tee "$RODADA/saida.txt"
 RESULTADO=${PIPESTATUS[0]}
+kill "$VIGIA" 2>/dev/null
 
 # O travamento do Android (crash buffer), que o Maestro sozinho nao captura
 # (orquestrador, 03/10). So fica o arquivo se houve crash na rodada.
@@ -111,6 +139,12 @@ if [ "$RESULTADO" = "0" ]; then
   echo "Bateria VERDE — logs apagados."
 else
   find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
+  if grep -q "device '.*' not found" "$RODADA/saida.txt"; then
+    echo ""
+    echo "O CELULAR SAIU DO ADB no meio da rodada — nao e defeito do app."
+    echo "Confira o cabo e o aviso de depuracao USB no celular. O que o vigia viu:"
+    head -20 "$RODADA/adb.txt" 2>/dev/null || echo "(o vigia nao pegou a queda)"
+  fi
   echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (saida.txt, prints e crash.txt se o app travou)."
 fi
 exit "$RESULTADO"
