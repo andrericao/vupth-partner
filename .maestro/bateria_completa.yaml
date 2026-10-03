@@ -90,3 +90,17 @@ env:
 - runFlow:
     file: etapas/08_dono_confere.yaml
     label: "00.20 · roda 08_dono_confere"
+# A 08 termina com o dono fora da conta; a 09 e do profissional
+- runFlow:
+    file: apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_PROF}
+    label: "00.21 · entra como o profissional"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "00.22 · espera aba-fila"
+- runFlow:
+    file: etapas/09_profissional_extras.yaml
+    label: "00.23 · roda 09_profissional_extras"

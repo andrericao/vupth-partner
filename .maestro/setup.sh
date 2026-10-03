@@ -124,7 +124,7 @@ SERIAL=$(adb get-serialno 2>/dev/null | tr -d '\r')
 VIGIA=$!
 
 # A bateria que nao para (bateria-nao-para, Andre 03/10): confere a versao e
-# roda as oito etapas AVULSAS (.maestro/avulsas), cada uma num maestro test
+# roda as etapas AVULSAS (.maestro/avulsas), cada uma num maestro test
 # proprio, com a mesma TAG. Cada etapa prepara pela API o que as anteriores
 # deixariam, entao uma falha nao derruba as seguintes. O relatorio.txt diz,
 # etapa a etapa, o que passou e onde parou (NN.MM).
@@ -165,7 +165,7 @@ if ! rodar 00_versao "$RAIZ/.maestro/avulsas/00_confere_versao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$RAIZ"/.maestro/avulsas/0[1-8].yaml; do
+  for ARQ in "$RAIZ"/.maestro/avulsas/0[1-9].yaml; do
     rodar "etapa_$(basename "$ARQ" .yaml)" "$ARQ" || RESULTADO=1
   done
 fi
