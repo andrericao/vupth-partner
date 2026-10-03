@@ -1,7 +1,13 @@
 #!/bin/bash
 # Prepara a bateria do Maestro (roteiro: .maestro/bateria_completa.yaml).
 #
-# Uso:  bash .maestro/setup.sh
+# Uso:  bash .maestro/setup.sh             # prepara e roda a bateria
+#       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
+#
+# Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
+# o maestro. Os logs e prints de cada rodada caem em .maestro/logs/<data>
+# (no .gitignore), para a equipe ler o erro sem o Andre colar. Rodada verde
+# apaga todos; rodada vermelha fica sozinha (as falhas antigas saem).
 #
 # Precisa de: celular com "Depuracao USB" ligada, conectado no cabo, com o APK
 # de PREVIEW instalado (com.vupth.partner.preview — aponta para o staging).
@@ -59,12 +65,46 @@ fi
 
 echo ""
 # 6. O commit esperado: a bateria confere o do app antes de comecar (Andre,
-#    03/10). E o HEAD desta pasta — o mesmo que o eas update publicou daqui.
-COMMIT=$(git -C "$(dirname "$0")/.." rev-parse --short=7 HEAD)
-echo "Commit esperado no app: $COMMIT"
+#    03/10). O OTA da dev sai do GitHub (eas-update.yml) com o commit do push;
+#    push so de .maestro, .md ou docs nao publica OTA (paths-ignore). Vale,
+#    entao, qualquer commit da origin/dev desde o ultimo que mudou o app.
+RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
+git -C "$RAIZ" fetch -q origin dev 2>/dev/null || echo "AVISO: sem fetch — usando a origin/dev que a pasta ja conhece."
+ULTIMO_OTA=$(git -C "$RAIZ" log -1 --format=%h origin/dev -- . \
+  ':(exclude,glob)**/*.md' ':(exclude)src/docs' ':(exclude)design' \
+  ':(exclude).maestro' ':(exclude).gitignore' ':(exclude)docs' ':(exclude)LICENSE')
+COMMIT=$(git -C "$RAIZ" log --format=%h --abbrev=7 "$ULTIMO_OTA^..origin/dev" | paste -sd,)
+echo "Commit esperado no app (OTA da dev): $COMMIT"
 
-echo "Tudo pronto. Rode:"
+CMD=(maestro test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
+
+if [ "$1" = "--so-preparar" ]; then
+  echo "Tudo pronto. Rode:"
+  echo ""
+  echo "  ${CMD[*]} .maestro/bateria_completa.yaml"
+  echo ""
+  echo "Ao terminar, devolva o preenchimento automatico:  bash .maestro/restaurar.sh"
+  exit 0
+fi
+
+# 7. Roda a bateria, com os logs na pasta do projeto (logs-da-bateria-na-pasta)
+LOGS="$RAIZ/.maestro/logs"
+RODADA="$LOGS/$(date +%Y-%m-%d_%H%M%S)"
+mkdir -p "$RODADA"
+echo "Rodando a bateria — logs em .maestro/logs/$(basename "$RODADA")"
 echo ""
-echo "  maestro test -e APP_ID=com.vupth.partner.preview -e API=$API -e SENHA=Teste@123 -e COMMIT=$COMMIT .maestro/bateria_completa.yaml"
-echo ""
-echo "Ao terminar, devolva o preenchimento automatico:  bash .maestro/restaurar.sh"
+"${CMD[@]}" --debug-output "$RODADA" --flatten-debug-output --test-output-dir "$RODADA" \
+  "$RAIZ/.maestro/bateria_completa.yaml" 2>&1 | tee "$RODADA/saida.txt"
+RESULTADO=${PIPESTATUS[0]}
+
+bash "$RAIZ/.maestro/restaurar.sh"
+
+# 8. Erro sanado, log apagado: verde limpa tudo; vermelho fica so a rodada atual
+if [ "$RESULTADO" = "0" ]; then
+  rm -rf "$LOGS"
+  echo "Bateria VERDE — logs apagados."
+else
+  find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
+  echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (saida.txt + prints)."
+fi
+exit "$RESULTADO"
