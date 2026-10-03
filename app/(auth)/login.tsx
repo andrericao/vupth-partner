@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { NwButton } from "@components/nw/Button";
 import { ChevronLeft, Mail, Lock } from "lucide-react-native";
 import { NwInput } from "@components/nw/Input";
+import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
@@ -155,6 +156,9 @@ export default function LoginScreen() {
                 </Text>
               </Pressable>
             </View>
+            {/* O commit sem login, tambem aqui: o Andre confere o OTA no
+                aparelho sem entrar (commit-visivel, 03/10). */}
+            <CommitDoCodigo />
           </View>
         </View>
       </ScrollView>
