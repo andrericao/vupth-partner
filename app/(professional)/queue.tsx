@@ -95,6 +95,7 @@ function ServingCard({
               dancar de largura a cada digito. */}
           <Text
             className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-forest"}`}
+            testID="cronometro"
           >
             {formatted}
           </Text>

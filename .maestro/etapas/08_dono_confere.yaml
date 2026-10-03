@@ -59,6 +59,40 @@ appId: ${APP_ID}
       id: "version-line"
     timeout: 20000
     label: "08.15 · espera version-line"
+
+# foto-com-botao-claro / foto-da-loja (8b89b1a, fb2b267): a foto da loja abre a
+# folha Tirar foto · Escolher da galeria · Cancelar. Enviar de verdade (camera,
+# galeria) e ver no Client ficam so a mao.
+- tapOn:
+    id: "aba-menu"
+    label: "08.16 · foto-da-loja · toca em aba-menu"
+- scrollUntilVisible:
+    element: "Dados do estabelecimento"
+    direction: UP
+    label: "08.17 · foto-da-loja · rola ate Dados do estabelecimento"
+- tapOn:
+    text: "Dados do estabelecimento"
+    label: "08.18 · foto-da-loja · toca em Dados do estabelecimento"
+- tapOn:
+    id: "foto-loja-editar"
+    label: "08.19 · foto-da-loja · toca em Pôr foto"
+- extendedWaitUntil:
+    visible:
+      id: "foto-loja-camera"
+    timeout: 10000
+    label: "08.20 · foto-da-loja · espera Tirar foto"
+- assertVisible:
+    id: "foto-loja-galeria"
+    label: "08.21 · foto-da-loja · confere Escolher da galeria"
+- tapOn:
+    text: "Cancelar"
+    label: "08.22 · foto-da-loja · toca em Cancelar"
+- extendedWaitUntil:
+    notVisible:
+      id: "foto-loja-camera"
+    timeout: 10000
+    label: "08.23 · foto-da-loja · a folha fechou"
+
 - runFlow:
     file: ../apoio/sair_dono.yaml
-    label: "08.16 · roda sair_dono"
+    label: "08.24 · roda sair_dono"
