@@ -42,6 +42,7 @@ export default function ProfessionalOnboardingScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<EstablishmentSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [listaFalhou, setListaFalhou] = useState(false);
   const [selectedEstablishment, setSelectedEstablishment] = useState<EstablishmentSearchResult | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -86,13 +87,19 @@ export default function ProfessionalOnboardingScreen() {
     }
   };
 
-  const handleSearch = async () => {
+  // `automatica`: a carga ao entrar no passo. Se ela falha, o aviso fica na
+  // tela, sem a caixa de erro: a caixa abria por cima do campo enquanto a
+  // pessoa digitava e engolia o texto (bateria do Andre, 03/10, 02.13).
+  const handleSearch = async (automatica = false) => {
     setIsSearching(true);
+    setListaFalhou(false);
     try {
-      const results = await searchByName(searchQuery.trim());
+      const results = await searchByName(automatica ? "" : searchQuery.trim());
       setSearchResults(results);
     } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível buscar estabelecimentos."));
+      setSearchResults([]);
+      if (automatica) setListaFalhou(true);
+      else Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível buscar estabelecimentos."));
     } finally {
       setIsSearching(false);
     }
@@ -103,7 +110,7 @@ export default function ProfessionalOnboardingScreen() {
   useEffect(() => {
     // busca automatica ao entrar no passo; handleSearch sinaliza isSearching.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (step === "search") handleSearch();
+    if (step === "search") handleSearch(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -262,7 +269,7 @@ export default function ProfessionalOnboardingScreen() {
               value={searchQuery}
               placeholder="Nome do estabelecimento"
               onChangeText={setSearchQuery}
-              onBuscar={handleSearch}
+              onBuscar={() => handleSearch()}
               onLimpar={() => {
                 setSearchQuery("");
                 setSearchResults([]);
@@ -300,7 +307,13 @@ export default function ProfessionalOnboardingScreen() {
               </View>
             )}
 
-            {!isSearching && searchResults.length === 0 && searchQuery.length > 0 && (
+            {!isSearching && listaFalhou && (
+              <Text testID="lista-falhou" className="font-body text-vupth-textSecondary text-center mt-6">
+                Não foi possível carregar a lista. Busque pelo nome.
+              </Text>
+            )}
+
+            {!isSearching && !listaFalhou && searchResults.length === 0 && searchQuery.length > 0 && (
               <Text className="font-body text-vupth-textSecondary text-center mt-6">
                 Nenhum estabelecimento encontrado.
               </Text>
