@@ -5,21 +5,12 @@ env:
   APP_ID: com.vupth.partner.preview
   COMMIT: ""
 ---
-- launchApp:
-    clearState: true
-    label: "00.06 · abre o app"
-- extendedWaitUntil:
-    visible: "Como você vai usar o Vupth?"
-    timeout: 120000
-    label: "00.07 · espera Como você vai usar o Vupth?"
-- stopApp:
-    label: "00.08 · fecha o app (o OTA baixado entra na proxima abertura)"
-- launchApp:
-    label: "00.09 · abre o app de novo"
-- extendedWaitUntil:
-    visible: "Como você vai usar o Vupth?"
-    timeout: 120000
-    label: "00.10 · espera Como você vai usar o Vupth?"
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "00.06 · abre o app do zero e espera o OTA entrar (ate 4 reaberturas)"
+- assertVisible:
+    id: "app-commit"
+    label: "00.10 · o rodape traz o commit (sem ele: o OTA nao chegou ao aparelho)"
 - copyTextFrom:
     id: "app-commit"
     label: "00.11 · le o commit do app (rodape da entrada)"

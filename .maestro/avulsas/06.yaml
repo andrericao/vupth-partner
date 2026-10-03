@@ -30,22 +30,9 @@ env:
       TAG: ${output.TAG}
       ETAPA: "6"
     label: "06.A6 · preparo pela API (o que as etapas anteriores deixariam)"
-# clearState apaga o OTA baixado: a 1a abertura baixa, a 2a aplica.
-- launchApp:
-    clearState: true
-    label: "06.A7 · abre o app do zero"
-- extendedWaitUntil:
-    visible: "Como você vai usar o Vupth?"
-    timeout: 120000
-    label: "06.A8 · espera Como você vai usar o Vupth?"
-- stopApp:
-    label: "06.A9 · fecha o app (o OTA entra na proxima abertura)"
-- launchApp:
-    label: "06.B1 · abre o app de novo"
-- extendedWaitUntil:
-    visible: "Como você vai usar o Vupth?"
-    timeout: 120000
-    label: "06.B2 · espera Como você vai usar o Vupth?"
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "06.A7 · abre o app do zero, ja com o OTA"
 - runFlow:
     file: ../apoio/entrar.yaml
     env:
