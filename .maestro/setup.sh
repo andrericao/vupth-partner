@@ -5,7 +5,8 @@
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
 #
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
-# o maestro. Os logs e prints de cada rodada caem em .maestro/logs/<data>
+# as etapas avulsas, uma a uma, sem parar na primeira falha (relatorio.txt).
+# Os logs e prints de cada rodada caem em .maestro/logs/<data>
 # (no .gitignore), para a equipe ler o erro sem o Andre colar. Rodada verde
 # apaga todos; rodada vermelha fica sozinha (as falhas antigas saem).
 #
@@ -81,7 +82,8 @@ CMD=(maestro test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Tes
 if [ "$1" = "--so-preparar" ]; then
   echo "Tudo pronto. Rode:"
   echo ""
-  echo "  ${CMD[*]} .maestro/bateria_completa.yaml"
+  echo "  ${CMD[*]} .maestro/bateria_completa.yaml      # tudo de uma vez (para na 1a falha)"
+  echo "  ${CMD[*]} -e TAG=<hhmmss> .maestro/avulsas/05.yaml   # uma etapa sozinha"
   echo ""
   echo "Ao terminar, devolva o preenchimento automatico:  bash .maestro/restaurar.sh"
   exit 0
@@ -121,10 +123,56 @@ SERIAL=$(adb get-serialno 2>/dev/null | tr -d '\r')
 ) &
 VIGIA=$!
 
-"${CMD[@]}" --debug-output "$RODADA" --flatten-debug-output --test-output-dir "$RODADA" \
-  "$RAIZ/.maestro/bateria_completa.yaml" 2>&1 | tee "$RODADA/saida.txt"
-RESULTADO=${PIPESTATUS[0]}
+# A bateria que nao para (bateria-nao-para, Andre 03/10): confere a versao e
+# roda as oito etapas AVULSAS (.maestro/avulsas), cada uma num maestro test
+# proprio, com a mesma TAG. Cada etapa prepara pela API o que as anteriores
+# deixariam, entao uma falha nao derruba as seguintes. O relatorio.txt diz,
+# etapa a etapa, o que passou e onde parou (NN.MM).
+TAG=$(date +%H%M%S)
+RELATORIO="$RODADA/relatorio.txt"
+echo "Rodada $(basename "$RODADA") · TAG $TAG · commit esperado $COMMIT" > "$RELATORIO"
+
+# Passo NN.MM em que a etapa parou: o ultimo rotulo que o maestro comecou.
+onde_parou() {
+  grep -oE '[0-9]{2}\.[0-9A-Z][0-9] · [^.]*' "$1" | tail -1
+}
+
+# Antes de cada etapa: o celular tem de estar no adb (espera ate 60 s).
+celular_ok() {
+  timeout 60 adb -s "$SERIAL" wait-for-device 2>/dev/null
+}
+
+rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
+  local saida="$RODADA/$1.txt"
+  if ! celular_ok; then
+    echo "⚠️  $1 — nao rodou: o celular nao esta no adb (confira o cabo)" | tee -a "$RELATORIO"
+    return 2
+  fi
+  "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
+    --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
+  if [ "${PIPESTATUS[0]}" = "0" ]; then
+    echo "✅ $1" >> "$RELATORIO"
+    return 0
+  fi
+  local motivo=""
+  grep -q "device '.*' not found" "$saida" && motivo=" — o celular saiu do adb (nao e o app)"
+  echo "❌ $1 — parou em $(onde_parou "$saida")$motivo" >> "$RELATORIO"
+  return 1
+}
+
+RESULTADO=0
+if ! rodar 00_versao "$RAIZ/.maestro/avulsas/00_confere_versao.yaml"; then
+  RESULTADO=1
+  echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
+else
+  for ARQ in "$RAIZ"/.maestro/avulsas/0[1-8].yaml; do
+    rodar "etapa_$(basename "$ARQ" .yaml)" "$ARQ" || RESULTADO=1
+  done
+fi
 kill "$VIGIA" 2>/dev/null
+echo ""
+echo "════ Relatorio etapa a etapa ════"
+cat "$RELATORIO"
 
 # O travamento do Android (crash buffer), que o Maestro sozinho nao captura
 # (orquestrador, 03/10). So fica o arquivo se houve crash na rodada.
@@ -139,12 +187,12 @@ if [ "$RESULTADO" = "0" ]; then
   echo "Bateria VERDE — logs apagados."
 else
   find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
-  if grep -q "device '.*' not found" "$RODADA/saida.txt"; then
+  if grep -q "device '.*' not found" "$RODADA"/*.txt; then
     echo ""
     echo "O CELULAR SAIU DO ADB no meio da rodada — nao e defeito do app."
     echo "Confira o cabo e o aviso de depuracao USB no celular. O que o vigia viu:"
     head -20 "$RODADA/adb.txt" 2>/dev/null || echo "(o vigia nao pegou a queda)"
   fi
-  echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (saida.txt, prints e crash.txt se o app travou)."
+  echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (relatorio.txt, a saida de cada etapa, prints e crash.txt se o app travou)."
 fi
 exit "$RESULTADO"
