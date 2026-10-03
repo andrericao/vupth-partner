@@ -18,15 +18,17 @@ export function linhaDaVersao(a: {
   updates: Updates;
   /** ISO carimbado pelo build:web (EXPO_PUBLIC_BUILD_TIME). */
   dataDoBuild?: string | null;
+  /** Commit carimbado pelo app.config.js (o mesmo que a bateria confere). */
+  commit?: string | null;
 }): string {
   if (a.plataforma === "web") {
     const data = a.dataDoBuild ? new Date(a.dataDoBuild) : null;
-    const partes = [a.versaoApp, "web", data && !isNaN(data.getTime()) ? quando(data) : null];
+    const partes = [a.versaoApp, "web", data && !isNaN(data.getTime()) ? quando(data) : null, a.commit];
     return partes.filter(Boolean).join(" · ");
   }
   const u = a.updates;
   const ota = u.updateId
     ? `OTA ${u.updateId.slice(0, 8)}${u.createdAt ? ` · ${quando(u.createdAt)}` : ""}`
     : "bundle embutido (nenhum OTA aplicado)";
-  return [u.runtimeVersion, u.channel, ota].filter(Boolean).join(" · ");
+  return [u.runtimeVersion, u.channel, ota, a.commit].filter(Boolean).join(" · ");
 }

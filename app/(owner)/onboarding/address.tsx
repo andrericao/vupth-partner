@@ -18,11 +18,13 @@ import { maskCEP, unmask } from "@lib/masks";
 import { lookupCep } from "@lib/cep";
 import { avisar } from "@lib/confirmar";
 import { pegarLocalizacao, preencherVazios } from "@lib/localizacao";
+import { mensagemDoEnderecoSalvo } from "@lib/pontoNoMapa";
 import { MapPin } from "lucide-react-native";
 
 export default function AddressScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const addAddress = useEstablishmentStore((s) => s.addAddress);
+  const updateAddress = useEstablishmentStore((s) => s.updateAddress);
   const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
 
   const [zipCode, setZipCode] = useState("");
@@ -39,6 +41,9 @@ export default function AddressScreen() {
   // endereco — sem ela a loja some da busca por proximidade (S25).
   const [coordenada, setCoordenada] = useState<{ latitude: number; longitude: number } | null>(null);
   const [localizando, setLocalizando] = useState(false);
+  // Com o id do endereco salvo, corrigir e PATCH (o POST cria outro endereco).
+  // So quando o backend o expoe no address embutido.
+  const [addressId, setAddressId] = useState<string | null>(null);
 
   const usarMinhaLocalizacao = async () => {
     setLocalizando(true);
@@ -82,6 +87,7 @@ export default function AddressScreen() {
         if (a.city) setCity(a.city);
         if (a.state) setState(a.state);
         if (a.zipCode) setZipCode(maskCEP(a.zipCode));
+        if (a.addressId) setAddressId(a.addressId);
       })
       .catch(() => {});
     return () => {
@@ -131,7 +137,7 @@ export default function AddressScreen() {
     setIsLoading(true);
 
     try {
-      await addAddress(establishment.id, {
+      const endereco = {
         street: street.trim(),
         number: number.trim(),
         complement: complement.trim() || undefined,
@@ -140,12 +146,16 @@ export default function AddressScreen() {
         state: state.trim(),
         zipCode: unmask(zipCode),
         ...(coordenada ?? {}),
-      });
+      };
+      const salvo = addressId
+        ? await updateAddress(establishment.id, addressId, endereco)
+        : await addAddress(establishment.id, endereco);
       // O endereco JA FOI salvo — sem a caixa na web o dono ficava no
-      // formulario sem saber, e salvava de novo.
+      // formulario sem saber, e salvava de novo. A mensagem diz se a loja ja
+      // entra na busca por perto (loja-sem-coordenada, S25).
       await avisar({
         titulo: "Endereço salvo",
-        mensagem: "Endereço do estabelecimento atualizado.",
+        mensagem: mensagemDoEnderecoSalvo(salvo),
       });
       router.replace("/(owner)/dashboard" as any);
     } catch (error: any) {

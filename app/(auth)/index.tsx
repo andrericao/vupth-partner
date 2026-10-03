@@ -4,6 +4,7 @@ import { Store, User, ChevronRight } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 
 import { getRoleCardRoute } from "@lib/routing";
+import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { useAuthStore } from "@store/auth.store";
 
 type Papel = {
@@ -118,6 +119,8 @@ export default function RoleChoiceScreen() {
           </Pressable>
         </View>
       )}
+
+      <CommitDoCodigo />
     </ScrollView>
   );
 }

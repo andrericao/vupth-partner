@@ -52,6 +52,10 @@ export const api = axios.create({
 
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
+  // Acesso (fd9a3af, 03/10). As telas de login/esqueci tratam os dois antes
+  // (com "Criar conta" e os segundos do Retry-After); isto e o texto de reserva.
+  EMAIL_NOT_FOUND: "Não há conta com este e-mail.",
+  TOO_MANY_REQUESTS: "Muitas tentativas. Espere um pouco e tente de novo.",
   // 422 da divisao do preco (contrato de 18/09): a conta nao fechou com a regra
   // das Taxas Vupth — ou o servico ainda e da regra antiga.
   // So agenda x fila (8e6c00f): troca so antes do 1o cliente da fila de hoje.

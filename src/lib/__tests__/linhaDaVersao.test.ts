@@ -47,4 +47,12 @@ describe("linhaDaVersao", () => {
     });
     expect(l).toBe("1.4.0 · web");
   });
+
+  it("com o commit carimbado: entra no fim da linha (aparelho e web)", () => {
+    expect(linhaDaVersao({ plataforma: "android", updates: { ...ota, updateId: null }, commit: "dc28e95" }))
+      .toBe("1.4.0 · preview · bundle embutido (nenhum OTA aplicado) · dc28e95");
+    expect(
+      linhaDaVersao({ plataforma: "web", versaoApp: "1.4.0", updates: {}, commit: "dc28e95" })
+    ).toBe("1.4.0 · web · dc28e95");
+  });
 });

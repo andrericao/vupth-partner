@@ -58,8 +58,13 @@ if [ "$CODE" != "200" ]; then
 fi
 
 echo ""
+# 6. O commit esperado: a bateria confere o do app antes de comecar (Andre,
+#    03/10). E o HEAD desta pasta — o mesmo que o eas update publicou daqui.
+COMMIT=$(git -C "$(dirname "$0")/.." rev-parse --short=7 HEAD)
+echo "Commit esperado no app: $COMMIT"
+
 echo "Tudo pronto. Rode:"
 echo ""
-echo "  maestro test -e APP_ID=com.vupth.partner.preview -e API=$API -e SENHA=Teste@123 .maestro/bateria_completa.yaml"
+echo "  maestro test -e APP_ID=com.vupth.partner.preview -e API=$API -e SENHA=Teste@123 -e COMMIT=$COMMIT .maestro/bateria_completa.yaml"
 echo ""
 echo "Ao terminar, devolva o preenchimento automatico:  bash .maestro/restaurar.sh"

@@ -15,12 +15,31 @@
 //
 // `EAS_BUILD_PROFILE` e carimbado pelo EAS durante o build. Rodando local ele
 // nao existe, e ai vale o app.json como esta.
+const { execSync } = require("child_process");
+
 const VARIANTES = {
   development: { sufixo: ".dev", nome: "VUPTH dev" },
   preview: { sufixo: ".preview", nome: "VUPTH preview" },
 };
 
+// O commit do codigo, em `extra.commit`: a bateria Maestro confere que o app
+// instalado e o codigo esperado (bateria-confere-versao, Andre 03/10). No EAS
+// Build nao ha .git — o EAS carimba EAS_BUILD_GIT_COMMIT_HASH; no `eas update`
+// (roda aqui) vale o git local. Sem nenhum dos dois, segue sem o carimbo.
+function commitDoCodigo() {
+  const doEas = process.env.EAS_BUILD_GIT_COMMIT_HASH;
+  if (doEas) return doEas.slice(0, 7);
+  try {
+    return String(execSync("git rev-parse --short=7 HEAD", { stdio: ["ignore", "pipe", "ignore"] })).trim();
+  } catch {
+    return null;
+  }
+}
+
 module.exports = ({ config }) => {
+  const commit = commitDoCodigo();
+  if (commit) config = { ...config, extra: { ...config.extra, commit } };
+
   const variante = VARIANTES[process.env.EAS_BUILD_PROFILE];
   if (!variante) return config;
 

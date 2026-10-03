@@ -24,5 +24,7 @@ var email = "prof_m" + TAG + "_recusado@teste.com";
 pedir("POST", "/auth/register", { email: email, password: SENHA });
 pedir("POST", "/professional/register", { name: nome, specialty: "NAIL_TECH" }, entrar(email));
 // Login de novo: o token tem de carregar o papel PROFESSIONAL recem-criado.
-pedir("POST", "/professional/affiliate", { establishmentId: lojas[0].id }, entrar(email));
+// O PEDIDO (PENDING), como o app faz em establishment-detail — o
+// /professional/affiliate vincula direto e nao deixa nada para o dono recusar.
+pedir("POST", "/professional/me/affiliations", { establishmentId: lojas[0].id }, entrar(email));
 output.PROF_RECUSADO = nome;

@@ -6,6 +6,7 @@ import Constants from "expo-constants";
 // jest e em alguns bundles web o expoConfig vem vazio.
 import appJson from "../../app.json";
 import { linhaDaVersao } from "@lib/linhaDaVersao";
+import { commitDoCodigo } from "@lib/commitDoCodigo";
 
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { PushDiagnostics } from "@components/PushDiagnostics";
@@ -64,6 +65,7 @@ export function OtaUpdateButton() {
     versaoApp: Constants.expoConfig?.version ?? appJson.expo.version,
     updates: Updates,
     dataDoBuild: process.env.EXPO_PUBLIC_BUILD_TIME ?? null,
+    commit: commitDoCodigo(Constants.expoConfig),
   });
   // Os 7 toques (diagnostico de WS e push) sao do APK: na web nao ha push nem
   // o que diagnosticar ali (Andre, 26/09).
