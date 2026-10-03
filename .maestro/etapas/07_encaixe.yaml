@@ -125,6 +125,12 @@ appId: ${APP_ID}
       id: "foto-perfil-camera"
     timeout: 10000
     label: "07.30 · foto-com-botao-claro · a folha fechou"
+# foto-pela-bateria (Andre, 03/10): grava a foto de verdade, pela galeria
+- runFlow:
+    file: ../apoio/escolher_foto.yaml
+    env:
+      QUAL: "foto-perfil"
+    label: "07.44 · foto-pela-bateria · grava a foto do perfil pela galeria"
 
 # aparencia (7834bec): Perfil → Aparência → fonte +2 → Salvar continua na mesma
 # tela e mostra +2; volta para Normal no fim (a rodada nao deixa sujeira).

@@ -50,6 +50,15 @@ fi
 adb shell settings put secure autofill_service null
 echo "Preenchimento automatico desligado: OK (ao terminar: bash .maestro/restaurar.sh)"
 
+# 4b. A imagem de teste na galeria (foto-pela-bateria, Andre 03/10): as etapas
+#     07 e 08 gravam a foto escolhendo-a no seletor. Vai com a data de agora,
+#     para ser a mais recente da grade; o media scan a poe na galeria.
+FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
+adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
+adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
+adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
+echo "Imagem de teste na galeria: OK ($FOTO)"
+
 # 5. Acordar o staging (Render dorme; o primeiro pedido leva ~50 s)
 echo -n "Acordando o staging"
 for i in $(seq 1 30); do

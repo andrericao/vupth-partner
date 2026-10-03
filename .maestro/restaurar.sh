@@ -12,3 +12,7 @@ else
 fi
 adb shell settings put secure spell_checker_enabled 1
 echo "Corretor religado."
+# A imagem de teste que o setup.sh pos na galeria (foto-pela-bateria)
+adb shell 'rm -f /sdcard/Pictures/vupth_teste_*.png' 2>/dev/null
+adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
+echo "Imagem de teste removida da galeria."

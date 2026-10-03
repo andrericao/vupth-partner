@@ -107,6 +107,11 @@ appId: ${APP_ID}
       id: "foto-loja-camera"
     timeout: 10000
     label: "08.23 · foto-da-loja · a folha fechou"
+- runFlow:
+    file: ../apoio/escolher_foto.yaml
+    env:
+      QUAL: "foto-loja"
+    label: "08.36 · foto-pela-bateria · grava a foto da loja pela galeria"
 
 # maestro-maximo (2a fatia): Dados cadastrais e Endereco da loja (so olhar)
 - tapOn:
