@@ -7,7 +7,7 @@
 function pedir(metodo, url, corpo, token) {
   var headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = "Bearer " + token;
-  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });
+  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" || metodo === "DELETE" ? undefined : "{}") });
   if (r.status >= 300) throw new Error(metodo + " " + url + " -> " + r.status + " " + r.body);
   return r.body ? json(r.body) : null;
 }
