@@ -1,3 +1,5 @@
+# Subfluxos do Partner para a bateria conjunta (o Client os chama por runFlow).
+# A lista e o env de cada um estao no vupth-docs, aba Partner (bateria-conjunta).
 # Entra no Partner como o profissional e espera a Fila. env: EMAIL, SENHA
 appId: ${APP_ID}
 ---
