@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { QueueOptions } from "@components/QueueOptions";
 import { ModoDeFuncionamento, type Modo } from "@components/ModoDeFuncionamento";
+import { ExporPosicao } from "@components/ExporPosicao";
 import { useProfessionalStore } from "@store/professional.store";
 import { viraTrabalhandoAoAbrirFila, fechaFilaAoSair } from "@lib/coerenciaFila";
 import { useIntervalStore, mealName } from "@store/interval.store";
@@ -36,6 +37,22 @@ export default function QueueOptionsScreen() {
       });
     } finally {
       setTrocandoModo(false);
+    }
+  };
+  // expor-posicao (35d57c0): o cliente ve a posicao na fila; padrao, mostrar.
+  const setShowPosition = useProfessionalStore((s) => s.setShowPosition);
+  const [salvandoPosicao, setSalvandoPosicao] = useState(false);
+  const mudarPosicao = async (expor: boolean) => {
+    setSalvandoPosicao(true);
+    try {
+      await setShowPosition(expor);
+    } catch (error: any) {
+      await avisar({
+        titulo: "Posição na fila",
+        mensagem: getApiErrorMessage(error, "Não foi possível mudar a posição na fila."),
+      });
+    } finally {
+      setSalvandoPosicao(false);
     }
   };
   const intervals = useIntervalStore((s) => s.intervals);
@@ -187,6 +204,13 @@ export default function QueueOptionsScreen() {
               onEscolher={escolherModo}
               ocupado={trocandoModo}
             />
+            <View className="mt-3">
+              <ExporPosicao
+                expor={professional.show_position ?? true}
+                onMudar={mudarPosicao}
+                ocupado={salvandoPosicao}
+              />
+            </View>
           </View>
         )}
       </View>

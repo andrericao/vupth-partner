@@ -28,6 +28,8 @@ type Professional = {
   accepting_new?: boolean | null;
   /** Fila ou so agenda (backend 8e6c00f). Ausente = fila. */
   operation_mode?: "QUEUE" | "AGENDA_ONLY";
+  /** O cliente ve a posicao dele na fila (Backend 35d57c0). Ausente = true. */
+  show_position?: boolean;
   message: string;
 };
 
@@ -84,6 +86,7 @@ type ProfessionalState = {
   updateMyStatus: (status: "WORKING" | "ON_BREAK" | "OFF") => Promise<void>;
   setOperationMode: (mode: "QUEUE" | "AGENDA_ONLY") => Promise<void>;
   setAcceptingNew: (value: boolean) => Promise<void>;
+  setShowPosition: (value: boolean) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (
     itemId: string,
@@ -110,6 +113,7 @@ function normalizeProfessional(data: any): Professional {
     work_status: data.work_status ?? data.workStatus ?? null,
     accepting_new: data.accepting_new ?? data.acceptingNew ?? null,
     operation_mode: data.operation_mode ?? data.operationMode ?? "QUEUE",
+    show_position: data.show_position ?? data.showPosition ?? true,
     message: data.message ?? "",
   };
 }
@@ -234,6 +238,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
 
   setAcceptingNew: async (value) => {
     await api.patch("/professional/me/accepting-new", { value });
+    await get().fetchMe();
+  },
+
+  // expor-posicao (decisao de 05/09, Backend 35d57c0): esconder a posicao do
+  // cliente na fila e a escolha ativa — o padrao e mostrar.
+  setShowPosition: async (value) => {
+    await api.patch("/professional/me", { show_position: value });
     await get().fetchMe();
   },
 
