@@ -91,3 +91,26 @@ env:
 - runFlow:
     file: etapas/09_profissional_extras.yaml
     label: "00.23 · roda 09_profissional_extras"
+# A 09 termina fora da conta; a 10 tem profissional proprio (muda o vinculo)
+- runScript:
+    file: scripts/troca_de_loja.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+    label: "00.24 · script troca_de_loja"
+- runFlow:
+    file: apoio/abrir_com_ota.yaml
+    label: "00.25 · abre o app do zero"
+- runFlow:
+    file: apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_TROCA}
+    label: "00.26 · entra como o profissional da troca"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "00.27 · espera aba-fila"
+- runFlow:
+    file: etapas/10_profissional_troca_de_loja.yaml
+    label: "00.28 · roda 10_profissional_troca_de_loja"

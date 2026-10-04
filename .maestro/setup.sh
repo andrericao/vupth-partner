@@ -239,7 +239,7 @@ if ! rodar 00_versao "$RAIZ/.maestro/avulsas/00_confere_versao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$RAIZ"/.maestro/avulsas/0[1-9].yaml; do
+  for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
     rodar "etapa_$(basename "$ARQ" .yaml)" "$ARQ" || RESULTADO=1
   done
 fi
