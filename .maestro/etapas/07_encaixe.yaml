@@ -25,6 +25,11 @@ appId: ${APP_ID}
     visible: ".*${output.CLIENTE_RECUSADO}.*"
     timeout: 60000
     label: "07.05 · espera …${output.CLIENTE_RECUSADO}…"
+# corte-com-horario (S26): o pedido sem horario diz "assim que abrir"
+- assertVisible:
+    id: "encaixe-quando"
+    text: "Quer assim que abrir"
+    label: "07.05a · confere Quer assim que abrir"
 - tapOn:
     text: "Recusar"
     label: "07.06 · toca em Recusar"

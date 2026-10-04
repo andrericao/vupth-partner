@@ -156,3 +156,28 @@ export async function releDepoisDeDecidir(
   deps.invalidar(["professionals-with-queue"]);
   deps.invalidar(["professional-queue"]);
 }
+
+const DIAS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+
+/**
+ * corte-com-horario (S26, Backend 36c4359): quando o cliente quer ser atendido,
+ * pelo `desired_time` do pedido. So informa — o aceite continua pondo o cliente
+ * no fim da fila. Sem horario (null), o cliente quer "assim que abrir".
+ */
+export function quandoOClienteQuer(
+  desiredTime: string | null | undefined,
+  nowMs: number
+): string {
+  const d = desiredTime ? new Date(desiredTime) : null;
+  if (!d || Number.isNaN(d.getTime())) return "Quer assim que abrir";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const hora = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const hoje = new Date(nowMs);
+  hoje.setHours(0, 0, 0, 0);
+  const dia = new Date(d);
+  dia.setHours(0, 0, 0, 0);
+  const dias = Math.round((dia.getTime() - hoje.getTime()) / 86400000);
+  if (dias === 0) return `Quer hoje às ${hora}`;
+  if (dias === 1) return `Quer amanhã às ${hora}`;
+  return `Quer ${DIAS[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)} às ${hora}`;
+}

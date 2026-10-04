@@ -16,6 +16,7 @@ import {
   cutRequestServices,
   cutRequestClientName,
   cutRequestTotal,
+  quandoOClienteQuer,
 } from "@lib/cutRequests";
 import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
@@ -146,6 +147,13 @@ export default function CutRequestsScreen() {
                       </View>
                     </View>
   
+                    <Text
+                      testID="encaixe-quando"
+                      className="font-body text-sm text-vupth-forest"
+                    >
+                      {quandoOClienteQuer(req.desired_time, nowMs)}
+                    </Text>
+
                     {time && (
                       <Text className="font-body text-f11 text-vupth-textSecondary">
                         Pediu às {time} · entra no fim da sua fila
