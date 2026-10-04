@@ -69,17 +69,21 @@ appId: ${APP_ID}
 - tapOn:
     text: "Adicionar serviço"
     label: "04.19 · toca em Adicionar serviço"
-# O 1o servico fecha o cadastro: o modal "Cadastro completo" chega DEPOIS
-# (useAnuncioPronto espera o perfil voltar) e cobre a lista — o Maestro deixa
-# de ver o "45min" que esta embaixo (rodada de 02/10 12:08). Espera o modal.
+# O 1o servico fecha o cadastro: chegam DOIS avisos, um depois do outro —
+# "Servico adicionado" e, quando o perfil volta (useAnuncioPronto), "Cadastro
+# completo". Cada um cobre a lista e o Maestro deixa de ver o "45min" embaixo
+# (rodadas de 03/10: fechava so o 1o; bateria-04-popup-loja). Fecha os dois.
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "04.20 · roda fechar_aviso (Servico adicionado)"
 - extendedWaitUntil:
     visible: "Cadastro completo"
     timeout: 15000
     optional: true
-    label: "04.20 · espera Cadastro completo"
+    label: "04.21 · espera Cadastro completo"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
-    label: "04.21 · roda fechar_aviso"
+    label: "04.21a · roda fechar_aviso (Cadastro completo)"
 - extendedWaitUntil:
     visible: ".*45min.*"
     timeout: 20000

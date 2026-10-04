@@ -8,6 +8,7 @@ import {
   cutRequestTotal,
   isCutRequestEvent,
   resumoDeSolicitacoes,
+  quandoOClienteQuer,
 } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
@@ -273,5 +274,35 @@ describe("releDepoisDeDecidir", () => {
     f.releStatus.mockRejectedValueOnce(new Error("rede"));
     await expect(releDepoisDeDecidir(true, f)).resolves.toBeUndefined();
     expect(f.invalidar).toHaveBeenCalledTimes(2);
+  });
+});
+
+// corte-com-horario (S26, Backend 36c4359): o desired_time so informa — o card
+// diz o dia e o horario que o cliente quer; null = "assim que abrir".
+describe("quandoOClienteQuer", () => {
+  // Datas locais: o teste roda em qualquer fuso
+  const local = (a: number, m: number, d: number, h: number, min: number) =>
+    new Date(a, m - 1, d, h, min).toISOString();
+  const agora = new Date(2026, 9, 4, 9, 0).getTime(); // dom, 04/10 09:00
+
+  it("sem horario escolhido diz que e assim que abrir", () => {
+    expect(quandoOClienteQuer(null, agora)).toBe("Quer assim que abrir");
+    expect(quandoOClienteQuer(undefined, agora)).toBe("Quer assim que abrir");
+  });
+
+  it("hoje", () => {
+    expect(quandoOClienteQuer(local(2026, 10, 4, 14, 30), agora)).toBe("Quer hoje às 14:30");
+  });
+
+  it("amanha", () => {
+    expect(quandoOClienteQuer(local(2026, 10, 5, 9, 5), agora)).toBe("Quer amanhã às 09:05");
+  });
+
+  it("outro dia diz o dia da semana e a data", () => {
+    expect(quandoOClienteQuer(local(2026, 10, 7, 18, 0), agora)).toBe("Quer qua, 07/10 às 18:00");
+  });
+
+  it("data invalida cai no assim que abrir", () => {
+    expect(quandoOClienteQuer("nao-e-data", agora)).toBe("Quer assim que abrir");
   });
 });

@@ -18,7 +18,10 @@ env:
   APP_ID: com.vupth.partner.preview
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
-  COMMIT: ""
+# ⚠️ TAG e COMMIT NAO entram no env: ele e aplicado DEPOIS do -e da linha de
+# comando e o apaga (Client, 04/10: a conferencia de versao era pulada e cada
+# etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
+# test direto), as expressoes testam typeof.
 ---
 - evalScript:
     script: ${output.TAG = String(Date.now()).slice(-6)}
@@ -51,7 +54,7 @@ env:
     file: scripts/confere_versao.js
     env:
       INSTALADO: ${maestro.copiedText}
-    label: "00.12 · confere a versão: o commit instalado está em ${COMMIT}?"
+    label: "00.12 · confere a versão: o commit instalado é o esperado?"
 
 - runFlow:
     file: etapas/01_dono_cadastra_a_loja.yaml
@@ -91,3 +94,47 @@ env:
 - runFlow:
     file: etapas/09_profissional_extras.yaml
     label: "00.23 · roda 09_profissional_extras"
+# A 09 termina fora da conta; a 10 tem profissional proprio (muda o vinculo)
+- runScript:
+    file: scripts/troca_de_loja.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+    label: "00.24 · script troca_de_loja"
+- runFlow:
+    file: apoio/abrir_com_ota.yaml
+    label: "00.25 · abre o app do zero"
+- runFlow:
+    file: apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_TROCA}
+    label: "00.26 · entra como o profissional da troca"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "00.27 · espera aba-fila"
+- runFlow:
+    file: etapas/10_profissional_troca_de_loja.yaml
+    label: "00.28 · roda 10_profissional_troca_de_loja"
+# A 10 termina na tela de papeis (o login errado); a 11 tem profissional proprio
+- runScript:
+    file: scripts/troca_de_loja.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+      QUEM: Abre
+    label: "00.29 · script troca_de_loja (Abre)"
+- runFlow:
+    file: apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_ABRE}
+    label: "00.30 · entra como o profissional que abre a loja"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "00.31 · espera aba-fila"
+- runFlow:
+    file: etapas/11_profissional_abre_a_loja.yaml
+    label: "00.32 · roda 11_profissional_abre_a_loja"

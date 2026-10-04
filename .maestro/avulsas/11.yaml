@@ -1,0 +1,61 @@
+# Etapa 11 AVULSA (bateria-nao-para, Andre 03/10): prepara pela API o estado
+# que ela espera, abre o app do zero e roda etapas/11_profissional_abre_a_loja.yaml. O setup.sh
+# roda as oito em sequencia com a mesma TAG e segue depois de uma falha.
+# Gerado junto com as demais — mudar o cabecalho nas oito.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+# ⚠️ TAG e COMMIT NAO entram no env: ele e aplicado DEPOIS do -e da linha de
+# comando e o apaga (Client, 04/10: a conferencia de versao era pulada e cada
+# etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
+# test direto), as expressoes testam typeof.
+---
+- evalScript:
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "11.A1 · etiqueta da rodada (TAG)"
+- evalScript:
+    script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
+    label: "11.A2 · e-mail do dono"
+- evalScript:
+    script: ${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}
+    label: "11.A3 · e-mail do profissional"
+- evalScript:
+    script: ${output.LOJA = 'Loja M' + output.TAG}
+    label: "11.A4 · nome da loja"
+- evalScript:
+    script: ${output.PROF = 'Prof' + output.TAG}
+    label: "11.A5 · nome do profissional"
+- runScript:
+    file: ../scripts/preparo.js
+    env:
+      TAG: ${output.TAG}
+      ETAPA: "2"
+    label: "11.A6 · preparo pela API (o dono com a loja)"
+- runScript:
+    file: ../scripts/troca_de_loja.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+      QUEM: Abre
+    label: "11.A8 · script troca_de_loja (o profissional desta etapa, vinculado)"
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "11.A7 · abre o app do zero, ja com o OTA"
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_ABRE}
+    label: "11.B3 · entra como o profissional desta etapa"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "11.B4 · espera aba-fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "11.B5 · roda fechar_aviso"
+- runFlow:
+    file: ../etapas/11_profissional_abre_a_loja.yaml
+    label: "11.00 · roda 11_profissional_abre_a_loja"

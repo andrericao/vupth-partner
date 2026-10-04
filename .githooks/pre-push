@@ -27,7 +27,23 @@ echo "────────────────────────�
 # --coverage p/ aplicar o mesmo gate de cobertura que o CI (coverageThreshold no
 # package.json). Sem isso, uma regressao de cobertura passava aqui e so estourava
 # no CI, disparando o auto-rollback. (2026-07-17)
-npm test -- --ci --coverage
+# DEC-22: a falha do jest fica em .logs-teste/<data>_jest_FALHA.txt (o hook do
+# vupth-docs acorda a equipe com ela); verde apaga as falhas antigas do jest. O
+# codigo de saida do jest sai por arquivo: o pipe com tee o esconderia.
+LOGS=.logs-teste
+mkdir -p "$LOGS"
+SAIDA=$(mktemp)
+CODIGO=$(mktemp)
+{ npm test -- --ci --coverage 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
+RC=$(cat "$CODIGO")
+rm -f "$CODIGO"
+if [ "$RC" != "0" ]; then
+  LOG="$LOGS/$(date +%Y-%m-%d_%H%M%S)_jest_FALHA.txt"
+  mv "$SAIDA" "$LOG"
+  echo "[pre-push] jest falhou - log em $LOG"
+  exit "$RC"
+fi
+rm -f "$SAIDA" "$LOGS"/*_jest_FALHA.txt
 
 echo "──────────────────────────────────────────────"
 echo "[pre-push] 4/4  config (expo-doctor)"

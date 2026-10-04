@@ -20,11 +20,20 @@ export function mapPlatform(os: string): DevicePlatform {
 }
 
 // Roteia o toque na notificacao pelo data.type que o backend envia no push.
-// Todos os tipos conhecidos levam o profissional para a fila; tipo desconhecido
-// ou ausente => null (nao navega).
-export function notificationRoute(data: any): string | null {
+// Fila e atendimento levam o profissional para a fila; os de vinculo (DEC-19,
+// 7e3e21b) levam a Solicitacoes da loja (dono) ou ao Vinculo (profissional).
+// `minhaLoja` e a loja do dono logado: o aceite/recusa nela e de um convite
+// dele. Tipo desconhecido ou ausente => null (nao navega).
+export function notificationRoute(data: any, minhaLoja?: string | null): string | null {
   const type = data?.type;
   if (typeof type !== "string") return null;
+  const loja = typeof data?.establishmentId === "string" ? data.establishmentId : null;
+  const solicitacoes = loja ? `/(owner)/affiliations?establishmentId=${loja}` : null;
+  if (type === "AFFILIATION_REQUESTED") return solicitacoes;
+  if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
+  if (type === "AFFILIATION_ACCEPTED" || type === "AFFILIATION_REJECTED") {
+    return loja && minhaLoja && loja === minhaLoja ? solicitacoes : "/(professional)/settings-vinculo";
+  }
   if (
     type === "QUEUE_NEXT_IN_LINE" ||
     type === "ATTENDANCE_STARTED" ||

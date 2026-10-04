@@ -63,8 +63,8 @@ describe("professional.store", () => {
       });
 
       const state = useProfessionalStore.getState();
-      // normalizeProfessional completa o modo: ausente = fila.
-      expect(state.professional).toEqual({ ...REGISTER_RESPONSE, operation_mode: "QUEUE" });
+      // normalizeProfessional completa o modo (ausente = fila) e a posicao (ausente = mostrar).
+      expect(state.professional).toEqual({ ...REGISTER_RESPONSE, operation_mode: "QUEUE", show_position: true });
       expect(state.professional?.establishment_id).toBeNull();
       expect(state.isLoading).toBe(false);
     });
@@ -430,6 +430,32 @@ describe("professional.store", () => {
       await expect(useProfessionalStore.getState().setOperationMode("QUEUE")).rejects.toMatchObject({
         response: { status: 409 },
       });
+    });
+  });
+
+  describe("setShowPosition (expor-posicao, Backend 35d57c0)", () => {
+    it("esconder: PATCH /professional/me {show_position:false} e re-le no /me", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, show_position: false });
+
+      await useProfessionalStore.getState().setShowPosition(false);
+
+      expect(mock.history.patch[0].url).toBe("/professional/me");
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ show_position: false });
+      expect(useProfessionalStore.getState().professional?.show_position).toBe(false);
+    });
+
+    it("sem o campo no /me: expoe (o padrao e true)", async () => {
+      mock.onGet("/professional/me").reply(200, AFFILIATE_RESPONSE);
+      await useProfessionalStore.getState().fetchMe();
+      expect(useProfessionalStore.getState().professional?.show_position).toBe(true);
+    });
+
+    it("aceita o camelCase (showPosition)", async () => {
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, showPosition: false });
+      await useProfessionalStore.getState().fetchMe();
+      expect(useProfessionalStore.getState().professional?.show_position).toBe(false);
     });
   });
 

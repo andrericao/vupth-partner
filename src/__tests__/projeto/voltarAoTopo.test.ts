@@ -38,7 +38,9 @@ describe("a pílula voltar ao topo está nas abas", () => {
     const src = fs.readFileSync(path.join(RAIZ, arquivo), "utf8");
     expect(src).toContain("usePilulaTopo(rolagemRef)");
     expect(src).toMatch(/<PilulaVoltarAoTopo[^>]*visivel=\{pilula\.visivel\}/);
-    expect(src).toMatch(/onScroll=\{pilula\.onScroll\}/);
+    // Direto, ou por um handler que tambem chama a pilula (o Seu dia pede a
+    // proxima pagina do historico na mesma rolagem — historico-paginado).
+    expect(src).toMatch(/onScroll=\{pilula\.onScroll\}|pilula\.onScroll\(e\)/);
   });
 });
 

@@ -19,6 +19,17 @@ API="https://vupth-backend-ia.onrender.com"
 
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 
+# 0. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10; DEC-17):
+#    duas sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
+#    "device not found". Client e Partner usam o mesmo celular — confere antes
+#    de mexer em qualquer coisa do aparelho.
+OUTRA=$(pgrep -af "^java .*maestro.cli.AppKt test")
+if [ -n "$OUTRA" ]; then
+  echo "ERRO: ja ha uma bateria do Maestro rodando neste computador — espere ela terminar:"
+  echo "$OUTRA" | cut -c1-160
+  exit 1
+fi
+
 # 1. Celular conectado
 DEVICE=$(adb devices | grep -w "device" | head -1)
 if [ -z "$DEVICE" ]; then
@@ -98,16 +109,28 @@ if [ "$1" = "--so-preparar" ]; then
   exit 0
 fi
 
-# 7a. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10): duas
-#     sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
-#     "device not found". Client e Partner usam o mesmo celular.
-OUTRA=$(pgrep -af "^java .*maestro.cli.AppKt test")
-if [ -n "$OUTRA" ]; then
-  echo "ERRO: ja ha uma bateria do Maestro rodando neste computador — espere ela terminar:"
-  echo "$OUTRA" | cut -c1-160
-  bash "$RAIZ/.maestro/restaurar.sh"
-  exit 1
+# 7a. Supervisao (bateria-supervisionada, DEC-15). Sem resposta em 1 min,
+#     segue sem supervisao — como antes.
+#       0 = sem supervisao: a bateria faz tudo sozinha (o Client e a API).
+#       1 = um tipo de usuario: o Andre so acompanha; a bateria diz qual etapa
+#           comeca e, na falha, onde esta o print.
+#       2 = os dois: onde a bateria faria o papel do cliente pela API, ela
+#           mostra o e-mail e a situacao, e o Andre faz no app Client, no
+#           segundo celular (senha Teste@123). Espera ate 5 min a acao dele.
+SUPERVISAO=0
+read -r -t 60 -p "Teste com supervisao? (s/N) " RESP
+if [ "$RESP" = "s" ] || [ "$RESP" = "S" ]; then
+  SUPERVISAO=1
+  read -r -t 60 -p "Um tipo de usuario ou os dois? (1/2) " RESP
+  [ "$RESP" = "2" ] && SUPERVISAO=2
 fi
+echo ""
+case "$SUPERVISAO" in
+  0) echo "Sem supervisao." ;;
+  1) echo "Supervisionada, so o Partner." ;;
+  2) echo "Supervisionada, Partner e Client: deixe o Client aberto no segundo celular, na tela de entrada." ;;
+esac
+CMD+=(-e "SUPERVISAO=$SUPERVISAO")
 
 # 7. Roda a bateria, com os logs na pasta do projeto (logs-da-bateria-na-pasta)
 LOGS="$RAIZ/.maestro/logs"
@@ -141,9 +164,46 @@ TAG=$(date +%H%M%S)
 RELATORIO="$RODADA/relatorio.txt"
 echo "Rodada $(basename "$RODADA") · TAG $TAG · commit esperado $COMMIT" > "$RELATORIO"
 
-# Passo NN.MM em que a etapa parou: o ultimo rotulo que o maestro comecou.
+# Passo NN.MM em que a etapa parou: o PRIMEIRO rotulo que falhou e o mais de
+# dentro (o "NN.00 · roda ..." que o chamou falha depois, na linha de baixo).
 onde_parou() {
-  grep -oE '[0-9]{2}\.[0-9A-Z][0-9] · [^.]*' "$1" | tail -1
+  grep -m1 -E '^ *[0-9]{2}\.[0-9A-Z]{1,2}[0-9a-z]* · .*\.\.\. FAILED$' "$1" \
+    | sed -E 's/^ +//; s/\.\.\. FAILED$//'
+}
+
+# O print da falha com o nome do passo (print-da-falha, DEC-16), na pasta da
+# rodada: FALHA_04.22_espera-45min.png. O Andre manda o print e a equipe acha
+# o passo no log. E o print que o Maestro tirou na falha; sem ele, um do
+# aparelho agora.
+print_da_falha() { # $1 = nome da etapa, $2 = passo (NN.MM · ...)
+  local num="${2%% ·*}" texto="${2#* · }" slug destino print
+  slug=$(printf '%s' "$texto" | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null \
+    | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-60)
+  destino="$RODADA/FALHA_${num:-$1}${slug:+_$slug}.png"
+  print=$(ls -t "$RODADA/$1"/screenshot-❌-*.png 2>/dev/null | head -1)
+  if [ -n "$print" ]; then
+    cp "$print" "$destino"
+  else
+    adb -s "$SERIAL" exec-out screencap -p > "$destino" 2>/dev/null
+    [ -s "$destino" ] || rm -f "$destino"
+  fi
+  [ -f "$destino" ] && echo "   print: ${destino#$RAIZ/}"
+}
+
+# Com os dois usuarios (SUPERVISAO=2): o que o Andre faz no Client, antes da
+# etapa que precisa dele. As contas saem da TAG; a etapa as cria.
+papel_do_andre() { # $1 = nome da etapa
+  [ "$SUPERVISAO" = "2" ] || return 0
+  case "$1" in
+    etapa_05)
+      echo ""
+      echo "👤 ETAPA 05 — o Andre e o 2o cliente da fila. Quando aparecer"
+      echo "   \"05.0A · espera o Andre entrar na fila\", no segundo celular:"
+      echo "   Client → entrar como client_${TAG}_2@teste.com (senha Teste@123)"
+      echo "   → entrar na fila do Prof${TAG}, na Loja M${TAG}. Espero ate 5 min."
+      echo "   Depois o profissional te retira da fila: confira o aviso no Client."
+      echo "" ;;
+  esac
 }
 
 # Antes de cada etapa: o celular tem de estar no adb (espera ate 60 s).
@@ -157,6 +217,8 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
     echo "⚠️  $1 — nao rodou: o celular nao esta no adb (confira o cabo)" | tee -a "$RELATORIO"
     return 2
   fi
+  [ "$SUPERVISAO" = "0" ] || echo "▶ $1 comecando"
+  papel_do_andre "$1"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
   if [ "${PIPESTATUS[0]}" = "0" ]; then
@@ -165,7 +227,10 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   fi
   local motivo=""
   grep -q "device '.*' not found" "$saida" && motivo=" — o celular saiu do adb (nao e o app)"
-  echo "❌ $1 — parou em $(onde_parou "$saida")$motivo" >> "$RELATORIO"
+  local passo
+  passo=$(onde_parou "$saida")
+  echo "❌ $1 — parou em ${passo:-?}$motivo" >> "$RELATORIO"
+  print_da_falha "$1" "$passo" | tee -a "$RELATORIO"
   return 1
 }
 
@@ -174,7 +239,7 @@ if ! rodar 00_versao "$RAIZ/.maestro/avulsas/00_confere_versao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$RAIZ"/.maestro/avulsas/0[1-9].yaml; do
+  for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
     rodar "etapa_$(basename "$ARQ" .yaml)" "$ARQ" || RESULTADO=1
   done
 fi

@@ -70,15 +70,27 @@ appId: ${APP_ID}
 - tapOn:
     text: "Rejeitar"
     label: "03.18 · toca em Rejeitar"
+# GET /establishment/{id}/affiliations so devolve os PENDING: o rejeitado sai
+# da lista, nao vira historico "Rejeitado" (rodadas de 03/10, bateria-03-rejeitado).
 - extendedWaitUntil:
-    visible: "Rejeitado"
+    notVisible: ${output.PROF_RECUSADO}
     timeout: 20000
-    label: "03.19 · espera Rejeitado (historico)"
+    label: "03.19 · espera ${output.PROF_RECUSADO} sumir da lista"
 - assertNotVisible:
     text: "Rejeitar"
     label: "03.20 · confere que nao tem pendente"
 - back:
     label: "03.21 · volta para Profissionais"
+# Solicitacoes e aba escondida (href: null): o back pode cair no Menu em vez de
+# Profissionais (rodada 2026-10-04_091005). Se caiu, entra de novo.
+- runFlow:
+    when:
+      notVisible:
+        id: "path-invite"
+    label: "03.21a · se caiu no Menu, toca em Profissionais"
+    commands:
+      - tapOn:
+          text: "Profissionais"
 - tapOn:
     id: "path-invite"
     label: "03.22 · toca em Convidar um profissional"

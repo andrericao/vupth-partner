@@ -15,7 +15,7 @@ var PROF = "Prof" + TAG;
 function chamar(metodo, url, corpo, token) {
   var headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = "Bearer " + token;
-  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });
+  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" || metodo === "DELETE" ? undefined : "{}") });
   return { status: r.status, corpo: r.body ? json(r.body) : null };
 }
 

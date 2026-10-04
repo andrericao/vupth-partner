@@ -54,6 +54,8 @@ export type CutRequestResponse = {
   expires_at: string;
   created_at: string;
   resulting_attendance_id: string | null;
+  /** Quando o cliente quer (S26, 36c4359); null = assim que abrir. So informa. */
+  desired_time?: string | null;
 };
 
 export type AttendanceInQueue = {

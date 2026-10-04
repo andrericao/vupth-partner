@@ -24,3 +24,15 @@ export function paramsDoHistorico(
 export function rotuloDoFiltroSemStatus(periodo: "day" | "week" | "month"): string {
   return periodo === "day" ? "Hoje" : periodo === "week" ? "7 dias" : "30 dias";
 }
+
+/**
+ * historico-paginado (Backend cefac04): a rolagem chegou perto do fim — hora
+ * de pedir a proxima pagina do historico (faltam menos de 400 px).
+ */
+export function pertoDoFim(e: {
+  contentOffset: { y: number };
+  layoutMeasurement: { height: number };
+  contentSize: { height: number };
+}): boolean {
+  return e.contentOffset.y + e.layoutMeasurement.height >= e.contentSize.height - 400;
+}
