@@ -12,6 +12,10 @@
 # jest-expo, jest e @types/jest sobem de major com o SDK do Expo: o jest-expo 57
 # e do SDK 57 (PR #62: react-test-renderer 19.2 contra o React 19.1) e o
 # expo-doctor recusa jest/@types/jest fora do par do SDK (PR #63).
+# Triagem de 04/10 (DEC-20): tailwindcss 4 (PR #68) nao roda no NativeWind 4,
+# que e do tailwind 3 — o CI passa porque o jest nao compila o CSS; o build
+# quebraria. @babel/core 8 (PR #69) quebra o babel-preset-expo do SDK 54 (CI
+# vermelho, todas as suites). Os dois sobem de major com o SDK/NativeWind.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -40,6 +44,10 @@ updates:
       - dependency-name: jest
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@babel/core"
         update-types: ["version-update:semver-major"]
     groups:
       menores:
