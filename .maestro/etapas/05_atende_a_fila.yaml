@@ -9,7 +9,7 @@ appId: ${APP_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
       TAG: ${output.TAG}
       QTD: "2"
-      PELO_ANDRE: ${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2' ? '1' : '0'}
+      PELO_ANDRE: "${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2' ? '1' : '0'}"
     label: "05.01 · script clientes_na_fila"
 - tapOn:
     id: "aba-fila"
@@ -18,7 +18,7 @@ appId: ${APP_ID}
 # entra na fila pelo Client no segundo celular — o setup.sh mostra o e-mail.
 - runFlow:
     when:
-      true: ${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}
+      true: "${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}"
     commands:
       - extendedWaitUntil:
           visible: ${output.CLIENTE2}
