@@ -41,3 +41,6 @@ yarn-error.*
 /coverage
 .maestro/.autofill_antes
 .maestro/logs/
+
+# DEC-22: logs de falha dos testes (o hook do vupth-docs le daqui)
+/.logs-teste/
