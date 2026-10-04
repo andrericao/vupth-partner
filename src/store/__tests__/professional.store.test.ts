@@ -63,8 +63,8 @@ describe("professional.store", () => {
       });
 
       const state = useProfessionalStore.getState();
-      // normalizeProfessional completa o modo: ausente = fila.
-      expect(state.professional).toEqual({ ...REGISTER_RESPONSE, operation_mode: "QUEUE" });
+      // normalizeProfessional completa o modo (ausente = fila) e a posicao (ausente = mostrar).
+      expect(state.professional).toEqual({ ...REGISTER_RESPONSE, operation_mode: "QUEUE", show_position: true });
       expect(state.professional?.establishment_id).toBeNull();
       expect(state.isLoading).toBe(false);
     });
