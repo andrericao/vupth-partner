@@ -1,0 +1,31 @@
+# O profissional abre a propria loja pelo Perfil (abrir-meu-estabelecimento,
+# que era so a mao): cria a loja nova e escolhe atender nela — a role OWNER se
+# soma a PROFESSIONAL e o Vinculo passa a mostrar a loja nova. Conta propria
+# (EMAIL_ABRE), vinculada a loja do dono, para aparecer "Onde voce vai atender?".
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../conjunta/prof_abrir_loja.yaml
+    env:
+      DONO: "Dono Abre${output.TAG}"
+      LOJA_NOVA: "Loja N${output.TAG}"
+      ESCOLHA: nova
+    label: "11.01 · roda prof_abrir_loja (atender na loja nova)"
+- tapOn:
+    id: "aba-perfil"
+    label: "11.02 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "11.03 · fecha o aviso, se houver"
+- tapOn:
+    text: "Vínculo"
+    label: "11.04 · toca em Vinculo"
+- extendedWaitUntil:
+    visible: "Loja N${output.TAG}"
+    timeout: 20000
+    label: "11.05 · espera Loja N${output.TAG}"
+- back:
+    label: "11.06 · volta para o Perfil"
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "11.07 · sai da conta"

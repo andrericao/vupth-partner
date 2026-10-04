@@ -114,3 +114,24 @@ env:
 - runFlow:
     file: etapas/10_profissional_troca_de_loja.yaml
     label: "00.28 · roda 10_profissional_troca_de_loja"
+# A 10 termina na tela de papeis (o login errado); a 11 tem profissional proprio
+- runScript:
+    file: scripts/troca_de_loja.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+      QUEM: Abre
+    label: "00.29 · script troca_de_loja (Abre)"
+- runFlow:
+    file: apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_ABRE}
+    label: "00.30 · entra como o profissional que abre a loja"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "00.31 · espera aba-fila"
+- runFlow:
+    file: etapas/11_profissional_abre_a_loja.yaml
+    label: "00.32 · roda 11_profissional_abre_a_loja"
