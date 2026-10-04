@@ -7,10 +7,13 @@ env:
   APP_ID: com.vupth.partner.preview
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
-  TAG: ""
+# ⚠️ TAG e COMMIT NAO entram no env: ele e aplicado DEPOIS do -e da linha de
+# comando e o apaga (Client, 04/10: a conferencia de versao era pulada e cada
+# etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
+# test direto), as expressoes testam typeof.
 ---
 - evalScript:
-    script: "${output.TAG = TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
     label: "03.A1 · etiqueta da rodada (TAG)"
 - evalScript:
     script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
