@@ -2,7 +2,15 @@ import { useState, useCallback, useEffect } from "react";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { useIsFocused } from "@react-navigation/native";
-import { RefreshControl, View, Text, Pressable, ScrollView } from "react-native";
+import {
+  RefreshControl,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
+} from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
@@ -15,7 +23,7 @@ import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
 import { avisoSemSplit } from "@lib/split";
-import { paramsDoHistorico, rotuloDoFiltroSemStatus } from "@lib/historicoDoPeriodo";
+import { paramsDoHistorico, rotuloDoFiltroSemStatus, pertoDoFim } from "@lib/historicoDoPeriodo";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
 // como no mockup do menu ("atendidos, faturado, historico" num item so).
@@ -119,7 +127,7 @@ export default function MyDayScreen() {
   const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
   const history = useAttendanceStore((s) => s.history);
-  const fetchHistory = useAttendanceStore((s) => s.fetchHistory);
+  const fetchHistoryPage = useAttendanceStore((s) => s.fetchHistoryPage);
   const { data } = useQueuePolling(professional?.establishment_id ?? null);
 
   const [period, setPeriod] = useState<Period>("day");
@@ -136,6 +144,10 @@ export default function MyDayScreen() {
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  // historico-paginado (cefac04): 20 por vez; a proxima ao chegar perto do fim.
+  const [pagina, setPagina] = useState(0);
+  const [temMais, setTemMais] = useState(false);
+  const [carregandoMais, setCarregandoMais] = useState(false);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const queueCount = myProfessional?.queue_count ?? 0;
@@ -147,14 +159,37 @@ export default function MyDayScreen() {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      await fetchHistory(paramsDoHistorico(professional.id, filter, period));
+      const { hasNext } = await fetchHistoryPage(paramsDoHistorico(professional.id, filter, period), 0);
+      setPagina(0);
+      setTemMais(hasNext);
       setHistoryLoaded(true);
     } catch (error: any) {
       setHistoryError(getApiErrorMessage(error, "Não foi possível carregar os atendimentos."));
     } finally {
       setHistoryLoading(false);
     }
-  }, [professional?.id, filter, period, fetchHistory]);
+  }, [professional?.id, filter, period, fetchHistoryPage]);
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const carregarMais = useCallback(async () => {
+    if (!professional?.id || !temMais || carregandoMais || historyLoading) return;
+    setCarregandoMais(true);
+    try {
+      const proxima = pagina + 1;
+      const { hasNext } = await fetchHistoryPage(paramsDoHistorico(professional.id, filter, period), proxima);
+      setPagina(proxima);
+      setTemMais(hasNext);
+    } catch {
+      // Fica a lista que ja veio; rolar de novo tenta outra vez.
+    } finally {
+      setCarregandoMais(false);
+    }
+  }, [professional?.id, temMais, carregandoMais, historyLoading, pagina, filter, period, fetchHistoryPage]);
+
+  const aoRolar = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    pilula.onScroll(e);
+    if (pertoDoFim(e.nativeEvent)) carregarMais();
+  };
 
   // RECARREGA AO FOCAR (feedback de device 2026-08-11): "iniciei o atendimento,
   // na Fila aparecia 'atendendo agora' e aqui continuava AGENDADO". A causa e
@@ -192,7 +227,7 @@ export default function MyDayScreen() {
     <View style={{ flex: 1 }}>
       <ScrollView
         ref={rolagemRef}
-        onScroll={pilula.onScroll}
+        onScroll={aoRolar}
         scrollEventThrottle={64}
         className="w-full"
         contentContainerStyle={{ flexGrow: 1 }}
@@ -320,6 +355,11 @@ export default function MyDayScreen() {
               {history.map((item) => (
                 <AttendanceHistoryCard key={item.id} item={item} />
               ))}
+              {carregandoMais && (
+                <View testID="historico-carregando-mais" className="mt-2">
+                  <SkeletonList count={2} />
+                </View>
+              )}
             </View>
           )}
         </View>

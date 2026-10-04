@@ -1,4 +1,4 @@
-import { paramsDoHistorico, rotuloDoFiltroSemStatus } from "@lib/historicoDoPeriodo";
+import { paramsDoHistorico, rotuloDoFiltroSemStatus, pertoDoFim } from "@lib/historicoDoPeriodo";
 
 // Desempenho do Meu dia (Andre, 25/09): o historico buscava TODOS os
 // atendimentos do profissional, desde sempre, a cada foco da aba. O backend ja
@@ -35,5 +35,24 @@ describe("rotuloDoFiltroSemStatus", () => {
     ["month", "30 dias"],
   ] as const)("%s -> %s", (periodo, rotulo) => {
     expect(rotuloDoFiltroSemStatus(periodo)).toBe(rotulo);
+  });
+});
+
+// historico-paginado (cefac04): a proxima pagina sai quando faltam menos de
+// 400 px para o fim da rolagem.
+describe("pertoDoFim", () => {
+  const rolagem = (y: number) => ({
+    contentOffset: { y },
+    layoutMeasurement: { height: 800 },
+    contentSize: { height: 3000 },
+  });
+
+  it("longe do fim, nao", () => {
+    expect(pertoDoFim(rolagem(1000))).toBe(false);
+  });
+
+  it("a menos de 400 px do fim, sim", () => {
+    expect(pertoDoFim(rolagem(1800))).toBe(true);
+    expect(pertoDoFim(rolagem(2200))).toBe(true);
   });
 });

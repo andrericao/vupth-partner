@@ -28,6 +28,12 @@ type AttendanceState = {
     dateTo?: string;
   }) => Promise<AttendanceHistoryItem[]>;
   /**
+   * historico-paginado (Backend cefac04): uma pagina de 20 do GET /attendances
+   * (page de 0). A pagina 0 troca a lista; as seguintes acrescentam. Backend
+   * sem paginacao devolve o array inteiro — vira uma pagina so, sem proxima.
+   */
+  fetchHistoryPage: (params: Record<string, string>, page: number) => Promise<{ hasNext: boolean }>;
+  /**
    * O atendimento que o backend devolveu no `start`, guardado como REDE.
    *
    * O card "ATENDENDO AGORA" dependia so do `current_attendance` do snapshot da
@@ -94,6 +100,14 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
     const { data } = await api.get("/attendances", { params });
     set({ history: data });
     return data;
+  },
+
+  fetchHistoryPage: async (params, page) => {
+    const { data } = await api.get("/attendances", { params: { ...params, page, size: 20 } });
+    const items: AttendanceHistoryItem[] = Array.isArray(data) ? data : (data?.items ?? []);
+    const hasNext = !Array.isArray(data) && !!data?.hasNext;
+    set((s) => ({ history: page === 0 ? items : [...s.history, ...items] }));
+    return { hasNext };
   },
 
   startAttendance: async (attendanceId) => {

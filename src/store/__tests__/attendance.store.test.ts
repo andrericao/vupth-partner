@@ -372,6 +372,49 @@ describe("attendance.store", () => {
     });
   });
 
+  // historico-paginado (Backend cefac04): page de 0, size 20; o envelope
+  // {items, hasNext, ...}. Backend sem paginacao devolve o array: uma pagina so.
+  describe("fetchHistoryPage", () => {
+    const envelope = (items: any[], page: number, hasNext: boolean) => ({
+      items, page, size: 20, totalItems: 99, totalPages: 5, hasNext,
+    });
+
+    it("pagina 0 troca a lista e manda page e size", async () => {
+      useAttendanceStore.setState({ history: [{ id: "velho" }] as any });
+      mock.onGet("/attendances").reply(200, envelope(HISTORY_RESPONSE, 0, true));
+
+      const r = await useAttendanceStore.getState().fetchHistoryPage({ professionalId: "p1" }, 0);
+
+      expect(mock.history.get[0].params).toEqual({ professionalId: "p1", page: 0, size: 20 });
+      expect(r).toEqual({ hasNext: true });
+      expect(useAttendanceStore.getState().history).toHaveLength(1);
+      expect(useAttendanceStore.getState().history[0].clientName).toBe("Joao");
+    });
+
+    it("a seguinte acrescenta no fim", async () => {
+      useAttendanceStore.setState({ history: HISTORY_RESPONSE as any });
+      mock.onGet("/attendances").reply(200, envelope([{ ...HISTORY_RESPONSE[0], id: "outro" }], 1, false));
+
+      const r = await useAttendanceStore.getState().fetchHistoryPage({ professionalId: "p1" }, 1);
+
+      expect(r).toEqual({ hasNext: false });
+      expect(useAttendanceStore.getState().history.map((h) => h.id)).toEqual([HISTORY_RESPONSE[0].id, "outro"]);
+    });
+
+    it("backend sem paginacao (array): a lista inteira e nao ha proxima", async () => {
+      mock.onGet("/attendances").reply(200, HISTORY_RESPONSE);
+      const r = await useAttendanceStore.getState().fetchHistoryPage({ professionalId: "p1" }, 0);
+      expect(r).toEqual({ hasNext: false });
+      expect(useAttendanceStore.getState().history).toHaveLength(1);
+    });
+
+    it("envelope sem items vira lista vazia", async () => {
+      mock.onGet("/attendances").reply(200, { page: 0, hasNext: false });
+      await useAttendanceStore.getState().fetchHistoryPage({ professionalId: "p1" }, 0);
+      expect(useAttendanceStore.getState().history).toEqual([]);
+    });
+  });
+
   describe("reset", () => {
     it("clears all state including history", () => {
       useAttendanceStore.setState({
