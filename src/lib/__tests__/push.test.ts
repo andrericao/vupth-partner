@@ -92,6 +92,48 @@ describe("notificationRoute", () => {
   });
 });
 
+// historico-de-vinculo (DEC-19, Backend 7e3e21b): os 4 pushes de vinculo. O
+// aceite e a recusa chegam a quem iniciou — o dono (convite) ou o profissional
+// (pedido); a loja do push diz qual: se e a loja do dono, vai para Solicitacoes.
+describe("notificationRoute — vinculo", () => {
+  const LOJA = "estab-1";
+
+  it("pedido de vinculo leva o dono as Solicitacoes da loja", () => {
+    expect(notificationRoute({ type: "AFFILIATION_REQUESTED", establishmentId: LOJA })).toBe(
+      "/(owner)/affiliations?establishmentId=estab-1"
+    );
+  });
+
+  it("convite leva o profissional ao Vinculo", () => {
+    expect(notificationRoute({ type: "AFFILIATION_INVITED", establishmentId: LOJA })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+  });
+
+  it("aceite e recusa na loja do dono (ele convidou) vao para as Solicitacoes", () => {
+    for (const type of ["AFFILIATION_ACCEPTED", "AFFILIATION_REJECTED"]) {
+      expect(notificationRoute({ type, establishmentId: LOJA }, LOJA)).toBe(
+        "/(owner)/affiliations?establishmentId=estab-1"
+      );
+    }
+  });
+
+  it("aceite e recusa em outra loja (o profissional pediu) vao para o Vinculo", () => {
+    for (const type of ["AFFILIATION_ACCEPTED", "AFFILIATION_REJECTED"]) {
+      expect(notificationRoute({ type, establishmentId: LOJA }, "outra")).toBe(
+        "/(professional)/settings-vinculo"
+      );
+      expect(notificationRoute({ type, establishmentId: LOJA })).toBe(
+        "/(professional)/settings-vinculo"
+      );
+    }
+  });
+
+  it("pedido sem a loja no push nao navega", () => {
+    expect(notificationRoute({ type: "AFFILIATION_REQUESTED" })).toBeNull();
+  });
+});
+
 describe("acquireExpoPushToken", () => {
   function makeEnv(overrides: Partial<PushEnv> = {}): PushEnv {
     return {

@@ -18,6 +18,7 @@ import {
   CANAL_ALERTAS,
 } from "@lib/push";
 import { useAuthStore } from "@store/auth.store";
+import { useEstablishmentStore } from "@store/establishment.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
 
 // CARGA PREGUICOSA (2026-08-12). O `expo-notifications` nao e mais importado no
@@ -195,7 +196,7 @@ export function usePushRegistration() {
             return;
           }
           const data = response.notification.request.content.data;
-          const route = notificationRoute(data);
+          const route = notificationRoute(data, useEstablishmentStore.getState().establishment?.id);
           if (route) router.push(route as any);
         }
       );
