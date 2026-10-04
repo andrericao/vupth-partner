@@ -1,0 +1,107 @@
+# maestro-maximo (DEC-11), 1a fatia: as telas do profissional que a bateria
+# ainda nao percorria. Cliente sem app pela Fila (add-guest), o Vinculo
+# (settings-vinculo) e, ja fora da conta, o Esqueci minha senha (forgot-password).
+appId: ${APP_ID}
+---
+# Cliente que chega andando: Adicionar cliente → nome + servico → na fila
+- tapOn:
+    id: "aba-fila"
+    label: "09.01 · toca em aba-fila"
+- scrollUntilVisible:
+    element: "Adicionar cliente"
+    direction: DOWN
+    label: "09.02 · rola ate Adicionar cliente"
+- tapOn:
+    text: "Adicionar cliente"
+    label: "09.03 · toca em Adicionar cliente"
+- tapOn:
+    id: "guest-name"
+    label: "09.04 · toca no nome"
+- inputText:
+    text: "Avulso${output.TAG}"
+    label: "09.05 · digita Avulso${output.TAG}"
+- hideKeyboard:
+    label: "09.06 · fecha o teclado"
+- tapOn:
+    text: "Manicure.*"
+    label: "09.07 · escolhe o servico"
+- scrollUntilVisible:
+    element: "Adicionar na Fila"
+    direction: DOWN
+    label: "09.08 · rola ate Adicionar na Fila"
+- tapOn:
+    text: "Adicionar na Fila"
+    label: "09.09 · toca em Adicionar na Fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "09.10 · fecha o aviso Adicionado"
+- extendedWaitUntil:
+    visible: "Avulso${output.TAG}"
+    timeout: 20000
+    label: "09.11 · espera Avulso${output.TAG} na fila"
+# Tira da fila, para nao sobrar cliente na conta de teste
+- tapOn:
+    text: "Opções de Avulso${output.TAG}"
+    label: "09.12 · abre as opcoes do avulso"
+- tapOn:
+    text: "Remover"
+    label: "09.13 · toca em Remover"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "09.14 · confirma Remover"
+- extendedWaitUntil:
+    notVisible: "Avulso${output.TAG}"
+    timeout: 20000
+    label: "09.15 · espera o avulso sair da fila"
+
+# Vinculo: a loja de agora e a saida (sem desafiliar)
+- tapOn:
+    id: "aba-perfil"
+    label: "09.16 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "09.17 · fecha o aviso, se houver"
+- tapOn:
+    text: "Vínculo"
+    label: "09.18 · toca em Vinculo"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+    label: "09.19 · espera ${output.LOJA}"
+- assertVisible:
+    text: "Desafiliar do Estabelecimento"
+    label: "09.20 · confere Desafiliar do Estabelecimento"
+- back:
+    label: "09.21 · volta para o Perfil"
+
+# Esqueci minha senha: pede o codigo (nao redefine — o codigo vai por e-mail)
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "09.22 · sai da conta"
+- tapOn:
+    id: "go-login"
+    label: "09.23 · toca em Entrar"
+- tapOn:
+    text: "Esqueci minha senha"
+    label: "09.24 · toca em Esqueci minha senha"
+- tapOn:
+    id: "forgot-email"
+    label: "09.25 · toca no e-mail"
+- inputText:
+    text: ${output.EMAIL_PROF}
+    label: "09.26 · digita o e-mail do profissional"
+- hideKeyboard:
+    label: "09.27 · fecha o teclado"
+- tapOn:
+    text: "Enviar código"
+    label: "09.28 · toca em Enviar codigo"
+- extendedWaitUntil:
+    visible: "Código enviado"
+    timeout: 20000
+    label: "09.29 · espera Codigo enviado"
+- tapOn:
+    text: "OK"
+    label: "09.30 · fecha o aviso"
+- assertVisible:
+    id: "forgot-code"
+    label: "09.31 · confere o campo do codigo"

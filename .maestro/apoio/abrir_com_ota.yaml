@@ -1,0 +1,29 @@
+# Abre o app do zero e garante que roda o OTA (bateria-00-11, 03/10). O
+# clearState apaga o OTA baixado: a 1a abertura roda o bundle do APK e baixa o
+# OTA por tras; so uma abertura DEPOIS do download o aplica. Fechar logo (como
+# antes) reabria o bundle do APK, que nao tem o app-commit. Aqui: espera ate
+# 15 s com o app aberto (o download corre), fecha, reabre — ate o rodape trazer
+# o commit (so o codigo novo o tem), no maximo 4 vezes.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 120000
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: "app-commit"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "app-commit"
+          timeout: 15000
+          optional: true
+      - stopApp
+      - launchApp
+      - extendedWaitUntil:
+          visible: "Como você vai usar o Vupth?"
+          timeout: 120000

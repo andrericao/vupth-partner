@@ -1,0 +1,21 @@
+# Antes das etapas: o app instalado e o codigo esperado (bateria-confere-versao).
+# Se falhar, o setup.sh nao roda as etapas — testar a versao errada nao serve.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  COMMIT: ""
+---
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "00.06 · abre o app do zero e espera o OTA entrar (ate 4 reaberturas)"
+- assertVisible:
+    id: "app-commit"
+    label: "00.10 · o rodape traz o commit (sem ele: o OTA nao chegou ao aparelho)"
+- copyTextFrom:
+    id: "app-commit"
+    label: "00.11 · le o commit do app (rodape da entrada)"
+- runScript:
+    file: ../scripts/confere_versao.js
+    env:
+      INSTALADO: ${maestro.copiedText}
+    label: "00.12 · confere a versão: o commit instalado está em ${COMMIT}?"

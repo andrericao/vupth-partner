@@ -3,6 +3,7 @@ import { Animated, AccessibilityInfo, Easing, View, Text } from "react-native";
 import { Smartphone, Store, Scissors, Footprints } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 import { NwButton } from "@components/nw/Button";
+import { CommitDoCodigo } from "@components/CommitDoCodigo";
 
 // Tela do portao de readiness / cold start (ver src/lib/readiness.ts). Enquanto
 // o backend acorda (Render Free, ~50s), seguramos o app aqui — login/cadastro
@@ -152,6 +153,9 @@ export function ServerWarmup({ failed, onRetry }: Props) {
         ) : (
           <WarmupAnimation />
         )}
+        {/* O commit ja na espera do servidor: e a primeira tela que o Andre
+            ve sem login (commit-visivel, 03/10). */}
+        <CommitDoCodigo />
       </View>
     </View>
   );

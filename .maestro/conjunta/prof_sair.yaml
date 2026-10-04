@@ -1,0 +1,6 @@
+# Sai da conta do profissional (volta a tela de entrada).
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "PJ8.01 · sai da conta"

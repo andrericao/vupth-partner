@@ -1,0 +1,25 @@
+# Atende e finaliza o proximo da fila (avaliar-so-sem-nota: o Client avalia
+# depois). env: CLIENTE (o nome no card — tem de ser o proximo)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+    label: "PJ6.01 · toca em aba-fila"
+- extendedWaitUntil:
+    visible: ${CLIENTE}
+    timeout: 20000
+    label: "PJ6.02 · espera ${CLIENTE} na fila"
+- tapOn:
+    text: "Iniciar próximo"
+    label: "PJ6.03 · toca em Iniciar proximo"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+    label: "PJ6.04 · espera Finalizar"
+- tapOn:
+    text: "Finalizar"
+    label: "PJ6.05 · toca em Finalizar"
+- extendedWaitUntil:
+    notVisible: ${CLIENTE}
+    timeout: 20000
+    label: "PJ6.06 · espera ${CLIENTE} sair da fila"

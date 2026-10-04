@@ -1,0 +1,24 @@
+# O profissional marca que o cliente nao chegou: ele cai uma posicao e fica
+# "Atrasado" (contagem-de-atrasos, aviso-de-atraso). env: CLIENTE (o nome no card)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+    label: "PJ2.01 · toca em aba-fila"
+- extendedWaitUntil:
+    visible: ${CLIENTE}
+    timeout: 20000
+    label: "PJ2.02 · espera ${CLIENTE} na fila"
+- tapOn:
+    text: "Opções de ${CLIENTE}"
+    label: "PJ2.03 · abre as opcoes de ${CLIENTE}"
+- tapOn:
+    text: "Não chegou"
+    label: "PJ2.04 · toca em Nao chegou"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "PJ2.05 · confirma Cliente nao chegou"
+- extendedWaitUntil:
+    visible: "(Atrasado|atrasado)"
+    timeout: 20000
+    label: "PJ2.06 · espera o selo Atrasado"

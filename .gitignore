@@ -40,3 +40,4 @@ yarn-error.*
 # test coverage
 /coverage
 .maestro/.autofill_antes
+.maestro/logs/

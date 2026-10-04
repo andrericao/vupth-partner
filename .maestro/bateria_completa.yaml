@@ -3,8 +3,8 @@
 # (Render). Decisao do Andre, 25/09: "prefiro com render, mas a bateria deve ser
 # completa".
 #
-#   bash .maestro/setup.sh                      # celular, teclado e servidor
-#   (o setup.sh imprime o comando do maestro test, com as variaveis)
+#   bash .maestro/setup.sh   # celular, teclado, servidor, commit — e roda
+#   (logs em .maestro/logs/<data>; --so-preparar so imprime o comando)
 #
 # Cada rodada cria contas NOVAS (sufixo = hora da rodada), entao pode repetir a
 # vontade. Os clientes nao vem do app do client: entram na fila e pedem encaixe
@@ -38,25 +38,12 @@ env:
 
 # O app abre na tela "preparando servidor" ate o staging responder (~50 s se
 # ele estava dormindo). O setup.sh ja o acorda; aqui so esperamos.
-- launchApp:
-    clearState: true
-    label: "00.06 · abre o app"
-- extendedWaitUntil:
-    visible: "Como você vai usar o Vupth?"
-    timeout: 120000
-    label: "00.07 · espera Como você vai usar o Vupth?"
-
-# Confere a versao antes de tudo (Andre, 03/10). O clearState apaga o OTA que
-# o aparelho tinha: a 1a abertura roda o bundle do APK e baixa o OTA por tras;
-# a 2a abertura o aplica. So entao o commit do rodape e o do codigo novo.
-- stopApp:
-    label: "00.08 · fecha o app (o OTA baixado entra na proxima abertura)"
-- launchApp:
-    label: "00.09 · abre o app de novo"
-- extendedWaitUntil:
-    visible: "Como você vai usar o Vupth?"
-    timeout: 120000
-    label: "00.10 · espera Como você vai usar o Vupth?"
+- runFlow:
+    file: apoio/abrir_com_ota.yaml
+    label: "00.06 · abre o app do zero e espera o OTA entrar (ate 4 reaberturas)"
+- assertVisible:
+    id: "app-commit"
+    label: "00.10 · o rodape traz o commit (sem ele: o OTA nao chegou ao aparelho)"
 - copyTextFrom:
     id: "app-commit"
     label: "00.11 · le o commit do app (rodape da entrada)"
@@ -64,7 +51,7 @@ env:
     file: scripts/confere_versao.js
     env:
       INSTALADO: ${maestro.copiedText}
-    label: "00.12 · confere a versão: o commit instalado é o ${COMMIT}?"
+    label: "00.12 · confere a versão: o commit instalado está em ${COMMIT}?"
 
 - runFlow:
     file: etapas/01_dono_cadastra_a_loja.yaml
@@ -90,3 +77,17 @@ env:
 - runFlow:
     file: etapas/08_dono_confere.yaml
     label: "00.20 · roda 08_dono_confere"
+# A 08 termina com o dono fora da conta; a 09 e do profissional
+- runFlow:
+    file: apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_PROF}
+    label: "00.21 · entra como o profissional"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "00.22 · espera aba-fila"
+- runFlow:
+    file: etapas/09_profissional_extras.yaml
+    label: "00.23 · roda 09_profissional_extras"

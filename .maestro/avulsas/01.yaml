@@ -1,0 +1,32 @@
+# Etapa 01 AVULSA (bateria-nao-para, Andre 03/10): prepara pela API o estado
+# que ela espera, abre o app do zero e roda etapas/01_dono_cadastra_a_loja.yaml. O setup.sh
+# roda as oito em sequencia com a mesma TAG e segue depois de uma falha.
+# Gerado junto com as demais — mudar o cabecalho nas oito.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+  TAG: ""
+---
+- evalScript:
+    script: "${output.TAG = TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "01.A1 · etiqueta da rodada (TAG)"
+- evalScript:
+    script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
+    label: "01.A2 · e-mail do dono"
+- evalScript:
+    script: ${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}
+    label: "01.A3 · e-mail do profissional"
+- evalScript:
+    script: ${output.LOJA = 'Loja M' + output.TAG}
+    label: "01.A4 · nome da loja"
+- evalScript:
+    script: ${output.PROF = 'Prof' + output.TAG}
+    label: "01.A5 · nome do profissional"
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "01.A7 · abre o app do zero, ja com o OTA"
+- runFlow:
+    file: ../etapas/01_dono_cadastra_a_loja.yaml
+    label: "01.00 · roda 01_dono_cadastra_a_loja"

@@ -1,0 +1,16 @@
+# Entra no Partner como o profissional e espera a Fila. env: EMAIL, SENHA
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${EMAIL}
+    label: "PJ1.01 · entra como ${EMAIL}"
+- extendedWaitUntil:
+    visible:
+      id: "aba-fila"
+    timeout: 30000
+    label: "PJ1.02 · espera aba-fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ1.03 · fecha o aviso, se houver"

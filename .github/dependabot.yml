@@ -9,6 +9,9 @@
 # que ele traz quebra no ESLint 10 (context.getFilename removido) — PR #58.
 # TypeScript 7 (PR #56): ts-jest e typescript-eslint ainda nao rodam nele.
 # Testing Library 14 (PR #57): render virou assincrono — migrar todas as suites.
+# jest-expo, jest e @types/jest sobem de major com o SDK do Expo: o jest-expo 57
+# e do SDK 57 (PR #62: react-test-renderer 19.2 contra o React 19.1) e o
+# expo-doctor recusa jest/@types/jest fora do par do SDK (PR #63).
 version: 2
 updates:
   - package-ecosystem: npm
@@ -31,6 +34,12 @@ updates:
       - dependency-name: typescript
         update-types: ["version-update:semver-major"]
       - dependency-name: "@testing-library/react-native"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: jest-expo
+        update-types: ["version-update:semver-major"]
+      - dependency-name: jest
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
         update-types: ["version-update:semver-major"]
     groups:
       menores:

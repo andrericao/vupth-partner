@@ -1,0 +1,50 @@
+# Cadastra uma refeicao todos os dias (horario-na-refeicao). env: NOME,
+# INICIO (so digitos, ex. 1200), DURACAO (minutos)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+    label: "PJ5.01 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ5.02 · fecha o aviso, se houver"
+- tapOn:
+    text: "Refeições"
+    label: "PJ5.03 · toca em Refeicoes"
+- tapOn:
+    text: "Adicionar refeição"
+    label: "PJ5.04 · toca em Adicionar refeicao"
+- tapOn:
+    text: "Ex: Almoço"
+    label: "PJ5.05 · toca no nome"
+- inputText:
+    text: ${NOME}
+    label: "PJ5.06 · digita ${NOME}"
+- tapOn:
+    text: "12:00"
+    label: "PJ5.07 · toca no inicio"
+- inputText:
+    text: ${INICIO}
+    label: "PJ5.08 · digita ${INICIO}"
+- tapOn:
+    text: "60"
+    label: "PJ5.09 · toca na duracao"
+- inputText:
+    text: ${DURACAO}
+    label: "PJ5.10 · digita ${DURACAO}"
+- hideKeyboard:
+    label: "PJ5.11 · fecha o teclado"
+- tapOn:
+    text: "Todos os dias"
+    label: "PJ5.12 · toca em Todos os dias"
+- scrollUntilVisible:
+    element: "Adicionar"
+    direction: DOWN
+    label: "PJ5.13 · rola ate Adicionar"
+- tapOn:
+    text: "Adicionar"
+    label: "PJ5.14 · toca em Adicionar"
+- extendedWaitUntil:
+    visible: ${NOME}
+    timeout: 20000
+    label: "PJ5.15 · espera ${NOME}"
