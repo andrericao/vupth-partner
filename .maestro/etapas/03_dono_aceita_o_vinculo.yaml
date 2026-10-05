@@ -57,6 +57,17 @@ appId: ${APP_ID}
       EMAIL_DONO: ${output.EMAIL_DONO}
       TAG: ${output.TAG}
     label: "03.14 · script vinculo_para_recusar"
+# O pedido novo chega como push com o app aberto e vira o dialogo "Pedido de
+# vinculo" por cima do Menu (bateria 2026-10-05_073223). Espera ele, sem exigir.
+- extendedWaitUntil:
+    visible:
+      id: "dialogo-botao-0"
+    timeout: 10000
+    optional: true
+    label: "03.14a · espera o aviso Pedido de vinculo"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "03.14b · fecha o aviso Pedido de vinculo"
 - tapOn:
     text: "Profissionais"
     label: "03.15 · toca em Profissionais"
