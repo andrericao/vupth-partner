@@ -1,35 +1,14 @@
 import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
-import { DiaDaSemanaLinha, DataEspecialForm, ListaDeExcecoes } from "@components/HorarioSemana";
+import { EditorDeHorarios } from "@components/EditorDeHorarios";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskTime, isValidTime, parseApiTime, toApiTime } from "@lib/time";
-import { avisar } from "@lib/confirmar";
 import { buscarHorarios, salvarSemana, salvarData, removerData } from "@lib/horariosApi";
-import {
-  semanaInicial,
-  validarSemana,
-  aplicarATodos,
-  descreverHorario,
-  nomeDoDia,
-  isoParaBr,
-  hojeIso,
-  type DiaSemanal,
-  type HorarioDoDia,
-  type HorariosDaLoja,
-} from "@lib/horarioSemanal";
 
 const VOLTAR = "/(owner)/establishment-data";
 
@@ -47,106 +26,9 @@ export default function EstablishmentHoursScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const id = establishment?.id ?? null;
 
-  const [estado, setEstado] = useState<"carregando" | "semana" | "legado" | "erro">("carregando");
-  const [horarios, setHorarios] = useState<HorariosDaLoja | null>(null);
-  const [semana, setSemana] = useState<DiaSemanal[]>([]);
-  const [salvandoSemana, setSalvandoSemana] = useState(false);
-  const [salvandoData, setSalvandoData] = useState(false);
-  const [removendo, setRemovendo] = useState<string | null>(null);
-
-  const legado = (() => {
-    const opens = parseApiTime(establishment?.opening_time);
-    const closes = parseApiTime(establishment?.closing_time);
-    return opens && closes ? { opens, closes } : null;
-  })();
-
-  // Relê a cada tentativa: o "Tentar de novo" so incrementa o contador.
-  const [tentativa, setTentativa] = useState(0);
-
-  useEffect(() => {
-    if (!id) return;
-    let ativo = true;
-    buscarHorarios(id)
-      .then((h) => {
-        if (!ativo) return;
-        if (!h) {
-          setEstado("legado");
-          return;
-        }
-        setHorarios(h);
-        setSemana(semanaInicial(h, legado));
-        setEstado("semana");
-      })
-      .catch(() => {
-        if (ativo) setEstado("erro");
-      });
-    return () => {
-      ativo = false;
-    };
-    // `legado` so semeia a 1a abertura; nao deve recarregar a semana.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, tentativa]);
-
-  const tentarDeNovo = () => {
-    setEstado("carregando");
-    setTentativa((n) => n + 1);
-  };
-
-  const trocarDia = (dia: DiaSemanal) =>
-    setSemana((s) => s.map((d) => (d.day === dia.day ? dia : d)));
-
-  const primeiroAberto = semana.find((d) => !d.closed && isValidTime(d.opens ?? "") && isValidTime(d.closes ?? ""));
-
-  const handleSalvarSemana = async () => {
-    if (!id) return;
-    const erro = validarSemana(semana);
-    if (erro) {
-      Alert.alert("Horário inválido", erro);
-      return;
-    }
-    setSalvandoSemana(true);
-    try {
-      const h = await salvarSemana(id, semana);
-      setHorarios(h);
-      setSemana(semanaInicial(h, null));
-      await avisar({ titulo: "Horário salvo", mensagem: "O horário da semana foi atualizado." });
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o horário."));
-    } finally {
-      setSalvandoSemana(false);
-    }
-  };
-
-  const handleAdicionarData = async (dataIso: string, h: HorarioDoDia) => {
-    if (!id) return;
-    setSalvandoData(true);
-    try {
-      setHorarios(await salvarData(id, dataIso, h));
-      await avisar({
-        titulo: "Data especial salva",
-        mensagem: `${isoParaBr(dataIso)}: ${descreverHorario(h)}.`,
-      });
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar a data."));
-    } finally {
-      setSalvandoData(false);
-    }
-  };
-
-  const handleRemoverData = async (dataIso: string) => {
-    if (!id) return;
-    setRemovendo(dataIso);
-    try {
-      await removerData(id, dataIso);
-      // DELETE devolve 204 sem corpo: relê para os "próximos dias" acompanharem.
-      const h = await buscarHorarios(id);
-      if (h) setHorarios(h);
-    } catch (error: any) {
-      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível remover a data."));
-    } finally {
-      setRemovendo(null);
-    }
-  };
+  const opens = parseApiTime(establishment?.opening_time);
+  const closes = parseApiTime(establishment?.closing_time);
+  const legado = opens && closes ? { opens, closes } : null;
 
   return (
     <KeyboardAvoidingView
@@ -164,95 +46,20 @@ export default function EstablishmentHoursScreen() {
             title="Horário de funcionamento"
             onBack={() => router.navigate(VOLTAR as any)}
           />
-
-          {estado === "carregando" && (
-            <ActivityIndicator className="mt-10" color="#163300" />
-          )}
-
-          {estado === "erro" && (
-            <View className="mt-6 gap-3">
-              <Text className="font-body text-vupth-textSecondary">
-                Não foi possível carregar o horário.
-              </Text>
-              <NwButton title="Tentar de novo" onPress={tentarDeNovo} />
-            </View>
-          )}
-
-          {estado === "legado" && <HorarioUnico />}
-
-          {estado === "semana" && horarios && (
-            <View className="mt-2 gap-6">
-              {!horarios.configured && (
-                <View className="bg-vupth-greenTint rounded-card p-4">
-                  <Text className="font-body text-sm text-vupth-forest">
-                    Defina o horário de cada dia da semana. Ele é necessário para abrir o
-                    estabelecimento, e as refeições dos profissionais precisam caber nele.
-                  </Text>
-                </View>
-              )}
-
-              <View className="gap-3">
-                <Text className="font-heading text-lg text-vupth-forest">Semana</Text>
-                <Text className="font-body text-sm text-vupth-textSecondary">
-                  Vale para todas as semanas. Fechar depois de abrir (22:00 às 02:00) vira o dia;
-                  abrir e fechar no mesmo horário é 24 horas.
-                </Text>
-                {semana.map((d) => (
-                  <DiaDaSemanaLinha key={d.day} dia={d} onChange={trocarDia} />
-                ))}
-                {primeiroAberto && (
-                  <NwButton
-                    title={`Usar o horário de ${nomeDoDia(primeiroAberto.day).toLowerCase()} nos dias abertos`}
-                    variant="vupthOutline"
-                    onPress={() =>
-                      setSemana((s) =>
-                        aplicarATodos(s, {
-                          opens: primeiroAberto.opens ?? "",
-                          closes: primeiroAberto.closes ?? "",
-                        })
-                      )
-                    }
-                  />
-                )}
-                <NwButton title="Salvar semana" onPress={handleSalvarSemana} isLoading={salvandoSemana} />
-              </View>
-
-              <View className="gap-3">
-                <Text className="font-heading text-lg text-vupth-forest">Datas especiais</Text>
-                <Text className="font-body text-sm text-vupth-textSecondary">
-                  Feriado ou um dia com horário diferente. Só vale para aquela data; a semana continua
-                  igual.
-                </Text>
-                <ListaDeExcecoes
-                  excecoes={horarios.exceptions}
-                  removendo={removendo}
-                  onRemover={handleRemoverData}
-                />
-                <DataEspecialForm
-                  hoje={hojeIso()}
-                  salvando={salvandoData}
-                  onAdicionar={handleAdicionarData}
-                />
-              </View>
-
-              {horarios.upcoming.length > 0 && (
-                <View className="gap-2">
-                  <Text className="font-heading text-lg text-vupth-forest">Próximos dias</Text>
-                  {horarios.upcoming.slice(0, 7).map((u) => (
-                    <View key={u.date} className="flex-row justify-between">
-                      <Text className="font-body text-sm text-vupth-textSecondary">
-                        {nomeDoDia(u.day)}, {isoParaBr(u.date).slice(0, 5)}
-                        {u.exception ? " · especial" : ""}
-                      </Text>
-                      <Text className="font-heading text-sm text-vupth-forest">
-                        {descreverHorario(u)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-          )}
+          <EditorDeHorarios
+            chave={id}
+            chamadas={{
+              buscar: () => buscarHorarios(id!),
+              salvarSemana: (dias) => salvarSemana(id!, dias),
+              salvarData: (dataIso, h) => salvarData(id!, dataIso, h),
+              removerData: (dataIso) => removerData(id!, dataIso),
+            }}
+            semente={legado}
+            semRota={<HorarioUnico />}
+            avisoSemCadastro="Defina o horário de cada dia da semana. Ele é necessário para abrir o estabelecimento, e as refeições dos profissionais precisam caber nele."
+            textoDaSemana="Vale para todas as semanas. Fechar depois de abrir (22:00 às 02:00) vira o dia; abrir e fechar no mesmo horário é 24 horas."
+            mensagemSemanaSalva="O horário da semana foi atualizado."
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

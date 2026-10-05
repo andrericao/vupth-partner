@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette, Store } from "lucide-react-native";
+  Info, Share2, Palette, Store, CalendarDays } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -258,8 +258,14 @@ export default function ProfessionalSettingsScreen() {
               icon={Utensils}
               title="Refeições"
               hint="horários + aviso na hora (ligar/desligar)"
-              last
               onPress={() => router.push("/(professional)/meals?from=settings" as any)}
+            />
+            <MenuCard
+              icon={CalendarDays}
+              title="Minha agenda"
+              hint="dias e horários em que você atende"
+              last
+              onPress={() => router.push("/(professional)/agenda" as any)}
             />
           </Grupo>
   
