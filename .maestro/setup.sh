@@ -211,6 +211,25 @@ celular_ok() {
   timeout 60 adb -s "$SERIAL" wait-for-device 2>/dev/null
 }
 
+# Prints para o Andre (print-para-o-andre, 05/10; mesmo formato do Client, C28):
+# a etapa chama apoio/para_o_andre.yaml com o label "NN.MM · para o Andre ·
+# <NOME> · <o que olhar>". Aqui os prints vao para para-o-andre/ e a linha do
+# label para para-o-andre.txt. O Maestro grava o print na pasta da etapa ou na
+# pasta de onde rodou — procura nas duas.
+PARA_O_ANDRE="$RODADA/para-o-andre"
+juntar_para_o_andre() { # $1 = nome da etapa
+  local f
+  find "$RODADA/$1" "$PWD" -maxdepth 2 -name 'para-o-andre_*.png' 2>/dev/null | sort -u | while read -r f; do
+    [ -f "$f" ] || continue
+    mkdir -p "$PARA_O_ANDRE"
+    mv "$f" "$PARA_O_ANDRE/${f##*/para-o-andre_}"
+  done
+  grep -E '· para o Andre · .*\.\.\. COMPLETED$' "$RODADA/$1.txt" 2>/dev/null \
+    | sed -E 's/^ +//; s/\.\.\. COMPLETED$//; s/ · para o Andre · ([^ ]+) · / · \1.png — /' \
+    >> "$PARA_O_ANDRE.txt"
+  [ -s "$PARA_O_ANDRE.txt" ] || rm -f "$PARA_O_ANDRE.txt"
+}
+
 rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   local saida="$RODADA/$1.txt"
   if ! celular_ok; then
@@ -221,7 +240,9 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   papel_do_andre "$1"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
-  if [ "${PIPESTATUS[0]}" = "0" ]; then
+  local rc="${PIPESTATUS[0]}"
+  juntar_para_o_andre "$1"
+  if [ "$rc" = "0" ]; then
     echo "✅ $1" >> "$RELATORIO"
     return 0
   fi
@@ -256,9 +277,21 @@ adb logcat -d -b crash > "$RODADA/crash.txt" 2>/dev/null
 bash "$RAIZ/.maestro/restaurar.sh"
 
 # 8. Erro sanado, log apagado: verde limpa tudo; vermelho fica so a rodada atual
+if [ -s "$PARA_O_ANDRE.txt" ]; then
+  echo ""
+  echo "════ Para o Andre olhar (.maestro/logs/$(basename "$RODADA")/para-o-andre/) ════"
+  cat "$PARA_O_ANDRE.txt"
+fi
 if [ "$RESULTADO" = "0" ]; then
-  rm -rf "$LOGS"
-  echo "Bateria VERDE — logs apagados."
+  # Verde apaga os logs, menos os prints que esperam o olho do Andre.
+  find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
+  find "$RODADA" -mindepth 1 -maxdepth 1 ! -name para-o-andre ! -name para-o-andre.txt -exec rm -rf {} +
+  if [ -d "$PARA_O_ANDRE" ]; then
+    echo "Bateria VERDE — logs apagados; ficam os prints para o Andre."
+  else
+    rm -rf "$LOGS"
+    echo "Bateria VERDE — logs apagados."
+  fi
 else
   find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
   if grep -q "device '.*' not found" "$RODADA"/*.txt; then

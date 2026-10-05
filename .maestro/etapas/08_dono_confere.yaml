@@ -11,6 +11,15 @@ appId: ${APP_ID}
     visible: ${output.LOJA}
     timeout: 30000
     label: "08.02 · espera ${output.LOJA}"
+# compartilhar-no-topo (05/10): o icone no canto direito do cabecalho do Inicio.
+- assertVisible:
+    id: "compartilhar-no-topo"
+    label: "08.02a · confere compartilhar-no-topo"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: inicio-compartilhar
+    label: "08.02b · para o Andre · inicio-compartilhar · o icone de compartilhar ao lado da pilula Aberta/Fechada, no topo do Inicio do dono"
 - tapOn:
     id: "aba-filas"
     label: "08.03 · toca em aba-filas"

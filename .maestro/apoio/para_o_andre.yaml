@@ -1,0 +1,8 @@
+# print-para-o-andre (Andre, 05/10): o print de um teste que precisa do olho do
+# Andre. env: NOME (sem espacos, vira o nome do arquivo). Quem chama poe no
+# label do runFlow "NN.MM · para o Andre · <NOME> · <o que olhar>": o setup.sh
+# junta os prints em logs/<data>/para-o-andre/ e escreve a linha do label em
+# para-o-andre.txt. Mesmo formato do Client (C28).
+appId: ${APP_ID}
+---
+- takeScreenshot: para-o-andre_${NOME}
