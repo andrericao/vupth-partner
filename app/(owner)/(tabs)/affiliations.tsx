@@ -7,6 +7,7 @@ import { NwButton } from "@components/nw/Button";
 import { api, getApiErrorMessage } from "@lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { chaveDosVinculos } from "@hooks/useSolicitacoesDeVinculo";
+import { historicoDeVinculos, diaDoVinculo } from "@lib/vinculos";
 
 type Affiliation = {
   id: string;
@@ -17,6 +18,8 @@ type Affiliation = {
   type: "REQUEST" | "INVITATION";
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
   createdAt: string;
+  /** Quando foi aceito/recusado/cancelado (BAK 7e3e21b); nulo no PENDING. */
+  resolvedAt?: string | null;
 };
 
 export default function OwnerAffiliationsScreen() {
@@ -30,8 +33,11 @@ export default function OwnerAffiliationsScreen() {
   const fetchAffiliations = useCallback(async () => {
     if (!establishmentId) return;
     try {
+      // ?status=ALL (historico-de-vinculo, BAK 7e3e21b): sem ele a API so
+      // manda os PENDING e o historico nunca aparece.
       const { data } = await api.get(
-        `/establishment/${establishmentId}/affiliations`
+        `/establishment/${establishmentId}/affiliations`,
+        { params: { status: "ALL" } }
       );
       setAffiliations(data);
       // O badge do Menu le a mesma lista: acompanha o que esta na tela.
@@ -83,7 +89,7 @@ export default function OwnerAffiliationsScreen() {
   };
 
   const pending = affiliations.filter((a) => a.status === "PENDING");
-  const resolved = affiliations.filter((a) => a.status !== "PENDING");
+  const resolved = historicoDeVinculos(affiliations);
 
   return (
     <ScrollView
@@ -153,13 +159,20 @@ export default function OwnerAffiliationsScreen() {
 
         {resolved.length > 0 && (
           <View>
-            <Text className="font-heading text-vupth-textSecondary mb-2">Historico</Text>
+            <Text className="font-heading text-vupth-textSecondary mb-2">Histórico</Text>
             {resolved.map((aff) => (
               <View
                 key={aff.id}
                 className="flex-row items-center justify-between py-3 px-4 bg-vupth-surface rounded-card mb-2"
               >
-                <Text className="font-body text-vupth-forest">{aff.professionalName}</Text>
+                <View className="flex-1">
+                  <Text className="font-body text-vupth-forest">{aff.professionalName}</Text>
+                  {!!diaDoVinculo(aff.resolvedAt) && (
+                    <Text className="font-body text-xs text-vupth-textSecondary">
+                      em {diaDoVinculo(aff.resolvedAt)}
+                    </Text>
+                  )}
+                </View>
                 <View
                   className={`px-3 py-1 rounded-md ${
                     aff.status === "ACCEPTED" ? "bg-vupth-greenTint" : "bg-vupth-dangerTint"
