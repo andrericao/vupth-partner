@@ -1,0 +1,48 @@
+# push-na-bateria (Andre, 05/10; o formato do Client, avulsa 13): o push chega
+# na gaveta do Android e o toque abre a tela certa. Aqui, o dono com o app
+# FECHADO recebe "Pedido de vinculo" (AFFILIATION_REQUESTED, um profissional
+# pede pela API) e o toque abre Solicitacoes com o pedido. Cobre o ✋
+# pushes-de-vinculo do lado do dono. O launchApp do Maestro ja permite as
+# notificacoes; o app registra o token ao entrar.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+    label: "12.01 · entra como o dono"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 30000
+    label: "12.02 · espera ${output.LOJA} (o token do push ja foi registrado)"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "12.03 · roda fechar_aviso"
+- stopApp:
+    label: "12.04 · fecha o app"
+- runScript:
+    file: ../scripts/vinculo_para_recusar.js
+    env:
+      EMAIL_DONO: ${output.EMAIL_DONO}
+      TAG: ${output.TAG}
+      QUEM: "Push"
+    label: "12.05 · um profissional pede vinculo pela API"
+- swipe:
+    start: "50%, 0%"
+    end: "50%, 80%"
+    label: "12.06 · abre a gaveta de notificações"
+- extendedWaitUntil:
+    visible: "Pedido de vínculo"
+    timeout: 90000
+    label: "12.07 · espera o push Pedido de vínculo"
+- tapOn:
+    text: "Pedido de vínculo"
+    label: "12.08 · toca no push"
+- extendedWaitUntil:
+    visible: "Solicitações"
+    timeout: 60000
+    label: "12.09 · abriu Solicitações"
+- extendedWaitUntil:
+    visible: ${output.PROF_PUSH}
+    timeout: 20000
+    label: "12.10 · o pedido de ${output.PROF_PUSH} está lá"
