@@ -16,19 +16,39 @@ import { NwButton } from "@components/nw/Button";
 import {
   useEstablishmentStore,
   type ProfessionalSearchResult,
+  type EmailInvitation,
 } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
+import { confirmar } from "@lib/confirmar";
+import { ConvitePorEmail } from "@components/ConvitePorEmail";
 
 export default function InviteProfessionalScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const searchProfessionals = useEstablishmentStore((s) => s.searchProfessionals);
   const inviteProfessional = useEstablishmentStore((s) => s.inviteProfessional);
+  const inviteByEmail = useEstablishmentStore((s) => s.inviteByEmail);
+  const fetchEmailInvitations = useEstablishmentStore((s) => s.fetchEmailInvitations);
+  const cancelEmailInvitation = useEstablishmentStore((s) => s.cancelEmailInvitation);
 
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<ProfessionalSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [invitedIds, setInvitedIds] = useState<string[]>([]);
   const [invitingId, setInvitingId] = useState<string | null>(null);
+  // convite-sem-conta (S30, BAK 0774ad2): os convites por e-mail que esperam a conta.
+  const [pendentes, setPendentes] = useState<EmailInvitation[]>([]);
+  const [enviandoEmail, setEnviandoEmail] = useState(false);
+  const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+
+  const establishmentId = establishment?.id;
+  const carregarPendentes = useCallback(async () => {
+    if (!establishmentId) return;
+    try {
+      setPendentes(await fetchEmailInvitations(establishmentId));
+    } catch {
+      // Backend sem o endpoint: a lista so nao aparece.
+    }
+  }, [establishmentId, fetchEmailInvitations]);
 
   const runSearch = useCallback(
     async (term: string) => {
@@ -49,6 +69,63 @@ export default function InviteProfessionalScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     runSearch("");
   }, [runSearch]);
+
+  useEffect(() => {
+    // carga inicial da lista (setState depois do await, como a busca acima).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    carregarPendentes();
+  }, [carregarPendentes]);
+
+  const handleConviteEmail = async (email: string) => {
+    if (!establishment?.id) return;
+    setEnviandoEmail(true);
+    try {
+      const r = await inviteByEmail(establishment.id, email);
+      if (r.outcome === "INVITATION_SENT") {
+        Alert.alert("Convite enviado", `${email} já tem conta de profissional e recebeu o convite no app.`);
+      } else {
+        Alert.alert(
+          "Convite enviado por e-mail",
+          `${email} recebe o convite. Quando criar a conta de profissional, ele aparece para aceitar.`
+        );
+      }
+      await carregarPendentes();
+    } catch (error: any) {
+      const code = error?.response?.data?.code;
+      const message =
+        code === "VALIDATION_ERROR"
+          ? "Confira o e-mail digitado."
+          : code === "PROFESSIONAL_ALREADY_AFFILIATED"
+          ? `${email} já está vinculado a um estabelecimento.`
+          : code === "AFFILIATION_ALREADY_PENDING"
+          ? `Já existe uma solicitação pendente com ${email}.`
+          : getApiErrorMessage(error, "Não foi possível enviar o convite.");
+      Alert.alert("Não foi possível convidar", message);
+    } finally {
+      setEnviandoEmail(false);
+    }
+  };
+
+  const handleCancelarConvite = async (c: EmailInvitation) => {
+    const ok = await confirmar({
+      titulo: "Cancelar convite",
+      mensagem: `O convite para ${c.email} deixa de valer.`,
+      confirmar: "Cancelar convite",
+      cancelar: "Manter",
+      destrutivo: true,
+    });
+    if (!ok) return;
+    setCancelandoId(c.id);
+    try {
+      await cancelEmailInvitation(c.id);
+      setPendentes((prev) => prev.filter((p) => p.id !== c.id));
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível cancelar o convite."));
+      await carregarPendentes();
+    } finally {
+      setCancelandoId(null);
+    }
+  };
 
   const handleInvite = async (p: ProfessionalSearchResult) => {
     if (!establishment?.id) return;
@@ -144,6 +221,14 @@ export default function InviteProfessionalScreen() {
               );
             })}
           </View>
+
+          <ConvitePorEmail
+            pendentes={pendentes}
+            onConvidar={handleConviteEmail}
+            onCancelar={handleCancelarConvite}
+            enviando={enviandoEmail}
+            cancelandoId={cancelandoId}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

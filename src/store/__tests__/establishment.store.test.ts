@@ -506,6 +506,64 @@ describe("establishment.store", () => {
     });
   });
 
+  // convite-sem-conta (S30, contrato BAK 0774ad2): convidar por e-mail quem
+  // ainda nao tem conta; quem ja e profissional recebe o convite comum.
+  describe("convite por e-mail", () => {
+    const CONVITE = {
+      id: "inv-1",
+      establishmentId: "estab-uuid-1",
+      email: "nova@teste.com",
+      status: "PENDING",
+      createdAt: "2026-10-05T08:00:00",
+      convertedAt: null,
+      affiliationId: null,
+    };
+
+    it("inviteByEmail: POST /establishment/{id}/email-invitations { email } devolve o outcome", async () => {
+      mock
+        .onPost("/establishment/estab-uuid-1/email-invitations")
+        .reply(201, { outcome: "WAITING_ACCOUNT", affiliation: null, emailInvitation: CONVITE });
+
+      const r = await useEstablishmentStore
+        .getState()
+        .inviteByEmail("estab-uuid-1", "  Nova@Teste.com ");
+
+      expect(JSON.parse(mock.history.post[0].data)).toEqual({ email: "Nova@Teste.com" });
+      expect(r.outcome).toBe("WAITING_ACCOUNT");
+      expect(r.emailInvitation?.id).toBe("inv-1");
+    });
+
+    it("inviteByEmail rejeita em 422 (e-mail invalido)", async () => {
+      mock
+        .onPost("/establishment/estab-uuid-1/email-invitations")
+        .reply(422, { code: "VALIDATION_ERROR" });
+
+      await expect(
+        useEstablishmentStore.getState().inviteByEmail("estab-uuid-1", "x")
+      ).rejects.toThrow();
+    });
+
+    it("fetchEmailInvitations: GET dos que esperam conta; sem array vira lista vazia", async () => {
+      mock.onGet("/establishment/estab-uuid-1/email-invitations").replyOnce(200, [CONVITE]);
+      expect(
+        await useEstablishmentStore.getState().fetchEmailInvitations("estab-uuid-1")
+      ).toEqual([CONVITE]);
+
+      mock.onGet("/establishment/estab-uuid-1/email-invitations").replyOnce(200, null);
+      expect(
+        await useEstablishmentStore.getState().fetchEmailInvitations("estab-uuid-1")
+      ).toEqual([]);
+    });
+
+    it("cancelEmailInvitation: DELETE /email-invitations/{id}", async () => {
+      mock.onDelete("/email-invitations/inv-1").reply(200, { ...CONVITE, status: "CANCELLED" });
+
+      await useEstablishmentStore.getState().cancelEmailInvitation("inv-1");
+
+      expect(mock.history.delete[0].url).toBe("/email-invitations/inv-1");
+    });
+  });
+
   describe("fetchEstablishmentById", () => {
     it("calls GET /establishment/id/{id} and returns normalized detail", async () => {
       mock.onGet("/establishment/id/estab-uuid-1").reply(200, {

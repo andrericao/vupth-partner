@@ -47,6 +47,27 @@ export type EstablishmentSearchResult = {
   status: string;
 };
 
+/** Convite por e-mail para quem ainda nao tem conta (convite-sem-conta, BAK 0774ad2). */
+export type EmailInvitation = {
+  id: string;
+  establishmentId: string;
+  email: string;
+  status: string;
+  createdAt: string;
+  convertedAt: string | null;
+  affiliationId: string | null;
+};
+
+/**
+ * INVITATION_SENT: o e-mail ja e de profissional — `affiliation` e o convite comum.
+ * WAITING_ACCOUNT: a pessoa recebe o e-mail — `emailInvitation` espera a conta.
+ */
+export type EmailInviteResult = {
+  outcome: "INVITATION_SENT" | "WAITING_ACCOUNT";
+  affiliation: unknown | null;
+  emailInvitation: EmailInvitation | null;
+};
+
 export type EstablishmentAddress = {
   street: string | null;
   number: string | null;
@@ -235,6 +256,9 @@ type EstablishmentState = {
   fetchEstablishmentById: (id: string) => Promise<EstablishmentDetail>;
   searchProfessionals: (name?: string, specialty?: string) => Promise<ProfessionalSearchResult[]>;
   inviteProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
+  inviteByEmail: (establishmentId: string, email: string) => Promise<EmailInviteResult>;
+  fetchEmailInvitations: (establishmentId: string) => Promise<EmailInvitation[]>;
+  cancelEmailInvitation: (invitationId: string) => Promise<void>;
   fetchReport: (id: string, dateFrom?: string, dateTo?: string) => Promise<EstablishmentReport>;
   removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   updateGeneralInfos: (id: string, changes: GeneralInfosChanges) => Promise<void>;
@@ -345,6 +369,22 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     await api.post(`/establishment/${establishmentId}/affiliations`, {
       professionalId,
     });
+  },
+
+  inviteByEmail: async (establishmentId, email) => {
+    const { data } = await api.post(`/establishment/${establishmentId}/email-invitations`, {
+      email: email.trim(),
+    });
+    return data;
+  },
+
+  fetchEmailInvitations: async (establishmentId) => {
+    const { data } = await api.get(`/establishment/${establishmentId}/email-invitations`);
+    return Array.isArray(data) ? data : [];
+  },
+
+  cancelEmailInvitation: async (invitationId) => {
+    await api.delete(`/email-invitations/${invitationId}`);
   },
 
   fetchReport: async (id, dateFrom, dateTo) => {
