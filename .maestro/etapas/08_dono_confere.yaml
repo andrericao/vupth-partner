@@ -19,7 +19,8 @@ appId: ${APP_ID}
     file: ../apoio/para_o_andre.yaml
     env:
       NOME: inicio-compartilhar
-    label: "08.02b · para o Andre · inicio-compartilhar · o icone de compartilhar ao lado da pilula Aberta/Fechada, no topo do Inicio do dono"
+      O_QUE: "o icone de compartilhar ao lado da pilula Aberta/Fechada, no topo do Inicio do dono"
+    label: "08.02b · print para o Andre (inicio-compartilhar)"
 - tapOn:
     id: "aba-filas"
     label: "08.03 · toca em aba-filas"

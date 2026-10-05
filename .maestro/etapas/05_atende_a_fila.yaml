@@ -39,7 +39,8 @@ appId: ${APP_ID}
     file: ../apoio/para_o_andre.yaml
     env:
       NOME: fila-compartilhar
-    label: "05.04b · para o Andre · fila-compartilhar · o icone de compartilhar no canto direito do cabecalho da Fila, ao lado do status e das opcoes"
+      O_QUE: "o icone de compartilhar no canto direito do cabecalho da Fila, ao lado do status e das opcoes"
+    label: "05.04b · print para o Andre (fila-compartilhar)"
 
 - tapOn:
     text: "Iniciar próximo"
