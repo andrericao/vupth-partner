@@ -12,7 +12,7 @@ import { CompartilharPerfil } from "@components/CompartilharPerfil";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
-import { linkDoProfissional } from "@lib/linkPublico";
+import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import { validatePassword } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
@@ -315,7 +315,10 @@ export default function SettingsAccountScreen() {
               <CompartilharPerfil
                 link={linkDoProfissional(API_ENV, professional.establishment_id, professional.id)}
                 titulo={professional.establishment_name ?? "Minha fila"}
-                mensagem="Entre na minha fila pelo Vupth:"
+                mensagem={mensagemDeDivulgacao(
+                  professional.establishment_name,
+                  professional.nickname || professional.name
+                )}
               />
             </View>
           )}

@@ -5,7 +5,7 @@ import { CompartilharPerfil } from "@components/CompartilharPerfil";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { editarFoto, rotaDaFotoDaLoja } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
-import { linkDaLoja } from "@lib/linkPublico";
+import { linkDaLoja, mensagemDeDivulgacao } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -95,7 +95,7 @@ export default function EstablishmentDataScreen() {
               rotulo="Compartilhar a loja"
               link={linkDaLoja(API_ENV, establishment.id)}
               titulo={establishment.name ?? "Minha loja"}
-              mensagem="Entre na fila da nossa loja pelo Vupth:"
+              mensagem={mensagemDeDivulgacao(establishment.name)}
             />
           </View>
         )}

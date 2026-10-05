@@ -3,7 +3,7 @@ import { SkeletonTexto } from "@components/Skeleton";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
-import { linkDoProfissional } from "@lib/linkPublico";
+import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
 import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
@@ -190,7 +190,10 @@ export default function ProfessionalSettingsScreen() {
                   linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
                   {
                     titulo: professional.establishment_name ?? "Minha fila",
-                    mensagem: "Entre na minha fila pelo Vupth:",
+                    mensagem: mensagemDeDivulgacao(
+                      professional.establishment_name,
+                      professional.nickname || professional.name
+                    ),
                   }
                 )
               }
