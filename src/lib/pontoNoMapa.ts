@@ -35,13 +35,30 @@ export function mensagemDoEnderecoSalvo(endereco: ComStatus): string {
 }
 
 /**
- * Ao abrir o endereco, oferecer a posicao do aparelho para o ponto da loja
- * (gps-da-loja, DEC-23; o PATCH so com latitude/longitude e o BAK f76fc25).
- * Regra do Andre: nao perguntar toda hora — so quando falta o ponto
- * (UNRESOLVED) e ha o id do endereco para o PATCH.
+ * Ao abrir o endereco, oferecer a posicao do aparelho para o ponto da loja.
+ * gps-da-loja (DEC-23): so quando faltava o ponto. ponto-da-loja-pelo-gps
+ * (Andre, 05/10): SEMPRE, mesmo com o endereco achado — "a lat e long e mais
+ * interessante para apuracao e para ser vista no Google Maps". Uma vez marcado
+ * pelo GPS, nao pergunta de novo (`jaMarcado`). Precisa do id do endereco para
+ * o PATCH so com latitude/longitude (BAK f76fc25).
  */
 export function perguntarPosicaoAoAbrir(
-  endereco: { locationStatus?: string | null; addressId?: string | null } | null | undefined
+  endereco: { locationStatus?: string | null; addressId?: string | null } | null | undefined,
+  jaMarcado: boolean
 ): boolean {
-  return situacaoDoPonto(endereco) === "sem-ponto" && !!endereco?.addressId;
+  return !!endereco?.addressId && !jaMarcado;
+}
+
+/** O texto da pergunta: sem ponto, a loja nao aparece; com ponto, fica exato. */
+export function mensagemDaPerguntaDoPonto(endereco: ComStatus): string {
+  if (situacaoDoPonto(endereco) === "sem-ponto") {
+    return (
+      "Sua loja não aparece para quem busca por perto: não achamos o endereço no mapa. " +
+      "Se você está na loja, usar a sua posição atual?"
+    );
+  }
+  return (
+    "Se você está na loja, marque o ponto exato pelo GPS: é mais preciso que o endereço " +
+    "e é o que abre no mapa do cliente."
+  );
 }

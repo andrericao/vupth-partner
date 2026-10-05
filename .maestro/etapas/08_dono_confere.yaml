@@ -140,6 +140,20 @@ appId: ${APP_ID}
     visible: "Endereço da loja"
     timeout: 20000
     label: "08.33 · espera Endereco da loja"
+# ponto-da-loja-pelo-gps (05/10): com endereco salvo e o ponto ainda nao
+# marcado pelo GPS, a tela pergunta ao abrir. A bateria nao muda o ponto.
+- extendedWaitUntil:
+    visible: "Ponto da loja no mapa"
+    timeout: 5000
+    optional: true
+    label: "08.33a · espera a pergunta do ponto (se a loja tem endereco)"
+- runFlow:
+    when:
+      visible: "Ponto da loja no mapa"
+    commands:
+      - tapOn:
+          text: "Agora não"
+    label: "08.33b · Agora não (o ponto fica como esta)"
 - assertVisible:
     text: "(Usar minha localização|Localização registrada ✓)"
     label: "08.34 · confere o botao da localizacao"

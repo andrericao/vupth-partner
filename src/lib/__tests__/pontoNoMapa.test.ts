@@ -1,4 +1,9 @@
-import { situacaoDoPonto, mensagemDoEnderecoSalvo, perguntarPosicaoAoAbrir } from "@lib/pontoNoMapa";
+import {
+  situacaoDoPonto,
+  mensagemDoEnderecoSalvo,
+  perguntarPosicaoAoAbrir,
+  mensagemDaPerguntaDoPonto,
+} from "@lib/pontoNoMapa";
 
 // loja-sem-coordenada (S25, contrato BAK d215d5a): o endereco diz se ja virou
 // ponto no mapa — so LOCATED entra na busca por proximidade.
@@ -42,25 +47,29 @@ describe("mensagemDoEnderecoSalvo (o texto da caixa \"Endereço salvo\")", () =>
   });
 });
 
-// gps-da-loja (DEC-23): ao abrir o endereco, perguntar "usar a posicao atual?"
-// so quando falta o ponto — loja com ponto configurado nao e incomodada.
+// ponto-da-loja-pelo-gps (Andre, 05/10): ao abrir o endereco, oferecer o GPS
+// SEMPRE — mesmo com o endereco achado —, ate o ponto ser marcado por ele.
 describe("perguntarPosicaoAoAbrir", () => {
-  it("UNRESOLVED com o id do endereco: pergunta (o PATCH tem onde ir)", () => {
-    expect(perguntarPosicaoAoAbrir({ locationStatus: "UNRESOLVED", addressId: "a1" })).toBe(true);
+  it("com o id do endereco e sem marca: pergunta, ache o geocoder ou nao", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "UNRESOLVED", addressId: "a1" }, false)).toBe(true);
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "LOCATED", addressId: "a1" }, false)).toBe(true);
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "PENDING", addressId: "a1" }, false)).toBe(true);
   });
 
-  it("LOCATED: a loja ja tem o ponto — nao pergunta", () => {
-    expect(perguntarPosicaoAoAbrir({ locationStatus: "LOCATED", addressId: "a1" })).toBe(false);
+  it("ja marcado pelo GPS: nao pergunta de novo", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "LOCATED", addressId: "a1" }, true)).toBe(false);
   });
 
-  it("PENDING: o geocoding ainda pode achar — nao pergunta", () => {
-    expect(perguntarPosicaoAoAbrir({ locationStatus: "PENDING", addressId: "a1" })).toBe(false);
+  it("sem o id do endereco ou sem endereco: nao pergunta (o PATCH nao tem onde ir)", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "UNRESOLVED" }, false)).toBe(false);
+    expect(perguntarPosicaoAoAbrir(null, false)).toBe(false);
+    expect(perguntarPosicaoAoAbrir(undefined, false)).toBe(false);
   });
+});
 
-  it("sem o id do endereco, sem o campo ou sem endereco: nao pergunta", () => {
-    expect(perguntarPosicaoAoAbrir({ locationStatus: "UNRESOLVED" })).toBe(false);
-    expect(perguntarPosicaoAoAbrir({ addressId: "a1" })).toBe(false);
-    expect(perguntarPosicaoAoAbrir(null)).toBe(false);
-    expect(perguntarPosicaoAoAbrir(undefined)).toBe(false);
+describe("mensagemDaPerguntaDoPonto", () => {
+  it("sem ponto: a loja nao aparece; com ponto: fica exato", () => {
+    expect(mensagemDaPerguntaDoPonto({ locationStatus: "UNRESOLVED" })).toMatch(/não aparece/);
+    expect(mensagemDaPerguntaDoPonto({ locationStatus: "LOCATED" })).toMatch(/ponto exato pelo GPS/);
   });
 });
