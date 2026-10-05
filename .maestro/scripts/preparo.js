@@ -71,19 +71,25 @@ if (etapa >= 3) {
   prof = me.corpo;
 }
 
+// O pedido pendente do profissional, lido do lado dele: a lista da loja nem
+// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).
 function pedidoPendente() {
-  var lista = pedir("GET", "/establishment/" + loja.id + "/affiliations", null, tokenDono) || [];
+  var r = chamar("GET", "/professional/me/affiliations", null, tokenProf);
+  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];
   for (var i = 0; i < lista.length; i++) {
-    var a = lista[i];
-    var doProf = a.professionalId === prof.id || a.professional_id === prof.id || a.professionalName === PROF;
-    if (doProf && String(a.status).toUpperCase() === "PENDING") return a;
+    if (String(lista[i].status).toUpperCase() === "PENDING") return lista[i];
   }
   return null;
 }
 
 // ── 03: o pedido de vinculo pendente, para o dono aceitar ──
+// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.
 if (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {
-  pedir("POST", "/professional/me/affiliations", { establishmentId: loja.id }, tokenProf);
+  var pedido = chamar("POST", "/professional/me/affiliations", { establishmentId: loja.id }, tokenProf);
+  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === "AFFILIATION_ALREADY_PENDING";
+  if (pedido.status >= 300 && !jaPendente) {
+    throw new Error("preparo da etapa 3: POST /professional/me/affiliations -> " + pedido.status + " " + JSON.stringify(pedido.corpo));
+  }
 }
 
 // ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──
