@@ -16,9 +16,9 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
 import { maskCEP, unmask } from "@lib/masks";
 import { lookupCep } from "@lib/cep";
-import { avisar } from "@lib/confirmar";
+import { avisar, confirmar } from "@lib/confirmar";
 import { pegarLocalizacao, preencherVazios } from "@lib/localizacao";
-import { mensagemDoEnderecoSalvo } from "@lib/pontoNoMapa";
+import { mensagemDoEnderecoSalvo, perguntarPosicaoAoAbrir } from "@lib/pontoNoMapa";
 import { MapPin } from "lucide-react-native";
 
 export default function AddressScreen() {
@@ -69,6 +69,36 @@ export default function AddressScreen() {
     }
   };
 
+  // gps-da-loja (DEC-23): a loja sem ponto no mapa (UNRESOLVED) nao aparece
+  // para quem busca por perto. Ao abrir, pergunta uma vez se usa a posicao do
+  // aparelho e manda so a coordenada no PATCH (BAK f76fc25) — o resto do
+  // endereco fica como esta. Com o ponto configurado, nao pergunta.
+  const oferecerPosicaoAtual = async (establishmentId: string, idDoEndereco: string) => {
+    const usar = await confirmar({
+      titulo: "Ponto da loja no mapa",
+      mensagem:
+        "Sua loja não aparece para quem busca por perto: não achamos o endereço no mapa. " +
+        "Se você está na loja, usar a sua posição atual?",
+      confirmar: "Usar minha posição",
+      cancelar: "Agora não",
+    });
+    if (!usar) return;
+    setLocalizando(true);
+    try {
+      const { coordenada: c } = await pegarLocalizacao();
+      const salvo = await updateAddress(establishmentId, idDoEndereco, c);
+      setCoordenada(c);
+      await avisar({ titulo: "Ponto salvo", mensagem: mensagemDoEnderecoSalvo(salvo) });
+    } catch (error: any) {
+      const msg = error?.response
+        ? getApiErrorMessage(error, "Não foi possível salvar a posição.")
+        : error?.message ?? "Não foi possível ler a localização.";
+      await avisar({ titulo: "Localização", mensagem: msg });
+    } finally {
+      setLocalizando(false);
+    }
+  };
+
   // Read-back: ao abrir, busca o endereco ja salvo (GET /establishment/id/{id},
   // que retorna `address`) e pre-preenche o form — assim o endereco "aparece"
   // ao reabrir. Se vier vazio mesmo apos salvar, o problema esta no backend
@@ -88,6 +118,7 @@ export default function AddressScreen() {
         if (a.state) setState(a.state);
         if (a.zipCode) setZipCode(maskCEP(a.zipCode));
         if (a.addressId) setAddressId(a.addressId);
+        if (perguntarPosicaoAoAbrir(a)) oferecerPosicaoAtual(establishment.id, a.addressId!);
       })
       .catch(() => {});
     return () => {

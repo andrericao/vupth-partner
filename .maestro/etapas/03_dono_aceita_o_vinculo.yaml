@@ -57,6 +57,17 @@ appId: ${APP_ID}
       EMAIL_DONO: ${output.EMAIL_DONO}
       TAG: ${output.TAG}
     label: "03.14 · script vinculo_para_recusar"
+# O pedido novo chega como push com o app aberto e vira o dialogo "Pedido de
+# vinculo" por cima do Menu (bateria 2026-10-05_073223). Espera ele, sem exigir.
+- extendedWaitUntil:
+    visible:
+      id: "dialogo-botao-0"
+    timeout: 10000
+    optional: true
+    label: "03.14a · espera o aviso Pedido de vinculo"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "03.14b · fecha o aviso Pedido de vinculo"
 - tapOn:
     text: "Profissionais"
     label: "03.15 · toca em Profissionais"
@@ -70,12 +81,12 @@ appId: ${APP_ID}
 - tapOn:
     text: "Rejeitar"
     label: "03.18 · toca em Rejeitar"
-# GET /establishment/{id}/affiliations so devolve os PENDING: o rejeitado sai
-# da lista, nao vira historico "Rejeitado" (rodadas de 03/10, bateria-03-rejeitado).
+# Com ?status=ALL (historico-de-vinculo, 2a parte; BAK 7e3e21b) o recusado
+# fica no Historico como "Rejeitado" (antes so vinham os PENDING).
 - extendedWaitUntil:
-    notVisible: ${output.PROF_RECUSADO}
+    visible: "Rejeitado"
     timeout: 20000
-    label: "03.19 · espera ${output.PROF_RECUSADO} sumir da lista"
+    label: "03.19 · espera Rejeitado (historico)"
 - assertNotVisible:
     text: "Rejeitar"
     label: "03.20 · confere que nao tem pendente"

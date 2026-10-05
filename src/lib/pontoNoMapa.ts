@@ -33,3 +33,15 @@ export function mensagemDoEnderecoSalvo(endereco: ComStatus): string {
   }
   return "Estamos localizando sua loja no mapa — leva alguns segundos.";
 }
+
+/**
+ * Ao abrir o endereco, oferecer a posicao do aparelho para o ponto da loja
+ * (gps-da-loja, DEC-23; o PATCH so com latitude/longitude e o BAK f76fc25).
+ * Regra do Andre: nao perguntar toda hora — so quando falta o ponto
+ * (UNRESOLVED) e ha o id do endereco para o PATCH.
+ */
+export function perguntarPosicaoAoAbrir(
+  endereco: { locationStatus?: string | null; addressId?: string | null } | null | undefined
+): boolean {
+  return situacaoDoPonto(endereco) === "sem-ponto" && !!endereco?.addressId;
+}
