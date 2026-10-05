@@ -1,4 +1,4 @@
-import { situacaoDoPonto, mensagemDoEnderecoSalvo } from "@lib/pontoNoMapa";
+import { situacaoDoPonto, mensagemDoEnderecoSalvo, perguntarPosicaoAoAbrir } from "@lib/pontoNoMapa";
 
 // loja-sem-coordenada (S25, contrato BAK d215d5a): o endereco diz se ja virou
 // ponto no mapa — so LOCATED entra na busca por proximidade.
@@ -39,5 +39,28 @@ describe("mensagemDoEnderecoSalvo (o texto da caixa \"Endereço salvo\")", () =>
       "Não achamos o endereço no mapa: sua loja não aparece para quem busca por perto. " +
         "Na loja, toque em \"Usar minha localização\" e salve de novo, ou confira o endereço."
     );
+  });
+});
+
+// gps-da-loja (DEC-23): ao abrir o endereco, perguntar "usar a posicao atual?"
+// so quando falta o ponto — loja com ponto configurado nao e incomodada.
+describe("perguntarPosicaoAoAbrir", () => {
+  it("UNRESOLVED com o id do endereco: pergunta (o PATCH tem onde ir)", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "UNRESOLVED", addressId: "a1" })).toBe(true);
+  });
+
+  it("LOCATED: a loja ja tem o ponto — nao pergunta", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "LOCATED", addressId: "a1" })).toBe(false);
+  });
+
+  it("PENDING: o geocoding ainda pode achar — nao pergunta", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "PENDING", addressId: "a1" })).toBe(false);
+  });
+
+  it("sem o id do endereco, sem o campo ou sem endereco: nao pergunta", () => {
+    expect(perguntarPosicaoAoAbrir({ locationStatus: "UNRESOLVED" })).toBe(false);
+    expect(perguntarPosicaoAoAbrir({ addressId: "a1" })).toBe(false);
+    expect(perguntarPosicaoAoAbrir(null)).toBe(false);
+    expect(perguntarPosicaoAoAbrir(undefined)).toBe(false);
   });
 });
