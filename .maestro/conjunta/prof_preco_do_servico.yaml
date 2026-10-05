@@ -1,0 +1,41 @@
+# Muda o preco do 1o servico (bateria-conjunta, Andre 05/10: o Client confere o
+# valor novo). env: PRECO (so digitos, em centavos: 4500 = R$ 45,00 — o que o
+# profissional recebe; o Client mostra o preco com a taxa)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+    label: "PJ9.01 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ9.02 · fecha o aviso, se houver"
+- tapOn:
+    text: "Meus serviços"
+    label: "PJ9.03 · toca em Meus servicos"
+- tapOn:
+    text: "Editar"
+    index: 0
+    label: "PJ9.04 · toca em Editar (1o servico)"
+- tapOn:
+    id: "edit-service-price"
+    label: "PJ9.05 · toca no preco"
+- eraseText:
+    charactersToErase: 12
+    label: "PJ9.06 · apaga o preco"
+- inputText:
+    text: ${PRECO}
+    label: "PJ9.07 · digita ${PRECO}"
+- hideKeyboard:
+    label: "PJ9.08 · fecha o teclado"
+- scrollUntilVisible:
+    element: "Salvar"
+    direction: DOWN
+    label: "PJ9.09 · rola ate Salvar"
+- tapOn:
+    text: "Salvar"
+    label: "PJ9.10 · toca em Salvar"
+- extendedWaitUntil:
+    notVisible:
+      id: "edit-service-price"
+    timeout: 20000
+    label: "PJ9.11 · espera o servico salvo (o formulario fecha)"

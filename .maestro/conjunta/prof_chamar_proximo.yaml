@@ -1,0 +1,19 @@
+# Chama o proximo da fila e deixa em atendimento, sem finalizar (bateria-conjunta,
+# Andre 05/10: o Client confere "em atendimento" e a fila andando).
+# env: CLIENTE (o nome no card — tem de ser o proximo)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+    label: "PJ10.01 · toca em aba-fila"
+- extendedWaitUntil:
+    visible: ${CLIENTE}
+    timeout: 20000
+    label: "PJ10.02 · espera ${CLIENTE} na fila"
+- tapOn:
+    text: "Iniciar próximo"
+    label: "PJ10.03 · toca em Iniciar proximo"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+    label: "PJ10.04 · espera Finalizar (${CLIENTE} em atendimento)"
