@@ -18,6 +18,19 @@ export function linkDoProfissional(env: ApiEnv, establishmentId: string, profess
   return `${linkDaLoja(env, establishmentId)}?profissional=${professionalId}`;
 }
 
+/**
+ * O texto do compartilhar, o mesmo do Client (CLI:link-de-divulgacao, 05/10).
+ * O link vai logo depois, no compartilharLink.
+ */
+export function mensagemDeDivulgacao(loja: string | null | undefined, profissional?: string | null): string {
+  const l = loja?.trim();
+  const p = profissional?.trim();
+  if (p && l) return `Conheça o ${p} na ${l} — veja a fila e os serviços no VUPTH:`;
+  if (p) return `Conheça o ${p} — veja a fila e os serviços no VUPTH:`;
+  if (l) return `Conheça a ${l} no VUPTH:`;
+  return "Veja a fila e os serviços no VUPTH:";
+}
+
 type Deps = {
   plataforma?: typeof Platform.OS;
   share?: (c: { title: string; message: string }) => Promise<unknown>;

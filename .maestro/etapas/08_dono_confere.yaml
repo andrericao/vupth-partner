@@ -11,6 +11,16 @@ appId: ${APP_ID}
     visible: ${output.LOJA}
     timeout: 30000
     label: "08.02 · espera ${output.LOJA}"
+# compartilhar-no-topo (05/10): o icone no canto direito do cabecalho do Inicio.
+- assertVisible:
+    id: "compartilhar-no-topo"
+    label: "08.02a · confere compartilhar-no-topo"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: inicio-compartilhar
+      O_QUE: "o icone de compartilhar ao lado da pilula Aberta/Fechada, no topo do Inicio do dono"
+    label: "08.02b · print para o Andre (inicio-compartilhar)"
 - tapOn:
     id: "aba-filas"
     label: "08.03 · toca em aba-filas"
@@ -130,6 +140,20 @@ appId: ${APP_ID}
     visible: "Endereço da loja"
     timeout: 20000
     label: "08.33 · espera Endereco da loja"
+# ponto-da-loja-pelo-gps (05/10): com endereco salvo e o ponto ainda nao
+# marcado pelo GPS, a tela pergunta ao abrir. A bateria nao muda o ponto.
+- extendedWaitUntil:
+    visible: "Ponto da loja no mapa"
+    timeout: 5000
+    optional: true
+    label: "08.33a · espera a pergunta do ponto (se a loja tem endereco)"
+- runFlow:
+    when:
+      visible: "Ponto da loja no mapa"
+    commands:
+      - tapOn:
+          text: "Agora não"
+    label: "08.33b · Agora não (o ponto fica como esta)"
 - assertVisible:
     text: "(Usar minha localização|Localização registrada ✓)"
     label: "08.34 · confere o botao da localizacao"

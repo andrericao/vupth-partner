@@ -52,6 +52,10 @@ export const api = axios.create({
 
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
+  // agenda-do-profissional (05/10): a agenda do profissional cabe no horario
+  // da loja.
+  PROFESSIONAL_HOURS_OUTSIDE_ESTABLISHMENT:
+    "Esse horário passa do horário da loja. A sua agenda tem de caber nele.",
   // Acesso (fd9a3af, 03/10). As telas de login/esqueci tratam os dois antes
   // (com "Criar conta" e os segundos do Retry-After); isto e o texto de reserva.
   EMAIL_NOT_FOUND: "Não há conta com este e-mail.",

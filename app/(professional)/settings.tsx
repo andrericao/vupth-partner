@@ -3,7 +3,7 @@ import { SkeletonTexto } from "@components/Skeleton";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
-import { linkDoProfissional } from "@lib/linkPublico";
+import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import { API_ENV } from "@lib/api";
 import { subtituloDasConfiguracoes } from "@lib/subtituloDasConfiguracoes";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette, Store } from "lucide-react-native";
+  Info, Share2, Palette, Store, CalendarDays } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -190,7 +190,10 @@ export default function ProfessionalSettingsScreen() {
                   linkDoProfissional(API_ENV, professional.establishment_id!, professional.id),
                   {
                     titulo: professional.establishment_name ?? "Minha fila",
-                    mensagem: "Entre na minha fila pelo Vupth:",
+                    mensagem: mensagemDeDivulgacao(
+                      professional.establishment_name,
+                      professional.nickname || professional.name
+                    ),
                   }
                 )
               }
@@ -255,8 +258,14 @@ export default function ProfessionalSettingsScreen() {
               icon={Utensils}
               title="Refeições"
               hint="horários + aviso na hora (ligar/desligar)"
-              last
               onPress={() => router.push("/(professional)/meals?from=settings" as any)}
+            />
+            <MenuCard
+              icon={CalendarDays}
+              title="Minha agenda"
+              hint="dias e horários em que você atende"
+              last
+              onPress={() => router.push("/(professional)/agenda" as any)}
             />
           </Grupo>
   

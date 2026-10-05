@@ -12,14 +12,16 @@ import { CompartilharPerfil } from "@components/CompartilharPerfil";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
-import { linkDoProfissional } from "@lib/linkPublico";
+import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import { validatePassword } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { ExcluirContaModal } from "@components/ExcluirContaModal";
 import { mensagemDaExclusao } from "@lib/exclusaoDeConta";
+import { maskPhone } from "@lib/masks";
+import { erroDoTelefoneDeContato, telefoneParaMostrar } from "@lib/telefoneDeContato";
 
-type Editing = null | "name" | "nickname" | "email" | "password";
+type Editing = null | "name" | "nickname" | "phone" | "email" | "password";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida". Esta tela concentra os DADOS CADASTRAIS (nome, apelido,
@@ -86,6 +88,7 @@ export default function SettingsAccountScreen() {
   const minhaFoto = useMinhaFoto();
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
   const updateNickname = useProfessionalStore((s) => s.updateNickname);
+  const setContactPhone = useProfessionalStore((s) => s.setContactPhone);
   const user = useAuthStore((s) => s.user);
   const updateEmail = useAuthStore((s) => s.updateEmail);
   const updatePassword = useAuthStore((s) => s.updatePassword);
@@ -116,6 +119,7 @@ export default function SettingsAccountScreen() {
 
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
@@ -126,6 +130,8 @@ export default function SettingsAccountScreen() {
     setFieldError(null);
     setName(field === "name" ? professional?.name ?? "" : "");
     setNickname(field === "nickname" ? professional?.nickname ?? "" : "");
+    const atual = telefoneParaMostrar(professional?.contact_phone);
+    setPhone(field === "phone" && atual !== "—" ? atual : "");
     setEmail("");
     setCurrentPassword("");
     setPassword("");
@@ -147,6 +153,7 @@ export default function SettingsAccountScreen() {
     setFieldError(null);
     setName("");
     setNickname("");
+    setPhone("");
     setEmail("");
     setCurrentPassword("");
     setPassword("");
@@ -190,6 +197,32 @@ export default function SettingsAccountScreen() {
       );
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o apelido."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // telefone-de-contato (Andre, 05/10): opcional. Vazio = o cliente nao ve
+  // telefone nenhum em "Informacoes do profissional".
+  const handleSavePhone = async () => {
+    const erro = erroDoTelefoneDeContato(phone);
+    if (erro) {
+      setFieldError(erro);
+      return;
+    }
+    setFieldError(null);
+    setIsSaving(true);
+    try {
+      await setContactPhone(phone);
+      setEditing(null);
+      Alert.alert(
+        "Telefone de contato",
+        phone.trim()
+          ? "Seu número foi salvo. O cliente vê em Informações do profissional."
+          : "Seu número foi removido. O cliente não vê mais telefone."
+      );
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível salvar o telefone."));
     } finally {
       setIsSaving(false);
     }
@@ -282,7 +315,10 @@ export default function SettingsAccountScreen() {
               <CompartilharPerfil
                 link={linkDoProfissional(API_ENV, professional.establishment_id, professional.id)}
                 titulo={professional.establishment_name ?? "Minha fila"}
-                mensagem="Entre na minha fila pelo Vupth:"
+                mensagem={mensagemDeDivulgacao(
+                  professional.establishment_name,
+                  professional.nickname || professional.name
+                )}
               />
             </View>
           )}
@@ -330,6 +366,30 @@ export default function SettingsAccountScreen() {
                 autoCapitalize="words"
                 maxLength={50}
               />
+            </FieldCard>
+
+            <FieldCard
+              label="Telefone de contato (opcional)"
+              value={telefoneParaMostrar(professional?.contact_phone)}
+              editing={editing === "phone"}
+              onEdit={() => startEdit("phone")}
+              onCancel={cancelEdit}
+              onSave={handleSavePhone}
+              isSaving={isSaving}
+              error={fieldError}
+            >
+              <NwInput
+                label="Telefone de contato"
+                placeholder="(11) 98888-7777"
+                value={phone}
+                onChangeText={(t) => setPhone(maskPhone(t))}
+                keyboardType="phone-pad"
+                testID="telefone-de-contato"
+              />
+              <Text className="font-body text-xs text-vupth-textSecondary mb-2">
+                Aparece em “Informações do profissional”, no app do cliente. Deixe vazio
+                para não mostrar.
+              </Text>
             </FieldCard>
               </>
             )}

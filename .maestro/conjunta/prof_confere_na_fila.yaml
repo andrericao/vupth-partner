@@ -1,0 +1,21 @@
+# O Partner confere o que o Client fez (bateria-conjunta, Andre 05/10: a
+# verificacao dos dois lados): o cliente aparece na Fila do profissional e,
+# opcional, um texto no card dele (ex.: "Atrasado", o servico).
+# env: CLIENTE, TEXTO (opcional — vazio so confere o nome)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+    label: "PJ12.01 · toca em aba-fila"
+- extendedWaitUntil:
+    visible: ${CLIENTE}
+    timeout: 60000
+    label: "PJ12.02 · espera ${CLIENTE} na fila"
+- runFlow:
+    when:
+      true: ${typeof TEXTO !== 'undefined' && !!TEXTO}
+    commands:
+      - extendedWaitUntil:
+          visible: ".*${TEXTO}.*"
+          timeout: 20000
+          label: "PJ12.03 · confere ${TEXTO}"

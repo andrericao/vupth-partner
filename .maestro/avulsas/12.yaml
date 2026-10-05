@@ -1,0 +1,35 @@
+# Etapa 12 AVULSA (bateria-nao-para, Andre 03/10): prepara pela API o estado
+# que ela espera, abre o app do zero e roda etapas/12_push_na_gaveta.yaml. O setup.sh
+# roda as oito em sequencia com a mesma TAG e segue depois de uma falha.
+# Gerado junto com as demais — mudar o cabecalho nas oito.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+# ⚠️ TAG e COMMIT NAO entram no env: ele e aplicado DEPOIS do -e da linha de
+# comando e o apaga (Client, 04/10: a conferencia de versao era pulada e cada
+# etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
+# test direto), as expressoes testam typeof.
+---
+- evalScript:
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "12.A1 · etiqueta da rodada (TAG)"
+- evalScript:
+    script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
+    label: "12.A2 · e-mail do dono"
+- evalScript:
+    script: ${output.LOJA = 'Loja M' + output.TAG}
+    label: "12.A4 · nome da loja"
+- runScript:
+    file: ../scripts/preparo.js
+    env:
+      TAG: ${output.TAG}
+      ETAPA: "2"
+    label: "12.A6 · preparo pela API (o dono com a loja)"
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "12.A7 · abre o app do zero, ja com o OTA"
+- runFlow:
+    file: ../etapas/12_push_na_gaveta.yaml
+    label: "12.00 · roda 12_push_na_gaveta"

@@ -64,7 +64,12 @@ describe("professional.store", () => {
 
       const state = useProfessionalStore.getState();
       // normalizeProfessional completa o modo (ausente = fila) e a posicao (ausente = mostrar).
-      expect(state.professional).toEqual({ ...REGISTER_RESPONSE, operation_mode: "QUEUE", show_position: true });
+      expect(state.professional).toEqual({
+        ...REGISTER_RESPONSE,
+        operation_mode: "QUEUE",
+        show_position: true,
+        contact_phone: null,
+      });
       expect(state.professional?.establishment_id).toBeNull();
       expect(state.isLoading).toBe(false);
     });
@@ -430,6 +435,42 @@ describe("professional.store", () => {
       await expect(useProfessionalStore.getState().setOperationMode("QUEUE")).rejects.toMatchObject({
         response: { status: 409 },
       });
+    });
+  });
+
+  describe("setContactPhone (telefone-de-contato, Backend 02dd5ef)", () => {
+    it("PATCH /professional/me {contact_phone} e re-le no /me", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me").reply(200, {});
+      mock
+        .onGet("/professional/me")
+        .reply(200, { ...AFFILIATE_RESPONSE, contact_phone: "(11) 98888-7777" });
+
+      await useProfessionalStore.getState().setContactPhone("(11) 98888-7777");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({
+        contact_phone: "(11) 98888-7777",
+      });
+      expect(useProfessionalStore.getState().professional?.contact_phone).toBe("(11) 98888-7777");
+    });
+
+    it("apagar: envia string vazia (em branco = nao expoe) e fica null", async () => {
+      useProfessionalStore.setState({
+        professional: { ...AFFILIATE_RESPONSE, contact_phone: "(11) 98888-7777" } as any,
+      });
+      mock.onPatch("/professional/me").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, contact_phone: null });
+
+      await useProfessionalStore.getState().setContactPhone("  ");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ contact_phone: "" });
+      expect(useProfessionalStore.getState().professional?.contact_phone).toBeNull();
+    });
+
+    it("le contactPhone (camelCase) tambem", async () => {
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, contactPhone: "(11) 3333-4444" });
+      await useProfessionalStore.getState().fetchMe();
+      expect(useProfessionalStore.getState().professional?.contact_phone).toBe("(11) 3333-4444");
     });
   });
 

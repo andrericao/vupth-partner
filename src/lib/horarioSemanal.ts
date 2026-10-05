@@ -98,6 +98,20 @@ export function semanaInicial(
   }));
 }
 
+/**
+ * A semana tirada dos proximos dias (agenda-do-profissional, 05/10): sem agenda
+ * cadastrada, o `upcoming` do profissional e o horario efetivo da loja — a
+ * semana abre com ele, em vez de vazia. Pula as datas especiais. null se
+ * faltar algum dos 7 dias.
+ */
+export function semanaDosProximosDias(upcoming: DiaResolvido[]): DiaSemanal[] | null {
+  const semana = DIAS.map((d) => {
+    const u = upcoming.find((x) => x.day === d.day && !x.exception);
+    return u ? { day: d.day, closed: u.closed, opens: u.opens ?? null, closes: u.closes ?? null } : null;
+  });
+  return semana.every((d) => d) ? (semana as DiaSemanal[]) : null;
+}
+
 /** Por que um dia nao pode ser salvo; null = pode. */
 export function erroDoDia(h: HorarioDoDia): string | null {
   if (h.closed) return null;

@@ -1,7 +1,8 @@
 #!/bin/bash
 # Prepara a bateria do Maestro (roteiro: .maestro/bateria_completa.yaml).
 #
-# Uso:  bash .maestro/setup.sh             # prepara e roda a bateria
+# Uso:  bash .maestro/setup.sh             # pula as etapas ja aprovadas neste commit
+#       bash .maestro/setup.sh --completa   # roda todas
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
 #
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
@@ -18,6 +19,14 @@ export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
 API="https://vupth-backend-ia.onrender.com"
 
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
+SO_PREPARAR=0
+COMPLETA=0
+for ARG in "$@"; do
+  case "$ARG" in
+    --so-preparar) SO_PREPARAR=1 ;;
+    --completa) COMPLETA=1 ;;
+  esac
+done
 
 # 0. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10; DEC-17):
 #    duas sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
@@ -99,7 +108,7 @@ echo "Commit esperado no app (OTA da dev): $COMMIT"
 
 CMD=(maestro test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
 
-if [ "$1" = "--so-preparar" ]; then
+if [ "$SO_PREPARAR" = "1" ]; then
   echo "Tudo pronto. Rode:"
   echo ""
   echo "  ${CMD[*]} .maestro/bateria_completa.yaml      # tudo de uma vez (para na 1a falha)"
@@ -211,6 +220,37 @@ celular_ok() {
   timeout 60 adb -s "$SERIAL" wait-for-device 2>/dev/null
 }
 
+# Prints para o Andre (print-para-o-andre, 05/10; o mesmo formato do Client):
+# a etapa chama apoio/para_o_andre.yaml (NOME, O_QUE). Aqui os prints vao para
+# para-o-andre/ e as linhas "PARA-O-ANDRE: NOME — O_QUE" da saida da etapa para
+# para-o-andre/para-o-andre.txt. O Maestro grava o print na pasta da etapa ou
+# na pasta de onde rodou — procura nas duas.
+PARA_O_ANDRE="$RODADA/para-o-andre"
+juntar_para_o_andre() { # $1 = nome da etapa
+  local achados
+  achados=$(find "$RODADA/$1" "$PWD" -maxdepth 2 -name 'para-o-andre_*.png' 2>/dev/null | sort -u)
+  grep -q 'PARA-O-ANDRE:' "$RODADA/$1.txt" 2>/dev/null || [ -n "$achados" ] || return 0
+  mkdir -p "$PARA_O_ANDRE"
+  grep -oP 'PARA-O-ANDRE: \K.*' "$RODADA/$1.txt" >> "$PARA_O_ANDRE/para-o-andre.txt" 2>/dev/null
+  [ -n "$achados" ] && echo "$achados" | while IFS= read -r f; do [ -f "$f" ] && mv "$f" "$PARA_O_ANDRE/"; done
+  return 0
+}
+
+# bateria-pula-aprovados (Andre, 05/10; mesmo formato do Client): a etapa verde
+# grava "NN <commit>" em aprovados.txt (no .gitignore); a proxima rodada no
+# MESMO commit a pula. O commit e o da origin/dev (o 1o da lista COMMIT): um
+# push novo, mesmo so de .maestro, roda tudo de novo. --completa roda tudo e
+# recomeca as marcas.
+APROVADOS="$RAIZ/.maestro/aprovados.txt"
+MARCA="${COMMIT%%,*}"
+if [ "$COMPLETA" = "1" ]; then
+  rm -f "$APROVADOS"
+  echo "Completa: todas as etapas rodam."
+fi
+touch "$APROVADOS"
+aprovada() { grep -qxF "$1 $MARCA" "$APROVADOS"; }
+aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $MARCA" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
+
 rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   local saida="$RODADA/$1.txt"
   if ! celular_ok; then
@@ -221,7 +261,9 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   papel_do_andre "$1"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
-  if [ "${PIPESTATUS[0]}" = "0" ]; then
+  local rc="${PIPESTATUS[0]}"
+  juntar_para_o_andre "$1"
+  if [ "$rc" = "0" ]; then
     echo "✅ $1" >> "$RELATORIO"
     return 0
   fi
@@ -235,12 +277,17 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
 }
 
 RESULTADO=0
-if ! rodar 00_versao "$RAIZ/.maestro/avulsas/00_confere_versao.yaml"; then
+if ! rodar 00_atualizacao "$RAIZ/.maestro/avulsas/00_atualizacao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
   for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
-    rodar "etapa_$(basename "$ARQ" .yaml)" "$ARQ" || RESULTADO=1
+    NN=$(basename "$ARQ" .yaml)
+    if aprovada "$NN"; then
+      echo "⏭  etapa_$NN (aprovada no $MARCA — --completa roda de novo)" >> "$RELATORIO"
+      continue
+    fi
+    if rodar "etapa_$NN" "$ARQ"; then aprovar "$NN"; else RESULTADO=1; fi
   done
 fi
 kill "$VIGIA" 2>/dev/null
@@ -256,9 +303,21 @@ adb logcat -d -b crash > "$RODADA/crash.txt" 2>/dev/null
 bash "$RAIZ/.maestro/restaurar.sh"
 
 # 8. Erro sanado, log apagado: verde limpa tudo; vermelho fica so a rodada atual
+if [ -d "$PARA_O_ANDRE" ]; then
+  echo ""
+  echo "👀 Para o Andre olhar: .maestro/logs/$(basename "$RODADA")/para-o-andre/ (o que olhar em para-o-andre.txt)"
+  cat "$PARA_O_ANDRE/para-o-andre.txt" 2>/dev/null
+fi
 if [ "$RESULTADO" = "0" ]; then
-  rm -rf "$LOGS"
-  echo "Bateria VERDE — logs apagados."
+  # Verde apaga os logs, menos os prints que esperam o olho do Andre.
+  find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
+  find "$RODADA" -mindepth 1 -maxdepth 1 ! -name para-o-andre -exec rm -rf {} +
+  if [ -d "$PARA_O_ANDRE" ]; then
+    echo "Bateria VERDE — logs apagados; ficam os prints para o Andre."
+  else
+    rm -rf "$LOGS"
+    echo "Bateria VERDE — logs apagados."
+  fi
 else
   find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
   if grep -q "device '.*' not found" "$RODADA"/*.txt; then
