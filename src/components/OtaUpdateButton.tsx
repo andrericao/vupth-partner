@@ -52,7 +52,7 @@ export function OtaUpdateButton() {
     } catch {
       Alert.alert(
         "Sem atualização",
-        "Atualizações OTA só funcionam no APK de build (não no Expo Go/modo dev)."
+        "Atualizações OTA só funcionam no APK de build (não no Expo Go/modo dev).",
       );
     } finally {
       setIsChecking(false);
@@ -73,7 +73,6 @@ export function OtaUpdateButton() {
 
   return (
     <View className="mt-8 items-center gap-3">
-
       {/* No navegador nao existe OTA: a versao nova chega em qualquer navegacao,
           e o botao so levaria a um erro (Andre, 18/09). */}
       {Platform.OS !== "web" && (
@@ -96,10 +95,13 @@ export function OtaUpdateButton() {
         onPress={() => setToques((n) => n + 1)}
         disabled={semDiagnostico}
         accessibilityRole="button"
-        accessibilityLabel="Informações da versão"
-        testID="version-line"
+        testID="version-line-trigger"
       >
-        <Text className="font-mono text-f10 text-vupth-textSecondary text-center">
+        <Text
+          testID="version-line"
+          accessibilityLabel="Informações da versão"
+          className="font-mono text-f10 text-vupth-textSecondary text-center"
+        >
           {versao}
         </Text>
       </Pressable>
