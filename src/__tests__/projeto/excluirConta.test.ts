@@ -50,3 +50,18 @@ describe("apagar a loja tem caminho no app", () => {
     expect(tela).toContain("mensagemDaRemocaoDaLoja(");
   });
 });
+
+// passar a posse a qualquer momento (Andre, 08/10): no menu da loja.
+describe("passar a posse tem caminho no app", () => {
+  it("o menu da loja leva a Passar a posse, e a tela esta registrada", () => {
+    expect(ler("app/(owner)/(tabs)/establishment-data.tsx")).toContain('"/(owner)/passar-posse"');
+    expect(ler("app/(owner)/(tabs)/_layout.tsx")).toContain('name="passar-posse"');
+    expect(ler("app/(owner)/(tabs)/passar-posse.tsx")).toContain("<PassarPosse");
+  });
+
+  it("o Vinculo mostra os convites de posse e o aviso de loja desativada", () => {
+    const tela = ler("app/(professional)/settings-vinculo.tsx");
+    expect(tela).toContain("<ConvitesDePosse");
+    expect(tela).toContain("<AvisoLojaDesativada");
+  });
+});

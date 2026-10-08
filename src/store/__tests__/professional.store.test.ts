@@ -18,6 +18,7 @@ const REGISTER_RESPONSE = {
   specialty: "Corte masculino",
   establishment_id: null,
   establishment_name: null,
+  establishment_status: null,
   is_available: true,
   work_status: null,
   accepting_new: null,
@@ -31,6 +32,7 @@ const AFFILIATE_RESPONSE = {
   specialty: "Corte masculino",
   establishment_id: "estab-uuid-1",
   establishment_name: "Barbearia do Andre",
+  establishment_status: null,
   is_available: true,
   work_status: null,
   accepting_new: null,
@@ -682,5 +684,15 @@ describe("professional.store", () => {
       expect(s.professional).toBeNull();
       expect(s.myServices).toEqual([]);
     });
+  });
+});
+
+// S42 (Backend 01c785e): a loja desativada chega no /me.
+describe("establishment_status", () => {
+  it("normaliza o status da loja (snake e camel); ausente vira null", async () => {
+    const { normalizeProfessional } = jest.requireActual<typeof import("../professional.store")>("../professional.store");
+    expect(normalizeProfessional({ id: "p", name: "n", establishment_status: "DEACTIVATED" }).establishment_status).toBe("DEACTIVATED");
+    expect(normalizeProfessional({ id: "p", name: "n", establishmentStatus: "ACTIVE" }).establishment_status).toBe("ACTIVE");
+    expect(normalizeProfessional({ id: "p", name: "n" }).establishment_status).toBeNull();
   });
 });

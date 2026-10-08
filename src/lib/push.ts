@@ -32,6 +32,18 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
   if (type === "CUT_REQUESTED") return "/(professional)/cut-requests";
+  // desativar-conta (Backend 01c785e): o convite de posse e o aviso de loja
+  // desativada/reativada sao do profissional; a resposta da posse e do dono —
+  // aceita, ele perdeu a loja e o inicio decide para onde ir.
+  if (
+    type === "OWNERSHIP_TRANSFER_REQUESTED" ||
+    type === "ESTABLISHMENT_DEACTIVATED" ||
+    type === "ESTABLISHMENT_REACTIVATED"
+  ) {
+    return "/(professional)/settings-vinculo";
+  }
+  if (type === "OWNERSHIP_TRANSFER_REFUSED") return "/(owner)/passar-posse";
+  if (type === "OWNERSHIP_TRANSFER_ACCEPTED") return "/";
   if (type === "AFFILIATION_ACCEPTED" || type === "AFFILIATION_REJECTED") {
     return loja && minhaLoja && loja === minhaLoja ? solicitacoes : "/(professional)/settings-vinculo";
   }

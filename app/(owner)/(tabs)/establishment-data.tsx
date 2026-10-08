@@ -144,6 +144,11 @@ export default function EstablishmentDataScreen() {
             description="Rua, número, bairro, CEP"
             onPress={() => router.push("/(owner)/onboarding/address" as any)}
           />
+          <MenuItem
+            label="Passar a posse"
+            description="Outra pessoa da equipe fica com a loja"
+            onPress={() => router.push("/(owner)/passar-posse" as any)}
+          />
         </View>
 
         <View
