@@ -113,7 +113,7 @@ export default function CutRequestsScreen() {
             ) : (
               pending.map((req) => {
                 const mins = minutesToExpire(req.expires_at, nowMs);
-                const urgent = mins <= 2;
+                const urgent = mins !== null && mins <= 2;
                 const who = cutRequestClientName(req);
                 const services = cutRequestServices(req.service_item_ids, myServices);
                 const total = cutRequestTotal(req.service_item_ids, myServices);
@@ -142,7 +142,7 @@ export default function CutRequestsScreen() {
                         <Text
                           className={`font-mono text-f11 ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
                         >
-                          {mins} min
+                          {mins === null ? "sem prazo" : `${mins} min`}
                         </Text>
                       </View>
                     </View>
