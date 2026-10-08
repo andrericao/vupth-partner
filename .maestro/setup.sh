@@ -77,7 +77,19 @@ FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
 adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
 adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
 adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
-echo "Imagem de teste na galeria: OK ($FOTO)"
+# Sem o indice, o seletor mostra primeiro uma foto PESSOAL do aparelho e a bateria
+# a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
+NOME_FOTO=$(basename "$FOTO")
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO" && break
+  sleep 1
+done
+if adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO"; then
+  echo "Imagem de teste na galeria: OK ($FOTO)"
+else
+  echo "⚠️  Imagem de teste NAO entrou na galeria ($FOTO): as etapas 07 e 08 escolheriam outra foto. Parando." >&2
+  exit 1
+fi
 
 # 5. Acordar o staging (Render dorme; o primeiro pedido leva ~50 s)
 echo -n "Acordando o staging"
