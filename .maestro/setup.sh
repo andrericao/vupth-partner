@@ -341,15 +341,17 @@ else
   fi
   echo "Bateria VERMELHA — logs em logs/maestro/$(basename "$RODADA") (relatorio.txt, a saida de cada etapa, prints e crash.txt se o app travou)."
 fi
-# 9. Logs no GitHub (DEC-28): commita SO a pasta logs/ (o resto da pasta fica como
-#    esta) e da push na cloud. Fora da cloud, so avisa — nada vai para outra branch.
+# 9. Logs e fluxos no GitHub (DEC-28; Andre, 08/10: "os logs e os comandos yml devem
+#    subir tambem"): commita SO logs/ e .maestro/ (o resto da pasta fica como esta)
+#    e da push na cloud — assim a correcao do fluxo pode ser feita na nuvem e o
+#    teste roda depois. Fora da cloud, so avisa — nada vai para outra branch.
 if [ "$(git -C "$RAIZ" rev-parse --abbrev-ref HEAD)" = "cloud" ]; then
-  git -C "$RAIZ" add -A logs/
-  if ! git -C "$RAIZ" diff --cached --quiet -- logs/; then
-    git -C "$RAIZ" commit -q -m "logs: bateria $(basename "$RODADA") $([ "$RESULTADO" = "0" ] && echo VERDE || echo VERMELHA)" -- logs/ \
+  git -C "$RAIZ" add -A logs/ .maestro/
+  if ! git -C "$RAIZ" diff --cached --quiet -- logs/ .maestro/; then
+    git -C "$RAIZ" commit -q -m "logs: bateria $(basename "$RODADA") $([ "$RESULTADO" = "0" ] && echo VERDE || echo VERMELHA)" -- logs/ .maestro/ \
       && git -C "$RAIZ" pull -q --rebase --autostash origin cloud \
       && git -C "$RAIZ" push -q --no-verify origin cloud \
-      && echo "Logs no GitHub (cloud)." \
+      && echo "Logs e fluxos no GitHub (cloud)." \
       || echo "⚠️  Nao consegui subir os logs — rode: git pull --rebase origin cloud && git push origin cloud"
   fi
 else
