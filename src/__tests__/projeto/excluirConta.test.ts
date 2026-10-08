@@ -23,3 +23,20 @@ describe("excluir conta tem caminho no app", () => {
     expect(ler("app/(owner)/(tabs)/menu.tsx")).toContain("settings-account");
   });
 });
+
+// desativar-conta (Andre, 08/10): "deve haver um menu em ambos os fronts para
+// excluir e desativar conta" — o menu Conta, com os dois lado a lado, e o
+// "Reativar / So consultar" na raiz (vale em qualquer tela).
+describe("menu Conta: desativar ao lado do excluir", () => {
+  it("a tela de dados da conta tem o menu Conta com Desativar e Excluir", () => {
+    const tela = ler("app/(professional)/settings-account.tsx");
+    expect(tela).toContain('testID="menu-conta"');
+    expect(tela).toContain("<DesativarContaModal");
+    expect(tela).toContain("deactivateAccount(");
+    expect(tela).toContain("mensagemDaDesativacao(");
+  });
+
+  it("o Reativar mora na raiz do app", () => {
+    expect(ler("app/_layout.tsx")).toContain("<ReativarContaDoApp />");
+  });
+});

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform, Pressable } from "react-native";
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
@@ -17,7 +17,8 @@ import { validatePassword } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { ExcluirContaModal } from "@components/ExcluirContaModal";
-import { mensagemDaExclusao } from "@lib/exclusaoDeConta";
+import { DesativarContaModal } from "@components/DesativarContaModal";
+import { mensagemDaExclusao, mensagemDaDesativacao } from "@lib/exclusaoDeConta";
 import { maskPhone } from "@lib/masks";
 import { erroDoTelefoneDeContato, telefoneParaMostrar } from "@lib/telefoneDeContato";
 
@@ -93,12 +94,32 @@ export default function SettingsAccountScreen() {
   const updateEmail = useAuthStore((s) => s.updateEmail);
   const updatePassword = useAuthStore((s) => s.updatePassword);
   const deleteAccount = useAuthStore((s) => s.deleteAccount);
+  const deactivateAccount = useAuthStore((s) => s.deactivateAccount);
 
   // Excluir conta: bloqueio de publicacao (lojas + LGPD). Mora aqui porque
   // esta tela e a mesma para profissional e dono.
   const [excluirAberto, setExcluirAberto] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
   const [erroExclusao, setErroExclusao] = useState<string | null>(null);
+
+  // desativar-conta (c0f5b17): o par reversivel do excluir, lado a lado no menu Conta.
+  const [desativarAberto, setDesativarAberto] = useState(false);
+  const [desativando, setDesativando] = useState(false);
+  const [erroDesativacao, setErroDesativacao] = useState<string | null>(null);
+
+  const handleDeactivateAccount = async (senhaAtual: string) => {
+    setDesativando(true);
+    setErroDesativacao(null);
+    try {
+      await deactivateAccount(senhaAtual);
+      setDesativarAberto(false);
+      router.replace("/(auth)" as any);
+    } catch (error: any) {
+      setErroDesativacao(mensagemDaDesativacao(error));
+    } finally {
+      setDesativando(false);
+    }
+  };
 
   const handleDeleteAccount = async (senhaAtual: string) => {
     setExcluindo(true);
@@ -454,23 +475,45 @@ export default function SettingsAccountScreen() {
             </FieldCard>
           </View>
 
-          {/* No fim e discreto, como no client: e caminho que a loja de apps
-              exige existir, nao acao do dia a dia. */}
-          <Pressable
-            onPress={() => {
-              setErroExclusao(null);
-              setExcluirAberto(true);
-            }}
-            className="mt-10 self-center py-2"
-            accessibilityRole="button"
-            accessibilityLabel="Deletar minha conta"
-            testID="delete-account"
-          >
-            <Text className="font-heading text-xs text-vupth-danger">Deletar minha conta</Text>
-          </Pressable>
+          {/* Menu Conta (Andre, 08/10: "deve haver um menu em ambos os fronts
+              para excluir e desativar conta"): Desativar e Excluir lado a lado,
+              no fim — caminho que a loja de apps exige, nao acao do dia a dia. */}
+          <View className="mt-10 gap-2" testID="menu-conta">
+            <Text className="font-heading text-sm text-vupth-forest">Conta</Text>
+            <View className="flex-row gap-2">
+              <NwButton
+                title="Desativar"
+                variant="secondary"
+                className="flex-1 mt-0"
+                onPress={() => {
+                  setErroDesativacao(null);
+                  setDesativarAberto(true);
+                }}
+                testID="deactivate-account"
+              />
+              <NwButton
+                title="Excluir"
+                variant="outlineDanger"
+                className="flex-1 mt-0"
+                onPress={() => {
+                  setErroExclusao(null);
+                  setExcluirAberto(true);
+                }}
+                testID="delete-account"
+              />
+            </View>
+          </View>
         </View>
       </ScrollView>
 
+      <DesativarContaModal
+        visible={desativarAberto}
+        ehDono={user?.roles?.includes("OWNER")}
+        isDeactivating={desativando}
+        error={erroDesativacao}
+        onConfirm={handleDeactivateAccount}
+        onClose={() => setDesativarAberto(false)}
+      />
       <ExcluirContaModal
         visible={excluirAberto}
         isDeleting={excluindo}

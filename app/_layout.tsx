@@ -22,6 +22,7 @@ import { instalarAlertWeb } from "../web-shims/alert";
 import { pedirParaNaoTraduzir } from "@lib/naoTraduzir";
 import { instalarDialogoNativo } from "@lib/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
+import { ReativarContaDoApp } from "@components/ReativarContaDoApp";
 import { useFonteStore } from "@store/fonte.store";
 import { varsDaFonte } from "@lib/fonte";
 
@@ -131,6 +132,9 @@ export default function RootLayout() {
                 nao pode ser coberto por ela. Fica fora do portao das fontes de
                 proposito — erro no boot precisa aparecer mesmo antes delas. */}
             <DialogoVupth />
+            {/* desativar-conta (c0f5b17): "Reativar / So consultar" no login de
+                conta desativada e no 403 ACCOUNT_DEACTIVATED de qualquer tela. */}
+            <ReativarContaDoApp />
           </View>
         </ThemeProvider>
       </QueryClientProvider>

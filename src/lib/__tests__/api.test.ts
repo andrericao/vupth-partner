@@ -1,7 +1,7 @@
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import * as SecureStore from "expo-secure-store";
-import { api, getApiErrorMessage } from "@lib/api";
+import { api, getApiErrorMessage, aoContaDesativada } from "@lib/api";
 
 // api.ts importa expo-secure-store no topo (interceptors) — mockar p/ o import.
 jest.mock("expo-secure-store", () => ({
@@ -273,5 +273,33 @@ describe("api — refresh em voo único (single-flight)", () => {
     await api.get("/dois");
 
     expect(rawMock.history.post.length).toBe(2);
+  });
+});
+
+// desativar-conta (c0f5b17): no "So consultar" o que mexe na operacao da 403
+// ACCOUNT_DEACTIVATED — o app oferece "Reativar" (o aviso mora no auth store;
+// o api so avisa quem se registrou, para nao importar o store aqui).
+describe("api — 403 ACCOUNT_DEACTIVATED", () => {
+  afterEach(() => {
+    apiMock.reset();
+    aoContaDesativada(null);
+  });
+
+  it("avisa quem se registrou e devolve o erro para a tela", async () => {
+    const avisar = jest.fn();
+    aoContaDesativada(avisar);
+    apiMock.onPost("/attendances").reply(403, { code: "ACCOUNT_DEACTIVATED" });
+
+    await expect(api.post("/attendances")).rejects.toBeTruthy();
+    expect(avisar).toHaveBeenCalledTimes(1);
+  });
+
+  it("outro 403 nao avisa", async () => {
+    const avisar = jest.fn();
+    aoContaDesativada(avisar);
+    apiMock.onGet("/x").reply(403, { code: "FORBIDDEN" });
+
+    await expect(api.get("/x")).rejects.toBeTruthy();
+    expect(avisar).not.toHaveBeenCalled();
   });
 });

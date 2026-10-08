@@ -1,4 +1,4 @@
-import { mensagemDaExclusao } from "@lib/exclusaoDeConta";
+import { mensagemDaExclusao, mensagemDaDesativacao } from "@lib/exclusaoDeConta";
 
 const erro = (status: number, data: object) => ({ response: { status, data } });
 
@@ -36,5 +36,47 @@ describe("mensagemDaExclusao", () => {
 
   it("erro interno (500): frase de servidor, nao a mensagem crua (26/09)", () => {
     expect(mensagemDaExclusao(erro(500, { message: "NullPointerException" }))).toMatch(/servidor teve um problema/);
+  });
+});
+
+// desativar-conta (contrato do Backend c0f5b17, 08/10): o dono com loja nao
+// apaga a conta — passa a posse ou apaga a loja antes.
+describe("mensagemDaExclusao — dono com loja", () => {
+  it("409 OWNER_MUST_TRANSFER: a mensagem do backend passa como veio", () => {
+    expect(
+      mensagemDaExclusao(erro(409, { code: "OWNER_MUST_TRANSFER", message: "Passe a posse antes." }))
+    ).toBe("Passe a posse antes.");
+  });
+
+  it("sem mensagem, diz os dois caminhos", () => {
+    expect(mensagemDaExclusao(erro(409, { code: "OWNER_MUST_TRANSFER" }))).toMatch(
+      /passe a posse.*ou apague a loja/i
+    );
+  });
+});
+
+describe("mensagemDaDesativacao", () => {
+  it("senha errada", () => {
+    expect(mensagemDaDesativacao(erro(401, { code: "CURRENT_PASSWORD_INVALID" }))).toBe(
+      "Senha incorreta. Confira e tente de novo."
+    );
+  });
+
+  it("compromisso vivo (409): a mensagem do backend passa como veio", () => {
+    expect(
+      mensagemDaDesativacao(
+        erro(409, { code: "ACCOUNT_DEACTIVATE_NOT_ALLOWED", message: "Encerre a fila antes." })
+      )
+    ).toBe("Encerre a fila antes.");
+  });
+
+  it("409 sem mensagem ainda diz o que fazer", () => {
+    expect(mensagemDaDesativacao(erro(409, { code: "ACCOUNT_DEACTIVATE_NOT_ALLOWED" }))).toMatch(
+      /atendimento ou fila/
+    );
+  });
+
+  it("outro erro cai na mensagem padrao", () => {
+    expect(mensagemDaDesativacao(new Error("Network Error"))).toMatch(/Sem conexao/);
   });
 });

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
-import { api } from "@lib/api";
+import { api, aoContaDesativada } from "@lib/api";
 import { getRolesFromToken, decodeToken } from "@lib/jwt";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -13,10 +13,20 @@ type User = {
   roles: string[];
 };
 
+/**
+ * desativar-conta (c0f5b17): "boas-vindas" no login de uma conta desativada;
+ * "bloqueado" quando, no "So consultar", algo da operacao deu 403
+ * ACCOUNT_DEACTIVATED. Os dois oferecem Reativar ou So consultar.
+ */
+export type AvisoDeReativar = "boas-vindas" | "bloqueado";
+
 type AuthState = {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** A conta logada esta desativada (o login nao reativa sozinho). */
+  contaDesativada: boolean;
+  avisoDeReativar: AvisoDeReativar | null;
 
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
@@ -27,6 +37,9 @@ type AuthState = {
   refreshToken: () => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: (currentPassword: string) => Promise<void>;
+  deactivateAccount: (currentPassword: string) => Promise<void>;
+  reactivateAccount: () => Promise<void>;
+  soConsultar: () => void;
   loadStoredTokens: () => Promise<void>;
 };
 
@@ -43,6 +56,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  contaDesativada: false,
+  avisoDeReativar: null,
 
   login: async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
@@ -58,9 +73,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     const roles = getRolesFromToken(data.tokens.access_token);
 
+    // Conta desativada: entra, mas o app pergunta se reativa (c0f5b17).
+    const desativada = data.deactivated === true;
     set({
       user: { id: data.user.id, email: data.user.email, roles },
       isAuthenticated: true,
+      contaDesativada: desativada,
+      avisoDeReativar: desativada ? "boas-vindas" : null,
     });
   },
 
@@ -154,7 +173,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {}
 
     await limparSessaoLocal();
-    set({ user: null, isAuthenticated: false });
+    set({ user: null, isAuthenticated: false, contaDesativada: false, avisoDeReativar: null });
   },
 
   // Exclusao de conta (bloqueio de publicacao: lojas + LGPD). Contrato do
@@ -180,8 +199,33 @@ export const useAuthStore = create<AuthState>((set) => ({
       await SecureStore.deleteItemAsync("vupth_push_token");
     } catch {}
     await limparSessaoLocal();
-    set({ user: null, isAuthenticated: false });
+    set({ user: null, isAuthenticated: false, contaDesativada: false, avisoDeReativar: null });
   },
+
+  // Desativar (c0f5b17): reversivel — volta entrando de novo. Como no apagar,
+  // o push sai ANTES (depois o token ja nao autentica) e o fim da sessao e so
+  // local. Erro (senha, 409) sobe para a tela e a sessao continua.
+  deactivateAccount: async (currentPassword) => {
+    try {
+      const pushToken = await SecureStore.getItemAsync("vupth_push_token");
+      if (pushToken) await unregisterDevice(pushToken);
+    } catch {}
+
+    await api.post("/profile/deactivate/me", { current_password: currentPassword });
+
+    try {
+      await SecureStore.deleteItemAsync("vupth_push_token");
+    } catch {}
+    await limparSessaoLocal();
+    set({ user: null, isAuthenticated: false, contaDesativada: false, avisoDeReativar: null });
+  },
+
+  reactivateAccount: async () => {
+    await api.post("/profile/reactivate/me");
+    set({ contaDesativada: false, avisoDeReativar: null });
+  },
+
+  soConsultar: () => set({ avisoDeReativar: null }),
 
   loadStoredTokens: async () => {
     const token = await SecureStore.getItemAsync("vupth_access_token");
@@ -216,3 +260,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 }));
+
+// O 403 ACCOUNT_DEACTIVATED de qualquer tela reabre o "Reativar".
+aoContaDesativada(() =>
+  useAuthStore.setState({ contaDesativada: true, avisoDeReativar: "bloqueado" })
+);
