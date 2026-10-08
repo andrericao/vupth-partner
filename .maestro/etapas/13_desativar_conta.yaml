@@ -1,0 +1,213 @@
+# bateria-desativar-conta (08/10; contrato do Backend c0f5b17 + S41/S42): as
+# tres fatias do Partner. Contas proprias (scripts/conta_para_desativar.js).
+#   13.0x passar a posse: o dono pede, ve o pendente e cancela; pede de novo
+#   13.1x o herdeiro ve o convite no Vinculo e recusa
+#   13.2x desativar: menu Conta → Desativar com a senha → volta a entrada
+#   13.3x entrar de novo: "Bem-vindo de volta" → So consultar → abrir a loja da
+#         403 ACCOUNT_DEACTIVATED → "Sua conta esta desativada" → Reativar
+#   13.4x apagar a loja com a senha → o dono volta a criar uma loja
+appId: ${APP_ID}
+---
+# ── passar a posse ──
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO_D}
+    label: "13.01 · entra como o dono D"
+- extendedWaitUntil:
+    visible: ${output.LOJA_D}
+    timeout: 30000
+    label: "13.02 · espera ${output.LOJA_D}"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "13.03 · roda fechar_aviso"
+- tapOn:
+    id: "aba-menu"
+    label: "13.04 · toca em aba-menu"
+- scrollUntilVisible:
+    element: "Dados do estabelecimento"
+    direction: DOWN
+    label: "13.05 · rola ate Dados do estabelecimento"
+- tapOn:
+    text: "Dados do estabelecimento"
+    label: "13.06 · toca em Dados do estabelecimento"
+- scrollUntilVisible:
+    element: "Passar a posse"
+    direction: DOWN
+    label: "13.07 · rola ate Passar a posse"
+- tapOn:
+    text: "Passar a posse"
+    label: "13.08 · toca em Passar a posse"
+- extendedWaitUntil:
+    visible: ${output.HERDEIRO}
+    timeout: 20000
+    label: "13.09 · a equipe mostra ${output.HERDEIRO}"
+- tapOn:
+    text: ${output.HERDEIRO}
+    label: "13.10 · pede a posse para ${output.HERDEIRO}"
+- extendedWaitUntil:
+    visible: "Esperando ${output.HERDEIRO} aceitar a posse da loja."
+    timeout: 20000
+    label: "13.11 · ve o pendente"
+- tapOn:
+    text: "Cancelar pedido"
+    label: "13.12 · cancela o pedido"
+- extendedWaitUntil:
+    visible: ${output.HERDEIRO}
+    timeout: 20000
+    label: "13.13 · a equipe volta (sem pendente)"
+- tapOn:
+    text: ${output.HERDEIRO}
+    label: "13.14 · pede de novo, para o herdeiro recusar"
+- extendedWaitUntil:
+    visible: "Esperando ${output.HERDEIRO} aceitar a posse da loja."
+    timeout: 20000
+    label: "13.15 · pendente de novo"
+- runFlow:
+    file: ../apoio/sair_dono.yaml
+    label: "13.16 · roda sair_dono"
+
+# ── o herdeiro recusa no Vinculo ──
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_HERDEIRO}
+    label: "13.17 · entra como ${output.HERDEIRO}"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "13.18 · roda fechar_aviso"
+- tapOn:
+    id: "aba-perfil"
+    label: "13.19 · toca em aba-perfil"
+- scrollUntilVisible:
+    element: "Vínculo"
+    direction: DOWN
+    label: "13.20 · rola ate Vínculo"
+- tapOn:
+    text: "Vínculo"
+    label: "13.21 · toca em Vínculo"
+- extendedWaitUntil:
+    visible: ".*quer passar a posse de ${output.LOJA_D} para você.*"
+    timeout: 20000
+    label: "13.22 · o convite de posse aparece"
+- tapOn:
+    text: "Recusar"
+    index: 0
+    label: "13.23 · recusa"
+- extendedWaitUntil:
+    notVisible: ".*quer passar a posse de ${output.LOJA_D} para você.*"
+    timeout: 20000
+    label: "13.24 · o convite saiu"
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "13.25 · roda sair_profissional"
+
+# ── desativar ──
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO_D}
+    label: "13.26 · entra como o dono D"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "13.27 · roda fechar_aviso"
+- tapOn:
+    id: "aba-menu"
+    label: "13.28 · toca em aba-menu"
+- scrollUntilVisible:
+    element: "Dados pessoais"
+    direction: DOWN
+    label: "13.29 · rola ate Dados pessoais"
+- tapOn:
+    text: "Dados pessoais"
+    label: "13.30 · toca em Dados pessoais"
+- scrollUntilVisible:
+    element:
+      id: "deactivate-account"
+    direction: DOWN
+    label: "13.31 · rola ate o menu Conta"
+- tapOn:
+    id: "deactivate-account"
+    label: "13.32 · toca em Desativar"
+- tapOn:
+    id: "deactivate-account-password"
+    label: "13.33 · toca na senha"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "deactivate-account-confirm"
+    label: "13.34 · confirma a desativacao"
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 30000
+    label: "13.35 · voltou para a entrada"
+
+# ── volta: Bem-vindo de volta → So consultar → 403 → Reativar ──
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO_D}
+    label: "13.36 · entra de novo"
+- extendedWaitUntil:
+    visible: "Bem-vindo de volta"
+    timeout: 30000
+    label: "13.37 · Bem-vindo de volta"
+- tapOn:
+    text: "Só consultar"
+    label: "13.38 · toca em Só consultar"
+- extendedWaitUntil:
+    visible: "Abrir estabelecimento"
+    timeout: 20000
+    label: "13.39 · o inicio do dono, sem reativar"
+- tapOn:
+    text: "Abrir estabelecimento"
+    label: "13.40 · tenta abrir a loja"
+- extendedWaitUntil:
+    visible: "Sua conta está desativada"
+    timeout: 20000
+    label: "13.41 · o 403 oferece Reativar"
+- tapOn:
+    id: "reactivate-account"
+    label: "13.42 · toca em Reativar"
+- extendedWaitUntil:
+    notVisible: "Sua conta está desativada"
+    timeout: 20000
+    label: "13.43 · reativada"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "13.44 · roda fechar_aviso"
+
+# ── apagar a loja ──
+- tapOn:
+    id: "aba-menu"
+    label: "13.45 · toca em aba-menu"
+- scrollUntilVisible:
+    element: "Dados do estabelecimento"
+    direction: DOWN
+    label: "13.46 · rola ate Dados do estabelecimento"
+- tapOn:
+    text: "Dados do estabelecimento"
+    label: "13.47 · toca em Dados do estabelecimento"
+- scrollUntilVisible:
+    element:
+      id: "delete-store"
+    direction: DOWN
+    label: "13.48 · rola ate Apagar a loja"
+- tapOn:
+    id: "delete-store"
+    label: "13.49 · toca em Apagar a loja"
+- tapOn:
+    id: "delete-store-password"
+    label: "13.50 · toca na senha"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "delete-store-confirm"
+    label: "13.51 · confirma"
+- assertNotVisible:
+    id: "delete-store-error"
+    label: "13.52 · sem erro"
+- extendedWaitUntil:
+    notVisible: ${output.LOJA_D}
+    timeout: 30000
+    label: "13.53 · a loja saiu; o dono volta a criar uma"
