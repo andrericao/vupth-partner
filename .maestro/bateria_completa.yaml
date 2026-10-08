@@ -4,7 +4,7 @@
 # completa".
 #
 #   bash .maestro/setup.sh   # celular, teclado, servidor, commit — e roda
-#   (logs em .maestro/logs/<data>; --so-preparar so imprime o comando)
+#   (logs em logs/maestro/<data>; --so-preparar so imprime o comando)
 #
 # Cada rodada cria contas NOVAS (sufixo = hora da rodada), entao pode repetir a
 # vontade. Os clientes nao vem do app do client: entram na fila e pedem encaixe

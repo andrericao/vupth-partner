@@ -40,9 +40,9 @@ yarn-error.*
 # test coverage
 /coverage
 .maestro/.autofill_antes
+# DEC-28: os logs novos vao para logs/ (commitados). A pasta antiga fica fora do
+# git: a rodada de 06/10 tem print com documento pessoal.
 .maestro/logs/
 
-# DEC-22: logs de falha dos testes (o hook do vupth-docs le daqui)
-/.logs-teste/
 .maestro/aprovados.txt
 .maestro/aprovados.txt.tmp

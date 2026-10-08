@@ -27,10 +27,10 @@ echo "────────────────────────�
 # --coverage p/ aplicar o mesmo gate de cobertura que o CI (coverageThreshold no
 # package.json). Sem isso, uma regressao de cobertura passava aqui e so estourava
 # no CI, disparando o auto-rollback. (2026-07-17)
-# DEC-22: a falha do jest fica em .logs-teste/<data>_jest_FALHA.txt (o hook do
+# DEC-22/28: a falha do jest fica em logs/testes/<data>_jest_FALHA.txt (o hook do
 # vupth-docs acorda a equipe com ela); verde apaga as falhas antigas do jest. O
 # codigo de saida do jest sai por arquivo: o pipe com tee o esconderia.
-LOGS=.logs-teste
+LOGS=logs/testes
 mkdir -p "$LOGS"
 SAIDA=$(mktemp)
 CODIGO=$(mktemp)
