@@ -39,3 +39,19 @@ export function mensagemDaDesativacao(error: any): string {
   }
   return getApiErrorMessage(error, "Não foi possível desativar a conta.");
 }
+
+// Erros do DELETE /establishment/{id} (c0f5b17, item 5): apagar a loja.
+//   401 CURRENT_PASSWORD_INVALID -> erro de CAMPO
+//   409 ESTABLISHMENT_HAS_ACTIVE_QUEUE -> ha gente na fila; a mensagem passa como veio.
+export function mensagemDaRemocaoDaLoja(error: any): string {
+  const code = error?.response?.data?.code;
+  const msg = error?.response?.data?.message;
+
+  if (code === "CURRENT_PASSWORD_INVALID") {
+    return "Senha incorreta. Confira e tente de novo.";
+  }
+  if (code === "ESTABLISHMENT_HAS_ACTIVE_QUEUE") {
+    return msg ?? "Ainda há clientes na fila. Atenda ou encerre a fila antes de apagar a loja.";
+  }
+  return getApiErrorMessage(error, "Não foi possível apagar a loja.");
+}

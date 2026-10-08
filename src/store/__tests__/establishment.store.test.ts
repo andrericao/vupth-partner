@@ -719,4 +719,29 @@ describe("establishment.store", () => {
       expect(useEstablishmentStore.getState().establishment).toBeNull();
     });
   });
+
+  // desativar-conta (c0f5b17, item 5): o dono apaga a loja com a senha. A loja
+  // vira "Loja removida" no backend; aqui ela sai do aparelho.
+  describe("deleteEstablishment", () => {
+    it("DELETE /establishment/{id} com a senha no corpo e a loja sai do aparelho", async () => {
+      mock.onDelete("/establishment/estab-uuid-1").reply(204);
+      useEstablishmentStore.setState({ establishment: { id: "estab-uuid-1" } as any });
+
+      await useEstablishmentStore.getState().deleteEstablishment("estab-uuid-1", "minha-senha");
+
+      const req = mock.history.delete.find((r) => r.url === "/establishment/estab-uuid-1")!;
+      expect(JSON.parse(req.data)).toEqual({ current_password: "minha-senha" });
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
+    });
+
+    it("loja com fila (409): propaga e a loja continua no aparelho", async () => {
+      mock.onDelete("/establishment/estab-uuid-1").reply(409, { code: "ESTABLISHMENT_HAS_ACTIVE_QUEUE" });
+      useEstablishmentStore.setState({ establishment: { id: "estab-uuid-1" } as any });
+
+      await expect(
+        useEstablishmentStore.getState().deleteEstablishment("estab-uuid-1", "s")
+      ).rejects.toBeTruthy();
+      expect(useEstablishmentStore.getState().establishment).not.toBeNull();
+    });
+  });
 });

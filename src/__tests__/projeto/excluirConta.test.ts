@@ -40,3 +40,13 @@ describe("menu Conta: desativar ao lado do excluir", () => {
     expect(ler("app/_layout.tsx")).toContain("<ReativarContaDoApp />");
   });
 });
+
+// desativar-conta (c0f5b17, item 5): o dono apaga a loja nos dados da loja.
+describe("apagar a loja tem caminho no app", () => {
+  it("a tela da loja abre o modal e chama o deleteEstablishment", () => {
+    const tela = ler("app/(owner)/(tabs)/establishment-data.tsx");
+    expect(tela).toContain("<ApagarLojaModal");
+    expect(tela).toContain("deleteEstablishment(");
+    expect(tela).toContain("mensagemDaRemocaoDaLoja(");
+  });
+});

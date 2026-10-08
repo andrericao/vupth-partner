@@ -1,4 +1,4 @@
-import { mensagemDaExclusao, mensagemDaDesativacao } from "@lib/exclusaoDeConta";
+import { mensagemDaExclusao, mensagemDaDesativacao, mensagemDaRemocaoDaLoja } from "@lib/exclusaoDeConta";
 
 const erro = (status: number, data: object) => ({ response: { status, data } });
 
@@ -78,5 +78,26 @@ describe("mensagemDaDesativacao", () => {
 
   it("outro erro cai na mensagem padrao", () => {
     expect(mensagemDaDesativacao(new Error("Network Error"))).toMatch(/Sem conexao/);
+  });
+});
+
+describe("mensagemDaRemocaoDaLoja", () => {
+  it("senha errada", () => {
+    expect(mensagemDaRemocaoDaLoja(erro(401, { code: "CURRENT_PASSWORD_INVALID" }))).toBe(
+      "Senha incorreta. Confira e tente de novo."
+    );
+  });
+
+  it("loja com fila (409): a mensagem do backend passa; sem ela, diz o que fazer", () => {
+    expect(
+      mensagemDaRemocaoDaLoja(erro(409, { code: "ESTABLISHMENT_HAS_ACTIVE_QUEUE", message: "Fila aberta." }))
+    ).toBe("Fila aberta.");
+    expect(mensagemDaRemocaoDaLoja(erro(409, { code: "ESTABLISHMENT_HAS_ACTIVE_QUEUE" }))).toMatch(
+      /clientes na fila/
+    );
+  });
+
+  it("outro erro cai na mensagem padrao", () => {
+    expect(mensagemDaRemocaoDaLoja(new Error("Network Error"))).toMatch(/Sem conexao/);
   });
 });
