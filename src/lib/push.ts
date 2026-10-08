@@ -31,6 +31,7 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   const solicitacoes = loja ? `/(owner)/affiliations?establishmentId=${loja}` : null;
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
+  if (type === "CUT_REQUESTED") return "/(professional)/cut-requests";
   if (type === "AFFILIATION_ACCEPTED" || type === "AFFILIATION_REJECTED") {
     return loja && minhaLoja && loja === minhaLoja ? solicitacoes : "/(professional)/settings-vinculo";
   }
@@ -142,8 +143,12 @@ export function pushSupported(env: {
 // o pedido de corte, o "quer fechar?"). Mesmo comportamento do Client
 // (52076672): com o app aberto, a de ciencia vira aviso com OK.
 
-/** Pushes que pedem uma decisao do profissional — o app ja tem a tela delas. */
-const PUSH_DE_DECISAO = new Set(["CUT_REQUESTED", "CLOSING_PROMPT"]);
+/**
+ * Pushes que pedem uma decisao do profissional — o app ja tem a tela delas.
+ * O CUT_REQUESTED saiu (aviso-de-corte-sem-ok, Andre 08/10): chegava sem OK.
+ * Agora e aviso com OK, e o toque leva a Solicitacoes de corte.
+ */
+const PUSH_DE_DECISAO = new Set(["CLOSING_PROMPT"]);
 
 export function ehDeDecisao(type: unknown): boolean {
   return typeof type === "string" && PUSH_DE_DECISAO.has(type);
