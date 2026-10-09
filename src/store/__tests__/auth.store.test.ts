@@ -625,3 +625,48 @@ describe("desativar e reativar a conta", () => {
     expect(useAuthStore.getState().avisoDeReativar).toBe("bloqueado");
   });
 });
+
+// cobertura-98 (Andre, 08/10): sem usuario na memoria, as trocas de e-mail,
+// senha e o refresh nao inventam um; token sem sub/email vira "".
+describe("sem usuario na memoria", () => {
+  beforeEach(() => {
+    mock.reset();
+    jest.clearAllMocks();
+    useAuthStore.setState({ user: null });
+  });
+
+  const tokens = { tokens: { access_token: CLIENT_TOKEN, refresh_token: "r" } };
+
+  it("updateEmail e updatePassword deixam o user nulo", async () => {
+    mock.onPatch("/profile/update-email/me").reply(200, tokens);
+    await useAuthStore.getState().updateEmail("novo@test.com");
+    expect(useAuthStore.getState().user).toBeNull();
+
+    mock.onPatch("/profile/update-password/me").reply(200, tokens);
+    await useAuthStore.getState().updatePassword("a", "b");
+    expect(useAuthStore.getState().user).toBeNull();
+  });
+
+  it("updateEmail com usuario e sem e-mail na resposta usa o digitado", async () => {
+    useAuthStore.setState({ user: { id: "u", email: "velho@test.com", roles: [] } });
+    mock.onPatch("/profile/update-email/me").reply(200, tokens);
+    await useAuthStore.getState().updateEmail("novo@test.com");
+    expect(useAuthStore.getState().user?.email).toBe("novo@test.com");
+  });
+
+  it("refreshToken sem usuario deixa o user nulo", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("r-salvo");
+    mock.onPost("/auth/refresh").reply(200, { access_token: CLIENT_TOKEN, refresh_token: "r2" });
+    await useAuthStore.getState().refreshToken();
+    expect(useAuthStore.getState().user).toBeNull();
+  });
+
+  it("token salvo sem sub nem email restaura com strings vazias", async () => {
+    const semNada = makeToken({ roles: "ROLE_CLIENT" });
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_access_token" ? semNada : null
+    );
+    await useAuthStore.getState().loadStoredTokens();
+    expect(useAuthStore.getState().user).toMatchObject({ id: "", email: "" });
+  });
+});

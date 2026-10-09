@@ -124,3 +124,38 @@ describe("waitForBackend", () => {
     expect(fetchImpl).toHaveBeenCalled();
   });
 });
+
+// cobertura-98 (Andre, 08/10): sem opcoes, usa o fetch global; e o teto que
+// estoura DURANTE a cutucada sai sem dormir de novo.
+describe("waitForBackend — padroes e teto", () => {
+  const g = globalThis as any;
+  let fetchAntes: unknown;
+  beforeEach(() => {
+    fetchAntes = g.fetch;
+  });
+  afterEach(() => {
+    g.fetch = fetchAntes;
+  });
+
+  it("sem opcoes, usa o fetch global", async () => {
+    g.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ status: "UP" }) }));
+    await expect(waitForBackend()).resolves.toBe(true);
+    expect(g.fetch).toHaveBeenCalled();
+  });
+
+  it("a cutucada passou do teto: desiste sem dormir", async () => {
+    let t = 0;
+    const sleep = jest.fn(async () => {});
+    const ok = await waitForBackend({
+      ceilingMs: 100,
+      fetchImpl: (async () => {
+        t = 200;
+        return { ok: false };
+      }) as any,
+      now: () => t,
+      sleep,
+    });
+    expect(ok).toBe(false);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+});

@@ -696,3 +696,22 @@ describe("establishment_status", () => {
     expect(normalizeProfessional({ id: "p", name: "n" }).establishment_status).toBeNull();
   });
 });
+
+// cobertura-98 (Andre, 08/10): sem profissional carregado, os servicos nao
+// tentam nada; o relatorio sem datas nao manda parametros vazios.
+describe("sem profissional / sem datas", () => {
+  beforeEach(() => useProfessionalStore.setState({ professional: null } as any));
+
+  it("atualizar e remover servico sem profissional falham com mensagem; buscar nao faz nada", async () => {
+    await expect(useProfessionalStore.getState().updateMyServiceItem("s1", {} as any)).rejects.toThrow("Professional not found");
+    await expect(useProfessionalStore.getState().removeMyServiceItem("s1")).rejects.toThrow("Professional not found");
+    await expect(useProfessionalStore.getState().fetchMyServices()).resolves.toBeUndefined();
+  });
+
+  it("fetchMyReport sem datas nao manda dateFrom/dateTo", async () => {
+    mock.onGet("/professional/me/reports").reply(200, {});
+    await useProfessionalStore.getState().fetchMyReport();
+    const req = mock.history.get.find((r) => r.url === "/professional/me/reports")!;
+    expect(req.params).toEqual({});
+  });
+});

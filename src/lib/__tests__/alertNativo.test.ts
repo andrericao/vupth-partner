@@ -1,3 +1,4 @@
+import { Alert } from "react-native";
 import { instalarDialogoNativo, dialogoNativoInstalado } from "../alertNativo";
 import { useDialogoStore } from "@store/dialogo.store";
 
@@ -56,5 +57,31 @@ describe("instalarDialogoNativo", () => {
     instalarDialogoNativo({ plataforma: "android", alvo: alvo as any, hostMontado: () => true });
 
     expect(alvo.alert).toBe(primeiro);
+  });
+});
+
+// cobertura-98 (Andre, 08/10): os padroes — sem deps instala no Alert do
+// react-native e le o host pelo store; botao sem texto vira "OK".
+describe("instalarDialogoNativo — os padroes", () => {
+  const alvoReal = Alert as any;
+  let alertAntes: unknown;
+  beforeEach(() => {
+    alertAntes = alvoReal.alert;
+    useDialogoStore.getState().fechar();
+  });
+  afterEach(() => {
+    alvoReal.alert = alertAntes;
+    delete alvoReal.__vupthDialogo;
+    delete alvoReal.__vupthAlertOriginal;
+  });
+
+  it("sem deps instala no Alert de verdade e usa o host do store", () => {
+    expect(dialogoNativoInstalado()).toBe(false);
+    expect(instalarDialogoNativo()).toBe(true);
+    expect(dialogoNativoInstalado()).toBe(true);
+
+    useDialogoStore.setState({ hostMontado: true } as any);
+    alvoReal.alert("Aviso", "texto", [{}]);
+    expect(useDialogoStore.getState().atual?.botoes[0]).toEqual({ texto: "OK", estilo: "default" });
   });
 });
