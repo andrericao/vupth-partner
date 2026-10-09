@@ -1,0 +1,20 @@
+Rodada 2026-10-09_200852 · TAG 200852 · commit esperado 63adc36,5fb2457
+✅ 00_atualizacao
+⏭  etapa_01 (aprovada no 63adc36 — --completa roda de novo)
+⏭  etapa_02 (aprovada no 63adc36 — --completa roda de novo)
+⏭  etapa_03 (aprovada no 63adc36 — --completa roda de novo)
+⏭  etapa_04 (aprovada no 63adc36 — --completa roda de novo)
+⏭  etapa_05 (aprovada no 63adc36 — --completa roda de novo)
+⏭  etapa_06 (aprovada no 63adc36 — --completa roda de novo)
+❌ etapa_07 — parou em 07.05 · espera …${output.CLIENTE_RECUSADO}…
+   print: .maestro/logs/2026-10-09_200852/FALHA_07.05_espera-output-cliente-recusado.png
+❌ etapa_08 — parou em 08.26 · espera a fila do profissional
+   print: .maestro/logs/2026-10-09_200852/FALHA_08.26_espera-a-fila-do-profissional.png
+❌ etapa_09 — parou em 09.11 · espera Avulso${output.TAG} na fila
+   print: .maestro/logs/2026-10-09_200852/FALHA_09.11_espera-avulso-output-tag-na-fila.png
+❌ etapa_10 — parou em 10.16 · espera o card de ${output.LOJA}
+   print: .maestro/logs/2026-10-09_200852/FALHA_10.16_espera-o-card-de-output-loja.png
+❌ etapa_11 — parou em 11.02 · toca em aba-perfil
+   print: .maestro/logs/2026-10-09_200852/FALHA_11.02_toca-em-aba-perfil.png
+❌ etapa_12 — parou em 12.07 · espera o push Pedido de vínculo
+   print: .maestro/logs/2026-10-09_200852/FALHA_12.07_espera-o-push-pedido-de-vinculo.png
