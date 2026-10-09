@@ -549,3 +549,26 @@ describe("attendance.store", () => {
     });
   });
 });
+
+// cobertura-98 (Andre, 08/10): resposta sem id usa o id pedido; remover outro
+// atendimento nao mexe no que esta em curso.
+describe("attendance.store — cantos", () => {
+  beforeEach(() => mock.reset());
+
+  it("start e resume sem id na resposta guardam o id pedido", async () => {
+    mock.onPatch("/attendances/a1/start").reply(200, {});
+    await useAttendanceStore.getState().startAttendance("a1");
+    expect(useAttendanceStore.getState().atendimentoIniciado?.id).toBe("a1");
+
+    mock.onPatch("/attendances/a2/resume").reply(200, null);
+    await useAttendanceStore.getState().resumeAttendance("a2");
+    expect(useAttendanceStore.getState().atendimentoIniciado?.id).toBe("a2");
+  });
+
+  it("remover outro atendimento mantem o que esta em curso", async () => {
+    useAttendanceStore.setState({ atendimentoIniciado: { id: "em-curso" } as any });
+    mock.onDelete("/professional-queue/outro/remove").reply(204);
+    await useAttendanceStore.getState().removeFromQueue("outro");
+    expect(useAttendanceStore.getState().atendimentoIniciado?.id).toBe("em-curso");
+  });
+});

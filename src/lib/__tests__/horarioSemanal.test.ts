@@ -1,5 +1,6 @@
 import {
   DIAS,
+  nomeDoDia,
   normalizarHorarios,
   semanaInicial,
   erroDoDia,
@@ -11,6 +12,7 @@ import {
   hojeIso,
   temHorarioDefinido,
   resumoDoDia,
+  semanaDosProximosDias,
   type DiaSemanal,
 } from "@lib/horarioSemanal";
 
@@ -237,5 +239,53 @@ describe("resumoDoDia", () => {
 
   it("hoje nao esta no upcoming: nada (nao inventa pela semana)", () => {
     expect(resumoDoDia(loja([dia("2026-09-20", "SUNDAY")]), "2026-09-19")).toBeNull();
+  });
+});
+
+// agenda-do-profissional (05/10): sem agenda, a semana abre com o horario
+// efetivo da loja, tirado dos proximos dias.
+describe("semanaDosProximosDias", () => {
+  const dia = (date: string, day: any, extra: object = {}) => ({
+    date, day, exception: false, closed: false, opens: "09:00", closes: "18:00", ...extra,
+  });
+  const upcoming = [
+    dia("2026-10-05", "MONDAY"),
+    dia("2026-10-06", "TUESDAY", { exception: true, closed: true, opens: null, closes: null }),
+    dia("2026-10-07", "WEDNESDAY"),
+    dia("2026-10-08", "THURSDAY"),
+    dia("2026-10-09", "FRIDAY"),
+    dia("2026-10-10", "SATURDAY", { closes: "12:00" }),
+    dia("2026-10-11", "SUNDAY", { closed: true, opens: null, closes: null }),
+    dia("2026-10-13", "TUESDAY"),
+  ];
+
+  it("um dia de cada, na ordem da semana, pulando a data especial", () => {
+    const s = semanaDosProximosDias(upcoming as any)!;
+    expect(s.map((d) => d.day)).toEqual(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]);
+    expect(s[1]).toEqual({ day: "TUESDAY", closed: false, opens: "09:00", closes: "18:00" });
+    expect(s[5].closes).toBe("12:00");
+    expect(s[6].closed).toBe(true);
+  });
+
+  it("faltando um dia: null", () => {
+    expect(semanaDosProximosDias(upcoming.slice(0, 3) as any)).toBeNull();
+  });
+});
+
+// cobertura-98 (Andre, 08/10): os cantos — dia desconhecido, horario curto e
+// opens/closes ausentes.
+describe("cantos", () => {
+  it("nomeDoDia de um dia desconhecido devolve o proprio codigo", () => {
+    expect(nomeDoDia("FERIADO" as any)).toBe("FERIADO");
+  });
+
+  it("horario curto ou nao-string vira null", () => {
+    const h = normalizarHorarios({ weekly: [{ day: "MONDAY", closed: false, opens: "8:0", closes: 900 }] });
+    expect(h.weekly[0]).toMatchObject({ opens: null, closes: null });
+  });
+
+  it("erroDoDia com abertura ou fechamento ausentes", () => {
+    expect(erroDoDia({ closed: false, opens: null, closes: "18:00" } as any)).toMatch(/abertura/);
+    expect(erroDoDia({ closed: false, opens: "08:00", closes: null } as any)).toMatch(/fechamento/);
   });
 });

@@ -26,7 +26,8 @@ type Props = {
 export function SolicitacoesCard({ resumo, onPress }: Props) {
   // 5 minutos e o TTL do backend. Abaixo de 2, o pedido morre antes de o
   // profissional terminar o que esta fazendo — entao o relogio pisca.
-  const urgente = resumo.expiraEm <= 2;
+  // Sem prazo (so pedidos de outro dia, DEC-27): nada expira, nada pisca.
+  const urgente = resumo.expiraEm !== null && resumo.expiraEm <= 2;
 
   return (
     <Pressable
@@ -46,9 +47,11 @@ export function SolicitacoesCard({ resumo, onPress }: Props) {
       <View className="flex-row items-center justify-between mt-1">
         {/* O relogio e do MAIS urgente: e ele que decide se da tempo. */}
         <Text testID="solicitacoes-expira" className="font-mono text-xs text-vupth-forest">
-          {resumo.expiraEm <= 0
-            ? "expira agora"
-            : `expira em ${resumo.expiraEm} min`}
+          {resumo.expiraEm === null
+            ? "sem prazo"
+            : resumo.expiraEm <= 0
+              ? "expira agora"
+              : `expira em ${resumo.expiraEm} min`}
         </Text>
         <View className="flex-row items-center gap-1">
           <Text className="font-heading text-f13 text-vupth-forest">Ver solicitações</Text>

@@ -16,7 +16,13 @@ appId: ${APP_ID}
 - tapOn:
     text: "(Foto|Photo|Imagem|Image) .+"
     index: 0
-# Recorte (allowsEditing): confirma, se a tela aparecer
+# Recorte (allowsEditing): confirma, se a tela aparecer. Espera ela abrir antes
+# de decidir — o "when" sozinho olhava cedo demais e o recorte ficava aberto
+# (log 06/10, 07.44).
+- extendedWaitUntil:
+    visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"
+    timeout: 10000
+    optional: true
 - runFlow:
     when:
       visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"

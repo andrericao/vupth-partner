@@ -1,6 +1,15 @@
 import MockAdapter from "axios-mock-adapter";
 import { api } from "@lib/api";
-import { buscarHorarios, salvarSemana, salvarData, removerData } from "@lib/horariosApi";
+import {
+  buscarHorarios,
+  salvarSemana,
+  salvarData,
+  removerData,
+  buscarAgenda,
+  salvarSemanaDaAgenda,
+  salvarDataDaAgenda,
+  removerDataDaAgenda,
+} from "@lib/horariosApi";
 import { DIAS } from "@lib/horarioSemanal";
 
 jest.mock("expo-secure-store", () => ({
@@ -58,5 +67,35 @@ describe("horariosApi", () => {
     mock.onDelete("/establishment/e1/hours/dates/2026-09-21").reply(204);
     await removerData("e1", "2026-09-21");
     expect(mock.history.delete).toHaveLength(1);
+  });
+});
+
+// agenda-do-profissional (05/10): o mesmo modelo, por profissional. Le pelo id
+// (publico), escreve no /me — o dono nao edita a dos outros.
+describe("agenda do profissional", () => {
+  afterEach(() => mock.reset());
+
+  it("GET /professional/{id}/hours le e normaliza; 404 = sem a rota", async () => {
+    mock.onGet("/professional/p1/hours").reply(200, { ...CORPO, configured: false });
+    expect((await buscarAgenda("p1"))?.configured).toBe(false);
+    mock.onGet("/professional/p2/hours").reply(404);
+    await expect(buscarAgenda("p2")).resolves.toBeNull();
+    mock.onGet("/professional/p3/hours").reply(500);
+    await expect(buscarAgenda("p3")).rejects.toBeTruthy();
+  });
+
+  it("PUT da semana, PUT e DELETE de uma data no /professional/me", async () => {
+    mock.onPut("/professional/me/hours/weekly").reply(200, CORPO);
+    mock.onPut("/professional/me/hours/dates/2026-10-12").reply(200, CORPO);
+    mock.onDelete("/professional/me/hours/dates/2026-10-12").reply(204);
+
+    await salvarSemanaDaAgenda(CORPO.weekly.map((d) => ({ ...d, day: d.day as any })));
+    expect(JSON.parse(mock.history.put[0].data).days).toHaveLength(7);
+
+    await salvarDataDaAgenda("2026-10-12", { closed: true });
+    expect(JSON.parse(mock.history.put[1].data)).toEqual({ closed: true });
+
+    await removerDataDaAgenda("2026-10-12");
+    expect(mock.history.delete[0].url).toBe("/professional/me/hours/dates/2026-10-12");
   });
 });

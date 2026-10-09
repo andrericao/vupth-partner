@@ -1,13 +1,16 @@
 #!/bin/bash
 # Prepara a bateria do Maestro (roteiro: .maestro/bateria_completa.yaml).
 #
-# Uso:  bash .maestro/setup.sh             # prepara e roda a bateria
+# Uso:  bash .maestro/setup.sh             # pula as etapas ja aprovadas neste commit
+#       bash .maestro/setup.sh --completa   # roda todas
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
 #
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
 # as etapas avulsas, uma a uma, sem parar na primeira falha (relatorio.txt).
-# Os logs e prints de cada rodada caem em .maestro/logs/<data>
-# (no .gitignore), para a equipe ler o erro sem o Andre colar. Rodada verde
+# Os logs e prints de cada rodada caem em .maestro/logs/<data> — versionada
+# (DEC-29): ao terminar, a bateria commita so a pasta .maestro/logs/ e da push na
+# branch da pasta (a dev, DEC-30),
+# para a equipe ler o erro de qualquer lugar (PC ou nuvem). Rodada verde
 # apaga todos; rodada vermelha fica sozinha (as falhas antigas saem).
 #
 # Precisa de: celular com "Depuracao USB" ligada, conectado no cabo, com o APK
@@ -18,6 +21,14 @@ export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
 API="https://vupth-backend-ia.onrender.com"
 
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
+SO_PREPARAR=0
+COMPLETA=0
+for ARG in "$@"; do
+  case "$ARG" in
+    --so-preparar) SO_PREPARAR=1 ;;
+    --completa) COMPLETA=1 ;;
+  esac
+done
 
 # 0. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10; DEC-17):
 #    duas sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
@@ -68,7 +79,19 @@ FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
 adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
 adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
 adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
-echo "Imagem de teste na galeria: OK ($FOTO)"
+# Sem o indice, o seletor mostra primeiro uma foto PESSOAL do aparelho e a bateria
+# a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
+NOME_FOTO=$(basename "$FOTO")
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO" && break
+  sleep 1
+done
+if adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO"; then
+  echo "Imagem de teste na galeria: OK ($FOTO)"
+else
+  echo "⚠️  Imagem de teste NAO entrou na galeria ($FOTO): as etapas 07 e 08 escolheriam outra foto. Parando." >&2
+  exit 1
+fi
 
 # 5. Acordar o staging (Render dorme; o primeiro pedido leva ~50 s)
 echo -n "Acordando o staging"
@@ -99,7 +122,7 @@ echo "Commit esperado no app (OTA da dev): $COMMIT"
 
 CMD=(maestro test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
 
-if [ "$1" = "--so-preparar" ]; then
+if [ "$SO_PREPARAR" = "1" ]; then
   echo "Tudo pronto. Rode:"
   echo ""
   echo "  ${CMD[*]} .maestro/bateria_completa.yaml      # tudo de uma vez (para na 1a falha)"
@@ -211,6 +234,37 @@ celular_ok() {
   timeout 60 adb -s "$SERIAL" wait-for-device 2>/dev/null
 }
 
+# Prints para o Andre (print-para-o-andre, 05/10; o mesmo formato do Client):
+# a etapa chama apoio/para_o_andre.yaml (NOME, O_QUE). Aqui os prints vao para
+# para-o-andre/ e as linhas "PARA-O-ANDRE: NOME — O_QUE" da saida da etapa para
+# para-o-andre/para-o-andre.txt. O Maestro grava o print na pasta da etapa ou
+# na pasta de onde rodou — procura nas duas.
+PARA_O_ANDRE="$RODADA/para-o-andre"
+juntar_para_o_andre() { # $1 = nome da etapa
+  local achados
+  achados=$(find "$RODADA/$1" "$PWD" -maxdepth 2 -name 'para-o-andre_*.png' 2>/dev/null | sort -u)
+  grep -q 'PARA-O-ANDRE:' "$RODADA/$1.txt" 2>/dev/null || [ -n "$achados" ] || return 0
+  mkdir -p "$PARA_O_ANDRE"
+  grep -oP 'PARA-O-ANDRE: \K.*' "$RODADA/$1.txt" >> "$PARA_O_ANDRE/para-o-andre.txt" 2>/dev/null
+  [ -n "$achados" ] && echo "$achados" | while IFS= read -r f; do [ -f "$f" ] && mv "$f" "$PARA_O_ANDRE/"; done
+  return 0
+}
+
+# bateria-pula-aprovados (Andre, 05/10; mesmo formato do Client): a etapa verde
+# grava "NN <commit>" em aprovados.txt (no .gitignore); a proxima rodada no
+# MESMO commit a pula. O commit e o da origin/dev (o 1o da lista COMMIT): um
+# push novo, mesmo so de .maestro, roda tudo de novo. --completa roda tudo e
+# recomeca as marcas.
+APROVADOS="$RAIZ/.maestro/aprovados.txt"
+MARCA="${COMMIT%%,*}"
+if [ "$COMPLETA" = "1" ]; then
+  rm -f "$APROVADOS"
+  echo "Completa: todas as etapas rodam."
+fi
+touch "$APROVADOS"
+aprovada() { grep -qxF "$1 $MARCA" "$APROVADOS"; }
+aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $MARCA" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
+
 rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   local saida="$RODADA/$1.txt"
   if ! celular_ok; then
@@ -221,7 +275,9 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   papel_do_andre "$1"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
-  if [ "${PIPESTATUS[0]}" = "0" ]; then
+  local rc="${PIPESTATUS[0]}"
+  juntar_para_o_andre "$1"
+  if [ "$rc" = "0" ]; then
     echo "✅ $1" >> "$RELATORIO"
     return 0
   fi
@@ -235,12 +291,17 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
 }
 
 RESULTADO=0
-if ! rodar 00_versao "$RAIZ/.maestro/avulsas/00_confere_versao.yaml"; then
+if ! rodar 00_atualizacao "$RAIZ/.maestro/avulsas/00_atualizacao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
   for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
-    rodar "etapa_$(basename "$ARQ" .yaml)" "$ARQ" || RESULTADO=1
+    NN=$(basename "$ARQ" .yaml)
+    if aprovada "$NN"; then
+      echo "⏭  etapa_$NN (aprovada no $MARCA — --completa roda de novo)" >> "$RELATORIO"
+      continue
+    fi
+    if rodar "etapa_$NN" "$ARQ"; then aprovar "$NN"; else RESULTADO=1; fi
   done
 fi
 kill "$VIGIA" 2>/dev/null
@@ -256,9 +317,21 @@ adb logcat -d -b crash > "$RODADA/crash.txt" 2>/dev/null
 bash "$RAIZ/.maestro/restaurar.sh"
 
 # 8. Erro sanado, log apagado: verde limpa tudo; vermelho fica so a rodada atual
+if [ -d "$PARA_O_ANDRE" ]; then
+  echo ""
+  echo "👀 Para o Andre olhar: .maestro/logs/$(basename "$RODADA")/para-o-andre/ (o que olhar em para-o-andre.txt)"
+  cat "$PARA_O_ANDRE/para-o-andre.txt" 2>/dev/null
+fi
 if [ "$RESULTADO" = "0" ]; then
-  rm -rf "$LOGS"
-  echo "Bateria VERDE — logs apagados."
+  # Verde apaga os logs, menos os prints que esperam o olho do Andre.
+  find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
+  find "$RODADA" -mindepth 1 -maxdepth 1 ! -name para-o-andre -exec rm -rf {} +
+  if [ -d "$PARA_O_ANDRE" ]; then
+    echo "Bateria VERDE — logs apagados; ficam os prints para o Andre."
+  else
+    rm -rf "$LOGS"
+    echo "Bateria VERDE — logs apagados."
+  fi
 else
   find "$LOGS" -mindepth 1 -maxdepth 1 -type d ! -name "$(basename "$RODADA")" -exec rm -rf {} +
   if grep -q "device '.*' not found" "$RODADA"/*.txt; then
@@ -268,5 +341,22 @@ else
     head -20 "$RODADA/adb.txt" 2>/dev/null || echo "(o vigia nao pegou a queda)"
   fi
   echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (relatorio.txt, a saida de cada etapa, prints e crash.txt se o app travou)."
+fi
+# 9. Logs no GitHub (DEC-28/29; DEC-30: a cloud saiu, sobe na branch da pasta).
+#    Commit so de .maestro/logs/ (o pathspec deixa de fora o que mais estiver
+#    mudado). O push so sai se o que sobe for so os logs — codigo sem push
+#    espera o push do Andre. Sem --no-verify: o pre-push roda como sempre.
+BRANCH=$(git -C "$RAIZ" branch --show-current)
+git -C "$RAIZ" add -A .maestro/logs/
+if [ -n "$BRANCH" ] && ! git -C "$RAIZ" diff --cached --quiet -- .maestro/logs/; then
+  git -C "$RAIZ" commit -q -m "chore(logs): bateria Maestro $(basename "$RODADA") — $([ "$RESULTADO" = "0" ] && echo verde || echo FALHA)" -- .maestro/logs/
+  git -C "$RAIZ" pull -q --rebase --autostash origin "$BRANCH" 2>/dev/null
+  if git -C "$RAIZ" diff --name-only "origin/$BRANCH"..HEAD | grep -qv '^.maestro/logs/'; then
+    echo "📝 Logs commitados; sobem no proximo push (ha codigo sem push na $BRANCH)."
+  elif git -C "$RAIZ" push -q origin "HEAD:$BRANCH"; then
+    echo "📤 Logs no GitHub (origin/$BRANCH)."
+  else
+    echo "⚠️  Push dos logs falhou — sobem no proximo push."
+  fi
 fi
 exit "$RESULTADO"

@@ -85,6 +85,29 @@ describe("notificationRoute", () => {
       "/(professional)/queue"
     );
   });
+  // aviso-de-corte-sem-ok (Andre, 08/10): o toque no pedido de corte abria o app
+  // sem levar a lugar nenhum — agora vai para a lista de pedidos.
+  it("roteia o pedido de corte para Solicitacoes de corte", () => {
+    expect(notificationRoute({ type: "CUT_REQUESTED" })).toBe(
+      "/(professional)/cut-requests"
+    );
+  });
+  // desativar-conta (respostas ao S41 e S42, Backend 01c785e).
+  it("posse: o convite leva ao Vinculo; recusado volta a Passar a posse; aceito deixa o inicio decidir", () => {
+    expect(notificationRoute({ type: "OWNERSHIP_TRANSFER_REQUESTED" })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+    expect(notificationRoute({ type: "OWNERSHIP_TRANSFER_REFUSED" })).toBe("/(owner)/passar-posse");
+    expect(notificationRoute({ type: "OWNERSHIP_TRANSFER_ACCEPTED" })).toBe("/");
+  });
+  it("loja desativada ou reativada leva ao Vinculo", () => {
+    expect(notificationRoute({ type: "ESTABLISHMENT_DEACTIVATED" })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+    expect(notificationRoute({ type: "ESTABLISHMENT_REACTIVATED" })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+  });
   it("retorna null para tipo desconhecido ou ausente", () => {
     expect(notificationRoute({ type: "FOO" })).toBeNull();
     expect(notificationRoute({})).toBeNull();
@@ -306,8 +329,10 @@ describe("acquireExpoPushToken — o relato para o painel", () => {
 // notificacao-de-ciencia (Andre, 02/10): a que so informa ganha um jeito de
 // fechar (OK); a de decisao segue com a tela dela.
 describe("notificacao de ciencia", () => {
-  it("decisao: pedido de corte e o 'quer fechar?' — o resto e ciencia", () => {
-    expect(ehDeDecisao("CUT_REQUESTED")).toBe(true);
+  // aviso-de-corte-sem-ok (Andre, 08/10): o pedido de corte ganha o OK, como o
+  // "E quase a sua vez!" do Client; decidir e na tela de pedidos (o toque leva).
+  it("decisao: so o 'quer fechar?' — o pedido de corte e o resto ganham OK", () => {
+    expect(ehDeDecisao("CUT_REQUESTED")).toBe(false);
     expect(ehDeDecisao("CLOSING_PROMPT")).toBe(true);
     expect(ehDeDecisao("ATTENDANCE_CANCELLED")).toBe(false);
     expect(ehDeDecisao("CUT_EXPIRED")).toBe(false);

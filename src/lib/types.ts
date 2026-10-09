@@ -51,7 +51,8 @@ export type CutRequestResponse = {
    */
   client_name?: string | null;
   service_item_ids: string[];
-  expires_at: string;
+  /** null = pedido para outro dia, sem o prazo de 5 min (DEC-27, Backend d8039b5). */
+  expires_at: string | null;
   created_at: string;
   resulting_attendance_id: string | null;
   /** Quando o cliente quer (S26, 36c4359); null = assim que abrir. So informa. */

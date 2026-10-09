@@ -17,8 +17,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@sentry/react-native": "~7.2.0",
     "@stomp/stompjs": "^7.3.0",
-    "@tanstack/react-query": "^5.104.0",
+    "@tanstack/react-query": "^5.104.1",
     "axios": "^1.17.1",
     "expo": "~54.0.37",
     "expo-clipboard": "~8.0.8",
@@ -37,7 +38,7 @@
     "expo-secure-store": "~15.0.8",
     "expo-status-bar": "~3.0.9",
     "expo-updates": "~29.0.20",
-    "lucide-react-native": "^1.49.0",
+    "lucide-react-native": "^1.52.0",
     "nativewind": "^4.2.7",
     "react": "19.1.0",
     "react-dom": "^19.1.0",
@@ -97,7 +98,7 @@
       "src/components/FotoRemota.tsx",
       "src/components/FotoEditavel.tsx",
       "src/components/Skeleton.tsx",
-    "src/components/ExpedienteCard.tsx",
+      "src/components/ExpedienteCard.tsx",
       "src/components/CommitDoCodigo.tsx",
       "src/components/AvisoLojaSemPonto.tsx",
       "src/components/ExporPosicao.tsx",
@@ -120,9 +121,9 @@
     ],
     "coverageThreshold": {
       "global": {
-        "statements": 98,
-        "branches": 91,
-        "functions": 98,
+        "statements": 99,
+        "branches": 98,
+        "functions": 99,
         "lines": 99
       }
     },

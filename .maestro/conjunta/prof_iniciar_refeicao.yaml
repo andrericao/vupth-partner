@@ -1,0 +1,20 @@
+# Inicia a refeicao pela pergunta da Fila (bateria-conjunta, Andre 05/10: o
+# Client confere que o profissional esta no almoco e o tempo da fila). A
+# refeicao tem de estar na janela: cadastre antes com prof_refeicao.yaml e
+# INICIO = agora. env: NOME (o da refeicao)
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-fila"
+    label: "PJ11.01 · toca em aba-fila"
+- extendedWaitUntil:
+    visible: "Iniciar agora"
+    timeout: 60000
+    label: "PJ11.02 · espera a pergunta Hora do ${NOME}"
+- tapOn:
+    text: "Iniciar agora"
+    label: "PJ11.03 · toca em Iniciar agora"
+- extendedWaitUntil:
+    notVisible: "Iniciar agora"
+    timeout: 20000
+    label: "PJ11.04 · a refeicao comecou"

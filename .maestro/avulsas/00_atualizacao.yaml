@@ -1,0 +1,49 @@
+# Antes das etapas: a fatia de atualizacao (fatia-de-atualizacao, Andre 05/10;
+# mesmo nome e lugar do Client). Entra, toca em "Verificar atualizacao" e
+# confere o commit (bateria-confere-versao). Se nao bater, o setup.sh nao roda
+# as etapas — testar a versao errada nao serve.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+# ⚠️ TAG e COMMIT NAO entram no env: ele e aplicado DEPOIS do -e da linha de
+# comando e o apaga (Client, 04/10). O setup.sh os passa por -e; sem eles
+# (maestro test direto), as expressoes testam typeof.
+---
+- evalScript:
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "00.01 · etiqueta da rodada (TAG)"
+- runScript:
+    file: ../scripts/conta_da_versao.js
+    env:
+      TAG: ${output.TAG}
+    label: "00.02 · conta de profissional so da 00, pela API"
+- launchApp:
+    clearState: true
+    label: "00.03 · abre o app do zero"
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 120000
+    label: "00.04 · espera a entrada"
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_VERSAO}
+    label: "00.05 · entra como o profissional da 00"
+- extendedWaitUntil:
+    visible:
+      id: "aba-perfil"
+    timeout: 30000
+    label: "00.06 · espera aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "00.07 · roda fechar_aviso"
+- runFlow:
+    file: ../apoio/atualizar.yaml
+    label: "00.08 · Perfil → Versão do app → Verificar atualização"
+- runScript:
+    file: ../scripts/confere_versao.js
+    env:
+      INSTALADO: ${output.INSTALADO}
+    label: "00.12 · confere a versão: o commit instalado é o esperado?"

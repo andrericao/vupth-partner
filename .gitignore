@@ -40,7 +40,8 @@ yarn-error.*
 # test coverage
 /coverage
 .maestro/.autofill_antes
-.maestro/logs/
 
-# DEC-22: logs de falha dos testes (o hook do vupth-docs le daqui)
+# DEC-22: log de falha do jest, so neste PC (DEC-28 ajustada: fora do repositorio)
 /.logs-teste/
+.maestro/aprovados.txt
+.maestro/aprovados.txt.tmp

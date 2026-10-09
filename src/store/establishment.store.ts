@@ -261,6 +261,7 @@ type EstablishmentState = {
   cancelEmailInvitation: (invitationId: string) => Promise<void>;
   fetchReport: (id: string, dateFrom?: string, dateTo?: string) => Promise<EstablishmentReport>;
   removeProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
+  deleteEstablishment: (id: string, currentPassword: string) => Promise<void>;
   updateGeneralInfos: (id: string, changes: GeneralInfosChanges) => Promise<void>;
   reset: () => void;
 };
@@ -393,6 +394,14 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     if (dateTo) params.dateTo = dateTo;
     const { data } = await api.get(`/establishment/${id}/reports`, { params });
     return data;
+  },
+
+  // desativar-conta (c0f5b17, item 5): so o dono, com a senha. No backend a
+  // loja vira "Loja removida" (o historico fica); aqui ela sai do aparelho.
+  deleteEstablishment: async (id, currentPassword) => {
+    await api.delete(`/establishment/${id}`, { data: { current_password: currentPassword } });
+    SecureStore.deleteItemAsync(STORAGE_KEY);
+    set({ establishment: null, isLoading: false, error: null });
   },
 
   removeProfessional: async (establishmentId, professionalId) => {

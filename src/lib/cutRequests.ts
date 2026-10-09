@@ -5,7 +5,10 @@ import type { CutRequestResponse } from "@lib/types";
 // a orientacao deles p/ o partner e expirar a UI LOCALMENTE pelo `expires_at`
 // ja recebido — por isso o filtro aqui e por status E validade.
 
-/** Pedidos que ainda merecem decisao: PENDING e dentro da validade. */
+/**
+ * Pedidos que ainda merecem decisao: PENDING e dentro da validade. O de outro
+ * dia vem com `expires_at` nulo (DEC-27, Backend d8039b5): nao expira.
+ */
 export function activeCutRequests(
   list: CutRequestResponse[] | null | undefined,
   nowMs: number
@@ -13,13 +16,18 @@ export function activeCutRequests(
   if (!list) return [];
   return list.filter((r) => {
     if (r.status !== "PENDING") return false;
+    if (r.expires_at === null) return true;
     const expires = Date.parse(r.expires_at);
     return Number.isFinite(expires) && expires > nowMs;
   });
 }
 
-/** Minutos restantes ate expirar (>= 0; data invalida conta como 0). */
-export function minutesToExpire(expiresAt: string, nowMs: number): number {
+/**
+ * Minutos restantes ate expirar (>= 0; data invalida conta como 0). Sem prazo
+ * (pedido de outro dia) => null: nao e "expira agora".
+ */
+export function minutesToExpire(expiresAt: string | null, nowMs: number): number | null {
+  if (expiresAt === null) return null;
   const expires = Date.parse(expiresAt);
   if (!Number.isFinite(expires)) return 0;
   return Math.max(0, Math.ceil((expires - nowMs) / 60000));
@@ -107,8 +115,8 @@ export function isCutRequestEvent(type: string | null | undefined): boolean {
 export type ResumoSolicitacoes = {
   titulo: string;
   quem: string;
-  /** Minutos ate o MAIS urgente expirar. */
-  expiraEm: number;
+  /** Minutos ate o MAIS urgente expirar; null = so pedidos sem prazo (outro dia). */
+  expiraEm: number | null;
 };
 
 export function resumoDeSolicitacoes(
@@ -119,12 +127,15 @@ export function resumoDeSolicitacoes(
   if (ativos.length === 0) return null;
 
   const primeiro = cutRequestClientName(ativos[0]);
+  const prazos = ativos
+    .map((r) => minutesToExpire(r.expires_at, nowMs))
+    .filter((m): m is number => m !== null);
   const outros = ativos.length - 1;
 
   return {
     titulo: `${ativos.length} ${ativos.length === 1 ? "solicitação" : "solicitações"} de encaixe`,
     quem: outros > 0 ? `${primeiro} e mais ${outros}` : primeiro,
-    expiraEm: Math.min(...ativos.map((r) => minutesToExpire(r.expires_at, nowMs))),
+    expiraEm: prazos.length > 0 ? Math.min(...prazos) : null,
   };
 }
 
@@ -180,4 +191,18 @@ export function quandoOClienteQuer(
   if (dias === 0) return `Quer hoje às ${hora}`;
   if (dias === 1) return `Quer amanhã às ${hora}`;
   return `Quer ${DIAS[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)} às ${hora}`;
+}
+
+/**
+ * texto-do-aceite (Backend aceite-vira-agendamento, ba38b81): o pedido para
+ * outro dia (expires_at nulo, DEC-27) vira agendamento naquele dia ao ser
+ * aceito; o de hoje entra no fim da fila.
+ */
+export function ehDeOutroDia(req: { expires_at: string | null }): boolean {
+  return req.expires_at === null;
+}
+
+/** O que acontece ao aceitar, na linha do card. */
+export function oQueAconteceAoAceitar(req: { expires_at: string | null }): string {
+  return ehDeOutroDia(req) ? "fica agendado para esse dia" : "entra no fim da sua fila";
 }

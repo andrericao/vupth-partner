@@ -22,10 +22,23 @@ import { instalarAlertWeb } from "../web-shims/alert";
 import { pedirParaNaoTraduzir } from "@lib/naoTraduzir";
 import { instalarDialogoNativo } from "@lib/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
+import { ReativarContaDoApp } from "@components/ReativarContaDoApp";
 import { useFonteStore } from "@store/fonte.store";
 import { varsDaFonte } from "@lib/fonte";
+import Constants from "expo-constants";
+import { iniciarSentry } from "@lib/sentry";
+import { commitDoCodigo } from "@lib/commitDoCodigo";
+import { API_ENV } from "@lib/api";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
+
+// sentry (Andre, 09/10): erros e crash, so com o DSN do ambiente; sem ele, inerte.
+iniciarSentry({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  ambiente: API_ENV,
+  commit: commitDoCodigo(Constants.expoConfig),
+  emTeste: !!process.env.JEST_WORKER_ID,
+});
 
 // [marca-vupth] O fundo das telas vinha do DEFAULT do React Navigation —
 // `rgb(242,242,242)` (#F2F2F2), que nao e cor nenhuma da marca. Medido no
@@ -131,6 +144,9 @@ export default function RootLayout() {
                 nao pode ser coberto por ela. Fica fora do portao das fontes de
                 proposito — erro no boot precisa aparecer mesmo antes delas. */}
             <DialogoVupth />
+            {/* desativar-conta (c0f5b17): "Reativar / So consultar" no login de
+                conta desativada e no 403 ACCOUNT_DEACTIVATED de qualquer tela. */}
+            <ReativarContaDoApp />
           </View>
         </ThemeProvider>
       </QueryClientProvider>

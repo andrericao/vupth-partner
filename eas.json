@@ -12,7 +12,8 @@
       },
       "channel": "development",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "staging"
+        "EXPO_PUBLIC_API_ENV": "staging",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "preview": {
@@ -22,7 +23,8 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "staging"
+        "EXPO_PUBLIC_API_ENV": "staging",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "production": {
@@ -32,7 +34,8 @@
       },
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "prod"
+        "EXPO_PUBLIC_API_ENV": "prod",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "prod-apk": {
@@ -44,7 +47,8 @@
       },
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "prod"
+        "EXPO_PUBLIC_API_ENV": "prod",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     }
   },

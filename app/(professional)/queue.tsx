@@ -14,7 +14,7 @@ import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useIntervalStore, mealName, type Interval } from "@store/interval.store";
 import type { AttendanceInQueue } from "@lib/types";
-import { getApiErrorMessage } from "@lib/api";
+import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
@@ -42,6 +42,8 @@ import { finalizarAtendimento } from "@lib/finalizar";
 import { fechaFilaAoSair, viraTrabalhandoAoAbrirFila } from "@lib/coerenciaFila";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
+import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
+import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import * as SecureStore from "expo-secure-store";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
@@ -801,6 +803,19 @@ export default function ProfessionalQueueScreen() {
                 >
                   <RotateCw size={20} color="#163300" />
                 </Pressable>
+              )}
+              {/* compartilhar-no-topo (Andre, 05/10): o link do profissional,
+                  com o texto do Client. */}
+              {professional && (
+                <CompartilharNoTopo
+                  link={linkDoProfissional(API_ENV, establishmentId, professional.id)}
+                  titulo={professional.establishment_name ?? "Minha fila"}
+                  mensagem={mensagemDeDivulgacao(
+                    professional.establishment_name,
+                    professional.nickname || professional.name
+                  )}
+                  rotulo="Compartilhar meu perfil"
+                />
               )}
               {/* Nav v2 (2026-07-23): a reticencia NAVEGA p/ a tela de opcoes
                   (nada de modal — "mais amigavel a tela inteira"). Badge =

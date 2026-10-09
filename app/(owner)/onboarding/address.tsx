@@ -18,7 +18,8 @@ import { maskCEP, unmask } from "@lib/masks";
 import { lookupCep } from "@lib/cep";
 import { avisar, confirmar } from "@lib/confirmar";
 import { pegarLocalizacao, preencherVazios } from "@lib/localizacao";
-import { mensagemDoEnderecoSalvo, perguntarPosicaoAoAbrir } from "@lib/pontoNoMapa";
+import { mensagemDoEnderecoSalvo, perguntarPosicaoAoAbrir, mensagemDaPerguntaDoPonto } from "@lib/pontoNoMapa";
+import { pontoJaMarcado, marcarPonto } from "@lib/pontoPeloGps";
 import { MapPin } from "lucide-react-native";
 
 export default function AddressScreen() {
@@ -69,16 +70,18 @@ export default function AddressScreen() {
     }
   };
 
-  // gps-da-loja (DEC-23): a loja sem ponto no mapa (UNRESOLVED) nao aparece
-  // para quem busca por perto. Ao abrir, pergunta uma vez se usa a posicao do
-  // aparelho e manda so a coordenada no PATCH (BAK f76fc25) — o resto do
-  // endereco fica como esta. Com o ponto configurado, nao pergunta.
-  const oferecerPosicaoAtual = async (establishmentId: string, idDoEndereco: string) => {
+  // gps-da-loja (DEC-23) e ponto-da-loja-pelo-gps (Andre, 05/10): ao abrir,
+  // pergunta se usa a posicao do aparelho para o ponto da loja e manda so a
+  // coordenada no PATCH (BAK f76fc25) — o resto do endereco fica como esta.
+  // Sempre, mesmo com o endereco achado: a lat/long e mais precisa e e o que o
+  // Client abre no mapa. Marcado pelo GPS, nao pergunta de novo.
+  const oferecerPosicaoAtual = async (
+    establishmentId: string,
+    endereco: { locationStatus?: string | null; addressId?: string | null }
+  ) => {
     const usar = await confirmar({
       titulo: "Ponto da loja no mapa",
-      mensagem:
-        "Sua loja não aparece para quem busca por perto: não achamos o endereço no mapa. " +
-        "Se você está na loja, usar a sua posição atual?",
+      mensagem: mensagemDaPerguntaDoPonto(endereco),
       confirmar: "Usar minha posição",
       cancelar: "Agora não",
     });
@@ -86,8 +89,9 @@ export default function AddressScreen() {
     setLocalizando(true);
     try {
       const { coordenada: c } = await pegarLocalizacao();
-      const salvo = await updateAddress(establishmentId, idDoEndereco, c);
+      const salvo = await updateAddress(establishmentId, endereco.addressId!, c);
       setCoordenada(c);
+      await marcarPonto(establishmentId);
       await avisar({ titulo: "Ponto salvo", mensagem: mensagemDoEnderecoSalvo(salvo) });
     } catch (error: any) {
       const msg = error?.response
@@ -106,8 +110,8 @@ export default function AddressScreen() {
   useEffect(() => {
     if (!establishment?.id) return;
     let active = true;
-    fetchEstablishmentById(establishment.id)
-      .then((detail) => {
+    Promise.all([fetchEstablishmentById(establishment.id), pontoJaMarcado(establishment.id)])
+      .then(([detail, jaMarcado]) => {
         const a = detail?.address;
         if (!active || !a) return;
         if (a.street) setStreet(a.street);
@@ -118,7 +122,7 @@ export default function AddressScreen() {
         if (a.state) setState(a.state);
         if (a.zipCode) setZipCode(maskCEP(a.zipCode));
         if (a.addressId) setAddressId(a.addressId);
-        if (perguntarPosicaoAoAbrir(a)) oferecerPosicaoAtual(establishment.id, a.addressId!);
+        if (perguntarPosicaoAoAbrir(a, jaMarcado)) oferecerPosicaoAtual(establishment.id, a);
       })
       .catch(() => {});
     return () => {
@@ -181,6 +185,8 @@ export default function AddressScreen() {
       const salvo = addressId
         ? await updateAddress(establishment.id, addressId, endereco)
         : await addAddress(establishment.id, endereco);
+      // Salvou com o GPS ("Usar minha localização"): o ponto esta marcado.
+      if (coordenada) await marcarPonto(establishment.id);
       // O endereco JA FOI salvo — sem a caixa na web o dono ficava no
       // formulario sem saber, e salvava de novo. A mensagem diz se a loja ja
       // entra na busca por perto (loja-sem-coordenada, S25).

@@ -40,6 +40,44 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Nenhum pedido de encaixe"
     label: "07.08 · confere a lista vazia"
+# aviso-de-corte-sem-ok (11d393f): com o app aberto, o push do pedido vira
+# caixa com OK. pedido-de-corte-outro-dia (817b0c5): o de amanha fica "sem prazo".
+- runScript:
+    file: ../scripts/pedido_de_encaixe.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+      QUEM: Amanha
+      AMANHA: "sim"
+    label: "07.08a · script pedido_de_encaixe para amanha"
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 90000
+    label: "07.08b · o push vira caixa com OK"
+- tapOn:
+    text: "OK"
+    label: "07.08c · toca em OK"
+- extendedWaitUntil:
+    visible: ".*${output.CLIENTE_AMANHA}.*"
+    timeout: 60000
+    label: "07.08d · espera …${output.CLIENTE_AMANHA}…"
+- assertVisible:
+    text: "sem prazo"
+    label: "07.08e · confere sem prazo"
+- assertVisible:
+    text: "Quer amanhã às.*"
+    label: "07.08f · confere Quer amanhã"
+# texto-do-aceite (ba38b81): aceitar o de outro dia o agenda naquele dia.
+- assertVisible:
+    text: ".*fica agendado para esse dia.*"
+    label: "07.08f2 · confere fica agendado para esse dia"
+- tapOn:
+    text: "Recusar"
+    label: "07.08g · recusa o de amanha"
+- extendedWaitUntil:
+    notVisible: ".*${output.CLIENTE_AMANHA}.*"
+    timeout: 20000
+    label: "07.08h · o pedido de amanha saiu"
 - runScript:
     file: ../scripts/pedido_de_encaixe.js
     env:

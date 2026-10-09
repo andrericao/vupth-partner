@@ -116,6 +116,11 @@ if (etapa >= 5) {
   if (prof.work_status !== "WORKING") {
     pedir("PATCH", "/professional/me/status", { status: "WORKING" }, tokenProf);
   }
+  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false
+  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).
+  if (prof.accepting_new === false || prof.acceptingNew === false) {
+    pedir("PATCH", "/professional/me/accepting-new", { value: true }, tokenProf);
+  }
 }
 
 // ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──

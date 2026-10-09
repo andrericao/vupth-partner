@@ -17,7 +17,10 @@ import {
   cutRequestClientName,
   cutRequestTotal,
   quandoOClienteQuer,
+  ehDeOutroDia,
+  oQueAconteceAoAceitar,
 } from "@lib/cutRequests";
+import { avisar } from "@lib/confirmar";
 import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
 import { formatCurrency } from "@utils/summaryCalculations";
@@ -64,14 +67,24 @@ export default function CutRequestsScreen() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const decide = async (id: string, accept: boolean) => {
     setBusyId(id);
+    const pedido = pending.find((r) => r.id === id);
+    // texto-do-aceite: o de outro dia vira agendamento naquele dia — nao entra
+    // na fila de hoje, entao o profissional nao vira Trabalhando por ele.
+    const agendado = accept && !!pedido && ehDeOutroDia(pedido);
     try {
       if (accept) await acceptCutRequest(id);
       else await refuseCutRequest(id);
+      if (agendado) {
+        await avisar({
+          titulo: "Agendado",
+          mensagem: `${quandoOClienteQuer(pedido!.desired_time, nowMs).replace(/^Quer/, "Fica agendado para")}.`,
+        });
+      }
       // Sem Date.now() aqui (react-hooks/purity barra fora do queryFn): o
       // refetch ja reexecuta o queryFn abaixo, que atualiza nowMs sozinho.
       await refetch();
       // Aceitar poe o profissional em Trabalhando e muda a fila (Andre, 25/09).
-      await releDepoisDeDecidir(accept, {
+      await releDepoisDeDecidir(accept && !agendado, {
         releStatus: fetchMe,
         statusAtual: () => useProfessionalStore.getState().professional?.work_status,
         ficarTrabalhando: () => updateMyStatus("WORKING"),
@@ -113,7 +126,7 @@ export default function CutRequestsScreen() {
             ) : (
               pending.map((req) => {
                 const mins = minutesToExpire(req.expires_at, nowMs);
-                const urgent = mins <= 2;
+                const urgent = mins !== null && mins <= 2;
                 const who = cutRequestClientName(req);
                 const services = cutRequestServices(req.service_item_ids, myServices);
                 const total = cutRequestTotal(req.service_item_ids, myServices);
@@ -142,7 +155,7 @@ export default function CutRequestsScreen() {
                         <Text
                           className={`font-mono text-f11 ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
                         >
-                          {mins} min
+                          {mins === null ? "sem prazo" : `${mins} min`}
                         </Text>
                       </View>
                     </View>
@@ -156,7 +169,7 @@ export default function CutRequestsScreen() {
 
                     {time && (
                       <Text className="font-body text-f11 text-vupth-textSecondary">
-                        Pediu às {time} · entra no fim da sua fila
+                        Pediu às {time} · {oQueAconteceAoAceitar(req)}
                       </Text>
                     )}
   

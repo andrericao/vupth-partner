@@ -34,6 +34,15 @@ describe("SolicitacoesCard", () => {
     expect(getByTestId("solicitacoes-expira").props.children).toBe("expira agora");
   });
 
+  // pedido-de-corte-outro-dia: so pedidos sem prazo (outro dia) — nada expira.
+  it("sem prazo, diz 'sem prazo' e nao pisca", () => {
+    const { getByTestId } = render(
+      <SolicitacoesCard resumo={{ ...resumo, expiraEm: null }} onPress={jest.fn()} />
+    );
+
+    expect(getByTestId("solicitacoes-expira").props.children).toBe("sem prazo");
+  });
+
   it("o rotulo de acessibilidade diz o que fazer, nao so o que e", () => {
     const { getByTestId } = render(<SolicitacoesCard resumo={resumo} onPress={jest.fn()} />);
 

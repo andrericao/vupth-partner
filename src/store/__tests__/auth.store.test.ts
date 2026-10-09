@@ -529,3 +529,144 @@ describe("deleteAccount", () => {
     expect(SecureStore.deleteItemAsync).not.toHaveBeenCalledWith("vupth_access_token");
   });
 });
+
+// desativar-conta (contrato do Backend c0f5b17, 08/10).
+describe("desativar e reativar a conta", () => {
+  beforeEach(() => {
+    mock.reset();
+    jest.clearAllMocks();
+    useAuthStore.setState({ contaDesativada: false, avisoDeReativar: null });
+  });
+
+  it("desativar: senha no corpo, push desregistrado ANTES, sessao local encerrada", async () => {
+    const ordem: string[] = [];
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_push_token" ? "expo-push-abc" : null
+    );
+    (unregisterDevice as jest.Mock).mockImplementation(async () => {
+      ordem.push("push");
+    });
+    mock.onPost("/profile/deactivate/me").reply((config) => {
+      ordem.push("deactivate");
+      expect(JSON.parse(config.data)).toEqual({ current_password: "minha-senha" });
+      return [204];
+    });
+    useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+    await useAuthStore.getState().deactivateAccount("minha-senha");
+
+    expect(ordem).toEqual(["push", "deactivate"]);
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("vupth_access_token");
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(mock.history.post.some((r) => r.url === "/auth/logout")).toBe(false);
+  });
+
+  it("desativar com senha errada: propaga o erro e a sessao continua", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    mock.onPost("/profile/deactivate/me").reply(401, { code: "CURRENT_PASSWORD_INVALID" });
+    useAuthStore.setState({ user: { id: "u1" } as any, isAuthenticated: true });
+
+    await expect(useAuthStore.getState().deactivateAccount("errada")).rejects.toBeTruthy();
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+  });
+
+  it("login de conta desativada: entra e abre as boas-vindas (nao reativa sozinho)", async () => {
+    mock.onPost("/auth/login").reply(200, {
+      user: { id: "uuid-1", email: "owner@test.com" },
+      tokens: { access_token: CLIENT_TOKEN, refresh_token: "r" },
+      deactivated: true,
+    });
+
+    await useAuthStore.getState().login("owner@test.com", "s");
+
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    expect(useAuthStore.getState().contaDesativada).toBe(true);
+    expect(useAuthStore.getState().avisoDeReativar).toBe("boas-vindas");
+    expect(mock.history.post.some((r) => r.url === "/profile/reactivate/me")).toBe(false);
+  });
+
+  it("login normal: nada de aviso", async () => {
+    mock.onPost("/auth/login").reply(200, {
+      user: { id: "uuid-1", email: "owner@test.com" },
+      tokens: { access_token: CLIENT_TOKEN, refresh_token: "r" },
+    });
+
+    await useAuthStore.getState().login("owner@test.com", "s");
+
+    expect(useAuthStore.getState().contaDesativada).toBe(false);
+    expect(useAuthStore.getState().avisoDeReativar).toBeNull();
+  });
+
+  it("Reativar: POST /profile/reactivate/me e o aviso fecha", async () => {
+    mock.onPost("/profile/reactivate/me").reply(204);
+    useAuthStore.setState({ contaDesativada: true, avisoDeReativar: "boas-vindas" });
+
+    await useAuthStore.getState().reactivateAccount();
+
+    expect(useAuthStore.getState().contaDesativada).toBe(false);
+    expect(useAuthStore.getState().avisoDeReativar).toBeNull();
+  });
+
+  it("So consultar: o aviso fecha e a conta segue desativada", () => {
+    useAuthStore.setState({ contaDesativada: true, avisoDeReativar: "boas-vindas" });
+
+    useAuthStore.getState().soConsultar();
+
+    expect(useAuthStore.getState().contaDesativada).toBe(true);
+    expect(useAuthStore.getState().avisoDeReativar).toBeNull();
+  });
+
+  it("403 ACCOUNT_DEACTIVATED no meio do uso reabre o aviso, agora como bloqueio", async () => {
+    mock.onPost("/attendances").reply(403, { code: "ACCOUNT_DEACTIVATED" });
+
+    await expect(api.post("/attendances")).rejects.toBeTruthy();
+
+    expect(useAuthStore.getState().contaDesativada).toBe(true);
+    expect(useAuthStore.getState().avisoDeReativar).toBe("bloqueado");
+  });
+});
+
+// cobertura-98 (Andre, 08/10): sem usuario na memoria, as trocas de e-mail,
+// senha e o refresh nao inventam um; token sem sub/email vira "".
+describe("sem usuario na memoria", () => {
+  beforeEach(() => {
+    mock.reset();
+    jest.clearAllMocks();
+    useAuthStore.setState({ user: null });
+  });
+
+  const tokens = { tokens: { access_token: CLIENT_TOKEN, refresh_token: "r" } };
+
+  it("updateEmail e updatePassword deixam o user nulo", async () => {
+    mock.onPatch("/profile/update-email/me").reply(200, tokens);
+    await useAuthStore.getState().updateEmail("novo@test.com");
+    expect(useAuthStore.getState().user).toBeNull();
+
+    mock.onPatch("/profile/update-password/me").reply(200, tokens);
+    await useAuthStore.getState().updatePassword("a", "b");
+    expect(useAuthStore.getState().user).toBeNull();
+  });
+
+  it("updateEmail com usuario e sem e-mail na resposta usa o digitado", async () => {
+    useAuthStore.setState({ user: { id: "u", email: "velho@test.com", roles: [] } });
+    mock.onPatch("/profile/update-email/me").reply(200, tokens);
+    await useAuthStore.getState().updateEmail("novo@test.com");
+    expect(useAuthStore.getState().user?.email).toBe("novo@test.com");
+  });
+
+  it("refreshToken sem usuario deixa o user nulo", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("r-salvo");
+    mock.onPost("/auth/refresh").reply(200, { access_token: CLIENT_TOKEN, refresh_token: "r2" });
+    await useAuthStore.getState().refreshToken();
+    expect(useAuthStore.getState().user).toBeNull();
+  });
+
+  it("token salvo sem sub nem email restaura com strings vazias", async () => {
+    const semNada = makeToken({ roles: "ROLE_CLIENT" });
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_access_token" ? semNada : null
+    );
+    await useAuthStore.getState().loadStoredTokens();
+    expect(useAuthStore.getState().user).toMatchObject({ id: "", email: "" });
+  });
+});

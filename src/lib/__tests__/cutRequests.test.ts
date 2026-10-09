@@ -9,6 +9,8 @@ import {
   isCutRequestEvent,
   resumoDeSolicitacoes,
   quandoOClienteQuer,
+  ehDeOutroDia,
+  oQueAconteceAoAceitar,
 } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
@@ -51,6 +53,12 @@ describe("activeCutRequests", () => {
   it("descarta expires_at inválido (não mantem lixo na tela)", () => {
     expect(activeCutRequests([req({ expires_at: "banana" })], NOW)).toEqual([]);
   });
+
+  // pedido-de-corte-outro-dia (DEC-27, Backend d8039b5): o de outro dia vem com
+  // expires_at nulo — sem os 5 min. Antes ele sumia da lista (data invalida).
+  it("mantem o pedido de outro dia (expires_at nulo = sem prazo)", () => {
+    expect(activeCutRequests([req({ expires_at: null })], NOW)).toHaveLength(1);
+  });
 });
 
 describe("minutesToExpire", () => {
@@ -65,6 +73,10 @@ describe("minutesToExpire", () => {
 
   it("data inválida -> 0", () => {
     expect(minutesToExpire("banana", NOW)).toBe(0);
+  });
+
+  it("sem prazo (pedido de outro dia) -> null, nao 0: nao e 'expira agora'", () => {
+    expect(minutesToExpire(null, NOW)).toBeNull();
   });
 });
 
@@ -225,6 +237,14 @@ describe("resumoDeSolicitacoes", () => {
     expect(r.expiraEm).toBe(1);
   });
 
+  it("o pedido sem prazo nao entra no relogio; so ele, o card fica sem relogio", () => {
+    const outroDia = pedido({ id: "r9", expires_at: null });
+    const comPrazo = pedido({ id: "r1", expires_at: new Date(NOW + 3 * 60000).toISOString() });
+
+    expect(resumoDeSolicitacoes([outroDia, comPrazo], NOW)!.expiraEm).toBe(3);
+    expect(resumoDeSolicitacoes([outroDia], NOW)!.expiraEm).toBeNull();
+  });
+
   it("expirado nao conta — decidir sobre pedido morto e pior que nao ver", () => {
     const expirado = pedido({ expires_at: new Date(NOW - 60000).toISOString() });
     expect(resumoDeSolicitacoes([expirado], NOW)).toBeNull();
@@ -304,5 +324,19 @@ describe("quandoOClienteQuer", () => {
 
   it("data invalida cai no assim que abrir", () => {
     expect(quandoOClienteQuer("nao-e-data", agora)).toBe("Quer assim que abrir");
+  });
+});
+
+// texto-do-aceite (Backend ba38b81): aceitar o pedido de outro dia o agenda
+// naquele dia; o de hoje entra no fim da fila.
+describe("oQueAconteceAoAceitar", () => {
+  it("outro dia (expires_at nulo): fica agendado", () => {
+    expect(ehDeOutroDia({ expires_at: null })).toBe(true);
+    expect(oQueAconteceAoAceitar({ expires_at: null })).toBe("fica agendado para esse dia");
+  });
+
+  it("hoje (com prazo): entra no fim da fila", () => {
+    expect(ehDeOutroDia({ expires_at: "2026-10-09T12:05:00Z" })).toBe(false);
+    expect(oQueAconteceAoAceitar({ expires_at: "2026-10-09T12:05:00Z" })).toBe("entra no fim da sua fila");
   });
 });

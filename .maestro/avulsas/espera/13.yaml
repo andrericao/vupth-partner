@@ -1,0 +1,24 @@
+# Etapa 13 AVULSA (bateria-desativar-conta, 08/10). ⏸️ EM ESPERA: so roda
+# quando o BAK desativar-conta estiver no staging. Para ligar, mover este
+# arquivo para .maestro/avulsas/13.yaml (o setup.sh roda avulsas/[0-9][0-9].yaml).
+# Sozinha: maestro test -e TAG=<hhmmss> .maestro/avulsas/espera/13.yaml
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- evalScript:
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "13.A1 · etiqueta da rodada (TAG)"
+- runScript:
+    file: ../../scripts/conta_para_desativar.js
+    env:
+      TAG: ${output.TAG}
+    label: "13.A2 · contas proprias pela API (dono D com loja, herdeiro vinculado)"
+- runFlow:
+    file: ../../apoio/abrir_com_ota.yaml
+    label: "13.A3 · abre o app do zero, ja com o OTA"
+- runFlow:
+    file: ../../etapas/13_desativar_conta.yaml
+    label: "13.00 · roda 13_desativar_conta"

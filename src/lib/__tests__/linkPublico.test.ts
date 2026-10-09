@@ -1,4 +1,4 @@
-import { baseDoWebCliente, linkDaLoja, linkDoProfissional, compartilharLink } from "@lib/linkPublico";
+import { baseDoWebCliente, linkDaLoja, linkDoProfissional, compartilharLink, mensagemDeDivulgacao } from "@lib/linkPublico";
 
 // Compartilhar o link da loja e do profissional (pedido do Andre, 24/09). O
 // Client publicou as paginas publicas em 26/09 (84983b0c) e mandou o formato:
@@ -98,5 +98,27 @@ describe("compartilharLink — caminhos padrao do navegador", () => {
       throw new Error("x");
     });
     expect(await compartilharLink("https://x/loja/1", texto, { plataforma: "ios", share })).toBe("falhou");
+  });
+});
+
+// compartilhar-no-topo (Andre, 05/10): o mesmo texto do Client
+// (CLI:link-de-divulgacao), o link vai depois da mensagem.
+describe("mensagemDeDivulgacao", () => {
+  it("com profissional: o nome dele e a loja", () => {
+    expect(mensagemDeDivulgacao("Barbearia do Zé", "Carlão")).toBe(
+      "Conheça o Carlão na Barbearia do Zé — veja a fila e os serviços no VUPTH:"
+    );
+  });
+
+  it("sem profissional: so a loja", () => {
+    expect(mensagemDeDivulgacao("Barbearia do Zé")).toBe("Conheça a Barbearia do Zé no VUPTH:");
+    expect(mensagemDeDivulgacao("Barbearia do Zé", "  ")).toBe("Conheça a Barbearia do Zé no VUPTH:");
+  });
+
+  it("sem o nome da loja ainda: um texto que nao fica pela metade", () => {
+    expect(mensagemDeDivulgacao(null, "Carlão")).toBe(
+      "Conheça o Carlão — veja a fila e os serviços no VUPTH:"
+    );
+    expect(mensagemDeDivulgacao(null)).toBe("Veja a fila e os serviços no VUPTH:");
   });
 });

@@ -52,6 +52,10 @@ export const api = axios.create({
 
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
+  // agenda-do-profissional (05/10): a agenda do profissional cabe no horario
+  // da loja.
+  PROFESSIONAL_HOURS_OUTSIDE_ESTABLISHMENT:
+    "Esse horário passa do horário da loja. A sua agenda tem de caber nele.",
   // Acesso (fd9a3af, 03/10). As telas de login/esqueci tratam os dois antes
   // (com "Criar conta" e os segundos do Retry-After); isto e o texto de reserva.
   EMAIL_NOT_FOUND: "Não há conta com este e-mail.",
@@ -78,6 +82,9 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
     "Horário inválido: confira os 7 dias e use datas de hoje em diante.",
   ESTABLISHMENT_HOURS_REQUIRED:
     "Defina o horário de funcionamento do estabelecimento antes de abrir.",
+  // desativar-conta, fatia 1 (Backend 6a5d3ab): a loja do dono desativado.
+  ESTABLISHMENT_UNAVAILABLE:
+    "Esta loja está desativada. Ela volta quando o dono reativar a conta.",
   ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:
     "Não é possível fechar enquanto há clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
   INTERVAL_INVALID_TIME:
@@ -176,10 +183,23 @@ function processQueue(error: unknown, token: string | null) {
   failedQueue = [];
 }
 
+// desativar-conta (c0f5b17): no "So consultar" o que mexe na operacao da 403
+// ACCOUNT_DEACTIVATED. O auth store se registra aqui para reabrir o "Reativar"
+// — o api nao importa o store (o store importa o api).
+let avisarContaDesativada: (() => void) | null = null;
+export function aoContaDesativada(fn: (() => void) | null) {
+  avisarContaDesativada = fn;
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (error.response?.status === 403 && error.response?.data?.code === "ACCOUNT_DEACTIVATED") {
+      avisarContaDesativada?.();
+      return Promise.reject(error);
+    }
 
     // 401 de NEGOCIO, nao de sessao: senha atual incorreta na troca de senha
     // (PATCH /profile/update-password/me). A tela trata como erro de campo —

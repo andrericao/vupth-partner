@@ -1,8 +1,12 @@
 // Um SEGUNDO profissional pede vinculo a loja do dono pela API do staging — o
 // dono recusa na bateria (fluxo critico, DEC-7) e depois o convida.
 //
-// Entradas (env do runScript): API, EMAIL_DONO, SENHA, TAG
-// Saida: output.PROF_RECUSADO (o nome, como aparece no card)
+// Tambem provoca o push "Pedido de vinculo" da 12 (push-na-bateria), com outro
+// profissional (QUEM).
+//
+// Entradas (env do runScript): API, EMAIL_DONO, SENHA, TAG e, opcional, QUEM
+// ("Recusado" se ausente — uma conta por QUEM)
+// Saida: output.PROF_<QUEM> (o nome, como aparece no card; ex.: PROF_RECUSADO)
 
 function pedir(metodo, url, corpo, token) {
   var headers = { "Content-Type": "application/json" };
@@ -19,12 +23,13 @@ function entrar(email) {
 var lojas = pedir("GET", "/establishment/mine", null, entrar(EMAIL_DONO));
 if (!lojas || lojas.length === 0) throw new Error("o dono nao tem loja");
 
-var nome = "Recusado" + TAG;
-var email = "prof_m" + TAG + "_recusado@teste.com";
+var quem = typeof QUEM === "undefined" || !QUEM ? "Recusado" : String(QUEM);
+var nome = quem + TAG;
+var email = "prof_m" + TAG + "_" + quem.toLowerCase() + "@teste.com";
 pedir("POST", "/auth/register", { email: email, password: SENHA });
 pedir("POST", "/professional/register", { name: nome, specialty: "NAIL_TECH" }, entrar(email));
 // Login de novo: o token tem de carregar o papel PROFESSIONAL recem-criado.
 // O PEDIDO (PENDING), como o app faz em establishment-detail — o
 // /professional/affiliate vincula direto e nao deixa nada para o dono recusar.
 pedir("POST", "/professional/me/affiliations", { establishmentId: lojas[0].id }, entrar(email));
-output.PROF_RECUSADO = nome;
+output["PROF_" + quem.toUpperCase()] = nome;

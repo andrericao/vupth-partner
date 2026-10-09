@@ -19,13 +19,15 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
-import { getApiErrorMessage } from "@lib/api";
+import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
 import { AvisoLojaSemPonto } from "@components/AvisoLojaSemPonto";
 import type { ProfessionalWithQueue } from "@lib/types";
 import { confirmar } from "@lib/confirmar";
 import { avisoDeAberturaSemProfissional } from "@lib/abertura";
+import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
+import { linkDaLoja, mensagemDeDivulgacao } from "@lib/linkPublico";
 
 export default function OwnerDashboardScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
@@ -188,8 +190,9 @@ export default function OwnerDashboardScreen() {
             title={establishment.name}
             subtitle={serviceTypeLabel(establishment.service_type)}
             action={
-              /* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
-                 cinza da borda sobre fundo claro a pilula sumia. */
+              <View className="flex-row items-center gap-2">
+              {/* Pausado fica AMBAR: e um estado que pede acao ("reabrir"), e no
+                 cinza da borda sobre fundo claro a pilula sumia. */}
               <View
                 className={`rounded-full px-3 py-1.5 ${
                   isOpen
@@ -208,6 +211,14 @@ export default function OwnerDashboardScreen() {
                 >
                   {badge.label}
                 </Text>
+              </View>
+              {/* compartilhar-no-topo (Andre, 05/10): o link da loja. */}
+              <CompartilharNoTopo
+                link={linkDaLoja(API_ENV, establishment.id)}
+                titulo={establishment.name ?? "Minha loja"}
+                mensagem={mensagemDeDivulgacao(establishment.name)}
+                rotulo="Compartilhar a loja"
+              />
               </View>
             }
           />
