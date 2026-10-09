@@ -1,4 +1,4 @@
-import { iniciarSentry } from "../sentry";
+import { iniciarSentry, carregarSentry } from "../sentry";
 
 // sentry (Andre, 09/10): inerte sem DSN e nos testes; com DSN, liga com o
 // ambiente e o commit, sem dado pessoal e sem rastreio de desempenho.
@@ -36,5 +36,9 @@ describe("iniciarSentry", () => {
     expect(iniciarSentry({ dsn: "d", ambiente: "prod", carregar: () => null })).toBe(false);
     const quebra = { init: () => { throw new Error("native"); } } as any;
     expect(iniciarSentry({ dsn: "d", ambiente: "prod", carregar: () => quebra })).toBe(false);
+  });
+
+  it("o carregador padrao nunca lanca: devolve o SDK ou null", () => {
+    expect(() => carregarSentry()).not.toThrow();
   });
 });

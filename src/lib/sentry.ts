@@ -18,7 +18,7 @@ export type ConfigDoSentry = {
   carregar?: () => Sentry | null;
 };
 
-function carregarSentry(): Sentry | null {
+export function carregarSentry(): Sentry | null {
   try {
     return require("@sentry/react-native");
   } catch {
