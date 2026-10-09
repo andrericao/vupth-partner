@@ -43,7 +43,7 @@ npx jest --ci --coverage      # o pre-push roda isto; cobertura mínima no packa
 3. `bash .maestro/setup.sh` (ou `--completa` para não pular as etapas aprovadas).
 
 A bateria empurra a imagem de teste (`.maestro/apoio/foto_teste.png`, versionada)
-para a galeria e, ao terminar na branch `cloud`, commita `logs/` e `.maestro/` e
+para a galeria e, ao terminar na branch `cloud`, commita `.maestro/` (com os logs em `.maestro/logs/`) e
 dá push. A senha das contas de QA está no próprio `setup.sh` (contas `@teste.com`
 do staging — não é segredo de produção).
 

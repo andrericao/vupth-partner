@@ -73,6 +73,44 @@ appId: ${APP_ID}
     label: "09.20 · confere Desafiliar do Estabelecimento"
 - back:
     label: "09.21 · volta para o Perfil"
+# agenda-do-profissional (2ed2c93): Perfil → Minha agenda → salva a semana
+- scrollUntilVisible:
+    element: "Minha agenda"
+    direction: DOWN
+    label: "09.21a · rola ate Minha agenda"
+- tapOn:
+    text: "Minha agenda"
+    label: "09.21b · toca em Minha agenda"
+- scrollUntilVisible:
+    element: "Salvar semana"
+    direction: DOWN
+    label: "09.21c · rola ate Salvar semana"
+- tapOn:
+    text: "Salvar semana"
+    label: "09.21d · toca em Salvar semana"
+- extendedWaitUntil:
+    visible: "A sua agenda da semana foi atualizada."
+    timeout: 20000
+    label: "09.21e · a agenda foi salva"
+- tapOn:
+    text: "OK"
+    label: "09.21f · fecha o aviso"
+- back:
+    label: "09.21g · volta para o Perfil"
+# telefone-de-contato (89d2d5c): o campo existe em Dados cadastrais
+- scrollUntilVisible:
+    element: "Dados cadastrais"
+    direction: DOWN
+    label: "09.21h · rola ate Dados cadastrais"
+- tapOn:
+    text: "Dados cadastrais"
+    label: "09.21i · toca em Dados cadastrais"
+- scrollUntilVisible:
+    element: "Telefone de contato \\(opcional\\)"
+    direction: DOWN
+    label: "09.21j · confere Telefone de contato"
+- back:
+    label: "09.21k · volta para o Perfil"
 
 # Esqueci minha senha: pede o codigo (nao redefine — o codigo vai por e-mail)
 - runFlow:
