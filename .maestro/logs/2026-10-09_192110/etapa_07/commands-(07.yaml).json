@@ -1,0 +1,1967 @@
+[ {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "3000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "07.B5 · roda fechar_aviso",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "FAILED",
+    "timestamp" : 1791585776175,
+    "duration" : 1988,
+    "error" : {
+      "cause" : {
+        "stackTrace" : [ {
+          "classLoaderName" : "app",
+          "methodName" : "send$dadb",
+          "fileName" : "AdbServer.kt",
+          "lineNumber" : 103,
+          "className" : "dadb.adbserver.AdbServer",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "open",
+          "fileName" : "AdbServer.kt",
+          "lineNumber" : 148,
+          "className" : "dadb.adbserver.AdbServerDadb",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "channel$lambda$0",
+          "fileName" : "AndroidDriver.kt",
+          "lineNumber" : 81,
+          "className" : "maestro.drivers.AndroidDriver",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "connect",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 40,
+          "className" : "maestro.android.AdbSocket",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "connect",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 44,
+          "className" : "maestro.android.AdbSocket",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "createSocket",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 19,
+          "className" : "maestro.android.AdbSocketFactory",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "createSocket",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 25,
+          "className" : "maestro.android.AdbSocketFactory",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "run",
+          "fileName" : "OkHttpClientTransport.java",
+          "lineNumber" : 535,
+          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "run",
+          "fileName" : "SerializingExecutor.java",
+          "lineNumber" : 133,
+          "className" : "io.grpc.internal.SerializingExecutor",
+          "nativeMethod" : false
+        }, {
+          "moduleName" : "java.base",
+          "moduleVersion" : "21.0.5",
+          "methodName" : "runWorker",
+          "fileName" : "ThreadPoolExecutor.java",
+          "lineNumber" : 1144,
+          "className" : "java.util.concurrent.ThreadPoolExecutor",
+          "nativeMethod" : false
+        }, {
+          "moduleName" : "java.base",
+          "moduleVersion" : "21.0.5",
+          "methodName" : "run",
+          "fileName" : "ThreadPoolExecutor.java",
+          "lineNumber" : 642,
+          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
+          "nativeMethod" : false
+        }, {
+          "moduleName" : "java.base",
+          "moduleVersion" : "21.0.5",
+          "methodName" : "run",
+          "fileName" : "Thread.java",
+          "lineNumber" : 1583,
+          "className" : "java.lang.Thread",
+          "nativeMethod" : false
+        } ],
+        "message" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found",
+        "localizedMessage" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found"
+      },
+      "stackTrace" : [ {
+        "classLoaderName" : "app",
+        "methodName" : "toStatusRuntimeException",
+        "fileName" : "ClientCalls.java",
+        "lineNumber" : 275,
+        "className" : "io.grpc.stub.ClientCalls",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "getUnchecked",
+        "fileName" : "ClientCalls.java",
+        "lineNumber" : 256,
+        "className" : "io.grpc.stub.ClientCalls",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "blockingUnaryCall",
+        "fileName" : "ClientCalls.java",
+        "lineNumber" : 169,
+        "className" : "io.grpc.stub.ClientCalls",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "deviceInfo",
+        "fileName" : "MaestroDriverGrpc.java",
+        "lineNumber" : 740,
+        "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "deviceInfo$lambda$5",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 201,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runDeviceCall",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 1273,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "deviceInfo",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 200,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "from-8JJjmZI",
+        "fileName" : "ViewHierarchy.kt",
+        "lineNumber" : 28,
+        "className" : "maestro.ViewHierarchy$Companion",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invoke-prqvCes",
+        "fileName" : "Maestro.kt",
+        "lineNumber" : 441,
+        "className" : "maestro.Maestro$findElementWithTimeout$found$1$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invoke",
+        "fileName" : "Maestro.kt",
+        "lineNumber" : 440,
+        "className" : "maestro.Maestro$findElementWithTimeout$found$1$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runInterruptibleInExpectedContext",
+        "fileName" : "Interruptible.kt",
+        "lineNumber" : 48,
+        "className" : "kotlinx.coroutines.InterruptibleKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$runInterruptibleInExpectedContext",
+        "fileName" : "Interruptible.kt",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.InterruptibleKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "Interruptible.kt",
+        "lineNumber" : 40,
+        "className" : "kotlinx.coroutines.InterruptibleKt$runInterruptible$2",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "LimitedDispatcher.kt",
+        "lineNumber" : 124,
+        "className" : "kotlinx.coroutines.internal.LimitedDispatcher$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "Tasks.kt",
+        "lineNumber" : 89,
+        "className" : "kotlinx.coroutines.scheduling.TaskImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSafely",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 586,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeTask",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 820,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runWorker",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 717,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 704,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      } ],
+      "status" : {
+        "code" : "UNAVAILABLE",
+        "cause" : {
+          "stackTrace" : [ {
+            "classLoaderName" : "app",
+            "methodName" : "send$dadb",
+            "fileName" : "AdbServer.kt",
+            "lineNumber" : 103,
+            "className" : "dadb.adbserver.AdbServer",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "open",
+            "fileName" : "AdbServer.kt",
+            "lineNumber" : 148,
+            "className" : "dadb.adbserver.AdbServerDadb",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "channel$lambda$0",
+            "fileName" : "AndroidDriver.kt",
+            "lineNumber" : 81,
+            "className" : "maestro.drivers.AndroidDriver",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "connect",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 40,
+            "className" : "maestro.android.AdbSocket",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "connect",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 44,
+            "className" : "maestro.android.AdbSocket",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "createSocket",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 19,
+            "className" : "maestro.android.AdbSocketFactory",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "createSocket",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 25,
+            "className" : "maestro.android.AdbSocketFactory",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "run",
+            "fileName" : "OkHttpClientTransport.java",
+            "lineNumber" : 535,
+            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "run",
+            "fileName" : "SerializingExecutor.java",
+            "lineNumber" : 133,
+            "className" : "io.grpc.internal.SerializingExecutor",
+            "nativeMethod" : false
+          }, {
+            "moduleName" : "java.base",
+            "moduleVersion" : "21.0.5",
+            "methodName" : "runWorker",
+            "fileName" : "ThreadPoolExecutor.java",
+            "lineNumber" : 1144,
+            "className" : "java.util.concurrent.ThreadPoolExecutor",
+            "nativeMethod" : false
+          }, {
+            "moduleName" : "java.base",
+            "moduleVersion" : "21.0.5",
+            "methodName" : "run",
+            "fileName" : "ThreadPoolExecutor.java",
+            "lineNumber" : 642,
+            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
+            "nativeMethod" : false
+          }, {
+            "moduleName" : "java.base",
+            "moduleVersion" : "21.0.5",
+            "methodName" : "run",
+            "fileName" : "Thread.java",
+            "lineNumber" : 1583,
+            "className" : "java.lang.Thread",
+            "nativeMethod" : false
+          } ],
+          "message" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found",
+          "localizedMessage" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found"
+        },
+        "ok" : false
+      },
+      "message" : "UNAVAILABLE",
+      "localizedMessage" : "UNAVAILABLE"
+    },
+    "sequenceNumber" : 29,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "3000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "07.B5 · roda fechar_aviso",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "repeatCommand" : {
+      "times" : "4",
+      "condition" : {
+        "notVisible" : {
+          "idRegex" : "app-commit",
+          "optional" : false
+        }
+      },
+      "commands" : [ {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "app-commit",
+              "optional" : false
+            }
+          },
+          "timeout" : "15000",
+          "optional" : true
+        }
+      }, {
+        "stopAppCommand" : {
+          "appId" : "${APP_ID}",
+          "optional" : false
+        }
+      }, {
+        "launchAppCommand" : {
+          "appId" : "${APP_ID}",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "120000",
+          "optional" : false
+        }
+      } ],
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585728706,
+    "duration" : 24407,
+    "sequenceNumber" : 13,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "4",
+        "condition" : {
+          "notVisible" : {
+            "idRegex" : "app-commit",
+            "optional" : false
+          }
+        },
+        "commands" : [ {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "app-commit",
+                "optional" : false
+              }
+            },
+            "timeout" : "15000",
+            "optional" : true
+          }
+        }, {
+          "stopAppCommand" : {
+            "appId" : "${APP_ID}",
+            "optional" : false
+          }
+        }, {
+          "launchAppCommand" : {
+            "appId" : "${APP_ID}",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "120000",
+            "optional" : false
+          }
+        } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "EMAIL" : "${output.EMAIL_PROF}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585753164,
+    "duration" : 13,
+    "sequenceNumber" : 19,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "EMAIL" : "prof_m192111@teste.com"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123",
+        "COMMIT" : "63adc36,5fb2457",
+        "SUPERVISAO" : "0",
+        "TAG" : "192111",
+        "MAESTRO_FILENAME" : "07",
+        "MAESTRO_DEVICE_UDID" : "ZF524LC5HC",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585711257,
+    "duration" : 33,
+    "sequenceNumber" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123",
+          "COMMIT" : "63adc36,5fb2457",
+          "SUPERVISAO" : "0",
+          "TAG" : "192111",
+          "MAESTRO_FILENAME" : "07",
+          "MAESTRO_DEVICE_UDID" : "ZF524LC5HC",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585753180,
+    "duration" : 20,
+    "sequenceNumber" : 20,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585776186,
+    "duration" : 9,
+    "sequenceNumber" : 30,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "FAILED",
+    "timestamp" : 1791585778083,
+    "duration" : 67,
+    "error" : {
+      "cause" : {
+        "stackTrace" : [ {
+          "classLoaderName" : "app",
+          "methodName" : "send$dadb",
+          "fileName" : "AdbServer.kt",
+          "lineNumber" : 103,
+          "className" : "dadb.adbserver.AdbServer",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "open",
+          "fileName" : "AdbServer.kt",
+          "lineNumber" : 148,
+          "className" : "dadb.adbserver.AdbServerDadb",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "channel$lambda$0",
+          "fileName" : "AndroidDriver.kt",
+          "lineNumber" : 81,
+          "className" : "maestro.drivers.AndroidDriver",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "connect",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 40,
+          "className" : "maestro.android.AdbSocket",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "connect",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 44,
+          "className" : "maestro.android.AdbSocket",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "createSocket",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 19,
+          "className" : "maestro.android.AdbSocketFactory",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "createSocket",
+          "fileName" : "AdbSocketFactory.kt",
+          "lineNumber" : 25,
+          "className" : "maestro.android.AdbSocketFactory",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "run",
+          "fileName" : "OkHttpClientTransport.java",
+          "lineNumber" : 535,
+          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
+          "nativeMethod" : false
+        }, {
+          "classLoaderName" : "app",
+          "methodName" : "run",
+          "fileName" : "SerializingExecutor.java",
+          "lineNumber" : 133,
+          "className" : "io.grpc.internal.SerializingExecutor",
+          "nativeMethod" : false
+        }, {
+          "moduleName" : "java.base",
+          "moduleVersion" : "21.0.5",
+          "methodName" : "runWorker",
+          "fileName" : "ThreadPoolExecutor.java",
+          "lineNumber" : 1144,
+          "className" : "java.util.concurrent.ThreadPoolExecutor",
+          "nativeMethod" : false
+        }, {
+          "moduleName" : "java.base",
+          "moduleVersion" : "21.0.5",
+          "methodName" : "run",
+          "fileName" : "ThreadPoolExecutor.java",
+          "lineNumber" : 642,
+          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
+          "nativeMethod" : false
+        }, {
+          "moduleName" : "java.base",
+          "moduleVersion" : "21.0.5",
+          "methodName" : "run",
+          "fileName" : "Thread.java",
+          "lineNumber" : 1583,
+          "className" : "java.lang.Thread",
+          "nativeMethod" : false
+        } ],
+        "message" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found",
+        "localizedMessage" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found"
+      },
+      "stackTrace" : [ {
+        "classLoaderName" : "app",
+        "methodName" : "toStatusRuntimeException",
+        "fileName" : "ClientCalls.java",
+        "lineNumber" : 275,
+        "className" : "io.grpc.stub.ClientCalls",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "getUnchecked",
+        "fileName" : "ClientCalls.java",
+        "lineNumber" : 256,
+        "className" : "io.grpc.stub.ClientCalls",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "blockingUnaryCall",
+        "fileName" : "ClientCalls.java",
+        "lineNumber" : 169,
+        "className" : "io.grpc.stub.ClientCalls",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "deviceInfo",
+        "fileName" : "MaestroDriverGrpc.java",
+        "lineNumber" : 740,
+        "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "deviceInfo$lambda$5",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 201,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runDeviceCall",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 1273,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "deviceInfo",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 200,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "from-8JJjmZI",
+        "fileName" : "ViewHierarchy.kt",
+        "lineNumber" : 28,
+        "className" : "maestro.ViewHierarchy$Companion",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invoke-prqvCes",
+        "fileName" : "Maestro.kt",
+        "lineNumber" : 441,
+        "className" : "maestro.Maestro$findElementWithTimeout$found$1$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invoke",
+        "fileName" : "Maestro.kt",
+        "lineNumber" : 440,
+        "className" : "maestro.Maestro$findElementWithTimeout$found$1$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runInterruptibleInExpectedContext",
+        "fileName" : "Interruptible.kt",
+        "lineNumber" : 48,
+        "className" : "kotlinx.coroutines.InterruptibleKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$runInterruptibleInExpectedContext",
+        "fileName" : "Interruptible.kt",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.InterruptibleKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "Interruptible.kt",
+        "lineNumber" : 40,
+        "className" : "kotlinx.coroutines.InterruptibleKt$runInterruptible$2",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "LimitedDispatcher.kt",
+        "lineNumber" : 124,
+        "className" : "kotlinx.coroutines.internal.LimitedDispatcher$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "Tasks.kt",
+        "lineNumber" : 89,
+        "className" : "kotlinx.coroutines.scheduling.TaskImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSafely",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 586,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeTask",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 820,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runWorker",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 717,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 704,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      } ],
+      "status" : {
+        "code" : "UNAVAILABLE",
+        "cause" : {
+          "stackTrace" : [ {
+            "classLoaderName" : "app",
+            "methodName" : "send$dadb",
+            "fileName" : "AdbServer.kt",
+            "lineNumber" : 103,
+            "className" : "dadb.adbserver.AdbServer",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "open",
+            "fileName" : "AdbServer.kt",
+            "lineNumber" : 148,
+            "className" : "dadb.adbserver.AdbServerDadb",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "channel$lambda$0",
+            "fileName" : "AndroidDriver.kt",
+            "lineNumber" : 81,
+            "className" : "maestro.drivers.AndroidDriver",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "connect",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 40,
+            "className" : "maestro.android.AdbSocket",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "connect",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 44,
+            "className" : "maestro.android.AdbSocket",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "createSocket",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 19,
+            "className" : "maestro.android.AdbSocketFactory",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "createSocket",
+            "fileName" : "AdbSocketFactory.kt",
+            "lineNumber" : 25,
+            "className" : "maestro.android.AdbSocketFactory",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "run",
+            "fileName" : "OkHttpClientTransport.java",
+            "lineNumber" : 535,
+            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
+            "nativeMethod" : false
+          }, {
+            "classLoaderName" : "app",
+            "methodName" : "run",
+            "fileName" : "SerializingExecutor.java",
+            "lineNumber" : 133,
+            "className" : "io.grpc.internal.SerializingExecutor",
+            "nativeMethod" : false
+          }, {
+            "moduleName" : "java.base",
+            "moduleVersion" : "21.0.5",
+            "methodName" : "runWorker",
+            "fileName" : "ThreadPoolExecutor.java",
+            "lineNumber" : 1144,
+            "className" : "java.util.concurrent.ThreadPoolExecutor",
+            "nativeMethod" : false
+          }, {
+            "moduleName" : "java.base",
+            "moduleVersion" : "21.0.5",
+            "methodName" : "run",
+            "fileName" : "ThreadPoolExecutor.java",
+            "lineNumber" : 642,
+            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
+            "nativeMethod" : false
+          }, {
+            "moduleName" : "java.base",
+            "moduleVersion" : "21.0.5",
+            "methodName" : "run",
+            "fileName" : "Thread.java",
+            "lineNumber" : 1583,
+            "className" : "java.lang.Thread",
+            "nativeMethod" : false
+          } ],
+          "message" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found",
+          "localizedMessage" : "Command failed (host:transport:ZF524LC5HC): device 'ZF524LC5HC' not found"
+        },
+        "ok" : false
+      },
+      "message" : "UNAVAILABLE",
+      "localizedMessage" : "UNAVAILABLE"
+    },
+    "sequenceNumber" : 32,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "app-commit",
+          "optional" : false
+        }
+      },
+      "timeout" : "15000",
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "WARNED",
+    "timestamp" : 1791585729392,
+    "sequenceNumber" : 14,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "app-commit",
+            "optional" : false
+          }
+        },
+        "timeout" : "15000",
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.PROF = 'Prof' + output.TAG}",
+      "label" : "07.A5 · nome do profissional",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585713870,
+    "duration" : 28,
+    "sequenceNumber" : 7,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.PROF = 'Prof' + output.TAG}",
+        "label" : "07.A5 · nome do profissional",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585711305,
+    "duration" : 2353,
+    "sequenceNumber" : 2,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585717295,
+    "duration" : 13,
+    "sequenceNumber" : 10,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}",
+      "label" : "07.A3 · e-mail do profissional",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585713800,
+    "duration" : 32,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}",
+        "label" : "07.A3 · e-mail do profissional",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-email",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585755646,
+    "duration" : 3098,
+    "sequenceNumber" : 22,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-email",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${EMAIL}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585758747,
+    "duration" : 4269,
+    "sequenceNumber" : 23,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "prof_m192111@teste.com",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${SENHA}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585766954,
+    "duration" : 3257,
+    "sequenceNumber" : 25,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "Teste@123",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "${APP_ID}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585739568,
+    "duration" : 6482,
+    "sequenceNumber" : 16,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.LOJA = 'Loja M' + output.TAG}",
+      "label" : "07.A4 · nome da loja",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585713839,
+    "duration" : 29,
+    "sequenceNumber" : 6,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.LOJA = 'Loja M' + output.TAG}",
+        "label" : "07.A4 · nome da loja",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+      "label" : "07.A1 · etiqueta da rodada (TAG)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585713662,
+    "duration" : 91,
+    "sequenceNumber" : 3,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+        "label" : "07.A1 · etiqueta da rodada (TAG)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "timeout" : "120000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585723660,
+    "duration" : 5038,
+    "sequenceNumber" : 12,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "go-login",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585753203,
+    "duration" : 2433,
+    "sequenceNumber" : 21,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "go-login",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-password",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585763020,
+    "duration" : 3929,
+    "sequenceNumber" : 24,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-password",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "aba-fila",
+          "optional" : false
+        }
+      },
+      "timeout" : "30000",
+      "label" : "07.B4 · espera aba-fila",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585774474,
+    "duration" : 1699,
+    "sequenceNumber" : 28,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "aba-fila",
+            "optional" : false
+          }
+        },
+        "timeout" : "30000",
+        "label" : "07.B4 · espera aba-fila",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "3000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585776196,
+    "duration" : 1882,
+    "sequenceNumber" : 31,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "3000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}",
+      "label" : "07.A2 · e-mail do dono",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585713757,
+    "duration" : 40,
+    "sequenceNumber" : 4,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}",
+        "label" : "07.A2 · e-mail do dono",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585711292,
+    "duration" : 9,
+    "sequenceNumber" : 1,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "launchAppCommand" : {
+          "appId" : "${APP_ID}",
+          "clearState" : true,
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "120000",
+          "optional" : false
+        }
+      }, {
+        "repeatCommand" : {
+          "times" : "4",
+          "condition" : {
+            "notVisible" : {
+              "idRegex" : "app-commit",
+              "optional" : false
+            }
+          },
+          "commands" : [ {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "app-commit",
+                  "optional" : false
+                }
+              },
+              "timeout" : "15000",
+              "optional" : true
+            }
+          }, {
+            "stopAppCommand" : {
+              "appId" : "${APP_ID}",
+              "optional" : false
+            }
+          }, {
+            "launchAppCommand" : {
+              "appId" : "${APP_ID}",
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "Como você vai usar o Vupth?",
+                  "optional" : false
+                }
+              },
+              "timeout" : "120000",
+              "optional" : false
+            }
+          } ],
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/abrir_com_ota.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "07.A7 · abre o app do zero, ja com o OTA",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585717211,
+    "duration" : 35909,
+    "sequenceNumber" : 9,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "launchAppCommand" : {
+            "appId" : "${APP_ID}",
+            "clearState" : true,
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "120000",
+            "optional" : false
+          }
+        }, {
+          "repeatCommand" : {
+            "times" : "4",
+            "condition" : {
+              "notVisible" : {
+                "idRegex" : "app-commit",
+                "optional" : false
+              }
+            },
+            "commands" : [ {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "app-commit",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "15000",
+                "optional" : true
+              }
+            }, {
+              "stopAppCommand" : {
+                "appId" : "${APP_ID}",
+                "optional" : false
+              }
+            }, {
+              "launchAppCommand" : {
+                "appId" : "${APP_ID}",
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "Como você vai usar o Vupth?",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "120000",
+                "optional" : false
+              }
+            } ],
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/abrir_com_ota.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "07.A7 · abre o app do zero, ja com o OTA",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-submit",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585772140,
+    "duration" : 2331,
+    "sequenceNumber" : 27,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-submit",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "${APP_ID}",
+      "clearState" : true,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585717310,
+    "duration" : 6349,
+    "sequenceNumber" : 11,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "clearState" : true,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Prepara pela API do staging o estado que a etapa ETAPA espera (bateria-nao-para,\n// Andre 03/10): cada etapa roda sozinha, mesmo que a anterior tenha falhado.\n// Tudo e idempotente — se a etapa anterior passou, o que ela criou pelo app e\n// reaproveitado; se falhou, o preparo cria o que faltou.\n//\n// Entradas (env do runScript): API, SENHA, TAG, ETAPA (1..8)\n// Saidas: output.CLIENTE1 e output.CLIENTE2 nas etapas 6 e 8 (o historico)\n\nvar etapa = parseInt(ETAPA, 10);\nvar EMAIL_DONO = \"prop_m\" + TAG + \"@teste.com\";\nvar EMAIL_PROF = \"prof_m\" + TAG + \"@teste.com\";\nvar LOJA = \"Loja M\" + TAG;\nvar PROF = \"Prof\" + TAG;\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"preparo da etapa \" + etapa + \": \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\n// Entra; sem a conta, cria e entra.\nfunction conta(email) {\n  var r = chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA });\n  if (r.status < 300) return r.corpo.tokens.access_token;\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// Login de novo: o token tem de carregar o papel recem-criado (OWNER/PROFESSIONAL).\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// ── A partir da 02: o dono com a loja aberta 24 horas (o que a 01 faz) ──\nvar loja = null;\nvar tokenDono = null;\nif (etapa >= 2) {\n  tokenDono = conta(EMAIL_DONO);\n  var lojas = chamar(\"GET\", \"/establishment/mine\", null, tokenDono);\n  if (lojas.status < 300 && lojas.corpo && lojas.corpo.length > 0) {\n    loja = lojas.corpo[0];\n  } else {\n    pedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Dono \" + TAG }, tokenDono);\n    loja = pedir(\"POST\", \"/establishment/quick-create\", { name: LOJA, serviceType: \"BARBER\" }, tokenDono);\n    tokenDono = entrar(EMAIL_DONO);\n    var dias = [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\", \"SUNDAY\"];\n    pedir(\"PUT\", \"/establishment/\" + loja.id + \"/hours/weekly\", {\n      days: dias.map(function (d) { return { day: d, closed: false, opens: \"00:00\", closes: \"00:00\" }; })\n    }, tokenDono);\n  }\n}\n\n// ── A partir da 03: o profissional cadastrado (o que a 02 faz) ──\nvar prof = null;\nvar tokenProf = null;\nif (etapa >= 3) {\n  tokenProf = conta(EMAIL_PROF);\n  var me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  if (me.status >= 300) {\n    pedir(\"POST\", \"/professional/register\", { name: PROF, specialty: \"NAIL_TECH\" }, tokenProf);\n    tokenProf = entrar(EMAIL_PROF);\n    me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  }\n  prof = me.corpo;\n}\n\n// O pedido pendente do profissional, lido do lado dele: a lista da loja nem\n// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).\nfunction pedidoPendente() {\n  var r = chamar(\"GET\", \"/professional/me/affiliations\", null, tokenProf);\n  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];\n  for (var i = 0; i < lista.length; i++) {\n    if (String(lista[i].status).toUpperCase() === \"PENDING\") return lista[i];\n  }\n  return null;\n}\n\n// ── 03: o pedido de vinculo pendente, para o dono aceitar ──\n// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.\nif (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {\n  var pedido = chamar(\"POST\", \"/professional/me/affiliations\", { establishmentId: loja.id }, tokenProf);\n  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === \"AFFILIATION_ALREADY_PENDING\";\n  if (pedido.status >= 300 && !jaPendente) {\n    throw new Error(\"preparo da etapa 3: POST /professional/me/affiliations -> \" + pedido.status + \" \" + JSON.stringify(pedido.corpo));\n  }\n}\n\n// ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──\nif (etapa >= 4 && !prof.establishment_id) {\n  var pendente = pedidoPendente();\n  if (pendente) pedir(\"PATCH\", \"/affiliations/\" + pendente.id + \"/accept\", null, tokenDono);\n  else pedir(\"POST\", \"/professional/affiliate\", { establishmentId: loja.id }, tokenProf);\n  tokenProf = entrar(EMAIL_PROF);\n  prof = pedir(\"GET\", \"/professional/me\", null, tokenProf);\n}\n\n// ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──\nvar servicos = [];\nif (etapa >= 5) {\n  servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf) || [];\n  if (servicos.length === 0) {\n    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)\n    pedir(\"POST\", \"/professional-queue/\" + prof.id + \"/add-service-items\", {\n      serviceItemType: \"MANICURE\", customName: \"Manicure \" + TAG,\n      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60\n    }, tokenProf);\n    servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf);\n  }\n  if (prof.work_status !== \"WORKING\") {\n    pedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, tokenProf);\n  }\n  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false\n  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).\n  if (prof.accepting_new === false || prof.acceptingNew === false) {\n    pedir(\"PATCH\", \"/professional/me/accepting-new\", { value: true }, tokenProf);\n  }\n}\n\n// ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──\n// Clientes proprios do preparo (sufixo h): nao dependem de a 05 ter passado.\nfunction clienteNaFila(n) {\n  var nome = \"Cliente\" + n + \"h\" + TAG;\n  var token = conta(\"client_\" + TAG + \"_h\" + n + \"_e\" + etapa + \"@teste.com\");\n  pedir(\"PATCH\", \"/profile/general-infos\", { first_name: nome }, token);\n  var at = pedir(\"POST\", \"/attendances\", {\n    professionalId: prof.id,\n    establishmentId: prof.establishment_id,\n    serviceItemIds: [servicos[0].id],\n    scheduledTime: new Date().toISOString()\n  }, token);\n  return { nome: nome, id: at.id };\n}\n\nif (etapa === 6 || etapa === 8) {\n  var finalizado = clienteNaFila(1);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/start\", null, tokenProf);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/finish\", null, tokenProf);\n  var retirado = clienteNaFila(2);\n  pedir(\"DELETE\", \"/professional-queue/\" + retirado.id + \"/remove\", null, tokenProf);\n  output.CLIENTE1 = finalizado.nome;\n  output.CLIENTE2 = retirado.nome;\n}\n",
+      "env" : {
+        "TAG" : "${output.TAG}",
+        "ETAPA" : "7"
+      },
+      "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/preparo.js",
+      "label" : "07.A6 · preparo pela API (o que as etapas anteriores deixariam)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585713901,
+    "duration" : 3304,
+    "sequenceNumber" : 8,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Prepara pela API do staging o estado que a etapa ETAPA espera (bateria-nao-para,\n// Andre 03/10): cada etapa roda sozinha, mesmo que a anterior tenha falhado.\n// Tudo e idempotente — se a etapa anterior passou, o que ela criou pelo app e\n// reaproveitado; se falhou, o preparo cria o que faltou.\n//\n// Entradas (env do runScript): API, SENHA, TAG, ETAPA (1..8)\n// Saidas: output.CLIENTE1 e output.CLIENTE2 nas etapas 6 e 8 (o historico)\n\nvar etapa = parseInt(ETAPA, 10);\nvar EMAIL_DONO = \"prop_m\" + TAG + \"@teste.com\";\nvar EMAIL_PROF = \"prof_m\" + TAG + \"@teste.com\";\nvar LOJA = \"Loja M\" + TAG;\nvar PROF = \"Prof\" + TAG;\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"preparo da etapa \" + etapa + \": \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\n// Entra; sem a conta, cria e entra.\nfunction conta(email) {\n  var r = chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA });\n  if (r.status < 300) return r.corpo.tokens.access_token;\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// Login de novo: o token tem de carregar o papel recem-criado (OWNER/PROFESSIONAL).\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// ── A partir da 02: o dono com a loja aberta 24 horas (o que a 01 faz) ──\nvar loja = null;\nvar tokenDono = null;\nif (etapa >= 2) {\n  tokenDono = conta(EMAIL_DONO);\n  var lojas = chamar(\"GET\", \"/establishment/mine\", null, tokenDono);\n  if (lojas.status < 300 && lojas.corpo && lojas.corpo.length > 0) {\n    loja = lojas.corpo[0];\n  } else {\n    pedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Dono \" + TAG }, tokenDono);\n    loja = pedir(\"POST\", \"/establishment/quick-create\", { name: LOJA, serviceType: \"BARBER\" }, tokenDono);\n    tokenDono = entrar(EMAIL_DONO);\n    var dias = [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\", \"SUNDAY\"];\n    pedir(\"PUT\", \"/establishment/\" + loja.id + \"/hours/weekly\", {\n      days: dias.map(function (d) { return { day: d, closed: false, opens: \"00:00\", closes: \"00:00\" }; })\n    }, tokenDono);\n  }\n}\n\n// ── A partir da 03: o profissional cadastrado (o que a 02 faz) ──\nvar prof = null;\nvar tokenProf = null;\nif (etapa >= 3) {\n  tokenProf = conta(EMAIL_PROF);\n  var me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  if (me.status >= 300) {\n    pedir(\"POST\", \"/professional/register\", { name: PROF, specialty: \"NAIL_TECH\" }, tokenProf);\n    tokenProf = entrar(EMAIL_PROF);\n    me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  }\n  prof = me.corpo;\n}\n\n// O pedido pendente do profissional, lido do lado dele: a lista da loja nem\n// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).\nfunction pedidoPendente() {\n  var r = chamar(\"GET\", \"/professional/me/affiliations\", null, tokenProf);\n  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];\n  for (var i = 0; i < lista.length; i++) {\n    if (String(lista[i].status).toUpperCase() === \"PENDING\") return lista[i];\n  }\n  return null;\n}\n\n// ── 03: o pedido de vinculo pendente, para o dono aceitar ──\n// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.\nif (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {\n  var pedido = chamar(\"POST\", \"/professional/me/affiliations\", { establishmentId: loja.id }, tokenProf);\n  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === \"AFFILIATION_ALREADY_PENDING\";\n  if (pedido.status >= 300 && !jaPendente) {\n    throw new Error(\"preparo da etapa 3: POST /professional/me/affiliations -> \" + pedido.status + \" \" + JSON.stringify(pedido.corpo));\n  }\n}\n\n// ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──\nif (etapa >= 4 && !prof.establishment_id) {\n  var pendente = pedidoPendente();\n  if (pendente) pedir(\"PATCH\", \"/affiliations/\" + pendente.id + \"/accept\", null, tokenDono);\n  else pedir(\"POST\", \"/professional/affiliate\", { establishmentId: loja.id }, tokenProf);\n  tokenProf = entrar(EMAIL_PROF);\n  prof = pedir(\"GET\", \"/professional/me\", null, tokenProf);\n}\n\n// ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──\nvar servicos = [];\nif (etapa >= 5) {\n  servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf) || [];\n  if (servicos.length === 0) {\n    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)\n    pedir(\"POST\", \"/professional-queue/\" + prof.id + \"/add-service-items\", {\n      serviceItemType: \"MANICURE\", customName: \"Manicure \" + TAG,\n      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60\n    }, tokenProf);\n    servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf);\n  }\n  if (prof.work_status !== \"WORKING\") {\n    pedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, tokenProf);\n  }\n  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false\n  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).\n  if (prof.accepting_new === false || prof.acceptingNew === false) {\n    pedir(\"PATCH\", \"/professional/me/accepting-new\", { value: true }, tokenProf);\n  }\n}\n\n// ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──\n// Clientes proprios do preparo (sufixo h): nao dependem de a 05 ter passado.\nfunction clienteNaFila(n) {\n  var nome = \"Cliente\" + n + \"h\" + TAG;\n  var token = conta(\"client_\" + TAG + \"_h\" + n + \"_e\" + etapa + \"@teste.com\");\n  pedir(\"PATCH\", \"/profile/general-infos\", { first_name: nome }, token);\n  var at = pedir(\"POST\", \"/attendances\", {\n    professionalId: prof.id,\n    establishmentId: prof.establishment_id,\n    serviceItemIds: [servicos[0].id],\n    scheduledTime: new Date().toISOString()\n  }, token);\n  return { nome: nome, id: at.id };\n}\n\nif (etapa === 6 || etapa === 8) {\n  var finalizado = clienteNaFila(1);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/start\", null, tokenProf);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/finish\", null, tokenProf);\n  var retirado = clienteNaFila(2);\n  pedir(\"DELETE\", \"/professional-queue/\" + retirado.id + \"/remove\", null, tokenProf);\n  output.CLIENTE1 = finalizado.nome;\n  output.CLIENTE2 = retirado.nome;\n}\n",
+        "env" : {
+          "TAG" : "192111",
+          "ETAPA" : "7"
+        },
+        "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/preparo.js",
+        "label" : "07.A6 · preparo pela API (o que as etapas anteriores deixariam)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "timeout" : "120000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585746054,
+    "duration" : 4904,
+    "sequenceNumber" : 17,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "EMAIL" : "${output.EMAIL_PROF}"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "go-login",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-email",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "inputTextCommand" : {
+          "text" : "${EMAIL}",
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-password",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "inputTextCommand" : {
+          "text" : "${SENHA}",
+          "optional" : false
+        }
+      }, {
+        "hideKeyboardCommand" : {
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-submit",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/entrar.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "07.B3 · entra como o profissional",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585753121,
+    "duration" : 21352,
+    "sequenceNumber" : 18,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "EMAIL" : "${output.EMAIL_PROF}"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "go-login",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-email",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "inputTextCommand" : {
+            "text" : "${EMAIL}",
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-password",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "inputTextCommand" : {
+            "text" : "${SENHA}",
+            "optional" : false
+          }
+        }, {
+          "hideKeyboardCommand" : {
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-submit",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/entrar.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "07.B3 · entra como o profissional",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "stopAppCommand" : {
+      "appId" : "${APP_ID}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585739426,
+    "duration" : 139,
+    "sequenceNumber" : 15,
+    "evaluatedCommand" : {
+      "stopAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "hideKeyboardCommand" : {
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791585770215,
+    "duration" : 1917,
+    "sequenceNumber" : 26,
+    "evaluatedCommand" : {
+      "hideKeyboardCommand" : {
+        "optional" : false
+      }
+    }
+  }
+} ]

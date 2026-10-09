@@ -1,0 +1,78 @@
+Running on ZF524LC5HC
+ > Flow 11
+11.A1 · etiqueta da rodada (TAG)... COMPLETED
+11.A2 · e-mail do dono... COMPLETED
+11.A3 · e-mail do profissional... COMPLETED
+11.A4 · nome da loja... COMPLETED
+11.A5 · nome do profissional... COMPLETED
+11.A6 · preparo pela API (o dono com a loja)... COMPLETED
+11.A8 · script troca_de_loja (o profissional desta etapa, vinculado)... COMPLETED
+11.A7 · abre o app do zero, ja com o OTA...
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)... COMPLETED
+11.A7 · abre o app do zero, ja com o OTA... COMPLETED
+11.B3 · entra como o profissional desta etapa...
+  Tap on id: go-login... COMPLETED
+  Tap on id: login-email... COMPLETED
+  Input text ${EMAIL}... COMPLETED
+  Tap on id: login-password... COMPLETED
+  Input text ${SENHA}... COMPLETED
+  Hide Keyboard... COMPLETED
+  Tap on id: login-submit... COMPLETED
+11.B3 · entra como o profissional desta etapa... COMPLETED
+11.B4 · espera aba-fila... COMPLETED
+11.B5 · roda fechar_aviso...
+  Wait for animation to end within 3000 ms... COMPLETED
+  Run flow when id: dialogo-botao-0 is visible...
+  Run flow when id: dialogo-botao-0 is visible... SKIPPED
+11.B5 · roda fechar_aviso... COMPLETED
+11.00 · roda 11_profissional_abre_a_loja...
+  11.01 · roda prof_abrir_loja (atender na loja nova)...
+    PJ7.01 · toca em aba-perfil... COMPLETED
+    PJ7.02 · fecha o aviso, se houver...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    PJ7.02 · fecha o aviso, se houver... COMPLETED
+    PJ7.03 · rola ate Abrir meu estabelecimento... COMPLETED
+    PJ7.04 · toca em Abrir meu estabelecimento... COMPLETED
+    PJ7.05 · toca no nome do dono... COMPLETED
+    PJ7.06 · digita ${DONO}... COMPLETED
+    PJ7.07 · toca no nome da loja... COMPLETED
+    PJ7.08 · digita ${LOJA_NOVA}... COMPLETED
+    PJ7.09 · fecha o teclado... COMPLETED
+    PJ7.10 · toca em Barbearia... COMPLETED
+    PJ7.11 · toca em Criar estabelecimento... COMPLETED
+    PJ7.12 · escolhe atender na loja nova...
+      Assert that "Onde você vai atender?" is visible... COMPLETED
+      Tap on "(Atender em .*|Atender na loja nova)"... COMPLETED
+    PJ7.12 · escolhe atender na loja nova... COMPLETED
+    PJ7.13 · escolhe continuar na loja de agora...
+    PJ7.13 · escolhe continuar na loja de agora... SKIPPED
+    PJ7.14 · fecha o aviso, se houver...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    PJ7.14 · fecha o aviso, se houver... COMPLETED
+  11.01 · roda prof_abrir_loja (atender na loja nova)... COMPLETED
+  11.02 · toca em aba-perfil... FAILED
+11.00 · roda 11_profissional_abre_a_loja... FAILED
+
+Element not found: Id matching regex: aba-perfil
+
+Element with Id matching regex: aba-perfil not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state.
+- This could be a real regression that needs to be addressed.
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-09_192110/etapa_11

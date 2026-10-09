@@ -1,0 +1,18 @@
+Rodada 2026-10-09_192110 · TAG 192111 · commit esperado 63adc36,5fb2457
+✅ 00_atualizacao
+✅ etapa_01
+✅ etapa_02
+✅ etapa_03
+✅ etapa_04
+✅ etapa_05
+✅ etapa_06
+❌ etapa_07 — parou em ? — o celular saiu do adb (nao e o app)
+❌ etapa_08 — parou em ?
+❌ etapa_09 — parou em 09.11 · espera Avulso${output.TAG} na fila
+   print: .maestro/logs/2026-10-09_192110/FALHA_09.11_espera-avulso-output-tag-na-fila.png
+❌ etapa_10 — parou em 10.16 · espera o card de ${output.LOJA}
+   print: .maestro/logs/2026-10-09_192110/FALHA_10.16_espera-o-card-de-output-loja.png
+❌ etapa_11 — parou em 11.02 · toca em aba-perfil
+   print: .maestro/logs/2026-10-09_192110/FALHA_11.02_toca-em-aba-perfil.png
+❌ etapa_12 — parou em 12.07 · espera o push Pedido de vínculo
+   print: .maestro/logs/2026-10-09_192110/FALHA_12.07_espera-o-push-pedido-de-vinculo.png

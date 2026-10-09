@@ -1,0 +1,219 @@
+=== 19:42:58 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10155 sex out  9 19:41:40 2026 java -classpath /home/andre/.maestro/lib/* maestro.cli.AppKt test -e APP_ID=com.vupth.partner.preview -e API=https://vupth-backend-ia.onrender.com -e SENHA=Teste@123 -
+  10156 sex out  9 19:41:40 2026 tee /home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-09_192110/etapa_07.txt
+=== 19:43:00 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:03 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:05 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:07 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:09 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:11 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:13 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:15 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:11
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:17 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:11
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:19 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:11
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:21 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:11
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:23 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:11
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  10566 sex out  9 19:43:00 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  10567 sex out  9 19:43:00 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:31 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:33 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:36 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:38 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:19
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:40 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:19
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:42 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:21
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:44 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:21
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:46 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:48 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:24
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:50 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:52 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+ZF524LC5HC             unauthorized usb:2-1.4 transport_id:27
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:54 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
+=== 19:43:56 o aparelho ZF524LC5HC saiu do adb ===
+List of devices attached
+
+   5747 sex out  9 19:20:58 2026 bash .maestro/setup.sh
+   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
+   5832 sex out  9 19:21:10 2026 bash .maestro/setup.sh
+  11025 sex out  9 19:43:31 2026 timeout 60 adb -s ZF524LC5HC wait-for-device
+  11026 sex out  9 19:43:31 2026 adb -s ZF524LC5HC wait-for-device
