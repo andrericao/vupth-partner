@@ -95,6 +95,10 @@ describe("mensagemDaRemocaoDaLoja", () => {
     expect(mensagemDaRemocaoDaLoja(erro(409, { code: "ESTABLISHMENT_HAS_ACTIVE_QUEUE" }))).toMatch(
       /clientes na fila/
     );
+    // o codigo que o Backend usa de fato (6a5d3ab)
+    expect(mensagemDaRemocaoDaLoja(erro(409, { code: "ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES" }))).toMatch(
+      /clientes na fila/
+    );
   });
 
   it("outro erro cai na mensagem padrao", () => {

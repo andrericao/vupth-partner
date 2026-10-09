@@ -33,6 +33,12 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err, "fallback")).toMatch(/já está vinculado/);
   });
 
+  // desativar-conta, fatia 1 (Backend 6a5d3ab): a loja de um dono desativado.
+  it("ESTABLISHMENT_UNAVAILABLE => a loja esta desativada", () => {
+    const err = { response: { status: 409, data: { code: "ESTABLISHMENT_UNAVAILABLE" } } };
+    expect(getApiErrorMessage(err, "fallback")).toMatch(/loja está desativada/);
+  });
+
   it("CURRENT_PASSWORD_INVALID => mensagem de senha atual incorreta", () => {
     const err = { response: { data: { code: "CURRENT_PASSWORD_INVALID" } } };
     expect(getApiErrorMessage(err, "fallback")).toMatch(/senha atual/i);

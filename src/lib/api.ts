@@ -82,6 +82,9 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
     "Horário inválido: confira os 7 dias e use datas de hoje em diante.",
   ESTABLISHMENT_HOURS_REQUIRED:
     "Defina o horário de funcionamento do estabelecimento antes de abrir.",
+  // desativar-conta, fatia 1 (Backend 6a5d3ab): a loja do dono desativado.
+  ESTABLISHMENT_UNAVAILABLE:
+    "Esta loja está desativada. Ela volta quando o dono reativar a conta.",
   ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES:
     "Não é possível fechar enquanto há clientes em atendimento ou na fila. Conclua a fila antes de fechar.",
   INTERVAL_INVALID_TIME:
