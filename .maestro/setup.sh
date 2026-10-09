@@ -8,7 +8,8 @@
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
 # as etapas avulsas, uma a uma, sem parar na primeira falha (relatorio.txt).
 # Os logs e prints de cada rodada caem em .maestro/logs/<data> — versionada
-# (DEC-29): ao terminar, a bateria commita so a pasta .maestro/ e da push na cloud,
+# (DEC-29): ao terminar, a bateria commita so a pasta .maestro/logs/ e da push na
+# branch da pasta (a dev, DEC-30),
 # para a equipe ler o erro de qualquer lugar (PC ou nuvem). Rodada verde
 # apaga todos; rodada vermelha fica sozinha (as falhas antigas saem).
 #
@@ -341,20 +342,21 @@ else
   fi
   echo "Bateria VERMELHA — logs em .maestro/logs/$(basename "$RODADA") (relatorio.txt, a saida de cada etapa, prints e crash.txt se o app travou)."
 fi
-# 9. Logs e fluxos no GitHub (DEC-28; Andre, 08/10: "os logs e os comandos yml devem
-#    subir tambem"; DEC-29: logs em .maestro/logs): commita SO .maestro/ (o resto fica como esta)
-#    e da push na cloud — assim a correcao do fluxo pode ser feita na nuvem e o
-#    teste roda depois. Fora da cloud, so avisa — nada vai para outra branch.
-if [ "$(git -C "$RAIZ" rev-parse --abbrev-ref HEAD)" = "cloud" ]; then
-  git -C "$RAIZ" add -A .maestro/
-  if ! git -C "$RAIZ" diff --cached --quiet -- .maestro/; then
-    git -C "$RAIZ" commit -q -m "logs: bateria $(basename "$RODADA") $([ "$RESULTADO" = "0" ] && echo VERDE || echo VERMELHA)" -- .maestro/ \
-      && git -C "$RAIZ" pull -q --rebase --autostash origin cloud \
-      && git -C "$RAIZ" push -q --no-verify origin cloud \
-      && echo "Logs e fluxos no GitHub (cloud)." \
-      || echo "⚠️  Nao consegui subir os logs — rode: git pull --rebase origin cloud && git push origin cloud"
+# 9. Logs no GitHub (DEC-28/29; DEC-30: a cloud saiu, sobe na branch da pasta).
+#    Commit so de .maestro/logs/ (o pathspec deixa de fora o que mais estiver
+#    mudado). O push so sai se o que sobe for so os logs — codigo sem push
+#    espera o push do Andre. Sem --no-verify: o pre-push roda como sempre.
+BRANCH=$(git -C "$RAIZ" branch --show-current)
+git -C "$RAIZ" add -A .maestro/logs/
+if [ -n "$BRANCH" ] && ! git -C "$RAIZ" diff --cached --quiet -- .maestro/logs/; then
+  git -C "$RAIZ" commit -q -m "chore(logs): bateria Maestro $(basename "$RODADA") — $([ "$RESULTADO" = "0" ] && echo verde || echo FALHA)" -- .maestro/logs/
+  git -C "$RAIZ" pull -q --rebase --autostash origin "$BRANCH" 2>/dev/null
+  if git -C "$RAIZ" diff --name-only "origin/$BRANCH"..HEAD | grep -qv '^.maestro/logs/'; then
+    echo "📝 Logs commitados; sobem no proximo push (ha codigo sem push na $BRANCH)."
+  elif git -C "$RAIZ" push -q origin "HEAD:$BRANCH"; then
+    echo "📤 Logs no GitHub (origin/$BRANCH)."
+  else
+    echo "⚠️  Push dos logs falhou — sobem no proximo push."
   fi
-else
-  echo "⚠️  Fora da branch cloud: os logs ficaram so neste PC (.maestro/logs)."
 fi
 exit "$RESULTADO"
