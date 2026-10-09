@@ -192,3 +192,17 @@ export function quandoOClienteQuer(
   if (dias === 1) return `Quer amanhã às ${hora}`;
   return `Quer ${DIAS[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)} às ${hora}`;
 }
+
+/**
+ * texto-do-aceite (Backend aceite-vira-agendamento, ba38b81): o pedido para
+ * outro dia (expires_at nulo, DEC-27) vira agendamento naquele dia ao ser
+ * aceito; o de hoje entra no fim da fila.
+ */
+export function ehDeOutroDia(req: { expires_at: string | null }): boolean {
+  return req.expires_at === null;
+}
+
+/** O que acontece ao aceitar, na linha do card. */
+export function oQueAconteceAoAceitar(req: { expires_at: string | null }): string {
+  return ehDeOutroDia(req) ? "fica agendado para esse dia" : "entra no fim da sua fila";
+}

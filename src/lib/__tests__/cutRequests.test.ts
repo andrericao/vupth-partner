@@ -9,6 +9,8 @@ import {
   isCutRequestEvent,
   resumoDeSolicitacoes,
   quandoOClienteQuer,
+  ehDeOutroDia,
+  oQueAconteceAoAceitar,
 } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
@@ -322,5 +324,19 @@ describe("quandoOClienteQuer", () => {
 
   it("data invalida cai no assim que abrir", () => {
     expect(quandoOClienteQuer("nao-e-data", agora)).toBe("Quer assim que abrir");
+  });
+});
+
+// texto-do-aceite (Backend ba38b81): aceitar o pedido de outro dia o agenda
+// naquele dia; o de hoje entra no fim da fila.
+describe("oQueAconteceAoAceitar", () => {
+  it("outro dia (expires_at nulo): fica agendado", () => {
+    expect(ehDeOutroDia({ expires_at: null })).toBe(true);
+    expect(oQueAconteceAoAceitar({ expires_at: null })).toBe("fica agendado para esse dia");
+  });
+
+  it("hoje (com prazo): entra no fim da fila", () => {
+    expect(ehDeOutroDia({ expires_at: "2026-10-09T12:05:00Z" })).toBe(false);
+    expect(oQueAconteceAoAceitar({ expires_at: "2026-10-09T12:05:00Z" })).toBe("entra no fim da sua fila");
   });
 });
