@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@sentry/react-native": "~7.2.0",
     "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.104.0",
     "axios": "^1.17.1",
@@ -97,7 +98,7 @@
       "src/components/FotoRemota.tsx",
       "src/components/FotoEditavel.tsx",
       "src/components/Skeleton.tsx",
-    "src/components/ExpedienteCard.tsx",
+      "src/components/ExpedienteCard.tsx",
       "src/components/CommitDoCodigo.tsx",
       "src/components/AvisoLojaSemPonto.tsx",
       "src/components/ExporPosicao.tsx",
