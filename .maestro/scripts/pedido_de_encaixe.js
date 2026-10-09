@@ -1,8 +1,9 @@
 // Um cliente pede ENCAIXE ao profissional pela API do staging (a loja precisa
 // estar fechada para novos — senao o backend responde 409).
 //
-// Entradas (env do runScript): API, EMAIL_PROF, SENHA, TAG e, opcional, QUEM
-// (outro cliente na mesma rodada — o do pedido que a bateria RECUSA)
+// Entradas (env do runScript): API, EMAIL_PROF, SENHA, TAG e, opcionais, QUEM
+// (outro cliente na mesma rodada — o do pedido que a bateria RECUSA) e AMANHA
+// ("sim": o pedido e para amanha as 10h — pedido-de-corte-outro-dia, sem prazo)
 // Saida: output.CLIENTE_ENCAIXE, ou output.CLIENTE_<QUEM> quando QUEM vem
 
 function pedir(metodo, url, corpo, token) {
@@ -27,10 +28,16 @@ var email = "client_" + TAG + "_encaixe" + quem.toLowerCase() + "@teste.com";
 pedir("POST", "/auth/register", { email: email, password: SENHA });
 var token = entrar(email);
 pedir("PATCH", "/profile/general-infos", { first_name: nome }, token);
-pedir("POST", "/attendances/cut-requests", {
+var corpo = {
   professionalId: prof.id,
   establishmentId: prof.establishment_id,
   serviceItemIds: [servicos[0].id]
-}, token);
+};
+if (typeof AMANHA !== "undefined" && AMANHA) {
+  var amanha = new Date(Date.now() + 24 * 3600 * 1000);
+  amanha.setUTCHours(13, 0, 0, 0); // 10h de Brasilia
+  corpo.desiredTime = amanha.toISOString();
+}
+pedir("POST", "/attendances/cut-requests", corpo, token);
 if (quem) output["CLIENTE_" + quem.toUpperCase()] = nome;
 else output.CLIENTE_ENCAIXE = nome;

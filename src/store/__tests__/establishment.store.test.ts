@@ -719,4 +719,98 @@ describe("establishment.store", () => {
       expect(useEstablishmentStore.getState().establishment).toBeNull();
     });
   });
+
+  // desativar-conta (c0f5b17, item 5): o dono apaga a loja com a senha. A loja
+  // vira "Loja removida" no backend; aqui ela sai do aparelho.
+  describe("deleteEstablishment", () => {
+    it("DELETE /establishment/{id} com a senha no corpo e a loja sai do aparelho", async () => {
+      mock.onDelete("/establishment/estab-uuid-1").reply(204);
+      useEstablishmentStore.setState({ establishment: { id: "estab-uuid-1" } as any });
+
+      await useEstablishmentStore.getState().deleteEstablishment("estab-uuid-1", "minha-senha");
+
+      const req = mock.history.delete.find((r) => r.url === "/establishment/estab-uuid-1")!;
+      expect(JSON.parse(req.data)).toEqual({ current_password: "minha-senha" });
+      expect(useEstablishmentStore.getState().establishment).toBeNull();
+    });
+
+    it("loja com fila (409): propaga e a loja continua no aparelho", async () => {
+      mock.onDelete("/establishment/estab-uuid-1").reply(409, { code: "ESTABLISHMENT_HAS_ACTIVE_QUEUE" });
+      useEstablishmentStore.setState({ establishment: { id: "estab-uuid-1" } as any });
+
+      await expect(
+        useEstablishmentStore.getState().deleteEstablishment("estab-uuid-1", "s")
+      ).rejects.toBeTruthy();
+      expect(useEstablishmentStore.getState().establishment).not.toBeNull();
+    });
+  });
+
+  // cobertura-98 (Andre, 08/10): os normalizadores aceitam camelCase e campos
+  // ausentes; os parametros opcionais nao vao vazios.
+  describe("normalizacao e parametros opcionais", () => {
+    it("fetchMine em camelCase, com o endereco em snake e sem os opcionais", async () => {
+      mock.onGet("/establishment/mine").reply(200, [
+        {
+          id: "e1",
+          name: "Loja",
+          serviceType: "BARBER",
+          openStatus: "OPEN",
+          ownerId: "o1",
+          urlImage: "http://x/f.png",
+          address: { zip_code: "01000-000", locationStatus: "OK", addressId: "a1" },
+        },
+      ]);
+      await useEstablishmentStore.getState().fetchMine();
+      const e = useEstablishmentStore.getState().establishment!;
+      expect(e.service_type).toBe("BARBER");
+      expect(e.open_status).toBe("OPEN");
+      expect(e.owner_id).toBe("o1");
+      expect(e.status).toBe("ACTIVE");
+      expect(e.address).toMatchObject({ zipCode: "01000-000", street: null, locationStatus: "OK", addressId: "a1" });
+    });
+
+    it("fetchMine sem nada ja e o padrao", async () => {
+      mock.onGet("/establishment/mine").reply(200, [{ id: "e2", name: "L" }]);
+      await useEstablishmentStore.getState().fetchMine();
+      const e = useEstablishmentStore.getState().establishment!;
+      expect(e.service_type).toBe("");
+      expect(e.open_status).toBe("CLOSED");
+      expect(e.owner_id).toBe("");
+      expect(e.address).toBeNull();
+    });
+
+    it("o detalhe tambem aceita camelCase e ausentes", async () => {
+      mock.onGet("/establishment/id/e1").replyOnce(200, { id: "e1", name: "L", serviceType: "NAIL", openStatus: "OPEN", urlImage: "u" });
+      const d = await useEstablishmentStore.getState().fetchEstablishmentById("e1");
+      expect(d.service_type).toBe("NAIL");
+      expect(d.open_status).toBe("OPEN");
+      expect(d.url_image).toBe("u");
+      mock.onGet("/establishment/id/e2").replyOnce(200, { id: "e2", name: "L" });
+      const d2 = await useEstablishmentStore.getState().fetchEstablishmentById("e2");
+      expect(d2.service_type).toBe("");
+      expect(d2.url_image).toBeNull();
+    });
+
+    it("addServiceItem sem tempo nao manda estimatedMinutes", async () => {
+      mock.onPost("/establishment/e1/service-items").reply(201, { id: "s1" });
+      await useEstablishmentStore.getState().addServiceItem("e1", "BARBER", "Corte", { price: 31.9 } as any);
+      expect(JSON.parse(mock.history.post[0].data)).not.toHaveProperty("estimatedMinutes");
+    });
+
+    it("searchProfessionals so com a especialidade; fetchReport sem datas", async () => {
+      mock.onGet("/professional").reply(200, []);
+      await useEstablishmentStore.getState().searchProfessionals(undefined, " BARBER ");
+      expect(mock.history.get[0].params).toEqual({ specialty: "BARBER" });
+      mock.onGet("/establishment/e1/reports").reply(200, {});
+      await useEstablishmentStore.getState().fetchReport("e1");
+      expect(mock.history.get[1].params).toEqual({});
+    });
+
+    it("updateGeneralInfos sem loja no aparelho usa so a resposta", async () => {
+      useEstablishmentStore.setState({ establishment: null });
+      mock.onPatch("/establishment/e1/general-infos").reply(200, { id: "e1", name: "Nova" });
+      await useEstablishmentStore.getState().updateGeneralInfos("e1", { name: "Nova" } as any);
+      expect(useEstablishmentStore.getState().establishment?.name).toBe("Nova");
+    });
+  });
 });

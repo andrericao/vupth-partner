@@ -58,3 +58,16 @@ describe("broadcastApagaAtendimento", () => {
     expect(broadcastApagaAtendimento(a as any, b as any)).toBe(false);
   });
 });
+
+// cobertura-98 (Andre, 08/10): snapshots sem listas nao quebram a guarda.
+describe("broadcastApagaAtendimento — listas ausentes", () => {
+  it("sem professionals nos dois lados: nada a desconfiar", () => {
+    expect(broadcastApagaAtendimento({} as any, {} as any)).toBe(false);
+  });
+
+  it("o atendimento sumiu e o novo nem tem waiting_list: suspeito", () => {
+    const anterior = { professionals: [{ id: "p1", current_attendance: { id: "a1" } }] } as any;
+    const novo = { professionals: [{ id: "p1", current_attendance: null }] } as any;
+    expect(broadcastApagaAtendimento(anterior, novo)).toBe(true);
+  });
+});

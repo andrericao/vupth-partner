@@ -14,6 +14,8 @@ type Professional = {
   specialty: string | null;
   establishment_id: string | null;
   establishment_name: string | null;
+  /** S42 (Backend 01c785e): a loja do profissional. DEACTIVATED = o dono desativou a conta; null sem loja. */
+  establishment_status?: "ACTIVE" | "DEACTIVATED" | null;
   is_available: boolean;
   /**
    * S1 fatia 1 (backend, verificado no codigo 2026-07-22): WORKING (trabalhando),
@@ -103,7 +105,7 @@ type ProfessionalState = {
   reset: () => void;
 };
 
-function normalizeProfessional(data: any): Professional {
+export function normalizeProfessional(data: any): Professional {
   return {
     id: data.id,
     name: data.name,
@@ -112,6 +114,7 @@ function normalizeProfessional(data: any): Professional {
     specialty: data.specialty ?? null,
     establishment_id: data.establishment_id ?? data.establishmentId ?? null,
     establishment_name: data.establishment_name ?? data.establishmentName ?? null,
+    establishment_status: data.establishment_status ?? data.establishmentStatus ?? null,
     is_available: data.is_available ?? data.isAvailable ?? true,
     work_status: data.work_status ?? data.workStatus ?? null,
     accepting_new: data.accepting_new ?? data.acceptingNew ?? null,

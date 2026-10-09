@@ -12,6 +12,8 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { CompletionCard } from "@components/CompletionCard";
 import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
+import { ApagarLojaModal } from "@components/ApagarLojaModal";
+import { mensagemDaRemocaoDaLoja } from "@lib/exclusaoDeConta";
 
 type MenuItemProps = {
   label: string;
@@ -42,6 +44,27 @@ export default function EstablishmentDataScreen() {
   const [fotoDaLoja, setFotoDaLoja] = useState<string | null>(establishment?.url_image ?? null);
   // A lista /mine pode nao trazer a foto: o detalhe traz (urlImage/url_image).
   const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
+  const deleteEstablishment = useEstablishmentStore((s) => s.deleteEstablishment);
+
+  // desativar-conta (c0f5b17, item 5): apagar a loja, com a senha.
+  const [apagarAberto, setApagarAberto] = useState(false);
+  const [apagando, setApagando] = useState(false);
+  const [erroApagar, setErroApagar] = useState<string | null>(null);
+
+  const apagarLoja = async (senhaAtual: string) => {
+    if (!establishment) return;
+    setApagando(true);
+    setErroApagar(null);
+    try {
+      await deleteEstablishment(establishment.id, senhaAtual);
+      setApagarAberto(false);
+      router.replace("/(owner)/onboarding/establishment" as any);
+    } catch (error: any) {
+      setErroApagar(mensagemDaRemocaoDaLoja(error));
+    } finally {
+      setApagando(false);
+    }
+  };
   useEffect(() => {
     if (!establishment?.id) return;
     fetchEstablishmentById(establishment.id)
@@ -121,6 +144,11 @@ export default function EstablishmentDataScreen() {
             description="Rua, número, bairro, CEP"
             onPress={() => router.push("/(owner)/onboarding/address" as any)}
           />
+          <MenuItem
+            label="Passar a posse"
+            description="Outra pessoa da equipe fica com a loja"
+            onPress={() => router.push("/(owner)/passar-posse" as any)}
+          />
         </View>
 
         <View
@@ -133,7 +161,30 @@ export default function EstablishmentDataScreen() {
             {professionalsCount}
           </Text>
         </View>
+
+        {/* No fim e discreto: apagar a loja e raro e irreversivel. */}
+        <Pressable
+          onPress={() => {
+            setErroApagar(null);
+            setApagarAberto(true);
+          }}
+          className="mt-10 self-center py-2"
+          accessibilityRole="button"
+          accessibilityLabel="Apagar a loja"
+          testID="delete-store"
+        >
+          <Text className="font-heading text-xs text-vupth-danger">Apagar a loja</Text>
+        </Pressable>
       </View>
+
+      <ApagarLojaModal
+        visible={apagarAberto}
+        nomeDaLoja={establishment?.name ?? "A loja"}
+        isDeleting={apagando}
+        error={erroApagar}
+        onConfirm={apagarLoja}
+        onClose={() => setApagarAberto(false)}
+      />
     </ScrollView>
   );
 }

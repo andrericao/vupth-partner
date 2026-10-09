@@ -92,6 +92,22 @@ describe("notificationRoute", () => {
       "/(professional)/cut-requests"
     );
   });
+  // desativar-conta (respostas ao S41 e S42, Backend 01c785e).
+  it("posse: o convite leva ao Vinculo; recusado volta a Passar a posse; aceito deixa o inicio decidir", () => {
+    expect(notificationRoute({ type: "OWNERSHIP_TRANSFER_REQUESTED" })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+    expect(notificationRoute({ type: "OWNERSHIP_TRANSFER_REFUSED" })).toBe("/(owner)/passar-posse");
+    expect(notificationRoute({ type: "OWNERSHIP_TRANSFER_ACCEPTED" })).toBe("/");
+  });
+  it("loja desativada ou reativada leva ao Vinculo", () => {
+    expect(notificationRoute({ type: "ESTABLISHMENT_DEACTIVATED" })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+    expect(notificationRoute({ type: "ESTABLISHMENT_REACTIVATED" })).toBe(
+      "/(professional)/settings-vinculo"
+    );
+  });
   it("retorna null para tipo desconhecido ou ausente", () => {
     expect(notificationRoute({ type: "FOO" })).toBeNull();
     expect(notificationRoute({})).toBeNull();

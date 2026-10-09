@@ -7,6 +7,15 @@ import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
+import { AvisoLojaDesativada } from "@components/AvisoLojaDesativada";
+import { ConvitesDePosse } from "@components/ConvitesDePosse";
+import {
+  aceitarPosse,
+  recusarPosse,
+  listarConvitesDePosse,
+  mensagemDaPosse,
+  type ConviteDePosse,
+} from "@lib/posseDaLoja";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): tudo sobre o VINCULO com o estabelecimento
 // em um lugar so — convites pendentes do owner, buscar e desafiliar. Antes
@@ -31,6 +40,40 @@ export default function SettingsVinculoScreen() {
       );
     } catch {}
   }, [fetchMyAffiliations]);
+
+  // Convites de POSSE (desativar-conta, S41): um dono quer passar a loja dele.
+  const fetchMe = useProfessionalStore((s) => s.fetchMe);
+  const [convitesDePosse, setConvitesDePosse] = useState<ConviteDePosse[]>([]);
+  const [respondendoPosse, setRespondendoPosse] = useState<string | null>(null);
+
+  const loadConvitesDePosse = useCallback(async () => {
+    try {
+      const todos = await listarConvitesDePosse();
+      setConvitesDePosse(todos.filter((c) => c.status === "PENDING"));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadConvitesDePosse();
+  }, [loadConvitesDePosse]);
+
+  const responderPosse = async (id: string, aceitar: boolean) => {
+    setRespondendoPosse(id);
+    try {
+      if (aceitar) await aceitarPosse(id);
+      else await recusarPosse(id);
+      setConvitesDePosse((prev) => prev.filter((c) => c.id !== id));
+      if (aceitar) {
+        await fetchMe().catch(() => {});
+        Alert.alert("Posse aceita", "Agora a loja é sua. Entre de novo para ver o painel do dono.");
+      }
+    } catch (error: any) {
+      Alert.alert("Erro", mensagemDaPosse(error));
+    } finally {
+      setRespondendoPosse(null);
+    }
+  };
 
   useEffect(() => {
     // carrega convites on-mount; setInvites e o efeito desejado do fetch.
@@ -121,6 +164,19 @@ export default function SettingsVinculoScreen() {
           title="Vínculo"
           onBack={() => router.navigate("/(professional)/settings" as any)}
         />
+
+        <View className="gap-3">
+          <AvisoLojaDesativada
+            status={professional?.establishment_status}
+            nomeDaLoja={professional?.establishment_name}
+          />
+          <ConvitesDePosse
+            convites={convitesDePosse}
+            ocupadoId={respondendoPosse}
+            onAceitar={(id) => responderPosse(id, true)}
+            onRecusar={(id) => responderPosse(id, false)}
+          />
+        </View>
 
         {invites.length > 0 && (
           <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-forest gap-2">

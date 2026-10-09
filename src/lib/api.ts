@@ -180,10 +180,23 @@ function processQueue(error: unknown, token: string | null) {
   failedQueue = [];
 }
 
+// desativar-conta (c0f5b17): no "So consultar" o que mexe na operacao da 403
+// ACCOUNT_DEACTIVATED. O auth store se registra aqui para reabrir o "Reativar"
+// — o api nao importa o store (o store importa o api).
+let avisarContaDesativada: (() => void) | null = null;
+export function aoContaDesativada(fn: (() => void) | null) {
+  avisarContaDesativada = fn;
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (error.response?.status === 403 && error.response?.data?.code === "ACCOUNT_DEACTIVATED") {
+      avisarContaDesativada?.();
+      return Promise.reject(error);
+    }
 
     // 401 de NEGOCIO, nao de sessao: senha atual incorreta na troca de senha
     // (PATCH /profile/update-password/me). A tela trata como erro de campo —

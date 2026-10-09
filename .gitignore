@@ -40,9 +40,6 @@ yarn-error.*
 # test coverage
 /coverage
 .maestro/.autofill_antes
-# DEC-28: os logs novos vao para logs/ (commitados). A pasta antiga fica fora do
-# git: a rodada de 06/10 tem print com documento pessoal.
-.maestro/logs/
 
 # DEC-22: log de falha do jest, so neste PC (DEC-28 ajustada: fora do repositorio)
 /.logs-teste/

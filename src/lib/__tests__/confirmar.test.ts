@@ -326,3 +326,56 @@ describe("escolherOpcao()", () => {
     expect(r).toBeNull();
   });
 });
+
+// cobertura-98 (Andre, 08/10): os padroes — sem deps, a plataforma e o Alert do
+// react-native; na web sem shim e sem confirmImpl, o window.confirm/alert do
+// navegador (ou "nao" quando nao ha window).
+describe("os padroes de confirmar, avisar e escolherOpcao", () => {
+  const g = globalThis as any;
+  let janelaAntes: unknown;
+  beforeEach(() => {
+    janelaAntes = g.window;
+  });
+  afterEach(() => {
+    g.window = janelaAntes;
+    jest.restoreAllMocks();
+  });
+
+  it("sem deps, usa o Alert do react-native (e o destrutivo pinta o botao)", async () => {
+    const spy = jest.spyOn(Alert, "alert").mockImplementation((_t, _m, botoes: any) => {
+      expect(botoes[1].style).toBe("destructive");
+      botoes[1].onPress();
+    });
+    await expect(confirmar({ titulo: "t", mensagem: "m", destrutivo: true })).resolves.toBe(true);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("avisar e escolherOpcao sem deps tambem usam o Alert", async () => {
+    jest.spyOn(Alert, "alert").mockImplementation((_t, _m, botoes: any) => {
+      botoes[botoes.length - 1].onPress();
+    });
+    await expect(avisar({ titulo: "t", mensagem: "m" })).resolves.toBeUndefined();
+    await expect(
+      escolherOpcao({ titulo: "t", mensagem: "m", opcoes: [{ texto: "A", valor: 1 }] })
+    ).resolves.toBe(1);
+  });
+
+  it("na web sem shim, cai no window do navegador", async () => {
+    g.window = { confirm: jest.fn(() => true), alert: jest.fn() };
+    await expect(confirmar({ titulo: "t", mensagem: "m" }, { plataforma: "web" })).resolves.toBe(true);
+    await avisar({ titulo: "t", mensagem: "m" }, { plataforma: "web" });
+    expect(g.window.alert).toHaveBeenCalled();
+    await expect(
+      escolherOpcao({ titulo: "t", mensagem: "m", opcoes: [{ texto: "A", valor: 1 }] }, { plataforma: "web" })
+    ).resolves.toBe(1);
+  });
+
+  it("na web sem window, na duvida nao executa (e o aviso segue)", async () => {
+    g.window = undefined;
+    await expect(confirmar({ titulo: "t", mensagem: "m" }, { plataforma: "web" })).resolves.toBe(false);
+    await expect(avisar({ titulo: "t", mensagem: "m" }, { plataforma: "web" })).resolves.toBeUndefined();
+    await expect(
+      escolherOpcao({ titulo: "t", mensagem: "m", opcoes: [{ texto: "A", valor: 1 }] }, { plataforma: "web" })
+    ).resolves.toBeNull();
+  });
+});

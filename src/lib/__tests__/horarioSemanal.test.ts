@@ -1,5 +1,6 @@
 import {
   DIAS,
+  nomeDoDia,
   normalizarHorarios,
   semanaInicial,
   erroDoDia,
@@ -268,5 +269,23 @@ describe("semanaDosProximosDias", () => {
 
   it("faltando um dia: null", () => {
     expect(semanaDosProximosDias(upcoming.slice(0, 3) as any)).toBeNull();
+  });
+});
+
+// cobertura-98 (Andre, 08/10): os cantos — dia desconhecido, horario curto e
+// opens/closes ausentes.
+describe("cantos", () => {
+  it("nomeDoDia de um dia desconhecido devolve o proprio codigo", () => {
+    expect(nomeDoDia("FERIADO" as any)).toBe("FERIADO");
+  });
+
+  it("horario curto ou nao-string vira null", () => {
+    const h = normalizarHorarios({ weekly: [{ day: "MONDAY", closed: false, opens: "8:0", closes: 900 }] });
+    expect(h.weekly[0]).toMatchObject({ opens: null, closes: null });
+  });
+
+  it("erroDoDia com abertura ou fechamento ausentes", () => {
+    expect(erroDoDia({ closed: false, opens: null, closes: "18:00" } as any)).toMatch(/abertura/);
+    expect(erroDoDia({ closed: false, opens: "08:00", closes: null } as any)).toMatch(/fechamento/);
   });
 });

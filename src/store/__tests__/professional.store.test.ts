@@ -18,6 +18,7 @@ const REGISTER_RESPONSE = {
   specialty: "Corte masculino",
   establishment_id: null,
   establishment_name: null,
+  establishment_status: null,
   is_available: true,
   work_status: null,
   accepting_new: null,
@@ -31,6 +32,7 @@ const AFFILIATE_RESPONSE = {
   specialty: "Corte masculino",
   establishment_id: "estab-uuid-1",
   establishment_name: "Barbearia do Andre",
+  establishment_status: null,
   is_available: true,
   work_status: null,
   accepting_new: null,
@@ -682,5 +684,34 @@ describe("professional.store", () => {
       expect(s.professional).toBeNull();
       expect(s.myServices).toEqual([]);
     });
+  });
+});
+
+// S42 (Backend 01c785e): a loja desativada chega no /me.
+describe("establishment_status", () => {
+  it("normaliza o status da loja (snake e camel); ausente vira null", async () => {
+    const { normalizeProfessional } = jest.requireActual<typeof import("../professional.store")>("../professional.store");
+    expect(normalizeProfessional({ id: "p", name: "n", establishment_status: "DEACTIVATED" }).establishment_status).toBe("DEACTIVATED");
+    expect(normalizeProfessional({ id: "p", name: "n", establishmentStatus: "ACTIVE" }).establishment_status).toBe("ACTIVE");
+    expect(normalizeProfessional({ id: "p", name: "n" }).establishment_status).toBeNull();
+  });
+});
+
+// cobertura-98 (Andre, 08/10): sem profissional carregado, os servicos nao
+// tentam nada; o relatorio sem datas nao manda parametros vazios.
+describe("sem profissional / sem datas", () => {
+  beforeEach(() => useProfessionalStore.setState({ professional: null } as any));
+
+  it("atualizar e remover servico sem profissional falham com mensagem; buscar nao faz nada", async () => {
+    await expect(useProfessionalStore.getState().updateMyServiceItem("s1", {} as any)).rejects.toThrow("Professional not found");
+    await expect(useProfessionalStore.getState().removeMyServiceItem("s1")).rejects.toThrow("Professional not found");
+    await expect(useProfessionalStore.getState().fetchMyServices()).resolves.toBeUndefined();
+  });
+
+  it("fetchMyReport sem datas nao manda dateFrom/dateTo", async () => {
+    mock.onGet("/professional/me/reports").reply(200, {});
+    await useProfessionalStore.getState().fetchMyReport();
+    const req = mock.history.get.find((r) => r.url === "/professional/me/reports")!;
+    expect(req.params).toEqual({});
   });
 });
