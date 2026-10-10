@@ -101,6 +101,16 @@ appId: ${APP_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
       TAG: ${output.TAG}
     label: "07.09 · script pedido_de_encaixe (o que sera aceito)"
+# Bateria 10:11: o push do pedido virou a caixa "Novo pedido de corte" por cima
+# da lista, e o card por tras nao conta como visivel. Fecha a caixa antes.
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 30000
+    optional: true
+    label: "07.09a · espera a caixa do push"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.09b · fecha a caixa do push, se veio"
 - extendedWaitUntil:
     visible: ".*${output.CLIENTE_ENCAIXE}.*"
     timeout: 60000
