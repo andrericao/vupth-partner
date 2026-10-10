@@ -103,4 +103,4 @@ Running on vupth_android11
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-10_171732/00_atualizacao
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-10_172514/00_atualizacao

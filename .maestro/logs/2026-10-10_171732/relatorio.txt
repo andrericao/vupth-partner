@@ -1,4 +1,0 @@
-Rodada 2026-10-10_171732 · TAG 171732 · commit esperado b126e44
-❌ 00_atualizacao — parou em ?
-   print: .maestro/logs/2026-10-10_171732/FALHA_00_atualizacao.png
-   (as etapas nao rodaram: com a versao errada o teste nao serve)
