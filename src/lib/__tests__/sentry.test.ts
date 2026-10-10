@@ -40,5 +40,25 @@ describe("iniciarSentry", () => {
 
   it("o carregador padrao nunca lanca: devolve o SDK ou null", () => {
     expect(() => carregarSentry()).not.toThrow();
+    expect(() => carregarSentry(() => true)).not.toThrow();
+  });
+
+  // volta-1-5-0 (Andre, 10/10): o OTA roda no APK 1.5.0, sem o RNSentry nativo.
+  // O require do JS passa mesmo assim; sem o nativo, nem carrega.
+  it("binario sem o RNSentry nativo: null, sem tocar no SDK", () => {
+    expect(carregarSentry(() => false)).toBeNull();
+  });
+
+  it("com o RNSentry nativo: carrega o SDK", () => {
+    const sdk = { init: jest.fn() } as never;
+    expect(carregarSentry(() => true, () => sdk)).toBe(sdk);
+  });
+
+  it("a pergunta pelo nativo que lanca vira null", () => {
+    expect(
+      carregarSentry(() => {
+        throw new Error("sem TurboModuleRegistry");
+      })
+    ).toBeNull();
   });
 });
