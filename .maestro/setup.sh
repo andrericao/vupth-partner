@@ -5,6 +5,8 @@
 #       bash .maestro/setup.sh --completa   # roda todas, sem perguntar
 #       bash .maestro/setup.sh --falhas     # so as que nao passaram, sem perguntar
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
+#       bash .maestro/setup.sh --device emulator-5554  # num aparelho escolhido
+#                                       (o emulador do PC, comandos.html#emulador)
 #
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
 # as etapas avulsas, uma a uma, sem parar na primeira falha (relatorio.txt).
@@ -24,13 +26,23 @@ API="https://vupth-backend-ia.onrender.com"
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 SO_PREPARAR=0
 COMPLETA=""
-for ARG in "$@"; do
-  case "$ARG" in
+APARELHO=""
+while [ $# -gt 0 ]; do
+  case "$1" in
     --so-preparar) SO_PREPARAR=1 ;;
     --completa) COMPLETA=1 ;;
     --falhas) COMPLETA=0 ;;
+    --device) APARELHO="$2"; shift ;;
   esac
+  shift
 done
+# emulador (Andre, 10/10): com o celular e o emulador no adb, --device escolhe
+# um. O ANDROID_SERIAL vale para todo adb deste script; o Maestro recebe o mesmo.
+MAESTRO_APARELHO=()
+if [ -n "$APARELHO" ]; then
+  export ANDROID_SERIAL="$APARELHO"
+  MAESTRO_APARELHO=(--device "$APARELHO")
+fi
 
 # 0. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10; DEC-17):
 #    duas sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
@@ -44,7 +56,7 @@ if [ -n "$OUTRA" ]; then
 fi
 
 # 1. Celular conectado
-DEVICE=$(adb devices | grep -w "device" | head -1)
+DEVICE=$(adb devices | grep -w "device" | grep "^${APARELHO}" | head -1)
 if [ -z "$DEVICE" ]; then
   echo "ERRO: nenhum celular. Ligue a Depuracao USB, conecte o cabo e aceite o aviso no celular."
   exit 1
@@ -130,7 +142,7 @@ ULTIMO_OTA=$(git -C "$RAIZ" log -1 --format=%h origin/dev -- . \
 COMMIT=$(git -C "$RAIZ" log --format=%h --abbrev=7 "$ULTIMO_OTA^..origin/dev" | paste -sd,)
 echo "Commit esperado no app (OTA da dev): $COMMIT"
 
-CMD=(maestro test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
+CMD=(maestro "${MAESTRO_APARELHO[@]}" test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
 
 if [ "$SO_PREPARAR" = "1" ]; then
   echo "Tudo pronto. Rode:"
