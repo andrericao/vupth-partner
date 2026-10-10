@@ -1,0 +1,17 @@
+Rodada 2026-10-10_150003 · TAG 150003 · commit esperado 5e93bf6,d8aeaeb,f1e777b,f65c8fb,22ff279,cd83088,cc8f8e3,60f7fea
+✅ 00_atualizacao
+⏭  etapa_01 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_02 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_03 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_04 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_05 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_06 (já passou no 22ff279 — a completa roda de novo)
+❌ etapa_07 — parou em 07.08e · confere sem prazo
+   print: .maestro/logs/2026-10-10_150003/FALHA_07.08e_confere-sem-prazo.png
+❌ etapa_08 — parou em 08.36 · foto-pela-bateria · grava a foto da loja pela galeria
+   print: .maestro/logs/2026-10-10_150003/FALHA_08.36_foto-pela-bateria-grava-a-foto-da-loja-pela-galeria.png
+⏭  etapa_09 (já passou no 22ff279 — a completa roda de novo)
+❌ etapa_10 — parou em 10.24 · espera Solicitacao em andamento
+   print: .maestro/logs/2026-10-10_150003/FALHA_10.24_espera-solicitacao-em-andamento.png
+⏭  etapa_11 (já passou no f1e777b — a completa roda de novo)
+⏭  etapa_12 (já passou no f1e777b — a completa roda de novo)
