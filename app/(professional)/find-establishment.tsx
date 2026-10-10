@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { CampoDeBusca } from "@components/nw/CampoDeBusca";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwButton } from "@components/nw/Button";
 import { SkeletonList } from "@components/Skeleton";
@@ -58,36 +58,45 @@ export default function FindEstablishmentScreen() {
     }
   };
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await useProfessionalStore.getState().fetchMe();
-        const prof = useProfessionalStore.getState().professional;
-        if (prof?.establishment_id) {
-          setBlockedName(prof.establishment_name ?? null);
-          setGate("affiliated");
-          return;
-        }
+  // Bateria 10/10 15:00 (10.24): a tela fica na pilha e volta reaproveitada
+  // (Perfil → Vínculo → Buscar, com a busca de antes digitada) — o portão lido
+  // so na montagem deixava pedir vinculo de novo com um pedido em andamento.
+  // Rele o portão a cada foco; a lista completa so carrega na primeira vez.
+  const carregouLista = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      const init = async () => {
         try {
-          const { data: affs } = await api.get("/professional/me/affiliations");
-          const pending = Array.isArray(affs)
-            ? affs.find((a: any) => a.status === "PENDING")
-            : null;
-          if (pending) {
-            setBlockedName(
-              pending.establishmentName ?? pending.establishment_name ?? null
-            );
-            setPendingAffiliationId(pending.id ?? null);
-            setGate("pending");
+          await useProfessionalStore.getState().fetchMe();
+          const prof = useProfessionalStore.getState().professional;
+          if (prof?.establishment_id) {
+            setBlockedName(prof.establishment_name ?? null);
+            setGate("affiliated");
             return;
           }
+          try {
+            const { data: affs } = await api.get("/professional/me/affiliations");
+            const pending = Array.isArray(affs)
+              ? affs.find((a: any) => a.status === "PENDING")
+              : null;
+            if (pending) {
+              setBlockedName(
+                pending.establishmentName ?? pending.establishment_name ?? null
+              );
+              setPendingAffiliationId(pending.id ?? null);
+              setGate("pending");
+              return;
+            }
+          } catch {}
         } catch {}
-      } catch {}
-      setGate("open");
-      await loadAll();
-    };
-    init();
-  }, []);
+        setGate("open");
+        if (carregouLista.current) return;
+        carregouLista.current = true;
+        await loadAll();
+      };
+      init();
+    }, [])
+  );
 
   const handleSearch = async () => {
     if (!search.trim()) return;
