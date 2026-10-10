@@ -1,4 +1,0 @@
-Rodada 2026-10-10_190928 · TAG 190929 · commit esperado 603a462
-❌ 00_atualizacao — parou em 00.04 · espera a entrada
-   print: .maestro/logs/2026-10-10_190928/FALHA_00.04_espera-a-entrada.png
-   (as etapas nao rodaram: com a versao errada o teste nao serve)

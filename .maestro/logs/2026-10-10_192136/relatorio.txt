@@ -1,0 +1,17 @@
+Rodada 2026-10-10_192136 · TAG 192136 · commit esperado 603a462
+✅ 00_atualizacao
+⏭  etapa_01 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_02 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_03 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_04 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_05 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_06 (já passou no 22ff279 — a completa roda de novo)
+❌ etapa_07 — parou em 07.05a · confere Quer assim que abrir
+   print: .maestro/logs/2026-10-10_192136/FALHA_07.05a_confere-quer-assim-que-abrir.png
+❌ etapa_08 — parou em 08.A7 · abre o app do zero, ja com o OTA
+   print: .maestro/logs/2026-10-10_192136/FALHA_08.A7_abre-o-app-do-zero-ja-com-o-ota.png
+⏭  etapa_09 (já passou no 22ff279 — a completa roda de novo)
+❌ etapa_10 — parou em 10.03 · toca em Vinculo
+   print: .maestro/logs/2026-10-10_192136/FALHA_10.03_toca-em-vinculo.png
+⏭  etapa_11 (já passou no f1e777b — a completa roda de novo)
+⏭  etapa_12 (já passou no f1e777b — a completa roda de novo)
