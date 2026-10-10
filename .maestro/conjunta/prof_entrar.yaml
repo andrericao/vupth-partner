@@ -8,11 +8,30 @@ appId: ${APP_ID}
     env:
       EMAIL: ${EMAIL}
     label: "PJ1.01 · entra como ${EMAIL}"
+# Conta dono + profissional (loja solo) abre na visao de dono (Inicio, Filas,
+# Menu): troca pelo Menu > "Atender como profissional" (Client, f6d319d).
+- extendedWaitUntil:
+    visible:
+      id: "(aba-fila|aba-menu)"
+    timeout: 30000
+    label: "PJ1.02 · espera a Fila ou o Menu do dono"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "PJ1.02a · fecha o aviso, se houver"
+- runFlow:
+    when:
+      notVisible:
+        id: "aba-fila"
+    commands:
+      - tapOn:
+          id: "aba-menu"
+      - tapOn: "Atender como profissional"
+    label: "PJ1.02b · na visao de dono, troca para a de profissional"
 - extendedWaitUntil:
     visible:
       id: "aba-fila"
     timeout: 30000
-    label: "PJ1.02 · espera aba-fila"
+    label: "PJ1.02c · espera aba-fila"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "PJ1.03 · fecha o aviso, se houver"
