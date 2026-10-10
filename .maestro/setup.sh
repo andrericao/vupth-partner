@@ -86,6 +86,24 @@ fi
 adb shell settings put secure autofill_service null
 echo "Preenchimento automatico desligado: OK (ao terminar: bash .maestro/restaurar.sh)"
 
+# 4a. emulador-lento (Andre, 10/10: "o emulador e mais lento, deve haver um
+#     preparo para isso"; print emulador-anr-system.png). So no emulador:
+#     animacoes em 0, permissoes do app dadas por adb (o pedido de localizacao
+#     ficava por baixo do "Process system isn't responding") e o app Google
+#     desligado (pesa no Celeron). As esperas dobram la (FATOR, passo 6b).
+EMULADOR=0
+case "$(adb get-serialno 2>/dev/null | tr -d '\r')" in emulator-*) EMULADOR=1 ;; esac
+if [ "$EMULADOR" = "1" ]; then
+  for CHAVE in window_animation_scale transition_animation_scale animator_duration_scale; do
+    adb shell settings put global "$CHAVE" 0
+  done
+  for PERM in ACCESS_FINE_LOCATION ACCESS_COARSE_LOCATION POST_NOTIFICATIONS CAMERA READ_MEDIA_IMAGES READ_EXTERNAL_STORAGE; do
+    adb shell pm grant com.vupth.partner.preview "android.permission.$PERM" >/dev/null 2>&1
+  done
+  adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox >/dev/null 2>&1
+  echo "Emulador: animacoes em 0, permissoes dadas, app Google desligado: OK"
+fi
+
 # 4b. A imagem de teste na galeria (foto-pela-bateria, Andre 03/10): as etapas
 #     07 e 08 gravam a foto escolhendo-a no seletor. Vai com a data de agora,
 #     para ser a mais recente da grade; o media scan a poe na galeria.
@@ -325,12 +343,25 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   return 1
 }
 
+# 6b. emulador-lento: no emulador, toda espera (timeout:) dos fluxos vale FATOR
+#     vezes (uma variavel so; FATOR=3 bash .maestro/setup.sh ... muda). Os fluxos
+#     rodam de uma copia com as esperas ja multiplicadas; o celular usa os
+#     originais.
+FLUXOS="$RAIZ/.maestro"
+if [ "$EMULADOR" = "1" ]; then
+  FATOR="${FATOR:-2}"
+  FLUXOS=$(mktemp -d)
+  cp -r "$RAIZ/.maestro/apoio" "$RAIZ/.maestro/avulsas" "$RAIZ/.maestro/etapas" "$RAIZ/.maestro/conjunta" "$RAIZ/.maestro/scripts" "$FLUXOS/"
+  find "$FLUXOS" -name '*.yaml' -exec perl -pi -e "s/(\btimeout:\s*)(\d+)/\$1.(\$2*$FATOR)/e" {} +
+  echo "Emulador: esperas x$FATOR ($FLUXOS)"
+fi
+
 RESULTADO=0
-if ! rodar 00_atualizacao "$RAIZ/.maestro/avulsas/00_atualizacao.yaml"; then
+if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
+  for ARQ in "$FLUXOS"/avulsas/[0-9][0-9].yaml; do
     NN=$(basename "$ARQ" .yaml)
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"

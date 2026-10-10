@@ -1,0 +1,14 @@
+# emulador-lento (Andre, 10/10; print emulador-anr-system.png): no emulador
+# lento o Android mostra "Process system isn't responding" (Close app / Wait)
+# por cima do app. Toca em Wait/Aguardar — nunca em Close app, que mata o
+# processo. Roda no comeco de cada etapa (fechar_cortina) e em cada
+# fechar_aviso. No celular, o aviso nao aparece e nada acontece.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      visible: ".*(isn't responding|não está respondendo|nao esta respondendo).*"
+    commands:
+      - tapOn: "(Wait|Aguardar|Esperar)"
+      - waitForAnimationToEnd:
+          timeout: 3000
