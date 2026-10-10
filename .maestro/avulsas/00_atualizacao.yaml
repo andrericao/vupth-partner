@@ -22,9 +22,24 @@ env:
 - launchApp:
     clearState: true
     label: "00.03 · abre o app do zero"
+# emulador-lento (log 10/10 19:09, 00.04): no emulador o "Process system isn't
+# responding" cobre a entrada enquanto o app sobe. Espera em pedacos e, entre
+# eles, toca em Wait se o aviso estiver na tela.
+- repeat:
+    times: 6
+    while:
+      notVisible: "Como você vai usar o Vupth?"
+    commands:
+      - runFlow:
+          file: ../apoio/fechar_anr.yaml
+      - extendedWaitUntil:
+          visible: "Como você vai usar o Vupth?"
+          timeout: 20000
+          optional: true
+    label: "00.04a · espera a entrada (tocando em Wait no aviso do Android)"
 - extendedWaitUntil:
     visible: "Como você vai usar o Vupth?"
-    timeout: 120000
+    timeout: 10000
     label: "00.04 · espera a entrada"
 - runFlow:
     file: ../apoio/entrar.yaml
