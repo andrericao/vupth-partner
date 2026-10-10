@@ -1,6 +1,0 @@
-=== 23:42:17 o aparelho ZF524LC5HC saiu do adb ===
-List of devices attached
-
-   5755 sex out  9 19:20:58 2026 adb -L tcp:5037 fork-server server --reply-fd 4
-  53428 sex out  9 22:35:36 2026 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 60e50cd42fc73fe680a5d7eaf217e0adbc0ebb73c008fe8c7ae6d4d120a0e3ee -address /run/containerd/containerd.sock
-  63284 sex out  9 22:48:29 2026 bash .maestro/setup.sh

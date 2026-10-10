@@ -63,11 +63,13 @@ appId: ${APP_ID}
         id: "campo-de-busca"
     timeout: 20000
     label: "10.16 · espera o card de ${output.LOJA}"
+# Bateria 10:11: o toque no nome caia no proprio campo (o texto digitado e
+# igual) e reabria o teclado. Toca no estado da loja, que so o card tem.
 - tapOn:
-    text: ${output.LOJA}
+    text: "(Aberto|Fechado)"
     below:
       id: "campo-de-busca"
-    label: "10.17 · toca no card de ${output.LOJA}"
+    label: "10.17 · toca no card de ${output.LOJA} (no Aberto/Fechado)"
 # Bateria 22:48: o primeiro toque no card nao abriu o detalhe (o teclado ainda
 # estava aberto). Se o detalhe nao vier em 10 s, fecha o teclado e toca de novo.
 - extendedWaitUntil:
@@ -79,9 +81,8 @@ appId: ${APP_ID}
     when:
       notVisible: "Solicitar vinculação"
     commands:
-      - hideKeyboard
       - tapOn:
-          text: ${output.LOJA}
+          text: "Barbearia"
           below:
             id: "campo-de-busca"
     label: "10.17b · toca de novo no card, se o detalhe nao abriu"

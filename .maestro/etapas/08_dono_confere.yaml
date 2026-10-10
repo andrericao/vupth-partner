@@ -98,6 +98,15 @@ appId: ${APP_ID}
 # foto-com-botao-claro / foto-da-loja (8b89b1a, fb2b267): a foto da loja abre a
 # folha Tirar foto · Escolher da galeria · Cancelar. Enviar de verdade (camera,
 # galeria) e ver no Client ficam so a mao.
+# Bateria 10:11: a tela Sistema e do grupo (professional) e abre com as abas
+# do profissional (sem aba-menu). Volta para o Menu do dono.
+- back:
+    label: "08.15a · volta da tela Sistema"
+- extendedWaitUntil:
+    visible:
+      id: "aba-menu"
+    timeout: 20000
+    label: "08.15b · espera aba-menu"
 - tapOn:
     id: "aba-menu"
     label: "08.16 · foto-da-loja · toca em aba-menu"
