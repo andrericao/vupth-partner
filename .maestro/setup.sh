@@ -77,18 +77,26 @@ echo "Preenchimento automatico desligado: OK (ao terminar: bash .maestro/restaur
 # 4b. A imagem de teste na galeria (foto-pela-bateria, Andre 03/10): as etapas
 #     07 e 08 gravam a foto escolhendo-a no seletor. Vai com a data de agora,
 #     para ser a mais recente da grade; o media scan a poe na galeria.
-FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
-adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
-adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
-adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
-# Sem o indice, o seletor mostra primeiro uma foto PESSOAL do aparelho e a bateria
-# a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
-NOME_FOTO=$(basename "$FOTO")
-for _ in 1 2 3 4 5 6 7 8 9 10; do
-  adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO" && break
-  sleep 1
-done
-if adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO"; then
+# foto-na-frente (log 10/10 15:00, 08.36): um print tirado no celular durante a
+# rodada fica na frente da imagem de teste e o seletor o escolhe. Por isso a
+# imagem vai de novo antes de cada etapa (rodar), com a data de agora.
+foto_na_frente() {
+  FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
+  adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
+  adb shell touch "$FOTO" >/dev/null 2>&1
+  adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
+  adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
+  # Sem o indice, o seletor mostra primeiro uma foto PESSOAL do aparelho e a bateria
+  # a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
+  local nome
+  nome=$(basename "$FOTO")
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$nome" && return 0
+    sleep 1
+  done
+  return 1
+}
+if foto_na_frente; then
   echo "Imagem de teste na galeria: OK ($FOTO)"
 else
   echo "⚠️  Imagem de teste NAO entrou na galeria ($FOTO): as etapas 07 e 08 escolheriam outra foto. Parando." >&2
@@ -287,6 +295,7 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   fi
   [ "$SUPERVISAO" = "0" ] || echo "▶ $1 comecando"
   papel_do_andre "$1"
+  foto_na_frente || echo "⚠️  $1 — a imagem de teste nao entrou de novo na galeria (a foto pode sair errada)"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
   local rc="${PIPESTATUS[0]}"
