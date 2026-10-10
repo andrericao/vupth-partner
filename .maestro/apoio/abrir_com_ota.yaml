@@ -8,6 +8,28 @@ appId: ${APP_ID}
 ---
 - runFlow:
     file: fechar_cortina.yaml
+# push-conta-errada (S43, Backend 657a119): o clearState troca o token do push
+# sem tirar o velho da conta anterior — o push dela chegava depois, na conta
+# nova. Antes de limpar, sai da conta que ficou logada (o logout desregistra o
+# token). Etapa que terminou bem ja saiu: ai nao ha aba e nada acontece.
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "(aba-perfil|aba-menu)"
+    timeout: 15000
+    optional: true
+- runFlow:
+    file: fechar_aviso.yaml
+- runFlow:
+    when:
+      visible:
+        id: "aba-perfil"
+    file: sair_profissional.yaml
+- runFlow:
+    when:
+      visible:
+        id: "aba-menu"
+    file: sair_dono.yaml
 - launchApp:
     clearState: true
 - extendedWaitUntil:
