@@ -24,8 +24,12 @@ appId: ${APP_ID}
     timeout: 10000
     optional: true
     label: "12.03a · espera 10 s o registro do token do push"
-- stopApp:
-    label: "12.04 · fecha o app"
+# Bateria 22:48 (e 20:08): o stopApp do Maestro e um force-stop, e o Android
+# nao entrega FCM a app parado a forca — o push nunca chegava. Vai para a tela
+# inicial: o app fica em segundo plano e o push cai na gaveta.
+- pressKey:
+    key: Home
+    label: "12.04 · vai para a tela inicial (app em segundo plano)"
 - runScript:
     file: ../scripts/vinculo_para_recusar.js
     env:

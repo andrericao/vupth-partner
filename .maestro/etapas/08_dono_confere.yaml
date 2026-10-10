@@ -42,8 +42,9 @@ appId: ${APP_ID}
     text: "Ver fila detalhada"
     label: "08.25a · toca em Ver fila detalhada"
 - extendedWaitUntil:
-    visible:
-      id: "atualizar-fila-dono"
+    # o atualizar-fila-dono so existe na web (bateria 22:48): no Android, o
+    # cartao "Espera total" e o que so a fila do profissional tem
+    visible: "Espera total"
     timeout: 20000
     label: "08.26 · espera a fila do profissional"
 - scrollUntilVisible:
