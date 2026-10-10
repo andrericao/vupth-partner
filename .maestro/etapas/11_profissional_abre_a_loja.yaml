@@ -11,6 +11,14 @@ appId: ${APP_ID}
       LOJA_NOVA: "Loja N${output.TAG}"
       ESCOLHA: nova
     label: "11.01 · roda prof_abrir_loja (atender na loja nova)"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "11.01a · fecha a caixa do push, se vier (bateria 20:08)"
+- extendedWaitUntil:
+    visible:
+      id: "aba-perfil"
+    timeout: 30000
+    label: "11.01b · espera a area do profissional (aba-perfil)"
 - tapOn:
     id: "aba-perfil"
     label: "11.02 · toca em aba-perfil"

@@ -6,6 +6,8 @@
 # o commit (so o codigo novo o tem), no maximo 4 vezes.
 appId: ${APP_ID}
 ---
+- runFlow:
+    file: fechar_cortina.yaml
 - launchApp:
     clearState: true
 - extendedWaitUntil:
@@ -27,3 +29,5 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible: "Como você vai usar o Vupth?"
           timeout: 120000
+- runFlow:
+    file: fechar_cortina.yaml

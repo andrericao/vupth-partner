@@ -1,4 +1,7 @@
 # Fecha a caixa de AVISO (um botao so: "OK"/"Entendi") se ela estiver na tela.
+# Duas caixas: a do app (DialogoVupth, dialogo-botao-0) e a do push com o app
+# aberto, que e o Alert nativo do Android (android:id/button1) — bateria 20:08:
+# o "Novo pedido de corte" e o "Pedido de vínculo" ficavam na tela e comiam os toques.
 # Nunca use depois de uma CONFIRMACAO: la o botao 0 e o Cancelar.
 appId: ${APP_ID}
 ---
@@ -11,3 +14,10 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           id: "dialogo-botao-0"
+- runFlow:
+    when:
+      visible:
+        id: "android:id/button1"
+    commands:
+      - tapOn:
+          id: "android:id/button1"

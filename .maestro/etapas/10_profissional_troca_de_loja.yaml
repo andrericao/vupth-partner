@@ -53,8 +53,8 @@ appId: ${APP_ID}
 - pressKey:
     key: Enter
     label: "10.14 · tecla Enter"
-- hideKeyboard:
-    label: "10.15 · fecha o teclado"
+# Sem hideKeyboard: o Enter ja fecha o teclado, e o hideKeyboard sem teclado
+# vira Voltar — fechava a busca (bateria 20:08, a tela voltou para a Fila).
 # O nome tambem esta no campo: o card e o que fica abaixo da busca
 - extendedWaitUntil:
     visible:

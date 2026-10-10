@@ -46,3 +46,6 @@ appId: ${APP_ID}
     visible: ${output.PROF_PUSH}
     timeout: 20000
     label: "12.10 · o pedido de ${output.PROF_PUSH} está lá"
+- runFlow:
+    file: ../apoio/fechar_cortina.yaml
+    label: "12.99 · confere a cortina fechada"

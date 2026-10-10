@@ -18,9 +18,23 @@ appId: ${APP_ID}
       TAG: ${output.TAG}
       QUEM: Recusado
     label: "07.03 · script pedido_de_encaixe (o que sera recusado)"
-- tapOn:
-    id: "aba-encaixes"
-    label: "07.04 · toca em aba-encaixes"
+# Bateria 20:08: o push do pedido virou caixa ("Novo pedido de corte") no
+# instante do toque e o comeu — a tela ficou na Fila. Fecha a caixa e tenta de
+# novo ate os Encaixes mostrarem o pedido.
+- repeat:
+    times: 4
+    while:
+      notVisible: ".*${output.CLIENTE_RECUSADO}.*"
+    commands:
+      - runFlow:
+          file: ../apoio/fechar_aviso.yaml
+      - tapOn:
+          id: "aba-encaixes"
+      - extendedWaitUntil:
+          visible: ".*${output.CLIENTE_RECUSADO}.*"
+          timeout: 15000
+          optional: true
+    label: "07.04 · toca em aba-encaixes (fecha a caixa do push, se vier)"
 - extendedWaitUntil:
     visible: ".*${output.CLIENTE_RECUSADO}.*"
     timeout: 60000
@@ -30,6 +44,9 @@ appId: ${APP_ID}
     id: "encaixe-quando"
     text: "Quer assim que abrir"
     label: "07.05a · confere Quer assim que abrir"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.05b · fecha a caixa do push, se vier agora"
 - tapOn:
     text: "Recusar"
     label: "07.06 · toca em Recusar"
