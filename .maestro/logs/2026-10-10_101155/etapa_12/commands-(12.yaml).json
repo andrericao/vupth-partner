@@ -1,0 +1,4705 @@
+[ {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+      "label" : "12.A1 · etiqueta da rodada (TAG)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639148992,
+    "duration" : 54,
+    "sequenceNumber" : 3,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+        "label" : "12.A1 · etiqueta da rodada (TAG)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "${APP_ID}",
+      "clearState" : true,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639198492,
+    "duration" : 6036,
+    "sequenceNumber" : 21,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "clearState" : true,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639241752,
+    "duration" : 12,
+    "sequenceNumber" : 35,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639146651,
+    "duration" : 5,
+    "sequenceNumber" : 1,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Um SEGUNDO profissional pede vinculo a loja do dono pela API do staging — o\n// dono recusa na bateria (fluxo critico, DEC-7) e depois o convida.\n//\n// Tambem provoca o push \"Pedido de vinculo\" da 12 (push-na-bateria), com outro\n// profissional (QUEM).\n//\n// Entradas (env do runScript): API, EMAIL_DONO, SENHA, TAG e, opcional, QUEM\n// (\"Recusado\" se ausente — uma conta por QUEM)\n// Saida: output.PROF_<QUEM> (o nome, como aparece no card; ex.: PROF_RECUSADO)\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\nvar lojas = pedir(\"GET\", \"/establishment/mine\", null, entrar(EMAIL_DONO));\nif (!lojas || lojas.length === 0) throw new Error(\"o dono nao tem loja\");\n\nvar quem = typeof QUEM === \"undefined\" || !QUEM ? \"Recusado\" : String(QUEM);\nvar nome = quem + TAG;\nvar email = \"prof_m\" + TAG + \"_\" + quem.toLowerCase() + \"@teste.com\";\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\npedir(\"POST\", \"/professional/register\", { name: nome, specialty: \"NAIL_TECH\" }, entrar(email));\n// Login de novo: o token tem de carregar o papel PROFESSIONAL recem-criado.\n// O PEDIDO (PENDING), como o app faz em establishment-detail — o\n// /professional/affiliate vincula direto e nao deixa nada para o dono recusar.\npedir(\"POST\", \"/professional/me/affiliations\", { establishmentId: lojas[0].id }, entrar(email));\noutput[\"PROF_\" + quem.toUpperCase()] = nome;\n",
+      "env" : {
+        "EMAIL_DONO" : "${output.EMAIL_DONO}",
+        "TAG" : "${output.TAG}",
+        "QUEM" : "Push"
+      },
+      "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/vinculo_para_recusar.js",
+      "label" : "12.05 · um profissional pede vinculo pela API",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639287615,
+    "duration" : 5451,
+    "sequenceNumber" : 51,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Um SEGUNDO profissional pede vinculo a loja do dono pela API do staging — o\n// dono recusa na bateria (fluxo critico, DEC-7) e depois o convida.\n//\n// Tambem provoca o push \"Pedido de vinculo\" da 12 (push-na-bateria), com outro\n// profissional (QUEM).\n//\n// Entradas (env do runScript): API, EMAIL_DONO, SENHA, TAG e, opcional, QUEM\n// (\"Recusado\" se ausente — uma conta por QUEM)\n// Saida: output.PROF_<QUEM> (o nome, como aparece no card; ex.: PROF_RECUSADO)\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\nvar lojas = pedir(\"GET\", \"/establishment/mine\", null, entrar(EMAIL_DONO));\nif (!lojas || lojas.length === 0) throw new Error(\"o dono nao tem loja\");\n\nvar quem = typeof QUEM === \"undefined\" || !QUEM ? \"Recusado\" : String(QUEM);\nvar nome = quem + TAG;\nvar email = \"prof_m\" + TAG + \"_\" + quem.toLowerCase() + \"@teste.com\";\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\npedir(\"POST\", \"/professional/register\", { name: nome, specialty: \"NAIL_TECH\" }, entrar(email));\n// Login de novo: o token tem de carregar o papel PROFESSIONAL recem-criado.\n// O PEDIDO (PENDING), como o app faz em establishment-detail — o\n// /professional/affiliate vincula direto e nao deixa nada para o dono recusar.\npedir(\"POST\", \"/professional/me/affiliations\", { establishmentId: lojas[0].id }, entrar(email));\noutput[\"PROF_\" + quem.toUpperCase()] = nome;\n",
+        "env" : {
+          "EMAIL_DONO" : "prop_m101155@teste.com",
+          "TAG" : "101155",
+          "QUEM" : "Push"
+        },
+        "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/vinculo_para_recusar.js",
+        "label" : "12.05 · um profissional pede vinculo pela API",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "stopAppCommand" : {
+      "appId" : "${APP_ID}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639220624,
+    "duration" : 115,
+    "sequenceNumber" : 25,
+    "evaluatedCommand" : {
+      "stopAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "swipeCommand" : {
+      "startRelative" : "50%, 0%",
+      "endRelative" : "50%, 80%",
+      "duration" : 400,
+      "label" : "12.06 · abre a gaveta de notificações",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639293067,
+    "duration" : 1838,
+    "sequenceNumber" : 52,
+    "evaluatedCommand" : {
+      "swipeCommand" : {
+        "startRelative" : "50%, 0%",
+        "endRelative" : "50%, 80%",
+        "duration" : 400,
+        "label" : "12.06 · abre a gaveta de notificações",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "${output.LOJA}",
+          "optional" : false
+        }
+      },
+      "timeout" : "30000",
+      "label" : "12.02 · espera ${output.LOJA} (o token do push ja foi registrado)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639263629,
+    "duration" : 1248,
+    "sequenceNumber" : 43,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Loja M101155",
+            "optional" : false
+          }
+        },
+        "timeout" : "30000",
+        "label" : "12.02 · espera Loja M101155 (o token do push ja foi registrado)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "EMAIL" : "${output.EMAIL_DONO}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639241737,
+    "duration" : 14,
+    "sequenceNumber" : 34,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "EMAIL" : "prop_m101155@teste.com"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Pedido de vínculo",
+          "optional" : false
+        }
+      },
+      "timeout" : "90000",
+      "label" : "12.07 · espera o push Pedido de vínculo",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639294906,
+    "duration" : 387,
+    "sequenceNumber" : 53,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Pedido de vínculo",
+            "optional" : false
+          }
+        },
+        "timeout" : "90000",
+        "label" : "12.07 · espera o push Pedido de vínculo",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "3000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639181776,
+    "duration" : 1308,
+    "sequenceNumber" : 16,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "3000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "${APP_ID}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639220740,
+    "duration" : 6549,
+    "sequenceNumber" : 26,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "${APP_ID}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639158391,
+    "duration" : 6983,
+    "sequenceNumber" : 12,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639234383,
+    "duration" : 5,
+    "sequenceNumber" : 29,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${EMAIL}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639247273,
+    "duration" : 4447,
+    "sequenceNumber" : 38,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "prop_m101155@teste.com",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639264886,
+    "duration" : 5,
+    "sequenceNumber" : 45,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "pressKeyCommand" : {
+              "code" : "BACK",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "swipeCommand" : {
+                  "startRelative" : "50%, 95%",
+                  "endRelative" : "50%, 5%",
+                  "duration" : 400,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_cortina.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639151236,
+    "duration" : 7154,
+    "sequenceNumber" : 9,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "pressKeyCommand" : {
+                "code" : "BACK",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "swipeCommand" : {
+                    "startRelative" : "50%, 95%",
+                    "endRelative" : "50%, 5%",
+                    "duration" : 400,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_cortina.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "3000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "12.03 · roda fechar_aviso",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639264879,
+    "duration" : 10204,
+    "sequenceNumber" : 44,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "3000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "12.03 · roda fechar_aviso",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "hideKeyboardCommand" : {
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639259140,
+    "duration" : 2014,
+    "sequenceNumber" : 41,
+    "evaluatedCommand" : {
+      "hideKeyboardCommand" : {
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "timeout" : "120000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639204530,
+    "duration" : 4564,
+    "sequenceNumber" : 22,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "(aba-perfil|aba-menu)",
+          "optional" : false
+        }
+      },
+      "timeout" : "15000",
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "WARNED",
+    "timestamp" : 1791639165377,
+    "sequenceNumber" : 13,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "(aba-perfil|aba-menu)",
+            "optional" : false
+          }
+        },
+        "timeout" : "15000",
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-email",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639243897,
+    "duration" : 3375,
+    "sequenceNumber" : 37,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-email",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}",
+      "label" : "12.A2 · e-mail do dono",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639149049,
+    "duration" : 19,
+    "sequenceNumber" : 4,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}",
+        "label" : "12.A2 · e-mail do dono",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639151244,
+    "duration" : 8,
+    "sequenceNumber" : 10,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "3000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639181758,
+    "duration" : 8882,
+    "sequenceNumber" : 14,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "3000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "pressKeyCommand" : {
+              "code" : "BACK",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "swipeCommand" : {
+                  "startRelative" : "50%, 95%",
+                  "endRelative" : "50%, 5%",
+                  "duration" : 400,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_cortina.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639234377,
+    "duration" : 7331,
+    "sequenceNumber" : 28,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "pressKeyCommand" : {
+                "code" : "BACK",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "swipeCommand" : {
+                    "startRelative" : "50%, 95%",
+                    "endRelative" : "50%, 5%",
+                    "duration" : 400,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_cortina.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "pressKeyCommand" : {
+      "code" : "HOME",
+      "label" : "12.04 · vai para a tela inicial (app em segundo plano)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639286423,
+    "duration" : 1191,
+    "sequenceNumber" : 50,
+    "evaluatedCommand" : {
+      "pressKeyCommand" : {
+        "code" : "HOME",
+        "label" : "12.04 · vai para a tela inicial (app em segundo plano)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.LOJA = 'Loja M' + output.TAG}",
+      "label" : "12.A4 · nome da loja",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639149071,
+    "duration" : 11,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.LOJA = 'Loja M' + output.TAG}",
+        "label" : "12.A4 · nome da loja",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Prepara pela API do staging o estado que a etapa ETAPA espera (bateria-nao-para,\n// Andre 03/10): cada etapa roda sozinha, mesmo que a anterior tenha falhado.\n// Tudo e idempotente — se a etapa anterior passou, o que ela criou pelo app e\n// reaproveitado; se falhou, o preparo cria o que faltou.\n//\n// Entradas (env do runScript): API, SENHA, TAG, ETAPA (1..8)\n// Saidas: output.CLIENTE1 e output.CLIENTE2 nas etapas 6 e 8 (o historico)\n\nvar etapa = parseInt(ETAPA, 10);\nvar EMAIL_DONO = \"prop_m\" + TAG + \"@teste.com\";\nvar EMAIL_PROF = \"prof_m\" + TAG + \"@teste.com\";\nvar LOJA = \"Loja M\" + TAG;\nvar PROF = \"Prof\" + TAG;\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"preparo da etapa \" + etapa + \": \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\n// Entra; sem a conta, cria e entra.\nfunction conta(email) {\n  var r = chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA });\n  if (r.status < 300) return r.corpo.tokens.access_token;\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// Login de novo: o token tem de carregar o papel recem-criado (OWNER/PROFESSIONAL).\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// ── A partir da 02: o dono com a loja aberta 24 horas (o que a 01 faz) ──\nvar loja = null;\nvar tokenDono = null;\nif (etapa >= 2) {\n  tokenDono = conta(EMAIL_DONO);\n  var lojas = chamar(\"GET\", \"/establishment/mine\", null, tokenDono);\n  if (lojas.status < 300 && lojas.corpo && lojas.corpo.length > 0) {\n    loja = lojas.corpo[0];\n  } else {\n    pedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Dono \" + TAG }, tokenDono);\n    loja = pedir(\"POST\", \"/establishment/quick-create\", { name: LOJA, serviceType: \"BARBER\" }, tokenDono);\n    tokenDono = entrar(EMAIL_DONO);\n    var dias = [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\", \"SUNDAY\"];\n    pedir(\"PUT\", \"/establishment/\" + loja.id + \"/hours/weekly\", {\n      days: dias.map(function (d) { return { day: d, closed: false, opens: \"00:00\", closes: \"00:00\" }; })\n    }, tokenDono);\n  }\n}\n\n// ── A partir da 03: o profissional cadastrado (o que a 02 faz) ──\nvar prof = null;\nvar tokenProf = null;\nif (etapa >= 3) {\n  tokenProf = conta(EMAIL_PROF);\n  var me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  if (me.status >= 300) {\n    pedir(\"POST\", \"/professional/register\", { name: PROF, specialty: \"NAIL_TECH\" }, tokenProf);\n    tokenProf = entrar(EMAIL_PROF);\n    me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  }\n  prof = me.corpo;\n}\n\n// O pedido pendente do profissional, lido do lado dele: a lista da loja nem\n// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).\nfunction pedidoPendente() {\n  var r = chamar(\"GET\", \"/professional/me/affiliations\", null, tokenProf);\n  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];\n  for (var i = 0; i < lista.length; i++) {\n    if (String(lista[i].status).toUpperCase() === \"PENDING\") return lista[i];\n  }\n  return null;\n}\n\n// ── 03: o pedido de vinculo pendente, para o dono aceitar ──\n// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.\nif (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {\n  var pedido = chamar(\"POST\", \"/professional/me/affiliations\", { establishmentId: loja.id }, tokenProf);\n  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === \"AFFILIATION_ALREADY_PENDING\";\n  if (pedido.status >= 300 && !jaPendente) {\n    throw new Error(\"preparo da etapa 3: POST /professional/me/affiliations -> \" + pedido.status + \" \" + JSON.stringify(pedido.corpo));\n  }\n}\n\n// ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──\nif (etapa >= 4 && !prof.establishment_id) {\n  var pendente = pedidoPendente();\n  if (pendente) pedir(\"PATCH\", \"/affiliations/\" + pendente.id + \"/accept\", null, tokenDono);\n  else pedir(\"POST\", \"/professional/affiliate\", { establishmentId: loja.id }, tokenProf);\n  tokenProf = entrar(EMAIL_PROF);\n  prof = pedir(\"GET\", \"/professional/me\", null, tokenProf);\n}\n\n// ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──\nvar servicos = [];\nif (etapa >= 5) {\n  servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf) || [];\n  if (servicos.length === 0) {\n    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)\n    pedir(\"POST\", \"/professional-queue/\" + prof.id + \"/add-service-items\", {\n      serviceItemType: \"MANICURE\", customName: \"Manicure \" + TAG,\n      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60\n    }, tokenProf);\n    servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf);\n  }\n  if (prof.work_status !== \"WORKING\") {\n    pedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, tokenProf);\n  }\n  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false\n  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).\n  if (prof.accepting_new === false || prof.acceptingNew === false) {\n    pedir(\"PATCH\", \"/professional/me/accepting-new\", { value: true }, tokenProf);\n  }\n}\n\n// ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──\n// Clientes proprios do preparo (sufixo h): nao dependem de a 05 ter passado.\nfunction clienteNaFila(n) {\n  var nome = \"Cliente\" + n + \"h\" + TAG;\n  var token = conta(\"client_\" + TAG + \"_h\" + n + \"_e\" + etapa + \"@teste.com\");\n  pedir(\"PATCH\", \"/profile/general-infos\", { first_name: nome }, token);\n  var at = pedir(\"POST\", \"/attendances\", {\n    professionalId: prof.id,\n    establishmentId: prof.establishment_id,\n    serviceItemIds: [servicos[0].id],\n    scheduledTime: new Date().toISOString()\n  }, token);\n  return { nome: nome, id: at.id };\n}\n\nif (etapa === 6 || etapa === 8) {\n  var finalizado = clienteNaFila(1);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/start\", null, tokenProf);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/finish\", null, tokenProf);\n  var retirado = clienteNaFila(2);\n  pedir(\"DELETE\", \"/professional-queue/\" + retirado.id + \"/remove\", null, tokenProf);\n  output.CLIENTE1 = finalizado.nome;\n  output.CLIENTE2 = retirado.nome;\n}\n",
+      "env" : {
+        "TAG" : "${output.TAG}",
+        "ETAPA" : "2"
+      },
+      "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/preparo.js",
+      "label" : "12.A6 · preparo pela API (o dono com a loja)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639149083,
+    "duration" : 2061,
+    "sequenceNumber" : 6,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Prepara pela API do staging o estado que a etapa ETAPA espera (bateria-nao-para,\n// Andre 03/10): cada etapa roda sozinha, mesmo que a anterior tenha falhado.\n// Tudo e idempotente — se a etapa anterior passou, o que ela criou pelo app e\n// reaproveitado; se falhou, o preparo cria o que faltou.\n//\n// Entradas (env do runScript): API, SENHA, TAG, ETAPA (1..8)\n// Saidas: output.CLIENTE1 e output.CLIENTE2 nas etapas 6 e 8 (o historico)\n\nvar etapa = parseInt(ETAPA, 10);\nvar EMAIL_DONO = \"prop_m\" + TAG + \"@teste.com\";\nvar EMAIL_PROF = \"prof_m\" + TAG + \"@teste.com\";\nvar LOJA = \"Loja M\" + TAG;\nvar PROF = \"Prof\" + TAG;\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"preparo da etapa \" + etapa + \": \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\n// Entra; sem a conta, cria e entra.\nfunction conta(email) {\n  var r = chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA });\n  if (r.status < 300) return r.corpo.tokens.access_token;\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// Login de novo: o token tem de carregar o papel recem-criado (OWNER/PROFESSIONAL).\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// ── A partir da 02: o dono com a loja aberta 24 horas (o que a 01 faz) ──\nvar loja = null;\nvar tokenDono = null;\nif (etapa >= 2) {\n  tokenDono = conta(EMAIL_DONO);\n  var lojas = chamar(\"GET\", \"/establishment/mine\", null, tokenDono);\n  if (lojas.status < 300 && lojas.corpo && lojas.corpo.length > 0) {\n    loja = lojas.corpo[0];\n  } else {\n    pedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Dono \" + TAG }, tokenDono);\n    loja = pedir(\"POST\", \"/establishment/quick-create\", { name: LOJA, serviceType: \"BARBER\" }, tokenDono);\n    tokenDono = entrar(EMAIL_DONO);\n    var dias = [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\", \"SUNDAY\"];\n    pedir(\"PUT\", \"/establishment/\" + loja.id + \"/hours/weekly\", {\n      days: dias.map(function (d) { return { day: d, closed: false, opens: \"00:00\", closes: \"00:00\" }; })\n    }, tokenDono);\n  }\n}\n\n// ── A partir da 03: o profissional cadastrado (o que a 02 faz) ──\nvar prof = null;\nvar tokenProf = null;\nif (etapa >= 3) {\n  tokenProf = conta(EMAIL_PROF);\n  var me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  if (me.status >= 300) {\n    pedir(\"POST\", \"/professional/register\", { name: PROF, specialty: \"NAIL_TECH\" }, tokenProf);\n    tokenProf = entrar(EMAIL_PROF);\n    me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  }\n  prof = me.corpo;\n}\n\n// O pedido pendente do profissional, lido do lado dele: a lista da loja nem\n// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).\nfunction pedidoPendente() {\n  var r = chamar(\"GET\", \"/professional/me/affiliations\", null, tokenProf);\n  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];\n  for (var i = 0; i < lista.length; i++) {\n    if (String(lista[i].status).toUpperCase() === \"PENDING\") return lista[i];\n  }\n  return null;\n}\n\n// ── 03: o pedido de vinculo pendente, para o dono aceitar ──\n// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.\nif (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {\n  var pedido = chamar(\"POST\", \"/professional/me/affiliations\", { establishmentId: loja.id }, tokenProf);\n  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === \"AFFILIATION_ALREADY_PENDING\";\n  if (pedido.status >= 300 && !jaPendente) {\n    throw new Error(\"preparo da etapa 3: POST /professional/me/affiliations -> \" + pedido.status + \" \" + JSON.stringify(pedido.corpo));\n  }\n}\n\n// ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──\nif (etapa >= 4 && !prof.establishment_id) {\n  var pendente = pedidoPendente();\n  if (pendente) pedir(\"PATCH\", \"/affiliations/\" + pendente.id + \"/accept\", null, tokenDono);\n  else pedir(\"POST\", \"/professional/affiliate\", { establishmentId: loja.id }, tokenProf);\n  tokenProf = entrar(EMAIL_PROF);\n  prof = pedir(\"GET\", \"/professional/me\", null, tokenProf);\n}\n\n// ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──\nvar servicos = [];\nif (etapa >= 5) {\n  servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf) || [];\n  if (servicos.length === 0) {\n    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)\n    pedir(\"POST\", \"/professional-queue/\" + prof.id + \"/add-service-items\", {\n      serviceItemType: \"MANICURE\", customName: \"Manicure \" + TAG,\n      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60\n    }, tokenProf);\n    servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf);\n  }\n  if (prof.work_status !== \"WORKING\") {\n    pedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, tokenProf);\n  }\n  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false\n  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).\n  if (prof.accepting_new === false || prof.acceptingNew === false) {\n    pedir(\"PATCH\", \"/professional/me/accepting-new\", { value: true }, tokenProf);\n  }\n}\n\n// ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──\n// Clientes proprios do preparo (sufixo h): nao dependem de a 05 ter passado.\nfunction clienteNaFila(n) {\n  var nome = \"Cliente\" + n + \"h\" + TAG;\n  var token = conta(\"client_\" + TAG + \"_h\" + n + \"_e\" + etapa + \"@teste.com\");\n  pedir(\"PATCH\", \"/profile/general-infos\", { first_name: nome }, token);\n  var at = pedir(\"POST\", \"/attendances\", {\n    professionalId: prof.id,\n    establishmentId: prof.establishment_id,\n    serviceItemIds: [servicos[0].id],\n    scheduledTime: new Date().toISOString()\n  }, token);\n  return { nome: nome, id: at.id };\n}\n\nif (etapa === 6 || etapa === 8) {\n  var finalizado = clienteNaFila(1);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/start\", null, tokenProf);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/finish\", null, tokenProf);\n  var retirado = clienteNaFila(2);\n  pedir(\"DELETE\", \"/professional-queue/\" + retirado.id + \"/remove\", null, tokenProf);\n  output.CLIENTE1 = finalizado.nome;\n  output.CLIENTE2 = retirado.nome;\n}\n",
+        "env" : {
+          "TAG" : "101155",
+          "ETAPA" : "2"
+        },
+        "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/preparo.js",
+        "label" : "12.A6 · preparo pela API (o dono com a loja)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639298996,
+    "duration" : 10,
+    "sequenceNumber" : 58,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639181768,
+    "duration" : 6,
+    "sequenceNumber" : 15,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${SENHA}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639255636,
+    "duration" : 3500,
+    "sequenceNumber" : 40,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "Teste@123",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "pressKeyCommand" : {
+          "code" : "BACK",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "swipeCommand" : {
+              "startRelative" : "50%, 95%",
+              "endRelative" : "50%, 5%",
+              "duration" : 400,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639299007,
+    "sequenceNumber" : 59,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "pressKeyCommand" : {
+            "code" : "BACK",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "swipeCommand" : {
+                "startRelative" : "50%, 95%",
+                "endRelative" : "50%, 5%",
+                "duration" : 400,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "3000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639264892,
+    "duration" : 1266,
+    "sequenceNumber" : 46,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "3000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639151227,
+    "duration" : 8,
+    "sequenceNumber" : 8,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639241722,
+    "duration" : 6,
+    "sequenceNumber" : 32,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "pressKeyCommand" : {
+              "code" : "BACK",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "swipeCommand" : {
+                  "startRelative" : "50%, 95%",
+                  "endRelative" : "50%, 5%",
+                  "duration" : 400,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/fechar_cortina.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "12.99 · confere a cortina fechada",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639298984,
+    "duration" : 7113,
+    "sequenceNumber" : 57,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "pressKeyCommand" : {
+                "code" : "BACK",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "swipeCommand" : {
+                    "startRelative" : "50%, 95%",
+                    "endRelative" : "50%, 5%",
+                    "duration" : 400,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/fechar_cortina.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "12.99 · confere a cortina fechada",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-password",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639251721,
+    "duration" : 3910,
+    "sequenceNumber" : 39,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-password",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Solicitações",
+          "optional" : false
+        }
+      },
+      "timeout" : "60000",
+      "label" : "12.09 · abriu Solicitações",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639298729,
+    "duration" : 114,
+    "sequenceNumber" : 55,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Solicitações",
+            "optional" : false
+          }
+        },
+        "timeout" : "60000",
+        "label" : "12.09 · abriu Solicitações",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "${output.PROF_PUSH}",
+          "optional" : false
+        }
+      },
+      "timeout" : "20000",
+      "label" : "12.10 · o pedido de ${output.PROF_PUSH} está lá",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639298844,
+    "duration" : 139,
+    "sequenceNumber" : 56,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Push101155",
+            "optional" : false
+          }
+        },
+        "timeout" : "20000",
+        "label" : "12.10 · o pedido de Push101155 está lá",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "EMAIL" : "${output.EMAIL_DONO}"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "go-login",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-email",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "inputTextCommand" : {
+          "text" : "${EMAIL}",
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-password",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "inputTextCommand" : {
+          "text" : "${SENHA}",
+          "optional" : false
+        }
+      }, {
+        "hideKeyboardCommand" : {
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-submit",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/entrar.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "12.01 · entra como o dono",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639241729,
+    "duration" : 21899,
+    "sequenceNumber" : 33,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "EMAIL" : "${output.EMAIL_DONO}"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "go-login",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-email",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "inputTextCommand" : {
+            "text" : "${EMAIL}",
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-password",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "inputTextCommand" : {
+            "text" : "${SENHA}",
+            "optional" : false
+          }
+        }, {
+          "hideKeyboardCommand" : {
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-submit",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/entrar.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "12.01 · entra como o dono",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Pedido de vínculo",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "label" : "12.08 · toca no push",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639295294,
+    "duration" : 3434,
+    "sequenceNumber" : 54,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Pedido de vínculo",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "label" : "12.08 · toca no push",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-submit",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639261158,
+    "duration" : 2467,
+    "sequenceNumber" : 42,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-submit",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "__nunca_aparece__",
+          "optional" : false
+        }
+      },
+      "timeout" : "10000",
+      "label" : "12.03a · espera 10 s o registro do token do push",
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "WARNED",
+    "timestamp" : 1791639275084,
+    "sequenceNumber" : 49,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "__nunca_aparece__",
+            "optional" : false
+          }
+        },
+        "timeout" : "10000",
+        "label" : "12.03a · espera 10 s o registro do token do push",
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "go-login",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639241765,
+    "duration" : 2131,
+    "sequenceNumber" : 36,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "go-login",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "pressKeyCommand" : {
+                  "code" : "BACK",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "swipeCommand" : {
+                      "startRelative" : "50%, 95%",
+                      "endRelative" : "50%, 5%",
+                      "duration" : 400,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_cortina.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "launchAppCommand" : {
+          "appId" : "${APP_ID}",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "(aba-perfil|aba-menu)",
+              "optional" : false
+            }
+          },
+          "timeout" : "15000",
+          "optional" : true
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "3000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "aba-perfil",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "3000",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_aviso.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "scrollUntilVisible" : {
+              "selector" : {
+                "textRegex" : "Sair da conta",
+                "optional" : false
+              },
+              "direction" : "DOWN",
+              "scrollDuration" : "40",
+              "visibilityPercentage" : 100,
+              "timeout" : "20000",
+              "centerElement" : false,
+              "originalSpeedValue" : "40",
+              "optional" : false,
+              "visibilityPercentageNormalized" : 1.0
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "Sair da conta",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-1",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "15000",
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "confirmar.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "Como você vai usar o Vupth?",
+                  "optional" : false
+                }
+              },
+              "timeout" : "20000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "aba-perfil",
+              "optional" : false
+            }
+          },
+          "sourceDescription" : "sair_profissional.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "aba-menu",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "scrollUntilVisible" : {
+              "selector" : {
+                "textRegex" : "Sair da conta",
+                "optional" : false
+              },
+              "direction" : "DOWN",
+              "scrollDuration" : "40",
+              "visibilityPercentage" : 100,
+              "timeout" : "20000",
+              "centerElement" : false,
+              "originalSpeedValue" : "40",
+              "optional" : false,
+              "visibilityPercentageNormalized" : 1.0
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "Sair da conta",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-1",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "15000",
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "confirmar.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "Como você vai usar o Vupth?",
+                  "optional" : false
+                }
+              },
+              "timeout" : "20000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "aba-menu",
+              "optional" : false
+            }
+          },
+          "sourceDescription" : "sair_dono.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "launchAppCommand" : {
+          "appId" : "${APP_ID}",
+          "clearState" : true,
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "120000",
+          "optional" : false
+        }
+      }, {
+        "repeatCommand" : {
+          "times" : "4",
+          "condition" : {
+            "notVisible" : {
+              "idRegex" : "app-commit",
+              "optional" : false
+            }
+          },
+          "commands" : [ {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "app-commit",
+                  "optional" : false
+                }
+              },
+              "timeout" : "15000",
+              "optional" : true
+            }
+          }, {
+            "stopAppCommand" : {
+              "appId" : "${APP_ID}",
+              "optional" : false
+            }
+          }, {
+            "launchAppCommand" : {
+              "appId" : "${APP_ID}",
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "Como você vai usar o Vupth?",
+                  "optional" : false
+                }
+              },
+              "timeout" : "120000",
+              "optional" : false
+            }
+          } ],
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "pressKeyCommand" : {
+                  "code" : "BACK",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "swipeCommand" : {
+                      "startRelative" : "50%, 95%",
+                      "endRelative" : "50%, 5%",
+                      "duration" : 400,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_cortina.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/abrir_com_ota.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "12.A7 · abre o app do zero, ja com o OTA",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639151146,
+    "duration" : 90564,
+    "sequenceNumber" : 7,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "pressKeyCommand" : {
+                    "code" : "BACK",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "swipeCommand" : {
+                        "startRelative" : "50%, 95%",
+                        "endRelative" : "50%, 5%",
+                        "duration" : 400,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_cortina.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "launchAppCommand" : {
+            "appId" : "${APP_ID}",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "(aba-perfil|aba-menu)",
+                "optional" : false
+              }
+            },
+            "timeout" : "15000",
+            "optional" : true
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "3000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "aba-perfil",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "3000",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-0",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "android:id/button1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_aviso.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "scrollUntilVisible" : {
+                "selector" : {
+                  "textRegex" : "Sair da conta",
+                  "optional" : false
+                },
+                "direction" : "DOWN",
+                "scrollDuration" : "40",
+                "visibilityPercentage" : 100,
+                "timeout" : "20000",
+                "centerElement" : false,
+                "originalSpeedValue" : "40",
+                "optional" : false,
+                "visibilityPercentageNormalized" : 1.0
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "Sair da conta",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-1",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "15000",
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "confirmar.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "Como você vai usar o Vupth?",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "20000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "aba-perfil",
+                "optional" : false
+              }
+            },
+            "sourceDescription" : "sair_profissional.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "aba-menu",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "scrollUntilVisible" : {
+                "selector" : {
+                  "textRegex" : "Sair da conta",
+                  "optional" : false
+                },
+                "direction" : "DOWN",
+                "scrollDuration" : "40",
+                "visibilityPercentage" : 100,
+                "timeout" : "20000",
+                "centerElement" : false,
+                "originalSpeedValue" : "40",
+                "optional" : false,
+                "visibilityPercentageNormalized" : 1.0
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "Sair da conta",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-1",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "15000",
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "confirmar.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "Como você vai usar o Vupth?",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "20000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "aba-menu",
+                "optional" : false
+              }
+            },
+            "sourceDescription" : "sair_dono.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "launchAppCommand" : {
+            "appId" : "${APP_ID}",
+            "clearState" : true,
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "120000",
+            "optional" : false
+          }
+        }, {
+          "repeatCommand" : {
+            "times" : "4",
+            "condition" : {
+              "notVisible" : {
+                "idRegex" : "app-commit",
+                "optional" : false
+              }
+            },
+            "commands" : [ {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "app-commit",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "15000",
+                "optional" : true
+              }
+            }, {
+              "stopAppCommand" : {
+                "appId" : "${APP_ID}",
+                "optional" : false
+              }
+            }, {
+              "launchAppCommand" : {
+                "appId" : "${APP_ID}",
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "Como você vai usar o Vupth?",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "120000",
+                "optional" : false
+              }
+            } ],
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "pressKeyCommand" : {
+                    "code" : "BACK",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "swipeCommand" : {
+                        "startRelative" : "50%, 95%",
+                        "endRelative" : "50%, 5%",
+                        "duration" : 400,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_cortina.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/abrir_com_ota.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "12.A7 · abre o app do zero, ja com o OTA",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639183086,
+    "sequenceNumber" : 17,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "aba-menu",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "scrollUntilVisible" : {
+          "selector" : {
+            "textRegex" : "Sair da conta",
+            "optional" : false
+          },
+          "direction" : "DOWN",
+          "scrollDuration" : "40",
+          "visibilityPercentage" : 100,
+          "timeout" : "20000",
+          "centerElement" : false,
+          "originalSpeedValue" : "40",
+          "optional" : false,
+          "visibilityPercentageNormalized" : 1.0
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Sair da conta",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-1",
+                  "optional" : false
+                }
+              },
+              "timeout" : "15000",
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "confirmar.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "20000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "aba-menu",
+          "optional" : false
+        }
+      },
+      "sourceDescription" : "sair_dono.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639198006,
+    "sequenceNumber" : 20,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "aba-menu",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "scrollUntilVisible" : {
+            "selector" : {
+              "textRegex" : "Sair da conta",
+              "optional" : false
+            },
+            "direction" : "DOWN",
+            "scrollDuration" : "40",
+            "visibilityPercentage" : 100,
+            "timeout" : "20000",
+            "centerElement" : false,
+            "originalSpeedValue" : "40",
+            "optional" : false,
+            "visibilityPercentageNormalized" : 1.0
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Sair da conta",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-1",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "15000",
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "confirmar.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "20000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "aba-menu",
+            "optional" : false
+          }
+        },
+        "sourceDescription" : "sair_dono.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "timeout" : "120000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639227290,
+    "duration" : 4426,
+    "sequenceNumber" : 27,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639146659,
+    "duration" : 2331,
+    "sequenceNumber" : 2,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/button1",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639190280,
+    "sequenceNumber" : 18,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123",
+        "COMMIT" : "f1e777b,f65c8fb,22ff279,cd83088,cc8f8e3,60f7fea",
+        "SUPERVISAO" : "0",
+        "TAG" : "101155",
+        "MAESTRO_FILENAME" : "12",
+        "MAESTRO_DEVICE_UDID" : "ZF524LC5HC",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639146624,
+    "duration" : 25,
+    "sequenceNumber" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123",
+          "COMMIT" : "f1e777b,f65c8fb,22ff279,cd83088,cc8f8e3,60f7fea",
+          "SUPERVISAO" : "0",
+          "TAG" : "101155",
+          "MAESTRO_FILENAME" : "12",
+          "MAESTRO_DEVICE_UDID" : "ZF524LC5HC",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "aba-perfil",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "3000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "scrollUntilVisible" : {
+          "selector" : {
+            "textRegex" : "Sair da conta",
+            "optional" : false
+          },
+          "direction" : "DOWN",
+          "scrollDuration" : "40",
+          "visibilityPercentage" : 100,
+          "timeout" : "20000",
+          "centerElement" : false,
+          "originalSpeedValue" : "40",
+          "optional" : false,
+          "visibilityPercentageNormalized" : 1.0
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Sair da conta",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-1",
+                  "optional" : false
+                }
+              },
+              "timeout" : "15000",
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "confirmar.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "20000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "aba-perfil",
+          "optional" : false
+        }
+      },
+      "sourceDescription" : "sair_profissional.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639190641,
+    "sequenceNumber" : 19,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "aba-perfil",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "3000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "scrollUntilVisible" : {
+            "selector" : {
+              "textRegex" : "Sair da conta",
+              "optional" : false
+            },
+            "direction" : "DOWN",
+            "scrollDuration" : "40",
+            "visibilityPercentage" : 100,
+            "timeout" : "20000",
+            "centerElement" : false,
+            "originalSpeedValue" : "40",
+            "optional" : false,
+            "visibilityPercentageNormalized" : 1.0
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Sair da conta",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-1",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "15000",
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "confirmar.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "20000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "aba-perfil",
+            "optional" : false
+          }
+        },
+        "sourceDescription" : "sair_profissional.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "pressKeyCommand" : {
+          "code" : "BACK",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "swipeCommand" : {
+              "startRelative" : "50%, 95%",
+              "endRelative" : "50%, 5%",
+              "duration" : 400,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639151253,
+    "sequenceNumber" : 11,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "pressKeyCommand" : {
+            "code" : "BACK",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "swipeCommand" : {
+                "startRelative" : "50%, 95%",
+                "endRelative" : "50%, 5%",
+                "duration" : 400,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "app-commit",
+          "optional" : false
+        }
+      },
+      "timeout" : "15000",
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "WARNED",
+    "timestamp" : 1791639209785,
+    "sequenceNumber" : 24,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "app-commit",
+            "optional" : false
+          }
+        },
+        "timeout" : "15000",
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "pressKeyCommand" : {
+          "code" : "BACK",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "swipeCommand" : {
+              "startRelative" : "50%, 95%",
+              "endRelative" : "50%, 5%",
+              "duration" : 400,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639234389,
+    "sequenceNumber" : 30,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "pressKeyCommand" : {
+            "code" : "BACK",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "swipeCommand" : {
+                "startRelative" : "50%, 95%",
+                "endRelative" : "50%, 5%",
+                "duration" : 400,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639266163,
+    "sequenceNumber" : 47,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "repeatCommand" : {
+      "times" : "4",
+      "condition" : {
+        "notVisible" : {
+          "idRegex" : "app-commit",
+          "optional" : false
+        }
+      },
+      "commands" : [ {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "app-commit",
+              "optional" : false
+            }
+          },
+          "timeout" : "15000",
+          "optional" : true
+        }
+      }, {
+        "stopAppCommand" : {
+          "appId" : "${APP_ID}",
+          "optional" : false
+        }
+      }, {
+        "launchAppCommand" : {
+          "appId" : "${APP_ID}",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "120000",
+          "optional" : false
+        }
+      } ],
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639209096,
+    "duration" : 25280,
+    "sequenceNumber" : 23,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "4",
+        "condition" : {
+          "notVisible" : {
+            "idRegex" : "app-commit",
+            "optional" : false
+          }
+        },
+        "commands" : [ {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "app-commit",
+                "optional" : false
+              }
+            },
+            "timeout" : "15000",
+            "optional" : true
+          }
+        }, {
+          "stopAppCommand" : {
+            "appId" : "${APP_ID}",
+            "optional" : false
+          }
+        }, {
+          "launchAppCommand" : {
+            "appId" : "${APP_ID}",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "120000",
+            "optional" : false
+          }
+        } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "defineVariablesCommand" : {
+              "env" : {
+                "EMAIL" : "${output.EMAIL_DONO}"
+              },
+              "optional" : false
+            }
+          }, {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "go-login",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "login-email",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "inputTextCommand" : {
+              "text" : "${EMAIL}",
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "login-password",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "inputTextCommand" : {
+              "text" : "${SENHA}",
+              "optional" : false
+            }
+          }, {
+            "hideKeyboardCommand" : {
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "login-submit",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "../apoio/entrar.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "label" : "12.01 · entra como o dono",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "${output.LOJA}",
+              "optional" : false
+            }
+          },
+          "timeout" : "30000",
+          "label" : "12.02 · espera ${output.LOJA} (o token do push ja foi registrado)",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "3000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "../apoio/fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "label" : "12.03 · roda fechar_aviso",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "__nunca_aparece__",
+              "optional" : false
+            }
+          },
+          "timeout" : "10000",
+          "label" : "12.03a · espera 10 s o registro do token do push",
+          "optional" : true
+        }
+      }, {
+        "pressKeyCommand" : {
+          "code" : "HOME",
+          "label" : "12.04 · vai para a tela inicial (app em segundo plano)",
+          "optional" : false
+        }
+      }, {
+        "runScriptCommand" : {
+          "script" : "// Um SEGUNDO profissional pede vinculo a loja do dono pela API do staging — o\n// dono recusa na bateria (fluxo critico, DEC-7) e depois o convida.\n//\n// Tambem provoca o push \"Pedido de vinculo\" da 12 (push-na-bateria), com outro\n// profissional (QUEM).\n//\n// Entradas (env do runScript): API, EMAIL_DONO, SENHA, TAG e, opcional, QUEM\n// (\"Recusado\" se ausente — uma conta por QUEM)\n// Saida: output.PROF_<QUEM> (o nome, como aparece no card; ex.: PROF_RECUSADO)\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\nvar lojas = pedir(\"GET\", \"/establishment/mine\", null, entrar(EMAIL_DONO));\nif (!lojas || lojas.length === 0) throw new Error(\"o dono nao tem loja\");\n\nvar quem = typeof QUEM === \"undefined\" || !QUEM ? \"Recusado\" : String(QUEM);\nvar nome = quem + TAG;\nvar email = \"prof_m\" + TAG + \"_\" + quem.toLowerCase() + \"@teste.com\";\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\npedir(\"POST\", \"/professional/register\", { name: nome, specialty: \"NAIL_TECH\" }, entrar(email));\n// Login de novo: o token tem de carregar o papel PROFESSIONAL recem-criado.\n// O PEDIDO (PENDING), como o app faz em establishment-detail — o\n// /professional/affiliate vincula direto e nao deixa nada para o dono recusar.\npedir(\"POST\", \"/professional/me/affiliations\", { establishmentId: lojas[0].id }, entrar(email));\noutput[\"PROF_\" + quem.toUpperCase()] = nome;\n",
+          "env" : {
+            "EMAIL_DONO" : "${output.EMAIL_DONO}",
+            "TAG" : "${output.TAG}",
+            "QUEM" : "Push"
+          },
+          "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/vinculo_para_recusar.js",
+          "label" : "12.05 · um profissional pede vinculo pela API",
+          "optional" : false
+        }
+      }, {
+        "swipeCommand" : {
+          "startRelative" : "50%, 0%",
+          "endRelative" : "50%, 80%",
+          "duration" : 400,
+          "label" : "12.06 · abre a gaveta de notificações",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Pedido de vínculo",
+              "optional" : false
+            }
+          },
+          "timeout" : "90000",
+          "label" : "12.07 · espera o push Pedido de vínculo",
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Pedido de vínculo",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "label" : "12.08 · toca no push",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Solicitações",
+              "optional" : false
+            }
+          },
+          "timeout" : "60000",
+          "label" : "12.09 · abriu Solicitações",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "${output.PROF_PUSH}",
+              "optional" : false
+            }
+          },
+          "timeout" : "20000",
+          "label" : "12.10 · o pedido de ${output.PROF_PUSH} está lá",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "pressKeyCommand" : {
+                  "code" : "BACK",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "swipeCommand" : {
+                      "startRelative" : "50%, 95%",
+                      "endRelative" : "50%, 5%",
+                      "duration" : 400,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "../apoio/fechar_cortina.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "label" : "12.99 · confere a cortina fechada",
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../etapas/12_push_na_gaveta.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "12.00 · roda 12_push_na_gaveta",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791639241712,
+    "duration" : 64386,
+    "sequenceNumber" : 31,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "defineVariablesCommand" : {
+                "env" : {
+                  "EMAIL" : "${output.EMAIL_DONO}"
+                },
+                "optional" : false
+              }
+            }, {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "go-login",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "login-email",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "inputTextCommand" : {
+                "text" : "${EMAIL}",
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "login-password",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "inputTextCommand" : {
+                "text" : "${SENHA}",
+                "optional" : false
+              }
+            }, {
+              "hideKeyboardCommand" : {
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "login-submit",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "../apoio/entrar.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "label" : "12.01 · entra como o dono",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "${output.LOJA}",
+                "optional" : false
+              }
+            },
+            "timeout" : "30000",
+            "label" : "12.02 · espera ${output.LOJA} (o token do push ja foi registrado)",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "3000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "../apoio/fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "label" : "12.03 · roda fechar_aviso",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "__nunca_aparece__",
+                "optional" : false
+              }
+            },
+            "timeout" : "10000",
+            "label" : "12.03a · espera 10 s o registro do token do push",
+            "optional" : true
+          }
+        }, {
+          "pressKeyCommand" : {
+            "code" : "HOME",
+            "label" : "12.04 · vai para a tela inicial (app em segundo plano)",
+            "optional" : false
+          }
+        }, {
+          "runScriptCommand" : {
+            "script" : "// Um SEGUNDO profissional pede vinculo a loja do dono pela API do staging — o\n// dono recusa na bateria (fluxo critico, DEC-7) e depois o convida.\n//\n// Tambem provoca o push \"Pedido de vinculo\" da 12 (push-na-bateria), com outro\n// profissional (QUEM).\n//\n// Entradas (env do runScript): API, EMAIL_DONO, SENHA, TAG e, opcional, QUEM\n// (\"Recusado\" se ausente — uma conta por QUEM)\n// Saida: output.PROF_<QUEM> (o nome, como aparece no card; ex.: PROF_RECUSADO)\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\nvar lojas = pedir(\"GET\", \"/establishment/mine\", null, entrar(EMAIL_DONO));\nif (!lojas || lojas.length === 0) throw new Error(\"o dono nao tem loja\");\n\nvar quem = typeof QUEM === \"undefined\" || !QUEM ? \"Recusado\" : String(QUEM);\nvar nome = quem + TAG;\nvar email = \"prof_m\" + TAG + \"_\" + quem.toLowerCase() + \"@teste.com\";\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\npedir(\"POST\", \"/professional/register\", { name: nome, specialty: \"NAIL_TECH\" }, entrar(email));\n// Login de novo: o token tem de carregar o papel PROFESSIONAL recem-criado.\n// O PEDIDO (PENDING), como o app faz em establishment-detail — o\n// /professional/affiliate vincula direto e nao deixa nada para o dono recusar.\npedir(\"POST\", \"/professional/me/affiliations\", { establishmentId: lojas[0].id }, entrar(email));\noutput[\"PROF_\" + quem.toUpperCase()] = nome;\n",
+            "env" : {
+              "EMAIL_DONO" : "${output.EMAIL_DONO}",
+              "TAG" : "${output.TAG}",
+              "QUEM" : "Push"
+            },
+            "sourceDescription" : "/home/andre/Documentos/programacao/vupth-partner/.maestro/scripts/vinculo_para_recusar.js",
+            "label" : "12.05 · um profissional pede vinculo pela API",
+            "optional" : false
+          }
+        }, {
+          "swipeCommand" : {
+            "startRelative" : "50%, 0%",
+            "endRelative" : "50%, 80%",
+            "duration" : 400,
+            "label" : "12.06 · abre a gaveta de notificações",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Pedido de vínculo",
+                "optional" : false
+              }
+            },
+            "timeout" : "90000",
+            "label" : "12.07 · espera o push Pedido de vínculo",
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Pedido de vínculo",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "label" : "12.08 · toca no push",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Solicitações",
+                "optional" : false
+              }
+            },
+            "timeout" : "60000",
+            "label" : "12.09 · abriu Solicitações",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "${output.PROF_PUSH}",
+                "optional" : false
+              }
+            },
+            "timeout" : "20000",
+            "label" : "12.10 · o pedido de ${output.PROF_PUSH} está lá",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "pressKeyCommand" : {
+                    "code" : "BACK",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "swipeCommand" : {
+                        "startRelative" : "50%, 95%",
+                        "endRelative" : "50%, 5%",
+                        "duration" : 400,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "../apoio/fechar_cortina.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "label" : "12.99 · confere a cortina fechada",
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../etapas/12_push_na_gaveta.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "12.00 · roda 12_push_na_gaveta",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/button1",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791639273778,
+    "sequenceNumber" : 48,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+} ]
