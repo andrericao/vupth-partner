@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
@@ -14,6 +15,7 @@ export default function AddGuestScreen() {
   const myServices = useProfessionalStore((s) => s.myServices);
   const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
   const addGuestAttendance = useAttendanceStore((s) => s.addGuestAttendance);
+  const queryClient = useQueryClient();
 
   const [clientName, setClientName] = useState("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -58,6 +60,11 @@ export default function AddGuestScreen() {
         establishmentId: professional.establishment_id,
         serviceItemIds: selectedServices,
         clientName: clientName.trim(),
+      });
+      // A Fila so ouvia o WS (e o refetch de 60s): com o socket atrasado, o
+      // avulso nao aparecia ao voltar (bateria 09.11). Recarrega na hora.
+      queryClient.invalidateQueries({
+        queryKey: ["professionals-with-queue", professional.establishment_id],
       });
       // O cliente JA entrou na fila. Sem a caixa na web a tela nao fechava, e
       // o profissional adicionava de novo — cliente duplicado na fila.

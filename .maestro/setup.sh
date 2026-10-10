@@ -1,8 +1,9 @@
 #!/bin/bash
 # Prepara a bateria do Maestro (roteiro: .maestro/bateria_completa.yaml).
 #
-# Uso:  bash .maestro/setup.sh             # pula as etapas ja aprovadas neste commit
-#       bash .maestro/setup.sh --completa   # roda todas
+# Uso:  bash .maestro/setup.sh             # pergunta: completa ou so as que nao passaram
+#       bash .maestro/setup.sh --completa   # roda todas, sem perguntar
+#       bash .maestro/setup.sh --falhas     # so as que nao passaram, sem perguntar
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
 #
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
@@ -22,11 +23,12 @@ API="https://vupth-backend-ia.onrender.com"
 
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 SO_PREPARAR=0
-COMPLETA=0
+COMPLETA=""
 for ARG in "$@"; do
   case "$ARG" in
     --so-preparar) SO_PREPARAR=1 ;;
     --completa) COMPLETA=1 ;;
+    --falhas) COMPLETA=0 ;;
   esac
 done
 
@@ -255,14 +257,26 @@ juntar_para_o_andre() { # $1 = nome da etapa
 # MESMO commit a pula. O commit e o da origin/dev (o 1o da lista COMMIT): um
 # push novo, mesmo so de .maestro, roda tudo de novo. --completa roda tudo e
 # recomeca as marcas.
+#
+# bateria-pergunta (Andre, 10/10: "o teste com partner nao me mostrou a opcao de
+# testar so o que falhou"; igual ao bateria.sh do Client, fc8b1293): sem
+# --completa/--falhas, pergunta. "So as que nao passaram" pula toda etapa ja
+# verde em aprovados.txt, de qualquer commit; sem resposta em 1 min, segue assim.
 APROVADOS="$RAIZ/.maestro/aprovados.txt"
 MARCA="${COMMIT%%,*}"
+if [ -z "$COMPLETA" ]; then
+  read -r -t 60 -p "Rodar a bateria completa ou só as que não passaram? (c = completa / F = só as falhas) " RESP
+  echo ""
+  if [ "$RESP" = "c" ] || [ "$RESP" = "C" ]; then COMPLETA=1; else COMPLETA=0; fi
+fi
 if [ "$COMPLETA" = "1" ]; then
   rm -f "$APROVADOS"
   echo "Completa: todas as etapas rodam."
+else
+  echo "Só as que não passaram: as etapas já verdes em aprovados.txt ficam como ⏭."
 fi
 touch "$APROVADOS"
-aprovada() { grep -qxF "$1 $MARCA" "$APROVADOS"; }
+aprovada() { grep -q "^$1 " "$APROVADOS"; }
 aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $MARCA" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
 
 rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
@@ -298,7 +312,7 @@ else
   for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
     NN=$(basename "$ARQ" .yaml)
     if aprovada "$NN"; then
-      echo "⏭  etapa_$NN (aprovada no $MARCA — --completa roda de novo)" >> "$RELATORIO"
+      echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"
       continue
     fi
     if rodar "etapa_$NN" "$ARQ"; then aprovar "$NN"; else RESULTADO=1; fi

@@ -34,7 +34,9 @@ var corpo = {
   serviceItemIds: [servicos[0].id]
 };
 if (typeof AMANHA !== "undefined" && AMANHA) {
-  var amanha = new Date(Date.now() + 24 * 3600 * 1000);
+  // o "amanha" e o de Brasilia (UTC-3): depois das 21h, o dia UTC ja virou e o
+  // pedido caia depois de amanha ("Quer dom" no lugar de "Quer amanha", bateria 09/10 22:48)
+  var amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000);
   amanha.setUTCHours(13, 0, 0, 0); // 10h de Brasilia
   corpo.desiredTime = amanha.toISOString();
 }

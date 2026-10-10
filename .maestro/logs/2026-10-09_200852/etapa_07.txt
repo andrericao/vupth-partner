@@ -1,0 +1,69 @@
+Running on ZF524LC5HC
+ > Flow 07
+07.A1 · etiqueta da rodada (TAG)... COMPLETED
+07.A2 · e-mail do dono... COMPLETED
+07.A3 · e-mail do profissional... COMPLETED
+07.A4 · nome da loja... COMPLETED
+07.A5 · nome do profissional... COMPLETED
+07.A6 · preparo pela API (o que as etapas anteriores deixariam)... COMPLETED
+07.A7 · abre o app do zero, ja com o OTA...
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)... COMPLETED
+07.A7 · abre o app do zero, ja com o OTA... COMPLETED
+07.B3 · entra como o profissional...
+  Tap on id: go-login... COMPLETED
+  Tap on id: login-email... COMPLETED
+  Input text ${EMAIL}... COMPLETED
+  Tap on id: login-password... COMPLETED
+  Input text ${SENHA}... COMPLETED
+  Hide Keyboard... COMPLETED
+  Tap on id: login-submit... COMPLETED
+07.B3 · entra como o profissional... COMPLETED
+07.B4 · espera aba-fila... COMPLETED
+07.B5 · roda fechar_aviso...
+  Wait for animation to end within 3000 ms... COMPLETED
+  Run flow when id: dialogo-botao-0 is visible...
+  Run flow when id: dialogo-botao-0 is visible... SKIPPED
+07.B5 · roda fechar_aviso... COMPLETED
+07.00 · roda 07_encaixe...
+  07.01 · roda status...
+    Tap on id: aba-fila... COMPLETED
+    Tap on "(Você está: .*|Definir seu status)"... COMPLETED
+    Tap on id: status-${STATUS}... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+        Tap on id: dialogo-botao-0... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible... COMPLETED
+    Run fechar_aviso.yaml... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+        Tap on id: dialogo-botao-0... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible... COMPLETED
+    Run fechar_aviso.yaml... COMPLETED
+  07.01 · roda status... COMPLETED
+  07.02 · confere Você está: Fora…... COMPLETED
+  07.03 · script pedido_de_encaixe (o que sera recusado)... COMPLETED
+  07.04 · toca em aba-encaixes... COMPLETED
+  07.05 · espera …${output.CLIENTE_RECUSADO}…... FAILED
+07.00 · roda 07_encaixe... FAILED
+
+Assertion is false: ".*Recusado200852.*" is visible
+
+Assertion '".*Recusado200852.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-09_200852/etapa_07

@@ -53,8 +53,8 @@ appId: ${APP_ID}
 - pressKey:
     key: Enter
     label: "10.14 · tecla Enter"
-- hideKeyboard:
-    label: "10.15 · fecha o teclado"
+# Sem hideKeyboard: o Enter ja fecha o teclado, e o hideKeyboard sem teclado
+# vira Voltar — fechava a busca (bateria 20:08, a tela voltou para a Fila).
 # O nome tambem esta no campo: o card e o que fica abaixo da busca
 - extendedWaitUntil:
     visible:
@@ -68,6 +68,27 @@ appId: ${APP_ID}
     below:
       id: "campo-de-busca"
     label: "10.17 · toca no card de ${output.LOJA}"
+# Bateria 22:48: o primeiro toque no card nao abriu o detalhe (o teclado ainda
+# estava aberto). Se o detalhe nao vier em 10 s, fecha o teclado e toca de novo.
+- extendedWaitUntil:
+    visible: "Solicitar vinculação"
+    timeout: 10000
+    optional: true
+    label: "10.17a · espera o detalhe da loja"
+- runFlow:
+    when:
+      notVisible: "Solicitar vinculação"
+    commands:
+      - hideKeyboard
+      - tapOn:
+          text: ${output.LOJA}
+          below:
+            id: "campo-de-busca"
+    label: "10.17b · toca de novo no card, se o detalhe nao abriu"
+- extendedWaitUntil:
+    visible: "Solicitar vinculação"
+    timeout: 20000
+    label: "10.17c · espera Solicitar vinculacao"
 - tapOn:
     text: "Solicitar vinculação"
     label: "10.18 · toca em Solicitar vinculacao"

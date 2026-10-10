@@ -29,12 +29,22 @@ appId: ${APP_ID}
     timeout: 20000
     label: "08.04 · espera ${output.PROF}"
 # maestro-maximo (2a fatia): a fila do profissional pelo olhar do dono
+# O toque no nome so abre/fecha o card (queues.tsx); a fila e o "Ver fila
+# detalhada" do card aberto (bateria 20:08: o card abriu e a fila nao).
+- runFlow:
+    when:
+      notVisible: "Ver fila detalhada"
+    commands:
+      - tapOn:
+          text: ${output.PROF}
+    label: "08.25 · abre o card de ${output.PROF}"
 - tapOn:
-    text: ${output.PROF}
-    label: "08.25 · abre a fila de ${output.PROF}"
+    text: "Ver fila detalhada"
+    label: "08.25a · toca em Ver fila detalhada"
 - extendedWaitUntil:
-    visible:
-      id: "atualizar-fila-dono"
+    # o atualizar-fila-dono so existe na web (bateria 22:48): no Android, o
+    # cartao "Espera total" e o que so a fila do profissional tem
+    visible: "Espera total"
     timeout: 20000
     label: "08.26 · espera a fila do profissional"
 - scrollUntilVisible:

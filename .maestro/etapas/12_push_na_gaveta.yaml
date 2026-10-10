@@ -18,8 +18,18 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "12.03 · roda fechar_aviso"
-- stopApp:
-    label: "12.04 · fecha o app"
+# S43 (Backend 657a119): da tempo ao POST /devices do token novo antes do push
+- extendedWaitUntil:
+    visible: "__nunca_aparece__"
+    timeout: 10000
+    optional: true
+    label: "12.03a · espera 10 s o registro do token do push"
+# Bateria 22:48 (e 20:08): o stopApp do Maestro e um force-stop, e o Android
+# nao entrega FCM a app parado a forca — o push nunca chegava. Vai para a tela
+# inicial: o app fica em segundo plano e o push cai na gaveta.
+- pressKey:
+    key: Home
+    label: "12.04 · vai para a tela inicial (app em segundo plano)"
 - runScript:
     file: ../scripts/vinculo_para_recusar.js
     env:
@@ -46,3 +56,6 @@ appId: ${APP_ID}
     visible: ${output.PROF_PUSH}
     timeout: 20000
     label: "12.10 · o pedido de ${output.PROF_PUSH} está lá"
+- runFlow:
+    file: ../apoio/fechar_cortina.yaml
+    label: "12.99 · confere a cortina fechada"

@@ -1,0 +1,143 @@
+Running on ZF524LC5HC
+ > Flow 04
+04.A1 · etiqueta da rodada (TAG)... COMPLETED
+04.A2 · e-mail do dono... COMPLETED
+04.A3 · e-mail do profissional... COMPLETED
+04.A4 · nome da loja... COMPLETED
+04.A5 · nome do profissional... COMPLETED
+04.A6 · preparo pela API (o que as etapas anteriores deixariam)... COMPLETED
+04.A7 · abre o app do zero, ja com o OTA...
+  Run fechar_cortina.yaml...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+      Press Back key... COMPLETED
+      Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+      Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... COMPLETED
+  Run fechar_cortina.yaml... COMPLETED
+  Launch app "${APP_ID}"... COMPLETED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... WARNED
+  Run fechar_aviso.yaml...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run fechar_aviso.yaml... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible...
+  Run sair_profissional.yaml when id: aba-perfil is visible... SKIPPED
+  Run sair_dono.yaml when id: aba-menu is visible...
+  Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)... COMPLETED
+  Run fechar_cortina.yaml...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+04.A7 · abre o app do zero, ja com o OTA... COMPLETED
+04.00 · roda 04_profissional_monta_o_atendimento...
+  04.01 · roda entrar...
+    Tap on id: go-login... COMPLETED
+    Tap on id: login-email... COMPLETED
+    Input text ${EMAIL}... COMPLETED
+    Tap on id: login-password... COMPLETED
+    Input text ${SENHA}... COMPLETED
+    Hide Keyboard... COMPLETED
+    Tap on id: login-submit... COMPLETED
+  04.01 · roda entrar... COMPLETED
+  04.02 · espera aba-perfil... COMPLETED
+  04.03 · toca em aba-perfil... COMPLETED
+  04.04 · roda fechar_aviso...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  04.04 · roda fechar_aviso... COMPLETED
+  04.05 · espera ${output.LOJA}... COMPLETED
+  04.06 · confere que nao tem …NAIL_TECH…... COMPLETED
+  04.07 · toca em Meus serviços... COMPLETED
+  04.08 · toca em Adicionar serviço... COMPLETED
+  04.09 · toca em service-name... COMPLETED
+  04.10 · apaga 40... COMPLETED
+  04.11 · digita Manicure ${output.TAG}... COMPLETED
+  04.12 · toca em service-minutes... COMPLETED
+  04.13 · apaga 5... COMPLETED
+  04.14 · digita 45... COMPLETED
+  04.15 · toca em service-price... COMPLETED
+  04.16 · digita 3000... COMPLETED
+  04.17 · fecha o teclado... COMPLETED
+  04.18 · rola ate Adicionar serviço... COMPLETED
+  04.19 · toca em Adicionar serviço... COMPLETED
+  04.20 · roda fechar_aviso (Servico adicionado)...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+      Tap on id: dialogo-botao-0... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible... COMPLETED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  04.20 · roda fechar_aviso (Servico adicionado)... COMPLETED
+  04.21 · espera Cadastro completo... COMPLETED
+  04.21a · roda fechar_aviso (Cadastro completo)...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+      Tap on id: dialogo-botao-0... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible... COMPLETED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  04.21a · roda fechar_aviso (Cadastro completo)... COMPLETED
+  04.22 · espera …45min…... COMPLETED
+  04.23 · toca em Editar... COMPLETED
+  04.24 · toca em edit-service-minutes... COMPLETED
+  04.25 · apaga 5... COMPLETED
+  04.26 · digita 60... COMPLETED
+  04.27 · fecha o teclado... COMPLETED
+  04.28 · rola ate Salvar... COMPLETED
+  04.29 · toca em Salvar... COMPLETED
+  04.30 · espera …60min…... COMPLETED
+  04.31 · toca em aba-perfil... COMPLETED
+  04.32 · toca em Refeições... COMPLETED
+  04.33 · toca em Adicionar refeição... COMPLETED
+  04.34 · toca em Ex: Almoço... COMPLETED
+  04.35 · digita Almoco... COMPLETED
+  04.36 · toca em 12:00... COMPLETED
+  04.37 · digita 0400... COMPLETED
+  04.38 · toca em 60... COMPLETED
+  04.39 · digita 30... COMPLETED
+  04.40 · fecha o teclado... COMPLETED
+  04.41 · toca em Todos os dias... COMPLETED
+  04.42 · rola ate Adicionar... COMPLETED
+  04.43 · toca em Adicionar... COMPLETED
+  04.44 · espera Almoco... COMPLETED
+  04.45 · rola ate interruptor-aviso-refeicao... COMPLETED
+  04.46 · toca em interruptor-aviso-refeicao... COMPLETED
+  04.47 · confere Desligado…... COMPLETED
+  04.48 · toca em interruptor-aviso-refeicao... COMPLETED
+  04.49 · confere Ligado…... COMPLETED
+  04.50 · roda status...
+    Tap on id: aba-fila... COMPLETED
+    Tap on "(Você está: .*|Definir seu status)"... COMPLETED
+    Tap on id: status-${STATUS}... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+        Tap on id: dialogo-botao-0... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible... COMPLETED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+  04.50 · roda status... COMPLETED
+  04.51 · confere Você está: Trabalhando…... COMPLETED
+04.00 · roda 04_profissional_monta_o_atendimento... COMPLETED

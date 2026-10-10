@@ -1,0 +1,18 @@
+# Cortina de notificacoes (Andre, 09/10): a etapa que puxa a gaveta (12) e
+# falha deixa a cortina aberta, e a seguinte abre o app por baixo dela — nada
+# funciona. Roda no comeco de cada etapa (abrir_com_ota) e ao fim da 12: se a
+# cortina estiver na tela, fecha (Voltar; se nao bastar, arrasta para cima).
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      visible: "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)"
+    commands:
+      - pressKey: back
+      - runFlow:
+          when:
+            visible: "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)"
+          commands:
+            - swipe:
+                start: "50%, 95%"
+                end: "50%, 5%"
