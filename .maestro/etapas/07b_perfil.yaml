@@ -84,6 +84,53 @@ appId: ${APP_ID}
     label: "07.60 · pix · a chave aparece cadastrada"
 - back:
     label: "07.61 · pix · volta para o Perfil"
+# conferencia-por-print (Andre, 10/10): agenda-do-profissional — Perfil → Minha
+# agenda → Salvar semana. Prints antes e depois.
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+- scrollUntilVisible:
+    element: "Minha agenda"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
+    label: "07.62 · agenda · rola ate Minha agenda"
+- tapOn:
+    text: "Minha agenda"
+    label: "07.63 · agenda · toca em Minha agenda"
+- extendedWaitUntil:
+    visible: "Os dias e horários em que você atende.*"
+    timeout: 20000
+    label: "07.64 · agenda · confere o titulo"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 07.65_agenda-antes
+      O_QUE: Minha agenda antes de salvar (agenda-do-profissional)
+    label: "07.65 · agenda · print antes"
+- scrollUntilVisible:
+    element: "Salvar semana"
+    direction: DOWN
+    centerElement: true
+    timeout: 30000
+    label: "07.66 · agenda · rola ate Salvar semana"
+- tapOn:
+    text: "Salvar semana"
+    label: "07.67 · agenda · toca em Salvar semana"
+- extendedWaitUntil:
+    visible: "(Horário salvo|.*caber no horário da loja.*)"
+    timeout: 20000
+    label: "07.68 · agenda · salvou (ou o aviso do horario da loja)"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 07.69_agenda-depois
+      O_QUE: o aviso de agenda salva (agenda-do-profissional)
+    label: "07.69 · agenda · print depois"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+- back:
+    label: "07.70 · agenda · volta para o Perfil"
 
 # aparencia (7834bec): Perfil → Aparência → fonte +2 → Salvar continua na mesma
 # tela e mostra +2; volta para Normal no fim (a rodada nao deixa sujeira).
