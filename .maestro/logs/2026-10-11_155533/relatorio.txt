@@ -1,0 +1,4 @@
+Rodada 2026-10-11_155533 · TAG 155533 · commit esperado 922424d,72acb26,398b34c,f286310,e7dcf25,a345c7d,94fdfc3,b392e9a,68f967b,d2e5010,d8c2f35,38428d0,b9aabe3,75c2931,d342fd0,936d17d,6c68f66
+❌ 00_atualizacao — parou em 00.04 · espera a entrada
+   print: .maestro/logs/2026-10-11_155533/FALHA_00.04_espera-a-entrada.png
+   (as etapas nao rodaram: com a versao errada o teste nao serve)
