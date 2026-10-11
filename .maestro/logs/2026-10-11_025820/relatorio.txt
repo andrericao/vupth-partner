@@ -1,0 +1,11 @@
+Rodada 2026-10-11_025820 · TAG 025820 · commit esperado 59eef55,e1f6f36,a8ea1de,bc20de8,d9adc3f,304f9fc,e2a15e7,6280fc1,b1287f8,c10237c
+✅ 00_atualizacao
+❌ etapa_01 — parou em 01.29 · rola ate 24 horas
+   print: .maestro/logs/2026-10-11_025820/FALHA_01.29_rola-ate-24-horas.png
+❌ etapa_02 — parou em 02.02 · espera Cadastro profissional
+   print: .maestro/logs/2026-10-11_025820/FALHA_02.02_espera-cadastro-profissional.png
+✅ etapa_03
+❌ etapa_04 — parou em 04.22 · espera …45min…
+   print: .maestro/logs/2026-10-11_025820/FALHA_04.22_espera-45min.png
+✅ etapa_05
+✅ etapa_06
