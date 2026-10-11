@@ -1,0 +1,11 @@
+Rodada 2026-10-11_071921 · TAG 071921 · commit esperado 6c68f66
+✅ 00_atualizacao
+❌ etapa_01 — parou em 01.23 · rola ate Usar o horário de segunda nos dias abertos
+   print: .maestro/logs/2026-10-11_071921/FALHA_01.23_rola-ate-usar-o-horario-de-segunda-nos-dias-abertos.png
+❌ etapa_02 — parou em 02.02 · espera Cadastro profissional
+   print: .maestro/logs/2026-10-11_071921/FALHA_02.02_espera-cadastro-profissional.png
+✅ etapa_03
+❌ etapa_04 — parou em 04.22 · espera …45min…
+   print: .maestro/logs/2026-10-11_071921/FALHA_04.22_espera-45min.png
+✅ etapa_05
+✅ etapa_06

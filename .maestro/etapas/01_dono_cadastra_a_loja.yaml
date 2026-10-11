@@ -76,9 +76,14 @@ appId: ${APP_ID}
     label: "01.21 · digita 0000"
 - hideKeyboard:
     label: "01.22 · fecha o teclado"
+# Emulador (log 2026-10-11_071921, 01.23): o rolar parava com o botao atras da
+# barra de abas. Rola ate ele ficar no meio da tela.
 - scrollUntilVisible:
     element: "Usar o horário de segunda nos dias abertos"
     direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
     label: "01.23 · rola ate Usar o horário de segunda nos dias abertos"
 - tapOn:
     text: "Usar o horário de segunda nos dias abertos"

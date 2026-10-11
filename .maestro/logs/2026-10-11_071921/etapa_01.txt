@@ -1,0 +1,125 @@
+Running on vupth_android11
+ > Flow 01
+01.A1 · etiqueta da rodada (TAG)... COMPLETED
+01.A2 · e-mail do dono... COMPLETED
+01.A3 · e-mail do profissional... COMPLETED
+01.A4 · nome da loja... COMPLETED
+01.A5 · nome do profissional... COMPLETED
+01.A7 · abre o app do zero, ja com o OTA...
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+  Launch app "${APP_ID}"... COMPLETED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... COMPLETED
+  Run fechar_aviso.yaml...
+    Wait for animation to end within 6000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run fechar_aviso.yaml... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible...
+    Tap on id: aba-perfil... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 6000 ms... COMPLETED
+      Run fechar_anr.yaml...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+      Run fechar_anr.yaml... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+    Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+    Tap on "Sair da conta"... COMPLETED
+    Run confirmar.yaml...
+      Assert that id: dialogo-botao-1 is visible... COMPLETED
+      Tap on id: dialogo-botao-1... COMPLETED
+    Run confirmar.yaml... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible... COMPLETED
+  Run sair_dono.yaml when id: aba-menu is visible...
+  Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)... COMPLETED
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+01.A7 · abre o app do zero, ja com o OTA... COMPLETED
+01.00 · roda 01_dono_cadastra_a_loja...
+  01.01 · roda cadastrar...
+    Tap on id: role-${PAPEL}... COMPLETED
+    Tap on id: register-email... COMPLETED
+    Assert that (Optional) id: register-email, focused is visible... COMPLETED
+    Input text ${EMAIL}... COMPLETED
+    Tap on id: register-password... COMPLETED
+    Assert that (Optional) id: register-password, focused is visible... COMPLETED
+    Input text ${SENHA}... COMPLETED
+    Tap on id: register-confirm-password... COMPLETED
+    Assert that (Optional) id: register-confirm-password, focused is visible... COMPLETED
+    Input text ${SENHA}... COMPLETED
+    Wait for animation to end within 6000 ms... COMPLETED
+    Hide Keyboard... COMPLETED
+    Run flow when "As senhas não coincidem" is visible...
+    Run flow when "As senhas não coincidem" is visible... SKIPPED
+    Tap on id: register-submit... COMPLETED
+  01.01 · roda cadastrar... COMPLETED
+  01.02 · espera Dados da loja... COMPLETED
+  01.03 · toca em Ex: João Silva... COMPLETED
+  01.04 · digita Dono ${output.TAG}... COMPLETED
+  01.05 · toca em Rei do Corte LTDA... COMPLETED
+  01.06 · digita ${output.LOJA}... COMPLETED
+  01.07 · fecha o teclado... COMPLETED
+  01.08 · toca em Barbearia... COMPLETED
+  01.09 · toca em Criar estabelecimento... COMPLETED
+  01.10 · espera Você também vai atender?... COMPLETED
+  01.11 · rola ate Não, apenas proprietário... COMPLETED
+  01.12 · toca em Não, apenas proprietário... COMPLETED
+  01.13 · espera ${output.LOJA}... COMPLETED
+  01.14 · toca em aba-menu... COMPLETED
+  01.15 · toca em Dados do estabelecimento... COMPLETED
+  01.16 · toca em Horário de Funcionamento... COMPLETED
+  01.17 · espera Semana... COMPLETED
+  01.18 · toca em Segunda abre... COMPLETED
+  01.19 · digita 0000... COMPLETED
+  01.20 · toca em Segunda fecha... COMPLETED
+  01.21 · digita 0000... COMPLETED
+  01.22 · fecha o teclado... COMPLETED
+  01.23 · rola ate Usar o horário de segunda nos dias abertos... FAILED
+01.00 · roda 01_dono_cadastra_a_loja... FAILED
+
+No visible element found: "Usar o horário de segunda nos dias abertos"
+
+Could not find a visible element matching selector: "Usar o horário de segunda nos dias abertos"
+Tip: Try adjusting the following settings to improve detection:
+- `timeout`: current = 20000ms → Increase if you need more time to find the element
+- `speed`: current = 40 (0-100 scale) → Increase for faster scrolling if element is far away
+- `waitToSettleTimeoutMs`: current = Not defined → Set this value (e.g., 500ms) if your UI updates frequently between scrolls
+- `visibilityPercentage`: current = 100% → Lower this value if you want to detect partially visible elements
+- `centerElement`: current = false → Enable if you want the element to be centered after finding it
+
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_071921/etapa_01
