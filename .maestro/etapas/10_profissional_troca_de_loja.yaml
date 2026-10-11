@@ -113,6 +113,13 @@ appId: ${APP_ID}
 - tapOn:
     id: "aba-perfil"
     label: "10.21 · toca em aba-perfil"
+# Emulador (log 2026-10-11_081612, 11.04): o "Vínculo" fica abaixo da tela.
+- scrollUntilVisible:
+    element: "Vínculo"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
 - tapOn:
     text: "Vínculo"
     label: "10.22 · toca em Vinculo"
