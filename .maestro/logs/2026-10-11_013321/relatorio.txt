@@ -1,0 +1,17 @@
+Rodada 2026-10-11_013321 · TAG 013321 · commit esperado b1287f8,c10237c
+✅ 00_atualizacao
+⏭  etapa_01 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_02 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_03 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_04 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_05 (já passou no 22ff279 — a completa roda de novo)
+⏭  etapa_06 (já passou no 22ff279 — a completa roda de novo)
+❌ etapa_07 — parou em 07.08b · o push vira caixa com OK
+   print: .maestro/logs/2026-10-11_013321/FALHA_07.08b_o-push-vira-caixa-com-ok.png
+❌ etapa_08 — parou em 08.36 · foto-pela-bateria · grava a foto da loja pela galeria
+   print: .maestro/logs/2026-10-11_013321/FALHA_08.36_foto-pela-bateria-grava-a-foto-da-loja-pela-galeria.png
+⏭  etapa_09 (já passou no 22ff279 — a completa roda de novo)
+❌ etapa_10 — parou em 10.03 · toca em Vinculo
+   print: .maestro/logs/2026-10-11_013321/FALHA_10.03_toca-em-vinculo.png
+⏭  etapa_11 (já passou no f1e777b — a completa roda de novo)
+⏭  etapa_12 (já passou no f1e777b — a completa roda de novo)

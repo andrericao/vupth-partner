@@ -1,5 +1,0 @@
-Running on vupth_android11
- > Flow 00_atualizacao
-00.01 · etiqueta da rodada (TAG)... COMPLETED
-00.02 · conta de profissional so da 00, pela API... COMPLETED
-00.03 · abre o app do zero...

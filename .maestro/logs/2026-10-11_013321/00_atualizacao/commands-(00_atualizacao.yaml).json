@@ -1,0 +1,5271 @@
+[ {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${SENHA}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693335830,
+    "duration" : 9949,
+    "sequenceNumber" : 21,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "Teste@123",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "6000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693355814,
+    "duration" : 1975,
+    "sequenceNumber" : 27,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "6000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "6000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693261504,
+    "duration" : 10200,
+    "sequenceNumber" : 11,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "6000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "aba-perfil",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "scrollUntilVisible" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "direction" : "DOWN",
+          "scrollDuration" : "40",
+          "visibilityPercentage" : 100,
+          "timeout" : "20000",
+          "centerElement" : false,
+          "originalSpeedValue" : "40",
+          "optional" : false,
+          "visibilityPercentageNormalized" : 1.0
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "check-update",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Atualização baixada|Tudo certo|Sem atualização)",
+              "optional" : false
+            }
+          },
+          "timeout" : "120000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "textRegex" : "(Wait|Aguardar|Esperar)",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      }, {
+                        "waitForAnimationToEndCommand" : {
+                          "timeout" : "6000",
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_anr.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_aviso.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "aba-perfil",
+                  "optional" : false
+                }
+              },
+              "timeout" : "120000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "textRegex" : "(Wait|Aguardar|Esperar)",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      }, {
+                        "waitForAnimationToEndCommand" : {
+                          "timeout" : "6000",
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_anr.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_aviso.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "aba-perfil",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "scrollUntilVisible" : {
+              "selector" : {
+                "textRegex" : "Versão do app",
+                "optional" : false
+              },
+              "direction" : "DOWN",
+              "scrollDuration" : "40",
+              "visibilityPercentage" : 100,
+              "timeout" : "20000",
+              "centerElement" : false,
+              "originalSpeedValue" : "40",
+              "optional" : false,
+              "visibilityPercentageNormalized" : 1.0
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "Versão do app",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Atualização baixada",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "(OK|Ok)",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Tudo certo|Sem atualização)",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "textRegex" : "(Wait|Aguardar|Esperar)",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  }, {
+                    "waitForAnimationToEndCommand" : {
+                      "timeout" : "6000",
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_anr.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "copyTextCommand" : {
+          "selector" : {
+            "idRegex" : "version-line",
+            "optional" : false
+          },
+          "optional" : false
+        }
+      }, {
+        "evalScriptCommand" : {
+          "scriptString" : "${output.INSTALADO = String(maestro.copiedText).split(' · ').pop().trim()}",
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/atualizar.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "00.08 · Perfil → Versão do app → Verificar atualização",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693365431,
+    "duration" : 78958,
+    "sequenceNumber" : 33,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "aba-perfil",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "scrollUntilVisible" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "direction" : "DOWN",
+            "scrollDuration" : "40",
+            "visibilityPercentage" : 100,
+            "timeout" : "20000",
+            "centerElement" : false,
+            "originalSpeedValue" : "40",
+            "optional" : false,
+            "visibilityPercentageNormalized" : 1.0
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "check-update",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Atualização baixada|Tudo certo|Sem atualização)",
+                "optional" : false
+              }
+            },
+            "timeout" : "120000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "textRegex" : "(Wait|Aguardar|Esperar)",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        }, {
+                          "waitForAnimationToEndCommand" : {
+                            "timeout" : "6000",
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_anr.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-0",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "android:id/button1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_aviso.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "aba-perfil",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "120000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "textRegex" : "(Wait|Aguardar|Esperar)",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        }, {
+                          "waitForAnimationToEndCommand" : {
+                            "timeout" : "6000",
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_anr.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-0",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "android:id/button1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_aviso.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "aba-perfil",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "scrollUntilVisible" : {
+                "selector" : {
+                  "textRegex" : "Versão do app",
+                  "optional" : false
+                },
+                "direction" : "DOWN",
+                "scrollDuration" : "40",
+                "visibilityPercentage" : 100,
+                "timeout" : "20000",
+                "centerElement" : false,
+                "originalSpeedValue" : "40",
+                "optional" : false,
+                "visibilityPercentageNormalized" : 1.0
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "Versão do app",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Atualização baixada",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "(OK|Ok)",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Tudo certo|Sem atualização)",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "textRegex" : "(Wait|Aguardar|Esperar)",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    }, {
+                      "waitForAnimationToEndCommand" : {
+                        "timeout" : "6000",
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_anr.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "copyTextCommand" : {
+            "selector" : {
+              "idRegex" : "version-line",
+              "optional" : false
+            },
+            "optional" : false
+          }
+        }, {
+          "evalScriptCommand" : {
+            "scriptString" : "${output.INSTALADO = String(maestro.copiedText).split(' · ').pop().trim()}",
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/atualizar.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "00.08 · Perfil → Versão do app → Verificar atualização",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693394380,
+    "duration" : 4026,
+    "sequenceNumber" : 47,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "repeatCommand" : {
+      "times" : "6",
+      "condition" : {
+        "notVisible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "commands" : [ {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "(Wait|Aguardar|Esperar)",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "../apoio/fechar_anr.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Como você vai usar o Vupth?",
+              "optional" : false
+            }
+          },
+          "timeout" : "40000",
+          "optional" : true
+        }
+      } ],
+      "label" : "00.04a · espera a entrada (tocando em Wait no aviso do Android)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693246268,
+    "duration" : 32455,
+    "sequenceNumber" : 6,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "6",
+        "condition" : {
+          "notVisible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "commands" : [ {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "(Wait|Aguardar|Esperar)",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "../apoio/fechar_anr.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Como você vai usar o Vupth?",
+                "optional" : false
+              }
+            },
+            "timeout" : "40000",
+            "optional" : true
+          }
+        } ],
+        "label" : "00.04a · espera a entrada (tocando em Wait no aviso do Android)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-email",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693281618,
+    "duration" : 13439,
+    "sequenceNumber" : 18,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-email",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "EMAIL" : "${output.EMAIL_VERSAO}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693278831,
+    "duration" : 9,
+    "sequenceNumber" : 15,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "EMAIL" : "prof_m013321_versao@teste.com"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "aba-perfil",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693365474,
+    "duration" : 1891,
+    "sequenceNumber" : 35,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "aba-perfil",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "textRegex" : "(Wait|Aguardar|Esperar)",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  }, {
+                    "waitForAnimationToEndCommand" : {
+                      "timeout" : "6000",
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_anr.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "aba-perfil",
+              "optional" : false
+            }
+          },
+          "timeout" : "120000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "textRegex" : "(Wait|Aguardar|Esperar)",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  }, {
+                    "waitForAnimationToEndCommand" : {
+                      "timeout" : "6000",
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_anr.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "aba-perfil",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "scrollUntilVisible" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "direction" : "DOWN",
+          "scrollDuration" : "40",
+          "visibilityPercentage" : 100,
+          "timeout" : "20000",
+          "centerElement" : false,
+          "originalSpeedValue" : "40",
+          "optional" : false,
+          "visibilityPercentageNormalized" : 1.0
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Atualização baixada",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693384922,
+    "duration" : 43062,
+    "sequenceNumber" : 40,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "textRegex" : "(Wait|Aguardar|Esperar)",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    }, {
+                      "waitForAnimationToEndCommand" : {
+                        "timeout" : "6000",
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_anr.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "aba-perfil",
+                "optional" : false
+              }
+            },
+            "timeout" : "120000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "textRegex" : "(Wait|Aguardar|Esperar)",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    }, {
+                      "waitForAnimationToEndCommand" : {
+                        "timeout" : "6000",
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_anr.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "android:id/button1",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "aba-perfil",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "scrollUntilVisible" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "direction" : "DOWN",
+            "scrollDuration" : "40",
+            "visibilityPercentage" : 100,
+            "timeout" : "20000",
+            "centerElement" : false,
+            "originalSpeedValue" : "40",
+            "optional" : false,
+            "visibilityPercentageNormalized" : 1.0
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Atualização baixada",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "hideKeyboardCommand" : {
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693345782,
+    "duration" : 4752,
+    "sequenceNumber" : 22,
+    "evaluatedCommand" : {
+      "hideKeyboardCommand" : {
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "(Wait|Aguardar|Esperar)",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_anr.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693435181,
+    "duration" : 9004,
+    "sequenceNumber" : 63,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "(Wait|Aguardar|Esperar)",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_anr.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693408387,
+    "duration" : 8,
+    "sequenceNumber" : 55,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+      "label" : "00.01 · etiqueta da rodada (TAG)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693237161,
+    "duration" : 75,
+    "sequenceNumber" : 3,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+        "label" : "00.01 · etiqueta da rodada (TAG)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "go-login",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693278850,
+    "duration" : 2763,
+    "sequenceNumber" : 17,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "go-login",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "dialogo-botao-0",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693394454,
+    "duration" : 3950,
+    "sequenceNumber" : 48,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693233658,
+    "duration" : 3499,
+    "sequenceNumber" : 2,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123",
+        "COMMIT" : "b1287f8,c10237c",
+        "SUPERVISAO" : "0",
+        "TAG" : "013321",
+        "MAESTRO_FILENAME" : "00_atualizacao",
+        "MAESTRO_DEVICE_UDID" : "emulator-5554",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693233626,
+    "duration" : 20,
+    "sequenceNumber" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123",
+          "COMMIT" : "b1287f8,c10237c",
+          "SUPERVISAO" : "0",
+          "TAG" : "013321",
+          "MAESTRO_FILENAME" : "00_atualizacao",
+          "MAESTRO_DEVICE_UDID" : "emulator-5554",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693278842,
+    "duration" : 7,
+    "sequenceNumber" : 16,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "(Wait|Aguardar|Esperar)",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693408396,
+    "sequenceNumber" : 56,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "(Wait|Aguardar|Esperar)",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "(Wait|Aguardar|Esperar)",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_anr.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693387262,
+    "duration" : 7117,
+    "sequenceNumber" : 44,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "(Wait|Aguardar|Esperar)",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_anr.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "scrollUntilVisible" : {
+      "selector" : {
+        "textRegex" : "Versão do app",
+        "optional" : false
+      },
+      "direction" : "DOWN",
+      "scrollDuration" : "40",
+      "visibilityPercentage" : 100,
+      "timeout" : "20000",
+      "centerElement" : false,
+      "originalSpeedValue" : "40",
+      "optional" : false,
+      "visibilityPercentageNormalized" : 1.0
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693417961,
+    "duration" : 7022,
+    "sequenceNumber" : 60,
+    "evaluatedCommand" : {
+      "scrollUntilVisible" : {
+        "selector" : {
+          "textRegex" : "Versão do app",
+          "optional" : false
+        },
+        "direction" : "DOWN",
+        "scrollDuration" : "601",
+        "visibilityPercentage" : 100,
+        "timeout" : "20000",
+        "centerElement" : false,
+        "originalSpeedValue" : "40",
+        "optional" : false,
+        "visibilityPercentageNormalized" : 1.0
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "(Wait|Aguardar|Esperar)",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_anr.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693406975,
+    "duration" : 9098,
+    "sequenceNumber" : 51,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "(Wait|Aguardar|Esperar)",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_anr.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "(Wait|Aguardar|Esperar)",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693255854,
+    "duration" : 5646,
+    "sequenceNumber" : 10,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "(Wait|Aguardar|Esperar)",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-submit",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693350536,
+    "duration" : 3153,
+    "sequenceNumber" : 23,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-submit",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/button1",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693365186,
+    "sequenceNumber" : 32,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "(Wait|Aguardar|Esperar)",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693255583,
+    "duration" : 16124,
+    "sequenceNumber" : 9,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "(Wait|Aguardar|Esperar)",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "version-line",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693444187,
+    "duration" : 136,
+    "sequenceNumber" : 71,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "version-line",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/button1",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693398407,
+    "sequenceNumber" : 49,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "(Wait|Aguardar|Esperar)",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_anr.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693408378,
+    "duration" : 7174,
+    "sequenceNumber" : 54,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "(Wait|Aguardar|Esperar)",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_anr.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.INSTALADO = String(maestro.copiedText).split(' · ').pop().trim()}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693444325,
+    "duration" : 63,
+    "sequenceNumber" : 72,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.INSTALADO = String(maestro.copiedText).split(' · ').pop().trim()}",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693415552,
+    "sequenceNumber" : 57,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Versão do app",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693374758,
+    "duration" : 3105,
+    "sequenceNumber" : 37,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Versão do app",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "(Wait|Aguardar|Esperar)",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_anr.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693385419,
+    "duration" : 21443,
+    "sequenceNumber" : 41,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "(Wait|Aguardar|Esperar)",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_anr.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693255573,
+    "duration" : 9,
+    "sequenceNumber" : 8,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// fatia-de-atualizacao (Andre, 05/10): uma conta de profissional SO da 00, para\n// entrar e chegar em Perfil -> Versao do app sem mexer no profissional das\n// etapas (a 02 cadastra o dela pelo app).\n//\n// Entradas (env do runScript): API, SENHA, TAG\n// Saida: output.EMAIL_VERSAO\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"conta da 00: \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\nvar email = \"prof_m\" + TAG + \"_versao@teste.com\";\nif (chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA }).status >= 300) {\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n}\nvar token = entrar(email);\nif (chamar(\"GET\", \"/professional/me\", null, token).status >= 300) {\n  pedir(\"POST\", \"/professional/register\", { name: \"Versao\" + TAG, specialty: \"NAIL_TECH\" }, token);\n}\noutput.EMAIL_VERSAO = email;\n",
+      "env" : {
+        "TAG" : "${output.TAG}"
+      },
+      "sourceDescription" : "/tmp/tmp.5UF5glxIQw/scripts/conta_da_versao.js",
+      "label" : "00.02 · conta de profissional so da 00, pela API",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693237238,
+    "duration" : 3262,
+    "sequenceNumber" : 4,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// fatia-de-atualizacao (Andre, 05/10): uma conta de profissional SO da 00, para\n// entrar e chegar em Perfil -> Versao do app sem mexer no profissional das\n// etapas (a 02 cadastra o dela pelo app).\n//\n// Entradas (env do runScript): API, SENHA, TAG\n// Saida: output.EMAIL_VERSAO\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"conta da 00: \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\nvar email = \"prof_m\" + TAG + \"_versao@teste.com\";\nif (chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA }).status >= 300) {\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n}\nvar token = entrar(email);\nif (chamar(\"GET\", \"/professional/me\", null, token).status >= 300) {\n  pedir(\"POST\", \"/professional/register\", { name: \"Versao\" + TAG, specialty: \"NAIL_TECH\" }, token);\n}\noutput.EMAIL_VERSAO = email;\n",
+        "env" : {
+          "TAG" : "013321"
+        },
+        "sourceDescription" : "/tmp/tmp.5UF5glxIQw/scripts/conta_da_versao.js",
+        "label" : "00.02 · conta de profissional so da 00, pela API",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "scrollUntilVisible" : {
+      "selector" : {
+        "textRegex" : "Versão do app",
+        "optional" : false
+      },
+      "direction" : "DOWN",
+      "scrollDuration" : "40",
+      "visibilityPercentage" : 100,
+      "timeout" : "20000",
+      "centerElement" : false,
+      "originalSpeedValue" : "40",
+      "optional" : false,
+      "visibilityPercentageNormalized" : 1.0
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693367367,
+    "duration" : 7390,
+    "sequenceNumber" : 36,
+    "evaluatedCommand" : {
+      "scrollUntilVisible" : {
+        "selector" : {
+          "textRegex" : "Versão do app",
+          "optional" : false
+        },
+        "direction" : "DOWN",
+        "scrollDuration" : "601",
+        "visibilityPercentage" : 100,
+        "timeout" : "20000",
+        "centerElement" : false,
+        "originalSpeedValue" : "40",
+        "optional" : false,
+        "visibilityPercentageNormalized" : 1.0
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "(Wait|Aguardar|Esperar)",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/fechar_anr.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693255555,
+    "duration" : 16154,
+    "sequenceNumber" : 7,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "(Wait|Aguardar|Esperar)",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/fechar_anr.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "(Wait|Aguardar|Esperar)",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693357820,
+    "sequenceNumber" : 30,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "(Wait|Aguardar|Esperar)",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "aba-perfil",
+          "optional" : false
+        }
+      },
+      "timeout" : "60000",
+      "label" : "00.06 · espera aba-perfil",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693353695,
+    "duration" : 2091,
+    "sequenceNumber" : 24,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "aba-perfil",
+            "optional" : false
+          }
+        },
+        "timeout" : "60000",
+        "label" : "00.06 · espera aba-perfil",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693364951,
+    "sequenceNumber" : 31,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693385429,
+    "duration" : 9,
+    "sequenceNumber" : 42,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "6000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693385441,
+    "duration" : 1819,
+    "sequenceNumber" : 43,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "6000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "timeout" : "20000",
+      "label" : "00.04 · espera a entrada",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693278726,
+    "duration" : 91,
+    "sequenceNumber" : 13,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "timeout" : "20000",
+        "label" : "00.04 · espera a entrada",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693355804,
+    "duration" : 9,
+    "sequenceNumber" : 26,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "aba-perfil",
+          "optional" : false
+        }
+      },
+      "timeout" : "120000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693406863,
+    "duration" : 111,
+    "sequenceNumber" : 50,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "aba-perfil",
+            "optional" : false
+          }
+        },
+        "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693406984,
+    "duration" : 5,
+    "sequenceNumber" : 52,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "aba-perfil",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693416073,
+    "duration" : 1886,
+    "sequenceNumber" : 59,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "aba-perfil",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693435190,
+    "duration" : 6,
+    "sequenceNumber" : 64,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "(Wait|Aguardar|Esperar)",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_anr.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/fechar_aviso.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "00.07 · roda fechar_aviso",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693355789,
+    "duration" : 9640,
+    "sequenceNumber" : 25,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "(Wait|Aguardar|Esperar)",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_anr.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "android:id/button1",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "android:id/button1",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "00.07 · roda fechar_aviso",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693387280,
+    "duration" : 5,
+    "sequenceNumber" : 45,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "(Wait|Aguardar|Esperar)",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_anr.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693436506,
+    "duration" : 7162,
+    "sequenceNumber" : 66,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "(Wait|Aguardar|Esperar)",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_anr.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693365467,
+    "duration" : 6,
+    "sequenceNumber" : 34,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/button1",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693443889,
+    "sequenceNumber" : 70,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "(Atualização baixada|Tudo certo|Sem atualização)",
+          "optional" : false
+        }
+      },
+      "timeout" : "120000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693380964,
+    "duration" : 3951,
+    "sequenceNumber" : 39,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "(Atualização baixada|Tudo certo|Sem atualização)",
+            "optional" : false
+          }
+        },
+        "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/button1",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693415779,
+    "sequenceNumber" : 58,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/button1",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/button1",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Confere, antes de a bateria comecar, que o app instalado e o codigo\n// esperado (bateria-confere-versao, Andre 03/10). O app mostra o commit no\n// rodape da tela de entrada (app-commit); o setup.sh passa o esperado.\n//\n// Entradas (env do runScript): COMMIT (esperados, separados por virgula — o\n// setup.sh passa os da origin/dev desde o ultimo OTA), INSTALADO (da tela)\n\nvar esperados = String(typeof COMMIT === \"undefined\" ? \"\" : COMMIT)\n  .split(\",\")\n  .map(function (c) { return c.trim(); })\n  .filter(function (c) { return c; });\nvar instalado = String(typeof INSTALADO === \"undefined\" ? \"\" : INSTALADO).trim();\n\n// Rodada fora do setup.sh (maestro test direto): sem o esperado, nao ha o que\n// conferir — avisa e segue, em vez de parar a bateria (Client parou assim, 03/10).\nif (!esperados.length) {\n  console.log(\"AVISO: sem COMMIT esperado (rodada fora do setup.sh) — versao nao conferida; instalado: \" + (instalado || \"(sem commit)\"));\n  output.COMMIT_CONFERIDO = \"\";\n} else {\nvar confere = esperados.some(function (esperado) {\n  return instalado && (instalado.indexOf(esperado) === 0 || esperado.indexOf(instalado) === 0);\n});\nif (!confere) {\n  throw new Error(\n    \"VERSAO ERRADA — instalado: \" + (instalado || \"(sem commit)\") + \" · esperado: \" + esperados.join(\" ou \") +\n    \". Publique o OTA da dev (ou instale o APK certo) e rode de novo.\"\n  );\n}\noutput.COMMIT_CONFERIDO = instalado;\n}\n",
+      "env" : {
+        "INSTALADO" : "${output.INSTALADO}"
+      },
+      "sourceDescription" : "/tmp/tmp.5UF5glxIQw/scripts/confere_versao.js",
+      "label" : "00.12 · confere a versão: o commit instalado é o esperado?",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693444389,
+    "duration" : 60,
+    "sequenceNumber" : 73,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Confere, antes de a bateria comecar, que o app instalado e o codigo\n// esperado (bateria-confere-versao, Andre 03/10). O app mostra o commit no\n// rodape da tela de entrada (app-commit); o setup.sh passa o esperado.\n//\n// Entradas (env do runScript): COMMIT (esperados, separados por virgula — o\n// setup.sh passa os da origin/dev desde o ultimo OTA), INSTALADO (da tela)\n\nvar esperados = String(typeof COMMIT === \"undefined\" ? \"\" : COMMIT)\n  .split(\",\")\n  .map(function (c) { return c.trim(); })\n  .filter(function (c) { return c; });\nvar instalado = String(typeof INSTALADO === \"undefined\" ? \"\" : INSTALADO).trim();\n\n// Rodada fora do setup.sh (maestro test direto): sem o esperado, nao ha o que\n// conferir — avisa e segue, em vez de parar a bateria (Client parou assim, 03/10).\nif (!esperados.length) {\n  console.log(\"AVISO: sem COMMIT esperado (rodada fora do setup.sh) — versao nao conferida; instalado: \" + (instalado || \"(sem commit)\"));\n  output.COMMIT_CONFERIDO = \"\";\n} else {\nvar confere = esperados.some(function (esperado) {\n  return instalado && (instalado.indexOf(esperado) === 0 || esperado.indexOf(instalado) === 0);\n});\nif (!confere) {\n  throw new Error(\n    \"VERSAO ERRADA — instalado: \" + (instalado || \"(sem commit)\") + \" · esperado: \" + esperados.join(\" ou \") +\n    \". Publique o OTA da dev (ou instale o APK certo) e rode de novo.\"\n  );\n}\noutput.COMMIT_CONFERIDO = instalado;\n}\n",
+        "env" : {
+          "INSTALADO" : "b1287f8"
+        },
+        "sourceDescription" : "/tmp/tmp.5UF5glxIQw/scripts/confere_versao.js",
+        "label" : "00.12 · confere a versão: o commit instalado é o esperado?",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "EMAIL" : "${output.EMAIL_VERSAO}"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "go-login",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-email",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "inputTextCommand" : {
+          "text" : "${EMAIL}",
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-password",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "inputTextCommand" : {
+          "text" : "${SENHA}",
+          "optional" : false
+        }
+      }, {
+        "hideKeyboardCommand" : {
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "login-submit",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/entrar.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "00.05 · entra como o profissional da 00",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693278818,
+    "duration" : 74873,
+    "sequenceNumber" : 14,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "EMAIL" : "${output.EMAIL_VERSAO}"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "go-login",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-email",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "inputTextCommand" : {
+            "text" : "${EMAIL}",
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-password",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "inputTextCommand" : {
+            "text" : "${SENHA}",
+            "optional" : false
+          }
+        }, {
+          "hideKeyboardCommand" : {
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "login-submit",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/entrar.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "label" : "00.05 · entra como o profissional da 00",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Como você vai usar o Vupth?",
+          "optional" : false
+        }
+      },
+      "timeout" : "40000",
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693271711,
+    "duration" : 140,
+    "sequenceNumber" : 12,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Como você vai usar o Vupth?",
+            "optional" : false
+          }
+        },
+        "timeout" : "40000",
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "check-update",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693377864,
+    "duration" : 3099,
+    "sequenceNumber" : 38,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "check-update",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "(Wait|Aguardar|Esperar)",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693387286,
+    "sequenceNumber" : 46,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "(Wait|Aguardar|Esperar)",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Versão do app",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693424984,
+    "duration" : 2999,
+    "sequenceNumber" : 61,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Versão do app",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "(Wait|Aguardar|Esperar)",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "6000",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693436530,
+    "sequenceNumber" : 68,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "(Wait|Aguardar|Esperar)",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "6000",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "${APP_ID}",
+      "clearState" : true,
+      "label" : "00.03 · abre o app do zero",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693240501,
+    "duration" : 5764,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "com.vupth.partner.preview",
+        "clearState" : true,
+        "label" : "00.03 · abre o app do zero",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "(OK|Ok)",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : "(Tudo certo|Sem atualização)",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693427985,
+    "sequenceNumber" : 62,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "(OK|Ok)",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : "(Tudo certo|Sem atualização)",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "6000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693406989,
+    "duration" : 1387,
+    "sequenceNumber" : 53,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "6000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693436524,
+    "duration" : 6,
+    "sequenceNumber" : 67,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "6000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693435197,
+    "duration" : 1308,
+    "sequenceNumber" : 65,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "6000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "login-password",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693328026,
+    "duration" : 7801,
+    "sequenceNumber" : 20,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "login-password",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693233649,
+    "duration" : 5,
+    "sequenceNumber" : 1,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791693443669,
+    "sequenceNumber" : 69,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${EMAIL}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693295062,
+    "duration" : 32961,
+    "sequenceNumber" : 19,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "prof_m013321_versao@teste.com",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "(Wait|Aguardar|Esperar)",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "6000",
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "fechar_anr.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693357791,
+    "duration" : 7159,
+    "sequenceNumber" : 28,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "(Wait|Aguardar|Esperar)",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "6000",
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "fechar_anr.yaml",
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791693357806,
+    "duration" : 14,
+    "sequenceNumber" : 29,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+} ]
