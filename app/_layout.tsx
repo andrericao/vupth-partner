@@ -19,6 +19,7 @@ import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { instalarAlertWeb } from "../web-shims/alert";
+import { FaixaBaixarApp } from "@components/FaixaBaixarApp";
 import { pedirParaNaoTraduzir } from "@lib/naoTraduzir";
 import { instalarDialogoNativo } from "@lib/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
@@ -139,6 +140,8 @@ export default function RootLayout() {
               degradar para a fonte do sistema, nunca prender o app numa tela
               de carregamento. Foi o spinner eterno de 2026-08-27. */}
           <View style={[{ flex: 1 }, vars(varsDaFonte(passoDaFonte))]}>
+            {/* baixar-do-parceiro (11/10): so no site, so fora do iPhone. */}
+            <FaixaBaixarApp />
             {fontLoaded || fontError ? <Slot /> : <Loading />}
             {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
                 nao pode ser coberto por ela. Fica fora do portao das fontes de
