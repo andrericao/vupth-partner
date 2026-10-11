@@ -149,12 +149,22 @@ appId: ${APP_ID}
 - inputText:
     text: "Almoco"
     label: "04.35 · digita Almoco"
+# Emulador (log 2026-10-11_081612, 04.36): o teclado do nome cobria o horario
+# e a duracao. Fecha o teclado e rola ate a duracao ficar no meio da tela.
+- hideKeyboard
+- scrollUntilVisible:
+    element: "60"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
 - tapOn:
     text: "12:00"
     label: "04.36 · toca em 12:00"
 - inputText:
     text: "0400"
     label: "04.37 · digita 0400"
+- hideKeyboard
 - tapOn:
     text: "60"
     label: "04.38 · toca em 60"

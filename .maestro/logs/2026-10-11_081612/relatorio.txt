@@ -1,0 +1,7 @@
+Rodada 2026-10-11_081612 · TAG 081612 · commit esperado 936d17d,6c68f66
+✅ 00_atualizacao
+✅ etapa_01
+✅ etapa_02
+✅ etapa_03
+❌ etapa_04 — parou em 04.36 · toca em 12:00
+   print: .maestro/logs/2026-10-11_081612/FALHA_04.36_toca-em-12-00.png
