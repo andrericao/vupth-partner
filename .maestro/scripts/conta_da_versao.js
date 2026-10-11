@@ -8,7 +8,16 @@
 function chamar(metodo, url, corpo, token) {
   var headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = "Bearer " + token;
-  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" || metodo === "DELETE" ? undefined : "{}") });
+  // 429 do staging (limite de logins; log 2026-10-11_023621, 08.A6): espera o
+  // tempo que ele pede ("try again in N s") e tenta de novo, ate 3 vezes.
+  var r = null;
+  for (var vez = 0; vez < 4; vez++) {
+    r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" || metodo === "DELETE" ? undefined : "{}") });
+    if (r.status !== 429 || vez === 3) break;
+    var n = /in (\d+) s/.exec(r.body || "");
+    var ate = Date.now() + ((n ? parseInt(n[1], 10) : 30) + 2) * 1000;
+    while (Date.now() < ate) {}
+  }
   return { status: r.status, corpo: r.body ? json(r.body) : null };
 }
 
