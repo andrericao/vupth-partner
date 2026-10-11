@@ -16,6 +16,11 @@ appId: ${APP_ID}
 - tapOn:
     id: "aba-perfil"
     label: "04.31 · toca em aba-perfil"
+# Log 2026-10-11_120324 (04.32): entrando de novo, o aviso "Cadastro completo"
+# cobre o Perfil. Fecha antes de tocar.
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "04.31a · roda fechar_aviso (Cadastro completo)"
 - tapOn:
     text: "Refeições"
     label: "04.32 · toca em Refeições"
