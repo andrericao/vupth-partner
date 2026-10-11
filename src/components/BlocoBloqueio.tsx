@@ -32,7 +32,10 @@ type Props = {
 
 export function BlocoBloqueio({ titulo, texto, acao, rota }: Props) {
   return (
-    <View className="bg-vupth-accentPeach rounded-card p-4 gap-2.5">
+    // bordas-do-card (Andre, 05/10 e 10/10): "caixa laranja quase sem borda" e o
+    // botao colado na borda de baixo. Borda em forest a 20% (sem token novo) e
+    // mais folga embaixo do botao.
+    <View testID="bloco-bloqueio" className="bg-vupth-accentPeach border-2 border-vupth-forest/20 rounded-card p-4 pb-6 gap-2.5">
       <Titulo nivel={2}>{titulo}</Titulo>
       <Text className="font-body text-f14 leading-5 text-vupth-forest">{texto}</Text>
       {/* Button/Secondary do desenho: fundo `forest`, rotulo e seta em

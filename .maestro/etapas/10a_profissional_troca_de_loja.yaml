@@ -44,7 +44,24 @@ appId: ${APP_ID}
     timeout: 20000
     label: "10.09 · espera Nao vinculado"
 
-# find-establishment, aberto: busca e pede
+# bordas-do-card (Andre, 05/10 e 10/10): sem loja, a Fila mostra a caixa pessego
+# com borda e o botao com folga embaixo. O botao dela leva a mesma busca.
+- tapOn:
+    id: "aba-fila"
+    label: "10.09a · bordas-do-card · toca em aba-fila"
+- extendedWaitUntil:
+    visible:
+      id: "bloco-bloqueio"
+    timeout: 20000
+    label: "10.09b · bordas-do-card · espera a caixa Você ainda não tem fila"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 10.09c_bordas-do-card
+      O_QUE: a caixa pessego com borda e o botao Buscar estabelecimento com folga embaixo
+    label: "10.09c · bordas-do-card · print para o Andre"
+
+# find-establishment, aberto: busca e pede (pelo botao da caixa da Fila)
 - tapOn:
     text: "Buscar estabelecimento"
     label: "10.10 · toca em Buscar estabelecimento"
