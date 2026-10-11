@@ -48,15 +48,31 @@ appId: ${APP_ID}
 - tapOn:
     id: "service-minutes"
     label: "04.12 · toca em service-minutes"
+- extendedWaitUntil:
+    visible:
+      id: "service-minutes"
+      focused: true
+    timeout: 10000
+    optional: true
 - eraseText:
     charactersToErase: 5
     label: "04.13 · apaga 5"
 - inputText:
     text: "45"
     label: "04.14 · digita 45"
+# Emulador (log 2026-10-11_025820, 04.22): o "3000" do preco caia no tempo
+# ("453") porque o foco mudava atrasado. Espera o teclado assentar.
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn:
     id: "service-price"
     label: "04.15 · toca em service-price"
+- extendedWaitUntil:
+    visible:
+      id: "service-price"
+      focused: true
+    timeout: 10000
+    optional: true
 - inputText:
     text: "3000"
     label: "04.16 · digita 3000"

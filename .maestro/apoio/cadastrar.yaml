@@ -1,17 +1,50 @@
 # Cria a conta a partir da tela de papeis. env: PAPEL (owner|professional), EMAIL
 appId: ${APP_ID}
 ---
+# Emulador (log 2026-10-11_025820, 02.02): o foco chegava atrasado e a
+# confirmacao da senha ficava vazia. Antes de digitar, espera o campo focado;
+# se ainda assim as senhas nao coincidem, digita a confirmacao de novo.
 - tapOn:
     id: "role-${PAPEL}"
 - tapOn:
     id: "register-email"
+- extendedWaitUntil:
+    visible:
+      id: "register-email"
+      focused: true
+    timeout: 10000
+    optional: true
 - inputText: ${EMAIL}
 - tapOn:
     id: "register-password"
+- extendedWaitUntil:
+    visible:
+      id: "register-password"
+      focused: true
+    timeout: 10000
+    optional: true
 - inputText: ${SENHA}
 - tapOn:
     id: "register-confirm-password"
+- extendedWaitUntil:
+    visible:
+      id: "register-confirm-password"
+      focused: true
+    timeout: 10000
+    optional: true
 - inputText: ${SENHA}
+- waitForAnimationToEnd:
+    timeout: 3000
 - hideKeyboard
+- runFlow:
+    when:
+      visible: "As senhas não coincidem"
+    commands:
+      - tapOn:
+          id: "register-confirm-password"
+      - eraseText:
+          charactersToErase: 40
+      - inputText: ${SENHA}
+      - hideKeyboard
 - tapOn:
     id: "register-submit"
