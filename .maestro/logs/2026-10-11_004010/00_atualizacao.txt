@@ -1,0 +1,68 @@
+Running on vupth_android11
+ > Flow 00_atualizacao
+00.01 · etiqueta da rodada (TAG)... COMPLETED
+00.02 · conta de profissional so da 00, pela API... COMPLETED
+00.03 · abre o app do zero... COMPLETED
+00.04a · espera a entrada (tocando em Wait no aviso do Android)...
+  Run ../apoio/fechar_anr.yaml...
+    Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Tap on "(Wait|Aguardar|Esperar)"... COMPLETED
+      Wait for animation to end within 6000 ms... COMPLETED
+    Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... COMPLETED
+  Run ../apoio/fechar_anr.yaml... COMPLETED
+  Assert that (Optional) "Como você vai usar o Vupth?" is visible... COMPLETED
+00.04a · espera a entrada (tocando em Wait no aviso do Android)... COMPLETED
+00.04 · espera a entrada... COMPLETED
+00.05 · entra como o profissional da 00...
+  Tap on id: go-login... COMPLETED
+  Tap on id: login-email... COMPLETED
+  Input text ${EMAIL}... COMPLETED
+  Tap on id: login-password...io.grpc.StatusRuntimeException: UNAVAILABLE
+	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
+	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
+	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
+	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.deviceInfo(MaestroDriverGrpc.java:740)
+	at maestro.drivers.AndroidDriver.deviceInfo$lambda$5(AndroidDriver.kt:201)
+	at maestro.drivers.AndroidDriver.runDeviceCall(AndroidDriver.kt:1273)
+	at maestro.drivers.AndroidDriver.deviceInfo(AndroidDriver.kt:200)
+	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:28)
+	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke-prqvCes(Maestro.kt:441)
+	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke(Maestro.kt:440)
+	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
+	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
+	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+Caused by: java.io.IOException: Command failed (tcp:7001): closed
+	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
+	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:149)
+	at maestro.drivers.AndroidDriver.channel$lambda$0(AndroidDriver.kt:81)
+	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:40)
+	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:44)
+	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:19)
+	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:25)
+	at io.grpc.okhttp.OkHttpClientTransport$3.run(OkHttpClientTransport.java:535)
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:133)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_004010/00_atualizacao
+╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                │
+│   Debug tests faster by easy access to test recordings, maestro logs, screenshots, and more.   │
+│                                                                                                │
+│   Run your flows on Maestro Cloud:                                                             │
+│   maestro cloud app_file flows_folder/                                                         │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+
