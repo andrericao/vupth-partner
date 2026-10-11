@@ -75,11 +75,20 @@ env:
     file: etapas/06_meu_dia.yaml
     label: "00.18 · roda 06_meu_dia"
 - runFlow:
-    file: etapas/07_encaixe.yaml
-    label: "00.19 · roda 07_encaixe"
+    file: etapas/07a_encaixe.yaml
+    label: "00.19 · roda 07a_encaixe"
 - runFlow:
-    file: etapas/08_dono_confere.yaml
-    label: "00.20 · roda 08_dono_confere"
+    file: etapas/07b_perfil.yaml
+    label: "00.19b · roda 07b_perfil"
+- runFlow:
+    file: etapas/08a_dono_confere.yaml
+    label: "00.20 · roda 08a_dono_confere"
+- runFlow:
+    file: apoio/sair_dono.yaml
+    label: "00.20a · sai do dono (a 08b entra de novo)"
+- runFlow:
+    file: etapas/08b_dono_loja.yaml
+    label: "00.20b · roda 08b_dono_loja"
 # A 08 termina com o dono fora da conta; a 09 e do profissional
 - runFlow:
     file: apoio/entrar.yaml

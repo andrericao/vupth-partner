@@ -372,7 +372,9 @@ if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$FLUXOS"/avulsas/[0-9][0-9].yaml; do
+  # etapas-curtas (Andre, 11/10): a etapa longa vira partes (07a, 07b...), cada
+  # uma com a sua aprovacao; a F repete so a parte que falhou.
+  for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do
     NN=$(basename "$ARQ" .yaml)
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"
