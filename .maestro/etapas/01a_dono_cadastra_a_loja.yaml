@@ -1,0 +1,49 @@
+# O dono cria a conta, a loja (Barbearia) e o horario: 24 horas nos 7 dias,
+# para a loja poder abrir a qualquer hora em que a bateria rodar.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/cadastrar.yaml
+    env:
+      PAPEL: owner
+      EMAIL: ${output.EMAIL_DONO}
+    label: "01.01 · roda cadastrar"
+- extendedWaitUntil:
+    visible: "Dados da loja"
+    timeout: 30000
+    label: "01.02 · espera Dados da loja"
+- tapOn:
+    text: "Ex: João Silva"
+    label: "01.03 · toca em Ex: João Silva"
+- inputText:
+    text: "Dono ${output.TAG}"
+    label: "01.04 · digita Dono ${output.TAG}"
+- tapOn:
+    text: "Rei do Corte LTDA"
+    label: "01.05 · toca em Rei do Corte LTDA"
+- inputText:
+    text: ${output.LOJA}
+    label: "01.06 · digita ${output.LOJA}"
+- hideKeyboard:
+    label: "01.07 · fecha o teclado"
+- tapOn:
+    text: "Barbearia"
+    label: "01.08 · toca em Barbearia"
+- tapOn:
+    text: "Criar estabelecimento"
+    label: "01.09 · toca em Criar estabelecimento"
+- extendedWaitUntil:
+    visible: "Você também vai atender?"
+    timeout: 20000
+    label: "01.10 · espera Você também vai atender?"
+- scrollUntilVisible:
+    element: "Não, apenas proprietário"
+    direction: DOWN
+    label: "01.11 · rola ate Não, apenas proprietário"
+- tapOn:
+    text: "Não, apenas proprietário"
+    label: "01.12 · toca em Não, apenas proprietário"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+    label: "01.13 · espera ${output.LOJA}"

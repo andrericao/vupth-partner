@@ -1,5 +1,5 @@
-# Etapa 05 AVULSA (bateria-nao-para, Andre 03/10): prepara pela API o estado
-# que ela espera, abre o app do zero e roda etapas/05_atende_a_fila.yaml. O setup.sh
+# Etapa 05a AVULSA (etapas-curtas, 11/10) (bateria-nao-para, Andre 03/10): prepara pela API o estado
+# que ela espera, abre o app do zero e roda etapas/05a_atende_a_fila.yaml. O setup.sh
 # roda as oito em sequencia com a mesma TAG e segue depois de uma falha.
 # Gerado junto com as demais — mudar o cabecalho nas oito.
 appId: ${APP_ID}
@@ -50,5 +50,5 @@ env:
     file: ../apoio/fechar_aviso.yaml
     label: "05.B5 · roda fechar_aviso"
 - runFlow:
-    file: ../etapas/05_atende_a_fila.yaml
-    label: "05.00 · roda 05_atende_a_fila"
+    file: ../etapas/05a_atende_a_fila.yaml
+    label: "05.00 · roda 05a_atende_a_fila"

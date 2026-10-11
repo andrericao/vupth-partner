@@ -1,0 +1,40 @@
+# 10b (etapas-curtas, Andre 11/10): fora da conta, o login com e-mail sem conta e
+# com senha errada. A 10a (desafiliar, buscar, pedir e cancelar) vem antes.
+appId: ${APP_ID}
+---
+# Login: e-mail sem conta oferece o cadastro; senha errada diz so isso (fd9a3af)
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: "semconta_m${output.TAG}@teste.com"
+    label: "10.30 · entra com e-mail sem conta"
+- extendedWaitUntil:
+    visible: "Não há conta com este e-mail"
+    timeout: 30000
+    label: "10.31 · espera Nao ha conta com este e-mail"
+- assertVisible:
+    text: "Criar conta"
+    label: "10.32 · confere Criar conta"
+- tapOn:
+    text: "Corrigir e-mail"
+    label: "10.33 · toca em Corrigir e-mail"
+- assertVisible:
+    id: "login-email"
+    label: "10.34 · confere que ficou no login"
+- back:
+    label: "10.35 · volta para os papeis"
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_TROCA}
+      SENHA: "Errada@123"
+    label: "10.36 · entra com a senha errada"
+- extendedWaitUntil:
+    visible: "Senha incorreta"
+    timeout: 30000
+    label: "10.37 · espera Senha incorreta"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "10.38 · fecha o aviso"
+- back:
+    label: "10.39 · volta para os papeis"
