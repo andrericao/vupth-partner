@@ -1,0 +1,298 @@
+02:40:04.103 [ INFO] maestro.cli.report.TestDebugReporter.logSystemInfo: Debug output path: /home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_023621/etapa_08
+02:40:04.110 [ INFO] MAESTRO.logSystemInfo: ---- System Info ----
+02:40:04.111 [ INFO] MAESTRO.logSystemInfo: Maestro Version: 2.5.1
+02:40:04.113 [ INFO] MAESTRO.logSystemInfo: CI: Undefined
+02:40:04.114 [ INFO] MAESTRO.logSystemInfo: OS Name: Linux
+02:40:04.115 [ INFO] MAESTRO.logSystemInfo: OS Version: 7.0.0-38-generic
+02:40:04.115 [ INFO] MAESTRO.logSystemInfo: Architecture: amd64
+02:40:04.120 [ INFO] MAESTRO.logSystemInfo: Java Version: 21
+02:40:04.130 [ INFO] MAESTRO.logSystemInfo: Xcode Version: null
+02:40:04.136 [ INFO] MAESTRO.logSystemInfo: Flutter Version: Undefined
+02:40:04.144 [ INFO] MAESTRO.logSystemInfo: Flutter Channel: Undefined
+02:40:04.145 [ INFO] MAESTRO.logSystemInfo: ---------------------
+02:40:06.591 [DEBUG] io.micrometer.common.util.internal.logging.InternalLoggerFactory.newDefaultFactory: Using SLF4J as the default logging framework
+02:40:07.453 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device emulator-5554 using port 7001 with execution plan ExecutionPlan(flowsToRun=[/tmp/tmp.V7D4xqsMFg/avulsas/08.yaml], sequence=FlowSequence(flows=[], continueOnFailure=true), workspaceConfig=WorkspaceConfig(flows=null, includeTags=null, excludeTags=null, executionOrder=null, baselineBranch=null, notifications=null, disableRetries=false, platform=PlatformConfiguration(android=AndroidConfiguration(disableAnimations=false), ios=IOSConfiguration(disableAnimations=false, snapshotKeyHonorModalViews=null)), testOutputDir=null))
+02:40:16.090 [ INFO] maestro.cli.runner.TestRunner.runSingle$lambda$0: Running flow 08.yaml...
+02:40:16.289 [ INFO] maestro.Maestro.cachedDeviceInfo_delegate$lambda$0: Getting device info
+02:40:16.811 [ INFO] maestro.Maestro.cachedDeviceInfo_delegate$lambda$0: Got device info: DeviceInfo(platform=ANDROID, widthPixels=1080, heightPixels=2280, widthGrid=1080, heightGrid=2280)
+02:40:17.222 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Define variables RUNNING
+02:40:17.278 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Define variables metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(defineVariablesCommand=DefineVariablesCommand(env={APP_ID=com.vupth.partner.preview, API=https://vupth-backend-ia.onrender.com, SENHA=Teste@123, COMMIT=bc20de8,d9adc3f,304f9fc,e2a15e7,6280fc1,b1287f8,c10237c, SUPERVISAO=0, TAG=023621, MAESTRO_FILENAME=08, MAESTRO_DEVICE_UDID=emulator-5554, MAESTRO_SHARD_ID=1, MAESTRO_SHARD_INDEX=0}, label=null, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:17.296 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Define variables COMPLETED
+02:40:17.301 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Define variables RUNNING
+02:40:17.316 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Define variables metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(defineVariablesCommand=DefineVariablesCommand(env={APP_ID=com.vupth.partner.preview, API=https://vupth-backend-ia.onrender.com, SENHA=Teste@123}, label=null, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:17.326 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Define variables COMPLETED
+02:40:17.340 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Apply configuration RUNNING
+02:40:20.477 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Apply configuration metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(applyConfigurationCommand=ApplyConfigurationCommand(config=MaestroConfig(appId=com.vupth.partner.preview, name=null, tags=[], ext={}, onFlowStart=null, onFlowComplete=null, properties={}), label=null, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:20.485 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Apply configuration COMPLETED
+02:40:20.489 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 08.A1 · etiqueta da rodada (TAG) RUNNING
+02:40:20.494 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 08.A1 · etiqueta da rodada (TAG) metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(evalScriptCommand=EvalScriptCommand(scriptString=${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}, label=08.A1 · etiqueta da rodada (TAG), optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:20.570 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 08.A1 · etiqueta da rodada (TAG) COMPLETED
+02:40:20.574 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 08.A2 · e-mail do dono RUNNING
+02:40:20.576 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 08.A2 · e-mail do dono metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(evalScriptCommand=EvalScriptCommand(scriptString=${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}, label=08.A2 · e-mail do dono, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:20.592 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 08.A2 · e-mail do dono COMPLETED
+02:40:20.595 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 08.A3 · e-mail do profissional RUNNING
+02:40:20.598 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 08.A3 · e-mail do profissional metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(evalScriptCommand=EvalScriptCommand(scriptString=${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}, label=08.A3 · e-mail do profissional, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:20.618 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 08.A3 · e-mail do profissional COMPLETED
+02:40:20.624 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 08.A4 · nome da loja RUNNING
+02:40:20.627 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 08.A4 · nome da loja metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(evalScriptCommand=EvalScriptCommand(scriptString=${output.LOJA = 'Loja M' + output.TAG}, label=08.A4 · nome da loja, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:20.646 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 08.A4 · nome da loja COMPLETED
+02:40:20.650 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 08.A5 · nome do profissional RUNNING
+02:40:20.655 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 08.A5 · nome do profissional metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(evalScriptCommand=EvalScriptCommand(scriptString=${output.PROF = 'Prof' + output.TAG}, label=08.A5 · nome do profissional, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:20.676 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 08.A5 · nome do profissional COMPLETED
+02:40:20.679 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 08.A6 · preparo pela API (o que as etapas anteriores deixariam) RUNNING
+02:40:20.707 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 08.A6 · preparo pela API (o que as etapas anteriores deixariam) metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(runScriptCommand=RunScriptCommand(script=// Prepara pela API do staging o estado que a etapa ETAPA espera (bateria-nao-para,
+// Andre 03/10): cada etapa roda sozinha, mesmo que a anterior tenha falhado.
+// Tudo e idempotente — se a etapa anterior passou, o que ela criou pelo app e
+// reaproveitado; se falhou, o preparo cria o que faltou.
+//
+// Entradas (env do runScript): API, SENHA, TAG, ETAPA (1..8)
+// Saidas: output.CLIENTE1 e output.CLIENTE2 nas etapas 6 e 8 (o historico)
+
+var etapa = parseInt(ETAPA, 10);
+var EMAIL_DONO = "prop_m" + TAG + "@teste.com";
+var EMAIL_PROF = "prof_m" + TAG + "@teste.com";
+var LOJA = "Loja M" + TAG;
+var PROF = "Prof" + TAG;
+
+function chamar(metodo, url, corpo, token) {
+  var headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = "Bearer " + token;
+  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" || metodo === "DELETE" ? undefined : "{}") });
+  return { status: r.status, corpo: r.body ? json(r.body) : null };
+}
+
+function pedir(metodo, url, corpo, token) {
+  var r = chamar(metodo, url, corpo, token);
+  if (r.status >= 300) throw new Error("preparo da etapa " + etapa + ": " + metodo + " " + url + " -> " + r.status + " " + JSON.stringify(r.corpo));
+  return r.corpo;
+}
+
+// Entra; sem a conta, cria e entra.
+function conta(email) {
+  var r = chamar("POST", "/auth/login", { email: email, password: SENHA });
+  if (r.status < 300) return r.corpo.tokens.access_token;
+  pedir("POST", "/auth/register", { email: email, password: SENHA });
+  return pedir("POST", "/auth/login", { email: email, password: SENHA }).tokens.access_token;
+}
+
+// Login de novo: o token tem de carregar o papel recem-criado (OWNER/PROFESSIONAL).
+function entrar(email) {
+  return pedir("POST", "/auth/login", { email: email, password: SENHA }).tokens.access_token;
+}
+
+// ── A partir da 02: o dono com a loja aberta 24 horas (o que a 01 faz) ──
+var loja = null;
+var tokenDono = null;
+if (etapa >= 2) {
+  tokenDono = conta(EMAIL_DONO);
+  var lojas = chamar("GET", "/establishment/mine", null, tokenDono);
+  if (lojas.status < 300 && lojas.corpo && lojas.corpo.length > 0) {
+    loja = lojas.corpo[0];
+  } else {
+    pedir("PATCH", "/profile/general-infos", { first_name: "Dono " + TAG }, tokenDono);
+    loja = pedir("POST", "/establishment/quick-create", { name: LOJA, serviceType: "BARBER" }, tokenDono);
+    tokenDono = entrar(EMAIL_DONO);
+    var dias = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+    pedir("PUT", "/establishment/" + loja.id + "/hours/weekly", {
+      days: dias.map(function (d) { return { day: d, closed: false, opens: "00:00", closes: "00:00" }; })
+    }, tokenDono);
+  }
+}
+
+// ── A partir da 03: o profissional cadastrado (o que a 02 faz) ──
+var prof = null;
+var tokenProf = null;
+if (etapa >= 3) {
+  tokenProf = conta(EMAIL_PROF);
+  var me = chamar("GET", "/professional/me", null, tokenProf);
+  if (me.status >= 300) {
+    pedir("POST", "/professional/register", { name: PROF, specialty: "NAIL_TECH" }, tokenProf);
+    tokenProf = entrar(EMAIL_PROF);
+    me = chamar("GET", "/professional/me", null, tokenProf);
+  }
+  prof = me.corpo;
+}
+
+// O pedido pendente do profissional, lido do lado dele: a lista da loja nem
+// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).
+function pedidoPendente() {
+  var r = chamar("GET", "/professional/me/affiliations", null, tokenProf);
+  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];
+  for (var i = 0; i < lista.length; i++) {
+    if (String(lista[i].status).toUpperCase() === "PENDING") return lista[i];
+  }
+  return null;
+}
+
+// ── 03: o pedido de vinculo pendente, para o dono aceitar ──
+// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.
+if (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {
+  var pedido = chamar("POST", "/professional/me/affiliations", { establishmentId: loja.id }, tokenProf);
+  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === "AFFILIATION_ALREADY_PENDING";
+  if (pedido.status >= 300 && !jaPendente) {
+    throw new Error("preparo da etapa 3: POST /professional/me/affiliations -> " + pedido.status + " " + JSON.stringify(pedido.corpo));
+  }
+}
+
+// ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──
+if (etapa >= 4 && !prof.establishment_id) {
+  var pendente = pedidoPendente();
+  if (pendente) pedir("PATCH", "/affiliations/" + pendente.id + "/accept", null, tokenDono);
+  else pedir("POST", "/professional/affiliate", { establishmentId: loja.id }, tokenProf);
+  tokenProf = entrar(EMAIL_PROF);
+  prof = pedir("GET", "/professional/me", null, tokenProf);
+}
+
+// ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──
+var servicos = [];
+if (etapa >= 5) {
+  servicos = pedir("GET", "/professional/" + prof.id + "/service-items", null, tokenProf) || [];
+  if (servicos.length === 0) {
+    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)
+    pedir("POST", "/professional-queue/" + prof.id + "/add-service-items", {
+      serviceItemType: "MANICURE", customName: "Manicure " + TAG,
+      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60
+    }, tokenProf);
+    servicos = pedir("GET", "/professional/" + prof.id + "/service-items", null, tokenProf);
+  }
+  if (prof.work_status !== "WORKING") {
+    pedir("PATCH", "/professional/me/status", { status: "WORKING" }, tokenProf);
+  }
+  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false
+  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).
+  if (prof.accepting_new === false || prof.acceptingNew === false) {
+    pedir("PATCH", "/professional/me/accepting-new", { value: true }, tokenProf);
+  }
+}
+
+// ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──
+// Clientes proprios do preparo (sufixo h): nao dependem de a 05 ter passado.
+function clienteNaFila(n) {
+  var nome = "Cliente" + n + "h" + TAG;
+  var token = conta("client_" + TAG + "_h" + n + "_e" + etapa + "@teste.com");
+  pedir("PATCH", "/profile/general-infos", { first_name: nome }, token);
+  var at = pedir("POST", "/attendances", {
+    professionalId: prof.id,
+    establishmentId: prof.establishment_id,
+    serviceItemIds: [servicos[0].id],
+    scheduledTime: new Date().toISOString()
+  }, token);
+  return { nome: nome, id: at.id };
+}
+
+if (etapa === 6 || etapa === 8) {
+  var finalizado = clienteNaFila(1);
+  pedir("PATCH", "/attendances/" + finalizado.id + "/start", null, tokenProf);
+  pedir("PATCH", "/attendances/" + finalizado.id + "/finish", null, tokenProf);
+  var retirado = clienteNaFila(2);
+  pedir("DELETE", "/professional-queue/" + retirado.id + "/remove", null, tokenProf);
+  output.CLIENTE1 = finalizado.nome;
+  output.CLIENTE2 = retirado.nome;
+}
+, env={TAG=023621, ETAPA=8}, sourceDescription=/tmp/tmp.V7D4xqsMFg/scripts/preparo.js, condition=null, label=08.A6 · preparo pela API (o que as etapas anteriores deixariam), optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+02:40:37.535 [ERROR] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandFailed: Error: preparo da etapa 8: POST /auth/login -> 429 {"status":429,"message":"Too many requests, try again in 45 s","code":"TOO_MANY_REQUESTS","timestamp":"2026-10-11T05:40:37.419406056Z"}
+02:40:37.540 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+02:40:37.543 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+02:40:38.158 [ERROR] maestro.cli.runner.TestRunner.runCatching-ta8aW1Q: Failed to run flow
+org.graalvm.polyglot.PolyglotException: Error: preparo da etapa 8: POST /auth/login -> 429 {"status":429,"message":"Too many requests, try again in 45 s","code":"TOO_MANY_REQUESTS","timestamp":"2026-10-11T05:40:37.419406056Z"}
+	at <js>.pedir(<eval>:24)
+	at <js>.conta(<eval>:33)
+	at <js>.clienteNaFila(<eval>:130)
+	at <js>.:program(<eval>:145)
+	at <js>.:anonymous(/tmp/tmp.V7D4xqsMFg/scripts/preparo.js:1)
+	at <js>.:program(/tmp/tmp.V7D4xqsMFg/scripts/preparo.js:1)
+	at org.graalvm.polyglot.Context.eval(Context.java:416)
+	at maestro.js.GraalJsEngine.evalWithIIFE(GraalJsEngine.kt:134)
+	at maestro.js.GraalJsEngine.evaluateScript(GraalJsEngine.kt:95)
+	at maestro.js.GraalJsEngine.evaluateScript(GraalJsEngine.kt:26)
+	at maestro.orchestra.Orchestra.runScriptCommand(Orchestra.kt:645)
+	at maestro.orchestra.Orchestra.executeCommand(Orchestra.kt:373)
+	at maestro.orchestra.Orchestra.executeCommands(Orchestra.kt:275)
+	at maestro.orchestra.Orchestra.access$executeCommands(Orchestra.kt:126)
+	at maestro.orchestra.Orchestra$executeCommands$1.invokeSuspend(Orchestra.kt)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:94)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:70)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at maestro.cli.runner.TestRunner.runSingle$lambda$0(TestRunner.kt:75)
+	at maestro.cli.runner.TestRunner.runCatching-ta8aW1Q(TestRunner.kt:204)
+	at maestro.cli.runner.TestRunner.runSingle(TestRunner.kt:66)
+	at maestro.cli.command.TestCommand.runSingleFlow(TestCommand.kt:561)
+	at maestro.cli.command.TestCommand.runShardSuite$lambda$10(TestCommand.kt:529)
+	at maestro.cli.session.MaestroSessionManager.newSession(MaestroSessionManager.kt:132)
+	at maestro.cli.session.MaestroSessionManager.newSession$default(MaestroSessionManager.kt:66)
+	at maestro.cli.command.TestCommand.runShardSuite(TestCommand.kt:476)
+	at maestro.cli.command.TestCommand.access$runShardSuite(TestCommand.kt:80)
+	at maestro.cli.command.TestCommand$handleSessions$1$results$1$1.invokeSuspend(TestCommand.kt:435)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+02:40:39.785 [ERROR] maestro.orchestra.debug.TestOutputWriter.saveCommands: Unable to parse commands
+com.fasterxml.jackson.databind.JsonMappingException: Engine is already closed. (through reference chain: java.util.ArrayList[0]->maestro.orchestra.debug.TestOutputWriter$CommandDebugWrapper["metadata"]->maestro.orchestra.debug.CommandDebugMetadata["error"]->org.graalvm.polyglot.PolyglotException["guestObject"]->org.graalvm.polyglot.Value["context"]->org.graalvm.polyglot.Context["engine"]->org.graalvm.polyglot.Engine["cachedSources"])
+	at com.fasterxml.jackson.databind.JsonMappingException.wrapWithPath(JsonMappingException.java:402)
+	at com.fasterxml.jackson.databind.JsonMappingException.wrapWithPath(JsonMappingException.java:361)
+	at com.fasterxml.jackson.databind.ser.std.StdSerializer.wrapAndThrow(StdSerializer.java:323)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:778)
+	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
+	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
+	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
+	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
+	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
+	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
+	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
+	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
+	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
+	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
+	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
+	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serializeContents(IndexedListSerializer.java:119)
+	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:79)
+	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:18)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectWriter$Prefetch.serialize(ObjectWriter.java:1574)
+	at com.fasterxml.jackson.databind.ObjectWriter._writeValueAndClose(ObjectWriter.java:1275)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1081)
+	at maestro.orchestra.debug.TestOutputWriter.saveCommands(TestOutputWriter.kt:55)
+	at maestro.cli.report.TestDebugReporter.saveFlow(TestDebugReporter.kt:87)
+	at maestro.cli.report.TestDebugReporter.saveFlow$default(TestDebugReporter.kt:82)
+	at maestro.cli.runner.TestRunner.runSingle(TestRunner.kt:91)
+	at maestro.cli.command.TestCommand.runSingleFlow(TestCommand.kt:561)
+	at maestro.cli.command.TestCommand.runShardSuite$lambda$10(TestCommand.kt:529)
+	at maestro.cli.session.MaestroSessionManager.newSession(MaestroSessionManager.kt:132)
+	at maestro.cli.session.MaestroSessionManager.newSession$default(MaestroSessionManager.kt:66)
+	at maestro.cli.command.TestCommand.runShardSuite(TestCommand.kt:476)
+	at maestro.cli.command.TestCommand.access$runShardSuite(TestCommand.kt:80)
+	at maestro.cli.command.TestCommand$handleSessions$1$results$1$1.invokeSuspend(TestCommand.kt:435)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+Caused by: java.lang.IllegalStateException: Engine is already closed.
+	at com.oracle.truffle.polyglot.PolyglotEngineException.illegalState(PolyglotEngineException.java:133)
+	at com.oracle.truffle.polyglot.PolyglotEngineImpl.checkState(PolyglotEngineImpl.java:1083)
+	at com.oracle.truffle.polyglot.PolyglotEngineImpl.getCachedSources(PolyglotEngineImpl.java:1397)
+	at com.oracle.truffle.polyglot.PolyglotEngineDispatch.getCachedSources(PolyglotEngineDispatch.java:193)
+	at org.graalvm.polyglot.Engine.getCachedSources(Engine.java:405)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:688)
+	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
+	... 43 more
