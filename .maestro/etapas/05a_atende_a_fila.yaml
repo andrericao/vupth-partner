@@ -1,0 +1,123 @@
+# Dois clientes entram na fila pela API. O profissional inicia o primeiro, pausa
+# e retoma pelo menu do card verde (QA 16.1), finaliza, e remove o segundo
+# (Retirado, QA 16.5).
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../scripts/clientes_na_fila.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+      QTD: "2"
+      PELO_ANDRE: "${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2' ? '1' : '0'}"
+    label: "05.01 · script clientes_na_fila"
+- tapOn:
+    id: "aba-fila"
+    label: "05.02 · toca em aba-fila"
+# Supervisionada com os dois usuarios (DEC-15): o 2o cliente e o Andre, que
+# entra na fila pelo Client no segundo celular — o setup.sh mostra o e-mail.
+- runFlow:
+    when:
+      true: "${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}"
+    commands:
+      - extendedWaitUntil:
+          visible: ${output.CLIENTE2}
+          timeout: 300000
+          label: "05.0A · espera o Andre entrar na fila (ate 5 min)"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE1}
+    timeout: 60000
+    label: "05.03 · espera ${output.CLIENTE1}"
+- assertVisible:
+    text: ${output.CLIENTE2}
+    label: "05.04 · confere ${output.CLIENTE2}"
+# compartilhar-no-topo (05/10): o icone no canto direito do cabecalho da Fila.
+- assertVisible:
+    id: "compartilhar-no-topo"
+    label: "05.04a · confere compartilhar-no-topo"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: fila-compartilhar
+      O_QUE: "o icone de compartilhar no canto direito do cabecalho da Fila, ao lado do status e das opcoes"
+    label: "05.04b · print para o Andre (fila-compartilhar)"
+
+- tapOn:
+    text: "Iniciar próximo"
+    label: "05.05 · toca em Iniciar próximo"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+    label: "05.06 · espera Finalizar"
+
+# Pausar e retomar pelo menu do card verde (um toque abre)
+- tapOn:
+    text: "Opções de ${output.CLIENTE1}"
+    label: "05.07 · toca em Opções de ${output.CLIENTE1}"
+- tapOn:
+    text: "Pausar atendimento"
+    label: "05.08 · toca em Pausar atendimento"
+- extendedWaitUntil:
+    visible: "Retomar"
+    timeout: 20000
+    label: "05.09 · espera Retomar"
+# cronometro-pausado (3f1068b): pausado, o relogio PARA. Le o valor, deixa
+# passar 3 s (espera opcional por um texto que nao existe) e confere o mesmo.
+- copyTextFrom:
+    id: "cronometro"
+    label: "05.10 · cronometro-pausado · le o cronometro"
+- evalScript:
+    script: ${output.PAUSADO = maestro.copiedText}
+    label: "05.11 · cronometro-pausado · guarda o valor"
+- extendedWaitUntil:
+    visible: "nada-com-este-texto"
+    timeout: 3000
+    optional: true
+    label: "05.12 · cronometro-pausado · deixa passar 3 s"
+- assertVisible:
+    id: "cronometro"
+    text: ${output.PAUSADO}
+    label: "05.13 · cronometro-pausado · o cronometro nao andou"
+- tapOn:
+    text: "Retomar"
+    label: "05.14 · toca em Retomar"
+- extendedWaitUntil:
+    visible: "Pausar"
+    timeout: 20000
+    label: "05.15 · espera Pausar"
+# Retomado, volta a andar a partir do valor pausado (nao do zero).
+- extendedWaitUntil:
+    notVisible:
+      id: "cronometro"
+      text: ${output.PAUSADO}
+    timeout: 5000
+    label: "05.16 · cronometro-pausado · volta a andar"
+# E nao recomecou do zero: o valor de agora >= o valor pausado (em segundos).
+- copyTextFrom:
+    id: "cronometro"
+    label: "05.17 · cronometro-pausado · le o cronometro retomado"
+- assertTrue:
+    condition: ${(function (a, b) { var s = function (t) { var p = String(t).split(':'); return Number(p[0]) * 60 + Number(p[1]); }; return s(a) >= s(b); })(maestro.copiedText, output.PAUSADO)}
+    label: "05.18 · cronometro-pausado · segue de onde parou"
+- tapOn:
+    text: "Finalizar"
+    label: "05.19 · toca em Finalizar"
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE1}
+    timeout: 20000
+    label: "05.20 · espera"
+
+# O segundo sai pela loja: Remover
+- tapOn:
+    text: "Opções de ${output.CLIENTE2}"
+    label: "05.21 · toca em Opções de ${output.CLIENTE2}"
+- tapOn:
+    text: "Remover"
+    label: "05.22 · toca em Remover"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "05.23 · roda confirmar"
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE2}
+    timeout: 20000
+    label: "05.24 · espera"

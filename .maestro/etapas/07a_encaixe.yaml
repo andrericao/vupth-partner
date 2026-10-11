@@ -1,0 +1,204 @@
+# Fora: a fila fecha e a loja fecha junto. Um cliente pede encaixe pela API e o
+# profissional RECUSA (fluxo critico, DEC-7); outro pede, o profissional aceita
+# e passa a Trabalhando (QA 19.2). Depois atende e sai.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/status.yaml
+    env:
+      STATUS: indisponivel
+    label: "07.01 · roda status"
+- assertVisible:
+    text: "Você está: Fora.*"
+    label: "07.02 · confere Você está: Fora…"
+- runScript:
+    file: ../scripts/pedido_de_encaixe.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+      QUEM: Recusado
+    label: "07.03 · script pedido_de_encaixe (o que sera recusado)"
+# card-vale-ate: o pedido de hoje sem horario vence as 23:59 (BAK-1); longe
+# disso (mais de 60 min), o card da Fila diz a hora, nao os minutos. Perto da
+# meia-noite o card mostra os minutos e a conferencia nao roda.
+- runFlow:
+    when:
+      true: "${new Date().getHours() < 22}"
+    commands:
+      - runFlow:
+          file: ../apoio/fechar_aviso.yaml
+      - extendedWaitUntil:
+          visible:
+            id: "solicitacoes-expira"
+          timeout: 60000
+      - assertVisible:
+          id: "solicitacoes-expira"
+          text: "vale até 23:59"
+    label: "07.03a · confere o card da Fila: vale até 23:59"
+# Bateria 20:08: o push do pedido virou caixa ("Novo pedido de corte") no
+# instante do toque e o comeu — a tela ficou na Fila. Fecha a caixa e tenta de
+# novo ate os Encaixes mostrarem o pedido.
+# Bateria 19:21 (emulador): o nome do cliente tambem aparece no card de
+# solicitacoes da Fila — o laco parava sem sair da Fila. Agora espera o
+# encaixe-quando, que so a tela Encaixes tem.
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: "encaixe-quando"
+    commands:
+      - runFlow:
+          file: ../apoio/fechar_aviso.yaml
+      - tapOn:
+          id: "aba-encaixes"
+      - extendedWaitUntil:
+          visible:
+            id: "encaixe-quando"
+          timeout: 15000
+          optional: true
+    label: "07.04 · toca em aba-encaixes (fecha a caixa do push, se vier)"
+- extendedWaitUntil:
+    visible: ".*${output.CLIENTE_RECUSADO}.*"
+    timeout: 60000
+    label: "07.05 · espera …${output.CLIENTE_RECUSADO}…"
+# corte-com-horario (S26): o pedido sem horario diz "assim que abrir"
+- assertVisible:
+    id: "encaixe-quando"
+    text: "Quer assim que abrir"
+    label: "07.05a · confere Quer assim que abrir"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.05b · fecha a caixa do push, se vier agora"
+- tapOn:
+    text: "Recusar"
+    label: "07.06 · toca em Recusar"
+- extendedWaitUntil:
+    notVisible: ".*${output.CLIENTE_RECUSADO}.*"
+    timeout: 20000
+    label: "07.07 · espera o pedido sumir"
+- assertVisible:
+    text: "Nenhum pedido de encaixe"
+    label: "07.08 · confere a lista vazia"
+# aviso-de-corte-sem-ok (11d393f): com o app aberto, o push do pedido vira
+# caixa com OK. pedido-de-corte-outro-dia (817b0c5) e pedido-vence-no-horario
+# (BAK-1): o de amanha vence no horario pedido — o selo diz "vale até HH:MM".
+- runScript:
+    file: ../scripts/pedido_de_encaixe.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+      QUEM: Amanha
+      AMANHA: "sim"
+    label: "07.08a · script pedido_de_encaixe para amanha"
+# Bateria 01:33 (emulador): o pedido chegou na lista, mas a caixa do push nao
+# veio (no emulador o push e' incerto). A caixa fica opcional: espera o pedido
+# e fecha a caixa so se ela aparecer.
+- extendedWaitUntil:
+    visible: ".*${output.CLIENTE_AMANHA}.*"
+    timeout: 90000
+    label: "07.08b · espera …${output.CLIENTE_AMANHA}…"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.08c · fecha a caixa do push com OK, se vier"
+- extendedWaitUntil:
+    visible: ".*${output.CLIENTE_AMANHA}.*"
+    timeout: 60000
+    label: "07.08d · espera …${output.CLIENTE_AMANHA}…"
+- assertVisible:
+    text: "vale até .*"
+    label: "07.08e · confere vale ate HH:MM"
+- assertVisible:
+    text: "Quer amanhã às.*"
+    label: "07.08f · confere Quer amanhã"
+# texto-do-aceite (ba38b81): aceitar o de outro dia o agenda naquele dia.
+- assertVisible:
+    text: ".*fica agendado para esse dia.*"
+    label: "07.08f2 · confere fica agendado para esse dia"
+- tapOn:
+    text: "Recusar"
+    label: "07.08g · recusa o de amanha"
+- extendedWaitUntil:
+    notVisible: ".*${output.CLIENTE_AMANHA}.*"
+    timeout: 20000
+    label: "07.08h · o pedido de amanha saiu"
+- runScript:
+    file: ../scripts/pedido_de_encaixe.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+    label: "07.09 · script pedido_de_encaixe (o que sera aceito)"
+# Bateria 10:11: o push do pedido virou a caixa "Novo pedido de corte" por cima
+# da lista, e o card por tras nao conta como visivel. Fecha a caixa antes.
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 30000
+    optional: true
+    label: "07.09a · espera a caixa do push"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.09b · fecha a caixa do push, se veio"
+- extendedWaitUntil:
+    visible: ".*${output.CLIENTE_ENCAIXE}.*"
+    timeout: 60000
+    label: "07.10 · espera …${output.CLIENTE_ENCAIXE}…"
+- tapOn:
+    text: "Aceitar"
+    label: "07.11 · toca em Aceitar"
+- tapOn:
+    id: "aba-fila"
+    label: "07.12 · toca em aba-fila"
+- extendedWaitUntil:
+    visible: "Você está: Trabalhando.*"
+    timeout: 20000
+    label: "07.13 · espera Você está: Trabalhando…"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE_ENCAIXE}
+    timeout: 30000
+    label: "07.14 · espera ${output.CLIENTE_ENCAIXE}"
+- tapOn:
+    text: "Iniciar próximo"
+    label: "07.15 · toca em Iniciar próximo"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+    label: "07.16 · espera Finalizar"
+- tapOn:
+    text: "Finalizar"
+    label: "07.17 · toca em Finalizar"
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE_ENCAIXE}
+    timeout: 20000
+    label: "07.18 · espera"
+- runFlow:
+    file: ../apoio/status.yaml
+    env:
+      STATUS: indisponivel
+    label: "07.19 · roda status"
+
+# expediente-no-card (b6dad1b; precisa do ece217a do Backend no staging): o
+# profissional trabalhou e foi para Fora — Hoje mostra a faixa HH:MM–HH:MM.
+- tapOn:
+    id: "aba-relatorios"
+    label: "07.20 · expediente-no-card · toca em aba-relatorios"
+- extendedWaitUntil:
+    visible: "Seu dia"
+    timeout: 20000
+    label: "07.21 · expediente-no-card · espera Seu dia"
+# Emulador (log 2026-10-11_081612, 07.22): a faixa nao apareceu e o print do
+# fim da lista nao mostra o que o card dizia. Print do card antes de conferir.
+- scrollUntilVisible:
+    element: "Expediente"
+    direction: DOWN
+    timeout: 20000
+    optional: true
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 07.21b_card_expediente
+      O_QUE: o que o card Expediente diz (a faixa HH:MM–HH:MM)
+    label: "07.21b · expediente-no-card · print do card"
+- scrollUntilVisible:
+    element: "\\d\\d:\\d\\d–\\d\\d:\\d\\d"
+    direction: DOWN
+    timeout: 20000
+    label: "07.22 · expediente-no-card · rola ate HH:MM–HH:MM"

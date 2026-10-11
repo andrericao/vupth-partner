@@ -43,6 +43,22 @@ describe("SolicitacoesCard", () => {
     expect(getByTestId("solicitacoes-expira").props.children).toBe("sem prazo");
   });
 
+  it("longe (mais de 60 min): diz a hora em que vence", () => {
+    const { getByTestId } = render(
+      <SolicitacoesCard resumo={{ ...resumo, expiraEm: 260, venceAs: "23:59" }} onPress={jest.fn()} />
+    );
+
+    expect(getByTestId("solicitacoes-expira").props.children).toBe("vale até 23:59");
+  });
+
+  it("longe sem a hora: cai nos minutos", () => {
+    const { getByTestId } = render(
+      <SolicitacoesCard resumo={{ ...resumo, expiraEm: 260 }} onPress={jest.fn()} />
+    );
+
+    expect(getByTestId("solicitacoes-expira").props.children).toBe("expira em 260 min");
+  });
+
   it("o rotulo de acessibilidade diz o que fazer, nao so o que e", () => {
     const { getByTestId } = render(<SolicitacoesCard resumo={resumo} onPress={jest.fn()} />);
 

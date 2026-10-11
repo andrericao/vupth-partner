@@ -11,11 +11,23 @@ appId: ${APP_ID}
     id: "${QUAL}-galeria"
 # Seletor de fotos do sistema: a 1a foto da grade e a mais recente
 - extendedWaitUntil:
-    visible: "(Foto|Photo|Imagem|Image) .+"
+    visible: "((Foto|Photo|Imagem|Image) .+|Recent|Recentes)"
     timeout: 20000
-- tapOn:
-    text: "(Foto|Photo|Imagem|Image) .+"
-    index: 0
+- runFlow:
+    when:
+      visible: "(Foto|Photo|Imagem|Image) .+"
+    commands:
+      - tapOn:
+          text: "(Foto|Photo|Imagem|Image) .+"
+          index: 0
+# No emulador (Android 11, log 2026-10-11_013321, 08.36) o seletor e o
+# "Recent" do DocumentsUI: miniaturas sem texto. Toca na 1a da grade.
+- runFlow:
+    when:
+      visible: "(Recent|Recentes)"
+    commands:
+      - tapOn:
+          point: "20%,31%"
 # Recorte (allowsEditing): confirma, se a tela aparecer. Espera ela abrir antes
 # de decidir — o "when" sozinho olhava cedo demais e o recorte ficava aberto
 # (log 06/10, 07.44).

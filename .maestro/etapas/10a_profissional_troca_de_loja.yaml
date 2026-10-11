@@ -1,0 +1,147 @@
+# O profissional troca de loja (maestro-maximo, 3a fatia): desafilia em Vinculo,
+# busca a loja em "Buscar estabelecimento" (find-establishment), pede o vinculo
+# e, com o pedido em andamento, cancela. Fora da conta, o login com e-mail sem
+# conta e com senha errada (email-sem-conta, que era so a mao). Conta propria (EMAIL_TROCA): a etapa
+# muda o vinculo e nao pode mexer no profissional das outras.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+    label: "10.01 · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "10.02 · fecha o aviso, se houver"
+# No emulador o card "Pronto para atender" empurra o Vinculo para baixo da
+# tela (log 2026-10-11_013321, 10.03): rola ate ele.
+- scrollUntilVisible:
+    element:
+      text: "Vínculo"
+    direction: DOWN
+    timeout: 20000
+    label: "10.03a · rola ate o Vinculo"
+- tapOn:
+    text: "Vínculo"
+    label: "10.03 · toca em Vinculo"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+    label: "10.04 · espera ${output.LOJA}"
+- tapOn:
+    text: "Desafiliar do Estabelecimento"
+    label: "10.05 · toca em Desafiliar do Estabelecimento"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "10.06 · confirma Desafiliar"
+- extendedWaitUntil:
+    visible: "Desafiliado"
+    timeout: 20000
+    label: "10.07 · espera Desafiliado"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "10.08 · fecha o aviso"
+- extendedWaitUntil:
+    visible: "Não vinculado"
+    timeout: 20000
+    label: "10.09 · espera Nao vinculado"
+
+# find-establishment, aberto: busca e pede
+- tapOn:
+    text: "Buscar estabelecimento"
+    label: "10.10 · toca em Buscar estabelecimento"
+- extendedWaitUntil:
+    visible: "Encontre um estabelecimento e solicite vinculação."
+    timeout: 20000
+    label: "10.11 · espera a busca aberta"
+- tapOn:
+    text: "Nome do estabelecimento"
+    label: "10.12 · toca na busca"
+- inputText:
+    text: ${output.LOJA}
+    label: "10.13 · digita ${output.LOJA}"
+- pressKey:
+    key: Enter
+    label: "10.14 · tecla Enter"
+# Sem hideKeyboard: o Enter ja fecha o teclado, e o hideKeyboard sem teclado
+# vira Voltar — fechava a busca (bateria 20:08, a tela voltou para a Fila).
+# O nome tambem esta no campo: o card e o que fica abaixo da busca
+- extendedWaitUntil:
+    visible:
+      text: ${output.LOJA}
+      below:
+        id: "campo-de-busca"
+    timeout: 20000
+    label: "10.16 · espera o card de ${output.LOJA}"
+# Bateria 10:11: o toque no nome caia no proprio campo (o texto digitado e
+# igual) e reabria o teclado. Toca no estado da loja, que so o card tem.
+- tapOn:
+    text: "(Aberto|Fechado)"
+    below:
+      id: "campo-de-busca"
+    label: "10.17 · toca no card de ${output.LOJA} (no Aberto/Fechado)"
+# Bateria 22:48: o primeiro toque no card nao abriu o detalhe (o teclado ainda
+# estava aberto). Se o detalhe nao vier em 10 s, fecha o teclado e toca de novo.
+- extendedWaitUntil:
+    visible: "Solicitar vinculação"
+    timeout: 10000
+    optional: true
+    label: "10.17a · espera o detalhe da loja"
+- runFlow:
+    when:
+      notVisible: "Solicitar vinculação"
+    commands:
+      - tapOn:
+          text: "Barbearia"
+          below:
+            id: "campo-de-busca"
+    label: "10.17b · toca de novo no card, se o detalhe nao abriu"
+- extendedWaitUntil:
+    visible: "Solicitar vinculação"
+    timeout: 20000
+    label: "10.17c · espera Solicitar vinculacao"
+- tapOn:
+    text: "Solicitar vinculação"
+    label: "10.18 · toca em Solicitar vinculacao"
+- extendedWaitUntil:
+    visible: "Solicitação enviada"
+    timeout: 20000
+    label: "10.19 · espera Solicitacao enviada"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "10.20 · fecha o aviso"
+
+# find-establishment, com o pedido em andamento: cancela
+- tapOn:
+    id: "aba-perfil"
+    label: "10.21 · toca em aba-perfil"
+# Emulador (log 2026-10-11_081612, 11.04): o "Vínculo" fica abaixo da tela.
+- scrollUntilVisible:
+    element: "Vínculo"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
+- tapOn:
+    text: "Vínculo"
+    label: "10.22 · toca em Vinculo"
+- tapOn:
+    text: "Buscar estabelecimento"
+    label: "10.23 · toca em Buscar estabelecimento"
+- extendedWaitUntil:
+    visible: "Solicitação em andamento"
+    timeout: 20000
+    label: "10.24 · espera Solicitacao em andamento"
+- tapOn:
+    text: "Cancelar solicitação"
+    label: "10.25 · toca em Cancelar solicitacao"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "10.26 · confirma Cancelar solicitacao"
+- extendedWaitUntil:
+    visible: "Encontre um estabelecimento e solicite vinculação."
+    timeout: 20000
+    label: "10.27 · espera a busca aberta de novo"
+- back:
+    label: "10.28 · volta para Vinculo"
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "10.29 · sai da conta"

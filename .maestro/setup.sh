@@ -23,6 +23,17 @@
 export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
 API="https://vupth-backend-ia.onrender.com"
 
+# Uma bateria por vez (DEC-33): a trava unica (flock -n /tmp/vupth-maestro.lock)
+# mora aqui dentro — o setup se reabre sob o flock e segura a trava ate o
+# restaurar.sh. So o pgrep do java deixou o Client comecar (11/10 00:41) com o
+# Partner ainda no setup, antes do java dele subir.
+if [ -z "$VUPTH_TRAVA" ]; then
+  VUPTH_TRAVA=1 flock -n -E 75 /tmp/vupth-maestro.lock bash "$0" "$@"
+  SAIDA=$?
+  [ "$SAIDA" = 75 ] && echo "ERRO: outra bateria segura /tmp/vupth-maestro.lock — espere ela terminar"
+  exit "$SAIDA"
+fi
+
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 SO_PREPARAR=0
 COMPLETA=""
@@ -361,7 +372,9 @@ if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$FLUXOS"/avulsas/[0-9][0-9].yaml; do
+  # etapas-curtas (Andre, 11/10): a etapa longa vira partes (07a, 07b...), cada
+  # uma com a sua aprovacao; a F repete so a parte que falhou.
+  for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do
     NN=$(basename "$ARQ" .yaml)
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"

@@ -1,0 +1,109 @@
+# O dono confere: Filas, Relatorios com o recebido por profissional (QA 18.3),
+# Atendimentos com o filtro Retirados, e a tela Sistema.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+    label: "08.01 · roda entrar"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 30000
+    label: "08.02 · espera ${output.LOJA}"
+# compartilhar-no-topo (05/10): o icone no canto direito do cabecalho do Inicio.
+- assertVisible:
+    id: "compartilhar-no-topo"
+    label: "08.02a · confere compartilhar-no-topo"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: inicio-compartilhar
+      O_QUE: "o icone de compartilhar ao lado da pilula Aberta/Fechada, no topo do Inicio do dono"
+    label: "08.02b · print para o Andre (inicio-compartilhar)"
+- tapOn:
+    id: "aba-filas"
+    label: "08.03 · toca em aba-filas"
+- extendedWaitUntil:
+    visible: ${output.PROF}
+    timeout: 20000
+    label: "08.04 · espera ${output.PROF}"
+# maestro-maximo (2a fatia): a fila do profissional pelo olhar do dono
+# O toque no nome so abre/fecha o card (queues.tsx); a fila e o "Ver fila
+# detalhada" do card aberto (bateria 20:08: o card abriu e a fila nao).
+- runFlow:
+    when:
+      notVisible: "Ver fila detalhada"
+    commands:
+      - tapOn:
+          text: ${output.PROF}
+    label: "08.25 · abre o card de ${output.PROF}"
+- tapOn:
+    text: "Ver fila detalhada"
+    label: "08.25a · toca em Ver fila detalhada"
+- extendedWaitUntil:
+    # o atualizar-fila-dono so existe na web (bateria 22:48): no Android, o
+    # cartao "Espera total" e o que so a fila do profissional tem
+    visible: "Espera total"
+    timeout: 20000
+    label: "08.26 · espera a fila do profissional"
+- scrollUntilVisible:
+    element: "Desvincular profissional"
+    direction: DOWN
+    label: "08.27 · confere Desvincular profissional (sem tocar)"
+- back:
+    label: "08.28 · volta para Filas"
+
+- tapOn:
+    id: "aba-menu"
+    label: "08.05 · toca em aba-menu"
+- tapOn:
+    text: "Relatórios"
+    label: "08.06 · toca em Relatórios"
+- scrollUntilVisible:
+    element: "recebe R\\$.*"
+    direction: DOWN
+    label: "08.07 · rola ate recebe R$…"
+
+- tapOn:
+    id: "aba-menu"
+    label: "08.08 · toca em aba-menu"
+- tapOn:
+    text: "Atendimentos"
+    label: "08.09 · toca em Atendimentos"
+- tapOn:
+    text: "Retirados"
+    label: "08.10 · toca em Retirados"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE2}
+    timeout: 20000
+    label: "08.11 · espera ${output.CLIENTE2}"
+
+- tapOn:
+    id: "aba-menu"
+    label: "08.12 · toca em aba-menu"
+- scrollUntilVisible:
+    element: "Versão do app"
+    direction: DOWN
+    label: "08.13 · rola ate Versão do app"
+- tapOn:
+    text: "Versão do app"
+    label: "08.14 · toca em Versão do app"
+- extendedWaitUntil:
+    visible:
+      id: "version-line"
+    timeout: 20000
+    label: "08.15 · espera version-line"
+
+# foto-com-botao-claro / foto-da-loja (8b89b1a, fb2b267): a foto da loja abre a
+# folha Tirar foto · Escolher da galeria · Cancelar. Enviar de verdade (camera,
+# galeria) e ver no Client ficam so a mao.
+# Bateria 10:11: a tela Sistema e do grupo (professional) e abre com as abas
+# do profissional (sem aba-menu). Volta para o Menu do dono.
+- back:
+    label: "08.15a · volta da tela Sistema"
+- extendedWaitUntil:
+    visible:
+      id: "aba-menu"
+    timeout: 20000
+    label: "08.15b · espera aba-menu"

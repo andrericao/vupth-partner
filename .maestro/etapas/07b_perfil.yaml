@@ -1,0 +1,90 @@
+# 07b (etapas-curtas, Andre 11/10): o perfil do profissional — foto com botao
+# claro, a foto pela galeria e a Aparencia. A 07a (encaixe e expediente) vem antes.
+appId: ${APP_ID}
+---
+# foto-com-botao-claro (8b89b1a): a foto do perfil tem "Pôr foto"/"Editar foto"
+# e abre a folha Tirar foto · Escolher da galeria · Cancelar. A camera e a
+# galeria de verdade ficam so a mao.
+- tapOn:
+    id: "aba-perfil"
+    label: "07.23 · foto-com-botao-claro · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.24 · roda fechar_aviso"
+- tapOn:
+    text: "Dados cadastrais"
+    label: "07.25 · foto-com-botao-claro · toca em Dados cadastrais"
+- tapOn:
+    id: "foto-perfil-editar"
+    label: "07.26 · foto-com-botao-claro · toca em Pôr foto"
+- extendedWaitUntil:
+    visible:
+      id: "foto-perfil-camera"
+    timeout: 10000
+    label: "07.27 · foto-com-botao-claro · espera Tirar foto"
+- assertVisible:
+    id: "foto-perfil-galeria"
+    label: "07.28 · foto-com-botao-claro · confere Escolher da galeria"
+- tapOn:
+    text: "Cancelar"
+    label: "07.29 · foto-com-botao-claro · toca em Cancelar"
+- extendedWaitUntil:
+    notVisible:
+      id: "foto-perfil-camera"
+    timeout: 10000
+    label: "07.30 · foto-com-botao-claro · a folha fechou"
+# foto-pela-bateria (Andre, 03/10): grava a foto de verdade, pela galeria
+- runFlow:
+    file: ../apoio/escolher_foto.yaml
+    env:
+      QUAL: "foto-perfil"
+    label: "07.44 · foto-pela-bateria · grava a foto do perfil pela galeria"
+
+# aparencia (7834bec): Perfil → Aparência → fonte +2 → Salvar continua na mesma
+# tela e mostra +2; volta para Normal no fim (a rodada nao deixa sujeira).
+- tapOn:
+    id: "aba-perfil"
+    label: "07.31 · aparencia · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.32 · roda fechar_aviso"
+- scrollUntilVisible:
+    element: "Aparência"
+    direction: DOWN
+    label: "07.33 · aparencia · rola ate Aparência"
+- tapOn:
+    text: "Aparência"
+    label: "07.34 · aparencia · toca em Aparência"
+- tapOn:
+    id: "aparencia-fonte"
+    label: "07.35 · aparencia · toca em Tamanho da fonte"
+- tapOn:
+    id: "fonte-2"
+    label: "07.36 · aparencia · escolhe +2"
+- tapOn:
+    id: "salvar-fonte"
+    label: "07.37 · aparencia · toca em Salvar"
+- extendedWaitUntil:
+    visible: "Tema e tamanho da fonte."
+    timeout: 20000
+    label: "07.38 · aparencia · continua na tela Aparência"
+- assertVisible:
+    text: "+2"
+    label: "07.39 · aparencia · confere +2"
+- tapOn:
+    id: "aparencia-fonte"
+    label: "07.40 · aparencia · toca em Tamanho da fonte"
+- tapOn:
+    id: "fonte-0"
+    label: "07.41 · aparencia · escolhe Normal"
+- tapOn:
+    id: "salvar-fonte"
+    label: "07.42 · aparencia · toca em Salvar"
+- extendedWaitUntil:
+    visible: "Normal"
+    timeout: 20000
+    label: "07.43 · aparencia · confere Normal"
+
+- runFlow:
+    file: ../apoio/sair_profissional.yaml
+    label: "07.44 · roda sair_profissional"

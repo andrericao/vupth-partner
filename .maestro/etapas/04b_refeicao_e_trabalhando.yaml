@@ -1,0 +1,95 @@
+# 04b (etapas-curtas, Andre 11/10): a refeicao, o interruptor do aviso e o
+# Trabalhando (abre a loja). A 04a (perfil e servico) vem antes.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_PROF}
+    label: "04.B1 · entra como o profissional"
+- extendedWaitUntil:
+    visible:
+      id: "aba-perfil"
+    timeout: 30000
+    label: "04.B2 · espera aba-perfil"
+# Refeicao e o interruptor do aviso
+- tapOn:
+    id: "aba-perfil"
+    label: "04.31 · toca em aba-perfil"
+- tapOn:
+    text: "Refeições"
+    label: "04.32 · toca em Refeições"
+- tapOn:
+    text: "Adicionar refeição"
+    label: "04.33 · toca em Adicionar refeição"
+- tapOn:
+    text: "Ex: Almoço"
+    label: "04.34 · toca em Ex: Almoço"
+- inputText:
+    text: "Almoco"
+    label: "04.35 · digita Almoco"
+# Emulador (log 2026-10-11_081612, 04.36): o teclado do nome cobria o horario
+# e a duracao. Fecha o teclado e rola ate a duracao ficar no meio da tela.
+- hideKeyboard
+- scrollUntilVisible:
+    element: "60"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
+- tapOn:
+    text: "12:00"
+    label: "04.36 · toca em 12:00"
+- inputText:
+    text: "0400"
+    label: "04.37 · digita 0400"
+- hideKeyboard
+- tapOn:
+    text: "60"
+    label: "04.38 · toca em 60"
+- inputText:
+    text: "30"
+    label: "04.39 · digita 30"
+- hideKeyboard:
+    label: "04.40 · fecha o teclado"
+- tapOn:
+    text: "Todos os dias"
+    label: "04.41 · toca em Todos os dias"
+- scrollUntilVisible:
+    element: "Adicionar"
+    direction: DOWN
+    label: "04.42 · rola ate Adicionar"
+- tapOn:
+    text: "Adicionar"
+    label: "04.43 · toca em Adicionar"
+- extendedWaitUntil:
+    visible: "Almoco"
+    timeout: 20000
+    label: "04.44 · espera Almoco"
+- scrollUntilVisible:
+    element:
+      id: "interruptor-aviso-refeicao"
+    direction: DOWN
+    label: "04.45 · rola ate interruptor-aviso-refeicao"
+- tapOn:
+    id: "interruptor-aviso-refeicao"
+    label: "04.46 · toca em interruptor-aviso-refeicao"
+- assertVisible:
+    text: "Desligado.*"
+    label: "04.47 · confere Desligado…"
+- tapOn:
+    id: "interruptor-aviso-refeicao"
+    label: "04.48 · toca em interruptor-aviso-refeicao"
+- assertVisible:
+    text: "Ligado.*"
+    label: "04.49 · confere Ligado…"
+
+# Trabalhando: a loja abre com a chegada do primeiro profissional
+- runFlow:
+    file: ../apoio/status.yaml
+    env:
+      STATUS: trabalhando
+    label: "04.50 · roda status"
+- assertVisible:
+    text: "Você está: Trabalhando.*"
+    label: "04.51 · confere Você está: Trabalhando…"

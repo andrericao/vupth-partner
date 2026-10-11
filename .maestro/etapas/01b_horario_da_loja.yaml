@@ -1,0 +1,78 @@
+# 01b (etapas-curtas, Andre 11/10): o horario da loja, 24 horas nos 7 dias.
+# A 01a (conta e loja) vem antes.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+    label: "01.B1 · entra como o dono"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 30000
+    label: "01.B2 · espera ${output.LOJA}"
+# Horario: segunda 00:00-00:00 (= 24 horas) e o mesmo nos outros dias.
+- tapOn:
+    id: "aba-menu"
+    label: "01.14 · toca em aba-menu"
+- tapOn:
+    text: "Dados do estabelecimento"
+    label: "01.15 · toca em Dados do estabelecimento"
+- tapOn:
+    text: "Horário de Funcionamento"
+    label: "01.16 · toca em Horário de Funcionamento"
+- extendedWaitUntil:
+    visible: "Semana"
+    timeout: 20000
+    label: "01.17 · espera Semana"
+- tapOn:
+    text: "Segunda abre"
+    label: "01.18 · toca em Segunda abre"
+- inputText:
+    text: "0000"
+    label: "01.19 · digita 0000"
+- tapOn:
+    text: "Segunda fecha"
+    label: "01.20 · toca em Segunda fecha"
+- inputText:
+    text: "0000"
+    label: "01.21 · digita 0000"
+- hideKeyboard:
+    label: "01.22 · fecha o teclado"
+# Emulador (log 2026-10-11_071921, 01.23): o rolar parava com o botao atras da
+# barra de abas. Rola ate ele ficar no meio da tela.
+- scrollUntilVisible:
+    element: "Usar o horário de segunda nos dias abertos"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
+    label: "01.23 · rola ate Usar o horário de segunda nos dias abertos"
+- tapOn:
+    text: "Usar o horário de segunda nos dias abertos"
+    label: "01.24 · toca em Usar o horário de segunda nos dias abertos"
+- scrollUntilVisible:
+    element: "Salvar semana"
+    direction: DOWN
+    label: "01.25 · rola ate Salvar semana"
+- tapOn:
+    text: "Salvar semana"
+    label: "01.26 · toca em Salvar semana"
+- extendedWaitUntil:
+    visible: "Horário salvo"
+    timeout: 20000
+    label: "01.27 · espera Horário salvo"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "01.28 · roda fechar_aviso"
+# Emulador (log 2026-10-11_025820, 01.29): o "24 horas" fica no fim da pagina,
+# rente a barra de abas, e nunca chega a 100% visivel. Basta metade.
+- scrollUntilVisible:
+    element: "24 horas"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 30000
+    label: "01.29 · rola ate 24 horas"
+- runFlow:
+    file: ../apoio/sair_dono.yaml
+    label: "01.30 · roda sair_dono"

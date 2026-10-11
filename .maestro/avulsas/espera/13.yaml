@@ -1,6 +1,6 @@
 # Etapa 13 AVULSA (bateria-desativar-conta, 08/10). ⏸️ EM ESPERA: so roda
 # quando o BAK desativar-conta estiver no staging. Para ligar, mover este
-# arquivo para .maestro/avulsas/13.yaml (o setup.sh roda avulsas/[0-9][0-9].yaml).
+# arquivo para .maestro/avulsas/13.yaml (o setup.sh roda avulsas/NN.yaml e as partes NNa, NNb...).
 # Sozinha: maestro test -e TAG=<hhmmss> .maestro/avulsas/espera/13.yaml
 appId: ${APP_ID}
 env:

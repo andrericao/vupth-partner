@@ -1,0 +1,19 @@
+Rodada 2026-10-11_081612 · TAG 081612 · commit esperado 936d17d,6c68f66
+✅ 00_atualizacao
+✅ etapa_01
+✅ etapa_02
+✅ etapa_03
+❌ etapa_04 — parou em 04.36 · toca em 12:00
+   print: .maestro/logs/2026-10-11_081612/FALHA_04.36_toca-em-12-00.png
+✅ etapa_05
+✅ etapa_06
+❌ etapa_07 — parou em 07.22 · expediente-no-card · rola ate HH:MM–HH:MM
+   print: .maestro/logs/2026-10-11_081612/FALHA_07.22_expediente-no-card-rola-ate-hh-mm-hh-mm.png
+✅ etapa_08
+❌ etapa_09 — parou em 09.18 · toca em Vinculo
+   print: .maestro/logs/2026-10-11_081612/FALHA_09.18_toca-em-vinculo.png
+✅ etapa_10
+❌ etapa_11 — parou em 11.04 · toca em Vinculo
+   print: .maestro/logs/2026-10-11_081612/FALHA_11.04_toca-em-vinculo.png
+❌ etapa_12 — parou em 12.07 · espera o push Pedido de vínculo
+   print: .maestro/logs/2026-10-11_081612/FALHA_12.07_espera-o-push-pedido-de-vinculo.png

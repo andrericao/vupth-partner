@@ -41,6 +41,13 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "11.03 · fecha o aviso, se houver"
+# Emulador (log 2026-10-11_081612, 11.04): o "Vínculo" fica abaixo da tela.
+- scrollUntilVisible:
+    element: "Vínculo"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
 - tapOn:
     text: "Vínculo"
     label: "11.04 · toca em Vinculo"

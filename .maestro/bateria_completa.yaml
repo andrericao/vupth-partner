@@ -57,8 +57,14 @@ env:
     label: "00.12 · confere a versão: o commit instalado é o esperado?"
 
 - runFlow:
-    file: etapas/01_dono_cadastra_a_loja.yaml
-    label: "00.13 · roda 01_dono_cadastra_a_loja"
+    file: etapas/01a_dono_cadastra_a_loja.yaml
+    label: "00.13 · roda 01a_dono_cadastra_a_loja"
+- runFlow:
+    file: apoio/sair_dono.yaml
+    label: "00.13a · sai do dono (a 01b entra de novo)"
+- runFlow:
+    file: etapas/01b_horario_da_loja.yaml
+    label: "00.13b · roda 01b_horario_da_loja"
 - runFlow:
     file: etapas/02_profissional_pede_vinculo.yaml
     label: "00.14 · roda 02_profissional_pede_vinculo"
@@ -66,20 +72,38 @@ env:
     file: etapas/03_dono_aceita_o_vinculo.yaml
     label: "00.15 · roda 03_dono_aceita_o_vinculo"
 - runFlow:
-    file: etapas/04_profissional_monta_o_atendimento.yaml
-    label: "00.16 · roda 04_profissional_monta_o_atendimento"
+    file: etapas/04a_profissional_monta_o_servico.yaml
+    label: "00.16 · roda 04a_profissional_monta_o_servico"
 - runFlow:
-    file: etapas/05_atende_a_fila.yaml
-    label: "00.17 · roda 05_atende_a_fila"
+    file: apoio/sair_profissional.yaml
+    label: "00.16a · sai do profissional (a 04b entra de novo)"
+- runFlow:
+    file: etapas/04b_refeicao_e_trabalhando.yaml
+    label: "00.16b · roda 04b_refeicao_e_trabalhando"
+- runFlow:
+    file: etapas/05a_atende_a_fila.yaml
+    label: "00.17 · roda 05a_atende_a_fila"
+- runFlow:
+    file: etapas/05b_opcoes_da_fila.yaml
+    label: "00.17b · roda 05b_opcoes_da_fila"
 - runFlow:
     file: etapas/06_meu_dia.yaml
     label: "00.18 · roda 06_meu_dia"
 - runFlow:
-    file: etapas/07_encaixe.yaml
-    label: "00.19 · roda 07_encaixe"
+    file: etapas/07a_encaixe.yaml
+    label: "00.19 · roda 07a_encaixe"
 - runFlow:
-    file: etapas/08_dono_confere.yaml
-    label: "00.20 · roda 08_dono_confere"
+    file: etapas/07b_perfil.yaml
+    label: "00.19b · roda 07b_perfil"
+- runFlow:
+    file: etapas/08a_dono_confere.yaml
+    label: "00.20 · roda 08a_dono_confere"
+- runFlow:
+    file: apoio/sair_dono.yaml
+    label: "00.20a · sai do dono (a 08b entra de novo)"
+- runFlow:
+    file: etapas/08b_dono_loja.yaml
+    label: "00.20b · roda 08b_dono_loja"
 # A 08 termina com o dono fora da conta; a 09 e do profissional
 - runFlow:
     file: apoio/entrar.yaml
@@ -115,8 +139,11 @@ env:
     timeout: 30000
     label: "00.27 · espera aba-fila"
 - runFlow:
-    file: etapas/10_profissional_troca_de_loja.yaml
-    label: "00.28 · roda 10_profissional_troca_de_loja"
+    file: etapas/10a_profissional_troca_de_loja.yaml
+    label: "00.28 · roda 10a_profissional_troca_de_loja"
+- runFlow:
+    file: etapas/10b_login_com_erro.yaml
+    label: "00.28b · roda 10b_login_com_erro"
 # A 10 termina na tela de papeis (o login errado); a 11 tem profissional proprio
 - runScript:
     file: scripts/troca_de_loja.js

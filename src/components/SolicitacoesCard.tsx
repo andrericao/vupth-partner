@@ -51,7 +51,9 @@ export function SolicitacoesCard({ resumo, onPress }: Props) {
             ? "sem prazo"
             : resumo.expiraEm <= 0
               ? "expira agora"
-              : `expira em ${resumo.expiraEm} min`}
+              : resumo.expiraEm > 60 && resumo.venceAs
+                ? `vale até ${resumo.venceAs}`
+                : `expira em ${resumo.expiraEm} min`}
         </Text>
         <View className="flex-row items-center gap-1">
           <Text className="font-heading text-f13 text-vupth-forest">Ver solicitações</Text>

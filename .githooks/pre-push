@@ -34,7 +34,11 @@ LOGS=.logs-teste
 mkdir -p "$LOGS"
 SAIDA=$(mktemp)
 CODIGO=$(mktemp)
-{ npm test -- --ci --coverage 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
+# DEC-33 (11/10): o jest e' pesado — espera a vez na trava da bateria
+# (flock sem -n), um pesado por vez na maquina. Dentro da bateria
+# (VUPTH_TRAVA) a trava ja e' nossa.
+if [ -z "$VUPTH_TRAVA" ]; then TRAVA="flock /tmp/vupth-maestro.lock"; else TRAVA=""; fi
+{ $TRAVA npm test -- --ci --coverage 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
 RC=$(cat "$CODIGO")
 rm -f "$CODIGO"
 if [ "$RC" != "0" ]; then
