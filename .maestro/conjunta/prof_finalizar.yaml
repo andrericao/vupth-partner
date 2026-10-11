@@ -19,6 +19,12 @@ appId: ${APP_ID}
 - tapOn:
     text: "Finalizar"
     label: "PJ6.05 · toca em Finalizar"
+- runFlow:
+    file: ../apoio/responder_pagamento.yaml
+    env:
+      RESPOSTA: "Sim, recebi"
+      FIM: "Atendimento concluído e pago."
+    label: "PJ6.05a · pix · Sim, recebi"
 - extendedWaitUntil:
     notVisible: ${CLIENTE}
     timeout: 20000

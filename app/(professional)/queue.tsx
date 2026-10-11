@@ -16,6 +16,7 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
+import { perguntarPagamento, mensagemDoFim } from "@lib/pagamento";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -593,6 +594,16 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
+  // pagamento-pix (adendos 1a0616c e 62295f1): todo Finalizar passa por aqui.
+  // Pendente -> "O pagamento foi efetuado?"; a resposta vai no finish. A
+  // mensagem do fim so aparece quando houve a pergunta.
+  const finalizarComPagamento = async (attendanceId: string) => {
+    const recebido = await perguntarPagamento(attendanceId);
+    const status = await finishAttendance(attendanceId, recebido);
+    const mensagem = recebido === undefined ? null : mensagemDoFim(status);
+    if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
+  };
+
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
   // finalizado antes (o profissional optou por pular pro proximo — ou por atender
   // alguem fora de ordem). `advance` = o escolhido nao e o 1o da fila.
@@ -601,7 +612,7 @@ export default function ProfessionalQueueScreen() {
     const doStart = () =>
       handleAction(async () => {
         if (currentAttendance) {
-          await finishAttendance(currentAttendance.id);
+          await finalizarComPagamento(currentAttendance.id);
           clearAttendanceStart(currentAttendance.id);
         }
         await startAttendance(att.id);
@@ -717,7 +728,7 @@ export default function ProfessionalQueueScreen() {
       handleAction(async () => {
         await finalizarAtendimento(att.id, att.status === "PAUSED", {
           retomar: resumeAttendance,
-          finalizar: finishAttendance,
+          finalizar: finalizarComPagamento,
         });
         clearAttendanceStart(att.id);
       });
@@ -883,7 +894,7 @@ export default function ProfessionalQueueScreen() {
                   await finalizarAtendimento(
                     currentAttendance.id,
                     currentAttendance.status === "PAUSED",
-                    { retomar: resumeAttendance, finalizar: finishAttendance }
+                    { retomar: resumeAttendance, finalizar: finalizarComPagamento }
                   );
                   clearAttendanceStart(currentAttendance.id);
                 })

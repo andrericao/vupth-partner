@@ -211,6 +211,23 @@ describe("attendance.store", () => {
       expect(mock.history.patch[0].url).toBe("/attendances/att-uuid-1/finish");
     });
 
+    it("sem a resposta do pagamento, finaliza sem corpo (compativel)", async () => {
+      mock.onPatch("/attendances/att-uuid-1/finish").reply(200, {});
+
+      await useAttendanceStore.getState().finishAttendance("att-uuid-1");
+
+      expect(mock.history.patch[0].data).toBeUndefined();
+    });
+
+    it("pagamento-pix (adendo 1a0616c): manda payment_received e devolve o payment_status", async () => {
+      mock.onPatch("/attendances/att-uuid-1/finish").reply(200, { payment_status: "PAID" });
+
+      const status = await useAttendanceStore.getState().finishAttendance("att-uuid-1", true);
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ payment_received: true });
+      expect(status).toBe("PAID");
+    });
+
     it("throws on 404 attendance not found", async () => {
       mock.onPatch("/attendances/invalid/finish").reply(404, {
         code: "ATTENDANCE_NOT_FOUND",

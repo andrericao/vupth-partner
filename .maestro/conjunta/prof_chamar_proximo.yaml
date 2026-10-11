@@ -13,6 +13,14 @@ appId: ${APP_ID}
 - tapOn:
     text: "Iniciar próximo"
     label: "PJ10.03 · toca em Iniciar proximo"
+# pagamento-pix: com alguem na cadeira, o Iniciar proximo finaliza o atual e
+# pode perguntar o pagamento (so se estiver pendente).
+- runFlow:
+    file: ../apoio/responder_pagamento.yaml
+    env:
+      RESPOSTA: "Sim, recebi"
+      FIM: "Atendimento concluído e pago."
+    label: "PJ10.03a · pix · Sim, recebi, se perguntar"
 - extendedWaitUntil:
     visible: "Finalizar"
     timeout: 20000
