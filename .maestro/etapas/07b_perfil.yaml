@@ -40,6 +40,51 @@ appId: ${APP_ID}
       QUAL: "foto-perfil"
     label: "07.44 · foto-pela-bateria · grava a foto do perfil pela galeria"
 
+# pagamento-pix, fatia 1 (contrato BAK 2a2b0ec): Perfil → Chave Pix → e-mail →
+# Salvar → a chave aparece cadastrada.
+- tapOn:
+    id: "aba-perfil"
+    label: "07.50 · pix · toca em aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.51 · roda fechar_aviso"
+- scrollUntilVisible:
+    element: "Chave Pix"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
+    label: "07.52 · pix · rola ate Chave Pix"
+- tapOn:
+    text: "Chave Pix"
+    label: "07.53 · pix · toca em Chave Pix"
+- tapOn:
+    id: "pix-tipo-EMAIL"
+    label: "07.54 · pix · escolhe E-mail"
+- tapOn:
+    id: "pix-chave"
+    label: "07.55 · pix · toca na chave"
+- inputText:
+    text: "pix_m${output.TAG}@teste.com"
+    label: "07.56 · pix · digita o e-mail"
+- hideKeyboard
+- tapOn:
+    id: "pix-titular"
+    label: "07.57 · pix · toca no titular"
+- inputText:
+    text: "Prof ${output.TAG}"
+    label: "07.58 · pix · digita o titular"
+- hideKeyboard
+- tapOn:
+    id: "pix-salvar"
+    label: "07.59 · pix · toca em Salvar chave"
+- extendedWaitUntil:
+    visible: "E-mail · pix_m${output.TAG}@teste.com"
+    timeout: 20000
+    label: "07.60 · pix · a chave aparece cadastrada"
+- back:
+    label: "07.61 · pix · volta para o Perfil"
+
 # aparencia (7834bec): Perfil → Aparência → fonte +2 → Salvar continua na mesma
 # tela e mostra +2; volta para Normal no fim (a rodada nao deixa sujeira).
 - tapOn:

@@ -157,6 +157,7 @@ export default function ProfessionalLayout() {
           Relatado pelo Andre no teste de 14/09. */}
       <Tabs.Screen name="sistema" options={HIDDEN} />
       <Tabs.Screen name="aparencia" options={HIDDEN} />
+      <Tabs.Screen name="pix" options={HIDDEN} />
       {/* PILOTO Gluestack v2 (NativeWind) — rota temporaria, remover ao concluir */}
     </Tabs>
   );
