@@ -11,6 +11,7 @@ import {
   quandoOClienteQuer,
   ehDeOutroDia,
   oQueAconteceAoAceitar,
+  seloDoPrazo,
 } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
@@ -245,6 +246,15 @@ describe("resumoDeSolicitacoes", () => {
     expect(resumoDeSolicitacoes([outroDia], NOW)!.expiraEm).toBeNull();
   });
 
+  it("o pedido de outro dia com vencimento (BAK-1) tambem fica fora do relogio", () => {
+    const amanha = new Date(NOW + 36 * 3600000).toISOString();
+    const outroDia = pedido({ id: "r9", desired_time: amanha, expires_at: amanha });
+    const comPrazo = pedido({ id: "r1", expires_at: new Date(NOW + 3 * 60000).toISOString() });
+
+    expect(resumoDeSolicitacoes([outroDia, comPrazo], NOW)!.expiraEm).toBe(3);
+    expect(resumoDeSolicitacoes([outroDia], NOW)!.expiraEm).toBeNull();
+  });
+
   it("expirado nao conta — decidir sobre pedido morto e pior que nao ver", () => {
     const expirado = pedido({ expires_at: new Date(NOW - 60000).toISOString() });
     expect(resumoDeSolicitacoes([expirado], NOW)).toBeNull();
@@ -328,15 +338,63 @@ describe("quandoOClienteQuer", () => {
 });
 
 // texto-do-aceite (Backend ba38b81): aceitar o pedido de outro dia o agenda
-// naquele dia; o de hoje entra no fim da fila.
+// naquele dia; o de hoje entra no fim da fila. pedido-vence-no-horario (BAK-1,
+// 0f18380): o expires_at vem sempre preenchido — o dia sai do desired_time.
 describe("oQueAconteceAoAceitar", () => {
-  it("outro dia (expires_at nulo): fica agendado", () => {
-    expect(ehDeOutroDia({ expires_at: null })).toBe(true);
-    expect(oQueAconteceAoAceitar({ expires_at: null })).toBe("fica agendado para esse dia");
+  const local = (a: number, m: number, d: number, h: number, min: number) =>
+    new Date(a, m - 1, d, h, min).toISOString();
+  const agora = new Date(2026, 9, 10, 15, 6).getTime(); // 10/10 15:06
+
+  it("desired_time amanha: fica agendado, mesmo com expires_at preenchido", () => {
+    const amanha = { desired_time: local(2026, 10, 11, 10, 0), expires_at: local(2026, 10, 11, 10, 0) };
+    expect(ehDeOutroDia(amanha, agora)).toBe(true);
+    expect(oQueAconteceAoAceitar(amanha, agora)).toBe("fica agendado para esse dia");
   });
 
-  it("hoje (com prazo): entra no fim da fila", () => {
-    expect(ehDeOutroDia({ expires_at: "2026-10-09T12:05:00Z" })).toBe(false);
-    expect(oQueAconteceAoAceitar({ expires_at: "2026-10-09T12:05:00Z" })).toBe("entra no fim da sua fila");
+  it("desired_time hoje: entra no fim da fila", () => {
+    const hoje = { desired_time: local(2026, 10, 10, 18, 0), expires_at: local(2026, 10, 10, 18, 0) };
+    expect(ehDeOutroDia(hoje, agora)).toBe(false);
+    expect(oQueAconteceAoAceitar(hoje, agora)).toBe("entra no fim da sua fila");
+  });
+
+  it("sem desired_time: entra no fim da fila", () => {
+    expect(ehDeOutroDia({ desired_time: null, expires_at: local(2026, 10, 10, 15, 11) }, agora)).toBe(false);
+    expect(ehDeOutroDia({ expires_at: local(2026, 10, 10, 15, 11) }, agora)).toBe(false);
+  });
+
+  it("desired_time invalido: entra no fim da fila", () => {
+    expect(ehDeOutroDia({ desired_time: "banana", expires_at: null }, agora)).toBe(false);
+  });
+
+  it("legado (antes do BAK-1): expires_at nulo sem desired_time conta como outro dia", () => {
+    expect(ehDeOutroDia({ expires_at: null }, agora)).toBe(true);
+    expect(oQueAconteceAoAceitar({ expires_at: null }, agora)).toBe("fica agendado para esse dia");
+  });
+});
+
+// O selo do card: ate 60 min, o relogio em minutos; mais longe, a hora em que
+// o pedido vence ("vale até 10:00"); sem vencimento (legado), "sem prazo".
+describe("seloDoPrazo", () => {
+  const local = (a: number, m: number, d: number, h: number, min: number) =>
+    new Date(a, m - 1, d, h, min).toISOString();
+  const agora = new Date(2026, 9, 10, 15, 6).getTime();
+
+  it("perto: minutos, urgente ate 2", () => {
+    expect(seloDoPrazo(local(2026, 10, 10, 15, 11), agora)).toEqual({ texto: "5 min", urgente: false });
+    expect(seloDoPrazo(local(2026, 10, 10, 15, 8), agora)).toEqual({ texto: "2 min", urgente: true });
+    expect(seloDoPrazo(local(2026, 10, 10, 16, 6), agora)).toEqual({ texto: "60 min", urgente: false });
+  });
+
+  it("longe: a hora em que vence", () => {
+    expect(seloDoPrazo(local(2026, 10, 11, 10, 0), agora)).toEqual({ texto: "vale até 10:00", urgente: false });
+    expect(seloDoPrazo(local(2026, 10, 10, 18, 30), agora)).toEqual({ texto: "vale até 18:30", urgente: false });
+  });
+
+  it("sem vencimento: sem prazo", () => {
+    expect(seloDoPrazo(null, agora)).toEqual({ texto: "sem prazo", urgente: false });
+  });
+
+  it("data invalida: 0 min, urgente", () => {
+    expect(seloDoPrazo("banana", agora)).toEqual({ texto: "0 min", urgente: true });
   });
 });

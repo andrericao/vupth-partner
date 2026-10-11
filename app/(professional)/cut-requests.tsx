@@ -12,13 +12,13 @@ import { useAttendanceStore } from "@store/attendance.store";
 import {
   activeCutRequests,
   releDepoisDeDecidir,
-  minutesToExpire,
   cutRequestServices,
   cutRequestClientName,
   cutRequestTotal,
   quandoOClienteQuer,
   ehDeOutroDia,
   oQueAconteceAoAceitar,
+  seloDoPrazo,
 } from "@lib/cutRequests";
 import { avisar } from "@lib/confirmar";
 import { hhmmFromIso } from "@lib/time";
@@ -70,7 +70,7 @@ export default function CutRequestsScreen() {
     const pedido = pending.find((r) => r.id === id);
     // texto-do-aceite: o de outro dia vira agendamento naquele dia — nao entra
     // na fila de hoje, entao o profissional nao vira Trabalhando por ele.
-    const agendado = accept && !!pedido && ehDeOutroDia(pedido);
+    const agendado = accept && !!pedido && ehDeOutroDia(pedido, nowMs);
     try {
       if (accept) await acceptCutRequest(id);
       else await refuseCutRequest(id);
@@ -125,8 +125,7 @@ export default function CutRequestsScreen() {
               />
             ) : (
               pending.map((req) => {
-                const mins = minutesToExpire(req.expires_at, nowMs);
-                const urgent = mins !== null && mins <= 2;
+                const { texto: prazo, urgente: urgent } = seloDoPrazo(req.expires_at, nowMs);
                 const who = cutRequestClientName(req);
                 const services = cutRequestServices(req.service_item_ids, myServices);
                 const total = cutRequestTotal(req.service_item_ids, myServices);
@@ -155,7 +154,7 @@ export default function CutRequestsScreen() {
                         <Text
                           className={`font-mono text-f11 ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
                         >
-                          {mins === null ? "sem prazo" : `${mins} min`}
+                          {prazo}
                         </Text>
                       </View>
                     </View>
@@ -169,7 +168,7 @@ export default function CutRequestsScreen() {
 
                     {time && (
                       <Text className="font-body text-f11 text-vupth-textSecondary">
-                        Pediu às {time} · {oQueAconteceAoAceitar(req)}
+                        Pediu às {time} · {oQueAconteceAoAceitar(req, nowMs)}
                       </Text>
                     )}
   

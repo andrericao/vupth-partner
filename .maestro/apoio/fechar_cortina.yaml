@@ -5,6 +5,8 @@
 appId: ${APP_ID}
 ---
 - runFlow:
+    file: fechar_anr.yaml
+- runFlow:
     when:
       visible: "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)"
     commands:

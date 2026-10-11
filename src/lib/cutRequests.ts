@@ -127,7 +127,10 @@ export function resumoDeSolicitacoes(
   if (ativos.length === 0) return null;
 
   const primeiro = cutRequestClientName(ativos[0]);
+  // O de outro dia fica fora do relogio: com o BAK-1 ele vence no horario
+  // pedido (amanha), nao e urgente.
   const prazos = ativos
+    .filter((r) => !ehDeOutroDia(r, nowMs))
     .map((r) => minutesToExpire(r.expires_at, nowMs))
     .filter((m): m is number => m !== null);
   const outros = ativos.length - 1;
@@ -193,16 +196,48 @@ export function quandoOClienteQuer(
   return `Quer ${DIAS[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)} às ${hora}`;
 }
 
+/** O dia (meia-noite local) de um instante, em ms. */
+function diaLocal(ms: number): number {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+type PedidoComDia = { desired_time?: string | null; expires_at: string | null };
+
 /**
  * texto-do-aceite (Backend aceite-vira-agendamento, ba38b81): o pedido para
- * outro dia (expires_at nulo, DEC-27) vira agendamento naquele dia ao ser
- * aceito; o de hoje entra no fim da fila.
+ * outro dia vira agendamento naquele dia ao ser aceito; o de hoje entra no fim
+ * da fila. pedido-vence-no-horario (BAK-1, 0f18380): o expires_at vem sempre
+ * preenchido (vence no horario pedido) — o dia sai do desired_time. Sem
+ * desired_time, o legado (antes do BAK-1): expires_at nulo era o de outro dia.
  */
-export function ehDeOutroDia(req: { expires_at: string | null }): boolean {
+export function ehDeOutroDia(req: PedidoComDia, nowMs: number): boolean {
+  if (req.desired_time) {
+    const quer = Date.parse(req.desired_time);
+    return Number.isFinite(quer) && diaLocal(quer) !== diaLocal(nowMs);
+  }
   return req.expires_at === null;
 }
 
 /** O que acontece ao aceitar, na linha do card. */
-export function oQueAconteceAoAceitar(req: { expires_at: string | null }): string {
-  return ehDeOutroDia(req) ? "fica agendado para esse dia" : "entra no fim da sua fila";
+export function oQueAconteceAoAceitar(req: PedidoComDia, nowMs: number): string {
+  return ehDeOutroDia(req, nowMs) ? "fica agendado para esse dia" : "entra no fim da sua fila";
+}
+
+/**
+ * O selo do prazo no card do pedido. Ate 60 min, o relogio em minutos (urgente
+ * ate 2); mais longe (BAK-1: o pedido vence no horario pedido, as vezes
+ * amanha), a hora em que vence; sem vencimento (legado), "sem prazo".
+ */
+export function seloDoPrazo(
+  expiresAt: string | null,
+  nowMs: number
+): { texto: string; urgente: boolean } {
+  const mins = minutesToExpire(expiresAt, nowMs);
+  if (mins === null) return { texto: "sem prazo", urgente: false };
+  if (mins <= 60) return { texto: `${mins} min`, urgente: mins <= 2 };
+  const d = new Date(expiresAt as string);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return { texto: `vale até ${pad(d.getHours())}:${pad(d.getMinutes())}`, urgente: false };
 }

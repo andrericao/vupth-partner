@@ -8,6 +8,8 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 3000
 - runFlow:
+    file: fechar_anr.yaml
+- runFlow:
     when:
       visible:
         id: "dialogo-botao-0"

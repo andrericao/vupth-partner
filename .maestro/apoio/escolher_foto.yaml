@@ -28,9 +28,40 @@ appId: ${APP_ID}
       visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"
     commands:
       - tapOn: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"
+# O recorte pode ignorar o 1o toque enquanto carrega a imagem (log 10/10 15:00,
+# 08.36: o CROP ficou na tela): espera e toca de novo.
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR)"
+    commands:
+      - tapOn: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR)"
 - runFlow:
     file: fechar_aviso.yaml
 # Enviou: o rotulo vira "Editar foto"
 - extendedWaitUntil:
     visible: "Editar foto"
     timeout: 60000
+    optional: true
+# Seletor e recorte sao do Android, nao do app (Andre, 10/10: "erra toda vez na
+# hora de selecionar foto"): se a foto nao gravou, o print vai para o Andre, a
+# bateria volta ao app e segue — o resto da etapa nao depende da foto.
+- runFlow:
+    when:
+      notVisible: "Editar foto"
+    commands:
+      - runFlow:
+          file: para_o_andre.yaml
+          env:
+            NOME: foto-nao-gravou-${QUAL}
+            O_QUE: "a foto nao gravou pelo seletor do Android (seletor ou recorte na tela?)"
+      - repeat:
+          times: 3
+          while:
+            notVisible:
+              id: "${QUAL}-editar"
+          commands:
+            - back
+            - waitForAnimationToEnd:
+                timeout: 2000

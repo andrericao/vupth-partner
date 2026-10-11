@@ -18,9 +18,24 @@ export type ConfigDoSentry = {
   carregar?: () => Sentry | null;
 };
 
-export function carregarSentry(): Sentry | null {
+/**
+ * O binario tem o modulo nativo do Sentry? volta-1-5-0 (Andre, 10/10): o OTA
+ * roda no APK 1.5.0, anterior ao Sentry; o require do JS passa la, e a falha so
+ * apareceria depois. Pergunta-se ao React Native antes (como o expo-image).
+ */
+export function temSentryNativo(): boolean {
+  // O TurboModuleRegistry.get tambem acha o modulo da arquitetura antiga.
+  const { TurboModuleRegistry } = require("react-native");
+  return TurboModuleRegistry.get("RNSentry") != null;
+}
+
+export function carregarSentry(
+  temNativo: () => boolean = temSentryNativo,
+  requerer: () => Sentry = () => require("@sentry/react-native")
+): Sentry | null {
   try {
-    return require("@sentry/react-native");
+    if (!temNativo()) return null;
+    return requerer();
   } catch {
     return null;
   }

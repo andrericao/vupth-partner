@@ -5,6 +5,8 @@
 #       bash .maestro/setup.sh --completa   # roda todas, sem perguntar
 #       bash .maestro/setup.sh --falhas     # so as que nao passaram, sem perguntar
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
+#       bash .maestro/setup.sh --device emulator-5554  # num aparelho escolhido
+#                                       (o emulador do PC, comandos.html#emulador)
 #
 # Um comando so (Andre, 03/10): o setup acha o commit esperado sozinho e roda
 # as etapas avulsas, uma a uma, sem parar na primeira falha (relatorio.txt).
@@ -24,13 +26,23 @@ API="https://vupth-backend-ia.onrender.com"
 echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 SO_PREPARAR=0
 COMPLETA=""
-for ARG in "$@"; do
-  case "$ARG" in
+APARELHO=""
+while [ $# -gt 0 ]; do
+  case "$1" in
     --so-preparar) SO_PREPARAR=1 ;;
     --completa) COMPLETA=1 ;;
     --falhas) COMPLETA=0 ;;
+    --device) APARELHO="$2"; shift ;;
   esac
+  shift
 done
+# emulador (Andre, 10/10): com o celular e o emulador no adb, --device escolhe
+# um. O ANDROID_SERIAL vale para todo adb deste script; o Maestro recebe o mesmo.
+MAESTRO_APARELHO=()
+if [ -n "$APARELHO" ]; then
+  export ANDROID_SERIAL="$APARELHO"
+  MAESTRO_APARELHO=(--device "$APARELHO")
+fi
 
 # 0. Uma bateria por vez no aparelho (adb-perde-o-aparelho, 03/10; DEC-17):
 #    duas sessoes do Maestro no mesmo celular brigam pelo driver e uma cai com
@@ -44,7 +56,7 @@ if [ -n "$OUTRA" ]; then
 fi
 
 # 1. Celular conectado
-DEVICE=$(adb devices | grep -w "device" | head -1)
+DEVICE=$(adb devices | grep -w "device" | grep "^${APARELHO}" | head -1)
 if [ -z "$DEVICE" ]; then
   echo "ERRO: nenhum celular. Ligue a Depuracao USB, conecte o cabo e aceite o aviso no celular."
   exit 1
@@ -74,21 +86,47 @@ fi
 adb shell settings put secure autofill_service null
 echo "Preenchimento automatico desligado: OK (ao terminar: bash .maestro/restaurar.sh)"
 
+# 4a. emulador-lento (Andre, 10/10: "o emulador e mais lento, deve haver um
+#     preparo para isso"; print emulador-anr-system.png). So no emulador:
+#     animacoes em 0, permissoes do app dadas por adb (o pedido de localizacao
+#     ficava por baixo do "Process system isn't responding") e o app Google
+#     desligado (pesa no Celeron). As esperas dobram la (FATOR, passo 6b).
+EMULADOR=0
+case "$(adb get-serialno 2>/dev/null | tr -d '\r')" in emulator-*) EMULADOR=1 ;; esac
+if [ "$EMULADOR" = "1" ]; then
+  for CHAVE in window_animation_scale transition_animation_scale animator_duration_scale; do
+    adb shell settings put global "$CHAVE" 0
+  done
+  for PERM in ACCESS_FINE_LOCATION ACCESS_COARSE_LOCATION POST_NOTIFICATIONS CAMERA READ_MEDIA_IMAGES READ_EXTERNAL_STORAGE; do
+    adb shell pm grant com.vupth.partner.preview "android.permission.$PERM" >/dev/null 2>&1
+  done
+  adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox >/dev/null 2>&1
+  echo "Emulador: animacoes em 0, permissoes dadas, app Google desligado: OK"
+fi
+
 # 4b. A imagem de teste na galeria (foto-pela-bateria, Andre 03/10): as etapas
 #     07 e 08 gravam a foto escolhendo-a no seletor. Vai com a data de agora,
 #     para ser a mais recente da grade; o media scan a poe na galeria.
-FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
-adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
-adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
-adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
-# Sem o indice, o seletor mostra primeiro uma foto PESSOAL do aparelho e a bateria
-# a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
-NOME_FOTO=$(basename "$FOTO")
-for _ in 1 2 3 4 5 6 7 8 9 10; do
-  adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO" && break
-  sleep 1
-done
-if adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$NOME_FOTO"; then
+# foto-na-frente (log 10/10 15:00, 08.36): um print tirado no celular durante a
+# rodada fica na frente da imagem de teste e o seletor o escolhe. Por isso a
+# imagem vai de novo antes de cada etapa (rodar), com a data de agora.
+foto_na_frente() {
+  FOTO=/sdcard/Pictures/vupth_teste_$(date +%H%M%S).png
+  adb push "$(dirname "$0")/apoio/foto_teste.png" "$FOTO" >/dev/null
+  adb shell touch "$FOTO" >/dev/null 2>&1
+  adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$FOTO" >/dev/null 2>&1
+  adb shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1
+  # Sem o indice, o seletor mostra primeiro uma foto PESSOAL do aparelho e a bateria
+  # a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
+  local nome
+  nome=$(basename "$FOTO")
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$nome" && return 0
+    sleep 1
+  done
+  return 1
+}
+if foto_na_frente; then
   echo "Imagem de teste na galeria: OK ($FOTO)"
 else
   echo "⚠️  Imagem de teste NAO entrou na galeria ($FOTO): as etapas 07 e 08 escolheriam outra foto. Parando." >&2
@@ -122,7 +160,7 @@ ULTIMO_OTA=$(git -C "$RAIZ" log -1 --format=%h origin/dev -- . \
 COMMIT=$(git -C "$RAIZ" log --format=%h --abbrev=7 "$ULTIMO_OTA^..origin/dev" | paste -sd,)
 echo "Commit esperado no app (OTA da dev): $COMMIT"
 
-CMD=(maestro test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
+CMD=(maestro "${MAESTRO_APARELHO[@]}" test -e APP_ID=com.vupth.partner.preview -e "API=$API" -e SENHA=Teste@123 -e "COMMIT=$COMMIT")
 
 if [ "$SO_PREPARAR" = "1" ]; then
   echo "Tudo pronto. Rode:"
@@ -287,6 +325,7 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   fi
   [ "$SUPERVISAO" = "0" ] || echo "▶ $1 comecando"
   papel_do_andre "$1"
+  foto_na_frente || echo "⚠️  $1 — a imagem de teste nao entrou de novo na galeria (a foto pode sair errada)"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
   local rc="${PIPESTATUS[0]}"
@@ -304,12 +343,25 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   return 1
 }
 
+# 6b. emulador-lento: no emulador, toda espera (timeout:) dos fluxos vale FATOR
+#     vezes (uma variavel so; FATOR=3 bash .maestro/setup.sh ... muda). Os fluxos
+#     rodam de uma copia com as esperas ja multiplicadas; o celular usa os
+#     originais.
+FLUXOS="$RAIZ/.maestro"
+if [ "$EMULADOR" = "1" ]; then
+  FATOR="${FATOR:-2}"
+  FLUXOS=$(mktemp -d)
+  cp -r "$RAIZ/.maestro/apoio" "$RAIZ/.maestro/avulsas" "$RAIZ/.maestro/etapas" "$RAIZ/.maestro/conjunta" "$RAIZ/.maestro/scripts" "$FLUXOS/"
+  find "$FLUXOS" -name '*.yaml' -exec perl -pi -e "s/(\btimeout:\s*)(\d+)/\$1.(\$2*$FATOR)/e" {} +
+  echo "Emulador: esperas x$FATOR ($FLUXOS)"
+fi
+
 RESULTADO=0
-if ! rodar 00_atualizacao "$RAIZ/.maestro/avulsas/00_atualizacao.yaml"; then
+if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
 else
-  for ARQ in "$RAIZ"/.maestro/avulsas/[0-9][0-9].yaml; do
+  for ARQ in "$FLUXOS"/avulsas/[0-9][0-9].yaml; do
     NN=$(basename "$ARQ" .yaml)
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"

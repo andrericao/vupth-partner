@@ -1,0 +1,19 @@
+Running on vupth_android11
+ > Flow 00_atualizacao
+00.01 · etiqueta da rodada (TAG)... COMPLETED
+00.02 · conta de profissional so da 00, pela API... COMPLETED
+00.03 · abre o app do zero... COMPLETED
+00.04 · espera a entrada... FAILED
+
+Assertion is false: "Como você vai usar o Vupth?" is visible
+
+Assertion '"Como você vai usar o Vupth?" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-10_190928/00_atualizacao

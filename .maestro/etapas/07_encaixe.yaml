@@ -58,7 +58,8 @@ appId: ${APP_ID}
     text: "Nenhum pedido de encaixe"
     label: "07.08 · confere a lista vazia"
 # aviso-de-corte-sem-ok (11d393f): com o app aberto, o push do pedido vira
-# caixa com OK. pedido-de-corte-outro-dia (817b0c5): o de amanha fica "sem prazo".
+# caixa com OK. pedido-de-corte-outro-dia (817b0c5) e pedido-vence-no-horario
+# (BAK-1): o de amanha vence no horario pedido — o selo diz "vale até HH:MM".
 - runScript:
     file: ../scripts/pedido_de_encaixe.js
     env:
@@ -79,8 +80,8 @@ appId: ${APP_ID}
     timeout: 60000
     label: "07.08d · espera …${output.CLIENTE_AMANHA}…"
 - assertVisible:
-    text: "sem prazo"
-    label: "07.08e · confere sem prazo"
+    text: "vale até .*"
+    label: "07.08e · confere vale ate HH:MM"
 - assertVisible:
     text: "Quer amanhã às.*"
     label: "07.08f · confere Quer amanhã"
