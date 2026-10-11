@@ -50,3 +50,39 @@ export function mensagemDoFim(paymentStatus: string | null | undefined): string 
     return "Atendimento concluído, aguardando o pagamento. O cliente pode pagar depois.";
   return null;
 }
+
+// ── Pendentes do profissional (adendo 1a0616c): os finalizados com PENDING e
+// os que o cliente diz que pagou (AWAITING_CONFIRMATION, em qualquer status).
+// awaiting_count e o numero do dot.
+export type PagamentoPendente = {
+  attendance_id: string;
+  status: "PENDING" | "AWAITING_CONFIRMATION";
+  amount: number;
+  client_name: string;
+  finished_at: string | null;
+  claimed_at: string | null;
+};
+
+export async function obterPagamentosPendentes(): Promise<{ awaiting_count: number; items: PagamentoPendente[] }> {
+  const { data } = await api.get("/professional/me/pending-payments");
+  return { awaiting_count: data?.awaiting_count ?? 0, items: data?.items ?? [] };
+}
+
+/** "Recebi": de PENDING ou AWAITING_CONFIRMATION para PAID (push ao cliente). */
+export async function confirmarRecebimento(attendanceId: string): Promise<void> {
+  await api.post(`/attendances/${attendanceId}/payment/confirm`);
+}
+
+/** PAYMENT_CLAIMED / PAYMENT_CONFIRMED no WS pessoal: re-busca os pendentes. */
+export function isPaymentEvent(type: string | null | undefined): boolean {
+  return !!type && type.startsWith("PAYMENT_");
+}
+
+/** A observacao embaixo do card (Andre, 10/10). */
+export function observacaoDoPagamento(status: PagamentoPendente["status"]): string {
+  return status === "AWAITING_CONFIRMATION"
+    ? "Confirme se o pagamento foi efetuado"
+    : "Aguardando o cliente efetuar o pagamento";
+}
+
+export { reais as formatarReais };

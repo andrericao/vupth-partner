@@ -208,3 +208,23 @@ appId: ${APP_ID}
     direction: DOWN
     timeout: 20000
     label: "07.22 · expediente-no-card · rola ate HH:MM–HH:MM"
+
+# pagamento-pix, fatia 3 (Andre, 10/10): o encaixe ficou "Ainda nao" (07.17a).
+# Em Relatorios ele aparece em Pagamentos pendentes; "Recebi" confirma e ele sai.
+# O botao diz de quem e ("Recebi de <cliente>"): o nome tambem esta no historico.
+- scrollUntilVisible:
+    element: "Recebi de ${output.CLIENTE_ENCAIXE}"
+    direction: DOWN
+    centerElement: true
+    timeout: 20000
+    label: "07.23a · pix · o encaixe esta nos Pagamentos pendentes"
+- tapOn:
+    text: "Recebi de ${output.CLIENTE_ENCAIXE}"
+    label: "07.23b · pix · toca em Recebi do encaixe"
+- tapOn:
+    text: "Sim, recebi"
+    label: "07.23c · pix · confirma"
+- extendedWaitUntil:
+    notVisible: "Recebi de ${output.CLIENTE_ENCAIXE}"
+    timeout: 20000
+    label: "07.23d · pix · o encaixe saiu dos pendentes"

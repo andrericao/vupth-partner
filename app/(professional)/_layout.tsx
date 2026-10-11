@@ -8,6 +8,8 @@ import { NotificationBadge } from "@components/NotificationBadge";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { hasAnyPending } from "@lib/completion";
+import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
+import { useProfessionalStore } from "@store/professional.store";
 
 // RODAPE = LUGARES. Quatro abas, como o Pencil desenha em `Tab Bar Professional`:
 // Fila · Encaixes · Relatórios · Perfil.
@@ -38,6 +40,9 @@ export default function ProfessionalLayout() {
   const { completion } = useProfessionalCompletion();
   const perfilDot = hasAnyPending(completion);
   const { count: encaixes } = usePendingCutRequests();
+  // pagamento-pix: dot na aba Relatorios quando um cliente diz que pagou.
+  const temProfissional = !!useProfessionalStore((s) => s.professional?.id);
+  const { aguardando: pagamentosAConferir } = usePagamentosPendentes(temProfissional);
 
   return (
     <Tabs
@@ -109,7 +114,25 @@ export default function ProfessionalLayout() {
         options={{
           title: "Relatórios",
           tabBarButtonTestID: "aba-relatorios",
-          tabBarIcon: ({ focused }) => <TabBarIcon name="reports" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <View>
+              <TabBarIcon name="reports" focused={focused} />
+              {pagamentosAConferir > 0 && (
+                <View
+                  testID="tab-dot-pagamentos"
+                  style={{
+                    position: "absolute",
+                    top: -2,
+                    right: -4,
+                    width: 9,
+                    height: 9,
+                    borderRadius: 5,
+                    backgroundColor: "#B3261E", // [marca-vupth] $brandDanger, como o dot do Perfil
+                  }}
+                />
+              )}
+            </View>
+          ),
         }}
       />
       <Tabs.Screen

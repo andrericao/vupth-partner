@@ -6,6 +6,7 @@ import * as SecureStore from "expo-secure-store";
 import { WS_URL } from "@lib/api";
 import type { EstablishmentWithProfessionals, QueueNotification } from "@lib/types";
 import { isCutRequestEvent } from "@lib/cutRequests";
+import { isPaymentEvent } from "@lib/pagamento";
 import { isClosingPromptEvent } from "@lib/closing";
 import { needsRefresh, tokenRecusado } from "@lib/socketAuth";
 import { useUiStore } from "@store/ui.store";
@@ -157,6 +158,10 @@ export function useQueueSocket(establishmentId: string | null) {
               const notification = JSON.parse(message.body) as QueueNotification;
               if (isCutRequestEvent(notification.type)) {
                 queryClient.invalidateQueries({ queryKey: ["cut-requests"] });
+              } else if (isPaymentEvent(notification.type)) {
+                // pagamento-pix (adendo 1a0616c): "Ja paguei" do cliente, mesmo
+                // outro dia -> o dot e a lista se atualizam sem recarregar.
+                queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
               } else if (isClosingPromptEvent(notification.type)) {
                 // Auto-fechamento (BUG1): abre o prompt "quer fechar?" com o
                 // countdown do graceUntil. O backend fecha sozinho no fim.
