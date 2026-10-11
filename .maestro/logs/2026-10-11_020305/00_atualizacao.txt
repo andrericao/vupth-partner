@@ -6,9 +6,7 @@ Running on vupth_android11
 00.04a · espera a entrada (tocando em Wait no aviso do Android)...
   Run ../apoio/fechar_anr.yaml...
     Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
-      Tap on "(Wait|Aguardar|Esperar)"... COMPLETED
-      Wait for animation to end within 6000 ms... COMPLETED
-    Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... COMPLETED
+    Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
   Run ../apoio/fechar_anr.yaml... COMPLETED
   Assert that (Optional) "Como você vai usar o Vupth?" is visible... COMPLETED
 00.04a · espera a entrada (tocando em Wait no aviso do Android)... COMPLETED
