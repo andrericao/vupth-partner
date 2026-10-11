@@ -1,5 +1,5 @@
-# Etapa 04 AVULSA (bateria-nao-para, Andre 03/10): prepara pela API o estado
-# que ela espera, abre o app do zero e roda etapas/04_profissional_monta_o_atendimento.yaml. O setup.sh
+# Etapa 04b AVULSA (etapas-curtas, 11/10) (bateria-nao-para, Andre 03/10): prepara pela API o estado
+# que ela espera, abre o app do zero e roda etapas/04b_refeicao_e_trabalhando.yaml. O setup.sh
 # roda as oito em sequencia com a mesma TAG e segue depois de uma falha.
 # Gerado junto com as demais — mudar o cabecalho nas oito.
 appId: ${APP_ID}
@@ -37,5 +37,5 @@ env:
     file: ../apoio/abrir_com_ota.yaml
     label: "04.A7 · abre o app do zero, ja com o OTA"
 - runFlow:
-    file: ../etapas/04_profissional_monta_o_atendimento.yaml
-    label: "04.00 · roda 04_profissional_monta_o_atendimento"
+    file: ../etapas/04b_refeicao_e_trabalhando.yaml
+    label: "04.00 · roda 04b_refeicao_e_trabalhando"

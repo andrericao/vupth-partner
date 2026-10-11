@@ -1,0 +1,41 @@
+# Etapa 04a AVULSA (etapas-curtas, 11/10) (bateria-nao-para, Andre 03/10): prepara pela API o estado
+# que ela espera, abre o app do zero e roda etapas/04a_profissional_monta_o_servico.yaml. O setup.sh
+# roda as oito em sequencia com a mesma TAG e segue depois de uma falha.
+# Gerado junto com as demais — mudar o cabecalho nas oito.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+# ⚠️ TAG e COMMIT NAO entram no env: ele e aplicado DEPOIS do -e da linha de
+# comando e o apaga (Client, 04/10: a conferencia de versao era pulada e cada
+# etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
+# test direto), as expressoes testam typeof.
+---
+- evalScript:
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "04.A1 · etiqueta da rodada (TAG)"
+- evalScript:
+    script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
+    label: "04.A2 · e-mail do dono"
+- evalScript:
+    script: ${output.EMAIL_PROF = 'prof_m' + output.TAG + '@teste.com'}
+    label: "04.A3 · e-mail do profissional"
+- evalScript:
+    script: ${output.LOJA = 'Loja M' + output.TAG}
+    label: "04.A4 · nome da loja"
+- evalScript:
+    script: ${output.PROF = 'Prof' + output.TAG}
+    label: "04.A5 · nome do profissional"
+- runScript:
+    file: ../scripts/preparo.js
+    env:
+      TAG: ${output.TAG}
+      ETAPA: "4"
+    label: "04.A6 · preparo pela API (o que as etapas anteriores deixariam)"
+- runFlow:
+    file: ../apoio/abrir_com_ota.yaml
+    label: "04.A7 · abre o app do zero, ja com o OTA"
+- runFlow:
+    file: ../etapas/04a_profissional_monta_o_servico.yaml
+    label: "04.00 · roda 04a_profissional_monta_o_servico"

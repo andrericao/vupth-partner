@@ -72,8 +72,14 @@ env:
     file: etapas/03_dono_aceita_o_vinculo.yaml
     label: "00.15 · roda 03_dono_aceita_o_vinculo"
 - runFlow:
-    file: etapas/04_profissional_monta_o_atendimento.yaml
-    label: "00.16 · roda 04_profissional_monta_o_atendimento"
+    file: etapas/04a_profissional_monta_o_servico.yaml
+    label: "00.16 · roda 04a_profissional_monta_o_servico"
+- runFlow:
+    file: apoio/sair_profissional.yaml
+    label: "00.16a · sai do profissional (a 04b entra de novo)"
+- runFlow:
+    file: etapas/04b_refeicao_e_trabalhando.yaml
+    label: "00.16b · roda 04b_refeicao_e_trabalhando"
 - runFlow:
     file: etapas/05a_atende_a_fila.yaml
     label: "00.17 · roda 05a_atende_a_fila"
