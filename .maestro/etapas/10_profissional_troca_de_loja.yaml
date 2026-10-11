@@ -11,6 +11,14 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "10.02 · fecha o aviso, se houver"
+# No emulador o card "Pronto para atender" empurra o Vinculo para baixo da
+# tela (log 2026-10-11_013321, 10.03): rola ate ele.
+- scrollUntilVisible:
+    element:
+      text: "Vínculo"
+    direction: DOWN
+    timeout: 20000
+    label: "10.03a · rola ate o Vinculo"
 - tapOn:
     text: "Vínculo"
     label: "10.03 · toca em Vinculo"
