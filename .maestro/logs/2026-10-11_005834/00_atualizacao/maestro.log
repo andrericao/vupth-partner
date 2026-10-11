@@ -1,0 +1,80 @@
+00:58:58.294 [ INFO] maestro.cli.report.TestDebugReporter.logSystemInfo: Debug output path: /home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_005834/00_atualizacao
+00:58:58.333 [ INFO] MAESTRO.logSystemInfo: ---- System Info ----
+00:58:58.335 [ INFO] MAESTRO.logSystemInfo: Maestro Version: 2.5.1
+00:58:58.356 [ INFO] MAESTRO.logSystemInfo: CI: Undefined
+00:58:58.360 [ INFO] MAESTRO.logSystemInfo: OS Name: Linux
+00:58:58.363 [ INFO] MAESTRO.logSystemInfo: OS Version: 7.0.0-38-generic
+00:58:58.366 [ INFO] MAESTRO.logSystemInfo: Architecture: amd64
+00:58:58.393 [ INFO] MAESTRO.logSystemInfo: Java Version: 21
+00:58:58.408 [ INFO] MAESTRO.logSystemInfo: Xcode Version: null
+00:58:58.423 [ INFO] MAESTRO.logSystemInfo: Flutter Version: Undefined
+00:58:58.439 [ INFO] MAESTRO.logSystemInfo: Flutter Channel: Undefined
+00:58:58.441 [ INFO] MAESTRO.logSystemInfo: ---------------------
+00:59:07.544 [DEBUG] io.micrometer.common.util.internal.logging.InternalLoggerFactory.newDefaultFactory: Using SLF4J as the default logging framework
+00:59:12.024 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device emulator-5554 using port 7001 with execution plan ExecutionPlan(flowsToRun=[/tmp/tmp.dTMnbzr6oU/avulsas/00_atualizacao.yaml], sequence=FlowSequence(flows=[], continueOnFailure=true), workspaceConfig=WorkspaceConfig(flows=null, includeTags=null, excludeTags=null, executionOrder=null, baselineBranch=null, notifications=null, disableRetries=false, platform=PlatformConfiguration(android=AndroidConfiguration(disableAnimations=false), ios=IOSConfiguration(disableAnimations=false, snapshotKeyHonorModalViews=null)), testOutputDir=null))
+00:59:47.934 [ INFO] maestro.cli.runner.TestRunner.runSingle$lambda$0: Running flow 00_atualizacao.yaml...
+00:59:48.117 [ INFO] maestro.Maestro.cachedDeviceInfo_delegate$lambda$0: Getting device info
+00:59:49.651 [ INFO] maestro.Maestro.cachedDeviceInfo_delegate$lambda$0: Got device info: DeviceInfo(platform=ANDROID, widthPixels=1080, heightPixels=2280, widthGrid=1080, heightGrid=2280)
+00:59:50.301 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Define variables RUNNING
+00:59:50.401 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Define variables metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(defineVariablesCommand=DefineVariablesCommand(env={APP_ID=com.vupth.partner.preview, API=https://vupth-backend-ia.onrender.com, SENHA=Teste@123, COMMIT=11db636,100fd4f,19074ba,86a2b0d,2b0f938,905ee46,603a462, SUPERVISAO=0, TAG=005834, MAESTRO_FILENAME=00_atualizacao, MAESTRO_DEVICE_UDID=emulator-5554, MAESTRO_SHARD_ID=1, MAESTRO_SHARD_INDEX=0}, label=null, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+00:59:50.423 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Define variables COMPLETED
+00:59:50.436 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Define variables RUNNING
+00:59:50.444 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Define variables metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(defineVariablesCommand=DefineVariablesCommand(env={APP_ID=com.vupth.partner.preview, API=https://vupth-backend-ia.onrender.com, SENHA=Teste@123}, label=null, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+00:59:50.454 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Define variables COMPLETED
+00:59:50.466 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Apply configuration RUNNING
+00:59:58.321 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Apply configuration metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(applyConfigurationCommand=ApplyConfigurationCommand(config=MaestroConfig(appId=com.vupth.partner.preview, name=null, tags=[], ext={}, onFlowStart=null, onFlowComplete=null, properties={}), label=null, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+00:59:58.327 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Apply configuration COMPLETED
+00:59:58.339 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 00.01 · etiqueta da rodada (TAG) RUNNING
+00:59:58.361 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 00.01 · etiqueta da rodada (TAG) metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(evalScriptCommand=EvalScriptCommand(scriptString=${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}, label=00.01 · etiqueta da rodada (TAG), optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+00:59:58.726 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 00.01 · etiqueta da rodada (TAG) COMPLETED
+00:59:58.738 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 00.02 · conta de profissional so da 00, pela API RUNNING
+00:59:58.839 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 00.02 · conta de profissional so da 00, pela API metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(runScriptCommand=RunScriptCommand(script=// fatia-de-atualizacao (Andre, 05/10): uma conta de profissional SO da 00, para
+// entrar e chegar em Perfil -> Versao do app sem mexer no profissional das
+// etapas (a 02 cadastra o dela pelo app).
+//
+// Entradas (env do runScript): API, SENHA, TAG
+// Saida: output.EMAIL_VERSAO
+
+function chamar(metodo, url, corpo, token) {
+  var headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = "Bearer " + token;
+  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" || metodo === "DELETE" ? undefined : "{}") });
+  return { status: r.status, corpo: r.body ? json(r.body) : null };
+}
+
+function pedir(metodo, url, corpo, token) {
+  var r = chamar(metodo, url, corpo, token);
+  if (r.status >= 300) throw new Error("conta da 00: " + metodo + " " + url + " -> " + r.status + " " + JSON.stringify(r.corpo));
+  return r.corpo;
+}
+
+function entrar(email) {
+  return pedir("POST", "/auth/login", { email: email, password: SENHA }).tokens.access_token;
+}
+
+var email = "prof_m" + TAG + "_versao@teste.com";
+if (chamar("POST", "/auth/login", { email: email, password: SENHA }).status >= 300) {
+  pedir("POST", "/auth/register", { email: email, password: SENHA });
+}
+var token = entrar(email);
+if (chamar("GET", "/professional/me", null, token).status >= 300) {
+  pedir("POST", "/professional/register", { name: "Versao" + TAG, specialty: "NAIL_TECH" }, token);
+}
+output.EMAIL_VERSAO = email;
+, env={TAG=005834}, sourceDescription=/tmp/tmp.dTMnbzr6oU/scripts/conta_da_versao.js, condition=null, label=00.02 · conta de profissional so da 00, pela API, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+01:00:03.036 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: 00.02 · conta de profissional so da 00, pela API COMPLETED
+01:00:03.049 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: 00.03 · abre o app do zero RUNNING
+01:00:03.132 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: 00.03 · abre o app do zero metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(launchAppCommand=LaunchAppCommand(appId=com.vupth.partner.preview, clearState=true, clearKeychain=null, stopApp=null, permissions=null, launchArguments=null, label=00.03 · abre o app do zero, optional=false)), logMessages=[], insight=Insight(message=, level=NONE), aiReasoning=null, labeledCommand=null)
+01:00:03.144 [ INFO] maestro.Maestro.clearAppState$lambda$5: Clearing app state com.vupth.partner.preview
+01:18:22.893 [ INFO] maestro.drivers.AndroidDriver.close: [Start] Uninstall driver from device
+01:18:22.894 [ERROR] maestro.cli.session.MaestroSessionManager.newSession$lambda$0: Failed to record heartbeat
+java.lang.InterruptedException: sleep interrupted
+	at java.base/java.lang.Thread.sleep0(Native Method)
+	at java.base/java.lang.Thread.sleep(Thread.java:509)
+	at maestro.cli.session.MaestroSessionManager.newSession$lambda$0(MaestroSessionManager.kt:95)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)

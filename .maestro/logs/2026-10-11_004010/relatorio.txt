@@ -1,4 +1,0 @@
-Rodada 2026-10-11_004010 · TAG 004010 · commit esperado 19074ba,86a2b0d,2b0f938,905ee46,603a462
-❌ 00_atualizacao — parou em ?
-   print: .maestro/logs/2026-10-11_004010/FALHA_00_atualizacao.png
-   (as etapas nao rodaram: com a versao errada o teste nao serve)
