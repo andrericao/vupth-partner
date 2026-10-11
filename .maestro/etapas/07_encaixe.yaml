@@ -21,17 +21,22 @@ appId: ${APP_ID}
 # Bateria 20:08: o push do pedido virou caixa ("Novo pedido de corte") no
 # instante do toque e o comeu — a tela ficou na Fila. Fecha a caixa e tenta de
 # novo ate os Encaixes mostrarem o pedido.
+# Bateria 19:21 (emulador): o nome do cliente tambem aparece no card de
+# solicitacoes da Fila — o laco parava sem sair da Fila. Agora espera o
+# encaixe-quando, que so a tela Encaixes tem.
 - repeat:
     times: 4
     while:
-      notVisible: ".*${output.CLIENTE_RECUSADO}.*"
+      notVisible:
+        id: "encaixe-quando"
     commands:
       - runFlow:
           file: ../apoio/fechar_aviso.yaml
       - tapOn:
           id: "aba-encaixes"
       - extendedWaitUntil:
-          visible: ".*${output.CLIENTE_RECUSADO}.*"
+          visible:
+            id: "encaixe-quando"
           timeout: 15000
           optional: true
     label: "07.04 · toca em aba-encaixes (fecha a caixa do push, se vier)"
@@ -68,13 +73,16 @@ appId: ${APP_ID}
       QUEM: Amanha
       AMANHA: "sim"
     label: "07.08a · script pedido_de_encaixe para amanha"
+# Bateria 01:33 (emulador): o pedido chegou na lista, mas a caixa do push nao
+# veio (no emulador o push e' incerto). A caixa fica opcional: espera o pedido
+# e fecha a caixa so se ela aparecer.
 - extendedWaitUntil:
-    visible: "OK"
+    visible: ".*${output.CLIENTE_AMANHA}.*"
     timeout: 90000
-    label: "07.08b · o push vira caixa com OK"
-- tapOn:
-    text: "OK"
-    label: "07.08c · toca em OK"
+    label: "07.08b · espera …${output.CLIENTE_AMANHA}…"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.08c · fecha a caixa do push com OK, se vier"
 - extendedWaitUntil:
     visible: ".*${output.CLIENTE_AMANHA}.*"
     timeout: 60000
