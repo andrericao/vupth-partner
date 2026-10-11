@@ -117,6 +117,8 @@ export type ResumoSolicitacoes = {
   quem: string;
   /** Minutos ate o MAIS urgente expirar; null = so pedidos sem prazo (outro dia). */
   expiraEm: number | null;
+  /** HH:MM em que o mais urgente vence (BAK-1: o de hoje sem horario vale ate 23:59). */
+  venceAs?: string | null;
 };
 
 export function resumoDeSolicitacoes(
@@ -129,16 +131,19 @@ export function resumoDeSolicitacoes(
   const primeiro = cutRequestClientName(ativos[0]);
   // O de outro dia fica fora do relogio: com o BAK-1 ele vence no horario
   // pedido (amanha), nao e urgente.
-  const prazos = ativos
+  const comPrazo = ativos
     .filter((r) => !ehDeOutroDia(r, nowMs))
-    .map((r) => minutesToExpire(r.expires_at, nowMs))
-    .filter((m): m is number => m !== null);
+    .map((r) => ({ r, mins: minutesToExpire(r.expires_at, nowMs) }))
+    .filter((p): p is { r: CutRequestResponse; mins: number } => p.mins !== null)
+    .sort((a, b) => a.mins - b.mins);
   const outros = ativos.length - 1;
+  const urgente = comPrazo[0];
 
   return {
     titulo: `${ativos.length} ${ativos.length === 1 ? "solicitação" : "solicitações"} de encaixe`,
     quem: outros > 0 ? `${primeiro} e mais ${outros}` : primeiro,
-    expiraEm: prazos.length > 0 ? Math.min(...prazos) : null,
+    expiraEm: urgente ? urgente.mins : null,
+    venceAs: urgente ? hhmmLocal(urgente.r.expires_at as string) : null,
   };
 }
 
@@ -196,6 +201,13 @@ export function quandoOClienteQuer(
   return `Quer ${DIAS[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)} às ${hora}`;
 }
 
+/** HH:MM local de um instante ISO. */
+function hhmmLocal(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 /** O dia (meia-noite local) de um instante, em ms. */
 function diaLocal(ms: number): number {
   const d = new Date(ms);
@@ -237,7 +249,5 @@ export function seloDoPrazo(
   const mins = minutesToExpire(expiresAt, nowMs);
   if (mins === null) return { texto: "sem prazo", urgente: false };
   if (mins <= 60) return { texto: `${mins} min`, urgente: mins <= 2 };
-  const d = new Date(expiresAt as string);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return { texto: `vale até ${pad(d.getHours())}:${pad(d.getMinutes())}`, urgente: false };
+  return { texto: `vale até ${hhmmLocal(expiresAt as string)}`, urgente: false };
 }

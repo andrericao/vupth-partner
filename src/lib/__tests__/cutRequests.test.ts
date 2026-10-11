@@ -246,6 +246,19 @@ describe("resumoDeSolicitacoes", () => {
     expect(resumoDeSolicitacoes([outroDia], NOW)!.expiraEm).toBeNull();
   });
 
+  it("diz a hora em que o mais urgente vence (BAK-1: o de hoje sem horario vale ate 23:59)", () => {
+    const vence = new Date(NOW + 260 * 60000);
+    const r = resumoDeSolicitacoes([pedido({ id: "r1", expires_at: vence.toISOString() })], NOW)!;
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    expect(r.expiraEm).toBe(260);
+    expect(r.venceAs).toBe(`${pad(vence.getHours())}:${pad(vence.getMinutes())}`);
+  });
+
+  it("so pedido sem prazo: sem hora de vencimento", () => {
+    expect(resumoDeSolicitacoes([pedido({ id: "r9", expires_at: null })], NOW)!.venceAs).toBeNull();
+  });
+
   it("o pedido de outro dia com vencimento (BAK-1) tambem fica fora do relogio", () => {
     const amanha = new Date(NOW + 36 * 3600000).toISOString();
     const outroDia = pedido({ id: "r9", desired_time: amanha, expires_at: amanha });

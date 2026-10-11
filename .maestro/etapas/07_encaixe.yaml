@@ -18,6 +18,23 @@ appId: ${APP_ID}
       TAG: ${output.TAG}
       QUEM: Recusado
     label: "07.03 · script pedido_de_encaixe (o que sera recusado)"
+# card-vale-ate: o pedido de hoje sem horario vence as 23:59 (BAK-1); longe
+# disso (mais de 60 min), o card da Fila diz a hora, nao os minutos. Perto da
+# meia-noite o card mostra os minutos e a conferencia nao roda.
+- runFlow:
+    when:
+      true: "${new Date().getHours() < 22}"
+    commands:
+      - runFlow:
+          file: ../apoio/fechar_aviso.yaml
+      - extendedWaitUntil:
+          visible:
+            id: "solicitacoes-expira"
+          timeout: 60000
+      - assertVisible:
+          id: "solicitacoes-expira"
+          text: "vale até 23:59"
+    label: "07.03a · confere o card da Fila: vale até 23:59"
 # Bateria 20:08: o push do pedido virou caixa ("Novo pedido de corte") no
 # instante do toque e o comeu — a tela ficou na Fila. Fecha a caixa e tenta de
 # novo ate os Encaixes mostrarem o pedido.
