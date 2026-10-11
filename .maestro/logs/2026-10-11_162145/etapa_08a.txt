@@ -1,0 +1,90 @@
+Running on vupth_android11
+ > Flow 08a
+08.A1 · etiqueta da rodada (TAG)... COMPLETED
+08.A2 · e-mail do dono... COMPLETED
+08.A3 · e-mail do profissional... COMPLETED
+08.A4 · nome da loja... COMPLETED
+08.A5 · nome do profissional... COMPLETED
+08.A6 · preparo pela API (o que as etapas anteriores deixariam)... COMPLETED
+08.A7 · abre o app do zero, ja com o OTA...
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+  Launch app "${APP_ID}"... COMPLETED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... WARNED
+  Run fechar_aviso.yaml...
+    Wait for animation to end within 6000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run fechar_aviso.yaml... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible...
+  Run sair_profissional.yaml when id: aba-perfil is visible... SKIPPED
+  Run sair_dono.yaml when id: aba-menu is visible...
+  Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)... COMPLETED
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+08.A7 · abre o app do zero, ja com o OTA... COMPLETED
+08.00 · roda 08a_dono_confere...
+  08.01 · roda entrar...
+    Tap on id: go-login... COMPLETED
+    Tap on id: login-email... COMPLETED
+    Input text ${EMAIL}... COMPLETED
+    Tap on id: login-password... COMPLETED
+    Input text ${SENHA}... COMPLETED
+    Hide Keyboard... COMPLETED
+    Tap on id: login-submit... COMPLETED
+  08.01 · roda entrar... COMPLETED
+  08.02 · espera ${output.LOJA}... COMPLETED
+  08.02a · confere compartilhar-no-topo... COMPLETED
+  08.02b · print para o Andre (inicio-compartilhar)...
+    Take screenshot para-o-andre_${NOME}... COMPLETED
+    Run ${console.log('PARA-O-ANDRE: ' + NOME + ' — ' + O_QUE)}... COMPLETED
+  08.02b · print para o Andre (inicio-compartilhar)... COMPLETED
+  08.03 · toca em aba-filas... COMPLETED
+  08.04 · espera ${output.PROF}... COMPLETED
+  08.25 · abre o card de ${output.PROF}...
+    Tap on "${output.PROF}"... COMPLETED
+  08.25 · abre o card de Prof162145... COMPLETED
+  08.25a · toca em Ver fila detalhada... COMPLETED
+  08.26 · espera a fila do profissional... COMPLETED
+  08.27 · confere Desvincular profissional (sem tocar)... COMPLETED
+  08.28 · volta para Filas... COMPLETED
+  08.05 · toca em aba-menu... COMPLETED
+  08.06 · toca em Relatórios... COMPLETED
+  08.07 · rola ate recebe R$…... COMPLETED
+  08.08 · toca em aba-menu... COMPLETED
+  08.09 · toca em Atendimentos... COMPLETED
+  08.10 · toca em Retirados... COMPLETED
+  08.11 · espera ${output.CLIENTE2}... COMPLETED
+  08.12 · toca em aba-menu... COMPLETED
+  08.13 · rola ate Versão do app... COMPLETED
+  08.14 · toca em Versão do app... COMPLETED
+  08.15 · espera version-line... COMPLETED
+  08.15a · volta da tela Sistema... COMPLETED
+  08.15b · espera aba-menu... COMPLETED
+08.00 · roda 08a_dono_confere... COMPLETED
