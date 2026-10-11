@@ -50,6 +50,11 @@ describe("pix — validar a chave", () => {
     expect(erroDaChave("CNPJ", "00.000.000/0000-00")).toMatch(/CNPJ/);
   });
 
+  it("digito verificador 0 (resto 10 no CPF, resto < 2 no CNPJ)", () => {
+    expect(erroDaChave("CPF", "631.086.193-06")).toBeNull();
+    expect(erroDaChave("CNPJ", "50.142.209/0061-07")).toBeNull();
+  });
+
   it("vazio pede a chave", () => {
     expect(erroDaChave("EMAIL", "  ")).toMatch(/Informe/);
   });
@@ -86,6 +91,10 @@ describe("pix — mostrar a chave salva", () => {
     expect(chaveParaMostrar({ key_type: "EMAIL", key: "ana@exemplo.com", holder_name: "Ana" })).toBe(
       "E-mail · ana@exemplo.com"
     );
+  });
+
+  it("tipo que o app nao conhece: mostra o codigo do tipo", () => {
+    expect(chaveParaMostrar({ key_type: "EVP" as never, key: "x", holder_name: "Ana" })).toBe("EVP · x");
   });
 });
 

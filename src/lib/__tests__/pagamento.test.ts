@@ -9,6 +9,8 @@ import {
 } from "@lib/pagamento";
 
 jest.mock("@lib/api", () => ({ api: { get: jest.fn(), post: jest.fn() } }));
+const mockConfirmar = jest.fn();
+jest.mock("@lib/confirmar", () => ({ confirmar: (...a: unknown[]) => mockConfirmar(...a) }));
 
 // pagamento-pix (adendos 1a0616c e 62295f1): antes do Finalizar ou do Iniciar
 // proximo, o app le o pagamento. PAID -> sem pergunta; PENDING ou
@@ -38,6 +40,18 @@ describe("perguntarPagamento", () => {
     pergunta.mockResolvedValueOnce(true);
     await perguntarPagamento("a1", { perguntar: pergunta });
     expect(pergunta).toHaveBeenCalledWith(expect.objectContaining({ mensagem: expect.stringMatching(/diz que pagou/) }));
+  });
+
+  it("sem deps, usa a caixa de confirmacao do app; sem valor, mostra R$ 0,00", async () => {
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING" } });
+    mockConfirmar.mockResolvedValueOnce(false);
+    await expect(perguntarPagamento("a1")).resolves.toBe(false);
+    expect(mockConfirmar).toHaveBeenCalledWith(expect.objectContaining({ mensagem: expect.stringContaining("R$ 0,00") }));
+  });
+
+  it("resposta vazia: nao pergunta", async () => {
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: null });
+    await expect(perguntarPagamento("a1", { perguntar: pergunta })).resolves.toBeUndefined();
   });
 
   it("sem pagamento (atendimento antigo, 409) ou falha de rede: finaliza como antes, sem perguntar", async () => {
