@@ -6,6 +6,7 @@ import {
   confirmarRecebimento,
   isPaymentEvent,
   observacaoDoPagamento,
+  rotuloDoPagamento,
 } from "@lib/pagamento";
 
 jest.mock("@lib/api", () => ({ api: { get: jest.fn(), post: jest.fn() } }));
@@ -108,5 +109,18 @@ describe("pagamentos pendentes do profissional (adendo 1a0616c)", () => {
   it("a observacao embaixo do card (Andre, 10/10)", () => {
     expect(observacaoDoPagamento("AWAITING_CONFIRMATION")).toBe("Confirme se o pagamento foi efetuado");
     expect(observacaoDoPagamento("PENDING")).toBe("Aguardando o cliente efetuar o pagamento");
+  });
+});
+
+describe("rotuloDoPagamento (adendo 62295f1: ao lado de qualquer status)", () => {
+  it("pago, aguardando ou a confirmar", () => {
+    expect(rotuloDoPagamento("PAID")).toBe("pago");
+    expect(rotuloDoPagamento("PENDING")).toBe("aguardando pagamento");
+    expect(rotuloDoPagamento("AWAITING_CONFIRMATION")).toBe("pagamento a confirmar");
+  });
+  it("sem pagamento (antigos, cancelados, retirados): nada", () => {
+    expect(rotuloDoPagamento(null)).toBeNull();
+    expect(rotuloDoPagamento(undefined)).toBeNull();
+    expect(rotuloDoPagamento("OUTRO")).toBeNull();
   });
 });

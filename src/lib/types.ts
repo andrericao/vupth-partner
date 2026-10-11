@@ -163,4 +163,6 @@ export type AttendanceHistoryItem = {
   startTime: string | null;
   endTime: string | null;
   durationInMinutes: number | null;
+  /** pagamento-pix (contrato 2a2b0ec): null nos antigos, cancelados e retirados. */
+  payment_status?: "PENDING" | "AWAITING_CONFIRMATION" | "PAID" | null;
 };

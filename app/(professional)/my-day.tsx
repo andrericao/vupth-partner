@@ -17,6 +17,7 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
+import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { confirmarRecebimento, formatarReais } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
@@ -79,6 +80,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
       <View className="flex-row justify-end mt-2">
         <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
+      <LinhaDoPagamento status={item.payment_status} />
     </View>
   );
 }

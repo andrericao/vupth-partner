@@ -78,6 +78,28 @@ appId: ${APP_ID}
     visible: ${output.CLIENTE2}
     timeout: 20000
     label: "08.11 · espera ${output.CLIENTE2}"
+# pagamento-pix, fatia 4 (contrato 2a2b0ec): o pagamento ao lado do status, e o
+# dono tambem marca "Recebi". O preparo da 08 finaliza o CLIENTE1 sem pagar.
+- tapOn:
+    text: "Finalizados"
+    label: "08.11a · pix · toca em Finalizados"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE1}
+    timeout: 20000
+    label: "08.11b · pix · espera ${output.CLIENTE1}"
+- assertVisible:
+    text: "Pagamento: aguardando pagamento"
+    label: "08.11c · pix · confere aguardando pagamento"
+- tapOn:
+    text: "Recebi"
+    label: "08.11d · pix · o dono toca em Recebi"
+- tapOn:
+    text: "Sim, recebi"
+    label: "08.11e · pix · confirma"
+- extendedWaitUntil:
+    visible: "Pagamento: pago"
+    timeout: 20000
+    label: "08.11f · pix · fica pago"
 
 - tapOn:
     id: "aba-menu"

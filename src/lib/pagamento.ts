@@ -86,3 +86,11 @@ export function observacaoDoPagamento(status: PagamentoPendente["status"]): stri
 }
 
 export { reais as formatarReais };
+
+/** O pagamento ao lado do status, no historico ("Concluido · aguardando pagamento"). */
+export function rotuloDoPagamento(status: string | null | undefined): string | null {
+  if (status === "PAID") return "pago";
+  if (status === "PENDING") return "aguardando pagamento";
+  if (status === "AWAITING_CONFIRMATION") return "pagamento a confirmar";
+  return null;
+}

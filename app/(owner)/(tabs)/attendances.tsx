@@ -9,8 +9,17 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
+import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
+import { confirmarRecebimento, formatarReais } from "@lib/pagamento";
+import { confirmar } from "@lib/confirmar";
 
-function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
+function AttendanceHistoryCard({
+  item,
+  onRecebi,
+}: {
+  item: AttendanceHistoryItem;
+  onRecebi: (item: AttendanceHistoryItem) => Promise<void>;
+}) {
   // Rotulo e cor vem da lib compartilhada com o Meu dia — inclusive o REMOVED
   // (a loja retirou), que antes cairia cru na tela.
   const statusInfo = seloDoStatus(item.status);
@@ -43,6 +52,8 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
       <View className="flex-row justify-end mt-2">
         <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
+      {/* pagamento-pix (contrato 2a2b0ec): o dono tambem marca "Recebi". */}
+      <LinhaDoPagamento status={item.payment_status} onRecebi={() => onRecebi(item)} />
     </View>
   );
 }
@@ -84,6 +95,21 @@ export default function OwnerAttendancesScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
   }, [loadHistory]);
+
+  const recebi = async (item: AttendanceHistoryItem) => {
+    const ok = await confirmar({
+      titulo: "Recebeu o pagamento?",
+      mensagem: `Confirme que ${item.clientName} pagou ${formatarReais(item.totalValue)}. O cliente recebe o aviso de pagamento confirmado.`,
+      confirmar: "Sim, recebi",
+    });
+    if (!ok) return;
+    try {
+      await confirmarRecebimento(item.id);
+      await loadHistory();
+    } catch (error: any) {
+      setErrorMsg(getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));
+    }
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -178,7 +204,7 @@ export default function OwnerAttendancesScreen() {
           <View>
             <View className="h-px bg-vupth-border mb-4" />
             {history.map((item) => (
-              <AttendanceHistoryCard key={item.id} item={item} />
+              <AttendanceHistoryCard key={item.id} item={item} onRecebi={recebi} />
             ))}
           </View>
         )}
