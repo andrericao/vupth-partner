@@ -255,7 +255,7 @@ export default function OwnerMenuScreen() {
                 label="Aparência"
                 hint="tema e tamanho da fonte"
                 onPress={() =>
-                  router.push({ pathname: "/(professional)/aparencia", params: { from: "owner" } } as any)
+                  router.push({ pathname: "/(owner)/aparencia", params: { from: "owner" } } as any)
                 }
               />
               <MenuItem
@@ -263,7 +263,7 @@ export default function OwnerMenuScreen() {
                 label="Versão do app"
                 onPress={() =>
                   router.push({
-                    pathname: "/(professional)/sistema",
+                    pathname: "/(owner)/sistema",
                     params: { from: "owner" },
                   } as any)
                 }

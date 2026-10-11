@@ -36,8 +36,21 @@ describe("o grupo Sistema é item de lista, não rodapé", () => {
   });
 
   it("as duas telas levam à MESMA tela de sistema", () => {
-    for (const arq of ["app/(professional)/settings.tsx", "app/(owner)/(tabs)/menu.tsx"]) {
-      expect(ler(arq)).toContain("/(professional)/sistema");
-    }
+    expect(ler("app/(professional)/settings.tsx")).toContain("/(professional)/sistema");
+    // abas-do-dono (Andre, 10/10): o dono abre a mesma tela, mas pela rota do
+    // grupo dele — senao ela vem com as abas do profissional.
+    expect(ler("app/(owner)/(tabs)/menu.tsx")).toContain("/(owner)/sistema");
+    expect(ler("app/(owner)/(tabs)/sistema.tsx")).toContain('from "../../(professional)/sistema"');
+  });
+
+  it("a Aparência do dono abre com as abas do dono (a mesma tela, rota do grupo dele)", () => {
+    expect(ler("app/(owner)/(tabs)/menu.tsx")).toContain("/(owner)/aparencia");
+    expect(ler("app/(owner)/(tabs)/aparencia.tsx")).toContain('from "../../(professional)/aparencia"');
+  });
+
+  it("as rotas do dono ficam fora da barra de abas dele", () => {
+    const layout = ler("app/(owner)/(tabs)/_layout.tsx");
+    expect(layout).toContain('<Tabs.Screen name="sistema" options={{ href: null }} />');
+    expect(layout).toContain('<Tabs.Screen name="aparencia" options={{ href: null }} />');
   });
 });
