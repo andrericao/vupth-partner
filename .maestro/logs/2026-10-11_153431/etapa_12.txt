@@ -14,7 +14,7 @@ Running on vupth_android11
     Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
   Run fechar_cortina.yaml... COMPLETED
   Launch app "${APP_ID}"... COMPLETED
-  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... WARNED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... COMPLETED
   Run fechar_aviso.yaml...
     Wait for animation to end within 6000 ms... COMPLETED
     Run fechar_anr.yaml...
@@ -27,7 +27,26 @@ Running on vupth_android11
     Run flow when id: android:id/button1 is visible... SKIPPED
   Run fechar_aviso.yaml... COMPLETED
   Run sair_profissional.yaml when id: aba-perfil is visible...
-  Run sair_profissional.yaml when id: aba-perfil is visible... SKIPPED
+    Tap on id: aba-perfil... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 6000 ms... COMPLETED
+      Run fechar_anr.yaml...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+      Run fechar_anr.yaml... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+    Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+    Tap on "Sair da conta"... COMPLETED
+    Run confirmar.yaml...
+      Assert that id: dialogo-botao-1 is visible... COMPLETED
+      Tap on id: dialogo-botao-1... COMPLETED
+    Run confirmar.yaml... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible... COMPLETED
   Run sair_dono.yaml when id: aba-menu is visible...
   Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
   Launch app "${APP_ID}" with clear state... COMPLETED
@@ -87,4 +106,4 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_143031/etapa_12
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_153431/etapa_12
