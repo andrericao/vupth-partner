@@ -111,8 +111,11 @@ if (etapa >= 4 && !prof.establishment_id) {
 }
 
 // ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──
+// A 04b (etapas-curtas; log 2026-10-11_143031, 04.51) so precisa do servico
+// (o que a 04a faz): sem ele o Trabalhando nao abre. O status ela mesma troca.
+var so04b = String(ETAPA) === "4b";
 var servicos = [];
-if (etapa >= 5) {
+if (etapa >= 5 || so04b) {
   servicos = pedir("GET", "/professional/" + prof.id + "/service-items", null, tokenProf) || [];
   if (servicos.length === 0) {
     // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)
@@ -122,7 +125,9 @@ if (etapa >= 5) {
     }, tokenProf);
     servicos = pedir("GET", "/professional/" + prof.id + "/service-items", null, tokenProf);
   }
-  if (prof.work_status !== "WORKING") {
+  if (so04b) {
+    // so o servico
+  } else if (prof.work_status !== "WORKING") {
     pedir("PATCH", "/professional/me/status", { status: "WORKING" }, tokenProf);
   }
   // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false
