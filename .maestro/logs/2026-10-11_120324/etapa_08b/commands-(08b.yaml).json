@@ -1,0 +1,341 @@
+[ {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.LOJA = 'Loja M' + output.TAG}",
+      "label" : "08.A4 · nome da loja",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791734689870,
+    "duration" : 21,
+    "sequenceNumber" : 6,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.LOJA = 'Loja M' + output.TAG}",
+        "label" : "08.A4 · nome da loja",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+      "label" : "08.A1 · etiqueta da rodada (TAG)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791734689720,
+    "duration" : 90,
+    "sequenceNumber" : 3,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+        "label" : "08.A1 · etiqueta da rodada (TAG)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Prepara pela API do staging o estado que a etapa ETAPA espera (bateria-nao-para,\n// Andre 03/10): cada etapa roda sozinha, mesmo que a anterior tenha falhado.\n// Tudo e idempotente — se a etapa anterior passou, o que ela criou pelo app e\n// reaproveitado; se falhou, o preparo cria o que faltou.\n//\n// Entradas (env do runScript): API, SENHA, TAG, ETAPA (1..8)\n// Saidas: output.CLIENTE1 e output.CLIENTE2 nas etapas 6 e 8 (o historico)\n\nvar etapa = parseInt(ETAPA, 10);\nvar EMAIL_DONO = \"prop_m\" + TAG + \"@teste.com\";\nvar EMAIL_PROF = \"prof_m\" + TAG + \"@teste.com\";\nvar LOJA = \"Loja M\" + TAG;\nvar PROF = \"Prof\" + TAG;\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  // 429 do staging (limite de logins; log 2026-10-11_023621, 08.A6): espera o\n  // tempo que ele pede (\"try again in N s\") e tenta de novo, ate 3 vezes.\n  var r = null;\n  for (var vez = 0; vez < 4; vez++) {\n    r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n    if (r.status !== 429 || vez === 3) break;\n    var n = /in (\\d+) s/.exec(r.body || \"\");\n    var ate = Date.now() + ((n ? parseInt(n[1], 10) : 30) + 2) * 1000;\n    while (Date.now() < ate) {}\n  }\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"preparo da etapa \" + etapa + \": \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\n// Entra; sem a conta, cria e entra.\nfunction conta(email) {\n  var r = chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA });\n  if (r.status < 300) return r.corpo.tokens.access_token;\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// Login de novo: o token tem de carregar o papel recem-criado (OWNER/PROFESSIONAL).\nfunction entrar(email) {\n  return pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\n}\n\n// ── A partir da 02: o dono com a loja aberta 24 horas (o que a 01 faz) ──\nvar loja = null;\nvar tokenDono = null;\nif (etapa >= 2) {\n  tokenDono = conta(EMAIL_DONO);\n  var lojas = chamar(\"GET\", \"/establishment/mine\", null, tokenDono);\n  if (lojas.status < 300 && lojas.corpo && lojas.corpo.length > 0) {\n    loja = lojas.corpo[0];\n  } else {\n    pedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Dono \" + TAG }, tokenDono);\n    loja = pedir(\"POST\", \"/establishment/quick-create\", { name: LOJA, serviceType: \"BARBER\" }, tokenDono);\n    tokenDono = entrar(EMAIL_DONO);\n    var dias = [\"MONDAY\", \"TUESDAY\", \"WEDNESDAY\", \"THURSDAY\", \"FRIDAY\", \"SATURDAY\", \"SUNDAY\"];\n    pedir(\"PUT\", \"/establishment/\" + loja.id + \"/hours/weekly\", {\n      days: dias.map(function (d) { return { day: d, closed: false, opens: \"00:00\", closes: \"00:00\" }; })\n    }, tokenDono);\n  }\n}\n\n// ── A partir da 03: o profissional cadastrado (o que a 02 faz) ──\nvar prof = null;\nvar tokenProf = null;\nif (etapa >= 3) {\n  tokenProf = conta(EMAIL_PROF);\n  var me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  if (me.status >= 300) {\n    pedir(\"POST\", \"/professional/register\", { name: PROF, specialty: \"NAIL_TECH\" }, tokenProf);\n    tokenProf = entrar(EMAIL_PROF);\n    me = chamar(\"GET\", \"/professional/me\", null, tokenProf);\n  }\n  prof = me.corpo;\n}\n\n// O pedido pendente do profissional, lido do lado dele: a lista da loja nem\n// sempre casa com o id de /professional/me (a 03 caiu num 409 com o pedido la).\nfunction pedidoPendente() {\n  var r = chamar(\"GET\", \"/professional/me/affiliations\", null, tokenProf);\n  var lista = r.status < 300 && Array.isArray(r.corpo) ? r.corpo : [];\n  for (var i = 0; i < lista.length; i++) {\n    if (String(lista[i].status).toUpperCase() === \"PENDING\") return lista[i];\n  }\n  return null;\n}\n\n// ── 03: o pedido de vinculo pendente, para o dono aceitar ──\n// 409 AFFILIATION_ALREADY_PENDING = a 02 ja deixou o pedido: e o estado esperado.\nif (etapa === 3 && !prof.establishment_id && !pedidoPendente()) {\n  var pedido = chamar(\"POST\", \"/professional/me/affiliations\", { establishmentId: loja.id }, tokenProf);\n  var jaPendente = pedido.status === 409 && pedido.corpo && pedido.corpo.code === \"AFFILIATION_ALREADY_PENDING\";\n  if (pedido.status >= 300 && !jaPendente) {\n    throw new Error(\"preparo da etapa 3: POST /professional/me/affiliations -> \" + pedido.status + \" \" + JSON.stringify(pedido.corpo));\n  }\n}\n\n// ── A partir da 04: o profissional ja vinculado (o que a 03 faz) ──\nif (etapa >= 4 && !prof.establishment_id) {\n  var pendente = pedidoPendente();\n  if (pendente) pedir(\"PATCH\", \"/affiliations/\" + pendente.id + \"/accept\", null, tokenDono);\n  else pedir(\"POST\", \"/professional/affiliate\", { establishmentId: loja.id }, tokenProf);\n  tokenProf = entrar(EMAIL_PROF);\n  prof = pedir(\"GET\", \"/professional/me\", null, tokenProf);\n}\n\n// ── A partir da 05: um servico e o profissional Trabalhando (o que a 04 faz) ──\nvar servicos = [];\nif (etapa >= 5) {\n  servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf) || [];\n  if (servicos.length === 0) {\n    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)\n    pedir(\"POST\", \"/professional-queue/\" + prof.id + \"/add-service-items\", {\n      serviceItemType: \"MANICURE\", customName: \"Manicure \" + TAG,\n      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60\n    }, tokenProf);\n    servicos = pedir(\"GET\", \"/professional/\" + prof.id + \"/service-items\", null, tokenProf);\n  }\n  if (prof.work_status !== \"WORKING\") {\n    pedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, tokenProf);\n  }\n  // Rodada depois do fechamento da loja: o auto-fechamento poe accepting_new=false\n  // e o POST /attendances da 409 PROFESSIONAL_NOT_ACCEPTING_NEW (log 06/10 20:30).\n  if (prof.accepting_new === false || prof.acceptingNew === false) {\n    pedir(\"PATCH\", \"/professional/me/accepting-new\", { value: true }, tokenProf);\n  }\n}\n\n// ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──\n// Clientes proprios do preparo (sufixo h): nao dependem de a 05 ter passado.\nfunction clienteNaFila(n) {\n  var nome = \"Cliente\" + n + \"h\" + TAG;\n  var token = conta(\"client_\" + TAG + \"_h\" + n + \"_e\" + etapa + \"@teste.com\");\n  pedir(\"PATCH\", \"/profile/general-infos\", { first_name: nome }, token);\n  var at = pedir(\"POST\", \"/attendances\", {\n    professionalId: prof.id,\n    establishmentId: prof.establishment_id,\n    serviceItemIds: [servicos[0].id],\n    scheduledTime: new Date().toISOString()\n  }, token);\n  return { nome: nome, id: at.id };\n}\n\nif (etapa === 6 || etapa === 8) {\n  var finalizado = clienteNaFila(1);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/start\", null, tokenProf);\n  pedir(\"PATCH\", \"/attendances/\" + finalizado.id + \"/finish\", null, tokenProf);\n  var retirado = clienteNaFila(2);\n  pedir(\"DELETE\", \"/professional-queue/\" + retirado.id + \"/remove\", null, tokenProf);\n  output.CLIENTE1 = finalizado.nome;\n  output.CLIENTE2 = retirado.nome;\n}\n",
+      "env" : {
+        "TAG" : "${output.TAG}",
+        "ETAPA" : "8"
+      },
+      "sourceDescription" : "/tmp/tmp.wHlm6Wdi7i/scripts/preparo.js",
+      "label" : "08.A6 · preparo pela API (o que as etapas anteriores deixariam)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "FAILED",
+    "timestamp" : 1791734689918,
+    "duration" : 4975,
+    "error" : {
+      "stackTrace" : [ {
+        "methodName" : "pedir",
+        "fileName" : "<eval>",
+        "lineNumber" : 33,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : "clienteNaFila",
+        "fileName" : "<eval>",
+        "lineNumber" : 141,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":program",
+        "fileName" : "<eval>",
+        "lineNumber" : 151,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":anonymous",
+        "fileName" : "/tmp/tmp.wHlm6Wdi7i/scripts/preparo.js",
+        "lineNumber" : 1,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":program",
+        "fileName" : "/tmp/tmp.wHlm6Wdi7i/scripts/preparo.js",
+        "lineNumber" : 1,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "eval",
+        "fileName" : "Context.java",
+        "lineNumber" : 416,
+        "className" : "org.graalvm.polyglot.Context",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evalWithIIFE",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 134,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evaluateScript",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 95,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evaluateScript",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 26,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runScriptCommand",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 645,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeCommand",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 373,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeCommands",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 275,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$executeCommands",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 126,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : -1,
+        "className" : "maestro.orchestra.Orchestra$executeCommands$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "processNextEvent",
+        "fileName" : "EventLoop.common.kt",
+        "lineNumber" : 263,
+        "className" : "kotlinx.coroutines.EventLoopImplBase",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "joinBlocking",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 94,
+        "className" : "kotlinx.coroutines.BlockingCoroutine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 70,
+        "className" : "kotlinx.coroutines.BuildersKt__BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking$default",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 48,
+        "className" : "kotlinx.coroutines.BuildersKt__BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking$default",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingle$lambda$0",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 75,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runCatching-ta8aW1Q",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 204,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingle",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 66,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingleFlow",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 561,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runShardSuite$lambda$10",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 529,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "newSession",
+        "fileName" : "MaestroSessionManager.kt",
+        "lineNumber" : 132,
+        "className" : "maestro.cli.session.MaestroSessionManager",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "newSession$default",
+        "fileName" : "MaestroSessionManager.kt",
+        "lineNumber" : 66,
+        "className" : "maestro.cli.session.MaestroSessionManager",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runShardSuite",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 476,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$runShardSuite",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 80,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 435,
+        "className" : "maestro.cli.command.TestCommand$handleSessions$1$results$1$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "LimitedDispatcher.kt",
+        "lineNumber" : 124,
+        "className" : "kotlinx.coroutines.internal.LimitedDispatcher$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "Tasks.kt",
+        "lineNumber" : 89,
+        "className" : "kotlinx.coroutines.scheduling.TaskImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSafely",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 586,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeTask",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 820,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runWorker",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 717,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 704,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      } ],
+      "message" : "Error: preparo da etapa 8: POST /attendances -> 409 {\"status\":409,\"message\":\"Voce tem pagamento pendente. Pague para entrar numa nova fila.\",\"code\":\"PAYMENT_PENDING\",\"count\":1,\"total\":31.9,\"items\":[{\"attendance_id\":\"9986bd66-ac5c-4851-89f8-bacc806636cd\",\"status\":\"PENDING\",\"amount\":31.9,\"professional_name\":\"Prof120324\",\"establishment_name\":\"Loja M120324\",\"finished_at\":\"2026-10-11T16:00:16.618947Z\"}],\"timestamp\":\"2026-10-11T16:04:54.731226816Z\"}",
+      "interrupted" : false,
+      "cancelled" : false,
+      "guestObject" : {
+        "context" : {
+          "engine" : {
+            "version" : "Development Build"

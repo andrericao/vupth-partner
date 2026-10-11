@@ -1,0 +1,97 @@
+Running on vupth_android11
+ > Flow 04b
+04.A1 · etiqueta da rodada (TAG)... COMPLETED
+04.A2 · e-mail do dono... COMPLETED
+04.A3 · e-mail do profissional... COMPLETED
+04.A4 · nome da loja... COMPLETED
+04.A5 · nome do profissional... COMPLETED
+04.A6 · preparo pela API (o que as etapas anteriores deixariam)... COMPLETED
+04.A7 · abre o app do zero, ja com o OTA...
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+  Launch app "${APP_ID}"... COMPLETED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... COMPLETED
+  Run fechar_aviso.yaml...
+    Wait for animation to end within 6000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run fechar_aviso.yaml... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible...
+    Tap on id: aba-perfil... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 6000 ms... COMPLETED
+      Run fechar_anr.yaml...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+      Run fechar_anr.yaml... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+    Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+    Tap on "Sair da conta"... COMPLETED
+    Run confirmar.yaml...
+      Assert that id: dialogo-botao-1 is visible... COMPLETED
+      Tap on id: dialogo-botao-1... COMPLETED
+    Run confirmar.yaml... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible... COMPLETED
+  Run sair_dono.yaml when id: aba-menu is visible...
+  Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)... COMPLETED
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+04.A7 · abre o app do zero, ja com o OTA... COMPLETED
+04.00 · roda 04b_refeicao_e_trabalhando...
+  04.B1 · entra como o profissional...
+    Tap on id: go-login... COMPLETED
+    Tap on id: login-email... COMPLETED
+    Input text ${EMAIL}... COMPLETED
+    Tap on id: login-password... COMPLETED
+    Input text ${SENHA}... COMPLETED
+    Hide Keyboard... COMPLETED
+    Tap on id: login-submit... COMPLETED
+  04.B1 · entra como o profissional... COMPLETED
+  04.B2 · espera aba-perfil... COMPLETED
+  04.31 · toca em aba-perfil... COMPLETED
+  04.32 · toca em Refeições... FAILED
+04.00 · roda 04b_refeicao_e_trabalhando... FAILED
+
+Element not found: Text matching regex: Refeições
+
+Element with Text matching regex: Refeições not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state.
+- This could be a real regression that needs to be addressed.
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_120324/etapa_04b
