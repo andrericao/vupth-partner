@@ -97,9 +97,13 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "01.28 · roda fechar_aviso"
+# Emulador (log 2026-10-11_025820, 01.29): o "24 horas" fica no fim da pagina,
+# rente a barra de abas, e nunca chega a 100% visivel. Basta metade.
 - scrollUntilVisible:
     element: "24 horas"
     direction: DOWN
+    visibilityPercentage: 50
+    timeout: 30000
     label: "01.29 · rola ate 24 horas"
 - runFlow:
     file: ../apoio/sair_dono.yaml
