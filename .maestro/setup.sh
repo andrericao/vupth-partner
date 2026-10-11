@@ -336,6 +336,9 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   fi
   [ "$SUPERVISAO" = "0" ] || echo "▶ $1 comecando"
   papel_do_andre "$1"
+  # Cortina aberta por uma etapa que falhou (a 12; log 2026-10-11_155533): fecha
+  # antes de cada etapa, pelo adb, para a proxima nao abrir o app por baixo dela.
+  adb -s "$SERIAL" shell cmd statusbar collapse >/dev/null 2>&1 || true
   foto_na_frente || echo "⚠️  $1 — a imagem de teste nao entrou de novo na galeria (a foto pode sair errada)"
   "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"

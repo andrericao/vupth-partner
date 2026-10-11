@@ -31,7 +31,7 @@ env:
     file: ../scripts/preparo.js
     env:
       TAG: ${output.TAG}
-      ETAPA: "4"
+      ETAPA: "4b"
     label: "04.A6 · preparo pela API (o que as etapas anteriores deixariam)"
 - runFlow:
     file: ../apoio/abrir_com_ota.yaml

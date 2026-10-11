@@ -12,6 +12,9 @@ env:
 # etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
 # test direto), as expressoes testam typeof.
 ---
+# 08b (log 2026-10-11_120324): o preparo da 8 cria de novo os atendimentos dos
+# mesmos clientes (409 "pagamento pendente" depois da 08a). A 08b so precisa
+# do dono com a loja.
 - evalScript:
     script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
     label: "08.A1 · etiqueta da rodada (TAG)"
@@ -31,8 +34,8 @@ env:
     file: ../scripts/preparo.js
     env:
       TAG: ${output.TAG}
-      ETAPA: "8"
-    label: "08.A6 · preparo pela API (o que as etapas anteriores deixariam)"
+      ETAPA: "2"
+    label: "08.A6 · preparo pela API (o dono com a loja)"
 - runFlow:
     file: ../apoio/abrir_com_ota.yaml
     label: "08.A7 · abre o app do zero, ja com o OTA"
