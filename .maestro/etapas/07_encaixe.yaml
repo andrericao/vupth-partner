@@ -184,6 +184,19 @@ appId: ${APP_ID}
     visible: "Seu dia"
     timeout: 20000
     label: "07.21 · expediente-no-card · espera Seu dia"
+# Emulador (log 2026-10-11_081612, 07.22): a faixa nao apareceu e o print do
+# fim da lista nao mostra o que o card dizia. Print do card antes de conferir.
+- scrollUntilVisible:
+    element: "Expediente"
+    direction: DOWN
+    timeout: 20000
+    optional: true
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 07.21b_card_expediente
+      O_QUE: o que o card Expediente diz (a faixa HH:MM–HH:MM)
+    label: "07.21b · expediente-no-card · print do card"
 - scrollUntilVisible:
     element: "\\d\\d:\\d\\d–\\d\\d:\\d\\d"
     direction: DOWN
