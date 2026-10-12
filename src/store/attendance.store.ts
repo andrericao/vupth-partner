@@ -133,7 +133,9 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
     // fantasma na tela depois de finalizar. Terminou um atendimento: a rede
     // local nao serve mais para nada.
     set({ atendimentoIniciado: null });
-    return data?.payment_status ?? null;
+    // O finish de staging (23:14) nao traz payment_status com este nome: aceita
+    // os dois e, sem nenhum, cai na resposta que o app mandou.
+    return data?.payment_status ?? data?.paymentStatus ?? (pagamentoRecebido === undefined ? null : pagamentoRecebido ? "PAID" : "PENDING");
   },
 
   pauseAttendance: async (attendanceId) => {
