@@ -11,6 +11,14 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "07.24 · roda fechar_aviso"
+# Log 2026-10-11_231425 (07.25): com a Chave Pix, "Dados cadastrais" fica
+# abaixo da tela.
+- scrollUntilVisible:
+    element: "Dados cadastrais"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
 - tapOn:
     text: "Dados cadastrais"
     label: "07.25 · foto-com-botao-claro · toca em Dados cadastrais"
