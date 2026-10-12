@@ -1,0 +1,61 @@
+Running on vupth_android11
+ > Flow 07a
+07.A1 · etiqueta da rodada (TAG)... COMPLETED
+07.A2 · e-mail do dono... COMPLETED
+07.A3 · e-mail do profissional... COMPLETED
+07.A4 · nome da loja... COMPLETED
+07.A5 · nome do profissional... COMPLETED
+07.A6 · preparo pela API (o que as etapas anteriores deixariam)... COMPLETED
+07.A7 · abre o app do zero, ja com o OTA...
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+  Launch app "${APP_ID}"... COMPLETED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... COMPLETED
+  Run fechar_aviso.yaml...
+    Wait for animation to end within 6000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run fechar_aviso.yaml... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible...
+    Tap on id: aba-perfil... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 6000 ms... COMPLETED
+      Run fechar_anr.yaml...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+      Run fechar_anr.yaml... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+    Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... FAILED
+  Run sair_profissional.yaml when id: aba-perfil is visible... FAILED
+07.A7 · abre o app do zero, ja com o OTA... FAILED
+
+No visible element found: "Sair da conta"
+
+Could not find a visible element matching selector: "Sair da conta"
+Tip: Try adjusting the following settings to improve detection:
+- `timeout`: current = 20000ms → Increase if you need more time to find the element
+- `speed`: current = 40 (0-100 scale) → Increase for faster scrolling if element is far away
+- `waitToSettleTimeoutMs`: current = Not defined → Set this value (e.g., 500ms) if your UI updates frequently between scrolls
+- `visibilityPercentage`: current = 100% → Lower this value if you want to detect partially visible elements
+- `centerElement`: current = false → Enable if you want the element to be centered after finding it
+
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-partner/.maestro/logs/2026-10-11_231425/etapa_07a
