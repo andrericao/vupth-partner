@@ -104,6 +104,8 @@ export default function OwnerTabsLayout() {
       <Tabs.Screen name="establishment-hours" options={{ href: null }} />
       <Tabs.Screen name="invite-professional" options={{ href: null }} />
       <Tabs.Screen name="passar-posse" options={{ href: null }} />
+      <Tabs.Screen name="sistema" options={{ href: null }} />
+      <Tabs.Screen name="aparencia" options={{ href: null }} />
     </Tabs>
   );
 }

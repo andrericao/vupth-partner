@@ -78,6 +78,28 @@ appId: ${APP_ID}
     visible: ${output.CLIENTE2}
     timeout: 20000
     label: "08.11 · espera ${output.CLIENTE2}"
+# pagamento-pix, fatia 4 (contrato 2a2b0ec): o pagamento ao lado do status, e o
+# dono tambem marca "Recebi". O preparo da 08 finaliza o CLIENTE1 sem pagar.
+- tapOn:
+    text: "Finalizados"
+    label: "08.11a · pix · toca em Finalizados"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE1}
+    timeout: 20000
+    label: "08.11b · pix · espera ${output.CLIENTE1}"
+- assertVisible:
+    text: "Pagamento: aguardando pagamento"
+    label: "08.11c · pix · confere aguardando pagamento"
+- tapOn:
+    text: "Recebi"
+    label: "08.11d · pix · o dono toca em Recebi"
+- tapOn:
+    text: "Sim, recebi"
+    label: "08.11e · pix · confirma"
+- extendedWaitUntil:
+    visible: "Pagamento: pago"
+    timeout: 20000
+    label: "08.11f · pix · fica pago"
 
 - tapOn:
     id: "aba-menu"
@@ -94,12 +116,14 @@ appId: ${APP_ID}
       id: "version-line"
     timeout: 20000
     label: "08.15 · espera version-line"
-
-# foto-com-botao-claro / foto-da-loja (8b89b1a, fb2b267): a foto da loja abre a
-# folha Tirar foto · Escolher da galeria · Cancelar. Enviar de verdade (camera,
-# galeria) e ver no Client ficam so a mao.
-# Bateria 10:11: a tela Sistema e do grupo (professional) e abre com as abas
-# do profissional (sem aba-menu). Volta para o Menu do dono.
+# abas-do-dono (Andre, 10/10; achado da bateria 10:11): a tela Sistema do dono
+# abre com as abas DELE (aba-menu), nao com as do profissional (aba-fila).
+- assertVisible:
+    id: "aba-menu"
+    label: "08.15c · abas-do-dono · Sistema com a aba Menu"
+- assertNotVisible:
+    id: "aba-fila"
+    label: "08.15d · abas-do-dono · sem a aba Fila do profissional"
 - back:
     label: "08.15a · volta da tela Sistema"
 - extendedWaitUntil:
@@ -107,3 +131,32 @@ appId: ${APP_ID}
       id: "aba-menu"
     timeout: 20000
     label: "08.15b · espera aba-menu"
+# abas-do-dono: a Aparencia do dono tambem
+- scrollUntilVisible:
+    element: "Aparência"
+    direction: DOWN
+    label: "08.15e · abas-do-dono · rola ate Aparência"
+- tapOn:
+    text: "Aparência"
+    label: "08.15f · abas-do-dono · toca em Aparência"
+- extendedWaitUntil:
+    visible: "Tamanho da fonte"
+    timeout: 20000
+    label: "08.15g · abas-do-dono · espera a tela Aparência"
+- assertVisible:
+    id: "aba-menu"
+    label: "08.15h · abas-do-dono · Aparência com a aba Menu"
+- assertNotVisible:
+    id: "aba-fila"
+    label: "08.15i · abas-do-dono · sem a aba Fila do profissional"
+- back:
+    label: "08.15j · volta da Aparência"
+- extendedWaitUntil:
+    visible:
+      id: "aba-menu"
+    timeout: 20000
+    label: "08.15k · espera aba-menu"
+
+# foto-com-botao-claro / foto-da-loja (8b89b1a, fb2b267): a foto da loja abre a
+# folha Tirar foto · Escolher da galeria · Cancelar. Enviar de verdade (camera,
+# galeria) e ver no Client ficam so a mao.

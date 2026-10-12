@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette, Store, CalendarDays } from "lucide-react-native";
+  Info, Share2, Palette, Store, CalendarDays, QrCode } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -264,8 +264,15 @@ export default function ProfessionalSettingsScreen() {
               icon={CalendarDays}
               title="Minha agenda"
               hint="dias e horários em que você atende"
-              last
               onPress={() => router.push("/(professional)/agenda" as any)}
+            />
+            {/* pagamento-pix (contrato BAK 2a2b0ec): a chave com que o cliente paga. */}
+            <MenuCard
+              icon={QrCode}
+              title="Chave Pix"
+              hint="para o cliente pagar direto a você"
+              last
+              onPress={() => router.push("/(professional)/pix" as any)}
             />
           </Grupo>
   

@@ -1,0 +1,24 @@
+Rodada 2026-10-11_231425 · TAG 231425 · commit esperado 5921c10,d511217
+✅ 00_atualizacao
+⏭  etapa_01a (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_01b (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_02 (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_03 (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_04a (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_04b (já passou no 01381b1 — a completa roda de novo)
+❌ etapa_05a — parou em 05.19a · pix · Sim, recebi: concluido e pago
+   print: .maestro/logs/2026-10-11_231425/FALHA_05.19a_pix-sim-recebi-concluido-e-pago.png
+⏭  etapa_05b (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_06 (já passou no 01381b1 — a completa roda de novo)
+❌ etapa_07a — parou em 07.A7 · abre o app do zero, ja com o OTA
+   print: .maestro/logs/2026-10-11_231425/FALHA_07.A7_abre-o-app-do-zero-ja-com-o-ota.png
+❌ etapa_07b — parou em 07.25 · foto-com-botao-claro · toca em Dados cadastrais
+   print: .maestro/logs/2026-10-11_231425/FALHA_07.25_foto-com-botao-claro-toca-em-dados-cadastrais.png
+✅ etapa_08a
+⏭  etapa_08b (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_09 (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_10a (já passou no 01381b1 — a completa roda de novo)
+⏭  etapa_10b (já passou no 01381b1 — a completa roda de novo)
+✅ etapa_11
+❌ etapa_12 — parou em 12.07 · espera o push Pedido de vínculo
+   print: .maestro/logs/2026-10-11_231425/FALHA_12.07_espera-o-push-pedido-de-vinculo.png

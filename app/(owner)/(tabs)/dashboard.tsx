@@ -342,7 +342,7 @@ export default function OwnerDashboardScreen() {
                     params: { establishmentId: establishment.id },
                   } as any)
                 }
-                className="mt-3 h-10"
+                className="mt-3 h-12 px-6"
               />
             </View>
           ) : (

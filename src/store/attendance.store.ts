@@ -43,7 +43,12 @@ type AttendanceState = {
    */
   atendimentoIniciado: AttendanceInProgress | null;
   startAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
-  finishAttendance: (attendanceId: string) => Promise<void>;
+  /**
+   * pagamento-pix (adendo 1a0616c): `pagamentoRecebido` e a resposta do "O
+   * pagamento foi efetuado?". Sem ela, finaliza como antes (sem corpo).
+   * Devolve o payment_status do atendimento.
+   */
+  finishAttendance: (attendanceId: string, pagamentoRecebido?: boolean) => Promise<string | null>;
   pauseAttendance: (attendanceId: string) => Promise<void>;
   resumeAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
   markLate: (attendanceId: string) => Promise<void>;
@@ -118,13 +123,19 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
     return data;
   },
 
-  finishAttendance: async (attendanceId) => {
-    await api.patch(`/attendances/${attendanceId}/finish`);
+  finishAttendance: async (attendanceId, pagamentoRecebido) => {
+    const { data } = await api.patch(
+      `/attendances/${attendanceId}/finish`,
+      pagamentoRecebido === undefined ? undefined : { payment_received: pagamentoRecebido }
+    );
     // Limpa SEMPRE, nao so quando o id casa. Comparar ids dependia de o payload
     // trazer `id` no formato esperado — e quando nao trazia, sobrava um card
     // fantasma na tela depois de finalizar. Terminou um atendimento: a rede
     // local nao serve mais para nada.
     set({ atendimentoIniciado: null });
+    // O finish de staging (23:14) nao traz payment_status com este nome: aceita
+    // os dois e, sem nenhum, cai na resposta que o app mandou.
+    return data?.payment_status ?? data?.paymentStatus ?? (pagamentoRecebido === undefined ? null : pagamentoRecebido ? "PAID" : "PENDING");
   },
 
   pauseAttendance: async (attendanceId) => {

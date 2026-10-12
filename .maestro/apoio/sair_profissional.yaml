@@ -4,9 +4,12 @@ appId: ${APP_ID}
 - tapOn:
     id: "aba-perfil"
 - runFlow: fechar_aviso.yaml
+# Log 2026-10-11_231425 (07.A7): com a Chave Pix o Perfil cresceu e o "Sair da
+# conta" fica rente a barra de abas — basta metade visivel.
 - scrollUntilVisible:
     element: "Sair da conta"
     direction: DOWN
+    visibilityPercentage: 50
 - tapOn: "Sair da conta"
 - runFlow: confirmar.yaml
 - extendedWaitUntil:

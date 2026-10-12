@@ -165,6 +165,12 @@ appId: ${APP_ID}
 - tapOn:
     text: "Finalizar"
     label: "07.17 · toca em Finalizar"
+- runFlow:
+    file: ../apoio/responder_pagamento.yaml
+    env:
+      RESPOSTA: "Ainda não"
+      FIM: "Atendimento concluído, aguardando o pagamento.*"
+    label: "07.17a · pix · Ainda nao: fica aguardando o pagamento"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE_ENCAIXE}
     timeout: 20000
@@ -202,3 +208,49 @@ appId: ${APP_ID}
     direction: DOWN
     timeout: 20000
     label: "07.22 · expediente-no-card · rola ate HH:MM–HH:MM"
+
+# pagamento-pix, fatia 3 (Andre, 10/10): o encaixe ficou "Ainda nao" (07.17a).
+# Em Relatorios ele aparece em Pagamentos pendentes; "Recebi" confirma e ele sai.
+# O botao diz de quem e ("Recebi de <cliente>"): o nome tambem esta no historico.
+- scrollUntilVisible:
+    element: "Recebi de ${output.CLIENTE_ENCAIXE}"
+    direction: DOWN
+    centerElement: true
+    timeout: 20000
+    label: "07.23a · pix · o encaixe esta nos Pagamentos pendentes"
+- tapOn:
+    text: "Recebi de ${output.CLIENTE_ENCAIXE}"
+    label: "07.23b · pix · toca em Recebi do encaixe"
+- tapOn:
+    text: "Sim, recebi"
+    label: "07.23c · pix · confirma"
+- extendedWaitUntil:
+    notVisible: "Recebi de ${output.CLIENTE_ENCAIXE}"
+    timeout: 20000
+    label: "07.23d · pix · o encaixe saiu dos pendentes"
+
+# conferencia-por-print (Andre, 10/10): expediente-no-card — Semana e Mes mostram
+# o total trabalhado.
+- scrollUntilVisible:
+    element: "Semana"
+    direction: UP
+    timeout: 20000
+    label: "07.24 · expediente · rola ate os periodos"
+- tapOn:
+    text: "Semana"
+    label: "07.25 · expediente · toca em Semana"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 07.26_expediente-semana
+      O_QUE: o card Expediente na Semana (total trabalhado)
+    label: "07.26 · expediente · print Semana"
+- tapOn:
+    text: "Mes"
+    label: "07.27 · expediente · toca em Mes"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: 07.28_expediente-mes
+      O_QUE: o card Expediente no Mes (total trabalhado)
+    label: "07.28 · expediente · print Mes"

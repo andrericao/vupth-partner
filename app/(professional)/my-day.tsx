@@ -3,6 +3,7 @@ import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { useIsFocused } from "@react-navigation/native";
 import {
+  Alert,
   RefreshControl,
   View,
   Text,
@@ -15,6 +16,12 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
+import { PagamentosPendentes } from "@components/PagamentosPendentes";
+import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
+import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
+import { confirmarRecebimento, formatarReais } from "@lib/pagamento";
+import { confirmar } from "@lib/confirmar";
+import { useQueryClient } from "@tanstack/react-query";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -73,6 +80,7 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
       <View className="flex-row justify-end mt-2">
         <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
+      <LinhaDoPagamento status={item.payment_status} />
     </View>
   );
 }
@@ -124,6 +132,23 @@ export default function MyDayScreen() {
   const pilula = usePilulaTopo(rolagemRef);
 
   const professional = useProfessionalStore((s) => s.professional);
+  const queryClient = useQueryClient();
+  const { itens: pagamentos } = usePagamentosPendentes(!!professional?.id);
+  const recebi = async (attendanceId: string) => {
+    const p = pagamentos.find((x) => x.attendance_id === attendanceId);
+    const ok = await confirmar({
+      titulo: "Recebeu o pagamento?",
+      mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}. Ele recebe o aviso de pagamento confirmado.`,
+      confirmar: "Sim, recebi",
+    });
+    if (!ok) return;
+    try {
+      await confirmarRecebimento(attendanceId);
+      await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));
+    }
+  };
   const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
   const history = useAttendanceStore((s) => s.history);
@@ -251,6 +276,10 @@ export default function MyDayScreen() {
           </View>
 
           <ExpedienteCard periodo={period} workdays={report?.workdays} />
+
+          {/* pagamento-pix (Andre, 10/10): os atendimentos com pagamento pendente
+              e o "Recebi". O dot da aba some quando nao ha o que conferir. */}
+          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} />
 
           <View className="h-px bg-vupth-border my-6" />
 

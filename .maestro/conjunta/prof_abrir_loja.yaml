@@ -36,6 +36,18 @@ appId: ${APP_ID}
 - tapOn:
     text: "Criar estabelecimento"
     label: "PJ7.11 · toca em Criar estabelecimento"
+# conferencia-por-print (Andre, 10/10): a validacao visual da tela "Onde voce vai
+# atender?" (abrir-meu-estabelecimento) sai do teste a mao.
+- extendedWaitUntil:
+    visible: "Onde você vai atender?"
+    timeout: 30000
+    label: "PJ7.11a · espera Onde você vai atender?"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: PJ7.11b_onde-voce-vai-atender
+      O_QUE: a tela Onde voce vai atender? (abrir-meu-estabelecimento)
+    label: "PJ7.11b · print para o Andre"
 - runFlow:
     when:
       true: ${ESCOLHA == 'nova'}
