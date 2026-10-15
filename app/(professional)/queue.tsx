@@ -870,6 +870,13 @@ export default function ProfessionalQueueScreen() {
             </View>
           )}
   
+          {/* aceitando-novos-fixo (PAR-13, Andre 15/10): a chave fica FIXA acima
+              dos cards de atendimento. No pe da lista ela descia a cada card
+              acrescentado. */}
+          {!isLoading && myProfessional && (
+            <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
+          )}
+
           {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
           {/* O card inteiro abre o menu, alem dos botoes: quem tentou finalizar
               pelo MENU (e nao pelos botoes) tem que achar as acoes onde procurou —
@@ -1012,13 +1019,6 @@ export default function ProfessionalQueueScreen() {
                 className="h-9 px-4"
               />
             </View>
-          )}
-  
-          {/* DS3 (c) — a chave de "aceitando novos" fica no PE da lista, nao no
-              cabecalho: nao e um estado meu (isso e a pilula), e uma propriedade
-              da fila — e a decisao nasce olhando o fim dela. */}
-          {!isLoading && myProfessional && (
-            <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
           )}
   
           {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao
