@@ -31,9 +31,9 @@ import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
 import {
   composicaoDoAtendimento,
+  somaDasContas,
   servicosComPrecoAntigo,
   avisoDoPrecoAntigo,
-  explicacaoDosTotais,
   type Composicao,
 } from "@lib/composicao";
 import { paramsDoHistorico, rotuloDoFiltroSemStatus, pertoDoFim } from "@lib/historicoDoPeriodo";
@@ -72,21 +72,22 @@ function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor:
   );
 }
 
-/** explicar-o-relatorio (PAR-18): para onde vai cada valor do atendimento. */
-function ContaDoAtendimento({ conta }: { conta: Composicao }) {
+/**
+ * relatorio-todas-as-linhas (DEC-55): todas as parcelas, e a soma fecha no
+ * "Cliente pagou". Serve ao atendimento e ao total do periodo.
+ */
+function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { conta: Composicao; testID?: string }) {
   return (
-    <View testID="composicao-do-atendimento" className="mt-3 pt-2 border-t border-vupth-border">
+    <View testID={testID} className="mt-3 pt-2 border-t border-vupth-border">
+      <LinhaDaConta rotulo="Você recebe" valor={conta.voceRecebeu} forte />
+      <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento} />
+      <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} />
+      <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} />
+      <LinhaDaConta rotulo="Outros (multa ou ajuste)" valor={conta.outros} />
       <LinhaDaConta rotulo="Cliente pagou" valor={conta.clientePagou} forte />
-      {conta.voceRecebeu != null ? (
-        <>
-          <LinhaDaConta rotulo="Você recebe" valor={conta.voceRecebeu} forte />
-          <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento ?? 0} />
-          <LinhaDaConta rotulo="App Vupth (2% + arredondamento)" valor={conta.app ?? 0} />
-          {conta.outros > 0 && <LinhaDaConta rotulo="Outros (multa ou ajuste)" valor={conta.outros} />}
-        </>
-      ) : (
+      {conta.estimados.length > 0 && (
         <Text className="font-body text-xs text-vupth-textSecondary mt-1">
-          {`Sem a divisão: ${conta.semDivisao.join(", ")} está com preço antigo ou foi apagado. Atualize em Perfil → Meus serviços.`}
+          {`Estimado: ${conta.estimados.join(", ")} com preço antigo ou apagado.`}
         </Text>
       )}
     </View>
@@ -233,6 +234,21 @@ export default function MyDayScreen() {
   const [temMais, setTemMais] = useState(false);
   const [carregandoMais, setCarregandoMais] = useState(false);
 
+  // relatorio-todas-as-linhas (DEC-55): os totais do topo somam as linhas do
+  // historico. So quando o historico do periodo esta inteiro e inclui os
+  // finalizados; senao, o resumo do backend.
+  const contaDoPeriodo =
+    historyLoaded && !temMais && (filter === "ALL" || filter === "FINISHED")
+      ? somaDasContas(
+          history
+            .filter((h) => h.status === "FINISHED")
+            .map((h) => composicaoDoAtendimento(h, myServices))
+        )
+      : null;
+  const precoAntigo =
+    contaDoPeriodo?.estimados ??
+    (report?.attendancesWithoutSplit ? servicosComPrecoAntigo(myServices) : []);
+
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const queueCount = myProfessional?.queue_count ?? 0;
   const waitMinutes = myProfessional?.estimated_wait_minutes ?? 0;
@@ -363,8 +379,10 @@ export default function MyDayScreen() {
                   total, como antes. Rotulos a validar com o Design. */}
               <View className="flex-row gap-3">
                 <Numero
-                  rotulo={report?.netRevenue != null ? "Você recebeu" : "Receita"}
-                  valor={`R$ ${Number(report?.netRevenue ?? report?.totalRevenue ?? 0).toFixed(2)}`}
+                  rotulo={contaDoPeriodo || report?.netRevenue != null ? "Você recebeu" : "Receita"}
+                  valor={`R$ ${Number(
+                    contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0
+                  ).toFixed(2)}`}
                   destaque
                 />
                 <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
@@ -383,19 +401,21 @@ export default function MyDayScreen() {
                 />
               </View>
 
-              {report?.netRevenue != null && (
-                <Text className="font-body text-xs text-vupth-textSecondary">
-                  Clientes pagaram R$ {Number(report?.totalRevenue ?? 0).toFixed(2)} (com as Taxas Vupth).
-                </Text>
-              )}
-              {report?.netRevenue != null && (
-                <Text className="font-body text-xs text-vupth-textSecondary">{explicacaoDosTotais()}</Text>
-              )}
-              {avisoDoPrecoAntigo(report?.attendancesWithoutSplit, servicosComPrecoAntigo(myServices)) && (
-                <View className="bg-vupth-warning p-3 rounded-card">
-                  <Text className="font-body text-xs text-vupth-forest">
-                    {avisoDoPrecoAntigo(report?.attendancesWithoutSplit, servicosComPrecoAntigo(myServices))}
+              {contaDoPeriodo ? (
+                <View className="bg-vupth-surface p-4 rounded-card">
+                  <Text className="font-heading text-sm text-vupth-forest">A conta do período</Text>
+                  <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
+                </View>
+              ) : (
+                report?.netRevenue != null && (
+                  <Text className="font-body text-xs text-vupth-textSecondary">
+                    {`Clientes pagaram R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}. Para ver a conta do período linha a linha, role o histórico até o fim em Todos ou Finalizados.`}
                   </Text>
+                )
+              )}
+              {avisoDoPrecoAntigo(precoAntigo) && (
+                <View className="bg-vupth-warning p-3 rounded-card">
+                  <Text className="font-body text-xs text-vupth-forest">{avisoDoPrecoAntigo(precoAntigo)}</Text>
                 </View>
               )}
 

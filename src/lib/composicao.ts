@@ -1,15 +1,27 @@
-// explicar-o-relatorio (PAR-18, Andre 15/10): "o profissional (e o cliente)
-// nao conseguem saber qual valor vai para o que". Cada atendimento do historico
-// abre a composicao: o que o cliente pagou, a parte do profissional, a empresa
-// de pagamento, o app (com o arredondamento) e o que sobra (multa, ajuste).
-//
-// O atendimento so traz o total (`totalValue`); a divisao vem do servico
-// cadastrado (`base_price` e `pro_receives`, gravados desde 18/09). Os numeros
-// seguem a regra de hoje (x1,06 no X,90); quando a formula nova do preco chegar
-// (preco-sobre-o-total), so muda a conta aqui.
+import { estimateDesiredFromClient } from "@lib/pricing";
 
-/** A empresa de pagamento fica com 4% do valor digitado (src/lib/pricing.ts). */
+// A conta de cada atendimento do relatorio.
+//
+// explicar-o-relatorio (PAR-18, Andre 15/10): "o profissional (e o cliente)
+// nao conseguem saber qual valor vai para o que".
+// relatorio-todas-as-linhas (DEC-55, Andre 15/10): "no relatorio nao e bem
+// explicacao, ele deve ter todas as linhas para que os valores batam". Cada
+// atendimento e cada total listam todas as parcelas e a soma fecha no total:
+//
+//   cliente pagou = profissional + empresa de pagamento + app + arredondamento + outros
+//
+// DEC-54: as porcentagens incidem sobre o total ja arredondado (4% da empresa
+// de pagamento, 2% do app); o arredondamento e o que sobra, e fecha a conta.
+// Ex.: R$ 53,90 = 50,00 + 2,16 + 1,08 + 0,66.
+//
+// O atendimento so traz o total (`totalValue`); a parte do profissional vem do
+// servico cadastrado (`pro_receives`, gravado desde 18/09). Servico com preco
+// antigo ou apagado tem a parte ESTIMADA pelo preco (x1,06), e a conta avisa.
+
+/** A empresa de pagamento (Asaas) fica com 4% do total (DEC-54). */
 const TAXA_DA_EMPRESA_DE_PAGAMENTO = 0.04;
+/** O app fica com 2% do total. */
+const TAXA_DO_APP = 0.02;
 
 type ServicoDoAtendimento = { id: string; customName: string };
 type MeuServico = {
@@ -22,15 +34,15 @@ type MeuServico = {
 
 export type Composicao = {
   clientePagou: number;
-  /** null quando algum servico nao tem a divisao (preco antigo ou apagado). */
-  voceRecebeu: number | null;
-  empresaDePagamento: number | null;
-  /** Os 2% do app + o arredondamento para o X,90. */
-  app: number | null;
-  /** O que o total tem alem dos servicos (multa, ajuste). 0 quando nao ha. */
+  voceRecebeu: number;
+  empresaDePagamento: number;
+  app: number;
+  /** O que sobra para fechar a conta (o X,90). Pode ser negativo em preco antigo. */
+  arredondamento: number;
+  /** O que o total tem alem dos servicos (multa, ajuste). */
   outros: number;
-  /** Servicos do atendimento sem a divisao gravada. */
-  semDivisao: string[];
+  /** Servicos com a parte do profissional estimada (preco antigo ou apagado). */
+  estimados: string[];
 };
 
 function centavos(valor: number): number {
@@ -46,33 +58,53 @@ export function composicaoDoAtendimento(
   meusServicos: MeuServico[]
 ): Composicao {
   const porId = new Map(meusServicos.map((s) => [s.id, s]));
-  const semDivisao: string[] = [];
-  let preco = 0;
+  const clientePagou = centavos(atendimento.totalValue);
+  const estimados: string[] = [];
+  const apagados: string[] = [];
+  let precoConhecido = 0;
   let recebe = 0;
-  let digitado = 0;
   for (const servico of atendimento.services) {
     const meu = porId.get(servico.id);
-    if (!temDivisao(meu)) {
-      semDivisao.push(servico.customName);
+    if (!meu) {
+      apagados.push(servico.customName);
       continue;
     }
-    preco += meu.price;
-    recebe += meu.pro_receives;
-    digitado += meu.base_price;
+    precoConhecido += meu.price;
+    if (temDivisao(meu)) {
+      recebe += meu.pro_receives;
+    } else {
+      recebe += estimateDesiredFromClient(meu.price);
+      estimados.push(servico.customName);
+    }
   }
-  const clientePagou = centavos(atendimento.totalValue);
-  if (semDivisao.length > 0) {
-    return { clientePagou, voceRecebeu: null, empresaDePagamento: null, app: null, outros: 0, semDivisao };
+  // Servico apagado: o preco dele e o que falta para o total; sem "outros".
+  let outros = 0;
+  if (apagados.length > 0) {
+    recebe += estimateDesiredFromClient(Math.max(0, clientePagou - precoConhecido));
+    estimados.push(...apagados);
+  } else {
+    outros = Math.max(0, centavos(clientePagou - precoConhecido));
   }
-  const empresaDePagamento = centavos(digitado * TAXA_DA_EMPRESA_DE_PAGAMENTO);
-  const outros = centavos(clientePagou - preco);
+  const dosServicos = centavos(clientePagou - outros);
+  const voceRecebeu = centavos(recebe);
+  const empresaDePagamento = centavos(dosServicos * TAXA_DA_EMPRESA_DE_PAGAMENTO);
+  const app = centavos(dosServicos * TAXA_DO_APP);
+  const arredondamento = centavos(dosServicos - voceRecebeu - empresaDePagamento - app);
+  return { clientePagou, voceRecebeu, empresaDePagamento, app, arredondamento, outros, estimados };
+}
+
+/** A conta do periodo: a soma das linhas de cada atendimento (fecha no total). */
+export function somaDasContas(contas: Composicao[]): Composicao {
+  const soma = (campo: keyof Omit<Composicao, "estimados">) =>
+    centavos(contas.reduce((total, c) => total + c[campo], 0));
   return {
-    clientePagou,
-    voceRecebeu: centavos(recebe),
-    empresaDePagamento,
-    app: centavos(preco - recebe - empresaDePagamento),
-    outros: outros > 0 ? outros : 0,
-    semDivisao,
+    clientePagou: soma("clientePagou"),
+    voceRecebeu: soma("voceRecebeu"),
+    empresaDePagamento: soma("empresaDePagamento"),
+    app: soma("app"),
+    arredondamento: soma("arredondamento"),
+    outros: soma("outros"),
+    estimados: [...new Set(contas.flatMap((c) => c.estimados))],
   };
 }
 
@@ -82,22 +114,14 @@ export function servicosComPrecoAntigo(meusServicos: MeuServico[]): string[] {
 }
 
 /**
- * A faixa do relatorio quando ha atendimento sem a divisao: diz QUAL servico
- * esta com preco antigo e COMO atualizar (Andre, 15/10).
+ * A faixa do relatorio quando ha servico com preco antigo: diz QUAL e COMO
+ * atualizar (Andre, 15/10). A conta desses atendimentos sai estimada.
  */
-export function avisoDoPrecoAntigo(semDivisao: number | null | undefined, nomes: string[]): string | null {
-  if (!semDivisao || semDivisao <= 0) return null;
-  const n = semDivisao === 1 ? "1 atendimento ficou" : `${semDivisao} atendimentos ficaram`;
+export function avisoDoPrecoAntigo(nomes: string[]): string | null {
+  if (nomes.length === 0) return null;
   const quais =
-    nomes.length === 0
-      ? "um serviço com preço antigo"
-      : nomes.length === 1
-        ? `o serviço ${nomes[0]}, com preço antigo`
-        : `os serviços ${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]}, com preço antigo`;
-  return `${n} fora do "Você recebeu": usa ${quais}. Para atualizar: Perfil → Meus serviços → Editar → Salvar.`;
-}
-
-/** De onde vem cada total do topo (Andre, 15/10: "por que 50,00 e não 88,80 − taxas"). */
-export function explicacaoDosTotais(): string {
-  return 'Você recebeu: a sua parte dos atendimentos finalizados no período. Clientes pagaram: o total desses atendimentos, com a empresa de pagamento e o app. Toque num atendimento do histórico para ver a conta.';
+    nomes.length === 1
+      ? `O serviço ${nomes[0]} está`
+      : `Os serviços ${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]} estão`;
+  return `${quais} com preço antigo: a sua parte nesses atendimentos é estimada. Para atualizar: Perfil → Meus serviços → Editar → Salvar.`;
 }

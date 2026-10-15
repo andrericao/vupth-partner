@@ -1,32 +1,40 @@
 import {
   composicaoDoAtendimento,
+  somaDasContas,
   servicosComPrecoAntigo,
   avisoDoPrecoAntigo,
-  explicacaoDosTotais,
+  type Composicao,
 } from "@lib/composicao";
 
-// explicar-o-relatorio (PAR-18, Andre 15/10).
-const CORTE = { id: "s1", customName: "Corte", price: 47.9, pro_receives: 45, base_price: 45 };
+// explicar-o-relatorio (PAR-18) e relatorio-todas-as-linhas (DEC-54, DEC-55).
+const CORTE = { id: "s1", customName: "Corte", price: 53.9, pro_receives: 50, base_price: 50 };
 const BARBA = { id: "s2", customName: "Barba", price: 31.9, pro_receives: 30, base_price: 30 };
 const ANTIGO = { id: "s3", customName: "Asadelta", price: 53.9, pro_receives: null, base_price: null };
 
+/** A prova real: as linhas somam o que o cliente pagou, sem sobra. */
+function fecha(c: Composicao): number {
+  return Math.round((c.voceRecebeu + c.empresaDePagamento + c.app + c.arredondamento + c.outros) * 100) / 100;
+}
+
 describe("composicaoDoAtendimento", () => {
-  it("um servico: cliente, voce, empresa de pagamento (4%) e o app (2% + arredondamento)", () => {
-    const c = composicaoDoAtendimento({ totalValue: 47.9, services: [{ id: "s1", customName: "Corte" }] }, [CORTE]);
+  it("o exemplo do Andre: 53,90 = 50,00 + 2,16 + 1,08 + 0,66", () => {
+    const c = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s1", customName: "Corte" }] }, [CORTE]);
     expect(c).toEqual({
-      clientePagou: 47.9,
-      voceRecebeu: 45,
-      empresaDePagamento: 1.8,
-      app: 1.1,
+      clientePagou: 53.9,
+      voceRecebeu: 50,
+      empresaDePagamento: 2.16,
+      app: 1.08,
+      arredondamento: 0.66,
       outros: 0,
-      semDivisao: [],
+      estimados: [],
     });
+    expect(fecha(c)).toBe(53.9);
   });
 
-  it("dois servicos somam; o que passa do preco (multa) vira outros", () => {
+  it("dois servicos e uma multa: a multa vira outros e a conta fecha", () => {
     const c = composicaoDoAtendimento(
       {
-        totalValue: 82.8,
+        totalValue: 88.8,
         services: [
           { id: "s1", customName: "Corte" },
           { id: "s2", customName: "Barba" },
@@ -34,31 +42,66 @@ describe("composicaoDoAtendimento", () => {
       },
       [CORTE, BARBA]
     );
-    expect(c.voceRecebeu).toBe(75);
-    expect(c.empresaDePagamento).toBe(3);
-    expect(c.app).toBe(1.8);
+    expect(c.voceRecebeu).toBe(80);
     expect(c.outros).toBe(3);
+    expect(c.empresaDePagamento).toBe(3.43);
+    expect(c.app).toBe(1.72);
+    expect(fecha(c)).toBe(88.8);
   });
 
-  it("servico com preco antigo ou apagado: sem a divisao, so o que o cliente pagou", () => {
+  it("preco antigo: a parte do profissional e estimada, e a conta fecha", () => {
+    const c = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s3", customName: "Asadelta" }] }, [ANTIGO]);
+    expect(c.voceRecebeu).toBe(50.84);
+    expect(c.estimados).toEqual(["Asadelta"]);
+    expect(fecha(c)).toBe(53.9);
+  });
+
+  it("servico apagado: o preco dele e o resto do total; estimado e sem outros", () => {
     const c = composicaoDoAtendimento(
       {
-        totalValue: 101.8,
+        totalValue: 85.8,
         services: [
           { id: "s1", customName: "Corte" },
-          { id: "s3", customName: "Asadelta" },
           { id: "sx", customName: "Apagado" },
         ],
       },
-      [CORTE, ANTIGO]
+      [CORTE]
     );
-    expect(c).toEqual({
-      clientePagou: 101.8,
-      voceRecebeu: null,
-      empresaDePagamento: null,
-      app: null,
+    expect(c.outros).toBe(0);
+    expect(c.estimados).toEqual(["Apagado"]);
+    expect(fecha(c)).toBe(85.8);
+  });
+
+  it("total menor que o preco conhecido: sem outros negativo", () => {
+    const c = composicaoDoAtendimento(
+      { totalValue: 40, services: [{ id: "s1", customName: "Corte" }, { id: "sx", customName: "X" }] },
+      [CORTE]
+    );
+    expect(c.outros).toBe(0);
+    expect(fecha(c)).toBe(40);
+  });
+});
+
+describe("somaDasContas", () => {
+  it("o total do periodo e a soma das linhas, e fecha", () => {
+    const a = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s1", customName: "Corte" }] }, [CORTE]);
+    const b = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s3", customName: "Asadelta" }] }, [ANTIGO]);
+    const s = somaDasContas([a, b, b]);
+    expect(s.clientePagou).toBe(161.7);
+    expect(s.voceRecebeu).toBe(151.68);
+    expect(s.estimados).toEqual(["Asadelta"]);
+    expect(fecha(s)).toBe(161.7);
+  });
+
+  it("sem atendimentos: tudo zero", () => {
+    expect(somaDasContas([])).toEqual({
+      clientePagou: 0,
+      voceRecebeu: 0,
+      empresaDePagamento: 0,
+      app: 0,
+      arredondamento: 0,
       outros: 0,
-      semDivisao: ["Asadelta", "Apagado"],
+      estimados: [],
     });
   });
 });
@@ -69,17 +112,10 @@ describe("preco antigo", () => {
   });
 
   it("a faixa diz qual servico e como atualizar", () => {
-    expect(avisoDoPrecoAntigo(0, ["Asadelta"])).toBeNull();
-    expect(avisoDoPrecoAntigo(null, [])).toBeNull();
-    expect(avisoDoPrecoAntigo(1, ["Asadelta"])).toBe(
-      '1 atendimento ficou fora do "Você recebeu": usa o serviço Asadelta, com preço antigo. Para atualizar: Perfil → Meus serviços → Editar → Salvar.'
+    expect(avisoDoPrecoAntigo([])).toBeNull();
+    expect(avisoDoPrecoAntigo(["Asadelta"])).toBe(
+      "O serviço Asadelta está com preço antigo: a sua parte nesses atendimentos é estimada. Para atualizar: Perfil → Meus serviços → Editar → Salvar."
     );
-    expect(avisoDoPrecoAntigo(2, ["A", "B", "C"])).toContain("2 atendimentos ficaram");
-    expect(avisoDoPrecoAntigo(2, ["A", "B", "C"])).toContain("os serviços A, B e C");
-    expect(avisoDoPrecoAntigo(1, [])).toContain("um serviço com preço antigo");
-  });
-
-  it("explica de onde vem cada total", () => {
-    expect(explicacaoDosTotais()).toContain("Toque num atendimento");
+    expect(avisoDoPrecoAntigo(["A", "B", "C"])).toContain("Os serviços A, B e C estão");
   });
 });
