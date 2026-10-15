@@ -14,10 +14,11 @@ import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
-  Info,
+  Info, LifeBuoy,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
+import { abrirSuporte } from "@lib/suporte";
 
 // [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
 // especifica o glifo exato via icon+library do no ("users", "clipboard-list",
@@ -267,6 +268,13 @@ export default function OwnerMenuScreen() {
                     params: { from: "owner" },
                   } as any)
                 }
+              />
+              {/* botao-suporte (PAR-7): abre o site de suporte no navegador. */}
+              <MenuItem
+                icon={LifeBuoy}
+                label="Suporte"
+                hint="dúvidas e passo a passo do app"
+                onPress={() => abrirSuporte("dono")}
                 last
               />
             </Grupo>

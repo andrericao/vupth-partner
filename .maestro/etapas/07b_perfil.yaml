@@ -185,6 +185,18 @@ appId: ${APP_ID}
     timeout: 20000
     label: "07.43 · aparencia · confere Normal"
 
+# botao-suporte (PAR-7): o Perfil tem o Suporte, no grupo Sistema. O toque abre
+# o navegador (fora do app), entao a bateria so confere o botao.
+- back:
+    label: "07.43a · suporte · volta para o Perfil"
+- scrollUntilVisible:
+    element: "Suporte"
+    direction: DOWN
+    label: "07.43b · suporte · rola ate Suporte"
+- assertVisible:
+    text: "dúvidas e passo a passo do app"
+    label: "07.43c · suporte · o botao Suporte esta no Perfil"
+
 - runFlow:
     file: ../apoio/sair_profissional.yaml
     label: "07.44 · roda sair_profissional"

@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette, Store, CalendarDays, QrCode } from "lucide-react-native";
+  Info, Share2, Palette, Store, CalendarDays, QrCode, LifeBuoy } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -27,6 +27,7 @@ import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
+import { abrirSuporte } from "@lib/suporte";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -324,8 +325,15 @@ export default function ProfessionalSettingsScreen() {
               icon={Info}
               title="Versão do app"
               hint="atualização e informações técnicas"
-              last
               onPress={() => router.push("/(professional)/sistema" as any)}
+            />
+            {/* botao-suporte (PAR-7): abre o site de suporte no navegador. */}
+            <MenuCard
+              icon={LifeBuoy}
+              title="Suporte"
+              hint="dúvidas e passo a passo do app"
+              last
+              onPress={() => abrirSuporte("profissional")}
             />
           </Grupo>
   

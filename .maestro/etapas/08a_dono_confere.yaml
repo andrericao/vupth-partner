@@ -131,6 +131,14 @@ appId: ${APP_ID}
       id: "aba-menu"
     timeout: 20000
     label: "08.15b · espera aba-menu"
+# botao-suporte (PAR-7): o Menu do dono tem o Suporte, abaixo da Versao do app.
+- scrollUntilVisible:
+    element: "Suporte"
+    direction: DOWN
+    label: "08.15s · suporte · rola ate Suporte"
+- assertVisible:
+    text: "dúvidas e passo a passo do app"
+    label: "08.15t · suporte · o botao Suporte esta no Menu do dono"
 # abas-do-dono: a Aparencia do dono tambem
 - scrollUntilVisible:
     element: "Aparência"
