@@ -36,6 +36,11 @@ appId: ${APP_ID}
 - tapOn:
     text: "Adicionar serviço"
     label: "04.08 · toca em Adicionar serviço"
+# tipo-de-servico-sumiu (PAR-14): a grade de tipos aparece (a manicure ve os
+# tipos dela); tipo-uma-vez (PAR-15): o cadastro segue sem tocar no tipo.
+- assertVisible:
+    text: "Pedicure"
+    label: "04.08a · tipos · a grade de tipos da manicure aparece"
 - tapOn:
     id: "service-name"
     label: "04.09 · toca em service-name"
@@ -81,6 +86,10 @@ appId: ${APP_ID}
     label: "04.16 · digita 3000"
 - hideKeyboard:
     label: "04.17 · fecha o teclado"
+# preco-sobre-o-total (DEC-54): R$ 30 digitados -> o cliente paga R$ 32.90.
+- assertVisible:
+    text: "R$ 32.90"
+    label: "04.17a · preco · o cliente paga R$ 32.90"
 - scrollUntilVisible:
     element: "Adicionar serviço"
     direction: DOWN

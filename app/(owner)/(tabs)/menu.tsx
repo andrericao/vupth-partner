@@ -14,10 +14,12 @@ import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
-  Info,
+  Info, LifeBuoy, QrCode, Ticket,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
+import { abrirSuporte } from "@lib/suporte";
+import { CUPOM_NO_AR } from "@lib/campanhas";
 
 // [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
 // especifica o glifo exato via icon+library do no ("users", "clipboard-list",
@@ -233,6 +235,22 @@ export default function OwnerMenuScreen() {
                     params: { from: "owner" },
                   } as any)
                 }
+              />
+              {/* cupom-no-app (DEC-61): liga quando o Backend das campanhas subir. */}
+              {CUPOM_NO_AR && (
+                <MenuItem
+                  icon={Ticket}
+                  label="Promoções"
+                  hint="usar um cupom"
+                  onPress={() => router.push("/(owner)/promocoes?from=owner" as any)}
+                />
+              )}
+              {/* pix-nas-configuracoes (DEC-65): a chave do dono e a alternativa. */}
+              <MenuItem
+                icon={QrCode}
+                label="Chave Pix (alternativa)"
+                hint="vale se o profissional não tiver a dele"
+                onPress={() => router.push("/(owner)/pix" as any)}
                 last={!establishment?.id}
               />
               {establishment?.id && (
@@ -267,6 +285,13 @@ export default function OwnerMenuScreen() {
                     params: { from: "owner" },
                   } as any)
                 }
+              />
+              {/* botao-suporte (PAR-7): abre o site de suporte no navegador. */}
+              <MenuItem
+                icon={LifeBuoy}
+                label="Suporte"
+                hint="dúvidas e passo a passo do app"
+                onPress={() => abrirSuporte("dono")}
                 last
               />
             </Grupo>

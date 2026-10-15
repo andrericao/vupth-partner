@@ -166,7 +166,7 @@ echo ""
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 git -C "$RAIZ" fetch -q origin dev 2>/dev/null || echo "AVISO: sem fetch — usando a origin/dev que a pasta ja conhece."
 ULTIMO_OTA=$(git -C "$RAIZ" log -1 --format=%h origin/dev -- . \
-  ':(exclude,glob)**/*.md' ':(exclude)src/docs' ':(exclude)design' \
+  ':(exclude,glob)**/*.md' ':(exclude)design' \
   ':(exclude).maestro' ':(exclude).gitignore' ':(exclude)docs' ':(exclude)LICENSE')
 COMMIT=$(git -C "$RAIZ" log --format=%h --abbrev=7 "$ULTIMO_OTA^..origin/dev" | paste -sd,)
 echo "Commit esperado no app (OTA da dev): $COMMIT"

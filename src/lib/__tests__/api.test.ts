@@ -23,9 +23,9 @@ const rawMock = new MockAdapter(axios);
 
 describe("getApiErrorMessage", () => {
   it("sem response (erro de rede) => mensagem de sem conexao", () => {
-    expect(getApiErrorMessage({}, "fallback")).toMatch(/Sem conexao/);
-    expect(getApiErrorMessage(new Error("timeout"), "fallback")).toMatch(/Sem conexao/);
-    expect(getApiErrorMessage(undefined, "fallback")).toMatch(/Sem conexao/);
+    expect(getApiErrorMessage({}, "fallback")).toMatch(/Sem conexão/);
+    expect(getApiErrorMessage(new Error("timeout"), "fallback")).toMatch(/Sem conexão/);
+    expect(getApiErrorMessage(undefined, "fallback")).toMatch(/Sem conexão/);
   });
 
   it("código conhecido => traducao PT (não usa o fallback)", () => {
@@ -56,7 +56,7 @@ describe("getApiErrorMessage", () => {
       },
     };
     const m = getApiErrorMessage(err, "fallback");
-    expect(m).toMatch(/servidor teve um problema/);
+    expect(m).toMatch(/Algo deu errado/);
     expect(m).not.toMatch(/NullPointer/);
   });
 

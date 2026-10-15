@@ -12,8 +12,13 @@ import {
   ehDeDecisao,
   avisoDoPush,
   tocouNoOk,
+  acaoDoPush,
+  carenciaDoFechamento,
   CATEGORIA_CIENCIA,
+  CATEGORIA_FECHAMENTO,
   ACAO_OK,
+  ACAO_FECHAR_AGORA,
+  ACAO_CONTINUAR,
   CANAL_ALERTAS,
 } from "../push";
 
@@ -354,5 +359,32 @@ describe("notificacao de ciencia", () => {
     expect(CANAL_ALERTAS).toBe("alertas");
     expect(tocouNoOk({ actionIdentifier: ACAO_OK })).toBe(true);
     expect(tocouNoOk({ actionIdentifier: "expo.modules.notifications.actions.DEFAULT" })).toBe(false);
+  });
+});
+
+// notificacao-com-botao (PAR-11, Andre 15/10): toda notificacao tem um botao.
+describe("notificacao-com-botao", () => {
+  it("cada botao vira uma acao; o corpo da notificacao abre o app", () => {
+    expect(CATEGORIA_FECHAMENTO).toBe("FECHAMENTO");
+    expect(acaoDoPush({ actionIdentifier: ACAO_OK })).toBe("ok");
+    expect(acaoDoPush({ actionIdentifier: ACAO_FECHAR_AGORA })).toBe("fechar-agora");
+    expect(acaoDoPush({ actionIdentifier: ACAO_CONTINUAR })).toBe("continuar");
+    expect(acaoDoPush({ actionIdentifier: "expo.modules.notifications.actions.DEFAULT" })).toBe("abrir");
+  });
+
+  it("o Hora de fechar? traz a carencia; os outros nao", () => {
+    expect(carenciaDoFechamento({ type: "CLOSING_PROMPT", graceUntil: "2026-10-15T22:15:00Z" })).toBe(
+      "2026-10-15T22:15:00Z"
+    );
+    expect(carenciaDoFechamento({ type: "CLOSING_PROMPT" })).toBeNull();
+    expect(carenciaDoFechamento({ type: "CLOSING_PROMPT", graceUntil: "" })).toBeNull();
+    expect(carenciaDoFechamento({ type: "CUT_REQUESTED", graceUntil: "x" })).toBeNull();
+    expect(carenciaDoFechamento(undefined)).toBeNull();
+  });
+
+  it("o toque leva a tela certa: pagamento, fechamento e loja removida", () => {
+    expect(notificationRoute({ type: "PAYMENT_CLAIMED" })).toBe("/(professional)/my-day");
+    expect(notificationRoute({ type: "CLOSING_PROMPT" })).toBe("/(professional)/queue");
+    expect(notificationRoute({ type: "ESTABLISHMENT_REMOVED" })).toBe("/(professional)/settings-vinculo");
   });
 });

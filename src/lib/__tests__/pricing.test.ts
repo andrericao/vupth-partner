@@ -4,6 +4,8 @@ import {
   ceilTo90,
   getAbsorptionOptions,
   estimateDesiredFromClient,
+  passaNaProvaReal,
+  precoParaReceber,
 } from "../pricing";
 
 describe("estimateDesiredFromClient", () => {
@@ -122,33 +124,38 @@ describe("calculatePricing", () => {
     }
   });
 
-  // REGRA DO ANDRE (16/09): a taxa entra POR CIMA do que o profissional quer
-  // receber (R$ 10 + 6% = R$ 10,60) e o preco sobe ate o X,90 seguinte
-  // (R$ 10,90). A divisao nasce aqui e fica gravada — ninguem recalcula 6%
-  // sobre os R$ 10,90 depois.
-  it("valores concretos em 0% (cliente paga tudo)", () => {
-    expect(calculatePricing(10, 0)).toEqual({
-      clientPrice: 10.9, proReceives: 10, platformFee: 0.9, intermediaryFee: 0.4, appFee: 0.5,
+  // preco-sobre-o-total (DEC-54, Andre 15/10): os exemplos do Backend (3e382fa).
+  it("valores concretos em 0% (cliente paga tudo) — iguais ao PriceSplit do Backend", () => {
+    expect(calculatePricing(30, 0)).toEqual({
+      clientPrice: 32.9, proReceives: 30, platformFee: 2.9, intermediaryFee: 1.32, appFee: 1.58,
     });
-    expect(calculatePricing(30, 0)).toMatchObject({ clientPrice: 31.9, proReceives: 30 });
-    expect(calculatePricing(50, 0)).toMatchObject({ clientPrice: 53.9, proReceives: 50 });
-    expect(calculatePricing(100, 0)).toMatchObject({ clientPrice: 106.9, proReceives: 100 });
+    expect(calculatePricing(50, 0)).toMatchObject({ clientPrice: 53.9, proReceives: 50, intermediaryFee: 2.16 });
+    expect(calculatePricing(80, 0)).toMatchObject({ clientPrice: 85.9, proReceives: 80 });
+    expect(calculatePricing(100, 0)).toMatchObject({ clientPrice: 106.9, proReceives: 100, intermediaryFee: 4.28 });
   });
 
-  it("nunca arredonda para BAIXO: cliente >= digitado + a parte da taxa que e dele", () => {
+  it("30 absorvendo tudo (1,80) -> 30,90", () => {
+    expect(calculatePricing(30, 100)).toMatchObject({ clientPrice: 30.9, proReceives: 28.2 });
+  });
+
+  it("prova real em todo preco: cliente - 4% - 2% (do preco) >= o que o profissional recebe", () => {
     for (let c = 500; c <= 50000; c += 37) {
       const p = c / 100;
       getAbsorptionOptions(p).forEach((pct) => {
         const r = calculatePricing(p, pct);
-        const parteDoCliente = p * 0.06 * (1 - pct / 100);
-        expect(r.clientPrice + 1e-9).toBeGreaterThanOrEqual(p + parteDoCliente);
+        expect(passaNaProvaReal(Math.round(r.clientPrice * 100), Math.round(r.proReceives * 100))).toBe(true);
       });
     }
   });
 
-  it("valor que ja cai em X,90 nao sobe mais um real (ruido de ponto flutuante)", () => {
-    // 15 x 1,06 = 15,90 — em float vira 15,900000000000002.
-    expect(calculatePricing(15, 0).clientPrice).toBe(15.9);
+  it("e o MENOR X,90 que passa na prova real", () => {
+    for (let c = 500; c <= 50000; c += 37) {
+      const recebe = c;
+      const preco = precoParaReceber(recebe);
+      expect(preco % 100).toBe(90);
+      expect(passaNaProvaReal(preco, recebe)).toBe(true);
+      expect(passaNaProvaReal(preco - 100, recebe)).toBe(false);
+    }
   });
 
   it("as tres partes somam o preco do cliente, centavo a centavo, e nenhuma e negativa", () => {
@@ -159,15 +166,15 @@ describe("calculatePricing", () => {
         const soma = Math.round((r.proReceives + r.intermediaryFee + r.appFee) * 100);
         expect(soma).toBe(Math.round(r.clientPrice * 100));
         expect(r.intermediaryFee).toBeGreaterThanOrEqual(0);
-        // o app fica com pelo menos os 2% (menos 1 centavo de arredondamento)
-        expect(Math.round(r.appFee * 100)).toBeGreaterThanOrEqual(Math.round(p * 2) - 1);
+        // o app fica com pelo menos os 2% do preco (a prova real garante)
+        expect(Math.round(r.appFee * 100)).toBeGreaterThanOrEqual(Math.floor((Math.round(r.clientPrice * 100) * 2 + 50) / 100));
       });
     }
   });
 
-  it("intermediador = 4% do valor digitado", () => {
-    expect(calculatePricing(100, 0).intermediaryFee).toBe(4);
-    expect(calculatePricing(100, 100).intermediaryFee).toBe(4);
-    expect(calculatePricing(31.3, 0).intermediaryFee).toBe(1.25); // 1,252 -> 1,25
+  it("intermediador = 4% do PRECO cobrado (meio centavo para cima)", () => {
+    expect(calculatePricing(100, 0).intermediaryFee).toBe(4.28); // 4% de 106,90
+    expect(calculatePricing(100, 100).intermediaryFee).toBe(4.04); // 4% de 100,90
+    expect(calculatePricing(10, 0).intermediaryFee).toBe(0.44); // 4% de 10,90 = 0,436
   });
 });

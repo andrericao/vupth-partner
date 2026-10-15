@@ -131,6 +131,36 @@ appId: ${APP_ID}
       id: "aba-menu"
     timeout: 20000
     label: "08.15b · espera aba-menu"
+# botao-suporte (PAR-7): o Menu do dono tem o Suporte, abaixo da Versao do app.
+- scrollUntilVisible:
+    element: "Suporte"
+    direction: DOWN
+    label: "08.15s · suporte · rola ate Suporte"
+- assertVisible:
+    text: "dúvidas e passo a passo do app"
+    label: "08.15t · suporte · o botao Suporte esta no Menu do dono"
+# pix-nas-configuracoes (DEC-65): o dono cadastra a chave dele, a alternativa.
+- scrollUntilVisible:
+    element: "Chave Pix (alternativa)"
+    direction: UP
+    label: "08.15u · pix-do-dono · rola ate Chave Pix (alternativa)"
+- tapOn:
+    text: "Chave Pix (alternativa)"
+    label: "08.15v · pix-do-dono · toca em Chave Pix (alternativa)"
+- extendedWaitUntil:
+    visible: "Vale quando o profissional que atendeu não tem chave. Cada profissional cadastra a dele."
+    timeout: 20000
+    label: "08.15w · pix-do-dono · abriu a tela da chave alternativa"
+- assertVisible:
+    id: "aba-menu"
+    label: "08.15x · pix-do-dono · com as abas do dono"
+- back:
+    label: "08.15y · pix-do-dono · volta ao Menu"
+- extendedWaitUntil:
+    visible:
+      id: "aba-menu"
+    timeout: 20000
+    label: "08.15z · pix-do-dono · espera aba-menu"
 # abas-do-dono: a Aparencia do dono tambem
 - scrollUntilVisible:
     element: "Aparência"

@@ -29,7 +29,13 @@ import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriod
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
-import { avisoSemSplit } from "@lib/split";
+import {
+  composicaoDoAtendimento,
+  somaDasContas,
+  servicosComPrecoAntigo,
+  avisoDoPrecoAntigo,
+  type Composicao,
+} from "@lib/composicao";
 import { paramsDoHistorico, rotuloDoFiltroSemStatus, pertoDoFim } from "@lib/historicoDoPeriodo";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
@@ -52,7 +58,44 @@ function humanizeService(value: string | null): string {
     .join(" ");
 }
 
-function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
+/** Uma linha da composicao: rotulo a esquerda, valor a direita. */
+function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor: number; forte?: boolean }) {
+  return (
+    <View className="flex-row justify-between mt-1">
+      <Text className={`font-body text-xs ${forte ? "text-vupth-forest font-semibold" : "text-vupth-textSecondary"}`}>
+        {rotulo}
+      </Text>
+      <Text className={`font-body text-xs ${forte ? "text-vupth-forest font-semibold" : "text-vupth-textSecondary"}`}>
+        R$ {valor.toFixed(2)}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * relatorio-todas-as-linhas (DEC-55): todas as parcelas, e a soma fecha no
+ * "Cliente pagou". Serve ao atendimento e ao total do periodo.
+ */
+function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { conta: Composicao; testID?: string }) {
+  return (
+    <View testID={testID} className="mt-3 pt-2 border-t border-vupth-border">
+      <LinhaDaConta rotulo="Você recebe" valor={conta.voceRecebeu} forte />
+      <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento} />
+      <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} />
+      <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} />
+      <LinhaDaConta rotulo="Outros (multa ou ajuste)" valor={conta.outros} />
+      <LinhaDaConta rotulo="Cliente pagou" valor={conta.clientePagou} forte />
+      {conta.estimados.length > 0 && (
+        <Text className="font-body text-xs text-vupth-textSecondary mt-1">
+          {`Estimado: ${conta.estimados.join(", ")} com preço antigo ou apagado.`}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; conta: Composicao }) {
+  const [aberto, setAberto] = useState(false);
   // Rotulo e cor vem da lib compartilhada com Atendimentos do dono —
   // inclusive o REMOVED (a loja retirou), que antes cairia cru na tela.
   const statusInfo = seloDoStatus(item.status);
@@ -60,7 +103,14 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <View className="bg-vupth-surface p-4 rounded-card mb-3">
+    <Pressable
+      onPress={() => setAberto((a) => !a)}
+      accessibilityRole="button"
+      accessibilityState={{ expanded: aberto }}
+      accessibilityLabel={`Atendimento de ${item.clientName}: ver a conta`}
+      testID="historico-atendimento"
+      className="bg-vupth-surface p-4 rounded-card mb-3 active:opacity-80"
+    >
       <View className="flex-row items-center justify-between">
         <Text className="font-heading text-vupth-forest">{item.clientName}</Text>
         <View className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
@@ -77,11 +127,13 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
-      <View className="flex-row justify-end mt-2">
+      <View className="flex-row items-center justify-between mt-2">
+        <Text className="font-body text-xs text-vupth-textSecondary">{aberto ? "Esconder a conta" : "Ver a conta"}</Text>
         <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
       <LinhaDoPagamento status={item.payment_status} />
-    </View>
+      {aberto && <ContaDoAtendimento conta={conta} />}
+    </Pressable>
   );
 }
 
@@ -151,6 +203,14 @@ export default function MyDayScreen() {
   };
   const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
+  // explicar-o-relatorio (PAR-18): a divisao de cada atendimento vem do servico cadastrado.
+  const myServices = useProfessionalStore((s) => s.myServices);
+  const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
+  useEffect(() => {
+    if (myServices.length === 0) fetchMyServices().catch(() => {});
+    // so na montagem: a lista vazia de quem nao tem servico nao refaz o GET em laco
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const history = useAttendanceStore((s) => s.history);
   const fetchHistoryPage = useAttendanceStore((s) => s.fetchHistoryPage);
   const { data } = useQueuePolling(professional?.establishment_id ?? null);
@@ -173,6 +233,21 @@ export default function MyDayScreen() {
   const [pagina, setPagina] = useState(0);
   const [temMais, setTemMais] = useState(false);
   const [carregandoMais, setCarregandoMais] = useState(false);
+
+  // relatorio-todas-as-linhas (DEC-55): os totais do topo somam as linhas do
+  // historico. So quando o historico do periodo esta inteiro e inclui os
+  // finalizados; senao, o resumo do backend.
+  const contaDoPeriodo =
+    historyLoaded && !temMais && (filter === "ALL" || filter === "FINISHED")
+      ? somaDasContas(
+          history
+            .filter((h) => h.status === "FINISHED")
+            .map((h) => composicaoDoAtendimento(h, myServices))
+        )
+      : null;
+  const precoAntigo =
+    contaDoPeriodo?.estimados ??
+    (report?.attendancesWithoutSplit ? servicosComPrecoAntigo(myServices) : []);
 
   const myProfessional = data?.professionals?.find((p) => p.id === professional?.id);
   const queueCount = myProfessional?.queue_count ?? 0;
@@ -304,8 +379,10 @@ export default function MyDayScreen() {
                   total, como antes. Rotulos a validar com o Design. */}
               <View className="flex-row gap-3">
                 <Numero
-                  rotulo={report?.netRevenue != null ? "Você recebeu" : "Receita"}
-                  valor={`R$ ${Number(report?.netRevenue ?? report?.totalRevenue ?? 0).toFixed(2)}`}
+                  rotulo={contaDoPeriodo || report?.netRevenue != null ? "Você recebeu" : "Receita"}
+                  valor={`R$ ${Number(
+                    contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0
+                  ).toFixed(2)}`}
                   destaque
                 />
                 <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
@@ -313,7 +390,7 @@ export default function MyDayScreen() {
 
               <View className="flex-row gap-3">
                 <Numero
-                  rotulo="Duracao media"
+                  rotulo="Duração média"
                   valor={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
                   tamanho="text-xl"
                 />
@@ -324,21 +401,26 @@ export default function MyDayScreen() {
                 />
               </View>
 
-              {report?.netRevenue != null && (
-                <Text className="font-body text-xs text-vupth-textSecondary">
-                  Clientes pagaram R$ {Number(report?.totalRevenue ?? 0).toFixed(2)} (com as Taxas Vupth).
-                </Text>
-              )}
-              {avisoSemSplit(report?.attendancesWithoutSplit) && (
-                <View className="bg-vupth-warning p-3 rounded-card">
-                  <Text className="font-body text-xs text-vupth-forest">
-                    {avisoSemSplit(report?.attendancesWithoutSplit)}
+              {contaDoPeriodo ? (
+                <View className="bg-vupth-surface p-4 rounded-card">
+                  <Text className="font-heading text-sm text-vupth-forest">A conta do período</Text>
+                  <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
+                </View>
+              ) : (
+                report?.netRevenue != null && (
+                  <Text className="font-body text-xs text-vupth-textSecondary">
+                    {`Clientes pagaram R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}. Para ver a conta do período linha a linha, role o histórico até o fim em Todos ou Finalizados.`}
                   </Text>
+                )
+              )}
+              {avisoDoPrecoAntigo(precoAntigo) && (
+                <View className="bg-vupth-warning p-3 rounded-card">
+                  <Text className="font-body text-xs text-vupth-forest">{avisoDoPrecoAntigo(precoAntigo)}</Text>
                 </View>
               )}
 
               <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
-                {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
+                {period === "day" ? "Hoje" : period === "week" ? "Últimos 7 dias" : "Últimos 30 dias"} •
                 atendimentos finalizados
               </Text>
             </View>
@@ -346,7 +428,7 @@ export default function MyDayScreen() {
 
           <View className="h-px bg-vupth-border my-6" />
 
-          <Text className="font-heading text-xl text-vupth-forest mb-3">Historico</Text>
+          <Text className="font-heading text-xl text-vupth-forest mb-3">Histórico</Text>
 
           <View className="flex-row flex-wrap gap-2 mb-4">
             {filters.map((f) => (
@@ -382,7 +464,11 @@ export default function MyDayScreen() {
           {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
             <View>
               {history.map((item) => (
-                <AttendanceHistoryCard key={item.id} item={item} />
+                <AttendanceHistoryCard
+                  key={item.id}
+                  item={item}
+                  conta={composicaoDoAtendimento(item, myServices)}
+                />
               ))}
               {carregandoMais && (
                 <View testID="historico-carregando-mais" className="mt-2">

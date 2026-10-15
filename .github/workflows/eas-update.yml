@@ -12,7 +12,6 @@ on:
     # Doc/spec/E2E-yaml nao mudam o bundle JS — nao republica OTA (economia).
     paths-ignore:
       - "**.md"
-      - "src/docs/**"
       - "design/**"
       - ".maestro/**"
       - ".gitignore"

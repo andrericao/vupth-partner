@@ -38,7 +38,7 @@ module.exports = {
       // a mesma palavra. `xs`, `sm` e `lg` ja batiam com o padrao do Tailwind;
       // `xl` muda de 20 para 22 (4 usos), e `md`/`xxl`/`xxxl` sao novos.
       // `text-base`, `text-2xl` e `text-3xl` seguem existindo mas estao FORA
-      // da escala — migrar. Ver src/docs/DESIGN.md.
+      // da escala — migrar. Ver vupth-docs/fontes/partner/DESIGN.md.
       // "Tamanho da letra" (Andre, 26/09): cada tamanho le uma VARIAVEL CSS,
       // definida no layout raiz por `vars(varsDaFonte(passo))` (src/lib/fonte.ts).
       // No passo Normal os valores sao exatamente os de antes (ver o teste).

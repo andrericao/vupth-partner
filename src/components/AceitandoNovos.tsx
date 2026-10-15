@@ -2,10 +2,9 @@ import { View, Text, Switch } from "react-native";
 
 // DS3 (c) — "aceitando novos clientes".
 //
-// Mora no PE da lista, nao no cabecalho, e a diferenca importa: nao e um estado
-// MEU (isso e a pilula), e uma propriedade da FILA. E a decisao nasce olhando o
-// fim dela — "atendo esses tres e chega". Controle no lugar onde a decisao
-// acontece vale mais do que controle onde fica bonito.
+// Nao e um estado MEU (isso e a pilula), e uma propriedade da FILA. Fica FIXA
+// acima dos cards de atendimento (aceitando-novos-fixo, Andre 15/10): no pe da
+// lista ela descia a cada card acrescentado.
 //
 // A forma (linha em `surface`, titulo + legenda + chave) vem do unico lugar do
 // arquivo de design onde isso foi desenhado: o quadro "ANTIGO · Partner Hoje",

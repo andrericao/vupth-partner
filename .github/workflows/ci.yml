@@ -7,7 +7,6 @@ on:
     # entao nao rodam o CI. (No PR para main o CI sempre roda — required check.)
     paths-ignore:
       - "**.md"
-      - "src/docs/**"
       - "design/**"
       - ".maestro/**"
       - ".gitignore"
