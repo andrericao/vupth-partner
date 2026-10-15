@@ -78,7 +78,7 @@ describe("mensagemDaPosse", () => {
     expect(mensagemDaPosse(erro(409, { code: "TRANSFER_ALREADY_PENDING" }))).toMatch(/pendente/);
   });
   it("outro erro cai na mensagem padrao", () => {
-    expect(mensagemDaPosse(new Error("Network Error"))).toMatch(/Sem conexao/);
+    expect(mensagemDaPosse(new Error("Network Error"))).toMatch(/Sem conexão/);
   });
 });
 

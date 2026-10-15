@@ -16,7 +16,7 @@ export function mensagemDoErroDaFoto(error: any): string {
     return "O envio de foto está indisponível no momento. Tente de novo mais tarde.";
   }
   if (status === 404 || status === 405) {
-    return "A foto ainda não pode ser enviada — o servidor não tem essa opção ainda.";
+    return "A foto ainda não pode ser enviada. Tente de novo mais tarde.";
   }
   if (code === "INVALID_PROFILE_PHOTO") {
     return "Use uma foto JPG, PNG ou WebP de até 2 MB.";

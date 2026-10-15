@@ -255,7 +255,7 @@ describe("web: reducao que falha e erros sem mensagem", () => {
       avisar,
     });
     // Neste arquivo o getApiErrorMessage e mockado e devolve o fallback; no app
-    // de verdade, sem resposta, ele diz "Sem conexao com o servidor".
+    // de verdade, sem resposta, ele diz "Sem conexão".
     expect(avisar).toHaveBeenCalledWith("Não foi possível salvar a foto.");
   });
 });
@@ -281,8 +281,8 @@ describe("foto da loja", () => {
   });
 
   it("enquanto o servidor nao tem a rota (404/405): frase clara", () => {
-    expect(mensagemDoErroDaFoto({ response: { status: 404 } })).toMatch(/servidor não tem essa opção/);
-    expect(mensagemDoErroDaFoto({ response: { status: 405 } })).toMatch(/servidor não tem essa opção/);
+    expect(mensagemDoErroDaFoto({ response: { status: 404 } })).toMatch(/ainda não pode ser enviada/);
+    expect(mensagemDoErroDaFoto({ response: { status: 405 } })).toMatch(/ainda não pode ser enviada/);
   });
 });
 

@@ -27,7 +27,7 @@ describe("mensagemDaExclusao", () => {
   });
 
   it("sem rede", () => {
-    expect(mensagemDaExclusao(new Error("Network Error"))).toMatch(/Sem conexao/);
+    expect(mensagemDaExclusao(new Error("Network Error"))).toMatch(/Sem conexão/);
   });
 
   it("outro erro com mensagem do backend (4xx)", () => {
@@ -35,7 +35,7 @@ describe("mensagemDaExclusao", () => {
   });
 
   it("erro interno (500): frase de servidor, nao a mensagem crua (26/09)", () => {
-    expect(mensagemDaExclusao(erro(500, { message: "NullPointerException" }))).toMatch(/servidor teve um problema/);
+    expect(mensagemDaExclusao(erro(500, { message: "NullPointerException" }))).toMatch(/Algo deu errado/);
   });
 });
 
@@ -77,7 +77,7 @@ describe("mensagemDaDesativacao", () => {
   });
 
   it("outro erro cai na mensagem padrao", () => {
-    expect(mensagemDaDesativacao(new Error("Network Error"))).toMatch(/Sem conexao/);
+    expect(mensagemDaDesativacao(new Error("Network Error"))).toMatch(/Sem conexão/);
   });
 });
 
@@ -102,6 +102,6 @@ describe("mensagemDaRemocaoDaLoja", () => {
   });
 
   it("outro erro cai na mensagem padrao", () => {
-    expect(mensagemDaRemocaoDaLoja(new Error("Network Error"))).toMatch(/Sem conexao/);
+    expect(mensagemDaRemocaoDaLoja(new Error("Network Error"))).toMatch(/Sem conexão/);
   });
 });

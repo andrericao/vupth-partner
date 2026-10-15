@@ -110,7 +110,7 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
 
 export function getApiErrorMessage(error: any, fallback: string): string {
   if (!error?.response) {
-    return "Sem conexao com o servidor. Verifique sua internet e tente novamente.";
+    return "Sem conexão. Verifique sua internet e tente novamente.";
   }
   const data = error.response.data;
 
@@ -122,7 +122,7 @@ export function getApiErrorMessage(error: any, fallback: string): string {
   // Erro interno (5xx) sem codigo conhecido: a mensagem e do servidor para o
   // servidor (ex.: NullPointerException, 26/09) — nao e frase para o usuario.
   if (error.response.status >= 500) {
-    return "O servidor teve um problema e não conseguiu concluir. Tente de novo em instantes — se continuar, avise o suporte.";
+    return "Algo deu errado e não foi possível concluir. Tente de novo em instantes — se continuar, avise o suporte.";
   }
 
   if (data?.fieldErrors) {
