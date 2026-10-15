@@ -29,7 +29,13 @@ import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriod
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus } from "@lib/statusAtendimento";
-import { avisoSemSplit } from "@lib/split";
+import {
+  composicaoDoAtendimento,
+  servicosComPrecoAntigo,
+  avisoDoPrecoAntigo,
+  explicacaoDosTotais,
+  type Composicao,
+} from "@lib/composicao";
 import { paramsDoHistorico, rotuloDoFiltroSemStatus, pertoDoFim } from "@lib/historicoDoPeriodo";
 
 // "MEU DIA" (2026-07-22) — unifica as antigas telas Relatorios + Atendimentos,
@@ -52,7 +58,43 @@ function humanizeService(value: string | null): string {
     .join(" ");
 }
 
-function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
+/** Uma linha da composicao: rotulo a esquerda, valor a direita. */
+function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor: number; forte?: boolean }) {
+  return (
+    <View className="flex-row justify-between mt-1">
+      <Text className={`font-body text-xs ${forte ? "text-vupth-forest font-semibold" : "text-vupth-textSecondary"}`}>
+        {rotulo}
+      </Text>
+      <Text className={`font-body text-xs ${forte ? "text-vupth-forest font-semibold" : "text-vupth-textSecondary"}`}>
+        R$ {valor.toFixed(2)}
+      </Text>
+    </View>
+  );
+}
+
+/** explicar-o-relatorio (PAR-18): para onde vai cada valor do atendimento. */
+function ContaDoAtendimento({ conta }: { conta: Composicao }) {
+  return (
+    <View testID="composicao-do-atendimento" className="mt-3 pt-2 border-t border-vupth-border">
+      <LinhaDaConta rotulo="Cliente pagou" valor={conta.clientePagou} forte />
+      {conta.voceRecebeu != null ? (
+        <>
+          <LinhaDaConta rotulo="Você recebe" valor={conta.voceRecebeu} forte />
+          <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento ?? 0} />
+          <LinhaDaConta rotulo="App Vupth (2% + arredondamento)" valor={conta.app ?? 0} />
+          {conta.outros > 0 && <LinhaDaConta rotulo="Outros (multa ou ajuste)" valor={conta.outros} />}
+        </>
+      ) : (
+        <Text className="font-body text-xs text-vupth-textSecondary mt-1">
+          {`Sem a divisão: ${conta.semDivisao.join(", ")} está com preço antigo ou foi apagado. Atualize em Perfil → Meus serviços.`}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; conta: Composicao }) {
+  const [aberto, setAberto] = useState(false);
   // Rotulo e cor vem da lib compartilhada com Atendimentos do dono —
   // inclusive o REMOVED (a loja retirou), que antes cairia cru na tela.
   const statusInfo = seloDoStatus(item.status);
@@ -60,7 +102,14 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
   const dateStr = `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
-    <View className="bg-vupth-surface p-4 rounded-card mb-3">
+    <Pressable
+      onPress={() => setAberto((a) => !a)}
+      accessibilityRole="button"
+      accessibilityState={{ expanded: aberto }}
+      accessibilityLabel={`Atendimento de ${item.clientName}: ver a conta`}
+      testID="historico-atendimento"
+      className="bg-vupth-surface p-4 rounded-card mb-3 active:opacity-80"
+    >
       <View className="flex-row items-center justify-between">
         <Text className="font-heading text-vupth-forest">{item.clientName}</Text>
         <View className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
@@ -77,11 +126,13 @@ function AttendanceHistoryCard({ item }: { item: AttendanceHistoryItem }) {
         {item.services.map((s) => s.customName).join(", ")}
       </Text>
 
-      <View className="flex-row justify-end mt-2">
+      <View className="flex-row items-center justify-between mt-2">
+        <Text className="font-body text-xs text-vupth-textSecondary">{aberto ? "Esconder a conta" : "Ver a conta"}</Text>
         <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
       <LinhaDoPagamento status={item.payment_status} />
-    </View>
+      {aberto && <ContaDoAtendimento conta={conta} />}
+    </Pressable>
   );
 }
 
@@ -151,6 +202,14 @@ export default function MyDayScreen() {
   };
   const isFocused = useIsFocused();
   const fetchMyReport = useProfessionalStore((s) => s.fetchMyReport);
+  // explicar-o-relatorio (PAR-18): a divisao de cada atendimento vem do servico cadastrado.
+  const myServices = useProfessionalStore((s) => s.myServices);
+  const fetchMyServices = useProfessionalStore((s) => s.fetchMyServices);
+  useEffect(() => {
+    if (myServices.length === 0) fetchMyServices().catch(() => {});
+    // so na montagem: a lista vazia de quem nao tem servico nao refaz o GET em laco
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const history = useAttendanceStore((s) => s.history);
   const fetchHistoryPage = useAttendanceStore((s) => s.fetchHistoryPage);
   const { data } = useQueuePolling(professional?.establishment_id ?? null);
@@ -313,7 +372,7 @@ export default function MyDayScreen() {
 
               <View className="flex-row gap-3">
                 <Numero
-                  rotulo="Duracao media"
+                  rotulo="Duração média"
                   valor={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
                   tamanho="text-xl"
                 />
@@ -329,16 +388,19 @@ export default function MyDayScreen() {
                   Clientes pagaram R$ {Number(report?.totalRevenue ?? 0).toFixed(2)} (com as Taxas Vupth).
                 </Text>
               )}
-              {avisoSemSplit(report?.attendancesWithoutSplit) && (
+              {report?.netRevenue != null && (
+                <Text className="font-body text-xs text-vupth-textSecondary">{explicacaoDosTotais()}</Text>
+              )}
+              {avisoDoPrecoAntigo(report?.attendancesWithoutSplit, servicosComPrecoAntigo(myServices)) && (
                 <View className="bg-vupth-warning p-3 rounded-card">
                   <Text className="font-body text-xs text-vupth-forest">
-                    {avisoSemSplit(report?.attendancesWithoutSplit)}
+                    {avisoDoPrecoAntigo(report?.attendancesWithoutSplit, servicosComPrecoAntigo(myServices))}
                   </Text>
                 </View>
               )}
 
               <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
-                {period === "day" ? "Hoje" : period === "week" ? "Ultimos 7 dias" : "Ultimos 30 dias"} •
+                {period === "day" ? "Hoje" : period === "week" ? "Últimos 7 dias" : "Últimos 30 dias"} •
                 atendimentos finalizados
               </Text>
             </View>
@@ -346,7 +408,7 @@ export default function MyDayScreen() {
 
           <View className="h-px bg-vupth-border my-6" />
 
-          <Text className="font-heading text-xl text-vupth-forest mb-3">Historico</Text>
+          <Text className="font-heading text-xl text-vupth-forest mb-3">Histórico</Text>
 
           <View className="flex-row flex-wrap gap-2 mb-4">
             {filters.map((f) => (
@@ -382,7 +444,11 @@ export default function MyDayScreen() {
           {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
             <View>
               {history.map((item) => (
-                <AttendanceHistoryCard key={item.id} item={item} />
+                <AttendanceHistoryCard
+                  key={item.id}
+                  item={item}
+                  conta={composicaoDoAtendimento(item, myServices)}
+                />
               ))}
               {carregandoMais && (
                 <View testID="historico-carregando-mais" className="mt-2">

@@ -20,6 +20,23 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Finalizado"
     label: "06.05 · confere Finalizado"
+# explicar-o-relatorio (PAR-18): o toque no atendimento abre a conta.
+- tapOn:
+    text: ${output.CLIENTE1}
+    label: "06.05a · conta · toca no atendimento de ${output.CLIENTE1}"
+- scrollUntilVisible:
+    element: "Empresa de pagamento (4%)"
+    direction: DOWN
+    label: "06.05b · conta · rola ate a conta"
+- assertVisible:
+    text: "Você recebe"
+    label: "06.05c · conta · mostra a parte do profissional"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: "06-conta-do-atendimento"
+      O_QUE: "a conta do atendimento: Cliente pagou, Voce recebe, Empresa de pagamento (4%), App Vupth"
+    label: "06.05d · print da conta do atendimento"
 - scrollUntilVisible:
     element: "Retirados"
     direction: UP
