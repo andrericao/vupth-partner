@@ -51,7 +51,8 @@ describe("composicaoDoAtendimento", () => {
 
   it("preco antigo: a parte do profissional e estimada, e a conta fecha", () => {
     const c = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s3", customName: "Asadelta" }] }, [ANTIGO]);
-    expect(c.voceRecebeu).toBe(50.84);
+    expect(c.voceRecebeu).toBe(50.66); // 53,90 - 2,16 - 1,08
+    expect(c.arredondamento).toBe(0);
     expect(c.estimados).toEqual(["Asadelta"]);
     expect(fecha(c)).toBe(53.9);
   });
@@ -88,7 +89,7 @@ describe("somaDasContas", () => {
     const b = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s3", customName: "Asadelta" }] }, [ANTIGO]);
     const s = somaDasContas([a, b, b]);
     expect(s.clientePagou).toBe(161.7);
-    expect(s.voceRecebeu).toBe(151.68);
+    expect(s.voceRecebeu).toBe(151.32);
     expect(s.estimados).toEqual(["Asadelta"]);
     expect(fecha(s)).toBe(161.7);
   });

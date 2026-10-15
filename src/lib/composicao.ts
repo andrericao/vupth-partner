@@ -1,4 +1,4 @@
-import { estimateDesiredFromClient } from "@lib/pricing";
+import { estimateDesiredFromClient, INTERMEDIARY_PERCENT, APP_PERCENT } from "@lib/pricing";
 
 // A conta de cada atendimento do relatorio.
 //
@@ -16,12 +16,12 @@ import { estimateDesiredFromClient } from "@lib/pricing";
 //
 // O atendimento so traz o total (`totalValue`); a parte do profissional vem do
 // servico cadastrado (`pro_receives`, gravado desde 18/09). Servico com preco
-// antigo ou apagado tem a parte ESTIMADA pelo preco (x1,06), e a conta avisa.
+// antigo ou apagado tem a parte ESTIMADA pelo preco (o preco menos as duas
+// taxas, src/lib/pricing.ts), e a conta avisa.
 
-/** A empresa de pagamento (Asaas) fica com 4% do total (DEC-54). */
-const TAXA_DA_EMPRESA_DE_PAGAMENTO = 0.04;
-/** O app fica com 2% do total. */
-const TAXA_DO_APP = 0.02;
+/** As taxas sobre o total (DEC-54) moram no pricing.ts, num lugar so. */
+const TAXA_DA_EMPRESA_DE_PAGAMENTO = INTERMEDIARY_PERCENT / 100;
+const TAXA_DO_APP = APP_PERCENT / 100;
 
 type ServicoDoAtendimento = { id: string; customName: string };
 type MeuServico = {

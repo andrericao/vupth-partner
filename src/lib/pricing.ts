@@ -1,5 +1,11 @@
-const FEE_RATE = 0.06; // 4% intermediador + 2% plataforma
-const INTERMEDIARY_RATE = 0.04;
+// preco-sobre-o-total (DEC-54, Andre 15/10; a mesma conta do PriceSplit do
+// Backend, 3e382fa): as taxas incidem sobre o PRECO cobrado. As duas taxas
+// moram aqui e so aqui — mudou a do gateway, muda so esta linha.
+/** A taxa do gateway (Asaas), em % do preco cobrado. */
+export const INTERMEDIARY_PERCENT = 4;
+/** A parte do app, em % do preco cobrado. */
+export const APP_PERCENT = 2;
+const FEE_RATE = (INTERMEDIARY_PERCENT + APP_PERCENT) / 100; // o teto da absorcao, sobre o digitado
 
 const OPTIONS_BELOW_50 = [0, 50, 100] as const;
 const OPTIONS_50_AND_ABOVE = [0, 25, 75, 100] as const;
@@ -36,39 +42,74 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-// Ao editar um servico ja criado so temos o clientPrice salvo (o preco-base e a
-// absorcao nao sao persistidos). Reconstruimos um preco-base que, reprocessado a
-// 0% de absorcao, reproduz o mesmo clientPrice — para reexibir o preview na edicao.
-// Truncado (nao arredondado): base x 1,06 nunca passa do preco salvo.
-export function estimateDesiredFromClient(clientPrice: number): number {
-  if (!(clientPrice > 0)) return 0;
-  return Math.floor(Math.round((clientPrice / (1 + FEE_RATE)) * 10000) / 100) / 100;
+/** Centavos de um valor em reais, sem o ruido do float. */
+function emCentavos(valor: number): number {
+  return Math.round(valor * 100);
 }
 
-// 🔁 REGRA DO ANDRE (16/09): a taxa entra POR CIMA do valor digitado — R$ 10
-// + 6% = R$ 10,60 — e o preco SOBE ate o X,90 seguinte: R$ 10,90. A divisao
-// nasce aqui e fica gravada; ninguem recalcula 6% sobre os R$ 10,90 depois
-// (era esse recalculo que deixava a parte do app negativa na conferencia do
-// backend). Antes: `/ 0,94` (6,38%) e X,90 MAIS PROXIMO, que as vezes descia.
+/** pct% de um valor em centavos, arredondando o meio centavo para cima (HALF_UP do Backend). */
+function porcentoEmCentavos(centavos: number, pct: number): number {
+  return Math.floor((centavos * pct + 50) / 100);
+}
+
+/** Prova real (DEC-54): depois do gateway e dos 2% do app, sobra ao menos o que o profissional recebe. */
+export function passaNaProvaReal(precoCentavos: number, recebeCentavos: number): boolean {
+  return (
+    precoCentavos -
+      porcentoEmCentavos(precoCentavos, INTERMEDIARY_PERCENT) -
+      porcentoEmCentavos(precoCentavos, APP_PERCENT) >=
+    recebeCentavos
+  );
+}
+
+/**
+ * O preco do cliente (em centavos) para o profissional receber `recebeCentavos`:
+ * o X,90 logo acima de recebe / 0,94, subindo R$ 1 ate passar na prova real.
+ * Igual ao PriceSplit.clientPriceFor do Backend.
+ */
+export function precoParaReceber(recebeCentavos: number): number {
+  const liquido = 100 - INTERMEDIARY_PERCENT - APP_PERCENT; // 94
+  let preco = Math.floor(recebeCentavos / liquido) * 100 + 90;
+  if (preco * liquido < recebeCentavos * 100) preco += 100;
+  while (!passaNaProvaReal(preco, recebeCentavos)) preco += 100;
+  return preco;
+}
+
+// Servico legado (sem a divisao gravada): so temos o preco. O maximo que o
+// profissional recebe nesse preco e o preco menos as duas taxas — e, com ele a
+// 0% de absorcao, a conta devolve o mesmo preco (round-trip da edicao).
+export function estimateDesiredFromClient(clientPrice: number): number {
+  if (!(clientPrice > 0)) return 0;
+  const preco = emCentavos(clientPrice);
+  return (
+    (preco - porcentoEmCentavos(preco, INTERMEDIARY_PERCENT) - porcentoEmCentavos(preco, APP_PERCENT)) / 100
+  );
+}
+
+// 🔁 REGRA DO ANDRE (15/10, DEC-54 — substitui a de 16/09, que cobrava os 4%
+// sobre o digitado e fazia o app perder a diferenca):
 //
-//   taxa          = 6% do digitado
-//   absorvido     = a parte da taxa que o profissional escolheu pagar
+//   absorvido     = a parte da taxa que o profissional escolheu pagar (0 a 6% do digitado)
 //   recebe        = digitado - absorvido          (o piso: so cai por escolha)
-//   cliente       = X,90 acima de (digitado + taxa - absorvido)
-//   intermediario = 4% do digitado
-//   app           = cliente - recebe - intermediario   (2% + arredondamento)
+//   cliente       = o menor X,90 que passa na prova real (comeca acima de recebe / 0,94)
+//   intermediario = 4% do PRECO
+//   app           = cliente - recebe - intermediario   (os 2% + a sobra do X,90)
+//   prova real    = cliente - 4% - 2% (do preco) >= recebe
 export function calculatePricing(
   desiredPrice: number,
   proAbsorptionPercent: number
 ): PricingResult {
-  const fee = desiredPrice * FEE_RATE;
-  const proAbsorbs = fee * (proAbsorptionPercent / 100);
+  const digitado = emCentavos(desiredPrice);
+  const absorvido = Math.floor((digitado * FEE_RATE * proAbsorptionPercent) / 100 + 0.5 + 1e-9);
+  const recebe = digitado - absorvido;
+  const preco = precoParaReceber(recebe);
+  const intermediario = porcentoEmCentavos(preco, INTERMEDIARY_PERCENT);
 
-  const proReceives = round2(desiredPrice - proAbsorbs);
-  const clientPrice = ceilTo90(desiredPrice + fee - proAbsorbs);
-  const platformFee = round2(clientPrice - proReceives);
-  const intermediaryFee = round2(desiredPrice * INTERMEDIARY_RATE);
-  const appFee = round2(platformFee - intermediaryFee);
-
-  return { clientPrice, proReceives, platformFee, intermediaryFee, appFee };
+  return {
+    clientPrice: preco / 100,
+    proReceives: recebe / 100,
+    platformFee: (preco - recebe) / 100,
+    intermediaryFee: intermediario / 100,
+    appFee: (preco - recebe - intermediario) / 100,
+  };
 }

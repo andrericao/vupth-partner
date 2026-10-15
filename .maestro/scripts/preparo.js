@@ -118,10 +118,11 @@ var servicos = [];
 if (etapa >= 5 || so04b) {
   servicos = pedir("GET", "/professional/" + prof.id + "/service-items", null, tokenProf) || [];
   if (servicos.length === 0) {
-    // R$ 30 digitados, sem absorcao: o cliente paga 31,90 (x1,06 e X,90 pra cima)
+    // R$ 30 digitados, sem absorcao: o cliente paga 32,90 (preco-sobre-o-total,
+    // DEC-54: o menor X,90 em que preco - 4% - 2% >= 30)
     pedir("POST", "/professional-queue/" + prof.id + "/add-service-items", {
       serviceItemType: "MANICURE", customName: "Manicure " + TAG,
-      price: 31.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60
+      price: 32.9, pro_receives: 30, base_price: 30, estimatedMinutes: 60
     }, tokenProf);
     servicos = pedir("GET", "/professional/" + prof.id + "/service-items", null, tokenProf);
   }

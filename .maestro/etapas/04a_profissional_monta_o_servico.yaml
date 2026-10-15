@@ -86,6 +86,10 @@ appId: ${APP_ID}
     label: "04.16 · digita 3000"
 - hideKeyboard:
     label: "04.17 · fecha o teclado"
+# preco-sobre-o-total (DEC-54): R$ 30 digitados -> o cliente paga R$ 32.90.
+- assertVisible:
+    text: "R$ 32.90"
+    label: "04.17a · preco · o cliente paga R$ 32.90"
 - scrollUntilVisible:
     element: "Adicionar serviço"
     direction: DOWN
