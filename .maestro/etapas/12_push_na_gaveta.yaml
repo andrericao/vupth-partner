@@ -45,6 +45,14 @@ appId: ${APP_ID}
     visible: "Pedido de vínculo"
     timeout: 90000
     label: "12.07 · espera o push Pedido de vínculo"
+# notificacao-com-botao (PAR-11): toda notificacao tem botao. O pedido de
+# vinculo vem com o OK (categoria CIENCIA); o print mostra a gaveta.
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: "12-push-com-botao"
+      O_QUE: "a notificacao Pedido de vinculo mostra o botao OK"
+    label: "12.07a · print da gaveta com o botao do push"
 - tapOn:
     text: "Pedido de vínculo"
     label: "12.08 · toca no push"

@@ -32,6 +32,12 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
   if (type === "CUT_REQUESTED") return "/(professional)/cut-requests";
+  // notificacao-com-botao (PAR-11): "Confira o pagamento" leva aos Relatorios,
+  // onde estao os pendentes com o "Recebi"; "Hora de fechar?" leva a Fila, onde
+  // o aviso de fechamento aparece; a loja removida leva ao Vinculo.
+  if (type === "PAYMENT_CLAIMED") return "/(professional)/my-day";
+  if (type === "CLOSING_PROMPT") return "/(professional)/queue";
+  if (type === "ESTABLISHMENT_REMOVED") return "/(professional)/settings-vinculo";
   // desativar-conta (Backend 01c785e): o convite de posse e o aviso de loja
   // desativada/reativada sao do profissional; a resposta da posse e do dono —
   // aceita, ele perdeu a loja e o inicio decide para onde ir.
@@ -190,4 +196,31 @@ export const CANAL_ALERTAS = "alertas";
 /** O toque foi no botao OK: so fecha a notificacao, nao abre tela. */
 export function tocouNoOk(resposta: { actionIdentifier: string }): boolean {
   return resposta.actionIdentifier === ACAO_OK;
+}
+
+/**
+ * notificacao-com-botao (PAR-11, Andre 15/10): "para toda notificacao deve ter
+ * um botao". O "Hora de fechar?" pede decisao, entao ganha os dois botoes do
+ * aviso da tela: "Fechar agora" (abre o app e fecha) e "Continuar atendendo"
+ * (so fecha a notificacao). Aparece quando o push vem com categoryId
+ * "FECHAMENTO" (pedido ao Backend em Solicitadas).
+ */
+export const CATEGORIA_FECHAMENTO = "FECHAMENTO";
+export const ACAO_FECHAR_AGORA = "FECHAR_AGORA";
+export const ACAO_CONTINUAR = "CONTINUAR";
+
+export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "abrir";
+
+/** O que fazer com o toque: um dos botoes, ou o corpo da notificacao (abrir). */
+export function acaoDoPush(resposta: { actionIdentifier: string }): AcaoDoPush {
+  if (resposta.actionIdentifier === ACAO_OK) return "ok";
+  if (resposta.actionIdentifier === ACAO_FECHAR_AGORA) return "fechar-agora";
+  if (resposta.actionIdentifier === ACAO_CONTINUAR) return "continuar";
+  return "abrir";
+}
+
+/** O "Hora de fechar?" traz o fim da carencia: com ele a Fila mostra o aviso. */
+export function carenciaDoFechamento(data: any): string | null {
+  if (data?.type !== "CLOSING_PROMPT") return null;
+  return typeof data?.graceUntil === "string" && data.graceUntil ? data.graceUntil : null;
 }

@@ -12,14 +12,20 @@ import {
   pushSupported,
   ehDeDecisao,
   avisoDoPush,
-  tocouNoOk,
+  acaoDoPush,
+  carenciaDoFechamento,
   CATEGORIA_CIENCIA,
+  CATEGORIA_FECHAMENTO,
   ACAO_OK,
+  ACAO_FECHAR_AGORA,
+  ACAO_CONTINUAR,
   CANAL_ALERTAS,
 } from "@lib/push";
 import { useAuthStore } from "@store/auth.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
+import { useProfessionalStore } from "@store/professional.store";
+import { useUiStore } from "@store/ui.store";
 
 // CARGA PREGUICOSA (2026-08-12). O `expo-notifications` nao e mais importado no
 // topo: em ambiente SEM push ele **grita no proprio import** — no Expo Go, desde
@@ -102,6 +108,11 @@ export function usePushRegistration() {
     try {
       Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
         { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      // notificacao-com-botao (PAR-11): o "Hora de fechar?" com os botoes do aviso.
+      Notifications.setNotificationCategoryAsync(CATEGORIA_FECHAMENTO, [
+        { identifier: ACAO_FECHAR_AGORA, buttonTitle: "Fechar agora", options: { opensAppToForeground: true } },
+        { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar atendendo", options: { opensAppToForeground: false } },
       ]).catch(() => {});
     } catch {
       // binario sem o modulo nativo de push.
@@ -190,12 +201,25 @@ export function usePushRegistration() {
     try {
       const sub = Notifications.addNotificationResponseReceivedListener(
         (response) => {
-          // "OK" so fecha a notificacao — nao navega.
-          if (tocouNoOk(response)) {
+          const acao = acaoDoPush(response);
+          const data = response.notification.request.content.data;
+          // "OK" e "Continuar atendendo" so fecham a notificacao — nao navegam.
+          if (acao !== "abrir") {
             Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
+          }
+          if (acao === "ok" || acao === "continuar") return;
+          const carencia = carenciaDoFechamento(data);
+          if (acao === "fechar-agora") {
+            // Fecha direto; se o backend barrar (atendimento em andamento), a
+            // Fila mostra o aviso de fechamento com o motivo.
+            useProfessionalStore
+              .getState()
+              .updateMyStatus("OFF")
+              .catch(() => useUiStore.getState().showClosingPrompt(carencia));
+            router.push("/(professional)/queue" as any);
             return;
           }
-          const data = response.notification.request.content.data;
+          if (carencia) useUiStore.getState().showClosingPrompt(carencia);
           const route = notificationRoute(data, useEstablishmentStore.getState().establishment?.id);
           if (route) router.push(route as any);
         }
