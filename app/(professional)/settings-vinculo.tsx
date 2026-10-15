@@ -209,6 +209,9 @@ export default function SettingsVinculoScreen() {
           </View>
         )}
 
+        {/* vinculo-botao-corta-card (PAR-17, Andre 15/10): o h-9 brigava com o
+            min-h-[54px] da pilula e o botao passava da base do card. Sem altura
+            fixa, o card cresce com o botao. */}
         <View className="mt-6 bg-vupth-surface p-4 rounded-lg border border-vupth-border">
           <Text className="font-body text-sm text-vupth-textSecondary">Estabelecimento</Text>
           {/* Sem o perfil ainda nao se sabe se ha vinculo: skeleton (e nenhum
@@ -230,7 +233,7 @@ export default function SettingsVinculoScreen() {
             <NwButton
               title="Buscar estabelecimento"
               onPress={() => router.push("/(professional)/find-establishment" as any)}
-              className="h-9 mt-2"
+              className="mt-3"
             />
           ) : (
             <NwButton
@@ -238,7 +241,7 @@ export default function SettingsVinculoScreen() {
               onPress={handleLeave}
               isLoading={isLeaving}
               variant="outlineDanger"
-              className="h-9 mt-2"
+              className="mt-3"
             />
           )}
         </View>
