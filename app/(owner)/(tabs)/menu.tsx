@@ -14,7 +14,7 @@ import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
-  Info, LifeBuoy,
+  Info, LifeBuoy, QrCode,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
@@ -234,6 +234,13 @@ export default function OwnerMenuScreen() {
                     params: { from: "owner" },
                   } as any)
                 }
+              />
+              {/* pix-nas-configuracoes (DEC-65): a chave do dono e a alternativa. */}
+              <MenuItem
+                icon={QrCode}
+                label="Chave Pix (alternativa)"
+                hint="vale se o profissional não tiver a dele"
+                onPress={() => router.push("/(owner)/pix" as any)}
                 last={!establishment?.id}
               />
               {establishment?.id && (
