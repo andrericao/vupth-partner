@@ -46,7 +46,7 @@ export function ServiceTypeGrid({
   selected,
   onSelect,
 }: {
-  items: Item[];
+  items: readonly Item[];
   selected: string;
   onSelect: (item: Item) => void;
 }) {

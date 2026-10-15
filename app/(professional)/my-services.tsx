@@ -27,33 +27,12 @@ import {
   type PricingResult,
 } from "@lib/pricing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
+import { TIPOS_DE_SERVICO, tiposDaEspecialidade, tipoDoServico } from "@lib/tiposDeServico";
 
-const SERVICE_ITEM_TYPES = [
-  { label: "Corte a maquina", value: "CORTE_MAQUINA", specialties: ["BARBER"] },
-  { label: "Corte a tesoura", value: "CORTE_TESOURA", specialties: ["BARBER"] },
-  { label: "Barba", value: "BARBA", specialties: ["BARBER"] },
-  { label: "Design de sobrancelha", value: "SOBRANCELHA", specialties: ["BARBER", "EYEBROW_TECH"] },
-  { label: "Pintura", value: "PINTURA", specialties: ["BARBER", "HAIRDRESSER"] },
-  { label: "Recorte das pontas", value: "RECORTE_PONTAS", specialties: ["HAIRDRESSER"] },
-  { label: "Escova", value: "ESCOVA", specialties: ["HAIRDRESSER"] },
-  { label: "Hidratacao capilar", value: "HIDRATACAO", specialties: ["HAIRDRESSER"] },
-  { label: "Progressiva", value: "PROGRESSIVA", specialties: ["HAIRDRESSER"] },
-  { label: "Manicure", value: "MANICURE", specialties: ["NAIL_TECH"] },
-  { label: "Pedicure", value: "PEDICURE", specialties: ["NAIL_TECH"] },
-  { label: "Unhas em gel", value: "UNHAS_GEL", specialties: ["NAIL_TECH"] },
-  { label: "Nail art", value: "NAIL_ART", specialties: ["NAIL_TECH"] },
-  { label: "Massagem relaxante", value: "MASSAGEM_RELAXANTE", specialties: ["MASSEUSE"] },
-  { label: "Massagem modeladora", value: "MASSAGEM_MODELADORA", specialties: ["MASSEUSE"] },
-  { label: "Limpeza de pele", value: "LIMPEZA_PELE", specialties: ["MASSEUSE", "ESTHETICIAN"] },
-  { label: "Depilacao", value: "DEPILACAO", specialties: ["MASSEUSE"] },
-  { label: "Drenagem linfatica", value: "DRENAGEM", specialties: ["MASSEUSE"] },
-  { label: "Peeling facial", value: "PEELING", specialties: ["ESTHETICIAN"] },
-  { label: "Aplicacao de botox", value: "BOTOX", specialties: ["ESTHETICIAN"] },
-  { label: "Microagulhamento", value: "MICROAGULHAMENTO", specialties: ["ESTHETICIAN"] },
-];
+
 
 const SERVICE_TYPE_LABELS: Record<string, string> = Object.fromEntries(
-  SERVICE_ITEM_TYPES.map((t) => [t.value, t.label])
+  TIPOS_DE_SERVICO.map((t) => [t.value, t.label])
 );
 
 function humanizeServiceType(value: string): string {
@@ -191,10 +170,9 @@ export default function MyServicesScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const mySpecialty = professional?.specialty ?? "BARBER";
-  const filteredTypes = SERVICE_ITEM_TYPES.filter(
-    (t) => t.specialties.includes(mySpecialty) || t.specialties.length === 0
-  );
+  // tipo-de-servico-sumiu (PAR-14): especialidade fora da lista (o backend
+  // aceita texto livre, ex. "Corte") deixava a grade vazia. Agora cai em todos.
+  const filteredTypes = tiposDaEspecialidade(professional?.specialty);
 
   const priceNum = unmaskMoney(price);
   const absorptionOptions = getAbsorptionOptions(priceNum);
@@ -318,10 +296,9 @@ export default function MyServicesScreen() {
       Alert.alert("Faltou preencher", `Informe ${faltam}.`);
       return;
     }
-    if (!serviceItemType) {
-      Alert.alert("Selecione o tipo", "Escolha o tipo de serviço antes de adicionar.");
-      return;
-    }
+    // tipo-uma-vez (PAR-15): o tipo nunca trava o cadastro — sem escolha, vale
+    // o primeiro da especialidade.
+    const tipo = tipoDoServico(filteredTypes, serviceItemType);
     const minutos = lerMinutos(minutes);
     if (minutos == null) {
       Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
@@ -335,7 +312,7 @@ export default function MyServicesScreen() {
     const finalPrice = split.price;
 
     try {
-      await addMyServiceItem(serviceItemType, customName.trim(), split, minutos);
+      await addMyServiceItem(tipo, customName.trim(), split, minutos);
       Alert.alert("Serviço adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
       setShowForm(false);
       setServiceItemType("");

@@ -36,6 +36,11 @@ appId: ${APP_ID}
 - tapOn:
     text: "Adicionar serviço"
     label: "04.08 · toca em Adicionar serviço"
+# tipo-de-servico-sumiu (PAR-14): a grade de tipos aparece (a manicure ve os
+# tipos dela); tipo-uma-vez (PAR-15): o cadastro segue sem tocar no tipo.
+- assertVisible:
+    text: "Pedicure"
+    label: "04.08a · tipos · a grade de tipos da manicure aparece"
 - tapOn:
     id: "service-name"
     label: "04.09 · toca em service-name"
