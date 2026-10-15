@@ -196,6 +196,11 @@ appId: ${APP_ID}
 - assertVisible:
     text: "dúvidas e passo a passo do app"
     label: "07.43c · suporte · o botao Suporte esta no Perfil"
+# cupom-no-app (DEC-61): "Promocoes" nasce desligado (CUPOM_NO_AR). Ao ligar,
+# trocar este passo por tocar em Promocoes e usar um cupom de teste.
+- assertNotVisible:
+    text: "Promoções"
+    label: "07.43d · cupom · Promoções ainda desligado"
 
 - runFlow:
     file: ../apoio/sair_profissional.yaml

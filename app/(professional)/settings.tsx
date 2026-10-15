@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette, Store, CalendarDays, QrCode, LifeBuoy } from "lucide-react-native";
+  Info, Share2, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -28,6 +28,7 @@ import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
+import { CUPOM_NO_AR } from "@lib/campanhas";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -294,6 +295,15 @@ export default function ProfessionalSettingsScreen() {
               last={!!isOwner}
               onPress={() => router.push("/(professional)/settings-vinculo" as any)}
             />
+            {/* cupom-no-app (DEC-61): liga quando o Backend das campanhas subir. */}
+            {CUPOM_NO_AR && (
+              <MenuCard
+                icon={Ticket}
+                title="Promoções"
+                hint="usar um cupom"
+                onPress={() => router.push("/(professional)/promocoes" as any)}
+              />
+            )}
             {/* S23 (PAR-7): a porta do profissional que abre a propria loja.
                 Quem ja e dono troca de area pelo "Área do dono", acima. */}
             {!isOwner && (
