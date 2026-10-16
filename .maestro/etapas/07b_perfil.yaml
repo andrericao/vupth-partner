@@ -206,6 +206,15 @@ appId: ${APP_ID}
 - tapOn:
     text: "Promoções"
     label: "07.43e · cupom · toca em Promoções"
+# link-de-indicacao (DEC-70, Backend 3fdcec1): o link do profissional em cima.
+- extendedWaitUntil:
+    visible:
+      id: "link-indicacao"
+    timeout: 20000
+    label: "07.43e1 · indicacao · o bloco Seu link aparece"
+- assertVisible:
+    text: "Nenhum cliente chegou pelo seu link ainda."
+    label: "07.43e2 · indicacao · conta nova: nenhum cliente ainda"
 - tapOn:
     id: "cupom-codigo"
     label: "07.43f · cupom · toca no campo Cupom"
