@@ -41,3 +41,17 @@ describe("SkeletonList", () => {
     expect((toJSON() as any).children).toHaveLength(3);
   });
 });
+
+// logo-no-menu (Andre, 16/10, DEC-42): o V estilizado no topo da Fila.
+describe("ScreenHeader marca", () => {
+  it("com marca, mostra o V antes do titulo", () => {
+    render(<ScreenHeader title="Fila" marca />);
+    expect(screen.getByTestId("logo-v")).toBeTruthy();
+    expect(screen.getByLabelText("Vupth")).toBeTruthy();
+  });
+
+  it("sem marca, nao mostra o V", () => {
+    render(<ScreenHeader title="Menu" />);
+    expect(screen.queryByTestId("logo-v")).toBeNull();
+  });
+});

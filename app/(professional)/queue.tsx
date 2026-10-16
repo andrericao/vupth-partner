@@ -750,6 +750,7 @@ export default function ProfessionalQueueScreen() {
       <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Fila"
+          marca
         />
         <View className="mt-4">
           <BlocoBloqueio
@@ -787,6 +788,7 @@ export default function ProfessionalQueueScreen() {
               proprio com margem propria embaixo do Header. */}
           <ScreenHeader
             title="Fila"
+            marca
             action={
               <View className="flex-row items-center gap-2">
               {/* DS3 — a pilula do proprio status. Ate aqui o `work_status` so

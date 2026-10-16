@@ -14,6 +14,10 @@ appId: ${APP_ID}
 - tapOn:
     id: "aba-fila"
     label: "05.02 · toca em aba-fila"
+# logo-no-menu (DEC-42): o V estilizado no topo da Fila.
+- assertVisible:
+    id: "logo-v"
+    label: "05.02a · logo-no-menu · o V no topo da Fila"
 # Supervisionada com os dois usuarios (DEC-15): o 2o cliente e o Andre, que
 # entra na fila pelo Client no segundo celular — o setup.sh mostra o e-mail.
 - runFlow:
