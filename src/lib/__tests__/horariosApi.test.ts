@@ -43,6 +43,16 @@ describe("horariosApi", () => {
     await expect(buscarHorarios("e1")).resolves.toBeNull();
   });
 
+  // um-refresh-por-vez (PAR-17): a mesma tela pedia o horario duas vezes.
+  it("dois pedidos juntos da mesma loja: um GET so", async () => {
+    mock.onGet("/establishment/e2/hours").reply(200, { configured: false, weekly: [], exceptions: [] });
+    const [a, b] = await Promise.all([buscarHorarios("e2"), buscarHorarios("e2")]);
+    expect(a).toBe(b);
+    expect(mock.history.get.filter((g) => g.url === "/establishment/e2/hours")).toHaveLength(1);
+    await buscarHorarios("e2");
+    expect(mock.history.get.filter((g) => g.url === "/establishment/e2/hours")).toHaveLength(2);
+  });
+
   it("outro erro sobe", async () => {
     mock.onGet("/establishment/e1/hours").reply(500);
     await expect(buscarHorarios("e1")).rejects.toBeTruthy();

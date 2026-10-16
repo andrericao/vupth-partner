@@ -13,14 +13,25 @@ import {
  * A semana da loja. `null` = o backend ainda nao tem a rota (404): quem chama
  * cai no horario unico antigo. O app nao pode depender da ordem dos deploys.
  */
-export async function buscarHorarios(establishmentId: string): Promise<HorariosDaLoja | null> {
-  try {
-    const { data } = await api.get(`/establishment/${establishmentId}/hours`);
-    return normalizarHorarios(data);
-  } catch (error: any) {
-    if (error?.response?.status === 404) return null;
-    throw error;
-  }
+const horariosEmVoo = new Map<string, Promise<HorariosDaLoja | null>>();
+
+export function buscarHorarios(establishmentId: string): Promise<HorariosDaLoja | null> {
+  // um-refresh-por-vez (PAR-17, log [SLOW] de 15/10): a mesma tela pedia o
+  // horario duas vezes juntas (o Menu e o dot das abas usam o
+  // useOwnerCompletion). Pedido igual em voo: espera o mesmo.
+  const emVoo = horariosEmVoo.get(establishmentId);
+  if (emVoo) return emVoo;
+  const pedido = (async () => {
+    try {
+      const { data } = await api.get(`/establishment/${establishmentId}/hours`);
+      return normalizarHorarios(data);
+    } catch (error: any) {
+      if (error?.response?.status === 404) return null;
+      throw error;
+    }
+  })().finally(() => horariosEmVoo.delete(establishmentId));
+  horariosEmVoo.set(establishmentId, pedido);
+  return pedido;
 }
 
 export async function salvarSemana(
