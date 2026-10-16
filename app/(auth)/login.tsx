@@ -11,6 +11,7 @@ import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
+import { SENHA_DICA, SENHA_MAX, senhaNoTamanho } from "@lib/passwordValidation";
 
 // 1a tela convertida p/ NativeWind (Gluestack v2, migracao faseada). A LOGICA e
 // identica ao v1 — so a apresentacao trocou (RN + className + nw/Input +
@@ -32,7 +33,7 @@ export default function LoginScreen() {
   const handleSubmit = async () => {
     if (isLoading) return;
     const emailInvalid = email.length < 6 || !email.includes("@");
-    const passwordInvalid = password.length < 6;
+    const passwordInvalid = !senhaNoTamanho(password);
     setIsEmailInvalid(emailInvalid);
     setIsPasswordInvalid(passwordInvalid);
     if (emailInvalid || passwordInvalid) return;
@@ -113,13 +114,14 @@ export default function LoginScreen() {
             <NwInput
               label="Senha"
               icon={Lock}
-              placeholder="senha"
+              placeholder={SENHA_DICA}
               secure
+              maxLength={SENHA_MAX}
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
               testID="login-password"
-              error={isPasswordInvalid ? "Informe sua senha (mínimo 6 caracteres)" : ""}
+              error={isPasswordInvalid ? `Informe sua senha (${SENHA_DICA.toLowerCase()})` : ""}
             />
 
             {/* S7 LIGADO (backend fatia 1): codigo de 6 digitos por e-mail. */}

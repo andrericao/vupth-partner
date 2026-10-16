@@ -13,7 +13,7 @@ import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
 import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
-import { validatePassword } from "@lib/passwordValidation";
+import { validatePassword, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { ExcluirContaModal } from "@components/ExcluirContaModal";
@@ -460,7 +460,8 @@ export default function SettingsAccountScreen() {
               />
               <NwInput
                 label="Nova senha"
-                placeholder="Nova senha"
+                placeholder={SENHA_DICA}
+                maxLength={SENHA_MAX}
                 value={password}
                 onChangeText={setPassword}
                 secure

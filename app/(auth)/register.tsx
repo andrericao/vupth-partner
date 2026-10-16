@@ -9,7 +9,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
 import { segundosDeEspera, textoDaEspera } from "@lib/erroDeAcesso";
-import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
+import { validatePassword, getPasswordRules, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 
 export default function RegisterScreen() {
@@ -131,8 +131,9 @@ export default function RegisterScreen() {
             <NwInput
               label="Senha"
               icon={Lock}
-              placeholder="senha"
+              placeholder={SENHA_DICA}
               secure
+              maxLength={SENHA_MAX}
               value={password}
               onChangeText={(t) => {
                 setPassword(t);

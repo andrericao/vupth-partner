@@ -17,7 +17,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { avisar, confirmar } from "@lib/confirmar";
 import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
-import { validatePassword, getPasswordRules } from "@lib/passwordValidation";
+import { validatePassword, getPasswordRules, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 
 // Esqueci minha senha (S7, backend fatia 1 2026-07-20).
@@ -202,8 +202,9 @@ export default function ForgotPasswordScreen() {
 
               <NwInput
                 label="Nova senha"
-                placeholder="nova senha"
+                placeholder={SENHA_DICA}
                 secure
+                maxLength={SENHA_MAX}
                 value={password}
                 onChangeText={(t: string) => {
                   setPassword(t);
