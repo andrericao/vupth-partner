@@ -215,6 +215,10 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Nenhum cliente chegou pelo seu link ainda."
     label: "07.43e2 · indicacao · conta nova: nenhum cliente ainda"
+# a-receber-da-indicacao (Backend e5dc2e8): conta nova, nada a receber.
+- assertVisible:
+    text: "0 concluíram o corte · R\\$ 0,00 a receber"
+    label: "07.43e3 · indicacao · conta nova: R$ 0,00 a receber"
 - tapOn:
     id: "cupom-codigo"
     label: "07.43f · cupom · toca no campo Cupom"

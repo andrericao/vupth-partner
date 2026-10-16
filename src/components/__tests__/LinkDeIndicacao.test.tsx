@@ -13,6 +13,18 @@ describe("LinkDeIndicacao", () => {
     expect(getByTestId("link-indicacao-clientes").props.children).toBe("1 cliente chegou pelo seu link.");
   });
 
+  it("com o a receber, mostra a linha; sem, esconde", async () => {
+    const com = { ...MEU, credited_clients: 1, to_receive: 5 };
+    const r1 = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(com)} />);
+    expect((await r1.findByTestId("link-indicacao-receber")).props.children).toBe(
+      "1 concluiu o corte · R$ 5,00 a receber"
+    );
+    r1.unmount();
+    const r2 = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(MEU)} />);
+    await r2.findByTestId("link-indicacao-link");
+    expect(r2.queryByTestId("link-indicacao-receber")).toBeNull();
+  });
+
   it("Compartilhar manda o link", async () => {
     const compartilhar = jest.fn().mockResolvedValue(undefined);
     const { findByTestId } = render(
