@@ -197,11 +197,31 @@ appId: ${APP_ID}
 - assertVisible:
     text: "dúvidas e passo a passo do app"
     label: "07.43c · suporte · o botao Suporte esta no Perfil"
-# cupom-no-app (DEC-61): "Promocoes" nasce desligado (CUPOM_NO_AR). Ao ligar,
-# trocar este passo por tocar em Promocoes e usar um cupom de teste.
-- assertNotVisible:
+# cupom-no-app (DEC-61): ligado no staging (Backend fd2954b). Um cupom que
+# nao existe da a frase do 404; o cupom de verdade o Andre cria no painel.
+- scrollUntilVisible:
+    element: "Promoções"
+    direction: UP
+    label: "07.43d · cupom · rola ate Promoções"
+- tapOn:
     text: "Promoções"
-    label: "07.43d · cupom · Promoções ainda desligado"
+    label: "07.43e · cupom · toca em Promoções"
+- tapOn:
+    id: "cupom-codigo"
+    label: "07.43f · cupom · toca no campo Cupom"
+- inputText:
+    text: "NAOEXISTE${output.TAG}"
+    label: "07.43g · cupom · digita um cupom que nao existe"
+- hideKeyboard
+- tapOn:
+    id: "cupom-usar"
+    label: "07.43h · cupom · toca em Usar"
+- extendedWaitUntil:
+    visible: "Cupom não encontrado."
+    timeout: 20000
+    label: "07.43i · cupom · Cupom não encontrado."
+- back:
+    label: "07.43j · cupom · volta ao Perfil"
 
 - runFlow:
     file: ../apoio/sair_profissional.yaml
