@@ -1,7 +1,7 @@
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import * as SecureStore from "expo-secure-store";
-import { api, getApiErrorMessage, aoContaDesativada } from "@lib/api";
+import { api, getApiErrorMessage, aoContaDesativada, renovarSessao } from "@lib/api";
 
 // api.ts importa expo-secure-store no topo (interceptors) — mockar p/ o import.
 jest.mock("expo-secure-store", () => ({
@@ -285,6 +285,39 @@ describe("api — refresh em voo único (single-flight)", () => {
 // desativar-conta (c0f5b17): no "So consultar" o que mexe na operacao da 403
 // ACCOUNT_DEACTIVATED — o app oferece "Reativar" (o aviso mora no auth store;
 // o api so avisa quem se registrou, para nao importar o store aqui).
+// um-refresh-por-vez (PAR-17, log [SLOW] de 15/10: dois POST /auth/refresh
+// juntos): o refreshToken() do auth store e o interceptor dividem o MESMO voo.
+describe("api — renovarSessao, o voo unico de fora do interceptor", () => {
+  afterEach(() => {
+    apiMock.reset();
+    rawMock.reset();
+    jest.clearAllMocks();
+  });
+
+  it("chamada de fora junto com um 401: um refresh so", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockImplementation(async (k: string) =>
+      k === "vupth_refresh_token" ? "refresh-1" : "access-velho"
+    );
+    rawMock.onPost(/\/auth\/refresh$/).reply(
+      () => new Promise((r) => setTimeout(() => r([200, { access_token: "novo-a", refresh_token: "novo-r" }]), 20))
+    );
+    apiMock.onGet("/x").replyOnce(401).onGet("/x").reply(200, { ok: true });
+    const [tokens, resposta] = await Promise.all([renovarSessao(), api.get("/x")]);
+    expect(tokens.access_token).toBe("novo-a");
+    expect(resposta.data).toEqual({ ok: true });
+    expect(rawMock.history.post.length).toBe(1);
+  });
+
+  it("sem refresh salvo: rejeita sem apagar nada", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    await expect(renovarSessao()).rejects.toThrow("SEM_REFRESH");
+    apiMock.onGet("/y").reply(401);
+    await expect(api.get("/y")).rejects.toMatchObject({ response: { status: 401 } });
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+    expect(rawMock.history.post.length).toBe(0);
+  });
+});
+
 describe("api — 403 ACCOUNT_DEACTIVATED", () => {
   afterEach(() => {
     apiMock.reset();

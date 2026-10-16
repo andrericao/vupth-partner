@@ -1,6 +1,6 @@
 import { api } from "@lib/api";
 import {
-  CUPOM_NO_AR,
+  cupomNoAr,
   usarCupom,
   minhasCampanhas,
   mensagemDoCupom,
@@ -20,8 +20,10 @@ const BASE: Campanha = { id: "c1", name: "Lançamento", type: "DISCOUNT" };
 describe("campanhas", () => {
   afterEach(() => jest.clearAllMocks());
 
-  it("nasce desligado ate o push do Backend", () => {
-    expect(CUPOM_NO_AR).toBe(false);
+  it("ligado onde o Backend ja subiu as campanhas (staging), desligado na producao", () => {
+    expect(cupomNoAr("staging")).toBe(true);
+    expect(cupomNoAr("dev")).toBe(true);
+    expect(cupomNoAr("prod")).toBe(false);
   });
 
   it("usa o cupom sem espacos", async () => {

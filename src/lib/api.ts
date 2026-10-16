@@ -162,25 +162,42 @@ api.interceptors.request.use(async (config) => {
 // TOKENS QUE A VENCEDORA ACABOU DE SALVAR. O usuario era deslogado pela propria
 // renovacao que deu certo.
 //
-// Padrao ESPELHADO do client (src/services/api.ts deles): flag + fila. O
-// primeiro 401 renova; os que chegam enquanto isso entram na fila e reusam o
-// token novo — ou caem todos juntos, se a renovacao falhar. Um logout, nunca
-// uma corrida. Nao ha janela entre o `if (isRefreshing)` e o
-// `isRefreshing = true`: nao existe `await` entre os dois.
+// O primeiro 401 renova; os que chegam enquanto isso esperam a MESMA promessa
+// e reusam o token novo — ou caem todos juntos, se a renovacao falhar. Um
+// logout, nunca uma corrida. Nao ha janela entre o `if (!refreshEmVoo)` e a
+// atribuicao: nao existe `await` entre os dois.
 //
 // ⚠️ Uma diferenca DELIBERADA do client: o refresh continua pelo `axios` GLOBAL,
 // nao pelo `api`. Eles tem `isPublicPath` para a rota de auth; nos nao. Pelo
 // `api`, um 401 no proprio refresh entraria nesta fila esperando a si mesmo —
 // deadlock, com o app travado e sem erro nenhum.
-let isRefreshing = false;
-let failedQueue: { resolve: (token: string) => void; reject: (err: unknown) => void }[] = [];
+//
+// um-refresh-por-vez (PAR-17, 15/10 — log [SLOW] do staging: dois POST
+// /auth/refresh juntos). O interceptor ja tinha o voo unico, mas o
+// `refreshToken()` do auth store (socket, onboarding) fazia o SEU, em
+// paralelo. Agora os dois passam por `renovarSessao()`: uma promessa so em voo;
+// quem chega depois espera o mesmo resultado.
+type Tokens = { access_token: string; refresh_token: string };
+let refreshEmVoo: Promise<Tokens> | null = null;
 
-function processQueue(error: unknown, token: string | null) {
-  failedQueue.forEach((p) => {
-    if (error) p.reject(error);
-    else p.resolve(token!);
-  });
-  failedQueue = [];
+/** Sem refresh token salvo: nao ha o que renovar. */
+export const SEM_REFRESH = "SEM_REFRESH";
+
+export function renovarSessao(): Promise<Tokens> {
+  if (!refreshEmVoo) {
+    refreshEmVoo = (async () => {
+      const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
+      if (!refreshToken) throw new Error(SEM_REFRESH);
+      const { data } = await axios.post<Tokens>(`${BASE_URL}/auth/refresh`, { refresh_token: refreshToken });
+      await SecureStore.setItemAsync("vupth_access_token", data.access_token);
+      await SecureStore.setItemAsync("vupth_refresh_token", data.refresh_token);
+      return data;
+    })().finally(() => {
+      // Sem isto, o primeiro refresh prenderia o app para sempre.
+      refreshEmVoo = null;
+    });
+  }
+  return refreshEmVoo;
 }
 
 // desativar-conta (c0f5b17): no "So consultar" o que mexe na operacao da 403
@@ -214,49 +231,19 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Ja ha uma renovacao em voo: espera por ela em vez de disparar outra.
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({
-          resolve: (token: string) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(api(originalRequest));
-          },
-          reject,
-        });
-      });
-    }
-
     originalRequest._retry = true;
-    isRefreshing = true;
-
     try {
-      const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
-      if (!refreshToken) {
-        // Sem refresh salvo nao ha o que renovar — mas a fila tambem precisa
-        // saber, senao quem esperava fica pendurado para sempre.
-        processQueue(error, null);
-        return Promise.reject(error);
-      }
-
-      const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
-        refresh_token: refreshToken,
-      });
-
-      await SecureStore.setItemAsync("vupth_access_token", data.access_token);
-      await SecureStore.setItemAsync("vupth_refresh_token", data.refresh_token);
-
-      originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-      processQueue(null, data.access_token);
+      const { access_token } = await renovarSessao();
+      originalRequest.headers.Authorization = `Bearer ${access_token}`;
       return api(originalRequest);
-    } catch (refreshError) {
-      processQueue(refreshError, null);
-      await SecureStore.deleteItemAsync("vupth_access_token");
-      await SecureStore.deleteItemAsync("vupth_refresh_token");
+    } catch (refreshError: any) {
+      // Sem refresh salvo nao se apaga nada; refresh recusado derruba a sessao
+      // (um logout so, mesmo com varias requisicoes esperando).
+      if (refreshError?.message !== SEM_REFRESH) {
+        await SecureStore.deleteItemAsync("vupth_access_token");
+        await SecureStore.deleteItemAsync("vupth_refresh_token");
+      }
       return Promise.reject(error);
-    } finally {
-      // Sem isto, o primeiro refresh prenderia o app na fila para sempre.
-      isRefreshing = false;
     }
   }
 );

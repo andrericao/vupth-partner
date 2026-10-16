@@ -1,5 +1,8 @@
 # Atende e finaliza o proximo da fila (avaliar-so-sem-nota: o Client avalia
-# depois). env: CLIENTE (o nome no card — tem de ser o proximo)
+# depois). env: CLIENTE (o nome no card — tem de ser o proximo); PAGAMENTO
+# (opcional, finalizar-pendente-na-bateria, pedido do Client CLI-30): a resposta
+# a "O pagamento foi efetuado?" — "Sim, recebi" (padrao) ou "Ainda não", para o
+# Client ter uma etapa com o atendimento a pagar.
 appId: ${APP_ID}
 ---
 - tapOn:
@@ -22,9 +25,9 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/responder_pagamento.yaml
     env:
-      RESPOSTA: "Sim, recebi"
-      FIM: "Atendimento concluído e pago."
-    label: "PJ6.05a · pix · Sim, recebi"
+      RESPOSTA: "${typeof PAGAMENTO !== 'undefined' && PAGAMENTO ? PAGAMENTO : 'Sim, recebi'}"
+      FIM: "${typeof PAGAMENTO !== 'undefined' && PAGAMENTO == 'Ainda não' ? 'Atendimento concluído, aguardando o pagamento.*' : 'Atendimento concluído e pago.'}"
+    label: "PJ6.05a · pix · responde o pagamento (Sim, recebi ou Ainda não)"
 - extendedWaitUntil:
     notVisible: ${CLIENTE}
     timeout: 20000

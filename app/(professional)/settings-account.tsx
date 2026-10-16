@@ -13,7 +13,7 @@ import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
 import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
-import { validatePassword } from "@lib/passwordValidation";
+import { validatePassword, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
 import { rotaDeVoltaDosDados } from "@lib/routing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { ExcluirContaModal } from "@components/ExcluirContaModal";
@@ -320,11 +320,13 @@ export default function SettingsAccountScreen() {
               uri={minhaFoto.uri}
               rotulo={minhaFoto.uri ? "Trocar foto de perfil" : "Pôr foto de perfil"}
               testID="foto-perfil"
-              onEscolher={(acao) =>
+              titulo="Foto de perfil"
+              onEscolher={(acao, enquadrar) =>
                 editarFoto({
                   temFoto: !!minhaFoto.uri,
                   rota: ROTA_DO_PERFIL,
                   aoMudar: minhaFoto.trocar,
+                  enquadrar,
                   perguntar: async () => acao,
                   avisar,
                 })
@@ -458,7 +460,8 @@ export default function SettingsAccountScreen() {
               />
               <NwInput
                 label="Nova senha"
-                placeholder="Nova senha"
+                placeholder={SENHA_DICA}
+                maxLength={SENHA_MAX}
                 value={password}
                 onChangeText={setPassword}
                 secure

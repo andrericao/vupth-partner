@@ -1,11 +1,16 @@
 import { useEffect } from "react";
 import { Titulo } from "@components/Titulo";
 import { SkeletonTexto } from "@components/Skeleton";
-import { BackHandler, View, Text, Pressable } from "react-native";
+import { BackHandler, View, Text, Pressable, Image } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
 import type { ReactNode } from "react";
+
+// logo-no-menu (Andre, 16/10, DEC-42): por enquanto a logo e so o V
+// estilizado, sem o nome. O mesmo arquivo da abertura; quando a Design
+// entregar o icone-do-v, troca-se so o asset.
+const LOGO_V = require("../../assets/logo-v.png");
 
 type Props = {
   /** Titulo da tela. Sai em Archivo display, 26. */
@@ -21,6 +26,8 @@ type Props = {
   carregando?: boolean;
   /** Acao no canto direito, alinhada ao titulo (ex.: badge, "Agora não"). */
   action?: ReactNode;
+  /** O V estilizado antes do titulo (logo-no-menu: so no topo da Fila). */
+  marca?: boolean;
 };
 
 /**
@@ -52,7 +59,7 @@ type Props = {
  * topo. Padding lateral segue com a tela, porque o conteudo abaixo varia
  * (lista full-bleed x formulario).
  */
-export function ScreenHeader({ title, subtitle, onBack, action, carregando = false }: Props) {
+export function ScreenHeader({ title, subtitle, onBack, action, marca = false, carregando = false }: Props) {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -90,6 +97,20 @@ export function ScreenHeader({ title, subtitle, onBack, action, carregando = fal
           >
             <ChevronLeft size={20} color="#163300" />
           </Pressable>
+        ) : null}
+
+        {/* O V ocupa a faixa de 40 do botao voltar: o titulo nao muda de altura. */}
+        {marca ? (
+          <View className="w-10 h-10 items-center justify-center">
+            <Image
+              source={LOGO_V}
+              testID="logo-v"
+              accessibilityRole="image"
+              accessibilityLabel="Vupth"
+              style={{ width: 32, height: 32 }}
+              resizeMode="contain"
+            />
+          </View>
         ) : null}
 
         {/* So o TITULO divide a linha com os botoes. */}

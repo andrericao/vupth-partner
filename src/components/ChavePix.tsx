@@ -9,14 +9,16 @@ import {
   apagarChavePix,
   chaveParaMostrar,
   erroDaChave,
-  erroDoTitular,
   obterChavePix,
   salvarChavePix,
+  titularDoPix,
   type ChavePix as Chave,
   type TipoDeChave,
 } from "@lib/pix";
 
 type Props = {
+  /** O nome da conta, que vai como titular sem perguntar (pix-sem-nome). */
+  nomeDaConta?: string | null;
   obter?: typeof obterChavePix;
   salvar?: typeof salvarChavePix;
   apagar?: typeof apagarChavePix;
@@ -35,8 +37,10 @@ const TECLADO: Record<TipoDeChave, "default" | "email-address" | "phone-pad" | "
  * pagamento-pix (contrato do Backend 2a2b0ec): a chave Pix do profissional. O
  * cliente ve a chave e o titular ao pagar (Pix copia-e-cola e QR). A aleatoria
  * vem primeiro e recomendada; o CPF por ultimo, com aviso (Andre, 10/10).
+ * pix-sem-nome (PAR-6, 15/10): so a chave; o titular vai sozinho.
  */
 export function ChavePix({
+  nomeDaConta,
   obter = obterChavePix,
   salvar = salvarChavePix,
   apagar = apagarChavePix,
@@ -48,8 +52,7 @@ export function ChavePix({
   const [editando, setEditando] = useState(false);
   const [tipo, setTipo] = useState<TipoDeChave>("RANDOM");
   const [texto, setTexto] = useState("");
-  const [titular, setTitular] = useState("");
-  const [erros, setErros] = useState<{ chave?: string | null; titular?: string | null; api?: string }>({});
+  const [erros, setErros] = useState<{ chave?: string | null; api?: string }>({});
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
@@ -68,12 +71,12 @@ export function ChavePix({
     );
 
   async function aoSalvar() {
-    const e = { chave: erroDaChave(tipo, texto), titular: erroDoTitular(titular) };
+    const e = { chave: erroDaChave(tipo, texto) };
     setErros(e);
-    if (e.chave || e.titular) return;
+    if (e.chave) return;
     setSalvando(true);
     try {
-      const nova = await salvar({ tipo, chave: texto, titular });
+      const nova = await salvar({ tipo, chave: texto, titular: titularDoPix(chave?.holder_name || nomeDaConta) });
       setChave(nova);
       setEditando(false);
     } catch (err) {
@@ -102,7 +105,6 @@ export function ChavePix({
   function aoTrocar() {
     setTipo(chave?.key_type ?? "RANDOM");
     setTexto("");
-    setTitular(chave?.holder_name ?? "");
     setErros({});
     setEditando(true);
   }
@@ -113,8 +115,6 @@ export function ChavePix({
         <View className="bg-vupth-surface rounded-card p-4 gap-1">
           <Text className="font-body text-xs text-vupth-textSecondary">Sua chave</Text>
           <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{chaveParaMostrar(chave)}</Text>
-          <Text className="font-body text-xs text-vupth-textSecondary mt-2">Titular</Text>
-          <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{chave.holder_name}</Text>
         </View>
         {erros.api && <Text className="font-body text-sm text-vupth-danger">{erros.api}</Text>}
         <NwButton title="Trocar chave" variant="vupthOutline" onPress={aoTrocar} testID="pix-trocar" />
@@ -160,14 +160,6 @@ export function ChavePix({
         keyboardType={TECLADO[tipo]}
         error={erros.chave ?? undefined}
         testID="pix-chave"
-      />
-      <NwInput
-        label="Nome do titular (até 25 letras)"
-        value={titular}
-        onChangeText={setTitular}
-        maxLength={40}
-        error={erros.titular ?? undefined}
-        testID="pix-titular"
       />
       {erros.api && <Text className="font-body text-sm text-vupth-danger">{erros.api}</Text>}
       <NwButton title="Salvar chave" onPress={aoSalvar} isLoading={salvando} testID="pix-salvar" />

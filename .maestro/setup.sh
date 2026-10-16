@@ -160,7 +160,7 @@ fi
 
 echo ""
 # 6. O commit esperado: a bateria confere o do app antes de comecar (Andre,
-#    03/10). O OTA da dev sai do GitHub (eas-update.yml) com o commit do push;
+#    03/10). O OTA da dev sai do GitHub (job ota do ci.yml, depois do CI verde) com o commit do push;
 #    push so de .maestro, .md ou docs nao publica OTA (paths-ignore). Vale,
 #    entao, qualquer commit da origin/dev desde o ultimo que mudou o app.
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"

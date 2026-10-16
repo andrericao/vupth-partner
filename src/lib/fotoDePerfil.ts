@@ -34,11 +34,19 @@ type Picker = Pick<
 
 export type OrigemDaFoto = "galeria" | "camera";
 
-async function reduzirPadrao(uri: string): Promise<{ uri: string }> {
+/** A foto saida da galeria/camera, com o tamanho original (quando o sistema diz). */
+export type FotoEscolhida = { uri: string; width?: number; height?: number };
+/** O quadrado escolhido no "Ajuste a foto", em pixels da original. */
+export type Recorte = { originX: number; originY: number; width: number; height: number };
+/** Mostra o "Ajuste a foto": null = Cancelar; { recorte } = Usar foto. */
+export type Enquadrar = (foto: FotoEscolhida) => Promise<{ recorte?: Recorte } | null>;
+
+async function reduzirPadrao(uri: string, recorte?: Recorte): Promise<{ uri: string }> {
   try {
     const M = carregarImageManipulator();
     if (!M) return { uri }; // binario sem o modulo: sobe a original
-    const r = await M.manipulateAsync(uri, [{ resize: { width: LADO } }], {
+    const acoes = [...(recorte ? [{ crop: recorte }] : []), { resize: { width: LADO } }];
+    const r = await M.manipulateAsync(uri, acoes, {
       compress: QUALIDADE,
       format: M.SaveFormat.JPEG,
     });
@@ -51,15 +59,18 @@ async function reduzirPadrao(uri: string): Promise<{ uri: string }> {
 }
 
 /**
- * Abre a galeria ou a camera, recorta quadrada e reduz. null = a pessoa
- * desistiu. A camera entrou no build 1.4.0 junto com a galeria (26/09): no
- * salao, tirar a foto na hora e o caminho natural.
+ * Abre a galeria ou a camera, mostra o "Ajuste a foto" (enquadrar), recorta
+ * quadrada e reduz. null = a pessoa desistiu. A camera entrou no build 1.4.0
+ * junto com a galeria (26/09): no salao, tirar a foto na hora e o caminho
+ * natural. foto-ux (Andre, 15/10): o recorte do Android (allowsEditing) saiu —
+ * so icones, "os botoes nao sao claros"; o recorte e o nosso, com texto.
  */
 export async function escolherFoto(
   deps: {
     origem?: OrigemDaFoto;
     picker?: Picker;
-    reduzir?: (uri: string) => Promise<{ uri: string }>;
+    reduzir?: (uri: string, recorte?: Recorte) => Promise<{ uri: string }>;
+    enquadrar?: Enquadrar;
   } = {}
 ): Promise<{ uri: string } | null> {
   const picker = deps.picker ?? carregarImagePicker();
@@ -77,10 +88,26 @@ export async function escolherFoto(
         : "Permita o acesso à galeria para escolher a foto."
     );
   }
-  const opcoes = { mediaTypes: ["images" as const], allowsEditing: true, aspect: [1, 1] as [number, number], quality: 1 };
+  const opcoes = { mediaTypes: ["images" as const], allowsEditing: false, quality: 1 };
   const r = camera ? await picker.launchCameraAsync(opcoes) : await picker.launchImageLibraryAsync(opcoes);
-  if (r.canceled || !r.assets?.[0]) return null;
-  return reduzir(r.assets[0].uri);
+  const asset = r.canceled ? undefined : r.assets?.[0];
+  if (!asset) return null;
+  const foto: FotoEscolhida = { uri: asset.uri, width: asset.width, height: asset.height };
+  const enquadrado = deps.enquadrar ? await deps.enquadrar(foto) : { recorte: recorteDoCentro(foto) };
+  if (!enquadrado) return null;
+  return reduzir(asset.uri, enquadrado.recorte);
+}
+
+/** Sem a tela de ajuste: o quadrado do meio (sem tamanho conhecido, nada). */
+export function recorteDoCentro(foto: FotoEscolhida): Recorte | undefined {
+  if (!foto.width || !foto.height) return undefined;
+  const lado = Math.min(foto.width, foto.height);
+  return {
+    originX: Math.round((foto.width - lado) / 2),
+    originY: Math.round((foto.height - lado) / 2),
+    width: lado,
+    height: lado,
+  };
 }
 
 /** Sobe a foto ja reduzida; devolve a URL publica nova. */
@@ -169,6 +196,7 @@ export function editarFoto(a: {
   rota: string;
   aoMudar: (uri: string | null) => void;
   titulo?: string;
+  enquadrar?: Enquadrar;
   perguntar: (texto: {
     titulo: string;
     mensagem: string;
@@ -188,7 +216,7 @@ export function editarFoto(a: {
           { texto: "Tirar foto", valor: "camera" as const },
         ],
       }),
-    escolher: (origem) => escolherFoto({ origem }),
+    escolher: (origem) => escolherFoto({ origem, enquadrar: a.enquadrar }),
     enviar: (uri) => enviarFoto(uri, { rota: a.rota }),
     remover: () => removerFoto(a.rota),
     aoMudar: a.aoMudar,

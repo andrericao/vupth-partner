@@ -1,7 +1,7 @@
 # Grava a foto pela galeria (foto-pela-bateria, Andre 03/10). env: QUAL
 # (foto-perfil | foto-loja — o testID do FotoEditavel). O setup.sh empurrou a
 # imagem de teste (apoio/foto_teste.png) para o celular; e a mais recente.
-# O seletor de fotos e o recorte sao do Android — os seletores aceitam os dois
+# O seletor de fotos e do Android (o recorte e do app, foto-ux) — os seletores aceitam os dois
 # idiomas e as variacoes mais comuns.
 appId: ${APP_ID}
 ---
@@ -28,27 +28,23 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           point: "20%,31%"
-# Recorte (allowsEditing): confirma, se a tela aparecer. Espera ela abrir antes
-# de decidir — o "when" sozinho olhava cedo demais e o recorte ficava aberto
-# (log 06/10, 07.44).
+# foto-ux (Andre, 15/10): o recorte do Android saiu; o "Ajuste a foto" e do
+# app, com Cancelar e Usar foto escritos.
 - extendedWaitUntil:
-    visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"
-    timeout: 10000
+    visible:
+      id: "${QUAL}-usar"
+    timeout: 20000
     optional: true
 - runFlow:
     when:
-      visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"
+      visible:
+        id: "${QUAL}-usar"
     commands:
-      - tapOn: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR|Concluído|Done|OK)"
-# O recorte pode ignorar o 1o toque enquanto carrega a imagem (log 10/10 15:00,
-# 08.36: o CROP ficou na tela): espera e toca de novo.
-- waitForAnimationToEnd:
-    timeout: 3000
-- runFlow:
-    when:
-      visible: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR)"
-    commands:
-      - tapOn: "(Crop|CROP|Cortar|CORTAR|Recortar|RECORTAR)"
+      - assertVisible: "Ajuste a foto"
+      - assertVisible:
+          id: "${QUAL}-recorte-cancelar"
+      - tapOn:
+          id: "${QUAL}-usar"
 - runFlow:
     file: fechar_aviso.yaml
 # Enviou: o rotulo vira "Editar foto"

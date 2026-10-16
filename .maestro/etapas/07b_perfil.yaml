@@ -33,6 +33,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "foto-perfil-galeria"
     label: "07.28 · foto-com-botao-claro · confere Escolher da galeria"
+# foto-ux (Andre, 15/10): a folha tem titulo
+- assertVisible:
+    text: "Foto de perfil"
+    label: "07.28a · foto-ux · a folha tem o titulo Foto de perfil"
 - tapOn:
     text: "Cancelar"
     label: "07.29 · foto-com-botao-claro · toca em Cancelar"
@@ -76,13 +80,10 @@ appId: ${APP_ID}
     text: "pix_m${output.TAG}@teste.com"
     label: "07.56 · pix · digita o e-mail"
 - hideKeyboard
-- tapOn:
+# pix-sem-nome (PAR-6, Andre 15/10): so a chave, sem o campo do titular
+- assertNotVisible:
     id: "pix-titular"
-    label: "07.57 · pix · toca no titular"
-- inputText:
-    text: "Prof ${output.TAG}"
-    label: "07.58 · pix · digita o titular"
-- hideKeyboard
+    label: "07.57 · pix-sem-nome · sem o campo do nome"
 - tapOn:
     id: "pix-salvar"
     label: "07.59 · pix · toca em Salvar chave"
@@ -196,11 +197,44 @@ appId: ${APP_ID}
 - assertVisible:
     text: "dúvidas e passo a passo do app"
     label: "07.43c · suporte · o botao Suporte esta no Perfil"
-# cupom-no-app (DEC-61): "Promocoes" nasce desligado (CUPOM_NO_AR). Ao ligar,
-# trocar este passo por tocar em Promocoes e usar um cupom de teste.
-- assertNotVisible:
+# cupom-no-app (DEC-61): ligado no staging (Backend fd2954b). Um cupom que
+# nao existe da a frase do 404; o cupom de verdade o Andre cria no painel.
+- scrollUntilVisible:
+    element: "Promoções"
+    direction: UP
+    label: "07.43d · cupom · rola ate Promoções"
+- tapOn:
     text: "Promoções"
-    label: "07.43d · cupom · Promoções ainda desligado"
+    label: "07.43e · cupom · toca em Promoções"
+# link-de-indicacao (DEC-70, Backend 3fdcec1): o link do profissional em cima.
+- extendedWaitUntil:
+    visible:
+      id: "link-indicacao"
+    timeout: 20000
+    label: "07.43e1 · indicacao · o bloco Seu link aparece"
+- assertVisible:
+    text: "Nenhum cliente chegou pelo seu link ainda."
+    label: "07.43e2 · indicacao · conta nova: nenhum cliente ainda"
+# a-receber-da-indicacao (Backend e5dc2e8): conta nova, nada a receber.
+- assertVisible:
+    text: "0 concluíram o corte · R\\$ 0,00 a receber"
+    label: "07.43e3 · indicacao · conta nova: R$ 0,00 a receber"
+- tapOn:
+    id: "cupom-codigo"
+    label: "07.43f · cupom · toca no campo Cupom"
+- inputText:
+    text: "NAOEXISTE${output.TAG}"
+    label: "07.43g · cupom · digita um cupom que nao existe"
+- hideKeyboard
+- tapOn:
+    id: "cupom-usar"
+    label: "07.43h · cupom · toca em Usar"
+- extendedWaitUntil:
+    visible: "Cupom não encontrado."
+    timeout: 20000
+    label: "07.43i · cupom · Cupom não encontrado."
+- back:
+    label: "07.43j · cupom · volta ao Perfil"
 
 - runFlow:
     file: ../apoio/sair_profissional.yaml

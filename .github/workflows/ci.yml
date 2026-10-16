@@ -18,8 +18,14 @@ on:
   pull_request:
     branches: [dev, main]
 
+# Um run por push (Andre, 16/10: "todos os projetos que sobem rodam duas
+# vezes"): o OTA era um workflow a parte (eas-update.yml), com o seu proprio
+# npm ci, e publicava mesmo com o CI vermelho. Agora e o job `ota` daqui, que
+# so roda depois do `lint-and-test` verde, e so em push (nunca em PR).
+#
 # Pushes em sequencia cancelam os runs anteriores da mesma branch (evita gastar
-# minutos com builds que ja seriam descartados). So o run mais novo sobrevive.
+# minutos com builds que ja seriam descartados). So o run mais novo sobrevive
+# (e so o ultimo commit e publicado no OTA).
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -48,3 +54,46 @@ jobs:
 
       - name: Config / native sanity (expo-doctor)
         run: npx expo-doctor
+
+  # EAS Update (OTA): publica a camada JavaScript (telas/logica/fixes) pela
+  # internet, sem rebuild de loja.
+  # push em dev  -> branch/canal "preview"    (testers, APK preview)
+  # push em main -> branch/canal "production"  (usuarios finais)
+  # Nao atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK
+  # exigem um novo build (o runtimeVersion muda e o update deixa de casar).
+  ota:
+    needs: lint-and-test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # A mensagem do commit vai por env var (nao interpolada direto no shell):
+      # mensagens multi-linha / com aspas quebram o `--message "${{ ... }}"`.
+      # --environment: o OTA le as variaveis do ambiente do EAS (preview na dev,
+      # production na main), como o build — e assim que o EXPO_PUBLIC_SENTRY_DSN
+      # entra no bundle sem ir ao repositorio (sentry-no-ota).
+      - name: Publish OTA (dev -> preview)
+        if: github.ref == 'refs/heads/dev'
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: eas update --branch preview --environment preview --message "$MSG" --non-interactive
+
+      - name: Publish OTA (main -> production)
+        if: github.ref == 'refs/heads/main'
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: eas update --branch production --environment production --message "$MSG" --non-interactive

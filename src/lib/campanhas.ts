@@ -1,14 +1,20 @@
-import { api, getApiErrorMessage } from "@lib/api";
+import { api, getApiErrorMessage, API_ENV } from "@lib/api";
+import type { ApiEnv } from "@lib/apiEnv";
 
 // cupom-no-app (DEC-61, DEC-63; contrato do Backend 4a94610): o profissional ou
 // o dono digita o cupom que o Andre deu e ve o beneficio. Texto curto: campo e
 // um botao de uma palavra.
 
 /**
- * O endpoint das campanhas ja esta no ar? Fica `false` ate o push do Backend
- * (branch `campanhas`). Ligado, o item "Promoções" aparece no Perfil e no Menu.
+ * O endpoint das campanhas ja esta no ar? Ligado, o item "Promoções" aparece
+ * no Perfil e no Menu. 15/10 23h: o Backend subiu as campanhas (fd2954b
+ * ce56d26 b625f19) e o staging responde GET /campaigns/active; a producao
+ * (Railway) ainda nao — la fica desligado ate o deploy.
  */
-export const CUPOM_NO_AR = false;
+export function cupomNoAr(env: ApiEnv = API_ENV): boolean {
+  return env !== "prod";
+}
+export const CUPOM_NO_AR = cupomNoAr();
 
 export type Campanha = {
   id: string;

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
-import { api, aoContaDesativada } from "@lib/api";
+import { api, aoContaDesativada, renovarSessao } from "@lib/api";
 import { getRolesFromToken, decodeToken } from "@lib/jwt";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -138,18 +138,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
     if (!refreshToken) return;
 
-    const { data } = await api.post("/auth/refresh", {
-      refresh_token: refreshToken,
-    });
-
-    await SecureStore.setItemAsync(
-      "vupth_access_token",
-      data.access_token
-    );
-    await SecureStore.setItemAsync(
-      "vupth_refresh_token",
-      data.refresh_token
-    );
+    // um-refresh-por-vez (PAR-17): o mesmo voo do interceptor, nunca outro.
+    const data = await renovarSessao();
 
     const roles = getRolesFromToken(data.access_token);
 

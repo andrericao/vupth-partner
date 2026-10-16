@@ -1,3 +1,4 @@
+import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
@@ -328,12 +329,16 @@ describe("auth.store", () => {
 
       (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("old-refresh");
 
-      mock.onPost("/auth/refresh").reply(200, {
+      // um-refresh-por-vez (PAR-17): o store usa o mesmo voo do interceptor
+      // (renovarSessao), pelo axios cru.
+      const raw = new MockAdapter(axios);
+      raw.onPost(/\/auth\/refresh$/).reply(200, {
         access_token: OWNER_TOKEN,
         refresh_token: "new-refresh",
       });
 
       await useAuthStore.getState().refreshToken();
+      raw.restore();
 
       expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
         "vupth_access_token",
@@ -656,8 +661,10 @@ describe("sem usuario na memoria", () => {
 
   it("refreshToken sem usuario deixa o user nulo", async () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("r-salvo");
-    mock.onPost("/auth/refresh").reply(200, { access_token: CLIENT_TOKEN, refresh_token: "r2" });
+    const raw = new MockAdapter(axios);
+    raw.onPost(/\/auth\/refresh$/).reply(200, { access_token: CLIENT_TOKEN, refresh_token: "r2" });
     await useAuthStore.getState().refreshToken();
+    raw.restore();
     expect(useAuthStore.getState().user).toBeNull();
   });
 

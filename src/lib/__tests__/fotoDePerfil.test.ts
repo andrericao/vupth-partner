@@ -52,15 +52,35 @@ describe("escolherFoto", () => {
 
   beforeEach(() => reduzir.mockClear());
 
-  it("escolhe, recorta quadrada e reduz para 800 px / 0.8", async () => {
-    const p = picker({ canceled: false, assets: [{ uri: "file:///orig.jpg" }] });
+  it("escolhe sem o recorte do Android e, sem tela de ajuste, recorta o quadrado do meio", async () => {
+    const p = picker({ canceled: false, assets: [{ uri: "file:///orig.jpg", width: 1200, height: 800 }] });
     await expect(escolherFoto({ picker: p as any, reduzir })).resolves.toEqual({
       uri: "file:///reduzida.jpg",
     });
-    expect(p.launchImageLibraryAsync).toHaveBeenCalledWith(
-      expect.objectContaining({ allowsEditing: true, aspect: [1, 1] })
-    );
-    expect(reduzir).toHaveBeenCalledWith("file:///orig.jpg");
+    // foto-ux (Andre, 15/10): o recorte do Android so tinha icones
+    expect(p.launchImageLibraryAsync).toHaveBeenCalledWith(expect.objectContaining({ allowsEditing: false }));
+    expect(reduzir).toHaveBeenCalledWith("file:///orig.jpg", { originX: 200, originY: 0, width: 800, height: 800 });
+  });
+
+  it("sem o tamanho da foto: reduz sem recortar", async () => {
+    const p = picker({ canceled: false, assets: [{ uri: "file:///orig.jpg" }] });
+    await escolherFoto({ picker: p as any, reduzir });
+    expect(reduzir).toHaveBeenCalledWith("file:///orig.jpg", undefined);
+  });
+
+  it("o 'Ajuste a foto' recebe a foto com o tamanho e o recorte dele vale", async () => {
+    const p = picker({ canceled: false, assets: [{ uri: "file:///orig.jpg", width: 600, height: 900 }] });
+    const recorte = { originX: 0, originY: 100, width: 600, height: 600 };
+    const enquadrar = jest.fn(async () => ({ recorte }));
+    await escolherFoto({ picker: p as any, reduzir, enquadrar });
+    expect(enquadrar).toHaveBeenCalledWith({ uri: "file:///orig.jpg", width: 600, height: 900 });
+    expect(reduzir).toHaveBeenCalledWith("file:///orig.jpg", recorte);
+  });
+
+  it("Cancelar no 'Ajuste a foto': nada sobe", async () => {
+    const p = picker({ canceled: false, assets: [{ uri: "file:///orig.jpg", width: 10, height: 10 }] });
+    await expect(escolherFoto({ picker: p as any, reduzir, enquadrar: async () => null })).resolves.toBeNull();
+    expect(reduzir).not.toHaveBeenCalled();
   });
 
   it("cancelou: nada", async () => {
@@ -168,7 +188,7 @@ describe("escolherFoto pela camera", () => {
   it("pede a permissao da camera, tira, recorta e reduz", async () => {
     const p = camera({ canceled: false, assets: [{ uri: "file:///c.jpg" }] });
     await expect(escolherFoto({ origem: "camera", picker: p as any, reduzir })).resolves.toEqual({ uri: "file:///r.jpg" });
-    expect(p.launchCameraAsync).toHaveBeenCalledWith(expect.objectContaining({ allowsEditing: true, aspect: [1, 1] }));
+    expect(p.launchCameraAsync).toHaveBeenCalledWith(expect.objectContaining({ allowsEditing: false }));
     expect(p.launchImageLibraryAsync).not.toHaveBeenCalled();
   });
 
@@ -184,6 +204,23 @@ jest.mock("expo-image-manipulator", () => ({
 }));
 
 describe("reducao padrao e envio na web", () => {
+  it("com recorte: corta antes de reduzir", async () => {
+    const { manipulateAsync } = jest.requireMock("expo-image-manipulator");
+    const picker = {
+      requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ granted: true })),
+      launchImageLibraryAsync: jest.fn(async () => ({
+        canceled: false,
+        assets: [{ uri: "file:///o.jpg", width: 100, height: 300 }],
+      })),
+    };
+    await escolherFoto({ picker: picker as any });
+    expect(manipulateAsync).toHaveBeenLastCalledWith(
+      "file:///o.jpg",
+      [{ crop: { originX: 0, originY: 100, width: 100, height: 100 } }, { resize: { width: 800 } }],
+      { compress: 0.8, format: "jpeg" }
+    );
+  });
+
   it("sem reduzir injetado: 800 px de largura, JPEG a 0.8", async () => {
     const { manipulateAsync } = jest.requireMock("expo-image-manipulator");
     const picker = {
@@ -315,5 +352,24 @@ describe("editarFoto", () => {
     await editarFoto({ temFoto: false, rota: "/profile/me/photo", aoMudar: jest.fn(), perguntar, avisar });
     expect((perguntar.mock.calls[0] as any)[0].opcoes.map((o: any) => o.valor)).toEqual(["galeria", "camera"]);
     expect(avisar).toHaveBeenCalledWith(expect.objectContaining({ titulo: "Foto de perfil" }));
+  });
+
+  it("passa o 'Ajuste a foto' para a escolha; Cancelar nele nao sobe nada", async () => {
+    jest.spyOn(ImagePicker, "requestMediaLibraryPermissionsAsync").mockResolvedValue({ granted: true } as any);
+    jest
+      .spyOn(ImagePicker, "launchImageLibraryAsync")
+      .mockResolvedValue({ canceled: false, assets: [{ uri: "file:///g.jpg", width: 4, height: 4 }] } as any);
+    const enquadrar = jest.fn(async () => null);
+    mockPut.mockReset();
+    await editarFoto({
+      temFoto: false,
+      rota: "/profile/me/photo",
+      aoMudar: jest.fn(),
+      enquadrar,
+      perguntar: async () => "galeria",
+      avisar: jest.fn(async () => undefined),
+    });
+    expect(enquadrar).toHaveBeenCalledWith({ uri: "file:///g.jpg", width: 4, height: 4 });
+    expect(mockPut).not.toHaveBeenCalled();
   });
 });
