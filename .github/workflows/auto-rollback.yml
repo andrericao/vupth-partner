@@ -7,7 +7,7 @@ name: Auto-rollback on red (DESLIGADO 2026-07-17)
 #
 # A rede real e o hook pre-push (lint + typecheck + jest --coverage + expo-doctor),
 # que agora barra TUDO antes do push. A protecao de PRODUCAO correta (a fazer) e
-# condicionar o OTA (eas-update) ao CI verde + branch protection no main; e a
+# condicionar o OTA ao CI verde (feito em 16/10: job ota do ci.yml) + branch protection no main; e a
 # recuperacao de um OTA ruim e `eas update:republish` do ultimo bom (nao git revert).
 #
 # Mantido como referencia; so roda por acionamento MANUAL — nunca mais no automatico.
