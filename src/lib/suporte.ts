@@ -12,12 +12,11 @@ export type PerfilDoSuporte = "profissional" | "dono";
 
 /**
  * O link do Suporte para quem esta logado: "cada um levando pro respectivo
- * perfil" (Andre, 15/10). As paginas por perfil nascem com o home-por-perfil
- * do Suporte; ate la, os dois levam a home, onde ja esta a secao
- * "Para profissionais e donos".
+ * perfil" (Andre, 15/10). A home de cada perfil veio com o home-por-perfil
+ * do Suporte (09c5de7): /profissional e /dono.
  */
-export function linkDoSuporte(_perfil: PerfilDoSuporte): string {
-  return SUPORTE_URL;
+export function linkDoSuporte(perfil: PerfilDoSuporte): string {
+  return `${SUPORTE_URL}${perfil}`;
 }
 
 /** Abre o site de suporte no navegador; falhou, nao derruba a tela. */

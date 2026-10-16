@@ -10,15 +10,17 @@ describe("suporte", () => {
     expect(SUPORTE_URL).toBe("https://vupth-support.pages.dev/");
   });
 
-  it("profissional e dono vao ao site de suporte", () => {
-    expect(linkDoSuporte("profissional")).toBe(SUPORTE_URL);
-    expect(linkDoSuporte("dono")).toBe(SUPORTE_URL);
+  it("profissional e dono vao a home do proprio perfil", () => {
+    expect(linkDoSuporte("profissional")).toBe(
+      "https://vupth-support.pages.dev/profissional",
+    );
+    expect(linkDoSuporte("dono")).toBe("https://vupth-support.pages.dev/dono");
   });
 
   it("abre o link no navegador", async () => {
     const abrir = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await abrirSuporte("dono");
-    expect(abrir).toHaveBeenCalledWith(SUPORTE_URL);
+    expect(abrir).toHaveBeenCalledWith("https://vupth-support.pages.dev/dono");
   });
 
   it("sem navegador, nao lanca", async () => {
