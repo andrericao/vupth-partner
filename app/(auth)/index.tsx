@@ -1,4 +1,5 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { LinksLegais } from "@components/LinksLegais";
 import { router } from "expo-router";
 import { Store, User, ChevronRight } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
@@ -120,6 +121,7 @@ export default function RoleChoiceScreen() {
         </View>
       )}
 
+      <LinksLegais className="mt-8" />
       <CommitDoCodigo />
     </ScrollView>
   );

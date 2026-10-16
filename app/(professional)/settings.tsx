@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { LinksLegais } from "@components/LinksLegais";
 import { BarraDeStatusClara } from "@components/BarraDeStatus";
 import { SkeletonTexto } from "@components/Skeleton";
 import { Avatar } from "@components/Avatar";
@@ -355,6 +356,7 @@ export default function ProfessionalSettingsScreen() {
               Sair da conta
             </Text>
           </Pressable>
+          <LinksLegais className="mt-2" />
   
         </View>
       </ScrollView>

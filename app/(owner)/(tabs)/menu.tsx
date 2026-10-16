@@ -1,4 +1,5 @@
 
+import { LinksLegais } from "@components/LinksLegais";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
@@ -305,6 +306,7 @@ export default function OwnerMenuScreen() {
             >
               <Text className="font-body text-sm font-semibold text-vupth-danger">Sair da conta</Text>
             </Pressable>
+            <LinksLegais className="mt-2" />
           </View>
         </View>
       </ScrollView>

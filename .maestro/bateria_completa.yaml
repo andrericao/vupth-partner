@@ -75,6 +75,16 @@ env:
     visible: "Como você vai usar o Vupth?"
     timeout: 120000
     label: "00.12e · abertura-v-pulsando · chega na entrada"
+# termos-no-rodape (PAR-4, Andre 15/10): Termos e Privacidade no rodape da
+# entrada (abrem o web do Client; o navegador fica so a mao).
+- scrollUntilVisible:
+    element:
+      id: "link-termos"
+    direction: DOWN
+    label: "00.12f · termos-no-rodape · rola ate os links legais"
+- assertVisible:
+    id: "link-privacidade"
+    label: "00.12g · termos-no-rodape · Termos de uso e Política de privacidade"
 
 - runFlow:
     file: etapas/01a_dono_cadastra_a_loja.yaml
