@@ -55,6 +55,26 @@ env:
     env:
       INSTALADO: ${maestro.copiedText}
     label: "00.12 · confere a versão: o commit instalado é o esperado?"
+# abertura-v-pulsando (PAR-2, Andre 15/10): o V pulsa, sem spinner. Com o
+# staging acordado a abertura e rapida — por isso a espera e opcional; o
+# desenho do pulso fica no jest e no olho do Andre.
+- stopApp:
+    label: "00.12a · abertura-v-pulsando · fecha o app"
+- launchApp:
+    label: "00.12b · abertura-v-pulsando · reabre"
+- extendedWaitUntil:
+    visible:
+      id: "abertura-v-pulsando"
+    timeout: 4000
+    optional: true
+    label: "00.12c · abertura-v-pulsando · o V pulsando (se a abertura durar)"
+- assertNotVisible:
+    id: "abertura-carregando"
+    label: "00.12d · abertura-v-pulsando · sem spinner"
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 120000
+    label: "00.12e · abertura-v-pulsando · chega na entrada"
 
 - runFlow:
     file: etapas/01a_dono_cadastra_a_loja.yaml

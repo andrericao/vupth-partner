@@ -1,4 +1,5 @@
-import { ActivityIndicator, Image, View, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, Easing, View, Text } from "react-native";
 import { NwButton } from "@components/nw/Button";
 import { CommitDoCodigo } from "@components/CommitDoCodigo";
 
@@ -11,8 +12,12 @@ import { CommitDoCodigo } from "@components/CommitDoCodigo";
 // servidor, API ou tempo de espera. O portao continua por baixo (no staging o
 // cold start do Render segue existindo). Quando a Design entregar o V da
 // abertura (icone-do-v), troca-se so o arquivo.
+//
+// abertura-v-pulsando (PAR-2, Andre 15/10): sem spinner — o V sem fundo
+// pulsa de leve e devagar, so para dar a sensacao de carregando. O Client
+// copia esta abertura (DEC-68).
 
-const FOREST = "#163300"; // [marca-vupth] $forest — o ActivityIndicator nao aceita token
+const PULSO_MS = 1100; // meia volta: some de leve e volta, devagar
 const LOGO_V = require("../../assets/logo-v.png");
 
 type Props = {
@@ -20,18 +25,42 @@ type Props = {
   onRetry?: () => void;
 };
 
+function usePulso(ativo: boolean) {
+  const [valor] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (!ativo) {
+      valor.setValue(0);
+      return;
+    }
+    const ida = { duration: PULSO_MS, easing: Easing.inOut(Easing.ease), useNativeDriver: true };
+    const laco = Animated.loop(
+      Animated.sequence([
+        Animated.timing(valor, { ...ida, toValue: 1 }),
+        Animated.timing(valor, { ...ida, toValue: 0 }),
+      ])
+    );
+    laco.start();
+    return () => laco.stop();
+  }, [ativo, valor]);
+  return {
+    opacity: valor.interpolate({ inputRange: [0, 1], outputRange: [1, 0.55] }),
+    transform: [{ scale: valor.interpolate({ inputRange: [0, 1], outputRange: [1, 0.94] }) }],
+  };
+}
+
 export function ServerWarmup({ failed, onRetry }: Props) {
+  const pulso = usePulso(!failed);
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
       <View className="items-center gap-6 w-full">
-        <Image
+        <Animated.Image
           source={LOGO_V}
           resizeMode="contain"
-          accessibilityLabel="Vupth"
-          testID="abertura-v"
-          style={{ width: 96, height: 80 }}
+          accessibilityLabel={failed ? "Vupth" : "Vupth, abrindo"}
+          testID={failed ? "abertura-v" : "abertura-v-pulsando"}
+          style={[{ width: 96, height: 80 }, failed ? null : pulso]}
         />
-        {failed ? (
+        {failed && (
           <>
             <View className="items-center gap-2">
               <Text className="font-heading text-lg text-vupth-forest text-center">
@@ -45,13 +74,6 @@ export function ServerWarmup({ failed, onRetry }: Props) {
               <NwButton title="Tentar de novo" onPress={onRetry} className="self-stretch mt-2" />
             )}
           </>
-        ) : (
-          <ActivityIndicator
-            size="small"
-            color={FOREST}
-            accessibilityLabel="Abrindo"
-            testID="abertura-carregando"
-          />
         )}
         {/* O commit ja na abertura: e a primeira tela que o Andre ve sem login
             (commit-visivel, 03/10). */}
