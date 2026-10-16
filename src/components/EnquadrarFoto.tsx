@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { View, Text, Pressable, Modal, Image, PanResponder, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import type { FotoEscolhida, Recorte } from "@lib/fotoDePerfil";
 
 type Props = {
@@ -68,7 +69,9 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
   const usar = () => onUsar(temTamanho ? recorteDoVisor(foto as Required<FotoEscolhida>, visor, pos.x, pos.y) : undefined);
 
   return (
-    <Modal visible={!!foto} animationType="fade" onRequestClose={onCancelar}>
+    <Modal visible={!!foto} animationType="fade" onRequestClose={onCancelar} statusBarTranslucent>
+      {/* Fundo forest: icones claros na barra de status (PAR-3). */}
+      <StatusBar style="light" />
       <View
         className="flex-1 bg-vupth-forest items-center justify-between px-4"
         style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}

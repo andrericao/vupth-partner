@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { BarraDeStatusClara } from "@components/BarraDeStatus";
 import { SkeletonTexto } from "@components/Skeleton";
 import { Avatar } from "@components/Avatar";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
@@ -168,6 +169,8 @@ export default function ProfessionalSettingsScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* O cabecalho forest fica sob a barra de status: icones claros (PAR-3). */}
+      <BarraDeStatusClara />
       <ScrollView
           ref={rolagemRef}
           onScroll={pilula.onScroll}
