@@ -2,7 +2,7 @@ import { api } from "@lib/api";
 import {
   TIPOS_DE_CHAVE,
   erroDaChave,
-  erroDoTitular,
+  titularDoPix,
   normalizarChave,
   chaveParaMostrar,
   obterChavePix,
@@ -60,11 +60,18 @@ describe("pix — validar a chave", () => {
   });
 });
 
-describe("pix — o titular", () => {
-  it("obrigatorio e ate 25 letras", () => {
-    expect(erroDoTitular("Ana Souza")).toBeNull();
-    expect(erroDoTitular(" ")).toMatch(/nome/);
-    expect(erroDoTitular("A".repeat(26))).toMatch(/25/);
+// pix-sem-nome (PAR-6, Andre 15/10): o titular nao se pergunta; vai o nome
+// da conta, ate 25 letras (o backend ainda o exige).
+describe("pix — o titular vai sozinho", () => {
+  it("o nome da conta, sem espacos sobrando, ate 25 letras", () => {
+    expect(titularDoPix("  Ana   Souza ")).toBe("Ana Souza");
+    expect(titularDoPix("A".repeat(30))).toHaveLength(25);
+    expect(titularDoPix("Maria Aparecida da Silva Santos")).toBe("Maria Aparecida da Silva");
+  });
+
+  it("sem nome: VUPTH", () => {
+    expect(titularDoPix(null)).toBe("VUPTH");
+    expect(titularDoPix("  ")).toBe("VUPTH");
   });
 });
 

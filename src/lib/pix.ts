@@ -68,12 +68,14 @@ export function erroDaChave(tipo: TipoDeChave, texto: string): string | null {
   }
 }
 
-/** O nome que aparece para o cliente no Pix: obrigatorio, ate 25 letras. */
-export function erroDoTitular(texto: string): string | null {
-  const t = texto.trim();
-  if (t.length === 0) return "Informe o nome do titular da conta.";
-  if (t.length > 25) return "Use até 25 letras (o Pix corta o resto).";
-  return null;
+/**
+ * pix-sem-nome (PAR-6, Andre 15/10): "nao pedir nome junto da chave —
+ * cadastrar a chave e pronto". O backend ainda exige o holder_name (ate 25
+ * letras, vai no Pix copia-e-cola): o app manda sozinho o nome da conta.
+ */
+export function titularDoPix(nome: string | null | undefined): string {
+  const t = (nome ?? "").trim().replace(/\s+/g, " ");
+  return (t || "VUPTH").slice(0, 25).trim();
 }
 
 /** A chave como o backend espera: telefone +55DDDNUMERO, CPF/CNPJ so digitos. */

@@ -34,7 +34,6 @@ describe("ChavePix", () => {
     const { findByTestId, getByText } = render(<ChavePix {...d} />);
     fireEvent.press(await findByTestId("pix-tipo-EMAIL"));
     fireEvent.changeText(await findByTestId("pix-chave"), "ana@");
-    fireEvent.changeText(await findByTestId("pix-titular"), "Ana Souza");
     fireEvent.press(await findByTestId("pix-salvar"));
     expect(getByText("Informe um e-mail válido.")).toBeTruthy();
     expect(d.salvar).not.toHaveBeenCalled();
@@ -42,10 +41,11 @@ describe("ChavePix", () => {
 
   it("salva e passa a mostrar a chave cadastrada", async () => {
     const d = deps();
-    const { findByTestId, findByText } = render(<ChavePix {...d} />);
+    const { findByTestId, findByText, queryByTestId } = render(<ChavePix {...d} nomeDaConta="Ana Souza" />);
+    // pix-sem-nome (PAR-6): so a chave; o nome da conta vai como titular
+    expect(queryByTestId("pix-titular")).toBeNull();
     fireEvent.press(await findByTestId("pix-tipo-EMAIL"));
     fireEvent.changeText(await findByTestId("pix-chave"), "ana@exemplo.com");
-    fireEvent.changeText(await findByTestId("pix-titular"), "Ana Souza");
     fireEvent.press(await findByTestId("pix-salvar"));
     await waitFor(() =>
       expect(d.salvar).toHaveBeenCalledWith({ tipo: "EMAIL", chave: "ana@exemplo.com", titular: "Ana Souza" })
@@ -60,7 +60,6 @@ describe("ChavePix", () => {
     const { findByTestId, findByText } = render(<ChavePix {...d} />);
     fireEvent.press(await findByTestId("pix-tipo-EMAIL"));
     fireEvent.changeText(await findByTestId("pix-chave"), "ana@exemplo.com");
-    fireEvent.changeText(await findByTestId("pix-titular"), "Ana Souza");
     fireEvent.press(await findByTestId("pix-salvar"));
     expect(await findByText("Chave Pix invalida para o tipo.")).toBeTruthy();
   });
@@ -69,7 +68,7 @@ describe("ChavePix", () => {
     const d = deps({ obter: jest.fn().mockResolvedValue(CHAVE) });
     const { findByText, findByTestId, queryByText } = render(<ChavePix {...d} />);
     expect(await findByText("E-mail · ana@exemplo.com")).toBeTruthy();
-    expect(await findByText("Ana Souza")).toBeTruthy();
+    expect(queryByText("Ana Souza")).toBeNull();
 
     fireEvent.press(await findByTestId("pix-trocar"));
     expect(await findByTestId("pix-chave")).toBeTruthy();
@@ -79,6 +78,26 @@ describe("ChavePix", () => {
     fireEvent.press(await findByTestId("pix-remover"));
     await waitFor(() => expect(d.apagar).toHaveBeenCalled());
     await waitFor(() => expect(queryByText("E-mail · ana@exemplo.com")).toBeNull());
+  });
+
+  it("trocar a chave mantem o titular que ja estava", async () => {
+    const d = deps({ obter: jest.fn().mockResolvedValue(CHAVE) });
+    const { findByTestId } = render(<ChavePix {...d} nomeDaConta="Outro Nome" />);
+    fireEvent.press(await findByTestId("pix-trocar"));
+    fireEvent.press(await findByTestId("pix-tipo-RANDOM"));
+    fireEvent.changeText(await findByTestId("pix-chave"), "123e4567-e89b-12d3-a456-426614174000");
+    fireEvent.press(await findByTestId("pix-salvar"));
+    await waitFor(() => expect(d.salvar).toHaveBeenCalledWith(expect.objectContaining({ titular: "Ana Souza" })));
+  });
+
+  it("erro ao remover aparece na tela", async () => {
+    const d = deps({
+      obter: jest.fn().mockResolvedValue(CHAVE),
+      apagar: jest.fn().mockRejectedValue({ response: { data: { message: "Falhou." } } }),
+    });
+    const { findByTestId, findByText } = render(<ChavePix {...d} />);
+    fireEvent.press(await findByTestId("pix-remover"));
+    expect(await findByText("Falhou.")).toBeTruthy();
   });
 
   it("remover cancelado nao apaga", async () => {

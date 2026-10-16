@@ -80,13 +80,10 @@ appId: ${APP_ID}
     text: "pix_m${output.TAG}@teste.com"
     label: "07.56 · pix · digita o e-mail"
 - hideKeyboard
-- tapOn:
+# pix-sem-nome (PAR-6, Andre 15/10): so a chave, sem o campo do titular
+- assertNotVisible:
     id: "pix-titular"
-    label: "07.57 · pix · toca no titular"
-- inputText:
-    text: "Prof ${output.TAG}"
-    label: "07.58 · pix · digita o titular"
-- hideKeyboard
+    label: "07.57 · pix-sem-nome · sem o campo do nome"
 - tapOn:
     id: "pix-salvar"
     label: "07.59 · pix · toca em Salvar chave"
