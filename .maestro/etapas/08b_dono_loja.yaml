@@ -32,6 +32,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "foto-loja-galeria"
     label: "08.21 · foto-da-loja · confere Escolher da galeria"
+# foto-ux (Andre, 15/10): a folha tem titulo
+- assertVisible:
+    text: "Foto da loja"
+    label: "08.21a · foto-ux · a folha tem o titulo Foto da loja"
 - tapOn:
     text: "Cancelar"
     label: "08.22 · foto-da-loja · toca em Cancelar"

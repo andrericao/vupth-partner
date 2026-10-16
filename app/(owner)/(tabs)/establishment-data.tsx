@@ -103,12 +103,14 @@ export default function EstablishmentDataScreen() {
               uri={fotoDaLoja}
               rotulo={fotoDaLoja ? "Trocar foto da loja" : "Pôr foto da loja"}
               testID="foto-loja"
-              onEscolher={(acao) =>
+              titulo="Foto da loja"
+              onEscolher={(acao, enquadrar) =>
                 editarFoto({
                   temFoto: !!fotoDaLoja,
                   rota: rotaDaFotoDaLoja(establishment.id),
                   aoMudar: aoMudarFoto,
                   titulo: "Foto da loja",
+                  enquadrar,
                   perguntar: async () => acao,
                   avisar,
                 })

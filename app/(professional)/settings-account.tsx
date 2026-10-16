@@ -320,11 +320,13 @@ export default function SettingsAccountScreen() {
               uri={minhaFoto.uri}
               rotulo={minhaFoto.uri ? "Trocar foto de perfil" : "Pôr foto de perfil"}
               testID="foto-perfil"
-              onEscolher={(acao) =>
+              titulo="Foto de perfil"
+              onEscolher={(acao, enquadrar) =>
                 editarFoto({
                   temFoto: !!minhaFoto.uri,
                   rota: ROTA_DO_PERFIL,
                   aoMudar: minhaFoto.trocar,
+                  enquadrar,
                   perguntar: async () => acao,
                   avisar,
                 })
