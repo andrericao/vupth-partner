@@ -28,6 +28,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
+import { NaoRealizadosCard } from "@components/NaoRealizadosCard";
 import { seloDoStatus, observacaoDoAtendimento } from "@lib/statusAtendimento";
 import {
   composicaoDoAtendimento,
@@ -419,6 +420,7 @@ export default function MyDayScreen() {
                   </Text>
                 )
               )}
+              <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
               {avisoDoPrecoAntigo(precoAntigo) && (
                 <View className="bg-vupth-warning p-3 rounded-card">
                   <Text className="font-body text-xs text-vupth-forest">{avisoDoPrecoAntigo(precoAntigo)}</Text>

@@ -11,6 +11,7 @@ import { ExpedienteCard } from "@components/ExpedienteCard";
 import { StatCard } from "@components/brand/StatCard";
 import { avisoSemSplit } from "@lib/split";
 import { RelatorioDasLojas } from "@components/RelatorioDasLojas";
+import { NaoRealizadosCard } from "@components/NaoRealizadosCard";
 
 type Period = Periodo;
 
@@ -161,6 +162,10 @@ export default function OwnerReportsScreen() {
                 </Text>
               </View>
             )}
+
+            <View className="mt-3">
+              <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
+            </View>
 
             <View className="h-px bg-vupth-border my-6" />
 

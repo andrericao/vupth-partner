@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
 import type { DiaDeExpediente } from "@lib/expediente";
 import type { LocationStatus } from "@lib/pontoNoMapa";
+import type { NaoRealizados } from "@lib/relatorioDasLojas";
 
 const STORAGE_KEY = "vupth_establishment";
 
@@ -126,6 +127,9 @@ export type EstablishmentReport = {
   attendancesWithoutSplit?: number;
   /** Expediente por dia (contrato de 03/10). Ausente em backend antigo. */
   workdays?: DiaDeExpediente[];
+  /** relatorio-sem-multa (Backend 0112396): so a contagem; a multa e do app. */
+  notRealized?: NaoRealizados | null;
+  finishedLate?: number | null;
 };
 
 type ProfessionalResponse = {

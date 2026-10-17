@@ -1,3 +1,4 @@
+import type { NaoRealizados } from "@lib/relatorioDasLojas";
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
@@ -62,6 +63,9 @@ export type ProfessionalReport = {
   attendancesWithoutSplit?: number;
   /** Expediente por dia (contrato de 03/10). Ausente em backend antigo. */
   workdays?: DiaDeExpediente[];
+  /** relatorio-sem-multa (Backend 0112396): so a contagem; a multa e do app. */
+  notRealized?: NaoRealizados | null;
+  finishedLate?: number | null;
 };
 
 type ProfessionalState = {
