@@ -107,14 +107,8 @@ export function RelatorioDasLojas() {
           </View>
           <View className="flex-row gap-4 mt-3">
             <StatCard flex={1} label="Profissionais recebem" value={reais(t.professionals_net)} />
-            <StatCard flex={1} label="Cancelados" value={String(t.cancelled)} />
+            <StatCard flex={1} label="Não realizados" value={String(t.cancelled)} />
           </View>
-          {t.penalties != null && Number(t.penalties) > 0 && (
-            <View className="flex-row gap-4 mt-3">
-              <StatCard flex={1} label="Multas" value={reais(t.penalties)} />
-              <StatCard flex={1} label="Taxas" value={reais(Number(t.gateway_fee) + Number(t.app_fee))} />
-            </View>
-          )}
 
           {lojaId === null && (r?.stores.length ?? 0) > 0 && (
             <>
@@ -125,7 +119,7 @@ export function RelatorioDasLojas() {
                     <View className="flex-1">
                       <Text className="font-heading text-vupth-forest">{l.name}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
-                        {l.summary.finished} concluídos · {l.summary.cancelled} cancelados
+                        {l.summary.finished} concluídos · {l.summary.cancelled} não realizados
                       </Text>
                     </View>
                     <Text className="font-heading text-vupth-forest">{reais(l.summary.gross_revenue)}</Text>

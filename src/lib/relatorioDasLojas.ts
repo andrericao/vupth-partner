@@ -21,8 +21,8 @@ export type ResumoDasLojas = {
   professionals_net: number;
   gateway_fee: number;
   app_fee: number;
-  /** Multas geradas (Backend 20bf19d); o dinheiro delas e do app. Backend antigo nao manda. */
-  penalties?: number | null;
+  // `penalties` (Backend 20bf19d) existe mas NAO se mostra: a multa e do app
+  // (DEC-83); o dono e o profissional veem so o registro e o motivo.
 };
 
 export type RelatorioDasLojas = {

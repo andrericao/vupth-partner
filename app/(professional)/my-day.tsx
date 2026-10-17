@@ -83,7 +83,7 @@ function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { c
       <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento} />
       <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} />
       <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} />
-      <LinhaDaConta rotulo="Outros (multa ou ajuste)" valor={conta.outros} />
+      <LinhaDaConta rotulo="Outros ajustes" valor={conta.outros} />
       <LinhaDaConta rotulo="Cliente pagou" valor={conta.clientePagou} forte />
       {conta.estimados.length > 0 && (
         <Text className="font-body text-xs text-vupth-textSecondary mt-1">
