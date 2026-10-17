@@ -66,7 +66,7 @@ describe("queueMenuActions — quem já está sendo atendido", () => {
   });
 
   it("sem status, nada muda — a fila comum segue como sempre foi", () => {
-    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "remover"]);
+    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "nao-compareceu", "remover"]);
     expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
     expect(queueMenuActions(false, "SCHEDULED")).toEqual(["adiantar", "promover", "remover"]);
   });
