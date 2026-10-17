@@ -21,6 +21,7 @@ import type { AttendanceInQueue } from "@lib/types";
 import { confirmar, avisar } from "@lib/confirmar";
 import { ehMeuAtendimento } from "@lib/meuAtendimento";
 import { finalizarAtendimento } from "@lib/finalizar";
+import { pedirFeedbackDoApp } from "@lib/feedbackDoApp";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 
@@ -271,7 +272,7 @@ export default function ProfessionalQueueScreen() {
                       (data.inAttendance as any).id,
                       (data.inAttendance as any).isPaused ?? false,
                       { retomar: resumeAttendance, finalizar: finishAttendance }
-                    ),
+                    ).then(() => void pedirFeedbackDoApp("dono")),
                   "Não foi possível finalizar o atendimento."
                 )
               }

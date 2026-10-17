@@ -40,6 +40,7 @@ import { SolicitacoesCard } from "@components/SolicitacoesCard";
 import { resumoDeSolicitacoes } from "@lib/cutRequests";
 import { escolherAtendimentoAtual } from "@lib/atendimentoAtual";
 import { finalizarAtendimento } from "@lib/finalizar";
+import { pedirFeedbackDoApp } from "@lib/feedbackDoApp";
 import { fechaFilaAoSair, viraTrabalhandoAoAbrirFila } from "@lib/coerenciaFila";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
@@ -731,6 +732,7 @@ export default function ProfessionalQueueScreen() {
           finalizar: finalizarComPagamento,
         });
         clearAttendanceStart(att.id);
+        void pedirFeedbackDoApp("profissional");
       });
     else if (action === "pausar") handleAction(() => pauseAttendance(att.id));
     else if (action === "retomar") handleAction(() => resumeAttendance(att.id));
@@ -906,6 +908,7 @@ export default function ProfessionalQueueScreen() {
                     { retomar: resumeAttendance, finalizar: finalizarComPagamento }
                   );
                   clearAttendanceStart(currentAttendance.id);
+                  void pedirFeedbackDoApp("profissional");
                 })
               }
               onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}
