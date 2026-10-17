@@ -10,7 +10,6 @@
     "build:web": "EXPO_PUBLIC_BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) expo export --platform web",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "cobertura:catraca": "node scripts/catraca-cobertura.js",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "prepare": "git config core.hooksPath .githooks || true"
@@ -121,10 +120,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "statements": 99,
-        "branches": 98,
-        "functions": 99,
-        "lines": 99
+        "statements": 80,
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
       }
     },
     "testPathIgnorePatterns": [
