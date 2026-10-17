@@ -1,11 +1,11 @@
-import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCard";
+import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCard";
 
 describe("queueMenuActions", () => {
   it("1o da vez: não chegou + remover (sem adiantar)", () => {
     // "Iniciar" entrou no menu do 1o em 2026-08-11 (pedido do Andre): e
     // REDUNDANTE com o botao do rodape de proposito — quem abriu o menu do
     // proximo espera poder inicia-lo dali, sem fechar e procurar o botao.
-    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "remover"]);
+    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "nao-compareceu", "remover"]);
   });
   it("demais: adiantar + promover + remover (sem não chegou)", () => {
     expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
@@ -20,10 +20,9 @@ describe("queueMenuActions", () => {
     expect(queueMenuActions(true)).toContain("remover");
     expect(queueMenuActions(false)).toContain("remover");
   });
-  it("não existe 'não compareceu'/no-show entre as ações", () => {
-    const all = [...queueMenuActions(true), ...queueMenuActions(false)];
-    expect(all).not.toContain("nao-compareceu");
-    expect(all).not.toContain("no-show");
+  it("a falta (nao compareceu) so existe para o 1o da vez", () => {
+    expect(queueMenuActions(true)).toContain("nao-compareceu");
+    expect(queueMenuActions(false)).not.toContain("nao-compareceu");
   });
   it("toda ação tem rotulo", () => {
     [...queueMenuActions(true), ...queueMenuActions(false)].forEach((a) => {
@@ -86,6 +85,21 @@ describe("mensagemDoAtraso", () => {
   it("explica a troca de lugar e o que acontece no 3o atraso", () => {
     const m = mensagemDoAtraso("Ana");
     expect(m).toMatch(/Ana troca de lugar com o próximo/);
-    expect(m).toMatch(/3º atraso.*fim da fila.*R\$ 5,00/);
+    expect(m).toMatch(/3º atraso.*fim da fila.*multa/);
+    // a multa e do app (DEC-83): o profissional nao ve o valor
+    expect(m).not.toMatch(/R\$/);
+  });
+});
+
+describe("a falta (DEC-83)", () => {
+  it("a confirmacao diz que o cliente leva multa, sem valor", () => {
+    const m = mensagemDaFalta("Ana");
+    expect(m).toMatch(/Ana não compareceu/);
+    expect(m).toMatch(/multa/);
+    expect(m).not.toMatch(/R\$/);
+  });
+  it("antes dos 10 min diz a hora; sem hora, so avisa", () => {
+    expect(mensagemDaFaltaCedo("14:10")).toContain("14:10");
+    expect(mensagemDaFaltaCedo(null)).toBe("Ainda é cedo para marcar a falta.");
   });
 });
