@@ -18,3 +18,14 @@ appId: ${APP_ID}
           visible: ${FIM}
           timeout: 20000
       - runFlow: fechar_aviso.yaml
+# pedido-de-feedback (PAR-13): depois do finalizar vem a caixa "Ajude a melhorar
+# o app" (no maximo a cada 30 dias). Dispensa, para nao cobrir a fila.
+- extendedWaitUntil:
+    visible: "Ajude a melhorar o app"
+    timeout: 5000
+    optional: true
+- runFlow:
+    when:
+      visible: "Ajude a melhorar o app"
+    commands:
+      - tapOn: "Agora não"
