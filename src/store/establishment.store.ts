@@ -202,6 +202,8 @@ async function persistEstablishment(establishment: Establishment) {
 
 type EstablishmentState = {
   establishment: Establishment | null;
+  /** Todas as lojas do dono (multi-loja-do-dono); `establishment` e a ativa. */
+  lojas: Establishment[];
   isLoading: boolean;
   error: string | null;
 
@@ -209,6 +211,8 @@ type EstablishmentState = {
   updateOpenStatus: (id: string, status: string) => Promise<void>;
   restoreEstablishment: () => Promise<void>;
   fetchMine: () => Promise<void>;
+  /** Troca a loja ativa entre as do dono. */
+  selecionarLoja: (id: string) => Promise<void>;
   quickCreateProfessional: (
     name: string,
     establishmentId: string,
@@ -268,6 +272,7 @@ type EstablishmentState = {
 
 export const useEstablishmentStore = create<EstablishmentState>((set) => ({
   establishment: null,
+  lojas: [],
   isLoading: false,
   error: null,
 
@@ -281,7 +286,12 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
 
     const establishment = normalizeEstablishment(data);
     await persistEstablishment(establishment);
-    set({ establishment, isLoading: false });
+    // A nova vira a ativa; as outras do dono ficam na lista.
+    set((st) => ({
+      establishment,
+      lojas: [...st.lojas.filter((l) => l.id !== establishment.id), establishment],
+      isLoading: false,
+    }));
   },
 
   updateOpenStatus: async (id, status) => {
@@ -293,7 +303,11 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
 
     const establishment = normalizeEstablishment(data);
     await persistEstablishment(establishment);
-    set({ establishment, isLoading: false });
+    set((st) => ({
+      establishment,
+      lojas: st.lojas.map((l) => (l.id === establishment.id ? establishment : l)),
+      isLoading: false,
+    }));
   },
 
   restoreEstablishment: async () => {
@@ -306,10 +320,20 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
   fetchMine: async () => {
     const { data } = await api.get("/establishment/mine");
     if (Array.isArray(data) && data.length > 0) {
-      const establishment = normalizeEstablishment(data[0]);
+      const lojas = data.map(normalizeEstablishment);
+      // Mantem a loja que o dono ja estava usando, se ela ainda for dele.
+      const atual = useEstablishmentStore.getState().establishment;
+      const establishment = lojas.find((l) => l.id === atual?.id) ?? lojas[0];
       await persistEstablishment(establishment);
-      set({ establishment });
+      set({ establishment, lojas });
     }
+  },
+
+  selecionarLoja: async (id) => {
+    const establishment = useEstablishmentStore.getState().lojas.find((l) => l.id === id);
+    if (!establishment) return;
+    await persistEstablishment(establishment);
+    set({ establishment });
   },
 
   quickCreateProfessional: async (name, establishmentId, specialty?) => {
@@ -401,7 +425,7 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
   deleteEstablishment: async (id, currentPassword) => {
     await api.delete(`/establishment/${id}`, { data: { current_password: currentPassword } });
     SecureStore.deleteItemAsync(STORAGE_KEY);
-    set({ establishment: null, isLoading: false, error: null });
+    set({ establishment: null, lojas: [], isLoading: false, error: null });
   },
 
   removeProfessional: async (establishmentId, professionalId) => {

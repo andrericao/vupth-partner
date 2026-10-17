@@ -15,12 +15,13 @@ import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
-  Info, LifeBuoy, QrCode, Ticket,
+  Info, LifeBuoy, QrCode, Ticket, Check, Plus,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
 import { CUPOM_NO_AR } from "@lib/campanhas";
+import { podeAdicionarLoja } from "@lib/multiLoja";
 
 // [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
 // especifica o glifo exato via icon+library do no ("users", "clipboard-list",
@@ -96,6 +97,8 @@ export default function OwnerMenuScreen() {
   const pilula = usePilulaTopo(rolagemRef);
 
   const establishment = useEstablishmentStore((s) => s.establishment);
+  const lojas = useEstablishmentStore((s) => s.lojas);
+  const selecionarLoja = useEstablishmentStore((s) => s.selecionarLoja);
   const resetEstablishment = useEstablishmentStore((s) => s.reset);
   const resetProfessional = useProfessionalStore((s) => s.reset);
   const user = useAuthStore((s) => s.user);
@@ -173,6 +176,29 @@ export default function OwnerMenuScreen() {
               </Pressable>
             )}
   
+            {establishment?.id && (
+              <Grupo label={lojas.length > 1 ? "SUAS LOJAS" : "LOJA"}>
+                {/* Seletor de loja (multi-loja-do-dono): a ativa leva o check. */}
+                {lojas.length > 1 &&
+                  lojas.map((l) => (
+                    <MenuItem
+                      key={l.id}
+                      icon={l.id === establishment.id ? Check : Store}
+                      label={l.name}
+                      onPress={() => selecionarLoja(l.id)}
+                    />
+                  ))}
+                {podeAdicionarLoja(lojas.length) && (
+                  <MenuItem
+                    icon={Plus}
+                    label="Adicionar outra loja"
+                    onPress={() => router.push("/(owner)/nova-loja" as any)}
+                    last
+                  />
+                )}
+              </Grupo>
+            )}
+
             {establishment?.id && (
               <Grupo label="EQUIPE">
                 {/* UMA porta pra equipe. Eram TRES linhas de mesmo peso
