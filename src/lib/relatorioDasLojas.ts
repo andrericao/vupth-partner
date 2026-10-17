@@ -14,7 +14,23 @@ export const PERIODOS_DAS_LOJAS: { key: PeriodoDasLojas; label: string }[] = [
   { key: "custom", label: "Personalizado" },
 ];
 
+/** relatorio-sem-multa (Backend 317c29c): os tres motivos do nao realizado. */
+export type NaoRealizados = {
+  client_cancelled: number;
+  professional_removed: number;
+  removed_for_lateness: number;
+};
+
+export const MOTIVOS_DO_NAO_REALIZADO: { campo: keyof NaoRealizados; rotulo: string }[] = [
+  { campo: "client_cancelled", rotulo: "Cliente cancelou" },
+  { campo: "professional_removed", rotulo: "Profissional removeu o cliente" },
+  { campo: "removed_for_lateness", rotulo: "Cliente removido por atraso" },
+];
+
 export type ResumoDasLojas = {
+  not_realized?: NaoRealizados | null;
+  /** Concluidos em que o cliente se atrasou. */
+  finished_late?: number | null;
   finished: number;
   cancelled: number;
   gross_revenue: number;

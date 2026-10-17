@@ -52,3 +52,22 @@ describe("relatorioDasLojas", () => {
     expect(reais(null)).toBe("R$ 0.00");
   });
 });
+
+describe("motivos do nao realizado (DEC-83)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { motivoNaoRealizado, observacaoDoAtendimento } = require("@lib/statusAtendimento");
+
+  it("so os tres motivos aparecem; o desconhecido some", () => {
+    expect(motivoNaoRealizado("CLIENT_CANCELLED")).toBe("Cliente cancelou");
+    expect(motivoNaoRealizado("PROFESSIONAL_REMOVED")).toBe("Profissional removeu o cliente");
+    expect(motivoNaoRealizado("REMOVED_FOR_LATENESS")).toBe("Cliente removido por atraso");
+    expect(motivoNaoRealizado("OUTRO")).toBeNull();
+    expect(motivoNaoRealizado(null)).toBeNull();
+  });
+
+  it("concluido com atraso diz que teve atraso; sem nada, nao diz nada", () => {
+    expect(observacaoDoAtendimento({ late_arrival: true })).toBe("Teve atraso");
+    expect(observacaoDoAtendimento({ not_realized_reason: "CLIENT_CANCELLED" })).toBe("Cliente cancelou");
+    expect(observacaoDoAtendimento({})).toBeNull();
+  });
+});

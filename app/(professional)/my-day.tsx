@@ -28,7 +28,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { seloDoStatus } from "@lib/statusAtendimento";
+import { seloDoStatus, observacaoDoAtendimento } from "@lib/statusAtendimento";
 import {
   composicaoDoAtendimento,
   somaDasContas,
@@ -122,6 +122,12 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
+
+      {observacaoDoAtendimento(item) && (
+        <Text testID="observacao-do-atendimento" className="font-body text-xs text-vupth-textSecondary mt-1">
+          {observacaoDoAtendimento(item)}
+        </Text>
+      )}
 
       <Text className="font-body text-sm text-vupth-textSecondary mt-1">
         {item.services.map((s) => s.customName).join(", ")}

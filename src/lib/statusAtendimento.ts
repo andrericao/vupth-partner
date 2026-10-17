@@ -33,3 +33,24 @@ const DESCONHECIDO: Selo = { label: "Outro", selo: "bg-white", texto: "text-vupt
 export function seloDoStatus(status: string | null | undefined): Selo {
   return (status && SELOS[status]) || DESCONHECIDO;
 }
+
+// relatorio-sem-multa (DEC-83): o profissional e a loja ficam com o REGISTRO do
+// atendimento que nao aconteceu e o MOTIVO — sem valor de multa. Sao tres
+// motivos; o que o app nao conhece nao aparece (nada de codigo cru na tela).
+const MOTIVOS: Record<string, string> = {
+  CLIENT_CANCELLED: "Cliente cancelou",
+  PROFESSIONAL_REMOVED: "Profissional removeu o cliente",
+  REMOVED_FOR_LATENESS: "Cliente removido por atraso",
+};
+
+export function motivoNaoRealizado(motivo: string | null | undefined): string | null {
+  return (motivo && MOTIVOS[motivo]) || null;
+}
+
+/** A linha de observacao do atendimento no historico, ou null. */
+export function observacaoDoAtendimento(item: {
+  not_realized_reason?: string | null;
+  late_arrival?: boolean | null;
+}): string | null {
+  return motivoNaoRealizado(item.not_realized_reason) ?? (item.late_arrival ? "Teve atraso" : null);
+}

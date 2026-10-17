@@ -10,6 +10,7 @@ import {
   caminhoDoRelatorio,
   diaMes,
   intervaloDasLojas,
+  MOTIVOS_DO_NAO_REALIZADO,
   reais,
   type PeriodoDasLojas,
   type RelatorioDasLojas as DadosDasLojas,
@@ -109,6 +110,25 @@ export function RelatorioDasLojas() {
             <StatCard flex={1} label="Profissionais recebem" value={reais(t.professionals_net)} />
             <StatCard flex={1} label="Não realizados" value={String(t.cancelled)} />
           </View>
+
+          {(t.finished_late ?? 0) > 0 && (
+            <Text className="font-body text-xs text-vupth-textSecondary mt-3">
+              {t.finished_late} concluídos com atraso do cliente
+            </Text>
+          )}
+          {t.not_realized && t.cancelled > 0 && (
+            <View testID="nao-realizados-por-motivo" className="bg-vupth-surface p-4 rounded-card mt-3 gap-1">
+              <Text className="font-heading text-vupth-forest">Não realizados</Text>
+              {MOTIVOS_DO_NAO_REALIZADO.map((mo) => (
+                <View key={mo.campo} className="flex-row justify-between">
+                  <Text className="font-body text-xs text-vupth-textSecondary">{mo.rotulo}</Text>
+                  <Text className="font-body text-xs text-vupth-textSecondary">
+                    {t.not_realized![mo.campo] ?? 0}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {lojaId === null && (r?.stores.length ?? 0) > 0 && (
             <>
