@@ -329,7 +329,7 @@ export default function OwnerDashboardScreen() {
             // O botao vai em OUTLINE: e acao terciaria dentro de um placeholder,
             // nao pode ter o mesmo peso do "Reabrir agora" logo acima — eram duas
             // pilulas verde-marca identicas na mesma tela.
-            <View className="bg-vupth-surface p-4 rounded-card items-center">
+            <View className="bg-vupth-surface px-4 pt-4 pb-6 rounded-card items-center">
               <Text className="font-body text-vupth-textSecondary text-center">
                 Nenhum profissional vinculado
               </Text>
