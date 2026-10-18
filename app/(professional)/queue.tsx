@@ -507,7 +507,10 @@ export default function ProfessionalQueueScreen() {
       mensagem:
         "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
       confirmar: "Fechar fila",
-      destrutivo: true,
+      // Fechar a fila e rotina do dia e da pra reabrir (a nota do NwButton): e um
+      // aviso de ATENCAO, nao uma acao destrutiva. O primario fica verde, como ja
+      // esta no "Fechar fila" das Opcoes da fila.
+      tipo: "atencao",
     });
     if (ok) aplicarAceitando(false);
   };

@@ -24,6 +24,24 @@ describe("Fechar fila nas Opcoes", () => {
   });
 });
 
+// O mesmo "Fechar fila" tem um segundo ponto de entrada, o interruptor da propria
+// tela da fila. Os dois tem de dizer a mesma coisa: com um deles ainda destrutivo,
+// o mesmo aviso aparecia vermelho num lugar e verde no outro.
+describe("Fechar fila na tela da fila", () => {
+  const tela = ler("app/(professional)/queue.tsx");
+  const i = tela.indexOf('titulo: "Fechar fila"');
+  const bloco = tela.slice(i, i + 900);
+
+  it("e um aviso de atencao, igual ao das Opcoes", () => {
+    expect(i).toBeGreaterThan(-1);
+    expect(bloco).toContain('tipo: "atencao"');
+  });
+
+  it("nao e destrutivo: o primario fica verde", () => {
+    expect(bloco).not.toMatch(/destrutivo:\s*true/);
+  });
+});
+
 describe("o DialogoVupth recebe variante, nunca cor", () => {
   it("nenhuma tela passa hex nem cor ao pedir o aviso com tipo", () => {
     const store = ler("src/store/dialogo.store.ts");
