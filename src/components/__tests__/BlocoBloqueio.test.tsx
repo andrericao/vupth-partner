@@ -31,7 +31,8 @@ describe("BlocoBloqueio", () => {
     const { getByTestId } = render(<BlocoBloqueio {...props} />);
     const caixa = getByTestId("bloco-bloqueio").props.className;
     expect(caixa).toContain("border-2");
-    expect(caixa).toContain("border-vupth-forest/20");
+    // a borda e a cor do TEXTO do bloco a 20% (forest no claro, pessego no escuro)
+    expect(caixa).toContain("border-vupth-onAccentPeach/20");
     expect(caixa).toContain("pb-6");
   });
 });

@@ -1,5 +1,7 @@
 import { Pressable, Text, View, ActivityIndicator, type PressableProps } from "react-native";
 import type { ReactNode } from "react";
+import { useTema } from "@hooks/useTema";
+import type { Cores } from "@theme/tema";
 
 // Primitiva NativeWind (migracao Gluestack v2). API LIMPA por VARIANTE — sem
 // props de token do gluestack. Mesmo visual do Button v1 (pilula + sombra +
@@ -71,7 +73,7 @@ const BOX: Record<Variant, string> = {
   primary: "bg-vupth-green active:opacity-70",
   secondary: "bg-vupth-surface active:bg-vupth-border active:opacity-80",
   danger: "bg-vupth-danger active:opacity-70",
-  outlineBrand: "bg-white border border-vupth-forest active:bg-vupth-greenTint active:opacity-80",
+  outlineBrand: "bg-vupth-background border border-vupth-textPrimary active:bg-vupth-greenTint active:opacity-80",
   outlineDanger: "bg-transparent border border-vupth-danger active:bg-vupth-dangerTint active:opacity-80",
   // `vupthPrimary` ficou IDENTICO ao primary depois do alinhamento acima —
   // mantido como apelido pra nao quebrar quem ja chamava por ele.
@@ -82,21 +84,35 @@ const BOX: Record<Variant, string> = {
   // sistema, o unico botao que segura peso sobre um fundo ja colorido.
   // Zero chamadas fora do proprio teste, entao a correcao nao tem raio.
   vupthSecondary: "bg-vupth-forest active:opacity-70",
-  vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint active:opacity-80",
+  vupthOutline: "bg-transparent border-2 border-vupth-textPrimary active:bg-vupth-greenTint active:opacity-80",
   vupthGhost: "bg-transparent active:bg-vupth-surface active:opacity-80",
 };
 
+// Texto e borda usam os tokens que TROCAM de tema (textPrimary, onGreen,
+// onDanger, background), nunca forest/white: no escuro o forest e a surface, e
+// um rotulo forest sobre ela daria 1:1 (invisivel). No claro cada um vale o
+// mesmo hex de antes. O botao primario nao muda de tema (onGreen sobre green).
 const LABEL: Record<Variant, string> = {
-  primary: "text-vupth-forest",
+  primary: "text-vupth-onGreen",
   secondary: "text-vupth-textPrimary",
-  danger: "text-white",
-  outlineBrand: "text-vupth-forest",
+  danger: "text-vupth-onDanger",
+  outlineBrand: "text-vupth-textPrimary",
   outlineDanger: "text-vupth-danger",
-  vupthPrimary: "text-vupth-forest",
+  vupthPrimary: "text-vupth-onGreen",
   vupthSecondary: "text-vupth-green",
-  vupthOutline: "text-vupth-forest",
-  vupthGhost: "text-vupth-forest",
+  vupthOutline: "text-vupth-textPrimary",
+  vupthGhost: "text-vupth-textPrimary",
 };
+
+// A cor do spinner e a do rotulo da variante: o spinner e uma prop, nao uma
+// classe, entao vem do tema.
+function corDoSpinner(variant: Variant, cores: Cores): string {
+  if (variant === "danger") return cores.onDanger;
+  if (variant === "outlineDanger") return cores.danger;
+  if (variant === "vupthSecondary") return cores.green;
+  if (variant === "primary" || variant === "vupthPrimary") return cores.onGreen;
+  return cores.textPrimary;
+}
 
 export function NwButton({
   title,
@@ -108,6 +124,7 @@ export function NwButton({
   disabled,
   ...rest
 }: Props) {
+  const { cores } = useTema();
   return (
     <Pressable
       accessibilityRole="button"
@@ -117,17 +134,7 @@ export function NwButton({
       {...rest}
     >
       {isLoading ? (
-        <ActivityIndicator
-          color={
-            variant === "danger"
-              ? "#fff"
-              : variant === "outlineDanger"
-                ? "#B3261E"
-                : variant === "vupthSecondary"
-                  ? "#9FE870"
-                  : "#163300"
-          }
-        />
+        <ActivityIndicator color={corDoSpinner(variant, cores)} />
       ) : (
         <View className="flex-row items-center gap-2">
           <Text className={`font-heading text-base ${textClassName ?? LABEL[variant]}`}>

@@ -1,9 +1,9 @@
 import { DOODLES, DOODLE_INK, type DoodleName } from "@components/doodles";
+import { coresDoTema } from "@theme/tema";
 
-// tailwind e CJS puro: da p/ exigir de verdade (mesma excecao do brandTokens.test).
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const tailwind = require("../../../tailwind.config.js");
-const vupth = tailwind.theme.extend.colors.vupth as Record<string, string>;
+// As classes `vupth-*` do tailwind leem variaveis (modo escuro, DEC-75); o hex de
+// cada token NO TEMA CLARO, que e o que o <Svg> repete, vem do tokens.json.
+const vupth: Record<string, string> = coresDoTema("claro");
 
 // GUARDA DAS CORES DA ILUSTRACAO.
 //

@@ -1,3 +1,5 @@
+import type { NomeDeCor } from "@theme/tema";
+
 // Status de trabalho do profissional. Ficava espalhado dentro da tela de
 // "Opcoes da fila"; virou modulo quando a PILULA do cabecalho passou a mostrar
 // e trocar o mesmo estado (DS3) — duas telas mexendo no mesmo semaforo com
@@ -24,27 +26,32 @@ export const KEY_TO_WORK: Record<StatusKey, WorkStatus> = {
 // elemento de interface: ele nao herda a paleta, muda de desenho em cada
 // sistema e nao escala com o texto. Aqui o proprio semaforo ja E a cor — nao
 // precisa nem de icone, so do ponto.
+//
+// `cor` e o NOME da cor do tema (`useTema().cores[cor]`), nao um hex: o ponto
+// e um style, que nao resolve classe, e um hex fixo ficaria o mesmo no escuro.
+// Intervalo e o `pessego` (a cor), nao o `warning` (que no escuro e o fundo).
+// Texto sobre cada fundo e o par `on*` dele.
 export const STATUS_META: Record<
   StatusKey,
-  { label: string; bg: string; texto: string; cor: string }
+  { label: string; bg: string; texto: string; cor: NomeDeCor }
 > = {
   trabalhando: {
     label: "Trabalhando",
     bg: "bg-vupth-green",
-    texto: "text-vupth-forest",
-    cor: "#9FE870",
+    texto: "text-vupth-onGreen",
+    cor: "green",
   },
   intervalo: {
     label: "Intervalo",
     bg: "bg-vupth-warning",
-    texto: "text-vupth-forest",
-    cor: "#FFC091",
+    texto: "text-vupth-onAccentPeach",
+    cor: "pessego",
   },
   indisponivel: {
     label: "Fora",
     bg: "bg-vupth-danger",
-    texto: "text-white",
-    cor: "#B3261E",
+    texto: "text-vupth-onDanger",
+    cor: "danger",
   },
 };
 
