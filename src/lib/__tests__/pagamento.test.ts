@@ -15,7 +15,7 @@ jest.mock("@lib/confirmar", () => ({ confirmar: (...a: unknown[]) => mockConfirm
 
 // pagamento-pix (adendos 1a0616c e 62295f1): antes do Finalizar ou do Iniciar
 // proximo, o app le o pagamento. PAID -> sem pergunta; PENDING ou
-// AWAITING_CONFIRMATION -> "O pagamento foi efetuado?".
+// AWAITING_CONFIRMATION -> "Recebeu o pagamento?".
 describe("perguntarPagamento", () => {
   beforeEach(() => jest.resetAllMocks());
   const pergunta = jest.fn();
@@ -64,13 +64,38 @@ describe("perguntarPagamento", () => {
   });
 });
 
+// GUIA_DE_TEXTO.md §4.8 e §1 ("Como se verifica"): botão de uma palavra, título
+// que diz o fato, corpo de uma linha (até 70 caracteres), nunca "Sim, ...".
+describe("a pergunta do pagamento segue o guia de texto", () => {
+  beforeEach(() => jest.resetAllMocks());
+  const pergunta = jest.fn();
+  const palavras = (texto: string) => texto.trim().split(/\s+/).length;
+
+  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Recebi · Ainda não", async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: { status: "PENDING", amount: 31.9 } });
+    pergunta.mockResolvedValue(true);
+    await perguntarPagamento("a1", { perguntar: pergunta });
+    const texto = pergunta.mock.calls[0][0];
+    expect(texto).toEqual({
+      titulo: "Recebeu o pagamento?",
+      mensagem: "R$ 31,90. Se ainda não, fica pendente.",
+      confirmar: "Recebi",
+      cancelar: "Ainda não",
+    });
+    expect(texto.mensagem.length).toBeLessThanOrEqual(70);
+    expect(palavras(texto.confirmar)).toBe(1);
+    expect(palavras(texto.cancelar)).toBeLessThanOrEqual(2);
+    expect(texto.confirmar).not.toMatch(/^Sim/);
+  });
+});
+
 describe("mensagemDoFim", () => {
   it("pago: a mensagem fica na tela (o backend nao manda push a quem tocou)", () => {
     expect(mensagemDoFim("PAID")).toBe("Atendimento concluído e pago.");
   });
-  it("pendente: avisa que fica aguardando", () => {
-    expect(mensagemDoFim("PENDING")).toMatch(/aguardando o pagamento/);
-    expect(mensagemDoFim("AWAITING_CONFIRMATION")).toMatch(/aguardando o pagamento/);
+  it("pendente: diz em uma frase que o pagamento fica pendente", () => {
+    expect(mensagemDoFim("PENDING")).toBe("Concluído. Pagamento pendente.");
+    expect(mensagemDoFim("AWAITING_CONFIRMATION")).toBe("Concluído. Pagamento pendente.");
   });
   it("sem status: nada a dizer", () => {
     expect(mensagemDoFim(undefined)).toBeNull();

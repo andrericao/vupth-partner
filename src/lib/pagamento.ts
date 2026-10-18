@@ -5,9 +5,9 @@ import { abrirDialogo } from "@store/dialogo.store";
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
 // (ou do Iniciar proximo, que finaliza o atual) o app le o pagamento: ja pago,
-// segue direto; pendente ou "o cliente diz que pagou", pergunta "O pagamento
-// foi efetuado?". Sim -> finish com payment_received: true (fica PAID). Nao ->
-// termina e o pagamento segue pendente (Andre, 10/10: e caminho feliz).
+// segue direto; pendente ou "o cliente diz que pagou", pergunta "Recebeu o
+// pagamento?". Recebi -> finish com payment_received: true (fica PAID). Ainda
+// nao -> termina e o pagamento segue pendente (Andre, 10/10: e caminho feliz).
 
 type StatusDoPagamento = "PENDING" | "AWAITING_CONFIRMATION" | "PAID";
 
@@ -34,12 +34,12 @@ export async function perguntarPagamento(
   if (status !== "PENDING" && status !== "AWAITING_CONFIRMATION") return undefined;
 
   return perguntar({
-    titulo: "O pagamento foi efetuado?",
+    titulo: "Recebeu o pagamento?",
     mensagem:
       status === "AWAITING_CONFIRMATION"
         ? `O cliente diz que pagou ${reais(valor)}. Confira no seu banco antes de confirmar.`
-        : `Valor do atendimento: ${reais(valor)}. Se ainda não pagou, ele fica pendente e o cliente paga depois.`,
-    confirmar: "Sim, recebi",
+        : `${reais(valor)}. Se ainda não, fica pendente.`,
+    confirmar: "Recebi",
     cancelar: "Ainda não",
   });
 }
@@ -48,7 +48,7 @@ export async function perguntarPagamento(
 export function mensagemDoFim(paymentStatus: string | null | undefined): string | null {
   if (paymentStatus === "PAID") return "Atendimento concluído e pago.";
   if (paymentStatus === "PENDING" || paymentStatus === "AWAITING_CONFIRMATION")
-    return "Atendimento concluído, aguardando o pagamento. O cliente pode pagar depois.";
+    return "Concluído. Pagamento pendente.";
   return null;
 }
 
@@ -83,7 +83,7 @@ export const FORMAS_DE_RECEBIMENTO: { valor: FormaDeRecebimento; rotulo: string 
   { valor: "NOTA", rotulo: "Nota" },
 ];
 
-/** Depois do "Sim, recebi": como? `undefined` = pulou (o fluxo segue igual). */
+/** Depois do "Recebi": como? `undefined` = pulou (o fluxo segue igual). */
 export async function perguntarForma(
   deps: { perguntar?: typeof abrirDialogo } = {}
 ): Promise<FormaDeRecebimento | undefined> {

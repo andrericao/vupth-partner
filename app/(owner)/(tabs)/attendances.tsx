@@ -106,7 +106,7 @@ export default function OwnerAttendancesScreen() {
     const ok = await confirmar({
       titulo: "Recebeu o pagamento?",
       mensagem: `Confirme que ${item.clientName} pagou ${formatarReais(item.totalValue)}. O cliente recebe o aviso de pagamento confirmado.`,
-      confirmar: "Sim, recebi",
+      confirmar: "Recebi",
     });
     if (!ok) return;
     const forma = await perguntarForma();
