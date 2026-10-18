@@ -3,6 +3,7 @@ import { LinksLegais } from "@components/LinksLegais";
 import { BarraDeStatusClara } from "@components/BarraDeStatus";
 import { SkeletonTexto } from "@components/Skeleton";
 import { Avatar } from "@components/Avatar";
+import { ratingLabel } from "@lib/rating";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
 import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
@@ -20,7 +21,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket } from "lucide-react-native";
+  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -219,6 +220,16 @@ export default function ProfessionalSettingsScreen() {
             <>
               <Text className="font-display text-xl text-white mt-3">{professional.name}</Text>
               <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
+              {/* avaliacao-no-resumo: a nota geral. A nota POR TIPO DE CORTE vem
+                  depois (so o lugar fica pensado: esta linha). */}
+              {ratingLabel(professional.rating_average, professional.rating_count) && (
+                <View className="flex-row items-center gap-1.5 mt-1" testID="perfil-avaliacao">
+                  <Star size={13} color="#9FE870" fill="#9FE870" />
+                  <Text className="font-body text-sm text-white">
+                    {ratingLabel(professional.rating_average, professional.rating_count)} · sua avaliação
+                  </Text>
+                </View>
+              )}
             </>
           ) : (
             <View className="items-center mt-3 gap-2">

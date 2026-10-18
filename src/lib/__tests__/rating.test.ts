@@ -17,3 +17,24 @@ describe("ratingLabel", () => {
     expect(ratingLabel(0, 5)).toBeNull();
   });
 });
+
+describe("avaliacao-no-resumo — normalizeProfessional", () => {
+  // import tardio: o store puxa o SecureStore, que o jest ja mocka no setup
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { normalizeProfessional } = require("@store/professional.store");
+
+  it("guarda a nota quando o /me a traz (snake ou camel) e nulo quando nao", () => {
+    expect(normalizeProfessional({ id: "1", name: "A", rating_average: 4.5, rating_count: 8 })).toMatchObject({
+      rating_average: 4.5,
+      rating_count: 8,
+    });
+    expect(normalizeProfessional({ id: "1", name: "A", ratingAverage: 4, ratingCount: 2 })).toMatchObject({
+      rating_average: 4,
+      rating_count: 2,
+    });
+    expect(normalizeProfessional({ id: "1", name: "A" })).toMatchObject({
+      rating_average: null,
+      rating_count: null,
+    });
+  });
+});
