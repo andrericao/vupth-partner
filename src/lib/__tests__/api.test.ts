@@ -365,6 +365,14 @@ describe("getApiErrorMessage — erros em portugues pelo codigo", () => {
     );
   });
 
+  it("senha fora do tamanho no cadastro (Backend 69519c1)", () => {
+    expect(getApiErrorMessage(erro("PASSWORD_TOO_SHORT", "Password too short", 422), "x")).toBe(
+      "A senha é curta demais. Use de 6 a 64 caracteres.",
+    );
+    expect(getApiErrorMessage(erro("PASSWORD_TOO_LONG", "Password too long", 422), "x")).toContain("6 a 64");
+    expect(getApiErrorMessage(erro("INVALID_REQUEST_BODY", "Malformed JSON", 400), "x")).toContain("dados enviados");
+  });
+
   it("nenhuma mensagem mapeada tem texto em ingles comum", () => {
     const codigos = ["ACCESS_DENIED", "ACCOUNT_LOCKED", "PIX_KEY_NOT_SET", "CUT_REQUEST_EXPIRED", "STORAGE_NOT_CONFIGURED"];
     for (const c of codigos) {

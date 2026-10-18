@@ -108,6 +108,10 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   VALIDATION_ERROR: "Verifique os dados informados e tente novamente.",
   // erros-em-portugues (Andre, 17/10): toda mensagem para a pessoa em portugues,
   // pelo CODIGO — o texto do servidor pode vir em ingles ("E-mail not registered").
+  // Backend 69519c1: o cadastro com senha fora do tamanho devolve estes (antes VALIDATION_ERROR).
+  PASSWORD_TOO_SHORT: "A senha é curta demais. Use de 6 a 64 caracteres.",
+  PASSWORD_TOO_LONG: "A senha é longa demais. Use de 6 a 64 caracteres.",
+  INVALID_REQUEST_BODY: "Não foi possível ler os dados enviados. Confira e tente de novo.",
   ACCESS_DENIED: "Você não tem acesso a isso.",
   ACCOUNT_DISABLED: "Esta conta está desativada.",
   ACCOUNT_DEACTIVATED: "Esta conta está desativada. Entre de novo para reativá-la.",
