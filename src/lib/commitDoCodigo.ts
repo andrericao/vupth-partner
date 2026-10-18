@@ -9,3 +9,14 @@ export function commitDoCodigo(
   const commit = expoConfig?.extra?.commit;
   return typeof commit === "string" && commit.trim() ? commit.trim() : null;
 }
+
+/**
+ * versao-so-nas-configuracoes (Andre, 17/10): o numero do commit fica a vista
+ * nos builds de teste (a trava da bateria o le) e SAI na producao, onde a versao
+ * fica so nas Configuracoes. O canal do EAS Update diz qual e: "production" so
+ * no build de producao (eas.json); preview, development e sem canal (dev, web)
+ * mostram.
+ */
+export function commitVisivelNoCanal(canal: string | null | undefined): boolean {
+  return canal !== "production";
+}

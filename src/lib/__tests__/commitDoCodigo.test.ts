@@ -1,4 +1,4 @@
-import { commitDoCodigo } from "@lib/commitDoCodigo";
+import { commitDoCodigo, commitVisivelNoCanal } from "@lib/commitDoCodigo";
 
 // Andre, 03/10 (bateria-confere-versao): a bateria confere, antes de comecar,
 // que o app instalado e o codigo certo. O app.config.js carimba o commit em
@@ -18,5 +18,18 @@ describe("commitDoCodigo", () => {
   it("commit que nao e texto ou vem vazio: null", () => {
     expect(commitDoCodigo({ extra: { commit: 42 } })).toBeNull();
     expect(commitDoCodigo({ extra: { commit: "  " } })).toBeNull();
+  });
+});
+
+describe("commitVisivelNoCanal", () => {
+  it("builds de teste mostram o commit; a producao nao", () => {
+    expect(commitVisivelNoCanal("preview")).toBe(true);
+    expect(commitVisivelNoCanal("development")).toBe(true);
+    expect(commitVisivelNoCanal("production")).toBe(false);
+  });
+
+  it("sem canal (dev local, web): mostra", () => {
+    expect(commitVisivelNoCanal(null)).toBe(true);
+    expect(commitVisivelNoCanal(undefined)).toBe(true);
   });
 });

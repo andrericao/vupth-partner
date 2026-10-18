@@ -11,11 +11,25 @@ jest.mock("expo-constants", () => ({
   },
 }));
 
+const mockUpdates: { channel: string | null } = { channel: "preview" };
+jest.mock("expo-updates", () => ({
+  get channel() {
+    return mockUpdates.channel;
+  },
+}));
+
 // A bateria le o app-commit na tela de entrada (bateria-confere-versao).
 describe("CommitDoCodigo", () => {
   it("mostra o commit carimbado, com o testID que a bateria le", () => {
     const { getByTestId } = render(<CommitDoCodigo />);
     expect(getByTestId("app-commit")).toHaveTextContent("dc28e95");
+  });
+
+  it("na producao (canal production) o commit nao aparece", () => {
+    mockUpdates.channel = "production";
+    const { queryByTestId } = render(<CommitDoCodigo />);
+    expect(queryByTestId("app-commit")).toBeNull();
+    mockUpdates.channel = "preview";
   });
 
   it("sem carimbo (dev sem git): nao mostra nada", () => {
