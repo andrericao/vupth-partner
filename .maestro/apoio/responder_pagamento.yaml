@@ -14,6 +14,7 @@ appId: ${APP_ID}
       visible: "O pagamento foi efetuado?"
     commands:
       - tapOn: ${RESPOSTA}
+      - runFlow: pular_forma.yaml
       - extendedWaitUntil:
           visible: ${FIM}
           timeout: 20000

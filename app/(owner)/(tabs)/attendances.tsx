@@ -10,7 +10,7 @@ import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { seloDoStatus, observacaoDoAtendimento } from "@lib/statusAtendimento";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
-import { confirmarRecebimento, formatarReais } from "@lib/pagamento";
+import { confirmarRecebimento, formatarReais, perguntarForma } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
 
 function AttendanceHistoryCard({
@@ -109,8 +109,9 @@ export default function OwnerAttendancesScreen() {
       confirmar: "Sim, recebi",
     });
     if (!ok) return;
+    const forma = await perguntarForma();
     try {
-      await confirmarRecebimento(item.id);
+      await confirmarRecebimento(item.id, forma);
       await loadHistory();
     } catch (error: any) {
       setErrorMsg(getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));

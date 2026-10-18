@@ -224,6 +224,9 @@ appId: ${APP_ID}
 - tapOn:
     text: "Sim, recebi"
     label: "07.23c · pix · confirma"
+- runFlow:
+    file: ../apoio/pular_forma.yaml
+    label: "07.23c1 · forma · pula Como recebeu?"
 - extendedWaitUntil:
     notVisible: "Recebi de ${output.CLIENTE_ENCAIXE}"
     timeout: 20000

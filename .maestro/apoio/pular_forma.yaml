@@ -1,0 +1,14 @@
+# forma-de-recebimento (Backend 8b158e3): depois do "Sim, recebi" o app pergunta
+# "Como recebeu?" (opcional). A bateria nao precisa da resposta: toca em Pular
+# se a caixa aparecer, e segue.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: "Como recebeu?"
+    timeout: 5000
+    optional: true
+- runFlow:
+    when:
+      visible: "Como recebeu?"
+    commands:
+      - tapOn: "Pular"

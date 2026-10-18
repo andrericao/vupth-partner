@@ -96,6 +96,9 @@ appId: ${APP_ID}
 - tapOn:
     text: "Sim, recebi"
     label: "08.11e · pix · confirma"
+- runFlow:
+    file: ../apoio/pular_forma.yaml
+    label: "08.11e1 · forma · pula Como recebeu?"
 - extendedWaitUntil:
     visible: "Pagamento: pago"
     timeout: 20000
