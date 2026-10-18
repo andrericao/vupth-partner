@@ -66,7 +66,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         accessibilityLabel={title}
         className="flex-row items-center gap-3 px-4 py-3.5 active:bg-vupth-surface"
       >
-        <Icon size={19} color="#163300" />
+        <Icon size={20} color="#163300" />
         <View className="flex-1">
           <View className="flex-row items-center gap-1">
             <Text className="font-body text-sm font-semibold text-vupth-forest">{title}</Text>
@@ -84,7 +84,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
-        <ChevronRight size={16} color="#454745" />
+        <ChevronRight size={16} color="#163300" />
       </Pressable>
       {!last && <View className="h-px bg-vupth-border" />}
     </>
@@ -95,7 +95,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
 function Grupo({ label, children }: { label: string; children: ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
+      <Text className="font-body text-xs font-bold tracking-wider text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
       <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
@@ -234,7 +234,7 @@ export default function ProfessionalSettingsScreen() {
           ) : (
             <View className="items-center mt-3 gap-2">
               <SkeletonTexto largura={160} altura={22} escuro testID="perfil-nome-carregando" />
-              <SkeletonTexto largura={120} altura={12} escuro />
+              <SkeletonTexto largura={120} altura={14} escuro />
             </View>
           )}
         </View>
@@ -255,7 +255,7 @@ export default function ProfessionalSettingsScreen() {
               onPress={() => router.replace("/(owner)/dashboard" as any)}
               className="flex-row items-center gap-3 bg-vupth-greenTint rounded-card px-4 py-3.5"
             >
-              <ArrowLeftRight size={19} color="#163300" />
+              <ArrowLeftRight size={20} color="#163300" />
               <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
                 Área do dono
               </Text>

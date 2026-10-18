@@ -114,7 +114,9 @@ export function FotoEditavel({
             accessibilityLabel="Fechar opções da foto"
           />
           <View className="bg-vupth-background rounded-t-hero p-4 gap-1" style={{ paddingBottom: insets.bottom + 24 }}>
-            <Text className="font-heading text-md text-vupth-textPrimary text-center pb-2">{titulo}</Text>
+            {/* Rotulo como o do StatusPill ("Você está"): a folha e a mesma peca, e
+                titulo centralizado em 16 competia com as opcoes que ela lista. */}
+            <Text className="font-heading text-xs text-vupth-textSecondary mb-1">{titulo}</Text>
             {opcoes.map(({ acao, texto, Icone, destrutiva }) => (
               <Pressable
                 key={acao}

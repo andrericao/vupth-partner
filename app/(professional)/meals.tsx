@@ -300,26 +300,28 @@ export default function MealsScreen() {
             )}
           </View>
 
-          {!temRefeicaoAtiva && meals.length > 0 && (
-            <NwButton
-              title="Iniciar refeição agora"
-              onPress={handleStartNext}
-              isLoading={iniciando}
-              className="mt-6"
-            />
+          {/* Os dois botoes sao irmaos: um grupo com `gap-3`. Cada um com o
+              proprio `mt-6` dava 24 px ENTRE eles (validacao de 17/10) — o
+              mesmo espaco que separa blocos de assuntos diferentes. */}
+          {((!temRefeicaoAtiva && meals.length > 0) || !showAdd) && (
+            <View className="mt-6 gap-3">
+              {!temRefeicaoAtiva && meals.length > 0 && (
+                <NwButton title="Iniciar refeição agora" onPress={handleStartNext} isLoading={iniciando} />
+              )}
+              {!showAdd && (
+                <NwButton
+                  title="Adicionar refeição"
+                  variant="secondary"
+                  onPress={() => {
+                    setEditingId(null);
+                    setShowAdd(true);
+                  }}
+                />
+              )}
+            </View>
           )}
 
-          {!showAdd ? (
-            <NwButton
-              title="Adicionar refeição"
-              variant="secondary"
-              onPress={() => {
-                setEditingId(null);
-                setShowAdd(true);
-              }}
-              className="mt-6"
-            />
-          ) : (
+          {showAdd && (
             <View className="mt-6">
               <View className="h-px bg-vupth-border mb-4" />
               <Text className="font-heading text-xl text-vupth-forest mb-3">Nova Refeição</Text>
