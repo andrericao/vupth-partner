@@ -55,7 +55,7 @@ appId: ${APP_ID}
     file: ../apoio/para_o_andre.yaml
     env:
       NOME: "06-conta-do-atendimento"
-      O_QUE: "a conta do atendimento: Cliente pagou, Voce recebe, Empresa de pagamento (4%), App Vupth"
+      O_QUE: "a conta do atendimento: Cliente pagou, Voce recebe, Empresa de pagamento, App Vupth"
     label: "06.05d · print da conta do atendimento"
 - scrollUntilVisible:
     element: "Retirados"

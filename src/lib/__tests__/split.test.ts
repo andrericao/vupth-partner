@@ -15,8 +15,8 @@ describe("corpoDoSplit", () => {
     });
   });
 
-  it("R$ 10 sem absorcao: cliente 10,90, recebe 10", () => {
-    expect(corpoDoSplit(10, 0)).toEqual({ price: 10.9, pro_receives: 10, base_price: 10 });
+  it("R$ 10 sem absorcao: cliente 12,90, recebe 10", () => {
+    expect(corpoDoSplit(10, 0)).toEqual({ price: 12.9, pro_receives: 10, base_price: 10 });
   });
 });
 

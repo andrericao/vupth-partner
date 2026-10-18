@@ -17,14 +17,14 @@ function fecha(c: Composicao): number {
 }
 
 describe("composicaoDoAtendimento", () => {
-  it("o exemplo do Andre: 53,90 = 50,00 + 2,16 + 1,08 + 0,66", () => {
+  it("o exemplo do Andre (DEC-91): 53,90 = 50,00 + 2,11 + 1,08 + 0,71", () => {
     const c = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s1", customName: "Corte" }] }, [CORTE]);
     expect(c).toEqual({
       clientePagou: 53.9,
       voceRecebeu: 50,
-      empresaDePagamento: 2.16,
+      empresaDePagamento: 2.11,
       app: 1.08,
-      arredondamento: 0.66,
+      arredondamento: 0.71,
       outros: 0,
       estimados: [],
     });
@@ -44,14 +44,15 @@ describe("composicaoDoAtendimento", () => {
     );
     expect(c.voceRecebeu).toBe(80);
     expect(c.outros).toBe(3);
-    expect(c.empresaDePagamento).toBe(3.43);
+    // DEC-91, por servico: 2,11 (53,90) + 1,99 (o fixo do Pix em 31,90)
+    expect(c.empresaDePagamento).toBe(4.1);
     expect(c.app).toBe(1.72);
     expect(fecha(c)).toBe(88.8);
   });
 
   it("preco antigo: a parte do profissional e estimada, e a conta fecha", () => {
     const c = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s3", customName: "Asadelta" }] }, [ANTIGO]);
-    expect(c.voceRecebeu).toBe(50.66); // 53,90 - 2,16 - 1,08
+    expect(c.voceRecebeu).toBe(50.71); // 53,90 - 2,11 - 1,08
     expect(c.arredondamento).toBe(0);
     expect(c.estimados).toEqual(["Asadelta"]);
     expect(fecha(c)).toBe(53.9);
@@ -89,7 +90,7 @@ describe("somaDasContas", () => {
     const b = composicaoDoAtendimento({ totalValue: 53.9, services: [{ id: "s3", customName: "Asadelta" }] }, [ANTIGO]);
     const s = somaDasContas([a, b, b]);
     expect(s.clientePagou).toBe(161.7);
-    expect(s.voceRecebeu).toBe(151.32);
+    expect(s.voceRecebeu).toBe(151.42);
     expect(s.estimados).toEqual(["Asadelta"]);
     expect(fecha(s)).toBe(161.7);
   });
