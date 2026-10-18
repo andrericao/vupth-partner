@@ -17,6 +17,7 @@ import { ServiceTypeGrid } from "@components/ServiceTypeGrid";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
+import { explicarPrecoDoServico } from "@lib/politicaDePreco";
 import { maskMoney, unmaskMoney } from "@lib/masks";
 import { corpoDoSplit, precoParaEditar } from "@lib/split";
 import { mascaraMinutos, lerMinutos, MINUTOS_PADRAO, rotuloDoTempo } from "@lib/tempoDoServico";
@@ -118,6 +119,29 @@ function PreviaDePreco({
           R$ {pricing.platformFee.toFixed(2)}
         </Text>
       </View>
+
+      {/* politica-de-preco-saiba-mais (DEC-91): de onde vem a taxa. */}
+      <View className="flex-row justify-between mt-1">
+        <Text className="font-body text-xs text-vupth-textSecondary">· Empresa de pagamento</Text>
+        <Text className="font-body text-xs text-vupth-textSecondary">
+          R$ {pricing.intermediaryFee.toFixed(2)}
+        </Text>
+      </View>
+      <View className="flex-row justify-between">
+        <Text className="font-body text-xs text-vupth-textSecondary">· App Vupth</Text>
+        <Text className="font-body text-xs text-vupth-textSecondary">
+          R$ {pricing.appFee.toFixed(2)}
+        </Text>
+      </View>
+      <Pressable
+        onPress={() => explicarPrecoDoServico()}
+        accessibilityRole="button"
+        testID="preco-saiba-mais"
+        hitSlop={8}
+        className="mt-2 self-start"
+      >
+        <Text className="font-body text-xs text-vupth-forest underline">Saiba mais</Text>
+      </Pressable>
 
       <Text className="font-body text-xs text-vupth-textSecondary mt-3">
         * O preco salvo do servico e o total pago pelo cliente
