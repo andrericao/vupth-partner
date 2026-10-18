@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { NumeroComSalto } from "@components/NumeroComSalto";
 
 /**
  * Card de numero (fila, receita, atendimentos...).
@@ -33,7 +34,11 @@ export function StatCard({ label, value, hero = false, flex }: Props) {
       className={`p-4 rounded-card ${hero ? "bg-vupth-green" : "bg-vupth-surface"}`}
     >
       {/* `font-display` (Archivo ExtraBold) e o token de NUMERO da marca. */}
-      <Text className="font-display text-f26 text-vupth-forest">{value}</Text>
+      {/* Trocar o período (Hoje, 7 dias, 30 dias) troca o número: o salto mostra
+          que mudou, e não que a tela travou. */}
+      <NumeroComSalto valor={value}>
+        <Text className="font-display text-f26 text-vupth-forest">{value}</Text>
+      </NumeroComSalto>
       <Text
         className={`font-body text-xs mt-1 ${
           hero ? "text-vupth-forest" : "text-vupth-textSecondary"

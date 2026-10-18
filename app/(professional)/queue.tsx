@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
+import { EntradaSuave } from "@components/EntradaSuave";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
@@ -1013,13 +1014,17 @@ export default function ProfessionalQueueScreen() {
                 Lista de Espera ({waitingList.length})
               </Titulo>
               {waitingList.map((att, idx) => (
-                <QueueRow
-                  key={att.id}
-                  attendance={att}
-                  position={idx + 1}
-                  isFirst={idx === 0}
-                  onMenu={() => setMenuTarget(att)}
-                />
+                // O cartão que chega entra com fade e deslize; quem já estava
+                // montado não reanima a cada atualização da fila (a chave é o id).
+                // O atraso escalona só a primeira tela de cartões.
+                <EntradaSuave key={att.id} atraso={Math.min(idx, 5) * 50}>
+                  <QueueRow
+                    attendance={att}
+                    position={idx + 1}
+                    isFirst={idx === 0}
+                    onMenu={() => setMenuTarget(att)}
+                  />
+                </EntradaSuave>
               ))}
             </View>
           )}
