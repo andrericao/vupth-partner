@@ -19,11 +19,16 @@ export function linkDoSuporte(perfil: PerfilDoSuporte): string {
   return `${SUPORTE_URL}${perfil}`;
 }
 
-/** Abre o site de suporte no navegador; falhou, nao derruba a tela. */
-export async function abrirSuporte(perfil: PerfilDoSuporte): Promise<void> {
+/** Abre um link do Suporte no navegador; falhou, nao derruba a tela. */
+export async function abrirLink(url: string): Promise<void> {
   try {
-    await Linking.openURL(linkDoSuporte(perfil));
+    await Linking.openURL(url);
   } catch {
     // sem navegador: nada a fazer na tela
   }
+}
+
+/** Abre o site de suporte no navegador. */
+export function abrirSuporte(perfil: PerfilDoSuporte): Promise<void> {
+  return abrirLink(linkDoSuporte(perfil));
 }

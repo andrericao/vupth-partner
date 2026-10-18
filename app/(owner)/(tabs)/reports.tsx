@@ -10,12 +10,15 @@ import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriod
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { StatCard } from "@components/brand/StatCard";
 import { avisoSemSplit } from "@lib/split";
+import { RelatorioDasLojas } from "@components/RelatorioDasLojas";
+import { NaoRealizadosCard } from "@components/NaoRealizadosCard";
 
 type Period = Periodo;
 
 export default function OwnerReportsScreen() {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const fetchReport = useEstablishmentStore((s) => s.fetchReport);
+  const totalDeLojas = useEstablishmentStore((s) => s.lojas.length);
   const { data: queue, refetch } = useQueuePolling(establishment?.id ?? null);
 
   const [period, setPeriod] = useState<Period>("day");
@@ -73,6 +76,14 @@ export default function OwnerReportsScreen() {
           subtitle={establishment?.name ?? undefined}
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
+
+        {/* multi-loja-do-dono: com mais de uma loja, o resumo das lojas vem antes. */}
+        {totalDeLojas > 1 && (
+          <>
+            <RelatorioDasLojas />
+            <View className="h-px bg-vupth-border mt-6" />
+          </>
+        )}
 
         <Text className="font-heading text-vupth-textSecondary mt-6 mb-2">Agora</Text>
         <View className="flex-row gap-4">
@@ -151,6 +162,10 @@ export default function OwnerReportsScreen() {
                 </Text>
               </View>
             )}
+
+            <View className="mt-3">
+              <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
+            </View>
 
             <View className="h-px bg-vupth-border my-6" />
 

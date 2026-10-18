@@ -8,7 +8,7 @@ import { useAttendanceStore } from "@store/attendance.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { seloDoStatus } from "@lib/statusAtendimento";
+import { seloDoStatus, observacaoDoAtendimento } from "@lib/statusAtendimento";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { confirmarRecebimento, formatarReais } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
@@ -44,6 +44,12 @@ function AttendanceHistoryCard({
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
+
+      {observacaoDoAtendimento(item) && (
+        <Text testID="observacao-do-atendimento" className="font-body text-xs text-vupth-textSecondary mt-1">
+          {observacaoDoAtendimento(item)}
+        </Text>
+      )}
 
       <Text className="font-body text-sm text-vupth-textSecondary mt-1">
         {item.services.map((sv) => sv.customName).join(", ")}

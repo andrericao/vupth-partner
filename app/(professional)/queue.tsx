@@ -17,9 +17,9 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { perguntarPagamento, mensagemDoFim } from "@lib/pagamento";
-import { parseApiTime, isoDate } from "@lib/time";
+import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
-import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
+import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import {
   mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN,
@@ -40,6 +40,7 @@ import { SolicitacoesCard } from "@components/SolicitacoesCard";
 import { resumoDeSolicitacoes } from "@lib/cutRequests";
 import { escolherAtendimentoAtual } from "@lib/atendimentoAtual";
 import { finalizarAtendimento } from "@lib/finalizar";
+import { pedirFeedbackDoApp } from "@lib/feedbackDoApp";
 import { fechaFilaAoSair, viraTrabalhandoAoAbrirFila } from "@lib/coerenciaFila";
 import { ClosingPrompt } from "@components/ClosingPrompt";
 import { LiveDot } from "@components/LiveDot";
@@ -278,7 +279,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, removeFromQueue, promoteAttendance, atendimentoIniciado,
+    markLate, markNoShow, removeFromQueue, promoteAttendance, atendimentoIniciado,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -674,6 +675,29 @@ export default function ProfessionalQueueScreen() {
     if (ok) handleAction(() => markLate(att.id));
   };
 
+  // "Nao compareceu" (botao-nao-compareceu, DEC-83): a falta. Antes dos 10 min o
+  // Backend recusa (409 NO_SHOW_TOO_EARLY) e diz a hora em `available_at`.
+  const confirmNoShow = async (att: AttendanceInQueue) => {
+    const ok = await confirmar({
+      titulo: "Cliente não compareceu",
+      mensagem: mensagemDaFalta(att.clientName),
+      confirmar: "Não compareceu",
+      destrutivo: true,
+    });
+    if (!ok) return;
+    try {
+      await markNoShow(att.id);
+      await refetch();
+    } catch (error: any) {
+      const data = error?.response?.data;
+      if (data?.code === "NO_SHOW_TOO_EARLY") {
+        Alert.alert("Ainda é cedo", mensagemDaFaltaCedo(hhmmFromIso(data.available_at)));
+      } else {
+        Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar ação."));
+      }
+    }
+  };
+
   // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
   // remover a qualquer momento, inclusive no 1o atraso.
   const confirmRemove = async (att: AttendanceInQueue) => {
@@ -721,6 +745,7 @@ export default function ProfessionalQueueScreen() {
     else if (action === "adiantar") startClient(att, true);
     else if (action === "promover") confirmPromote(att);
     else if (action === "nao-chegou") confirmLate(att);
+    else if (action === "nao-compareceu") confirmNoShow(att);
     else if (action === "remover") confirmRemove(att);
     // As tres de quem JA esta na cadeira. Elas nao existiam: o menu era por
     // posicao, e quem esta sendo atendido nao tem posicao na espera.
@@ -731,6 +756,7 @@ export default function ProfessionalQueueScreen() {
           finalizar: finalizarComPagamento,
         });
         clearAttendanceStart(att.id);
+        void pedirFeedbackDoApp("profissional");
       });
     else if (action === "pausar") handleAction(() => pauseAttendance(att.id));
     else if (action === "retomar") handleAction(() => resumeAttendance(att.id));
@@ -906,6 +932,7 @@ export default function ProfessionalQueueScreen() {
                     { retomar: resumeAttendance, finalizar: finalizarComPagamento }
                   );
                   clearAttendanceStart(currentAttendance.id);
+                  void pedirFeedbackDoApp("profissional");
                 })
               }
               onPause={() => handleAction(() => pauseAttendance(currentAttendance.id))}

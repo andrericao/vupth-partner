@@ -125,6 +125,13 @@ describe("caminho web — cabecalhos (melhorias de 02/10, mesmo formato do Clien
     expect(headers).toMatch(/Permissions-Policy: geolocation=\(self\), camera=\(self\), microphone=\(\)/);
   });
 
+  it("S12: o CSP deixa o ViaCEP (busca de CEP) e fecha object-src e frame-ancestors", () => {
+    expect(headers).toMatch(/connect-src [^;]*https:\/\/viacep\.com\.br/);
+    expect(headers).toContain("object-src 'none'");
+    expect(headers).toContain("frame-ancestors 'none'");
+    expect(headers).toContain("Strict-Transport-Security");
+  });
+
   it("os bundles com hash ficam um ano no cache; o index.html e conferido a cada visita", () => {
     expect(headers).toMatch(/\/_expo\/static\/\*\n  Cache-Control: public, max-age=31536000, immutable/);
     expect(headers).toMatch(/\n\/\n  Cache-Control: no-cache/);

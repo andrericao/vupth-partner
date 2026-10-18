@@ -28,7 +28,8 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriodo";
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
-import { seloDoStatus } from "@lib/statusAtendimento";
+import { NaoRealizadosCard } from "@components/NaoRealizadosCard";
+import { seloDoStatus, observacaoDoAtendimento } from "@lib/statusAtendimento";
 import {
   composicaoDoAtendimento,
   somaDasContas,
@@ -83,7 +84,7 @@ function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { c
       <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento} />
       <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} />
       <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} />
-      <LinhaDaConta rotulo="Outros (multa ou ajuste)" valor={conta.outros} />
+      <LinhaDaConta rotulo="Outros ajustes" valor={conta.outros} />
       <LinhaDaConta rotulo="Cliente pagou" valor={conta.clientePagou} forte />
       {conta.estimados.length > 0 && (
         <Text className="font-body text-xs text-vupth-textSecondary mt-1">
@@ -122,6 +123,12 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
         {dateStr}
         {item.durationInMinutes != null && ` — ${item.durationInMinutes}min`}
       </Text>
+
+      {observacaoDoAtendimento(item) && (
+        <Text testID="observacao-do-atendimento" className="font-body text-xs text-vupth-textSecondary mt-1">
+          {observacaoDoAtendimento(item)}
+        </Text>
+      )}
 
       <Text className="font-body text-sm text-vupth-textSecondary mt-1">
         {item.services.map((s) => s.customName).join(", ")}
@@ -413,6 +420,7 @@ export default function MyDayScreen() {
                   </Text>
                 )
               )}
+              <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
               {avisoDoPrecoAntigo(precoAntigo) && (
                 <View className="bg-vupth-warning p-3 rounded-card">
                   <Text className="font-body text-xs text-vupth-forest">{avisoDoPrecoAntigo(precoAntigo)}</Text>

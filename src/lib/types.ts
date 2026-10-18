@@ -165,4 +165,8 @@ export type AttendanceHistoryItem = {
   durationInMinutes: number | null;
   /** pagamento-pix (contrato 2a2b0ec): null nos antigos, cancelados e retirados. */
   payment_status?: "PENDING" | "AWAITING_CONFIRMATION" | "PAID" | null;
+  /** relatorio-sem-multa (Backend 317c29c): por que o atendimento nao aconteceu. */
+  not_realized_reason?: "CLIENT_CANCELLED" | "PROFESSIONAL_REMOVED" | "REMOVED_FOR_LATENESS" | null;
+  /** Corte concluido com observacao de atraso do cliente. */
+  late_arrival?: boolean | null;
 };
