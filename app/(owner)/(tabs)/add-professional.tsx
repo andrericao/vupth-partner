@@ -172,16 +172,7 @@ export default function AddProfessionalScreen() {
           Alert.alert("Erro", getApiErrorMessage(err, "Não foi possível verificar o perfil profissional."));
         }
       } else {
-        const data = error?.response?.data;
-        let msg = "Não foi possível criar o profissional.";
-        if (data?.fieldErrors) {
-          msg = Object.entries(data.fieldErrors)
-            .map(([field, err]) => `${field}: ${err}`)
-            .join("\n");
-        } else if (data?.message) {
-          msg = data.message;
-        }
-        Alert.alert("Erro", msg);
+        Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível criar o profissional."));
       }
     } finally {
       setIsLoading(false);
