@@ -81,12 +81,14 @@ describe("queueMenuActions — quem já está sendo atendido", () => {
 // Regra dos atrasos refeita pelo backend em 26/09 (e328629): atraso 1 e 2 troca
 // de lugar com o proximo; no 3o, multa de R$ 5,00 e o cliente vai para o FIM da
 // fila. O "Nao compareceu" saiu. O profissional precisa saber disso ao marcar.
+//
+// Guia de texto (§4.9): a caixa diz so o que vale sempre, em uma linha; o 3o
+// atraso, a multa e o fim da fila moram no "Saiba mais" (artigo de atrasos).
 describe("mensagemDoAtraso", () => {
-  it("explica a troca de lugar e o que acontece no 3o atraso", () => {
-    const m = mensagemDoAtraso("Ana");
-    expect(m).toMatch(/Ana troca de lugar com o próximo/);
-    expect(m).toMatch(/3º atraso.*fim da fila.*multa/);
-    // a multa e do app (DEC-83): o profissional nao ve o valor
+  it("diz a troca de lugar em uma linha, sem valor (a multa e do app, DEC-83)", () => {
+    const m = mensagemDoAtraso();
+    expect(m).toBe("Troca de lugar com o próximo.");
+    expect(m.length).toBeLessThanOrEqual(70);
     expect(m).not.toMatch(/R\$/);
   });
 });

@@ -83,6 +83,19 @@ export function refeicoesDoDia<T extends { suppressedToday?: boolean | null }>(m
   return meals.filter((m) => m.suppressedToday !== true);
 }
 
+/**
+ * O titulo da pergunta da refeicao: "Hora do almoço" / "Hora da janta". A Janta
+ * e feminina: o titulo montado como `Hora do ${nome}` saia "Hora do Janta".
+ * Outro nome (refeicao criada pelo profissional) usa "Hora de", que serve aos
+ * dois generos.
+ */
+export function tituloDaRefeicao(description: string): string {
+  const nome = mealName(description);
+  if (nome === "Almoço") return "Hora do almoço";
+  if (nome === "Janta") return "Hora da janta";
+  return `Hora de ${nome.toLowerCase()}`;
+}
+
 /** "Almoço começou às HH:MM" ("iniciado" erraria o genero da Janta) pela hora real de inicio, ou null. */
 export function rotuloRefeicaoIniciada(m: { description: string; startTime: string | null }): string | null {
   const hora = hhmmFromIso(m.startTime);

@@ -83,12 +83,12 @@ export function ClosingPrompt() {
             </Text>
           </View>
           <NwButton
-            title="Fechar agora"
+            title="Fechar"
             onPress={onCloseNow}
             isLoading={closing}
           />
           <NwButton
-            title="Continuar atendendo"
+            title="Continuar"
             onPress={dismiss}
             variant="secondary"
             className="h-10"
