@@ -388,7 +388,7 @@ export default function OwnerDashboardScreen() {
                           prof.is_available ? "text-vupth-forest" : "text-vupth-textSecondary"
                         }`}
                       >
-                        {prof.is_available ? "Disponivel" : "Indisponivel"}
+                        {prof.is_available ? "Disponível" : "Indisponível"}
                       </Text>
                     </View>
                   </View>

@@ -429,7 +429,7 @@ export default function ProfessionalQueueScreen() {
           // intromissao na tela"). Depois disso o aviso fica so no menu — dot +
           // contagem. Reversivel em Configuracoes > Refeicoes.
           { text: "Não ver mais", onPress: () => disableMealNudge() },
-          { text: "Não almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
+          { text: "Não almoçar", style: "destructive", onPress: () => handleSkipMeal(due) },
           { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
         ]
       );
@@ -645,7 +645,7 @@ export default function ProfessionalQueueScreen() {
         const nome = mealName(cruzada.description);
         const adiantar = await confirmar({
           titulo: `${nome} às ${parseApiTime(cruzada.fixedStartTime)}`,
-          mensagem: `O atendimento de ${att.clientName} (~${duracao}min) passa do horário do ${nome.toLowerCase()}. Adiantar: ${nome.toLowerCase()} agora (${cruzada.durationMinutes}min) e ${att.clientName} depois. Adiar: atende ${att.clientName} e o ${nome.toLowerCase()} vem em seguida.`,
+          mensagem: `O atendimento de ${att.clientName} (~${duracao}min) passa da hora: ${nome}. Adiantar: ${nome.toLowerCase()} agora (${cruzada.durationMinutes}min) e ${att.clientName} depois. Adiar: atende ${att.clientName} e ${nome.toLowerCase()} vem em seguida.`,
           confirmar: `Adiantar ${nome.toLowerCase()}`,
           cancelar: "Adiar",
         });
