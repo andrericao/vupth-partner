@@ -76,15 +76,17 @@ env:
     timeout: 120000
     label: "00.12e · abertura-v-pulsando · chega na entrada"
 # termos-no-rodape (PAR-4, Andre 15/10): Termos e Privacidade no rodape da
-# entrada (abrem o web do Client; o navegador fica so a mao).
-- scrollUntilVisible:
-    element:
-      id: "link-termos"
-    direction: DOWN
-    label: "00.12f · termos-no-rodape · rola ate os links legais"
+# entrada (abrem o web do Client; o navegador fica so a mao). O rodape e fixo,
+# fora da rolagem (tela-de-entrada, 17/10): nao ha o que rolar ate ele.
+- assertVisible:
+    id: "link-termos"
+    label: "00.12f · termos-no-rodape · o rodape fixo mostra os links legais"
 - assertVisible:
     id: "link-privacidade"
     label: "00.12g · termos-no-rodape · Termos de uso e Política de privacidade"
+- assertVisible:
+    id: "go-login"
+    label: "00.12h · tela-de-entrada · Entrar e o botao secundario do rodape"
 
 - runFlow:
     file: etapas/01a_dono_cadastra_a_loja.yaml
