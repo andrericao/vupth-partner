@@ -9,7 +9,8 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
-import { avisar, confirmar } from "@lib/confirmar";
+import { avisar, confirmar, confirmarComSaibaMais } from "@lib/confirmar";
+import { abrirLink } from "@lib/suporte";
 import { getPrimeiroCaminhoDoDono } from "@lib/routing";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
@@ -212,8 +213,16 @@ export default function AddProfessionalScreen() {
                 return;
               }
               // Trocar de area e trocar de contexto — a barra e o menu mudam.
-              // O aviso (um OK so) explica isso e diz por onde voltar.
-              if (primeiroCaminho.aviso) await avisar(primeiroCaminho.aviso);
+              // Uma frase com Sim, Cancelar e "Saiba mais" (o resto, e por onde
+              // voltar, esta no Suporte). Cancelar fica na tela.
+              const { aviso } = primeiroCaminho;
+              if (aviso) {
+                const ok = await confirmarComSaibaMais(
+                  { titulo: aviso.titulo, mensagem: aviso.mensagem, confirmar: "Sim" },
+                  () => abrirLink(aviso.saibaMais)
+                );
+                if (!ok) return;
+              }
               router.push(primeiroCaminho.rota as any);
             }}
           />

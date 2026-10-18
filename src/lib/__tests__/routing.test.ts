@@ -123,15 +123,15 @@ describe("getPrimeiroCaminhoDoDono — o aviso de troca de contexto", () => {
     expect(getPrimeiroCaminhoDoDono(false).aviso).toBeUndefined();
   });
 
-  it("o aviso ensina os DOIS caminhos de volta, com os rotulos que existem na tela", () => {
+  it("o aviso e UMA frase curta; a explicacao de como voltar fica no Suporte (Saiba mais)", () => {
     const aviso = getPrimeiroCaminhoDoDono(true).aviso!;
 
-    expect(aviso.mensagem).toContain("Área do dono");
-    expect(aviso.mensagem).toContain("Atender como profissional");
+    expect(aviso.mensagem).toBe("Você vai para a página do profissional.");
+    expect(aviso.saibaMais).toBe("https://vupth-support.pages.dev/profissional");
   });
 
   it("o aviso diz para ONDE se esta indo, nao so que algo vai acontecer", () => {
-    expect(getPrimeiroCaminhoDoDono(true).aviso!.titulo).toMatch(/profissional/i);
+    expect(getPrimeiroCaminhoDoDono(true).aviso!.mensagem).toMatch(/profissional/i);
   });
 });
 
