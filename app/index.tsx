@@ -19,16 +19,10 @@ export default function RootIndex() {
 
   const warmUp = useCallback(async () => {
     setPhase("warming");
-    // Mesmo com o backend ja quente, garantimos pelo menos UM ciclo completo da
-    // animacao de abertura (4 icones x ~0.8s) — e a "marca" do app (estilo
-    // splash da Netflix/Mercado Livre). Ver ServerWarmup/WarmupAnimation.
-    const MIN_SPLASH_MS = 3400;
-    const started = Date.now();
+    // Sem minimo de splash (abertura-sem-piscar, 18/10): o minimo de 3,4 s era
+    // espera inventada, mesmo com o servidor quente. O unico tempo fixo e a
+    // varredura de entrada do V (0,6 s), que o ServerWarmup espera por conta propria.
     const ok = await waitForBackend();
-    const elapsed = Date.now() - started;
-    if (elapsed < MIN_SPLASH_MS) {
-      await new Promise((r) => setTimeout(r, MIN_SPLASH_MS - elapsed));
-    }
     setPhase(ok ? "ready" : "failed");
   }, []);
 
@@ -43,8 +37,14 @@ export default function RootIndex() {
     useAuthStore.getState().loadStoredTokens();
   }, []);
 
+  // O V sai antes de a rota trocar: a navegacao so acontece quando ele terminou
+  // de sair. "Pronto" espera tambem o token local (SecureStore) — senao o V
+  // sairia e sobraria um <Loading /> por cima da Home.
+  const [saiu, setSaiu] = useState(false);
+  const pronto = phase === "ready" && !isLoading;
+
   useEffect(() => {
-    if (phase !== "ready" || isLoading) return;
+    if (!saiu) return;
 
     const roles = user?.roles ?? [];
     if (isAuthenticated && roles.length > 0) {
@@ -53,9 +53,9 @@ export default function RootIndex() {
     } else {
       router.replace("/(auth)" as any);
     }
-  }, [phase, isLoading, isAuthenticated, user]);
+  }, [saiu, isAuthenticated, user]);
 
-  if (phase === "warming") return <ServerWarmup />;
   if (phase === "failed") return <ServerWarmup failed onRetry={warmUp} />;
-  return <Loading />;
+  if (saiu) return <Loading />;
+  return <ServerWarmup pronto={pronto} onSaiu={() => setSaiu(true)} />;
 }
