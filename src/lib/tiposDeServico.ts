@@ -4,14 +4,14 @@
 export type TipoDeServico = { label: string; value: string; specialties: string[] };
 
 export const TIPOS_DE_SERVICO: readonly TipoDeServico[] = [
-  { label: "Corte a maquina", value: "CORTE_MAQUINA", specialties: ["BARBER"] },
+  { label: "Corte a máquina", value: "CORTE_MAQUINA", specialties: ["BARBER"] },
   { label: "Corte a tesoura", value: "CORTE_TESOURA", specialties: ["BARBER"] },
   { label: "Barba", value: "BARBA", specialties: ["BARBER"] },
   { label: "Design de sobrancelha", value: "SOBRANCELHA", specialties: ["BARBER", "EYEBROW_TECH"] },
   { label: "Pintura", value: "PINTURA", specialties: ["BARBER", "HAIRDRESSER"] },
   { label: "Recorte das pontas", value: "RECORTE_PONTAS", specialties: ["HAIRDRESSER"] },
   { label: "Escova", value: "ESCOVA", specialties: ["HAIRDRESSER"] },
-  { label: "Hidratacao capilar", value: "HIDRATACAO", specialties: ["HAIRDRESSER"] },
+  { label: "Hidratação capilar", value: "HIDRATACAO", specialties: ["HAIRDRESSER"] },
   { label: "Progressiva", value: "PROGRESSIVA", specialties: ["HAIRDRESSER"] },
   { label: "Manicure", value: "MANICURE", specialties: ["NAIL_TECH"] },
   { label: "Pedicure", value: "PEDICURE", specialties: ["NAIL_TECH"] },
@@ -20,10 +20,10 @@ export const TIPOS_DE_SERVICO: readonly TipoDeServico[] = [
   { label: "Massagem relaxante", value: "MASSAGEM_RELAXANTE", specialties: ["MASSEUSE"] },
   { label: "Massagem modeladora", value: "MASSAGEM_MODELADORA", specialties: ["MASSEUSE"] },
   { label: "Limpeza de pele", value: "LIMPEZA_PELE", specialties: ["MASSEUSE", "ESTHETICIAN"] },
-  { label: "Depilacao", value: "DEPILACAO", specialties: ["MASSEUSE"] },
-  { label: "Drenagem linfatica", value: "DRENAGEM", specialties: ["MASSEUSE"] },
+  { label: "Depilação", value: "DEPILACAO", specialties: ["MASSEUSE"] },
+  { label: "Drenagem linfática", value: "DRENAGEM", specialties: ["MASSEUSE"] },
   { label: "Peeling facial", value: "PEELING", specialties: ["ESTHETICIAN"] },
-  { label: "Aplicacao de botox", value: "BOTOX", specialties: ["ESTHETICIAN"] },
+  { label: "Aplicação de botox", value: "BOTOX", specialties: ["ESTHETICIAN"] },
   { label: "Microagulhamento", value: "MICROAGULHAMENTO", specialties: ["ESTHETICIAN"] },
 ];
 
