@@ -1,6 +1,6 @@
 # O profissional abre a propria loja pelo Perfil (abrir-meu-estabelecimento).
 # env: DONO (nome do dono), LOJA_NOVA, ESCOLHA (nova = Atender na loja nova;
-# atual = Continuar na loja de agora). Sem loja, o app vincula direto na nova.
+# atual = Continuar na loja atual). Sem loja, o app vincula direto na nova.
 appId: ${APP_ID}
 ---
 - tapOn:
@@ -64,8 +64,8 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible: "Onde você vai atender?"
           timeout: 30000
-      - tapOn: "Continuar em .*"
-    label: "PJ7.13 · escolhe continuar na loja de agora"
+      - tapOn: "Continuar na loja atual"
+    label: "PJ7.13 · escolhe continuar na loja atual"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "PJ7.14 · fecha o aviso, se houver"
