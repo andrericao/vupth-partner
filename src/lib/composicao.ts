@@ -46,7 +46,8 @@ export type Composicao = {
 };
 
 function centavos(valor: number): number {
-  return Math.round(valor * 100) / 100;
+  // + 0: tira o -0 (53,90 - 53,90 dava -0 e o relatorio nao deve mostra-lo)
+  return Math.round(valor * 100) / 100 + 0;
 }
 
 function temDivisao(s: MeuServico | undefined): s is MeuServico & { pro_receives: number; base_price: number } {
