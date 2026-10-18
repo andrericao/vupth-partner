@@ -115,9 +115,9 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/responder_pagamento.yaml
     env:
-      RESPOSTA: "Sim, recebi"
+      RESPOSTA: "Recebi"
       FIM: "Atendimento concluído e pago."
-    label: "05.19a · pix · Sim, recebi: concluido e pago"
+    label: "05.19a · pix · Recebi: concluido e pago"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE1}
     timeout: 20000

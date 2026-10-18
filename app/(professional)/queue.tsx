@@ -596,11 +596,11 @@ export default function ProfessionalQueueScreen() {
   };
 
   // pagamento-pix (adendos 1a0616c e 62295f1): todo Finalizar passa por aqui.
-  // Pendente -> "O pagamento foi efetuado?"; a resposta vai no finish. A
+  // Pendente -> "Recebeu o pagamento?"; a resposta vai no finish. A
   // mensagem do fim so aparece quando houve a pergunta.
   const finalizarComPagamento = async (attendanceId: string) => {
     const recebido = await perguntarPagamento(attendanceId);
-    // forma-de-recebimento: so quem disse "Sim, recebi" e so se quiser.
+    // forma-de-recebimento: so quem disse "Recebi" e so se quiser.
     const forma = recebido === true ? await perguntarForma() : undefined;
     const status = await finishAttendance(attendanceId, recebido, forma);
     const mensagem = recebido === undefined ? null : mensagemDoFim(status);
