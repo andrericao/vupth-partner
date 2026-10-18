@@ -88,13 +88,20 @@ describe("AvisoLojaSemPonto", () => {
     };
     const ponto = { locationStatus: "UNRESOLVED" };
 
+    // `Once`, e nao spyOn + restore: AccessibilityInfo.isReduceMotionEnabled ja
+    // e um jest.fn() do setup do React Native, e restaurar um spy dele apaga a
+    // implementacao (a chamada passa a devolver undefined nos testes seguintes).
+    // O Animated.timing e funcao de verdade; esse espiao se desfaz normalmente.
+    const reduzido = AccessibilityInfo.isReduceMotionEnabled as jest.Mock;
+    let timing: jest.SpyInstance | undefined;
     afterEach(() => {
-      jest.restoreAllMocks();
+      timing?.mockRestore();
+      timing = undefined;
     });
 
     it("comeca invisivel, 12 px abaixo, e anima para o lugar em 400 ms no driver nativo", async () => {
-      jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
-      const timing = jest.spyOn(Animated, "timing");
+      reduzido.mockResolvedValueOnce(false);
+      timing = jest.spyOn(Animated, "timing");
       const { getByTestId } = render(<AvisoLojaSemPonto endereco={ponto} onReler={jest.fn()} />);
       const inicio = estilo(getByTestId("aviso-loja-sem-ponto"));
       expect(inicio.opacity).toBe(0);
@@ -104,14 +111,14 @@ describe("AvisoLojaSemPonto", () => {
         await Promise.resolve();
       });
       expect(timing).toHaveBeenCalledTimes(1);
-      expect(timing.mock.calls[0][1]).toEqual(
+      expect(timing!.mock.calls[0][1]).toEqual(
         expect.objectContaining({ toValue: 1, duration: 400, useNativeDriver: true })
       );
     });
 
     it("com remover animacoes ligado, aparece pronto", async () => {
-      jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(true);
-      const timing = jest.spyOn(Animated, "timing");
+      reduzido.mockResolvedValueOnce(true);
+      timing = jest.spyOn(Animated, "timing");
       const { getByTestId } = render(<AvisoLojaSemPonto endereco={ponto} onReler={jest.fn()} />);
       await act(async () => {
         await Promise.resolve();
@@ -121,7 +128,7 @@ describe("AvisoLojaSemPonto", () => {
     });
 
     it("se o sistema nao responde sobre animacao, o aviso aparece mesmo assim", async () => {
-      jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockRejectedValue(new Error("sem resposta"));
+      reduzido.mockRejectedValueOnce(new Error("sem resposta"));
       const { getByTestId } = render(<AvisoLojaSemPonto endereco={ponto} onReler={jest.fn()} />);
       await act(async () => {
         await Promise.resolve();
@@ -130,8 +137,8 @@ describe("AvisoLojaSemPonto", () => {
     });
 
     it("desmontar antes da resposta nao anima nem estoura", async () => {
-      jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
-      const timing = jest.spyOn(Animated, "timing");
+      reduzido.mockResolvedValueOnce(false);
+      timing = jest.spyOn(Animated, "timing");
       const { unmount } = render(<AvisoLojaSemPonto endereco={ponto} onReler={jest.fn()} />);
       unmount();
       await act(async () => {
