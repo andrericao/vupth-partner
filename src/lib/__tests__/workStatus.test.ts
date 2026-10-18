@@ -6,10 +6,12 @@ import {
   avisoDeLoja,
   type StatusKey,
 } from "../workStatus";
+import { coresDoTema } from "@theme/tema";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const tailwind = require("../../../tailwind.config.js");
-const vupth: Record<string, string> = tailwind.theme.extend.colors.vupth;
+// As classes `vupth-*` do tailwind leem variaveis (modo escuro, DEC-75); o hex
+// de cada uma NO TEMA CLARO, que e o que estas cores fixas do codigo repetem,
+// vem de src/theme/tokens.json por tema.ts. O escuro tem teste proprio.
+const vupth: Record<string, string> = coresDoTema("claro");
 
 describe("mapa de status", () => {
   it.each(STATUS_ORDEM)("%s vai e volta sem perder o valor", (key) => {
