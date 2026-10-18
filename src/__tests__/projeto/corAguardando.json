@@ -1,0 +1,5 @@
+{
+  "src/components/AvisoLojaSemPonto.tsx": { "pr": "#90", "hex": 2, "textoForest": 3 },
+  "src/components/DialogoVupth.tsx": { "pr": "#94 e #96", "hex": 8 },
+  "src/lib/tipoDeDialogo.ts": { "pr": "#94 e #96", "hex": 12 }
+}

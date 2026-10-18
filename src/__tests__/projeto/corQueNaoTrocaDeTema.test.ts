@@ -17,11 +17,18 @@ import path from "path";
 // que a lista baixa sozinha (ela nunca sobe: so grava se nada piorou).
 // Quando a lista esvaziar, apague o arquivo.
 //
+// `corAguardando.json` e o que PRs ainda abertas vao acrescentar quando entrarem
+// (cada arquivo diz qual PR): sem ele a primeira a ser mesclada deixaria a
+// `dev` vermelha por uma cor que ela escreveu antes desta catraca existir. E
+// licenca transitoria: quando a PR entrar, o arquivo e convertido e a entrada
+// sai. Nao conta para o "so diminui".
+//
 // Cor que de proposito NAO troca (texto branco sobre foto, o V sobre o fundo
 // verde da marca...) fica na linha com um comentario `tema-fixo: <porque>`: a
 // linha deixa de contar, e o porque fica escrito ao lado dela.
 const RAIZ = path.resolve(__dirname, "../../..");
 const BASELINE = path.join(__dirname, "corPendente.json");
+const AGUARDANDO = path.join(__dirname, "corAguardando.json");
 const MARCA_DE_FIXO = "tema-fixo";
 
 type Contagem = Partial<Record<Categoria, number>>;
@@ -99,13 +106,14 @@ function varrer(): Record<string, Contagem> {
 }
 
 let pendente: Record<string, Contagem> = JSON.parse(fs.readFileSync(BASELINE, "utf8"));
+const aguardando: Record<string, Contagem & { pr?: string }> = JSON.parse(fs.readFileSync(AGUARDANDO, "utf8"));
 const atual = varrer();
 
 function pioras(): string[] {
   const lista: string[] = [];
   for (const [arquivo, contagem] of Object.entries(atual)) {
     for (const [categoria, n] of Object.entries(contagem) as [Categoria, number][]) {
-      const permitido = pendente[arquivo]?.[categoria] ?? 0;
+      const permitido = Math.max(pendente[arquivo]?.[categoria] ?? 0, aguardando[arquivo]?.[categoria] ?? 0);
       if (n > permitido) lista.push(`${arquivo}: ${categoria} ${n} (permitido ${permitido})`);
     }
   }
@@ -138,6 +146,17 @@ describe("cor que nao troca de tema (hex, forest como texto, branco fixo)", () =
   it("todo arquivo da lista ainda existe", () => {
     for (const arquivo of Object.keys(pendente)) {
       expect(fs.existsSync(path.join(RAIZ, arquivo))).toBe(true);
+    }
+  });
+
+  it("cada licenca de PR aberta diz qual PR e nao repete o que ja esta na lista", () => {
+    for (const [arquivo, licenca] of Object.entries(aguardando)) {
+      expect(licenca.pr).toMatch(/^#\d+/);
+      for (const categoria of Object.keys(PADROES) as Categoria[]) {
+        if (licenca[categoria] === undefined) continue;
+        // Uma licenca menor ou igual ao que a lista ja permite nao serve para nada.
+        expect(licenca[categoria] as number).toBeGreaterThan(pendente[arquivo]?.[categoria] ?? 0);
+      }
     }
   });
 });
