@@ -23,7 +23,7 @@ export function PassarPosse({ pendente, candidatos, ocupado, erro, onPedir, onCa
           <Text className="font-body text-sm text-vupth-textPrimary">
             Esperando {pendente.professional_name} aceitar a posse da loja.
           </Text>
-          <NwButton title="Cancelar pedido" variant="secondary" disabled={ocupado} onPress={onCancelar} />
+          <NwButton title="Cancelar pedido" variant="secondaryPainel" disabled={ocupado} onPress={onCancelar} />
         </View>
       ) : (
         <>

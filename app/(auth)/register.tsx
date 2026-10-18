@@ -11,8 +11,10 @@ import { getApiErrorMessage } from "@lib/api";
 import { segundosDeEspera, textoDaEspera } from "@lib/erroDeAcesso";
 import { validatePassword, getPasswordRules, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
+import { useTema } from "@hooks/useTema";
 
 export default function RegisterScreen() {
+  const { cores } = useTema();
   // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
   // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
   // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
@@ -91,7 +93,7 @@ export default function RegisterScreen() {
             accessibilityRole="button"
             testID="back-button"
           >
-            <ChevronLeft size={20} color="#163300" />
+            <ChevronLeft size={20} color={cores.textPrimary} />
           </Pressable>
 
           {/* O titulo diz o PAPEL escolhido na tela anterior: quem chega aqui
@@ -99,10 +101,10 @@ export default function RegisterScreen() {
               cliquei no lugar certo?". Sem papel (link direto), cai no
               generico. */}
           <View className="mt-10 gap-2">
-            <Text className="font-display text-f13 tracking-[2px] text-vupth-forest">
+            <Text className="font-display text-f13 tracking-[2px] text-vupth-textPrimary">
               VUPTH
             </Text>
-            <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
+            <Text className="font-display text-f30 leading-[32px] text-vupth-textPrimary">
               {role === "owner"
                 ? "Criar conta de dono"
                 : role === "professional"
@@ -163,7 +165,7 @@ export default function RegisterScreen() {
 
             {confirmPassword.length > 0 && (
               <Text
-                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-vupth-forest" : "text-vupth-danger"}`}
+                className={`font-body text-xs mb-3 ${passwordsMatch ? "text-vupth-textPrimary" : "text-vupth-danger"}`}
               >
                 {passwordsMatch ? "Senhas conferem" : "Senhas não conferem"}
               </Text>
@@ -179,7 +181,7 @@ export default function RegisterScreen() {
                 onPress={() => router.push(`/(auth)/login?role=${role ?? ""}` as any)}
                 testID="go-login"
               >
-                <Text className="font-heading text-f13 text-vupth-forest">Entrar</Text>
+                <Text className="font-heading text-f13 text-vupth-textPrimary">Entrar</Text>
               </Pressable>
             </View>
           </View>

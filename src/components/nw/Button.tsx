@@ -21,6 +21,11 @@ type Variant =
   // secondary (surface) sumiria. Usa o papel `sobrePainel` (surface no claro,
   // surfaceAlt no escuro: design-modais.html, .btn.sec).
   | "secondaryPainel"
+  // `vupthOutline` sobre o cartao VERDE do atendimento (o heroi: green nos dois
+  // temas). A borda e o rotulo sao `onGreen`: textPrimary no escuro e quase
+  // branco e sobre o green daria 1,4:1. Sem fundo no toque: o greenTint de
+  // `vupthOutline` no escuro e verde escuro e engoliria o rotulo.
+  | "vupthOutlineNoVerde"
   | "danger"
   | "outlineBrand"
   | "outlineDanger"
@@ -91,6 +96,7 @@ const BOX: Record<Variant, string> = {
   vupthSecondary: "bg-vupth-forest active:opacity-70",
   vupthOutline: "bg-transparent border-2 border-vupth-textPrimary active:bg-vupth-greenTint active:opacity-80",
   vupthGhost: "bg-transparent active:bg-vupth-surface active:opacity-80",
+  vupthOutlineNoVerde: "bg-transparent border-2 border-vupth-onGreen active:opacity-70",
 };
 
 // Texto e borda usam os tokens que TROCAM de tema (textPrimary, onGreen,
@@ -108,6 +114,7 @@ const LABEL: Record<Variant, string> = {
   vupthSecondary: "text-vupth-green",
   vupthOutline: "text-vupth-textPrimary",
   vupthGhost: "text-vupth-textPrimary",
+  vupthOutlineNoVerde: "text-vupth-onGreen",
 };
 
 // A cor do spinner e a do rotulo da variante: o spinner e uma prop, nao uma
@@ -116,7 +123,7 @@ function corDoSpinner(variant: Variant, cores: Cores): string {
   if (variant === "danger") return cores.onDanger;
   if (variant === "outlineDanger") return cores.danger;
   if (variant === "vupthSecondary") return cores.green;
-  if (variant === "primary" || variant === "vupthPrimary") return cores.onGreen;
+  if (variant === "primary" || variant === "vupthPrimary" || variant === "vupthOutlineNoVerde") return cores.onGreen;
   return cores.textPrimary;
 }
 

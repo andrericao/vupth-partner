@@ -201,6 +201,7 @@ describe("contraste de cada variante do botao", () => {
     "vupthPrimary",
     "vupthSecondary",
     "vupthOutline",
+    "vupthOutlineNoVerde",
   ];
 
   it.each(VARIANTES)("%s passa no minimo AA (4.5:1)", (v) => {
@@ -223,9 +224,12 @@ describe("contraste de cada variante do botao", () => {
     const texto = hex(nome(LABEL, "text"));
     expect(texto).toBeTruthy();
     const fundoClasse = nome(BOX, "bg");
+    // Sobre o que cada variante transparente assenta: a tela, o cartao e o painel,
+    // menos a que vive so sobre o cartao verde do atendimento.
+    const SOBRE: Record<string, string[]> = { vupthOutlineNoVerde: [escuro.green] };
     const fundos =
       fundoClasse === "transparent"
-        ? [escuro.background, escuro.surface, escuro.painel]
+        ? (SOBRE[v] ?? [escuro.background, escuro.surface, escuro.painel])
         : [hex(fundoClasse) as string];
     for (const fundo of fundos) expect(razao(fundo, texto as string)).toBeGreaterThanOrEqual(4.5);
   });

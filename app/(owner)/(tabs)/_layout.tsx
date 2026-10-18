@@ -7,8 +7,10 @@ import { rotulosCabem } from "@lib/rotulosDaAba";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
+import { useTema } from "@hooks/useTema";
 
 export default function OwnerTabsLayout() {
+  const { cores } = useTema();
   const fs = useFs();
   const insets = useSafeAreaInsets();
   // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
@@ -31,8 +33,8 @@ export default function OwnerTabsLayout() {
       backBehavior="history"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
-        tabBarInactiveTintColor: "#454745", // $text-secondary
+        tabBarActiveTintColor: cores.textPrimary, // forest no claro
+        tabBarInactiveTintColor: cores.textSecondary,
         // Rotulo SEMPRE embaixo do icone. Sem isto o React Navigation decide
         // sozinho e, faltando altura, joga o rotulo AO LADO — que com a pilula
         // (larga) cai por cima do icone. Aconteceu no app do cliente em
@@ -42,8 +44,8 @@ export default function OwnerTabsLayout() {
         tabBarShowLabel: mostrarRotulo,
         tabBarStyle: {
           ...tabBarShadow,
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#D7DDD3", // [marca-vupth] $brandBorder
+          backgroundColor: cores.background,
+          borderTopColor: cores.border,
           borderTopWidth: 0,
           // [marca-vupth] Rotulo cortado em device real (QA Alexia 2026-08-21):
           // 60 - 8(top) - 8(bottom) sobrava so 44px pro icone (24) + label —

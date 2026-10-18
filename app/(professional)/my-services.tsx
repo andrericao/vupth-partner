@@ -90,10 +90,10 @@ function PreviaDePreco({
               accessibilityRole="button"
               accessibilityState={{ selected: ativo }}
               className={`py-1.5 px-3 rounded-full border mb-1 ${
-                ativo ? "bg-vupth-forest border-vupth-forest" : "bg-white border-vupth-border"
+                ativo ? "bg-vupth-selecionado border-vupth-selecionado" : "bg-vupth-background border-vupth-border"
               }`}
             >
-              <Text className={`font-body text-xs ${ativo ? "text-white" : "text-vupth-textSecondary"}`}>
+              <Text className={`font-body text-xs ${ativo ? "text-vupth-onSelecionadoBranco" : "text-vupth-textSecondary"}`}>
                 {ABSORPTION_LABELS[pct] ?? `${pct}%`}
               </Text>
             </Pressable>
@@ -105,12 +105,12 @@ function PreviaDePreco({
 
       <View className="flex-row justify-between mb-1">
         <Text className="font-body text-sm text-vupth-textSecondary">Cliente paga:</Text>
-        <Text className="font-heading text-lg text-vupth-forest">R$ {pricing.clientPrice.toFixed(2)}</Text>
+        <Text className="font-heading text-lg text-vupth-textPrimary">R$ {pricing.clientPrice.toFixed(2)}</Text>
       </View>
 
       <View className="flex-row justify-between mb-1">
         <Text className="font-body text-sm text-vupth-textSecondary">Você recebe:</Text>
-        <Text className="font-heading text-vupth-forest">R$ {pricing.proReceives.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">R$ {pricing.proReceives.toFixed(2)}</Text>
       </View>
 
       <View className="flex-row justify-between">
@@ -140,7 +140,7 @@ function PreviaDePreco({
         hitSlop={8}
         className="mt-2 self-start"
       >
-        <Text className="font-body text-xs text-vupth-forest underline">Saiba mais</Text>
+        <Text className="font-body text-xs text-vupth-textPrimary underline">Saiba mais</Text>
       </Pressable>
 
       <Text className="font-body text-xs text-vupth-textSecondary mt-3">
@@ -368,14 +368,14 @@ export default function MyServicesScreen() {
           <ScreenHeader title="Meus serviços" onBack={() => router.navigate(backTarget as any)} />
 
           {professional?.establishment_id && professional?.establishment_name ? (
-            <Text className="font-body text-sm text-vupth-forest mt-1">
+            <Text className="font-body text-sm text-vupth-textPrimary mt-1">
               {professional.establishment_name}
             </Text>
           ) : null}
 
           {!professional?.establishment_id && (
             <View className="bg-vupth-warning p-4 rounded-card mt-6 items-center">
-              <Text className="font-body text-vupth-forest text-center mb-4">
+              <Text className="font-body text-vupth-onAccentPeach text-center mb-4">
                 Você precisa estar vinculado a um estabelecimento para adicionar serviços. Se já solicitou vinculação, aguarde a aprovação do proprietário e arraste para baixo para atualizar.
               </Text>
               <NwButton
@@ -390,7 +390,7 @@ export default function MyServicesScreen() {
             <View className="mt-4 gap-2">
               {myServices.map((svc) =>
                 editingId === svc.id ? (
-                  <View key={svc.id} className="bg-vupth-surface p-3 rounded-md border border-vupth-forest">
+                  <View key={svc.id} className="bg-vupth-surface p-3 rounded-md border border-vupth-textPrimary">
                     <NwInput
                       label="Nome do serviço"
                       placeholder="Ex: Corte Social"
@@ -428,7 +428,7 @@ export default function MyServicesScreen() {
                     <View className="flex-row gap-2 mt-1">
                       <NwButton
                         title="Cancelar"
-                        variant="secondary"
+                        variant="secondaryPainel"
                         onPress={cancelEditItem}
                         className="flex-1"
                       />
@@ -446,21 +446,21 @@ export default function MyServicesScreen() {
                     className="flex-row items-center justify-between bg-vupth-surface p-4 rounded-card"
                   >
                     <View className="flex-1">
-                      <Text className="font-heading text-vupth-forest">{svc.customName}</Text>
+                      <Text className="font-heading text-vupth-textPrimary">{svc.customName}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
                         {humanizeServiceType(svc.serviceItemType)}
                         {rotuloDoTempo(svc.estimatedMinutes)}
                       </Text>
                       <View className="flex-row gap-3 mt-1">
                         <Pressable onPress={() => startEditItem(svc)} accessibilityRole="button" hitSlop={6}>
-                          <Text className="font-body text-xs text-vupth-forest">Editar</Text>
+                          <Text className="font-body text-xs text-vupth-textPrimary">Editar</Text>
                         </Pressable>
                         <Pressable onPress={() => handleRemoveItem(svc)} accessibilityRole="button" hitSlop={6}>
                           <Text className="font-body text-xs text-vupth-danger">Remover</Text>
                         </Pressable>
                       </View>
                     </View>
-                    <Text className="font-heading text-vupth-forest">R$ {svc.price.toFixed(2)}</Text>
+                    <Text className="font-heading text-vupth-textPrimary">R$ {svc.price.toFixed(2)}</Text>
                   </View>
                 )
               )}
@@ -486,7 +486,7 @@ export default function MyServicesScreen() {
             <View className="mt-6">
               <View className="h-px bg-vupth-border mb-4" />
 
-              <Text className="font-heading text-xl text-vupth-forest mb-4">Novo Serviço</Text>
+              <Text className="font-heading text-xl text-vupth-textPrimary mb-4">Novo Serviço</Text>
 
               <Text className="font-body text-vupth-textSecondary mb-2">Tipo de serviço</Text>
               {/* [#11] grade de chips com icone (substitui a lista de pilulas).

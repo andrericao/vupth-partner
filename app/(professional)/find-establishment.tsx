@@ -19,6 +19,7 @@ import { api, getApiErrorMessage } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { useProfessionalStore } from "@store/professional.store";
 import { confirmar } from "@lib/confirmar";
+import { useTema } from "@hooks/useTema";
 
 type EstablishmentResult = {
   id: string;
@@ -34,6 +35,7 @@ type EstablishmentResult = {
 type Gate = "loading" | "affiliated" | "pending" | "open";
 
 export default function FindEstablishmentScreen() {
+  const { cores } = useTema();
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<EstablishmentResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -169,13 +171,13 @@ export default function FindEstablishmentScreen() {
 
           {gate === "loading" && (
             <View className="items-center mt-12">
-              <ActivityIndicator size="large" color="#163300" />
+              <ActivityIndicator size="large" color={cores.textPrimary} />
             </View>
           )}
 
           {gate === "affiliated" && (
-            <View className="bg-vupth-greenTint p-4 rounded-card border border-vupth-forest mt-6">
-              <Text className="font-heading text-vupth-forest mb-2">Você já está vinculado</Text>
+            <View className="bg-vupth-greenTint p-4 rounded-card border border-vupth-onGreenTint mt-6">
+              <Text className="font-heading text-vupth-onGreenTint mb-2">Você já está vinculado</Text>
               <Text className="font-body text-vupth-textSecondary mb-4">
                 Você atende em {blockedName ?? "um estabelecimento"}. Um profissional só pode
                 trabalhar em um estabelecimento por vez. Para mudar, desafilie-se em Configurações.
@@ -190,7 +192,7 @@ export default function FindEstablishmentScreen() {
 
           {gate === "pending" && (
             <View className="bg-vupth-warning p-4 rounded-card mt-6">
-              <Text className="font-heading text-vupth-forest mb-2">Solicitação em andamento</Text>
+              <Text className="font-heading text-vupth-onAccentPeach mb-2">Solicitação em andamento</Text>
               <Text className="font-body text-vupth-textSecondary mb-4">
                 Você já solicitou vinculação a {blockedName ?? "um estabelecimento"} e esta
                 aguardando a resposta do proprietário. Só e possível solicitar a um estabelecimento
@@ -246,7 +248,7 @@ export default function FindEstablishmentScreen() {
                 >
                   <View className="flex-row justify-between items-center">
                     <View className="flex-1">
-                      <Text className="font-heading text-vupth-forest">{est.name}</Text>
+                      <Text className="font-heading text-vupth-textPrimary">{est.name}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
                         {serviceTypeLabel(est.serviceType)}
                       </Text>
@@ -255,13 +257,13 @@ export default function FindEstablishmentScreen() {
                       <Text
                         className={`font-body text-xs ${
                           est.openStatus === "OPEN"
-                            ? "text-vupth-forest"
+                            ? "text-vupth-textPrimary"
                             : "text-vupth-textSecondary"
                         }`}
                       >
                         {est.openStatus === "OPEN" ? "Aberto" : "Fechado"}
                       </Text>
-                      <ChevronRight size={16} color="#454745" />
+                      <ChevronRight size={16} color={cores.textSecondary} />
                     </View>
                   </View>
                 </Pressable>

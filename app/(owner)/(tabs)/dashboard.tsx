@@ -28,8 +28,10 @@ import { confirmar } from "@lib/confirmar";
 import { avisoDeAberturaSemProfissional } from "@lib/abertura";
 import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
 import { linkDaLoja, mensagemDeDivulgacao } from "@lib/linkPublico";
+import { useTema } from "@hooks/useTema";
 
 export default function OwnerDashboardScreen() {
+  const { cores } = useTema();
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
@@ -177,12 +179,12 @@ export default function OwnerDashboardScreen() {
         ref={rolagemRef}
           onScroll={pilula.onScroll}
           scrollEventThrottle={64}
-        className="w-full bg-white"
+        className="w-full bg-vupth-background"
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View className="flex-1 pb-6 px-4 bg-white">
+        <View className="flex-1 pb-6 px-4 bg-vupth-background">
           {/* O nome da loja E o titulo desta tela, e o status a acao do canto —
               entao viram title/subtitle/action do cabecalho, em vez de um bloco
               proprio com margem propria embaixo de um Header vazio. */}
@@ -199,14 +201,16 @@ export default function OwnerDashboardScreen() {
                     ? "bg-vupth-green"
                     : status === "TEMPORARILY_CLOSED"
                       ? "bg-vupth-warning"
-                      : "bg-vupth-border"
+                      : "bg-vupth-trilho"
                 }`}
               >
                 <Text
                   className={`font-display text-f11 ${
-                    isOpen || status === "TEMPORARILY_CLOSED"
-                      ? "text-vupth-forest"
-                      : "text-vupth-textSecondary"
+                    isOpen
+                      ? "text-vupth-onGreen"
+                      : status === "TEMPORARILY_CLOSED"
+                        ? "text-vupth-onAccentPeach"
+                        : "text-vupth-textSecondary"
                   }`}
                 >
                   {badge.label}
@@ -252,12 +256,14 @@ export default function OwnerDashboardScreen() {
               }`}
             >
               <View className="flex-row justify-between items-start">
-                <Text className="font-display text-f32 text-vupth-forest">{totalInQueue}</Text>
-                <ChevronRight size={18} color="#163300" />
+                <Text className={`font-display text-f32 ${totalInQueue > 0 ? "text-vupth-onGreen" : "text-vupth-textPrimary"}`}>
+                  {totalInQueue}
+                </Text>
+                <ChevronRight size={18} color={totalInQueue > 0 ? cores.onGreen : cores.textPrimary} />
               </View>
               <Text
                 className={`font-body text-xs mt-1 ${
-                  totalInQueue > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+                  totalInQueue > 0 ? "text-vupth-onGreen" : "text-vupth-textSecondary"
                 }`}
               >
                 na fila agora
@@ -265,7 +271,7 @@ export default function OwnerDashboardScreen() {
             </Pressable>
   
             <View className="flex-1 bg-vupth-surface p-4 rounded-card">
-              <Text className="font-display text-f32 text-vupth-forest">
+              <Text className="font-display text-f32 text-vupth-textPrimary">
                 {queueData?.available_professionals ?? 0}
               </Text>
               <Text className="font-body text-xs text-vupth-textSecondary mt-1">
@@ -302,14 +308,14 @@ export default function OwnerDashboardScreen() {
                 disabled={isToggling}
               >
                 <View className="flex-row items-center gap-1">
-                  <Moon size={15} color="#454745" />
+                  <Moon size={15} color={cores.textSecondary} />
                   <Text className="font-body text-sm text-vupth-textSecondary">Encerrar o dia</Text>
                 </View>
               </Pressable>
   
               <Pressable onPress={() => setStatus("TEMPORARILY_CLOSED")} disabled={isToggling}>
                 <View className="flex-row items-center gap-1">
-                  <Pause size={15} color="#454745" />
+                  <Pause size={15} color={cores.textSecondary} />
                   <Text className="font-body text-sm text-vupth-textSecondary">Pausar entrada</Text>
                 </View>
               </Pressable>
@@ -319,7 +325,7 @@ export default function OwnerDashboardScreen() {
           <View className="h-px bg-vupth-border my-6" />
   
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="font-heading text-lg text-vupth-forest">Profissionais</Text>
+            <Text className="font-heading text-lg text-vupth-textPrimary">Profissionais</Text>
             <Text className="font-body text-sm text-vupth-textSecondary">
               {professionals.length} cadastrado{professionals.length !== 1 ? "s" : ""}
             </Text>
@@ -364,7 +370,7 @@ export default function OwnerDashboardScreen() {
                 >
                   <View className="flex-row justify-between items-center">
                     <View className="flex-1">
-                      <Text className="font-heading text-vupth-forest">{prof.name}</Text>
+                      <Text className="font-heading text-vupth-textPrimary">{prof.name}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
                         {nomeDaEspecialidade(prof.specialty) || "Sem especialidade"}
                       </Text>
@@ -372,12 +378,12 @@ export default function OwnerDashboardScreen() {
                     <View className="items-end">
                       <View
                         className={`px-3 py-1 rounded-md ${
-                          prof.queue_count > 0 ? "bg-vupth-greenTint" : "bg-white"
+                          prof.queue_count > 0 ? "bg-vupth-greenTint" : "bg-vupth-background"
                         }`}
                       >
                         <Text
                           className={`font-body text-xs ${
-                            prof.queue_count > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+                            prof.queue_count > 0 ? "text-vupth-onGreenTint" : "text-vupth-textSecondary"
                           }`}
                         >
                           {prof.queue_count} na fila
@@ -385,7 +391,7 @@ export default function OwnerDashboardScreen() {
                       </View>
                       <Text
                         className={`font-body text-xs mt-1 ${
-                          prof.is_available ? "text-vupth-forest" : "text-vupth-textSecondary"
+                          prof.is_available ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
                         }`}
                       >
                         {prof.is_available ? "Disponivel" : "Indisponivel"}

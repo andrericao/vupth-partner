@@ -131,13 +131,13 @@ export default function AddGuestScreen() {
                   accessibilityLabel={svc.customName}
                   accessibilityState={{ selected: isSelected }}
                   className={`py-3 px-4 rounded-md border ${
-                    isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
+                    isSelected ? "bg-vupth-selecionado border-vupth-selecionado" : "bg-vupth-surface border-vupth-border"
                   }`}
                 >
                   <View className="flex-row justify-between items-center">
                     <View className="flex-1">
                       <Text
-                        className={`font-body text-sm ${isSelected ? "text-white" : "text-vupth-textSecondary"}`}
+                        className={`font-body text-sm ${isSelected ? "text-vupth-onSelecionadoBranco" : "text-vupth-textSecondary"}`}
                       >
                         {svc.customName}
                       </Text>
@@ -148,7 +148,7 @@ export default function AddGuestScreen() {
                       </Text>
                     </View>
                     <Text
-                      className={`font-heading ${isSelected ? "text-white" : "text-vupth-forest"}`}
+                      className={`font-heading ${isSelected ? "text-vupth-onSelecionadoBranco" : "text-vupth-textPrimary"}`}
                     >
                       R$ {svc.price.toFixed(2)}
                     </Text>
@@ -159,9 +159,9 @@ export default function AddGuestScreen() {
           </View>
 
           {selectedServices.length > 0 && (
-            <View className="bg-vupth-greenTint p-3 rounded-md border border-vupth-forest flex-row justify-between items-center mb-4">
-              <Text className="font-body text-vupth-forest">Total:</Text>
-              <Text className="font-heading text-lg text-vupth-forest">
+            <View className="bg-vupth-greenTint p-3 rounded-md border border-vupth-onGreenTint flex-row justify-between items-center mb-4">
+              <Text className="font-body text-vupth-onGreenTint">Total:</Text>
+              <Text className="font-heading text-lg text-vupth-onGreenTint">
                 R$ {selectedTotal.toFixed(2)}
               </Text>
             </View>

@@ -47,6 +47,7 @@ import { LiveDot } from "@components/LiveDot";
 import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
 import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import * as SecureStore from "expo-secure-store";
+import { useTema } from "@hooks/useTema";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
 // design/queue-layout-combined.html). Fica no TOPO da tela e concentra as acoes
@@ -64,6 +65,7 @@ function ServingCard({
   onPause?: () => void;
   onResume?: () => void;
 }) {
+  const { cores } = useTema();
   const isPaused = attendance.status === "PAUSED";
   const { formatted } = useElapsedTime(
     attendance.id,
@@ -76,8 +78,9 @@ function ServingCard({
 
   return (
     // Pausado fica AMBAR (estado de atencao); atendendo fica no verde-marca —
-    // com `forest` por cima, que e o par de contraste da marca. E o card mais
-    // claro da tela de proposito: e o que esta acontecendo agora.
+    // com `forest` por cima, que e o par de contraste da marca (onGreen, igual
+    // nos dois temas). E o card mais claro da tela de proposito: e o que esta
+    // acontecendo agora. No pausado o texto e branco nos dois temas.
     <View
       className={`p-4 rounded-card mt-4 ${isPaused ? "bg-vupth-accentPeach" : "bg-vupth-green"}`}
     >
@@ -85,11 +88,11 @@ function ServingCard({
         <View className="flex-row items-center gap-1.5">
           {/* Pisca so ATENDENDO: pausado esta parado, e ponto piscando
               sinalizaria movimento que não esta acontecendo. */}
-          <LiveDot size={7} color={isPaused ? "#FFFFFF" : "#163300"} pulsing={!isPaused} />
+          {/* tema-fixo: branco sobre o pessego do cartao pausado, igual nos dois temas */}
+          <LiveDot size={7} color={isPaused ? "#FFFFFF" : cores.onGreen} pulsing={!isPaused} />
           <Text
-            className={`font-heading text-f10 tracking-widest ${
-              isPaused ? "text-white" : "text-vupth-forest"
-            }`}
+            // tema-fixo: branco no cartao pausado, igual nos dois temas
+            className={`font-heading text-f10 tracking-widest ${isPaused ? "text-white" : "text-vupth-onGreen"}`}
           >
             {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
           </Text>
@@ -98,26 +101,30 @@ function ServingCard({
           {/* Cronometro em DM Mono: numero que muda a cada segundo nao pode
               dancar de largura a cada digito. */}
           <Text
-            className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-forest"}`}
+            // tema-fixo: idem
+            className={`font-mono text-sm ${isPaused ? "text-white" : "text-vupth-onGreen"}`}
             testID="cronometro"
           >
             {formatted}
           </Text>
           {/* O sinal de que o card tem MAIS opcoes (Remover, alem dos botoes).
               Sem ele o menu existia e ninguem o achava (Andre, 24/09). */}
-          <Ellipsis size={18} color={isPaused ? "#FFFFFF" : "#163300"} />
+          {/* tema-fixo: idem */}
+          <Ellipsis size={18} color={isPaused ? "#FFFFFF" : cores.onGreen} />
         </View>
       </View>
 
       <View className="mt-3 gap-1">
         <Text
-          className={`font-display text-f22 ${isPaused ? "text-white" : "text-vupth-forest"}`}
+          // tema-fixo: idem
+          className={`font-display text-f22 ${isPaused ? "text-white" : "text-vupth-onGreen"}`}
         >
           {attendance.clientName}
         </Text>
         <Text
           className={`font-body text-xs font-semibold ${
-            isPaused ? "text-white opacity-90" : "text-vupth-forest opacity-70"
+            // tema-fixo: idem
+            isPaused ? "text-white opacity-90" : "text-vupth-onGreen opacity-70"
           }`}
         >
           {/* `?? 0`: campo faltando NAO pode derrubar a tela. Foi assim que o
@@ -163,7 +170,7 @@ function ServingCard({
           <NwButton
             title="Pausar"
             onPress={onPause}
-            variant="vupthOutline"
+            variant="vupthOutlineNoVerde"
             className="flex-1 h-11"
           />
         )}
@@ -189,6 +196,7 @@ function QueueRow({
   isFirst: boolean;
   onMenu: () => void;
 }) {
+  const { cores } = useTema();
   const isLate = attendance.status === "LATE";
   const services = formatServices(attendance.services ?? []);
   const price = `R$ ${(attendance.totalValue ?? 0).toFixed(2)}`;
@@ -199,17 +207,17 @@ function QueueRow({
       accessibilityRole="button"
       accessibilityLabel={`Opções de ${attendance.clientName}`}
       className={`bg-vupth-surface pl-4 active:bg-vupth-greenTint ${
-        isFirst ? "p-4 rounded-card border border-vupth-forest mb-3" : "p-3 rounded-card mb-2"
+        isFirst ? "p-4 rounded-card border border-vupth-textPrimary mb-3" : "p-3 rounded-card mb-2"
       }`}
     >
       <View className="flex-row items-center gap-2">
         <View
           className={`w-6 h-6 rounded-full items-center justify-center ${
-            isFirst ? "bg-vupth-forest" : "bg-vupth-surface"
+            isFirst ? "bg-vupth-selecionado" : "bg-vupth-surface"
           }`}
         >
           <Text
-            className={`font-heading text-xs ${isFirst ? "text-white" : "text-vupth-textSecondary"}`}
+            className={`font-heading text-xs ${isFirst ? "text-vupth-onSelecionadoBranco" : "text-vupth-textSecondary"}`}
           >
             {position}
           </Text>
@@ -218,7 +226,7 @@ function QueueRow({
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
             <Text
-              className={`font-heading text-vupth-forest ${isFirst ? "text-base" : "text-sm"}`}
+              className={`font-heading text-vupth-textPrimary ${isFirst ? "text-base" : "text-sm"}`}
             >
               {attendance.clientName}
             </Text>
@@ -233,7 +241,7 @@ function QueueRow({
                 }`}
               >
                 <Text
-                  className={`text-xs ${isLate ? "text-vupth-forest" : "text-vupth-textSecondary"}`}
+                  className={`text-xs ${isLate ? "text-vupth-onAccentPeach" : "text-vupth-textSecondary"}`}
                 >
                   {isLate ? "atrasado" : "aguardando"}
                 </Text>
@@ -248,7 +256,7 @@ function QueueRow({
           {isFirst && (
             <Text
               className={`font-body text-xs mt-0.5 ${
-                isLate ? "text-vupth-textSecondary" : "text-vupth-forest"
+                isLate ? "text-vupth-textSecondary" : "text-vupth-textPrimary"
               }`}
             >
               {isLate ? "Atrasado" : "Próximo"}
@@ -259,13 +267,14 @@ function QueueRow({
         {/* [marca-vupth] Era o caractere "›" — mesmo padrao ja trocado por
             ícone no dashboard do dono; o Pencil (PROF · 01 Fila) especifica
             chevron-right/lucide aqui também. */}
-        <ChevronRight size={18} color="#454745" />
+        <ChevronRight size={18} color={cores.textSecondary} />
       </View>
     </Pressable>
   );
 }
 
 export default function ProfessionalQueueScreen() {
+  const { cores, veu } = useTema();
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
@@ -842,7 +851,7 @@ export default function ProfessionalQueueScreen() {
                   disabled={refreshing}
                   className={refreshing ? "opacity-40" : undefined}
                 >
-                  <RotateCw size={20} color="#163300" />
+                  <RotateCw size={20} color={cores.textPrimary} />
                 </Pressable>
               )}
               {/* compartilhar-no-topo (Andre, 05/10): o link do profissional,
@@ -873,7 +882,7 @@ export default function ProfessionalQueueScreen() {
                   "opcoes": nada no desenho sugeria status, refeicoes ou fechar
                   fila, que e o que mora atras deste botao. Vira reticencia, que
                   e o que o proprio time chamava de "mais opcoes". */}
-              <Ellipsis size={22} color="#163300" />
+              <Ellipsis size={22} color={cores.textPrimary} />
               {/* Badge COM CONTAGEM (Andre 2026-08-05). So conta o que tem dot
                   DENTRO do menu — a pendência de cadastro ficou de fora porque o
                   dot dela mora na aba Configurações (levar ao lugar certo). */}
@@ -893,7 +902,7 @@ export default function ProfessionalQueueScreen() {
   
           {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
             <View className="flex-row items-center gap-1.5 mt-1">
-              <Star size={13} color="#454745" fill="#454745" />
+              <Star size={13} color={cores.textSecondary} fill={cores.textSecondary} />
               <Text className="font-body text-sm text-vupth-textSecondary">
                 {ratingLabel(myProfessional.rating_average, myProfessional.rating_count)} · sua avaliação
               </Text>
@@ -987,14 +996,14 @@ export default function ProfessionalQueueScreen() {
           {myProfessional && (
             <View className="flex-row gap-2 mt-4 items-center">
               <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
-                <Users size={13} color="#163300" />
-                <Text className="font-heading text-xs text-vupth-forest">
+                <Users size={13} color={cores.onGreenTint} />
+                <Text className="font-heading text-xs text-vupth-onGreenTint">
                   {myProfessional.queue_count} na fila
                 </Text>
               </View>
               <View className="flex-row items-center gap-1 bg-vupth-greenTint rounded-full px-3 py-1.5">
-                <Clock size={13} color="#163300" />
-                <Text className="font-heading text-xs text-vupth-forest">
+                <Clock size={13} color={cores.onGreenTint} />
+                <Text className="font-heading text-xs text-vupth-onGreenTint">
                   {myProfessional.estimated_wait_minutes} min
                 </Text>
               </View>
@@ -1029,9 +1038,9 @@ export default function ProfessionalQueueScreen() {
               a um toque — o resto (iniciar/adiar/pular/editar) e no menu. */}
           {activeMeal && (
             <View className="flex-row items-center gap-2 mt-6 bg-vupth-accentPeach p-3 rounded-card">
-              <UtensilsCrossed size={17} color="#163300" />
+              <UtensilsCrossed size={17} color={cores.onAccentPeach} />
               <View className="flex-1">
-                <Text className="font-heading text-sm text-vupth-forest">
+                <Text className="font-heading text-sm text-vupth-onAccentPeach">
                   {mealName(activeMeal.description)} em andamento
                 </Text>
                 <Text className="font-body text-xs text-vupth-textSecondary">
@@ -1065,7 +1074,7 @@ export default function ProfessionalQueueScreen() {
               variant="vupthGhost"
               onPress={() => router.push("/(professional)/add-guest" as any)}
               className="self-start mt-3"
-              icon={<UserPlus size={16} color="#163300" />}
+              icon={<UserPlus size={16} color={cores.textPrimary} />}
             />
           )}
   
@@ -1095,7 +1104,7 @@ export default function ProfessionalQueueScreen() {
       {waitingList.length > 0 && (
         <View
           className="px-4 pt-3"
-          style={{ paddingBottom: 12, backgroundColor: "#FFFFFF" }}
+          style={{ paddingBottom: 12, backgroundColor: cores.background }}
         >
           {currentAttendance ? (
             <View
@@ -1103,7 +1112,7 @@ export default function ProfessionalQueueScreen() {
             >
               {/* Icone info (Pencil PROF · 01 Fila) — a dica antes era so
                   texto; o desenho marca com um icone de informacao. */}
-              <Info size={15} color="#454745" />
+              <Info size={15} color={cores.textSecondary} />
               {/* DS4 (opcao A, 31/08): o texto QUEBRA em vez de vazar. Com a
                   fonte do sistema ampliada ele nao cabe numa linha, e a pilula
                   tem altura fixa — o icone saia da caixa e a frase era cortada.
@@ -1133,14 +1142,14 @@ export default function ProfessionalQueueScreen() {
       >
         <View className="flex-1 justify-end">
           <Pressable
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: veu }}
             onPress={() => setMenuTarget(null)}
             accessibilityLabel="Fechar menu"
           />
           {/* paddingBottom = barra de gestos do aparelho + folga. Sem o inset,
               a ULTIMA opcao ficava embaixo do rodape do celular (device 08-11). */}
           <View
-            className="bg-white rounded-t-2xl p-4 gap-1"
+            className="bg-vupth-painel rounded-t-2xl p-4 gap-1"
             style={{ paddingBottom: insets.bottom + 24 }}
           >
             {menuTarget && (
@@ -1161,7 +1170,7 @@ export default function ProfessionalQueueScreen() {
                   >
                     <Text
                       className={`font-body text-base ${
-                        action === "remover" ? "text-vupth-danger" : "text-vupth-forest"
+                        action === "remover" ? "text-vupth-danger" : "text-vupth-textPrimary"
                       }`}
                     >
                       {QUEUE_ACTION_LABEL[action]}

@@ -13,6 +13,7 @@ import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { ratingLabel } from "@lib/rating";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
+import { useTema } from "@hooks/useTema";
 
 function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
   const statusLabel =
@@ -21,15 +22,16 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
       : attendance.status === "PAUSED"
         ? "Pausado"
         : "Aguardando";
-  // Pausado e o unico que pede atencao: fica ambar. Atendendo e aguardando sao
-  // estados normais e ficam no forest.
+  // Pausado e o unico que pede atencao: fica pessego (a cor, nao o fundo
+  // `warning`, que no escuro e marrom escuro). Atendendo e aguardando sao
+  // estados normais e ficam no texto padrao.
   const statusClasse =
-    attendance.status === "PAUSED" ? "text-vupth-warning" : "text-vupth-forest";
+    attendance.status === "PAUSED" ? "text-vupth-pessego" : "text-vupth-textPrimary";
 
   return (
     <View className="flex-row justify-between items-center py-2 px-3 border-b border-vupth-surface">
       <View className="flex-1">
-        <Text className="font-body text-sm text-vupth-forest">{attendance.clientName}</Text>
+        <Text className="font-body text-sm text-vupth-textPrimary">{attendance.clientName}</Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
           {attendance.services.map((sv) => sv.customName).join(", ")}
         </Text>
@@ -51,6 +53,7 @@ function ProfessionalCard({
   professional: ProfessionalWithQueue;
   establishmentId: string;
 }) {
+  const { cores } = useTema();
   const [expanded, setExpanded] = useState(false);
   const allAttendances = [
     ...(professional.current_attendance ? [professional.current_attendance] : []),
@@ -63,13 +66,13 @@ function ProfessionalCard({
         <View className="flex-row justify-between items-center gap-3">
           <Avatar nome={professional.name} uri={professional.profile_image_url} tamanho={40} />
           <View className="flex-1">
-            <Text className="font-heading text-vupth-forest">{professional.name}</Text>
+            <Text className="font-heading text-vupth-textPrimary">{professional.name}</Text>
             <Text className="font-body text-sm text-vupth-textSecondary">
               {nomeDaEspecialidade(professional.specialty)}
             </Text>
             {ratingLabel(professional.rating_average, professional.rating_count) && (
               <View className="flex-row items-center gap-1 mt-0.5">
-                <Star size={12} color="#454745" fill="#454745" />
+                <Star size={12} color={cores.textSecondary} fill={cores.textSecondary} />
                 <Text className="font-body text-xs text-vupth-textSecondary">
                   {ratingLabel(professional.rating_average, professional.rating_count)}
                 </Text>
@@ -79,12 +82,12 @@ function ProfessionalCard({
           <View className="items-end">
             <View
               className={`px-3 py-1 rounded-md ${
-                professional.queue_count > 0 ? "bg-vupth-greenTint" : "bg-white"
+                professional.queue_count > 0 ? "bg-vupth-greenTint" : "bg-vupth-background"
               }`}
             >
               <Text
                 className={`font-body text-xs ${
-                  professional.queue_count > 0 ? "text-vupth-forest" : "text-vupth-textSecondary"
+                  professional.queue_count > 0 ? "text-vupth-onGreenTint" : "text-vupth-textSecondary"
                 }`}
               >
                 {professional.queue_count} na fila
@@ -111,7 +114,7 @@ function ProfessionalCard({
           }
           className="py-2 px-4 bg-vupth-greenTint border-t border-vupth-surface"
         >
-          <Text className="font-body text-sm text-vupth-forest text-center">
+          <Text className="font-body text-sm text-vupth-onGreenTint text-center">
             Ver fila detalhada
           </Text>
         </Pressable>

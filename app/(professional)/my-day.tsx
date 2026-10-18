@@ -63,10 +63,10 @@ function humanizeService(value: string | null): string {
 function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor: number; forte?: boolean }) {
   return (
     <View className="flex-row justify-between mt-1">
-      <Text className={`font-body text-xs ${forte ? "text-vupth-forest font-semibold" : "text-vupth-textSecondary"}`}>
+      <Text className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}>
         {rotulo}
       </Text>
-      <Text className={`font-body text-xs ${forte ? "text-vupth-forest font-semibold" : "text-vupth-textSecondary"}`}>
+      <Text className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}>
         R$ {valor.toFixed(2)}
       </Text>
     </View>
@@ -113,7 +113,7 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
       className="bg-vupth-surface p-4 rounded-card mb-3 active:opacity-80"
     >
       <View className="flex-row items-center justify-between">
-        <Text className="font-heading text-vupth-forest">{item.clientName}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{item.clientName}</Text>
         <View className={`px-3 py-1 rounded-md ${statusInfo.selo}`}>
           <Text className={`font-body text-xs ${statusInfo.texto}`}>{statusInfo.label}</Text>
         </View>
@@ -136,7 +136,7 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
 
       <View className="flex-row items-center justify-between mt-2">
         <Text className="font-body text-xs text-vupth-textSecondary">{aberto ? "Esconder a conta" : "Ver a conta"}</Text>
-        <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
       <LinhaDoPagamento status={item.payment_status} />
       {aberto && <ContaDoAtendimento conta={conta} />}
@@ -151,11 +151,11 @@ function Chip({ label, ativo, onPress }: { label: string; ativo: boolean; onPres
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: ativo }}
-      className={`py-2 px-4 rounded-full active:opacity-70 ${ativo ? "bg-vupth-forest" : "bg-vupth-surface"}`}
+      className={`py-2 px-4 rounded-full active:opacity-70 ${ativo ? "bg-vupth-selecionado" : "bg-vupth-surface"}`}
     >
       <Text
         numberOfLines={1}
-        className={`font-body text-sm text-center ${ativo ? "text-vupth-green" : "text-vupth-textSecondary"}`}
+        className={`font-body text-sm text-center ${ativo ? "text-vupth-onSelecionado" : "text-vupth-textSecondary"}`}
       >
         {label}
       </Text>
@@ -177,10 +177,10 @@ function Numero({
 }) {
   return (
     <View className={`flex-1 p-4 rounded-card ${destaque ? "bg-vupth-green" : "bg-vupth-surface"}`}>
-      <Text className={`font-body text-sm ${destaque ? "text-vupth-forest" : "text-vupth-textSecondary"}`}>
+      <Text className={`font-body text-sm ${destaque ? "text-vupth-onGreen" : "text-vupth-textSecondary"}`}>
         {rotulo}
       </Text>
-      <Text className={`font-heading ${tamanho} text-vupth-forest`}>{valor}</Text>
+      <Text className={`font-heading ${tamanho} ${destaque ? "text-vupth-onGreen" : "text-vupth-textPrimary"}`}>{valor}</Text>
     </View>
   );
 }
@@ -411,7 +411,7 @@ export default function MyDayScreen() {
 
               {contaDoPeriodo ? (
                 <View className="bg-vupth-surface p-4 rounded-card">
-                  <Text className="font-heading text-sm text-vupth-forest">A conta do período</Text>
+                  <Text className="font-heading text-sm text-vupth-textPrimary">A conta do período</Text>
                   <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
                 </View>
               ) : (
@@ -424,7 +424,7 @@ export default function MyDayScreen() {
               <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
               {avisoDoPrecoAntigo(precoAntigo) && (
                 <View className="bg-vupth-warning p-3 rounded-card">
-                  <Text className="font-body text-xs text-vupth-forest">{avisoDoPrecoAntigo(precoAntigo)}</Text>
+                  <Text className="font-body text-xs text-vupth-onAccentPeach">{avisoDoPrecoAntigo(precoAntigo)}</Text>
                 </View>
               )}
 
@@ -437,7 +437,7 @@ export default function MyDayScreen() {
 
           <View className="h-px bg-vupth-border my-6" />
 
-          <Text className="font-heading text-xl text-vupth-forest mb-3">Histórico</Text>
+          <Text className="font-heading text-xl text-vupth-textPrimary mb-3">Histórico</Text>
 
           <View className="flex-row flex-wrap gap-2 mb-4">
             {filters.map((f) => (
@@ -453,9 +453,9 @@ export default function MyDayScreen() {
 
           {historyError && (
             <View className="bg-vupth-warning p-4 rounded-card mt-2">
-              <Text className="font-body text-vupth-forest text-center">{historyError}</Text>
+              <Text className="font-body text-vupth-onAccentPeach text-center">{historyError}</Text>
               <Pressable onPress={loadHistory} accessibilityRole="button" className="mt-2 active:opacity-70">
-                <Text className="font-body text-sm text-vupth-forest text-center">Tentar novamente</Text>
+                <Text className="font-body text-sm text-vupth-onAccentPeach text-center">Tentar novamente</Text>
               </Pressable>
             </View>
           )}

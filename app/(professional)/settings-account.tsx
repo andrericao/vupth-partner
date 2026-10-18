@@ -64,14 +64,14 @@ function FieldCard({
             <Text className="font-body text-xs text-vupth-danger mb-2">{error}</Text>
           )}
           <View className="flex-row gap-2">
-            <NwButton title="Cancelar" onPress={onCancel} variant="secondary" className="flex-1 h-9 mt-0" />
+            <NwButton title="Cancelar" onPress={onCancel} variant="secondaryPainel" className="flex-1 h-9 mt-0" />
             <NwButton title="Salvar" onPress={onSave} isLoading={isSaving} className="flex-1 h-9 mt-0" />
           </View>
         </View>
       ) : (
         <>
-          <Text className="font-heading text-vupth-forest mt-1">{value}</Text>
-          <NwButton title={editLabel} onPress={onEdit} variant="secondary" className="h-9 mt-2" />
+          <Text className="font-heading text-vupth-textPrimary mt-1">{value}</Text>
+          <NwButton title={editLabel} onPress={onEdit} variant="secondaryPainel" className="h-9 mt-2" />
         </>
       )}
     </View>
@@ -488,7 +488,7 @@ export default function SettingsAccountScreen() {
               para excluir e desativar conta"): Desativar e Excluir lado a lado,
               no fim — caminho que a loja de apps exige, nao acao do dia a dia. */}
           <View className="mt-10 gap-2" testID="menu-conta">
-            <Text className="font-heading text-sm text-vupth-forest">Conta</Text>
+            <Text className="font-heading text-sm text-vupth-textPrimary">Conta</Text>
             <View className="flex-row gap-2">
               <NwButton
                 title="Desativar"

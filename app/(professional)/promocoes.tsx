@@ -10,7 +10,7 @@ import { LinkDeIndicacao } from "@components/LinkDeIndicacao";
 export default function PromocoesScreen() {
   const { from } = useLocalSearchParams<{ from?: string }>();
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+    <ScrollView className="flex-1 bg-vupth-background" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
       <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Promoções"
