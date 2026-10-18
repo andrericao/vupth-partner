@@ -145,23 +145,12 @@
     "textoForest": 1,
     "branco": 1
   },
-  "src/components/Avatar.tsx": {
-    "textoForest": 1
-  },
   "src/components/AvisoLojaDesativada.tsx": {
     "textoForest": 2
   },
   "src/components/AvisoLojaSemPonto.tsx": {
     "hex": 1,
     "textoForest": 2
-  },
-  "src/components/BlocoBloqueio.tsx": {
-    "hex": 1,
-    "textoForest": 1,
-    "bordaForest": 1
-  },
-  "src/components/ButtonGoBack.tsx": {
-    "hex": 1
   },
   "src/components/ChavePix.tsx": {
     "textoForest": 1,
@@ -172,13 +161,6 @@
     "hex": 1,
     "textoForest": 1,
     "branco": 1
-  },
-  "src/components/CompartilharNoTopo.tsx": {
-    "hex": 1
-  },
-  "src/components/CompartilharPerfil.tsx": {
-    "hex": 1,
-    "bordaForest": 1
   },
   "src/components/CompletionCard.tsx": {
     "hex": 10,
@@ -235,10 +217,6 @@
     "hex": 4,
     "textoForest": 2
   },
-  "src/components/InputSearch.tsx": {
-    "hex": 2,
-    "branco": 1
-  },
   "src/components/LinhaComInterruptor.tsx": {
     "hex": 4,
     "textoForest": 1
@@ -246,21 +224,12 @@
   "src/components/LinkDeIndicacao.tsx": {
     "textoForest": 2
   },
-  "src/components/LiveDot.tsx": {
-    "hex": 1
-  },
-  "src/components/Loading.tsx": {
-    "hex": 1
-  },
   "src/components/ModoDeFuncionamento.tsx": {
     "textoForest": 2,
     "bordaForest": 1
   },
   "src/components/NaoRealizadosCard.tsx": {
     "textoForest": 1
-  },
-  "src/components/NotificationBadge.tsx": {
-    "hex": 2
   },
   "src/components/OnboardingPathChoice.tsx": {
     "hex": 1,
@@ -274,16 +243,6 @@
   },
   "src/components/PassarPosse.tsx": {
     "textoForest": 2
-  },
-  "src/components/PasswordRules.tsx": {
-    "hex": 2,
-    "textoForest": 1
-  },
-  "src/components/PendingDot.tsx": {
-    "hex": 1
-  },
-  "src/components/PilulaVoltarAoTopo.tsx": {
-    "hex": 1
   },
   "src/components/PushDiagnostics.tsx": {
     "textoForest": 4,
@@ -319,19 +278,9 @@
     "textoForest": 1,
     "bordaForest": 1
   },
-  "src/components/Skeleton.tsx": {
-    "hex": 2
-  },
   "src/components/SolicitacoesCard.tsx": {
     "hex": 2,
     "textoForest": 3
-  },
-  "src/components/StatusPill.tsx": {
-    "hex": 2
-  },
-  "src/components/StepsButton.tsx": {
-    "hex": 2,
-    "branco": 1
   },
   "src/components/TabBarIcon.tsx": {
     "hex": 3
@@ -343,24 +292,8 @@
   "src/components/brand/StatCard.tsx": {
     "textoForest": 2
   },
-  "src/components/comingSoon.tsx": {
-    "hex": 2,
-    "textoForest": 1,
-    "branco": 1
-  },
   "src/components/doodles/index.ts": {
     "hex": 5
-  },
-  "src/components/nw/CampoDeBusca.tsx": {
-    "hex": 3,
-    "textoForest": 1,
-    "bordaForest": 1,
-    "branco": 1
-  },
-  "src/components/nw/Input.tsx": {
-    "hex": 4,
-    "bordaForest": 1,
-    "branco": 1
   },
   "src/lib/statusAtendimento.ts": {
     "textoForest": 5,
@@ -368,10 +301,5 @@
   },
   "src/lib/styles.ts": {
     "hex": 1
-  },
-  "src/lib/workStatus.ts": {
-    "hex": 3,
-    "textoForest": 2,
-    "branco": 1
   }
 }

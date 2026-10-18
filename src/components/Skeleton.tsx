@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Animated, View } from "react-native";
+import { useTema } from "@hooks/useTema";
 
 // [new-design] Skeleton loading (R4): placeholders com a forma do conteudo,
 // no lugar dos Spinner. Pulso de opacidade (Animated nativo, sem dep extra).
 // Migrado p/ NativeWind (v2).
 
-// [marca-vupth] $brandBorder. Os blocos ficam DENTRO do card fantasma, que e
-// $brandSurface plano igual ao card real — border e o unico neutro da paleta
-// que aparece sobre ele. Era #E2E9E5, cinza da paleta pre-marca.
-const BASE = "#D7DDD3";
+// Os blocos ficam DENTRO do card fantasma, que e `surface` plano igual ao card
+// real. No claro o unico neutro da paleta que aparece sobre ele e o `border`
+// (era #E2E9E5, cinza da paleta pre-marca); no escuro o `border` e um verde vivo
+// e berraria, entao a cor vem do papel `esqueleto` (surfaceAlt, discreto).
 
 function usePulse() {
   const [v] = useState(() => new Animated.Value(0.45));
@@ -36,9 +37,10 @@ function Block({
   h?: number;
   r?: number;
 }) {
+  const { cores } = useTema();
   return (
     <Animated.View
-      style={{ width: w as any, height: h, borderRadius: r, backgroundColor: BASE, opacity }}
+      style={{ width: w as any, height: h, borderRadius: r, backgroundColor: cores.esqueleto, opacity }}
     />
   );
 }
@@ -88,6 +90,7 @@ export function SkeletonTexto({
   testID?: string;
 }) {
   const opacity = usePulse();
+  const { cores } = useTema();
   return (
     <Animated.View
       testID={testID}
@@ -96,7 +99,8 @@ export function SkeletonTexto({
         width: largura as any,
         height: altura,
         borderRadius: 8,
-        backgroundColor: escuro ? "rgba(255,255,255,0.22)" : BASE,
+        // tema-fixo: o cabecalho do Perfil e forest nos dois temas, entao o branco translucido vale nos dois
+        backgroundColor: escuro ? "rgba(255,255,255,0.22)" : cores.esqueleto,
         opacity,
       }}
     />

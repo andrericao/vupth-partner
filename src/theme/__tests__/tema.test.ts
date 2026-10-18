@@ -126,6 +126,9 @@ describe("papeis — onde o desenho troca de token entre os temas", () => {
     expect(papeis.sobrePainel.claro).toBe("surface"); // era bg-vupth-surface
     expect(papeis.selecionado.claro).toBe("forest"); // era bg-vupth-forest
     expect(papeis.onSelecionado.claro).toBe("green"); // era text-vupth-green
+    expect(papeis.onSelecionadoBranco.claro).toBe("background"); // era text-white
+    expect(papeis.pessego.claro).toBe("accentPeach"); // era warning usado como cor
+    expect(papeis.esqueleto.claro).toBe("border"); // era #D7DDD3 fixo
   });
 
   it("o painel do modal e o #163300 do desenho no escuro (design-modais.html)", () => {

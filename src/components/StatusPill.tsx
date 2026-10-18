@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, Pressable, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Check } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 
 import {
   STATUS_META,
@@ -31,6 +32,7 @@ type Props = {
 export function StatusPill({ current, onSelect }: Props) {
   const [aberto, setAberto] = useState(false);
   const insets = useSafeAreaInsets();
+  const { cores, veu } = useTema();
   const meta = current ? STATUS_META[current] : null;
 
   return (
@@ -59,7 +61,7 @@ export function StatusPill({ current, onSelect }: Props) {
       >
         <View className="flex-1 justify-end">
           <Pressable
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: veu }}
             onPress={() => setAberto(false)}
             accessibilityLabel="Fechar seletor de status"
           />
@@ -85,11 +87,11 @@ export function StatusPill({ current, onSelect }: Props) {
                   }}
                   className="flex-row items-center gap-3 py-3.5 px-3 rounded-card active:bg-vupth-surface"
                 >
-                  <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.cor }} />
+                  <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cores[m.cor] }} />
                   <Text className="font-body text-md flex-1 text-vupth-textPrimary">
                     {m.label}
                   </Text>
-                  {ativo && <Check size={18} color="#163300" />}
+                  {ativo && <Check size={18} color={cores.textPrimary} />}
                 </Pressable>
               );
             })}

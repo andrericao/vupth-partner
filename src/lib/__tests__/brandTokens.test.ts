@@ -61,6 +61,9 @@ const DESENHO: Record<string, string> = {
   sobrePainel: "#F3F5F1",
   selecionado: "#163300",
   onSelecionado: "#9FE870",
+  onSelecionadoBranco: "#FFFFFF", // era text-white sobre o chip forest
+  pessego: "#FFC091", // o ponto e o texto pessego (era warning usado como cor)
+  esqueleto: "#D7DDD3", // o bloco do esqueleto (era border)
 };
 
 const noTailwind: Record<string, string> = tailwind.theme.extend.colors.vupth;

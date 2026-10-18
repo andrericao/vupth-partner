@@ -17,10 +17,13 @@ export function StepsButton({ title, isLoading, disabled, ...rest }: Props) {
       {...rest}
     >
       {isLoading ? (
+        // tema-fixo: o botao e forest nos dois temas (mesmo hex), e branco sobre forest passa nos dois
         <ActivityIndicator color="#fff" />
       ) : (
         <View className="flex-row items-center">
+          {/* tema-fixo: branco sobre o forest do botao, igual nos dois temas */}
           <Text className="font-body text-white mr-3">{title}</Text>
+          {/* tema-fixo: idem */}
           <ArrowRight size={18} color="#fff" />
         </View>
       )}

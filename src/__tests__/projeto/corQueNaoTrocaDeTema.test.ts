@@ -23,9 +23,10 @@ import path from "path";
 // licenca transitoria: quando a PR entrar, o arquivo e convertido e a entrada
 // sai. Nao conta para o "so diminui".
 //
-// Cor que de proposito NAO troca (texto branco sobre foto, o V sobre o fundo
-// verde da marca...) fica na linha com um comentario `tema-fixo: <porque>`: a
-// linha deixa de contar, e o porque fica escrito ao lado dela.
+// Cor que de proposito NAO troca (texto branco sobre foto, branco sobre o
+// forest, que e o mesmo hex nos dois temas...) leva um comentario
+// `tema-fixo: <porque>` NA LINHA ou na linha de cima: essa linha e a seguinte
+// deixam de contar, e o porque fica escrito ao lado.
 const RAIZ = path.resolve(__dirname, "../../..");
 const BASELINE = path.join(__dirname, "corPendente.json");
 const AGUARDANDO = path.join(__dirname, "corAguardando.json");
@@ -79,11 +80,11 @@ function arquivos(dir: string): string[] {
   });
 }
 
-/** Conta, por categoria, as ocorrencias de um arquivo (linha marcada `tema-fixo` nao conta). */
+/** Conta, por categoria, as ocorrencias de um arquivo (a linha `tema-fixo` e a seguinte nao contam). */
 function contar(fonte: string): Contagem {
-  const semFixos = fonte
-    .split("\n")
-    .map((linha) => (linha.includes(MARCA_DE_FIXO) ? "" : linha))
+  const linhas = fonte.split("\n");
+  const semFixos = linhas
+    .map((linha, i) => (linha.includes(MARCA_DE_FIXO) || linhas[i - 1]?.includes(MARCA_DE_FIXO) ? "" : linha))
     .join("\n");
   const texto = semComentarios(semFixos);
   const contagem: Contagem = {};
@@ -183,10 +184,13 @@ describe("a varredura em si", () => {
     expect(contar(fonte)).toEqual({});
   });
 
-  it("a linha marcada com tema-fixo nao conta, e a vizinha continua contando", () => {
+  it("tema-fixo isenta a propria linha e a SEGUINTE, e so ela", () => {
     const fonte = [
       '<Text className="text-white">sobre a foto</Text> {/* tema-fixo: texto sobre a foto, sempre escura */}',
       '<Text className="text-white">sobre o fundo do tema</Text>',
+      "// tema-fixo: sobre o forest",
+      '<Text className="text-white">isento pela linha de cima</Text>',
+      '<Text className="text-white">este conta</Text>',
     ].join("\n");
     expect(contar(fonte)).toEqual({ branco: 1 });
   });

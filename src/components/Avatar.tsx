@@ -28,7 +28,7 @@ export function Avatar({ nome, uri, tamanho = 72, onPress, rotulo, testID = "ava
     <FotoRemota testID={`${testID}-foto`} uri={uri} style={estilo} />
   ) : (
     <View style={estilo} className="bg-vupth-green items-center justify-center">
-      <Text className="font-display text-vupth-forest" style={{ fontSize: tamanho * 0.33 }}>
+      <Text className="font-display text-vupth-onGreen" style={{ fontSize: tamanho * 0.33 }}>
         {iniciais(nome)}
       </Text>
     </View>
