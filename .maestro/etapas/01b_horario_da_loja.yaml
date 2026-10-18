@@ -42,15 +42,15 @@ appId: ${APP_ID}
 # Emulador (log 2026-10-11_071921, 01.23): o rolar parava com o botao atras da
 # barra de abas. Rola ate ele ficar no meio da tela.
 - scrollUntilVisible:
-    element: "Usar o horário de segunda nos dias abertos"
+    element: "Repetir segunda"
     direction: DOWN
     visibilityPercentage: 50
     centerElement: true
     timeout: 30000
-    label: "01.23 · rola ate Usar o horário de segunda nos dias abertos"
+    label: "01.23 · rola ate Repetir segunda"
 - tapOn:
-    text: "Usar o horário de segunda nos dias abertos"
-    label: "01.24 · toca em Usar o horário de segunda nos dias abertos"
+    text: "Repetir segunda"
+    label: "01.24 · toca em Repetir segunda"
 - scrollUntilVisible:
     element: "Salvar semana"
     direction: DOWN

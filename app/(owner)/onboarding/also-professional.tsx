@@ -237,13 +237,13 @@ export default function AlsoProfessionalScreen() {
             </View>
 
             <NwButton
-              title="Sim, também serei profissional"
+              title="Também atendo"
               onPress={handleYes}
               isLoading={isLoading}
             />
 
             <NwButton
-              title="Não, apenas proprietário"
+              title="Só dono"
               onPress={handleNo}
               variant="secondary"
               className="mt-2"

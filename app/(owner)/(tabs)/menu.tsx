@@ -125,8 +125,8 @@ export default function OwnerMenuScreen() {
 
   const handleLogout = () => {
     confirmar({
-      titulo: "Sair",
-      mensagem: "Tem certeza que deseja sair da conta?",
+      titulo: "Sair da conta",
+      mensagem: "",
       confirmar: "Sair",
       destrutivo: true,
     }).then(async (ok) => {

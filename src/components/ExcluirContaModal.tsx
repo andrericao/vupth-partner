@@ -13,9 +13,11 @@ type Props = {
   onClose: () => void;
 };
 
-// Confirmacao para apagar a conta — espelho do DeleteAccountModal do client,
-// com os mesmos textos. Pede a SENHA ATUAL porque o backend exige (07/08): o
-// app fica logado por muito tempo e apagar e irreversivel.
+// Confirmacao para excluir a conta — espelho do DeleteAccountModal do client.
+// Pede a SENHA ATUAL porque o backend exige (07/08): o app fica logado por
+// muito tempo e excluir e irreversivel. O campo ja se chama "Senha atual";
+// uma frase mandando digita-la so repetia o rotulo e empurrava o corpo para
+// duas linhas (guia de texto, regra 3).
 //
 // O texto diz o que REALMENTE acontece: o backend anonimiza, e o atendimento
 // sobrevive sem o nome. "Todos os seus dados serao perdidos" seria mentira.
@@ -38,14 +40,10 @@ export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClo
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
         <View className="bg-white rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-forest">Deletar conta</Text>
+          <Text className="font-heading text-lg text-vupth-forest">Excluir conta</Text>
 
           <Text className="font-body text-sm text-vupth-textSecondary">
-            Seus dados pessoais serão apagados e você sairá do app. Os atendimentos que você já fez
-            continuam no histórico do estabelecimento, sem o seu nome.
-          </Text>
-          <Text className="font-body text-sm text-vupth-textSecondary">
-            Para confirmar que é você, digite sua senha atual.
+            Seus dados são apagados; o histórico da loja fica sem o seu nome.
           </Text>
 
           <NwInput
@@ -65,9 +63,10 @@ export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClo
           )}
 
           <NwButton
-            title={isDeleting ? "Deletando..." : "Deletar minha conta"}
+            title="Excluir"
             variant="outlineDanger"
-            disabled={password.length === 0 || isDeleting}
+            isLoading={isDeleting}
+            disabled={password.length === 0}
             onPress={confirm}
             testID="delete-account-confirm"
           />

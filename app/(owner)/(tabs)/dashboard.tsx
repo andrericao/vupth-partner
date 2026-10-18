@@ -26,6 +26,7 @@ import { AvisoLojaSemPonto } from "@components/AvisoLojaSemPonto";
 import type { ProfessionalWithQueue } from "@lib/types";
 import { confirmar } from "@lib/confirmar";
 import { avisoDeAberturaSemProfissional } from "@lib/abertura";
+import { confirmarComArtigo } from "@lib/confirmarComArtigo";
 import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
 import { linkDaLoja, mensagemDeDivulgacao } from "@lib/linkPublico";
 
@@ -105,7 +106,7 @@ export default function OwnerDashboardScreen() {
     // Avisa e deixa seguir — decisao do Andre, 07/09. Ver src/lib/abertura.ts.
     if (newStatus === "OPEN") {
       const aviso = avisoDeAberturaSemProfissional(professionals);
-      if (aviso && !(await confirmar(aviso))) return;
+      if (aviso && !(await confirmarComArtigo({ ...aviso, artigo: "statusEFila" }))) return;
     }
 
     // A validacao de "estabelecimento pronto" (>=1 profissional com >=1 servico)
