@@ -81,7 +81,7 @@ function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { c
   return (
     <View testID={testID} className="mt-3 pt-2 border-t border-vupth-border">
       <LinhaDaConta rotulo="Você recebe" valor={conta.voceRecebeu} forte />
-      <LinhaDaConta rotulo="Empresa de pagamento (4%)" valor={conta.empresaDePagamento} />
+      <LinhaDaConta rotulo="Empresa de pagamento" valor={conta.empresaDePagamento} />
       <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} />
       <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} />
       <LinhaDaConta rotulo="Outros ajustes" valor={conta.outros} />

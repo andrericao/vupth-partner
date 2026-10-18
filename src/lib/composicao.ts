@@ -1,4 +1,4 @@
-import { estimateDesiredFromClient, INTERMEDIARY_PERCENT, APP_PERCENT } from "@lib/pricing";
+import { estimateDesiredFromClient, taxaDoGateway, APP_PERCENT } from "@lib/pricing";
 
 // A conta de cada atendimento do relatorio.
 //
@@ -10,17 +10,17 @@ import { estimateDesiredFromClient, INTERMEDIARY_PERCENT, APP_PERCENT } from "@l
 //
 //   cliente pagou = profissional + empresa de pagamento + app + arredondamento + outros
 //
-// DEC-54: as porcentagens incidem sobre o total ja arredondado (4% da empresa
-// de pagamento, 2% do app); o arredondamento e o que sobra, e fecha a conta.
-// Ex.: R$ 53,90 = 50,00 + 2,16 + 1,08 + 0,66.
+// DEC-54: as taxas incidem sobre o total ja arredondado (2% do app); o gateway
+// e, desde a DEC-91, o maior entre R$ 1,99 e R$ 0,49 + 2,99% do preco, por
+// servico (como o Backend soma); o arredondamento e o que sobra, e fecha a conta.
+// Ex.: R$ 53,90 = 50,00 + 2,08 + 1,08 + 0,74.
 //
 // O atendimento so traz o total (`totalValue`); a parte do profissional vem do
 // servico cadastrado (`pro_receives`, gravado desde 18/09). Servico com preco
 // antigo ou apagado tem a parte ESTIMADA pelo preco (o preco menos as duas
 // taxas, src/lib/pricing.ts), e a conta avisa.
 
-/** As taxas sobre o total (DEC-54) moram no pricing.ts, num lugar so. */
-const TAXA_DA_EMPRESA_DE_PAGAMENTO = INTERMEDIARY_PERCENT / 100;
+/** As taxas (DEC-54, DEC-91) moram no pricing.ts, num lugar so. */
 const TAXA_DO_APP = APP_PERCENT / 100;
 
 type ServicoDoAtendimento = { id: string; customName: string };
@@ -46,7 +46,8 @@ export type Composicao = {
 };
 
 function centavos(valor: number): number {
-  return Math.round(valor * 100) / 100;
+  // + 0: tira o -0 (53,90 - 53,90 dava -0 e o relatorio nao deve mostra-lo)
+  return Math.round(valor * 100) / 100 + 0;
 }
 
 function temDivisao(s: MeuServico | undefined): s is MeuServico & { pro_receives: number; base_price: number } {
@@ -63,6 +64,7 @@ export function composicaoDoAtendimento(
   const apagados: string[] = [];
   let precoConhecido = 0;
   let recebe = 0;
+  let empresaDePagamento = 0;
   for (const servico of atendimento.services) {
     const meu = porId.get(servico.id);
     if (!meu) {
@@ -70,6 +72,7 @@ export function composicaoDoAtendimento(
       continue;
     }
     precoConhecido += meu.price;
+    empresaDePagamento += taxaDoGateway(meu.price);
     if (temDivisao(meu)) {
       recebe += meu.pro_receives;
     } else {
@@ -80,17 +83,19 @@ export function composicaoDoAtendimento(
   // Servico apagado: o preco dele e o que falta para o total; sem "outros".
   let outros = 0;
   if (apagados.length > 0) {
-    recebe += estimateDesiredFromClient(Math.max(0, clientePagou - precoConhecido));
+    const resto = Math.max(0, clientePagou - precoConhecido);
+    recebe += estimateDesiredFromClient(resto);
+    if (resto > 0) empresaDePagamento += taxaDoGateway(resto);
     estimados.push(...apagados);
   } else {
     outros = Math.max(0, centavos(clientePagou - precoConhecido));
   }
   const dosServicos = centavos(clientePagou - outros);
   const voceRecebeu = centavos(recebe);
-  const empresaDePagamento = centavos(dosServicos * TAXA_DA_EMPRESA_DE_PAGAMENTO);
+  const gateway = centavos(empresaDePagamento);
   const app = centavos(dosServicos * TAXA_DO_APP);
-  const arredondamento = centavos(dosServicos - voceRecebeu - empresaDePagamento - app);
-  return { clientePagou, voceRecebeu, empresaDePagamento, app, arredondamento, outros, estimados };
+  const arredondamento = centavos(dosServicos - voceRecebeu - gateway - app);
+  return { clientePagou, voceRecebeu, empresaDePagamento: gateway, app, arredondamento, outros, estimados };
 }
 
 /** A conta do periodo: a soma das linhas de cada atendimento (fecha no total). */

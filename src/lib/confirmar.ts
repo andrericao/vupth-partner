@@ -77,6 +77,37 @@ export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
   });
 }
 
+/**
+ * `confirmar()` com um terceiro botao, "Saiba mais" (guia de texto curto): a
+ * frase fica curta e a explicacao mora no Suporte. "Saiba mais" NAO confirma
+ * nem cancela a acao: abre o link e a pergunta continua valendo (resolve
+ * `false`, a pessoa fica onde estava e pode tocar de novo). Na web sem o shim
+ * do Alert so cabem dois botoes: cai no `confirmar()` normal.
+ */
+export function confirmarComSaibaMais(
+  texto: Texto,
+  aoSaberMais: () => void,
+  deps: Deps = {}
+): Promise<boolean> {
+  const plataforma = deps.plataforma ?? Platform.OS;
+  if (plataforma === "web" && !alertWebInstalado()) return confirmar(texto, deps);
+
+  const alertImpl = deps.alertImpl ?? Alert.alert;
+  return new Promise<boolean>((resolve) => {
+    alertImpl(texto.titulo, texto.mensagem, [
+      { text: texto.cancelar ?? "Cancelar", style: "cancel", onPress: () => resolve(false) },
+      {
+        text: "Saiba mais",
+        onPress: () => {
+          aoSaberMais();
+          resolve(false);
+        },
+      },
+      { text: texto.confirmar ?? "Sim", onPress: () => resolve(true) },
+    ]);
+  });
+}
+
 // ---------------------------------------------------------------------------
 
 type TextoAviso = {

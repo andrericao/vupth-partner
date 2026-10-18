@@ -1,3 +1,5 @@
+import { linkDoSuporte } from "@lib/suporte";
+
 type RoleIntent = "owner" | "professional" | undefined;
 
 /**
@@ -72,11 +74,12 @@ export type CaminhoDoDono = {
    * Mostrado ANTES de navegar. Sair da area do dono para a do profissional e
    * uma troca de contexto, nao uma tela a mais: a barra muda, o menu muda, e
    * quem nao percebeu isso acha que "o app pulou para outro lugar". O aviso diz
-   * o que vai acontecer e, principalmente, POR ONDE VOLTAR — os dois botoes de
-   * troca sao "Área do dono" (Configuracoes do profissional) e "Atender como
-   * profissional" (Menu do dono).
+   * UMA frase (modal-adicionar-servico-curto, Andre 18/10, guia "menos e mais");
+   * o resto — POR ONDE VOLTAR: "Área do dono" nas Configuracoes do profissional
+   * e "Atender como profissional" no Menu do dono — fica no Suporte, atras do
+   * "Saiba mais" (`saibaMais`, o link aberto por esse botao).
    */
-  aviso?: { titulo: string; mensagem: string };
+  aviso?: { titulo: string; mensagem: string; saibaMais: string };
 };
 
 export function getPrimeiroCaminhoDoDono(isProfessional: boolean): CaminhoDoDono {
@@ -87,11 +90,9 @@ export function getPrimeiroCaminhoDoDono(isProfessional: boolean): CaminhoDoDono
       hint: "cadastre o que VOCÊ faz — sem serviço a loja não abre",
       rota: "/(professional)/my-services?from=settings",
       aviso: {
-        titulo: "Você vai para a sua área de profissional",
-        mensagem:
-          "O serviço é SEU, não da loja — por isso o cadastro acontece lá. " +
-          "Para voltar, use “Área do dono” em Configurações; para vir de novo " +
-          "para cá, “Atender como profissional” no Menu.",
+        titulo: "Adicionar serviço",
+        mensagem: "Você vai para a página do profissional.",
+        saibaMais: linkDoSuporte("profissional"),
       },
     };
   }

@@ -32,7 +32,7 @@ export function useProfessionalCompletion(): {
     const map: Record<string, string> = {
       affiliated: "/(professional)/find-establishment",
       service: "/(professional)/my-services",
-      nickname: "/(professional)/settings",
+      nickname: "/(professional)/settings-account?editar=nickname",
       specialty: "/(professional)/settings",
     };
     return map[key];

@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 
-import { escolherOpcao, confirmar, avisar } from "../confirmar";
+import { escolherOpcao, confirmar, avisar, confirmarComSaibaMais } from "../confirmar";
 
 // 🔴 DEFEITO REAL (issue #25, teste manual de 30/08): "botao de remover servico
 // nao funciona" e "o botao de aceitar novos nao funciona" — os dois na WEB.
@@ -377,5 +377,58 @@ describe("os padroes de confirmar, avisar e escolherOpcao", () => {
     await expect(
       escolherOpcao({ titulo: "t", mensagem: "m", opcoes: [{ texto: "A", valor: 1 }] }, { plataforma: "web" })
     ).resolves.toBeNull();
+  });
+});
+
+describe("confirmarComSaibaMais()", () => {
+  const alertQueToca = (indice: number) =>
+    jest.fn((_t: string, _m?: string, botoes?: any[]) => botoes![indice].onPress());
+
+  it("tem Cancelar, Saiba mais e Sim, nessa ordem", async () => {
+    const alertImpl = alertQueToca(2);
+    await confirmarComSaibaMais({ titulo: "t", mensagem: "m", confirmar: "Sim" }, jest.fn(), {
+      plataforma: "android",
+      alertImpl: alertImpl as any,
+    });
+    const rotulos = (alertImpl.mock.calls[0][2] as any[]).map((b) => b.text);
+    expect(rotulos).toEqual(["Cancelar", "Saiba mais", "Sim"]);
+  });
+
+  it("Sim confirma", async () => {
+    await expect(
+      confirmarComSaibaMais({ titulo: "t", mensagem: "m" }, jest.fn(), {
+        plataforma: "ios",
+        alertImpl: alertQueToca(2) as any,
+      })
+    ).resolves.toBe(true);
+  });
+
+  it("Cancelar nao confirma", async () => {
+    await expect(
+      confirmarComSaibaMais({ titulo: "t", mensagem: "m" }, jest.fn(), {
+        plataforma: "ios",
+        alertImpl: alertQueToca(0) as any,
+      })
+    ).resolves.toBe(false);
+  });
+
+  it("Saiba mais abre o link e NAO confirma", async () => {
+    const aoSaberMais = jest.fn();
+    await expect(
+      confirmarComSaibaMais({ titulo: "t", mensagem: "m" }, aoSaberMais, {
+        plataforma: "android",
+        alertImpl: alertQueToca(1) as any,
+      })
+    ).resolves.toBe(false);
+    expect(aoSaberMais).toHaveBeenCalledTimes(1);
+  });
+
+  it("na web sem shim cai no confirmar() de dois botoes", async () => {
+    await expect(
+      confirmarComSaibaMais({ titulo: "t", mensagem: "m" }, jest.fn(), {
+        plataforma: "web",
+        confirmImpl: () => true,
+      })
+    ).resolves.toBe(true);
   });
 });

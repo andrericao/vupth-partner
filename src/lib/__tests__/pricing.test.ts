@@ -6,6 +6,8 @@ import {
   estimateDesiredFromClient,
   passaNaProvaReal,
   precoParaReceber,
+  taxaDoGateway,
+  taxaDoGatewayEmCentavos,
 } from "../pricing";
 
 describe("estimateDesiredFromClient", () => {
@@ -127,18 +129,18 @@ describe("calculatePricing", () => {
   // preco-sobre-o-total (DEC-54, Andre 15/10): os exemplos do Backend (3e382fa).
   it("valores concretos em 0% (cliente paga tudo) — iguais ao PriceSplit do Backend", () => {
     expect(calculatePricing(30, 0)).toEqual({
-      clientPrice: 32.9, proReceives: 30, platformFee: 2.9, intermediaryFee: 1.32, appFee: 1.58,
+      clientPrice: 32.9, proReceives: 30, platformFee: 2.9, intermediaryFee: 1.99, appFee: 0.91,
     });
-    expect(calculatePricing(50, 0)).toMatchObject({ clientPrice: 53.9, proReceives: 50, intermediaryFee: 2.16 });
-    expect(calculatePricing(80, 0)).toMatchObject({ clientPrice: 85.9, proReceives: 80 });
-    expect(calculatePricing(100, 0)).toMatchObject({ clientPrice: 106.9, proReceives: 100, intermediaryFee: 4.28 });
+    expect(calculatePricing(50, 0)).toMatchObject({ clientPrice: 53.9, proReceives: 50, intermediaryFee: 2.11 });
+    expect(calculatePricing(80, 0)).toMatchObject({ clientPrice: 84.9, proReceives: 80 });
+    expect(calculatePricing(100, 0)).toMatchObject({ clientPrice: 105.9, proReceives: 100, intermediaryFee: 3.66 });
   });
 
   it("30 absorvendo tudo (1,80) -> 30,90", () => {
     expect(calculatePricing(30, 100)).toMatchObject({ clientPrice: 30.9, proReceives: 28.2 });
   });
 
-  it("prova real em todo preco: cliente - 4% - 2% (do preco) >= o que o profissional recebe", () => {
+  it("prova real em todo preco: cliente - gateway - 2% (do preco) >= o que o profissional recebe", () => {
     for (let c = 500; c <= 50000; c += 37) {
       const p = c / 100;
       getAbsorptionOptions(p).forEach((pct) => {
@@ -172,9 +174,34 @@ describe("calculatePricing", () => {
     }
   });
 
-  it("intermediador = 4% do PRECO cobrado (meio centavo para cima)", () => {
-    expect(calculatePricing(100, 0).intermediaryFee).toBe(4.28); // 4% de 106,90
-    expect(calculatePricing(100, 100).intermediaryFee).toBe(4.04); // 4% de 100,90
-    expect(calculatePricing(10, 0).intermediaryFee).toBe(0.44); // 4% de 10,90 = 0,436
+  // taxa-fixa-pelo-pior-caso (DEC-91, Backend 8cdbeb9): os mesmos casos do Backend.
+  it("o preco do cliente para quem digita 10, 15, 20, 30, 50, 80 e 100", () => {
+    const esperado: Record<number, number> = { 10: 12.9, 15: 17.9, 20: 22.9, 30: 32.9, 50: 53.9, 80: 84.9, 100: 105.9 };
+    for (const [digitado, preco] of Object.entries(esperado)) {
+      expect(calculatePricing(Number(digitado), 0).clientPrice).toBe(preco);
+    }
+  });
+
+  it("intermediador = max(R$ 1,99; R$ 0,49 + 2,99% do PRECO), centavo para cima", () => {
+    expect(calculatePricing(100, 0).intermediaryFee).toBe(3.66); // 0,49 + 2,99% de 105,90 = 3,6564 -> 3,66
+    expect(calculatePricing(100, 100).intermediaryFee).toBe(3.48); // preco 99,90
+    expect(calculatePricing(10, 0).intermediaryFee).toBe(1.99); // o fixo do Pix
+  });
+
+  it("a taxa do gateway: Pix ate a virada, cartao depois (~R$ 50,17)", () => {
+    expect(taxaDoGatewayEmCentavos(1290)).toBe(199);
+    expect(taxaDoGatewayEmCentavos(5010)).toBe(199); // 0,49 + 1,498 = 1,99 (arredondado para cima)
+    expect(taxaDoGatewayEmCentavos(5390)).toBe(211);
+    expect(taxaDoGateway(105.9)).toBe(3.66);
+  });
+
+  it("varredura R$ 5 a R$ 500: a taxa cobrada cobre o Pix e o credito a vista, e a conta fecha", () => {
+    for (let c = 500; c <= 50000; c += 100) {
+      const r = calculatePricing(c / 100, 0);
+      const preco = Math.round(r.clientPrice * 100);
+      expect(taxaDoGatewayEmCentavos(preco)).toBeGreaterThanOrEqual(199);
+      expect(taxaDoGatewayEmCentavos(preco)).toBeGreaterThanOrEqual(Math.ceil(49 + (preco * 299) / 10000));
+      expect(r.proReceives).toBe(c / 100);
+    }
   });
 });

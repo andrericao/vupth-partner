@@ -70,11 +70,12 @@ export function mensagemDoAtraso(nome: string): string {
 }
 
 /**
- * botao-nao-compareceu (DEC-83): a falta. O profissional nao ve o valor da multa
- * (e do app); so sabe que o cliente leva uma.
+ * nao-compareceu-vira-atraso (DEC-86, Backend d1d738c): a falta vale como atraso.
+ * O cliente fica atrasado, troca de lugar com o proximo e continua na fila; a multa
+ * so no 3o atraso. O profissional nao ve o valor (e do app).
  */
 export function mensagemDaFalta(nome: string): string {
-  return `${nome} não compareceu? O cliente leva uma multa e o atendimento fica como não realizado por atraso.`;
+  return `${nome} não compareceu? Ele fica como atrasado, troca de lugar com o próximo e continua na fila. No 3º atraso, vai para o fim da fila e leva multa.`;
 }
 
 /** 409 NO_SHOW_TOO_EARLY: ainda nao passaram os 10 min; diz a partir de quando. */

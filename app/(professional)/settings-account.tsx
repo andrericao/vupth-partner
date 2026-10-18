@@ -84,7 +84,7 @@ export default function SettingsAccountScreen() {
   // PERFIL PROFISSIONAL — quem nao tem um nao vê esses campos, senao a tela
   // ofereceria editar algo que nao existe. E-mail e senha sao do usuario e
   // valem para os dois.
-  const { from } = useLocalSearchParams<{ from?: string }>();
+  const { from, editar } = useLocalSearchParams<{ from?: string; editar?: string }>();
   const temPerfilProfissional = !!professional;
   const minhaFoto = useMinhaFoto();
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
@@ -135,11 +135,17 @@ export default function SettingsAccountScreen() {
     }
   };
 
-  const [editing, setEditing] = useState<Editing>(null);
+  const [editing, setEditing] = useState<Editing>(
+    // apelido-no-link-das-configuracoes: a linha "Apelido" do card de perfil
+    // chega com ?editar=nickname e ja abre o campo para digitar.
+    editar === "nickname" && professional ? "nickname" : null
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const [name, setName] = useState("");
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(
+    editar === "nickname" ? professional?.nickname ?? "" : ""
+  );
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");

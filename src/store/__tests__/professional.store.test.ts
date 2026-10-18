@@ -71,6 +71,8 @@ describe("professional.store", () => {
         operation_mode: "QUEUE",
         show_position: true,
         contact_phone: null,
+        rating_average: null,
+        rating_count: null,
       });
       expect(state.professional?.establishment_id).toBeNull();
       expect(state.isLoading).toBe(false);

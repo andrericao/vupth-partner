@@ -35,6 +35,13 @@ type Professional = {
   show_position?: boolean;
   /** Telefone que o cliente ve (Backend 02dd5ef). null = nao expoe. */
   contact_phone?: string | null;
+  /**
+   * avaliacao-no-resumo (Andre, 18/10): a nota do proprio profissional no resumo
+   * do Perfil. Hoje so o professionals-with-queue traz; o /me ainda nao (pedido em
+   * Solicitadas). Opcional: sem o campo, o resumo nao mostra a linha.
+   */
+  rating_average?: number | null;
+  rating_count?: number | null;
   message: string;
 };
 
@@ -125,6 +132,8 @@ export function normalizeProfessional(data: any): Professional {
     operation_mode: data.operation_mode ?? data.operationMode ?? "QUEUE",
     show_position: data.show_position ?? data.showPosition ?? true,
     contact_phone: data.contact_phone ?? data.contactPhone ?? null,
+    rating_average: data.rating_average ?? data.ratingAverage ?? null,
+    rating_count: data.rating_count ?? data.ratingCount ?? null,
     message: data.message ?? "",
   };
 }
