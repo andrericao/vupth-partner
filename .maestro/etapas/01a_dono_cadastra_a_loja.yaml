@@ -37,12 +37,12 @@ appId: ${APP_ID}
     timeout: 20000
     label: "01.10 · espera Você também vai atender?"
 - scrollUntilVisible:
-    element: "Não, apenas proprietário"
+    element: "Só dono"
     direction: DOWN
-    label: "01.11 · rola ate Não, apenas proprietário"
+    label: "01.11 · rola ate Só dono"
 - tapOn:
-    text: "Não, apenas proprietário"
-    label: "01.12 · toca em Não, apenas proprietário"
+    text: "Só dono"
+    label: "01.12 · toca em Só dono"
 - extendedWaitUntil:
     visible: ${output.LOJA}
     timeout: 20000

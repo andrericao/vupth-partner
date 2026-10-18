@@ -19,9 +19,22 @@ describe("avisoDeAberturaSemProfissional", () => {
     ]);
 
     expect(aviso).not.toBeNull();
-    expect(aviso!.mensagem).toMatch(/ningu[ée]m|nenhum/i);
-    // O rotulo diz que abrir e possivel — o aviso informa, nao bloqueia.
-    expect(aviso!.confirmar).toMatch(/assim/i);
+    expect(aviso!.titulo).toMatch(/ningu[ée]m/i);
+    // O rotulo diz que abrir e possivel — o aviso informa, nao bloqueia — e o
+    // outro botao e o Cancelar do guia, nao um "Voltar" que parece sair da tela.
+    expect(aviso!.confirmar).toMatch(/^abrir/i);
+    expect(aviso!.cancelar).toBe("Cancelar");
+  });
+
+  // GUIA_DE_TEXTO.md §4.10: titulo que diz o fato (ate 4 palavras), corpo de uma
+  // linha (ate 70 caracteres), botao de uma palavra.
+  it("segue o guia de texto: título curto, corpo de uma linha, botão de uma palavra", () => {
+    const aviso = avisoDeAberturaSemProfissional([{ is_available: false }])!;
+    expect(aviso.titulo).toBe("Ninguém trabalhando");
+    expect(aviso.mensagem).toBe("A loja abre sem quem atenda.");
+    expect(aviso.titulo.split(" ").length).toBeLessThanOrEqual(4);
+    expect(aviso.mensagem.length).toBeLessThanOrEqual(70);
+    expect(aviso.confirmar.split(" ")).toHaveLength(1);
   });
 
   it("loja sem nenhum profissional tambem avisa", () => {

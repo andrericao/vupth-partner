@@ -26,13 +26,13 @@ export function avisoDeAberturaSemProfissional(
   const alguemTrabalhando = professionals.some((p) => p?.is_available === true);
   if (alguemTrabalhando) return null;
 
+  // Uma linha (guia de texto, regras 1 a 3): o que ficou de fora — o caminho
+  // normal e o profissional se marcar como disponivel, e a loja abre por
+  // consequencia — mora no "Saiba mais" (artigo de status e fila).
   return {
-    titulo: "Ninguém está trabalhando agora",
-    mensagem:
-      "Nenhum profissional marcou que está trabalhando, então a loja vai " +
-      "aparecer para o cliente sem ninguém para atender. O caminho normal é o " +
-      "profissional se marcar como disponível — a loja abre por consequência.",
-    confirmar: "Abrir mesmo assim",
-    cancelar: "Voltar",
+    titulo: "Ninguém trabalhando",
+    mensagem: "A loja abre sem quem atenda.",
+    confirmar: "Abrir",
+    cancelar: "Cancelar",
   };
 }

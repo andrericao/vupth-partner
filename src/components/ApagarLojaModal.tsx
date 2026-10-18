@@ -14,9 +14,12 @@ type Props = {
   onClose: () => void;
 };
 
-// desativar-conta (c0f5b17, item 5): apagar a loja e irreversivel. Diz o que
-// acontece de verdade: a equipe sai e e avisada, e o historico fica como
-// "Loja removida" (os atendimentos sao tambem do cliente e do profissional).
+// desativar-conta (c0f5b17, item 5): excluir a loja e irreversivel. O corpo e
+// uma linha; a equipe que sai e e avisada e o historico que fica como "Loja
+// removida" (os atendimentos sao tambem do cliente e do profissional) sao o que
+// o Suporte explica. Falta o artigo da loja (so ha o da conta), entao ainda nao
+// ha "Saiba mais" aqui. O campo ja se chama "Senha atual": a frase mandando
+// digita-la saiu (guia de texto, regra 3).
 export function ApagarLojaModal({ visible, nomeDaLoja, isDeleting, error, onConfirm, onClose }: Props) {
   const [password, setPassword] = useState("");
 
@@ -34,14 +37,10 @@ export function ApagarLojaModal({ visible, nomeDaLoja, isDeleting, error, onConf
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
         <View className="bg-white rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-forest">Apagar a loja</Text>
+          <Text className="font-heading text-lg text-vupth-forest">Excluir loja</Text>
 
           <Text className="font-body text-sm text-vupth-textSecondary">
-            {nomeDaLoja} sai do app de vez. Os profissionais saem da loja e são avisados. Os
-            atendimentos que já aconteceram continuam no histórico, como “Loja removida”.
-          </Text>
-          <Text className="font-body text-sm text-vupth-textSecondary">
-            Para confirmar que é você, digite sua senha atual.
+            {nomeDaLoja} sai do app. O histórico fica.
           </Text>
 
           <NwInput
@@ -61,9 +60,10 @@ export function ApagarLojaModal({ visible, nomeDaLoja, isDeleting, error, onConf
           )}
 
           <NwButton
-            title={isDeleting ? "Apagando..." : "Apagar a loja de vez"}
+            title="Excluir"
             variant="outlineDanger"
-            disabled={password.length === 0 || isDeleting}
+            isLoading={isDeleting}
+            disabled={password.length === 0}
             onPress={confirm}
             testID="delete-store-confirm"
           />

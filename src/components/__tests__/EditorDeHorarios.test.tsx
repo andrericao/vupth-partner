@@ -43,6 +43,12 @@ describe("EditorDeHorarios", () => {
     expect(screen.getByText("Próximos dias")).toBeTruthy();
   });
 
+  it("o botão que copia o primeiro dia aberto diz 'Repetir segunda' (guia de texto: 2 palavras)", async () => {
+    render(<EditorDeHorarios chave="p1" chamadas={chamadas({ buscar: jest.fn(async () => CADASTRADA) })} {...textos} />);
+    expect(await screen.findByText("Repetir segunda")).toBeTruthy();
+    expect(screen.queryByText(/nos dias abertos/)).toBeNull();
+  });
+
   it("salvar a semana chama o salvarSemana com os 7 dias e avisa", async () => {
     const c = chamadas({ buscar: jest.fn(async () => CADASTRADA) });
     render(<EditorDeHorarios chave="p1" chamadas={c} {...textos} />);
