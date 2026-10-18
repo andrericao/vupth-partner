@@ -77,14 +77,14 @@ appId: ${APP_ID}
     timeout: 20000
     label: "09.19 · espera ${output.LOJA}"
 - assertVisible:
-    text: "Desafiliar do Estabelecimento"
-    label: "09.20 · confere Desafiliar do Estabelecimento"
+    text: "Sair da loja"
+    label: "09.20 · confere Sair da loja"
 # vinculo-botao-corta-card (PAR-17): o botao fica dentro do card.
 - runFlow:
     file: ../apoio/para_o_andre.yaml
     env:
       NOME: "09-vinculo-botao-no-card"
-      O_QUE: "o botao Desafiliar do Estabelecimento inteiro dentro do card cinza, sem cortar a borda de baixo"
+      O_QUE: "o botao Sair da loja inteiro dentro do card cinza, sem cortar a borda de baixo"
     label: "09.20a · print do card do Vinculo"
 - back:
     label: "09.21 · volta para o Perfil"
