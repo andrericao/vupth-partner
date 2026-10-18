@@ -342,3 +342,42 @@ describe("api — 403 ACCOUNT_DEACTIVATED", () => {
     expect(avisar).not.toHaveBeenCalled();
   });
 });
+
+// erros-em-portugues (Andre, 17/10): o texto do servidor pode vir em ingles
+// ("E-mail not registered"); a pessoa le a mensagem do CODIGO, em portugues.
+describe("getApiErrorMessage — erros em portugues pelo codigo", () => {
+  const erro = (code: string, message: string, status = 409) => ({
+    response: { status, data: { code, message } },
+  });
+
+  it("o texto em ingles do servidor nao chega a tela", () => {
+    expect(getApiErrorMessage(erro("EMAIL_NOT_FOUND", "E-mail not registered", 404), "x")).toBe(
+      "Não há conta com este e-mail.",
+    );
+    expect(getApiErrorMessage(erro("BAD_CREDENTIALS", "Invalid email or password", 401), "x")).toBe(
+      "E-mail ou senha incorretos.",
+    );
+    expect(getApiErrorMessage(erro("OWNER_STORE_LIMIT", "Owner store limit reached"), "x")).toBe(
+      "Você já tem 5 lojas, o máximo por dono.",
+    );
+    expect(getApiErrorMessage(erro("NO_SHOW_TOO_EARLY", "Too early"), "x")).toBe(
+      "Ainda é cedo para marcar a falta.",
+    );
+  });
+
+  it("senha fora do tamanho no cadastro (Backend 69519c1)", () => {
+    expect(getApiErrorMessage(erro("PASSWORD_TOO_SHORT", "Password too short", 422), "x")).toBe(
+      "A senha é curta demais. Use de 6 a 64 caracteres.",
+    );
+    expect(getApiErrorMessage(erro("PASSWORD_TOO_LONG", "Password too long", 422), "x")).toContain("6 a 64");
+    expect(getApiErrorMessage(erro("INVALID_REQUEST_BODY", "Malformed JSON", 400), "x")).toContain("dados enviados");
+  });
+
+  it("nenhuma mensagem mapeada tem texto em ingles comum", () => {
+    const codigos = ["ACCESS_DENIED", "ACCOUNT_LOCKED", "PIX_KEY_NOT_SET", "CUT_REQUEST_EXPIRED", "STORAGE_NOT_CONFIGURED"];
+    for (const c of codigos) {
+      const m = getApiErrorMessage(erro(c, "english text"), "x");
+      expect(m).not.toMatch(/\b(the|is|not|error|invalid)\b/i);
+    }
+  });
+});

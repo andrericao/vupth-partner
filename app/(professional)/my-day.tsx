@@ -19,7 +19,7 @@ import { ExpedienteCard } from "@components/ExpedienteCard";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
-import { confirmarRecebimento, formatarReais } from "@lib/pagamento";
+import { confirmarRecebimento, formatarReais, perguntarForma } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -201,8 +201,9 @@ export default function MyDayScreen() {
       confirmar: "Sim, recebi",
     });
     if (!ok) return;
+    const forma = await perguntarForma();
     try {
-      await confirmarRecebimento(attendanceId);
+      await confirmarRecebimento(attendanceId, forma);
       await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));

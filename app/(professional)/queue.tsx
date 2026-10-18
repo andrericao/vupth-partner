@@ -16,7 +16,7 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
-import { perguntarPagamento, mensagemDoFim } from "@lib/pagamento";
+import { perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
 import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -600,7 +600,9 @@ export default function ProfessionalQueueScreen() {
   // mensagem do fim so aparece quando houve a pergunta.
   const finalizarComPagamento = async (attendanceId: string) => {
     const recebido = await perguntarPagamento(attendanceId);
-    const status = await finishAttendance(attendanceId, recebido);
+    // forma-de-recebimento: so quem disse "Sim, recebi" e so se quiser.
+    const forma = recebido === true ? await perguntarForma() : undefined;
+    const status = await finishAttendance(attendanceId, recebido, forma);
     const mensagem = recebido === undefined ? null : mensagemDoFim(status);
     if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
   };

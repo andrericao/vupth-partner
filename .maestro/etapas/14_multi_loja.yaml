@@ -1,0 +1,78 @@
+# multi-loja-do-dono (PAR-9, Andre 15/10; Backend 3c78f6d e 677cb73): o dono
+# adiciona outra loja (fluxo curto: so nome e tipo), troca de loja no Menu e o
+# Relatorios traz "Todas as lojas". Roda por ultimo: criar a 2a loja a deixa
+# ativa, e as etapas anteriores contam com a primeira.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+    label: "14.01 · entra como o dono"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 30000
+    label: "14.02 · espera ${output.LOJA}"
+- tapOn:
+    id: "aba-menu"
+    label: "14.03 · toca em aba-menu"
+- scrollUntilVisible:
+    element: "Adicionar outra loja"
+    direction: UP
+    label: "14.04 · rola ate Adicionar outra loja"
+- tapOn:
+    text: "Adicionar outra loja"
+    label: "14.05 · toca em Adicionar outra loja"
+- tapOn:
+    text: "Rei do Corte Centro"
+    label: "14.06 · toca no nome da loja"
+- inputText:
+    text: "Filial ${output.TAG}"
+    label: "14.07 · digita o nome da 2a loja"
+- hideKeyboard:
+    label: "14.08 · fecha o teclado"
+- tapOn:
+    text: "Barbearia"
+    label: "14.09 · toca em Barbearia"
+- tapOn:
+    text: "Criar loja"
+    label: "14.10 · toca em Criar loja"
+# De volta ao Menu: com duas lojas aparece o seletor, com a nova ativa.
+- extendedWaitUntil:
+    visible: "SUAS LOJAS"
+    timeout: 30000
+    label: "14.11 · o Menu mostra SUAS LOJAS"
+- assertVisible:
+    text: "Filial ${output.TAG}"
+    label: "14.12 · a 2a loja esta na lista"
+- assertVisible:
+    text: ${output.LOJA}
+    label: "14.13 · a 1a loja segue na lista"
+# Troca para a primeira (o seletor so muda a loja ativa).
+- tapOn:
+    text: ${output.LOJA}
+    label: "14.14 · troca para a 1a loja"
+# Relatorios: com mais de uma loja, o resumo das lojas vem antes, com os periodos.
+- scrollUntilVisible:
+    element: "Relatórios"
+    direction: DOWN
+    label: "14.15 · rola ate Relatórios"
+- tapOn:
+    text: "Relatórios"
+    label: "14.16 · toca em Relatórios"
+- extendedWaitUntil:
+    visible: "Todas as lojas"
+    timeout: 20000
+    label: "14.17 · Relatórios traz Todas as lojas"
+- assertVisible:
+    text: "30 dias"
+    label: "14.18 · tem o periodo 30 dias"
+- assertVisible:
+    text: "Personalizado"
+    label: "14.19 · tem o periodo Personalizado"
+- tapOn:
+    text: "Personalizado"
+    label: "14.20 · toca em Personalizado"
+- assertVisible:
+    text: "Digite as duas datas.*"
+    label: "14.21 · pede as duas datas"

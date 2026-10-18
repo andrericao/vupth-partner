@@ -1,5 +1,6 @@
 import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
+import { abrirDialogo } from "@store/dialogo.store";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -68,9 +69,45 @@ export async function obterPagamentosPendentes(): Promise<{ awaiting_count: numb
   return { awaiting_count: data?.awaiting_count ?? 0, items: data?.items ?? [] };
 }
 
+/**
+ * forma-de-recebimento (Andre, fase de testes sem gateway; Backend 8b158e3): como
+ * o profissional recebeu. So registro — nao aparece para o cliente nem nos
+ * relatorios, e e opcional.
+ */
+export type FormaDeRecebimento = "PIX" | "CARTAO" | "DINHEIRO" | "NOTA";
+
+export const FORMAS_DE_RECEBIMENTO: { valor: FormaDeRecebimento; rotulo: string }[] = [
+  { valor: "PIX", rotulo: "Pix" },
+  { valor: "CARTAO", rotulo: "Cartão" },
+  { valor: "DINHEIRO", rotulo: "Dinheiro" },
+  { valor: "NOTA", rotulo: "Nota" },
+];
+
+/** Depois do "Sim, recebi": como? `undefined` = pulou (o fluxo segue igual). */
+export async function perguntarForma(
+  deps: { perguntar?: typeof abrirDialogo } = {}
+): Promise<FormaDeRecebimento | undefined> {
+  const perguntar = deps.perguntar ?? abrirDialogo;
+  const escolha = await perguntar({
+    titulo: "Como recebeu?",
+    mensagem: "Só para o seu registro. Pode pular.",
+    botoes: [
+      ...FORMAS_DE_RECEBIMENTO.map((f) => ({ texto: f.rotulo })),
+      { texto: "Pular", estilo: "cancel" as const },
+    ],
+  });
+  return FORMAS_DE_RECEBIMENTO[escolha]?.valor;
+}
+
 /** "Recebi": de PENDING ou AWAITING_CONFIRMATION para PAID (push ao cliente). */
-export async function confirmarRecebimento(attendanceId: string): Promise<void> {
-  await api.post(`/attendances/${attendanceId}/payment/confirm`);
+export async function confirmarRecebimento(
+  attendanceId: string,
+  forma?: FormaDeRecebimento
+): Promise<void> {
+  await api.post(
+    `/attendances/${attendanceId}/payment/confirm`,
+    forma ? { method: forma } : undefined
+  );
 }
 
 /** PAYMENT_CLAIMED / PAYMENT_CONFIRMED no WS pessoal: re-busca os pendentes. */

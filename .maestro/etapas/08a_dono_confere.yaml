@@ -96,6 +96,15 @@ appId: ${APP_ID}
 - tapOn:
     text: "Sim, recebi"
     label: "08.11e · pix · confirma"
+# forma-de-recebimento (PAR, Backend 8b158e3): o "Sim, recebi" pergunta a forma;
+# aqui o dono escolhe Dinheiro (nas outras etapas a bateria pula).
+- extendedWaitUntil:
+    visible: "Como recebeu?"
+    timeout: 10000
+    label: "08.11e1 · forma · a caixa Como recebeu? aparece"
+- tapOn:
+    text: "Dinheiro"
+    label: "08.11e2 · forma · escolhe Dinheiro"
 - extendedWaitUntil:
     visible: "Pagamento: pago"
     timeout: 20000
