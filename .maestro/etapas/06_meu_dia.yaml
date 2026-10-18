@@ -22,6 +22,16 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Arredondamento"
     label: "06.03b · conta · com todas as linhas"
+# relatorio-sem-multa (PAR, DEC-83, Backend 0112396): o CLIENTE2 saiu pela loja
+# (05.22, Remover), entao o resumo traz "Nao realizados" com o motivo, sem valor
+# de multa.
+- scrollUntilVisible:
+    element: "Não realizados"
+    direction: DOWN
+    label: "06.03c · nao-realizados · o resumo traz Não realizados"
+- assertVisible:
+    text: "Profissional removeu o cliente"
+    label: "06.03d · nao-realizados · com o motivo (a loja removeu o cliente)"
 - scrollUntilVisible:
     element: ${output.CLIENTE1}
     direction: DOWN
@@ -61,3 +71,6 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Retirado"
     label: "06.09 · confere Retirado"
+- assertVisible:
+    text: "Profissional removeu o cliente"
+    label: "06.09a · nao-realizados · o atendimento retirado diz o motivo"

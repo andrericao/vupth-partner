@@ -123,6 +123,28 @@ appId: ${APP_ID}
     timeout: 20000
     label: "05.20 · espera"
 
+# botao-nao-compareceu (PAR, DEC-83, Backend falta-do-cliente): o 1o da vez tem a
+# acao "Nao compareceu". A confirmacao diz que o cliente leva multa; que nao traz
+# valor o jest trava (queueCard.test.ts).
+# Nao confirma: o Backend so aceita a falta 10 min depois da hora, e o proximo
+# passo (Remover) precisa do CLIENTE2 na fila. O 409 ("Ainda e cedo") fica no jest.
+- tapOn:
+    text: "Opções de ${output.CLIENTE2}"
+    label: "05.20a · falta · toca em Opções de ${output.CLIENTE2}"
+- tapOn:
+    text: "Não compareceu"
+    label: "05.20b · falta · toca em Não compareceu"
+- extendedWaitUntil:
+    visible: "Cliente não compareceu"
+    timeout: 10000
+    label: "05.20c · falta · a confirmação aparece"
+- assertVisible:
+    text: ".*leva uma multa.*"
+    label: "05.20d · falta · diz que o cliente leva multa"
+- tapOn:
+    id: "dialogo-botao-0"
+    label: "05.20e · falta · Cancelar (o CLIENTE2 continua na fila)"
+
 # O segundo sai pela loja: Remover
 - tapOn:
     text: "Opções de ${output.CLIENTE2}"

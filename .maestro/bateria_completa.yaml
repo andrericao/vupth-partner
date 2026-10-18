@@ -195,3 +195,7 @@ env:
 - runFlow:
     file: etapas/11_profissional_abre_a_loja.yaml
     label: "00.32 · roda 11_profissional_abre_a_loja"
+# A 11 termina na tela de papeis; a 14 e do dono e roda por ultimo (a 2a loja vira a ativa)
+- runFlow:
+    file: etapas/14_multi_loja.yaml
+    label: "00.33 · roda 14_multi_loja"
