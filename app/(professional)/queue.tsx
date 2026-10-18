@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
+import { EntradaSuave } from "@components/EntradaSuave";
+import { LinhaQueSeMove } from "@components/LinhaQueSeMove";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
@@ -505,7 +507,10 @@ export default function ProfessionalQueueScreen() {
       mensagem:
         "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
       confirmar: "Fechar fila",
-      destrutivo: true,
+      // Fechar a fila e rotina do dia e da pra reabrir (a nota do NwButton): e um
+      // aviso de ATENCAO, nao uma acao destrutiva. O primario fica verde, como ja
+      // esta no "Fechar fila" das Opcoes da fila.
+      tipo: "atencao",
     });
     if (ok) aplicarAceitando(false);
   };
@@ -1013,13 +1018,19 @@ export default function ProfessionalQueueScreen() {
                 Lista de Espera ({waitingList.length})
               </Titulo>
               {waitingList.map((att, idx) => (
-                <QueueRow
-                  key={att.id}
-                  attendance={att}
-                  position={idx + 1}
-                  isFirst={idx === 0}
-                  onMenu={() => setMenuTarget(att)}
-                />
+                // O cartão que chega entra com fade e deslize; quem já estava
+                // montado não reanima a cada atualização da fila (a chave é o id).
+                // O atraso escalona só a primeira tela de cartões.
+                <EntradaSuave key={att.id} atraso={Math.min(idx, 5) * 50}>
+                  <LinhaQueSeMove>
+                    <QueueRow
+                      attendance={att}
+                      position={idx + 1}
+                      isFirst={idx === 0}
+                      onMenu={() => setMenuTarget(att)}
+                    />
+                  </LinhaQueSeMove>
+                </EntradaSuave>
               ))}
             </View>
           )}

@@ -1,6 +1,8 @@
-import { View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, StyleSheet, View } from "react-native";
 import { House, Users, List, Hourglass, ChartColumn, User } from "lucide-react-native";
 import type { ComponentType } from "react";
+import { EASE, movimentoReduzido } from "@lib/motion";
 
 /**
  * Icone da tab bar. Os glifos sao os que o Pencil nomeia nos componentes
@@ -49,15 +51,41 @@ const INACTIVE = "#454745"; // $text-secondary (era #9CA3AF, cinza generico)
 
 export function TabBarIcon({ name, focused }: { name: TabIconName; focused: boolean }) {
   const Icon = ICONS[name];
-  // A pilula ocupa espaco SEMPRE (o inativo so nao pinta o fundo), senao a
-  // linha de icones pula de altura a cada troca de aba.
+  const pilula = usePilula(focused);
+  // A pilula ocupa espaco SEMPRE (o inativo so nao a pinta), senao a linha de
+  // icones pula de altura a cada troca de aba. Ela e uma camada atras do icone
+  // que entra em fade e escala: a aba que acende e a que apaga trocam em 0,25 s,
+  // em vez de o fundo trocar de uma vez.
   return (
-    <View
-      className={`px-4 py-1 rounded-full ${focused ? "bg-vupth-greenTint" : "bg-transparent"}`}
-    >
+    <View className="px-4 py-1 rounded-full">
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, pilula]}>
+        <View className="flex-1 bg-vupth-greenTint rounded-full" />
+      </Animated.View>
       <Icon size={22} color={focused ? ACTIVE : INACTIVE} />
     </View>
   );
+}
+
+function usePilula(focused: boolean) {
+  const [v] = useState(() => new Animated.Value(focused ? 1 : 0));
+  useEffect(() => {
+    let vivo = true;
+    let anim: Animated.CompositeAnimation | null = null;
+    movimentoReduzido().then((reduzido) => {
+      if (!vivo) return;
+      if (reduzido) {
+        v.setValue(focused ? 1 : 0);
+        return;
+      }
+      anim = Animated.timing(v, { toValue: focused ? 1 : 0, duration: 250, easing: EASE.entrada, useNativeDriver: true });
+      anim.start();
+    });
+    return () => {
+      vivo = false;
+      anim?.stop();
+    };
+  }, [focused, v]);
+  return { opacity: v, transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }] };
 }
 
 // [new-design] Sombra superior sutil da tab bar. E uma das POUCAS sombras

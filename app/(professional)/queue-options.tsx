@@ -156,7 +156,10 @@ export default function QueueOptionsScreen() {
         mensagem:
           "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
         confirmar: "Fechar fila",
-        destrutivo: true,
+        // "Fechamento" e atencao (design-modais). Sem `destrutivo`: fechar a fila
+        // e rotina do dia e da para reabrir, entao o primario e o verde da marca,
+        // nao o vermelho de quem nao tem volta.
+        tipo: "atencao",
       }).then((ok) => {
         if (ok) runToggleQueue(false);
       });
