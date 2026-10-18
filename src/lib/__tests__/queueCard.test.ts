@@ -92,9 +92,11 @@ describe("mensagemDoAtraso", () => {
 });
 
 describe("a falta (DEC-83)", () => {
-  it("a confirmacao diz que o cliente leva multa, sem valor", () => {
+  it("a confirmacao diz que o cliente vira atrasado e a multa so no 3o, sem valor", () => {
     const m = mensagemDaFalta("Ana");
     expect(m).toMatch(/Ana não compareceu/);
+    expect(m).toMatch(/atrasado/);
+    expect(m).toMatch(/3º atraso/);
     expect(m).toMatch(/multa/);
     expect(m).not.toMatch(/R\$/);
   });

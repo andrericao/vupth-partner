@@ -677,14 +677,14 @@ export default function ProfessionalQueueScreen() {
     if (ok) handleAction(() => markLate(att.id));
   };
 
-  // "Nao compareceu" (botao-nao-compareceu, DEC-83): a falta. Antes dos 10 min o
+  // "Nao compareceu" (botao-nao-compareceu, DEC-83): a falta, que agora vale como atraso (DEC-86). Antes dos 10 min o
   // Backend recusa (409 NO_SHOW_TOO_EARLY) e diz a hora em `available_at`.
   const confirmNoShow = async (att: AttendanceInQueue) => {
     const ok = await confirmar({
       titulo: "Cliente não compareceu",
       mensagem: mensagemDaFalta(att.clientName),
       confirmar: "Não compareceu",
-      destrutivo: true,
+      destrutivo: false,
     });
     if (!ok) return;
     try {
