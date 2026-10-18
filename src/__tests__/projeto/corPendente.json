@@ -137,65 +137,12 @@
   "app/(professional)/sistema.tsx": {
     "branco": 1
   },
-  "src/components/AceitandoNovos.tsx": {
-    "hex": 4
-  },
-  "src/components/ApagarLojaModal.tsx": {
-    "hex": 1,
-    "textoForest": 1,
-    "branco": 1
-  },
-  "src/components/AvisoLojaDesativada.tsx": {
-    "textoForest": 2
-  },
   "src/components/AvisoLojaSemPonto.tsx": {
     "hex": 1,
     "textoForest": 2
   },
-  "src/components/ChavePix.tsx": {
-    "textoForest": 1,
-    "bordaForest": 1,
-    "branco": 1
-  },
-  "src/components/ClosingPrompt.tsx": {
-    "hex": 1,
-    "textoForest": 1,
-    "branco": 1
-  },
-  "src/components/CompletionCard.tsx": {
-    "hex": 10,
-    "textoForest": 2
-  },
-  "src/components/ConvitePorEmail.tsx": {
-    "textoForest": 2
-  },
-  "src/components/ConvitesDePosse.tsx": {
-    "textoForest": 1
-  },
-  "src/components/Cupom.tsx": {
-    "textoForest": 1
-  },
-  "src/components/DesativarContaModal.tsx": {
-    "hex": 1,
-    "textoForest": 1,
-    "branco": 1
-  },
   "src/components/DialogoVupth.tsx": {
     "hex": 6
-  },
-  "src/components/EditorDeHorarios.tsx": {
-    "hex": 1,
-    "textoForest": 5
-  },
-  "src/components/EnquadrarFoto.tsx": {
-    "hex": 2,
-    "textoForest": 1,
-    "branco": 3
-  },
-  "src/components/ExcluirContaModal.tsx": {
-    "hex": 1,
-    "textoForest": 1,
-    "branco": 1
   },
   "src/components/ExpedienteCard.tsx": {
     "textoForest": 1
@@ -204,66 +151,13 @@
     "hex": 2,
     "textoForest": 1
   },
-  "src/components/FaixaBaixarApp.tsx": {
-    "textoForest": 1,
-    "branco": 2
-  },
-  "src/components/FotoEditavel.tsx": {
-    "hex": 6,
-    "textoForest": 1,
-    "branco": 1
-  },
-  "src/components/HorarioSemana.tsx": {
-    "hex": 4,
-    "textoForest": 2
-  },
   "src/components/LinhaComInterruptor.tsx": {
     "hex": 4,
     "textoForest": 1
   },
-  "src/components/LinkDeIndicacao.tsx": {
-    "textoForest": 2
-  },
-  "src/components/ModoDeFuncionamento.tsx": {
-    "textoForest": 2,
-    "bordaForest": 1
-  },
-  "src/components/NaoRealizadosCard.tsx": {
-    "textoForest": 1
-  },
-  "src/components/OnboardingPathChoice.tsx": {
-    "hex": 1,
-    "textoForest": 1
-  },
-  "src/components/OtaUpdateButton.tsx": {
-    "textoForest": 1
-  },
-  "src/components/PagamentosPendentes.tsx": {
-    "textoForest": 2
-  },
-  "src/components/PassarPosse.tsx": {
-    "textoForest": 2
-  },
-  "src/components/PushDiagnostics.tsx": {
-    "textoForest": 4,
-    "branco": 1
-  },
-  "src/components/QueueOptions.tsx": {
-    "hex": 9,
-    "textoForest": 1,
-    "branco": 2
-  },
   "src/components/ReadinessFaixa.tsx": {
     "hex": 1,
     "textoForest": 3
-  },
-  "src/components/ReativarContaModal.tsx": {
-    "hex": 1,
-    "textoForest": 1,
-    "branco": 1
-  },
-  "src/components/RelatorioDasLojas.tsx": {
-    "textoForest": 5
   },
   "src/components/SelectService.tsx": {
     "bordaForest": 1,
@@ -273,27 +167,11 @@
     "textoForest": 1,
     "branco": 1
   },
-  "src/components/ServiceTypeGrid.tsx": {
-    "hex": 3,
-    "textoForest": 1,
-    "bordaForest": 1
-  },
-  "src/components/SolicitacoesCard.tsx": {
-    "hex": 2,
-    "textoForest": 3
-  },
   "src/components/TabBarIcon.tsx": {
     "hex": 3
   },
-  "src/components/WsDiagnostics.tsx": {
-    "textoForest": 4,
-    "branco": 1
-  },
   "src/components/brand/StatCard.tsx": {
     "textoForest": 2
-  },
-  "src/components/doodles/index.ts": {
-    "hex": 5
   },
   "src/lib/statusAtendimento.ts": {
     "textoForest": 5,

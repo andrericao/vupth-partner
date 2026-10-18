@@ -25,9 +25,12 @@ import { veredictoDoCanal, desdeQuando, type NivelVeredito } from "@lib/diagnost
 // Diferenca que FICA: no partner os dois canais dividem UMA conexao STOMP (o
 // client abre duas), e o snapshot da fila (GET x WS) so existe aqui.
 
+// O ponto e COR (nao fundo de bloco): ok e o papel `selecionado` (forest no
+// claro; no escuro forest e a surface e o ponto sumiria) e warn e o `pessego`
+// (o warning vira marrom escuro no escuro).
 const PONTO: Record<NivelVeredito, string> = {
-  ok: "bg-vupth-forest",
-  warn: "bg-vupth-warning",
+  ok: "bg-vupth-selecionado",
+  warn: "bg-vupth-pessego",
   bad: "bg-vupth-danger",
   idle: "bg-vupth-textSecondary",
 };
@@ -36,7 +39,15 @@ const FUNDO: Record<NivelVeredito, string> = {
   ok: "bg-vupth-greenTint",
   warn: "bg-vupth-warning",
   bad: "bg-vupth-dangerTint",
-  idle: "bg-white",
+  idle: "bg-vupth-background",
+};
+
+// O texto do veredito e o par do FUNDO dele (forest sobre tudo so valia no claro).
+const TEXTO: Record<NivelVeredito, string> = {
+  ok: "text-vupth-onGreenTint",
+  warn: "text-vupth-onAccentPeach",
+  bad: "text-vupth-textPrimary",
+  idle: "text-vupth-textSecondary",
 };
 
 function Canal({
@@ -57,14 +68,12 @@ function Canal({
     <View className="gap-1" testID={`ws-diag-${canal}`}>
       <View className="flex-row items-center gap-2">
         <View className={`w-2 h-2 rounded-full ${PONTO[veredito.level]}`} />
-        <Text className="font-heading text-sm text-vupth-forest">{rotulo}</Text>
+        <Text className="font-heading text-sm text-vupth-textPrimary">{rotulo}</Text>
       </View>
       <View className={`rounded-lg px-3 py-2 ${FUNDO[veredito.level]}`}>
         <Text
           testID={`ws-diag-${canal}-veredito`}
-          className={`font-body text-xs ${
-            veredito.level === "idle" ? "text-vupth-textSecondary" : "text-vupth-forest"
-          }`}
+          className={`font-body text-xs ${TEXTO[veredito.level]}`}
         >
           {veredito.message}
         </Text>
@@ -100,7 +109,7 @@ export function WsDiagnostics() {
   return (
     <View className="mt-8 gap-3" testID="ws-diagnostics">
       <View>
-        <Text className="font-heading text-base text-vupth-forest mb-1">
+        <Text className="font-heading text-base text-vupth-textPrimary mb-1">
           Tempo real (diagnóstico)
         </Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
@@ -120,7 +129,7 @@ export function WsDiagnostics() {
           <>
             <View className="h-px bg-vupth-border" />
             <View className="gap-1">
-              <Text className="font-heading text-sm text-vupth-forest">Snapshot da fila</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">Snapshot da fila</Text>
               {snapshotGet && (
                 <Text testID="ws-diag-snapshot-get" className="font-mono text-xs text-vupth-textSecondary">
                   {snapshotGet.linha}

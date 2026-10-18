@@ -69,7 +69,7 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
           <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEUS CUPONS</Text>
           {campanhas.map((c) => (
             <View key={c.id} testID="cupom-campanha" className="bg-vupth-surface rounded-card px-4 py-3">
-              <Text className="font-heading text-sm text-vupth-forest">{c.name}</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
               <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
                 {[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
               </Text>

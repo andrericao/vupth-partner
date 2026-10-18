@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { ChevronRight, Check } from "lucide-react-native";
 import type { Completion, CompletionTracker } from "@lib/completion";
 import { PendingDot } from "@components/PendingDot";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   completion: Completion;
@@ -12,15 +13,17 @@ type Props = {
 };
 
 function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
+  const { cores } = useTema();
   return (
     <View
       style={{
         height: 9,
         borderRadius: 99,
-        // [marca-vupth] Trilho vazio da barra: $brandBorder e o UNICO neutro da
-        // paleta mais escuro que o $brandSurface do card — no surface a barra
-        // sumiria. Era #E8EDEA, cinza da paleta pre-marca.
-        backgroundColor: "#D7DDD3",
+        // Trilho vazio da barra, sobre o surface do card: no claro o `border` e o
+        // UNICO neutro mais escuro que ele (no surface a barra sumiria; era
+        // #E8EDEA, cinza da paleta pre-marca). No escuro o `border` e um verde
+        // vivo, entao o papel `trilho` (surfaceAlt) assume.
+        backgroundColor: cores.trilho,
         overflow: "hidden",
       }}
     >
@@ -29,7 +32,7 @@ function Bar({ percent, muted }: { percent: number; muted?: boolean }) {
           height: "100%",
           width: `${percent}%`,
           borderRadius: 99,
-          backgroundColor: muted ? "#E2F6D5" : "#9FE870", // [marca-vupth] greenTint / brandGreen
+          backgroundColor: muted ? cores.progressoSuave : cores.green, // greenTint no claro (o suave) / brandGreen
         }}
       />
     </View>
@@ -45,6 +48,7 @@ function Row({
   done: boolean;
   route?: string;
 }) {
+  const { cores } = useTema();
   const navigable = !done && !!route;
   const content = (
     <View className="flex-row items-center gap-3 py-2.5 px-2">
@@ -55,13 +59,14 @@ function Row({
           borderRadius: 11,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: done ? "#163300" : "#FFFFFF", // [marca-vupth] $forest
+          backgroundColor: done ? cores.selecionado : cores.background, // forest (no escuro, green) / fundo
           borderWidth: done ? 0 : 2,
-          borderColor: "#D7DDD3", // [marca-vupth] $brandBorder
+          borderColor: cores.border,
         }}
       >
-        {/* [marca-vupth] Sobre `forest` o par e brand-green, nunca branco. */}
-        {done && <Check size={13} color="#9FE870" strokeWidth={3} />}
+        {/* [marca-vupth] Sobre `forest` o par e brand-green, nunca branco (o papel
+            onSelecionado: no escuro o fundo e o green e o par e o onGreen). */}
+        {done && <Check size={13} color={cores.onSelecionado} strokeWidth={3} />}
       </View>
       <Text
         className={`flex-1 font-body text-sm ${
@@ -70,7 +75,7 @@ function Row({
       >
         {label}
       </Text>
-      {navigable && <ChevronRight size={16} color="#454745" />}
+      {navigable && <ChevronRight size={16} color={cores.textSecondary} />}
     </View>
   );
 
@@ -95,11 +100,12 @@ function List({
   tracker: CompletionTracker;
   routeFor: (key: string) => string | undefined;
 }) {
+  const { cores } = useTema();
   return (
     <View className="mt-2">
       {tracker.items.map((item, idx) => (
         <View key={item.key}>
-          {idx > 0 && <View style={{ height: 1, backgroundColor: "#D7DDD3" }} />}
+          {idx > 0 && <View style={{ height: 1, backgroundColor: cores.border }} />}
           <Row label={item.label} done={item.done} route={routeFor(item.key)} />
         </View>
       ))}
@@ -108,6 +114,7 @@ function List({
 }
 
 export function CompletionCard({ completion, routeFor }: Props) {
+  const { cores } = useTema();
   const { basic, profile } = completion;
 
   // Nada a mostrar quando tudo esta completo.
@@ -142,7 +149,7 @@ export function CompletionCard({ completion, routeFor }: Props) {
               </Text>
               <PendingDot />
             </View>
-            <Text className="font-heading text-base text-vupth-forest">
+            <Text className="font-heading text-base text-vupth-textPrimary">
               {basic.percent}%
             </Text>
           </View>
@@ -154,7 +161,7 @@ export function CompletionCard({ completion, routeFor }: Props) {
 
       {profile.total > 0 && (
         <>
-          <View style={{ height: 1, backgroundColor: "#D7DDD3", marginVertical: 14 }} />
+          <View style={{ height: 1, backgroundColor: cores.border, marginVertical: 14 }} />
           <View className="flex-row justify-between items-baseline mb-2">
             <View className="flex-row items-center gap-2">
               <Text className="font-heading text-sm text-vupth-textPrimary">
@@ -165,7 +172,7 @@ export function CompletionCard({ completion, routeFor }: Props) {
             {/* [marca-vupth] Era text-brand-600 — escala ANTIGA (#3b7a3f,
                 pre-marca), único resquício dela neste card (a linha "Pronto
                 para atender" acima já usava vupth-forest). */}
-            <Text className="font-heading text-sm text-vupth-forest">
+            <Text className="font-heading text-sm text-vupth-textPrimary">
               {profile.percent}%
             </Text>
           </View>

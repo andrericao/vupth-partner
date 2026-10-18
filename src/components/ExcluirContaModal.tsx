@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, View, Text } from "react-native";
 
 import { NwButton } from "@components/nw/Button";
+import { useTema } from "@hooks/useTema";
 import { NwInput } from "@components/nw/Input";
 
 type Props = {
@@ -21,6 +22,7 @@ type Props = {
 // sobrevive sem o nome. "Todos os seus dados serao perdidos" seria mentira.
 // `Alert.prompt` nao serve: so existe no iOS.
 export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClose }: Props) {
+  const { veu } = useTema();
   const [password, setPassword] = useState("");
 
   function close() {
@@ -36,9 +38,9 @@ export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClo
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-        <View className="bg-white rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-forest">Deletar conta</Text>
+      <View className="flex-1 justify-center px-6" style={{ backgroundColor: veu }}>
+        <View className="bg-vupth-painel rounded-card p-6 gap-3">
+          <Text className="font-heading text-lg text-vupth-textPrimary">Deletar conta</Text>
 
           <Text className="font-body text-sm text-vupth-textSecondary">
             Seus dados pessoais serão apagados e você sairá do app. Os atendimentos que você já fez
@@ -71,7 +73,7 @@ export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClo
             onPress={confirm}
             testID="delete-account-confirm"
           />
-          <NwButton title="Cancelar" variant="secondary" onPress={close} disabled={isDeleting} />
+          <NwButton title="Cancelar" variant="secondaryPainel" onPress={close} disabled={isDeleting} />
         </View>
       </View>
     </Modal>

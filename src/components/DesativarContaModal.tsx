@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, View, Text } from "react-native";
 
 import { NwButton } from "@components/nw/Button";
+import { useTema } from "@hooks/useTema";
 import { NwInput } from "@components/nw/Input";
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
 // ExcluirContaModal. Pede a senha atual (o backend exige) e diz o que acontece
 // de verdade — inclusive com a loja, para o dono.
 export function DesativarContaModal({ visible, ehDono, isDeactivating, error, onConfirm, onClose }: Props) {
+  const { veu } = useTema();
   const [password, setPassword] = useState("");
 
   function close() {
@@ -33,9 +35,9 @@ export function DesativarContaModal({ visible, ehDono, isDeactivating, error, on
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-        <View className="bg-white rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-forest">Desativar conta</Text>
+      <View className="flex-1 justify-center px-6" style={{ backgroundColor: veu }}>
+        <View className="bg-vupth-painel rounded-card p-6 gap-3">
+          <Text className="font-heading text-lg text-vupth-textPrimary">Desativar conta</Text>
 
           <Text className="font-body text-sm text-vupth-textSecondary">
             Você sai do app e deixa de receber avisos. Nada é apagado: para voltar, é só entrar de
@@ -72,7 +74,7 @@ export function DesativarContaModal({ visible, ehDono, isDeactivating, error, on
             onPress={confirm}
             testID="deactivate-account-confirm"
           />
-          <NwButton title="Cancelar" variant="secondary" onPress={close} disabled={isDeactivating} />
+          <NwButton title="Cancelar" variant="secondaryPainel" onPress={close} disabled={isDeactivating} />
         </View>
       </View>
     </Modal>

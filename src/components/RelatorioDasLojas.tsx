@@ -23,11 +23,11 @@ function Chip({ label, ativo, onPress }: { label: string; ativo: boolean; onPres
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className={`py-2 px-4 rounded-full shrink-0 ${ativo ? "bg-vupth-forest" : "bg-vupth-surface"}`}
+      className={`py-2 px-4 rounded-full shrink-0 ${ativo ? "bg-vupth-selecionado" : "bg-vupth-surface"}`}
     >
       <Text
         numberOfLines={1}
-        className={`font-body text-sm text-center ${ativo ? "text-vupth-green" : "text-vupth-textSecondary"}`}
+        className={`font-body text-sm text-center ${ativo ? "text-vupth-onSelecionado" : "text-vupth-textSecondary"}`}
       >
         {label}
       </Text>
@@ -83,7 +83,7 @@ export function RelatorioDasLojas() {
               keyboardType="numbers-and-punctuation"
               maxLength={10}
               accessibilityLabel={campo === "de" ? "Data inicial" : "Data final"}
-              className="flex-1 bg-vupth-surface rounded-card px-4 py-3 font-body text-sm text-vupth-forest"
+              className="flex-1 bg-vupth-surface rounded-card px-4 py-3 font-body text-sm text-vupth-textPrimary"
             />
           ))}
         </View>
@@ -122,12 +122,12 @@ export function RelatorioDasLojas() {
                 {r!.stores.map((l) => (
                   <View key={l.id} className="bg-vupth-surface p-4 rounded-card flex-row justify-between">
                     <View className="flex-1">
-                      <Text className="font-heading text-vupth-forest">{l.name}</Text>
+                      <Text className="font-heading text-vupth-textPrimary">{l.name}</Text>
                       <Text className="font-body text-xs text-vupth-textSecondary">
                         {l.summary.finished} concluídos · {l.summary.cancelled} não realizados
                       </Text>
                     </View>
-                    <Text className="font-heading text-vupth-forest">{reais(l.summary.gross_revenue)}</Text>
+                    <Text className="font-heading text-vupth-textPrimary">{reais(l.summary.gross_revenue)}</Text>
                   </View>
                 ))}
               </View>
@@ -140,11 +140,11 @@ export function RelatorioDasLojas() {
               <View className="gap-2">
                 {r!.series.map((p) => (
                   <View key={p.from} className="bg-vupth-surface p-3 rounded-card flex-row justify-between">
-                    <Text className="font-body text-sm text-vupth-forest">{diaMes(p.from)}</Text>
+                    <Text className="font-body text-sm text-vupth-textPrimary">{diaMes(p.from)}</Text>
                     <Text className="font-body text-xs text-vupth-textSecondary">
                       {p.summary.finished} concluídos
                     </Text>
-                    <Text className="font-heading text-vupth-forest">{reais(p.summary.gross_revenue)}</Text>
+                    <Text className="font-heading text-vupth-textPrimary">{reais(p.summary.gross_revenue)}</Text>
                   </View>
                 ))}
               </View>

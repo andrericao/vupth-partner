@@ -1,4 +1,5 @@
 import { View, Text, Switch } from "react-native";
+import { useTema } from "@hooks/useTema";
 
 // DS3 (c) — "aceitando novos clientes".
 //
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function AceitandoNovos({ aceitando, onToggle }: Props) {
+  const { interruptor } = useTema();
   return (
     <View className="flex-row items-center gap-3 mt-4 bg-vupth-surface rounded-card px-4 py-3">
       <View className="flex-1">
@@ -34,9 +36,7 @@ export function AceitandoNovos({ aceitando, onToggle }: Props) {
         value={aceitando}
         onValueChange={onToggle}
         accessibilityLabel="Aceitando novos clientes"
-        trackColor={{ false: "#D7DDD3", true: "#9FE870" }}
-        thumbColor="#FFFFFF"
-        ios_backgroundColor="#D7DDD3"
+        {...interruptor}
       />
     </View>
   );

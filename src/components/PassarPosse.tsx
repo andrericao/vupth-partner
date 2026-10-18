@@ -20,7 +20,7 @@ export function PassarPosse({ pendente, candidatos, ocupado, erro, onPedir, onCa
     <View className="gap-3">
       {pendente ? (
         <View className="bg-vupth-surface rounded-card p-4 gap-3" testID="posse-pendente">
-          <Text className="font-body text-sm text-vupth-forest">
+          <Text className="font-body text-sm text-vupth-textPrimary">
             Esperando {pendente.professional_name} aceitar a posse da loja.
           </Text>
           <NwButton title="Cancelar pedido" variant="secondary" disabled={ocupado} onPress={onCancelar} />
@@ -44,7 +44,7 @@ export function PassarPosse({ pendente, candidatos, ocupado, erro, onPedir, onCa
                 accessibilityRole="button"
                 className="bg-vupth-surface rounded-card px-4 py-4 active:opacity-80"
               >
-                <Text className="font-heading text-base text-vupth-forest">{c.nome}</Text>
+                <Text className="font-heading text-base text-vupth-textPrimary">{c.nome}</Text>
               </Pressable>
             ))
           )}

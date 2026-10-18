@@ -6,6 +6,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { graceSecondsRemaining, graceCountdownLabel } from "@lib/closing";
 import { floatingShadow } from "@lib/styles";
+import { useTema } from "@hooks/useTema";
 
 /**
  * Prompt de AUTO-FECHAMENTO (BUG1 / S1 fatia 5). Quando o backend manda o WS
@@ -19,6 +20,7 @@ import { floatingShadow } from "@lib/styles";
  *    (o proprio backend ja aplicou o OFF).
  */
 export function ClosingPrompt() {
+  const { veu } = useTema();
   const graceUntil = useUiStore((s) => s.closingGraceUntil);
   const dismiss = useUiStore((s) => s.dismissClosingPrompt);
   const updateMyStatus = useProfessionalStore((s) => s.updateMyStatus);
@@ -58,11 +60,11 @@ export function ClosingPrompt() {
     <Modal visible={!!graceUntil} transparent animationType="fade" onRequestClose={dismiss}>
       <View className="flex-1 justify-center items-center px-4">
         <Pressable
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.45)" }}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: veu }}
           onPress={dismiss}
           accessibilityLabel="Fechar aviso"
         />
-        <View className="bg-white rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
+        <View className="bg-vupth-painel rounded-2xl p-5 w-full gap-2" style={floatingShadow}>
           <Text className="font-heading text-lg text-vupth-textPrimary">
             Passou do horário de fechamento
           </Text>
@@ -70,14 +72,14 @@ export function ClosingPrompt() {
             A fila já foi fechada para novos clientes. Quem está na fila segue sendo
             atendido. Fecha sozinho em:
           </Text>
-          {/* [marca-vupth] Countdown numa pilula $brandWarning com texto forest
-              — mesmo par do selo "EM BREVE". A paleta nao tem ambar escuro pra
-              texto: o peach (#FFC091) so funciona como FUNDO, nunca como cor de
-              letra sobre claro. Era text-amber-600, da escala antiga. */}
+          {/* [marca-vupth] Countdown numa pilula $brandWarning com o par de texto
+              dele (onAccentPeach: forest no claro, pessego no escuro) — mesmo par
+              do selo "EM BREVE". O peach so funciona como FUNDO sobre claro,
+              nunca como cor de letra. Era text-amber-600, da escala antiga. */}
           <View className="bg-vupth-warning rounded-full px-3 py-1 self-center my-1">
             <Text
               accessibilityLabel={`Fecha em ${graceCountdownLabel(remaining)}`}
-              className="font-heading text-2xl text-vupth-forest text-center"
+              className="font-heading text-2xl text-vupth-onAccentPeach text-center"
             >
               {graceCountdownLabel(remaining)}
             </Text>
@@ -90,7 +92,7 @@ export function ClosingPrompt() {
           <NwButton
             title="Continuar atendendo"
             onPress={dismiss}
-            variant="secondary"
+            variant="secondaryPainel"
             className="h-10"
           />
         </View>

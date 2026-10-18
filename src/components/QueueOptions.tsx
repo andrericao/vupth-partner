@@ -5,6 +5,8 @@ import { router } from "expo-router";
 import { comingSoon } from "@components/comingSoon";
 import { NotificationBadge } from "@components/NotificationBadge";
 import type { MealSignal } from "@lib/meals";
+import { useTema } from "@hooks/useTema";
+import type { NomeDeCor } from "@theme/tema";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
 // design/professional-nav-v2.html). Substitui o antigo menu-modal do banco:
@@ -40,15 +42,20 @@ type Props = {
 };
 
 // Semaforo (Andre 2026-07-23): verde trabalhando, ambar intervalo, vermelho fora.
+//
+// `cor` e o NOME da cor do tema (cores[cor]), como em STATUS_META. O ativo de
+// Trabalhando e o papel `selecionado` (forest no claro, green no escuro: forest
+// no escuro e a surface do cartao e o botao ativo sumiria).
 const STATUS: {
-  key: StatusKey; label: string; activeBg: string; activeText: string; cor: string;
+  key: StatusKey; label: string; activeBg: string; activeText: string; cor: NomeDeCor;
 }[] = [
-  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-forest", activeText: "text-white", cor: "#9FE870" },
+  { key: "trabalhando", label: "Trabalhando", activeBg: "bg-vupth-selecionado", activeText: "text-vupth-onSelecionadoBranco", cor: "green" },
   // [marca-vupth] `intervalo` e o unico ativo com fundo CLARO (warning #FFC091,
-  // que era bg-amber-500 da escala antiga) — por isso o texto e forest, e nao o
-  // branco dos outros dois: sobre claro a marca manda usar forest.
-  { key: "intervalo", label: "Intervalo", activeBg: "bg-vupth-warning", activeText: "text-vupth-forest", cor: "#FFC091" },
-  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", activeText: "text-white", cor: "#B3261E" },
+  // que era bg-amber-500 da escala antiga) — por isso o texto e o par dele
+  // (onAccentPeach, forest no claro), e nao o branco dos outros dois: sobre
+  // claro a marca manda usar forest.
+  { key: "intervalo", label: "Intervalo", activeBg: "bg-vupth-warning", activeText: "text-vupth-onAccentPeach", cor: "pessego" },
+  { key: "indisponivel", label: "Fora", activeBg: "bg-vupth-danger", activeText: "text-vupth-onDanger", cor: "danger" },
 ];
 
 // Section/Row no escopo do MODULO (licao do segfault do tsc: definidos dentro
@@ -73,6 +80,7 @@ type RowProps = {
 };
 
 function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
+  const { cores } = useTema();
   return (
     <Pressable
       onPress={onPress}
@@ -95,7 +103,7 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
         {dot && (
           <View
             testID="menu-dot-meals"
-            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#B3261E" }}
+            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: cores.danger }}
           />
         )}
       </View>
@@ -112,6 +120,7 @@ export function QueueOptions({
   pendingRequests = 0,
   onOpenRequests,
 }: Props) {
+  const { cores } = useTema();
   // ⚠️ Nao inventar um valor quando o status ainda nao chegou. Isto ja dizia
   // "Você está: Trabalhando" com o status DESCONHECIDO — num recarregamento
   // frio a tela afirmava o contrario da verdade, e o profissional que estava
@@ -156,8 +165,7 @@ export function QueueOptions({
               testID="status-dot"
               className="w-2.5 h-2.5 rounded-full"
               style={{
-                backgroundColor:
-                  STATUS.find((s) => s.key === currentStatus)?.cor ?? "#D7DDD3",
+                backgroundColor: cores[STATUS.find((s) => s.key === currentStatus)?.cor ?? "border"],
               }}
             />
           </View>
@@ -204,14 +212,14 @@ export function QueueOptions({
 
       {closeQueue && !closeQueue.acceptingNew ? (
         <Row
-          icon={<Unlock size={18} color="#163300" />}
+          icon={<Unlock size={18} color={cores.textPrimary} />}
           label="Reabrir fila"
           hint="fila fechada para proximos clientes"
           onPress={closeQueue.onToggle}
         />
       ) : (
         <Row
-          icon={<Lock size={18} color="#163300" />}
+          icon={<Lock size={18} color={cores.textPrimary} />}
           label="Fechar fila"
           hint="termina quem já está; ninguém novo entra"
           onPress={() => (closeQueue ? closeQueue.onToggle() : comingSoon("Fechar fila"))}
@@ -221,7 +229,7 @@ export function QueueOptions({
       <Section title="Hoje" />
       {pendingRequests > 0 && (
         <Row
-          icon={<Inbox size={18} color="#163300" />}
+          icon={<Inbox size={18} color={cores.textPrimary} />}
           label="Solicitações"
           hint="fila fechada — pedidos de corte"
           badge={pendingRequests}
@@ -232,7 +240,7 @@ export function QueueOptions({
         />
       )}
       <Row
-        icon={<UtensilsCrossed size={18} color="#163300" />}
+        icon={<UtensilsCrossed size={18} color={cores.textPrimary} />}
         label={mealLabel ?? "Refeições"}
         hint={mealHint}
         dot={mealDot}

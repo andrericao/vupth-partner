@@ -17,6 +17,10 @@ import type { Cores } from "@theme/tema";
 type Variant =
   | "primary"
   | "secondary"
+  // `secondary` DENTRO de painel de modal: no escuro o painel e a surface, e um
+  // secondary (surface) sumiria. Usa o papel `sobrePainel` (surface no claro,
+  // surfaceAlt no escuro: design-modais.html, .btn.sec).
+  | "secondaryPainel"
   | "danger"
   | "outlineBrand"
   | "outlineDanger"
@@ -72,6 +76,7 @@ const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
 const BOX: Record<Variant, string> = {
   primary: "bg-vupth-green active:opacity-70",
   secondary: "bg-vupth-surface active:bg-vupth-border active:opacity-80",
+  secondaryPainel: "bg-vupth-sobrePainel active:bg-vupth-border active:opacity-80",
   danger: "bg-vupth-danger active:opacity-70",
   outlineBrand: "bg-vupth-background border border-vupth-textPrimary active:bg-vupth-greenTint active:opacity-80",
   outlineDanger: "bg-transparent border border-vupth-danger active:bg-vupth-dangerTint active:opacity-80",
@@ -95,6 +100,7 @@ const BOX: Record<Variant, string> = {
 const LABEL: Record<Variant, string> = {
   primary: "text-vupth-onGreen",
   secondary: "text-vupth-textPrimary",
+  secondaryPainel: "text-vupth-textPrimary",
   danger: "text-vupth-onDanger",
   outlineBrand: "text-vupth-textPrimary",
   outlineDanger: "text-vupth-danger",

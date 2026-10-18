@@ -22,7 +22,7 @@ const EXPLICACAO: Record<string, string> = {
 };
 
 function Linha({ rotulo, valor, ok }: { rotulo: string; valor: string; ok: boolean | null }) {
-  const cor = ok === null ? "text-vupth-textSecondary" : ok ? "text-vupth-forest" : "text-vupth-danger";
+  const cor = ok === null ? "text-vupth-textSecondary" : ok ? "text-vupth-textPrimary" : "text-vupth-danger";
   return (
     <View className="flex-row justify-between items-center gap-2">
       <Text className="font-body text-sm text-vupth-textSecondary">{rotulo}</Text>
@@ -43,7 +43,7 @@ export function PushDiagnostics() {
 
   return (
     <View className="bg-vupth-surface rounded-lg p-3 mt-3 gap-2" testID="push-diagnostics">
-      <Text className="font-heading text-sm text-vupth-forest">Push</Text>
+      <Text className="font-heading text-sm text-vupth-textPrimary">Push</Text>
 
       {push === null ? (
         // Sem tentativa nenhuma o cartao vazio pareceria "tudo certo".
@@ -65,8 +65,8 @@ export function PushDiagnostics() {
           {mostrarToken && token && (
             // Token INTEIRO, selecionavel e com o botao de copiar (build 1.4.0,
             // expo-clipboard).
-            <View className="bg-white rounded p-2 gap-2">
-              <Text selectable className="font-mono text-xs text-vupth-forest">
+            <View className="bg-vupth-background rounded p-2 gap-2">
+              <Text selectable className="font-mono text-xs text-vupth-textPrimary">
                 {token}
               </Text>
               <Pressable
@@ -74,7 +74,7 @@ export function PushDiagnostics() {
                 accessibilityRole="button"
                 className="self-start active:opacity-70"
               >
-                <Text className="font-body text-xs font-semibold text-vupth-forest">Copiar token</Text>
+                <Text className="font-body text-xs font-semibold text-vupth-textPrimary">Copiar token</Text>
               </Pressable>
             </View>
           )}

@@ -84,6 +84,21 @@ export function canais(hex: string): string {
   return `${parseInt(m[1], 16)} ${parseInt(m[2], 16)} ${parseInt(m[3], 16)}`;
 }
 
+/** O branco fixo da bolinha do interruptor (design.html, DS7: "bolinha branca") nos dois temas. */
+export const BRANCO = "#FFFFFF";
+
+/**
+ * As props de cor do `Switch`: trilho desligado `border`, ligado `green`, bolinha
+ * branca (design.html, DS7). O `Switch` nao resolve classe, entao e prop.
+ */
+export function interruptorDoTema(cores: Cores) {
+  return {
+    trackColor: { false: cores.border, true: cores.green },
+    thumbColor: BRANCO,
+    ios_backgroundColor: cores.border,
+  };
+}
+
 /** surfaceAlt -> --vupth-surface-alt (o tailwind.config.js usa a mesma regra). */
 export function nomeDaVariavel(nome: string): string {
   return `--vupth-${nome.replace(/[A-Z]/g, (l) => `-${l.toLowerCase()}`)}`;

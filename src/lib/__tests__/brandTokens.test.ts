@@ -64,6 +64,8 @@ const DESENHO: Record<string, string> = {
   onSelecionadoBranco: "#FFFFFF", // era text-white sobre o chip forest
   pessego: "#FFC091", // o ponto e o texto pessego (era warning usado como cor)
   esqueleto: "#D7DDD3", // o bloco do esqueleto (era border)
+  trilho: "#D7DDD3", // o trilho vazio da barra de progresso (era border fixo)
+  progressoSuave: "#E2F6D5", // a barra do perfil (era greenTint fixo)
 };
 
 const noTailwind: Record<string, string> = tailwind.theme.extend.colors.vupth;
@@ -192,6 +194,7 @@ describe("contraste de cada variante do botao", () => {
   const VARIANTES = [
     "primary",
     "secondary",
+    "secondaryPainel",
     "danger",
     "outlineBrand",
     "outlineDanger",

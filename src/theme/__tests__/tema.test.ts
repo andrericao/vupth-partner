@@ -2,6 +2,7 @@ import path from "path";
 import tokens from "../tokens.json";
 import { papeis } from "../papeis.json";
 import {
+  BRANCO,
   NOMES_DE_COR,
   NOMES_DE_PAPEL,
   NOMES_DE_TOKEN,
@@ -9,6 +10,7 @@ import {
   ROTULO_DA_PREFERENCIA,
   canais,
   coresDoTema,
+  interruptorDoTema,
   nomeDaVariavel,
   preferenciaValida,
   resolverTema,
@@ -129,6 +131,8 @@ describe("papeis — onde o desenho troca de token entre os temas", () => {
     expect(papeis.onSelecionadoBranco.claro).toBe("background"); // era text-white
     expect(papeis.pessego.claro).toBe("accentPeach"); // era warning usado como cor
     expect(papeis.esqueleto.claro).toBe("border"); // era #D7DDD3 fixo
+    expect(papeis.trilho.claro).toBe("border"); // o trilho da barra era #D7DDD3 fixo
+    expect(papeis.progressoSuave.claro).toBe("greenTint"); // a barra do perfil era #E2F6D5 fixo
   });
 
   it("o painel do modal e o #163300 do desenho no escuro (design-modais.html)", () => {
@@ -222,6 +226,25 @@ describe("tailwind.config.js — as classes vupth-* leem as variaveis", () => {
     const plugins = tailwind.plugins as { handler: (api: unknown) => void }[];
     for (const p of plugins) p.handler({ addBase: (b: typeof base) => (base = { ...base, ...b }) });
     expect(base[":root"]).toEqual(varsDoTema("claro"));
+  });
+});
+
+describe("interruptorDoTema", () => {
+  it("no claro e o trilho, o verde e a bolinha de antes", () => {
+    expect(interruptorDoTema(coresDoTema("claro"))).toEqual({
+      trackColor: { false: "#D7DDD3", true: "#9FE870" },
+      thumbColor: "#FFFFFF",
+      ios_backgroundColor: "#D7DDD3",
+    });
+  });
+
+  it("no escuro o trilho desligado e a borda do tema e a bolinha continua branca", () => {
+    const escuro = coresDoTema("escuro");
+    expect(interruptorDoTema(escuro)).toEqual({
+      trackColor: { false: escuro.border, true: escuro.green },
+      thumbColor: BRANCO,
+      ios_backgroundColor: escuro.border,
+    });
   });
 });
 

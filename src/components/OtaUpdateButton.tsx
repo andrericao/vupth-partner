@@ -82,7 +82,7 @@ export function OtaUpdateButton() {
           accessibilityRole="button"
           testID="check-update"
         >
-          <Text className="font-heading text-f13 text-vupth-forest">
+          <Text className="font-heading text-f13 text-vupth-textPrimary">
             {isChecking ? "Verificando..." : "Verificar atualização"}
           </Text>
         </Pressable>

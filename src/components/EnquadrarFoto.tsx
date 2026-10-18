@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal, Image, PanResponder, useWindowDimensions 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import type { FotoEscolhida, Recorte } from "@lib/fotoDePerfil";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   foto: FotoEscolhida | null;
@@ -33,6 +34,7 @@ export function recorteDoVisor(foto: { width: number; height: number }, visor: n
 // enquadrar, e dois botões com texto — Cancelar e Usar foto.
 export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editavel" }: Props) {
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
   const { width: larguraDaTela } = useWindowDimensions();
   const visor = Math.min(larguraDaTela - 32, 320);
   const temTamanho = !!foto?.width && !!foto?.height;
@@ -70,13 +72,16 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
 
   return (
     <Modal visible={!!foto} animationType="fade" onRequestClose={onCancelar} statusBarTranslucent>
-      {/* Fundo forest: icones claros na barra de status (PAR-3). */}
+      {/* Fundo forest: icones claros na barra de status (PAR-3). Esta tela e
+          forest nos DOIS temas (o mesmo hex): o texto branco, o recorte e o anel
+          verde valem nos dois. */}
       <StatusBar style="light" />
       <View
         className="flex-1 bg-vupth-forest items-center justify-between px-4"
         style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}
       >
         <View className="items-center gap-1">
+          {/* tema-fixo: tela forest nos dois temas, branco sobre forest passa nos dois */}
           <Text className="font-heading text-lg text-white">Ajuste a foto</Text>
           <Text className="font-body text-sm text-vupth-greenTint">Arraste para enquadrar no círculo</Text>
         </View>
@@ -104,12 +109,13 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
               height: visor * 2,
               borderRadius: visor,
               borderWidth: visor / 2,
+              // tema-fixo: forest a 60%, escurece os cantos do recorte sobre a foto
               borderColor: "rgba(22,51,0,0.6)",
             }}
           />
           <View
             pointerEvents="none"
-            style={{ position: "absolute", left: 0, top: 0, right: 0, bottom: 0, borderRadius: visor / 2, borderWidth: 2, borderColor: "#9FE870" }}
+            style={{ position: "absolute", left: 0, top: 0, right: 0, bottom: 0, borderRadius: visor / 2, borderWidth: 2, borderColor: cores.green }}
           />
         </View>
 
@@ -118,8 +124,10 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
             testID={`${testID}-recorte-cancelar`}
             accessibilityRole="button"
             onPress={onCancelar}
+            // tema-fixo: botao vazado sobre o forest da tela, branco nos dois temas
             className="flex-1 items-center py-4 rounded-card border-2 border-white active:opacity-70"
           >
+            {/* tema-fixo: idem */}
             <Text className="font-heading text-md text-white">Cancelar</Text>
           </Pressable>
           <Pressable
@@ -128,7 +136,7 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
             onPress={usar}
             className="flex-1 items-center py-4 rounded-card bg-vupth-green active:opacity-80"
           >
-            <Text className="font-heading text-md text-vupth-forest">Usar foto</Text>
+            <Text className="font-heading text-md text-vupth-onGreen">Usar foto</Text>
           </Pressable>
         </View>
       </View>

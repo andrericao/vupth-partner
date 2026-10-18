@@ -4,6 +4,7 @@ import { useTemaStore } from "@store/tema.store";
 import { ESCURO_LIBERADO } from "@theme/liberacao";
 import {
   coresDoTema,
+  interruptorDoTema,
   resolverTema,
   varsDoTema,
   veuDoTema,
@@ -24,6 +25,8 @@ export type TemaAtual = {
   veu: string;
   /** As variaveis CSS que as classes `bg-vupth-*` leem (o layout raiz as aplica). */
   vars: Record<string, string>;
+  /** `<Switch {...interruptor} />`: trilho, bolinha e fundo do iOS no tema. */
+  interruptor: ReturnType<typeof interruptorDoTema>;
 };
 
 /**
@@ -47,6 +50,7 @@ export function useTema(): TemaAtual {
       cores: coresDoTema(tema),
       veu: veuDoTema(tema),
       vars: varsDoTema(tema),
+      interruptor: interruptorDoTema(coresDoTema(tema)),
     }),
     [tema, preferencia],
   );

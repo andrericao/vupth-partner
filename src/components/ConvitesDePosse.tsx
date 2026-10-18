@@ -21,7 +21,7 @@ export function ConvitesDePosse({ convites, ocupadoId, onAceitar, onRecusar }: P
         const ocupado = ocupadoId === c.id;
         return (
           <View key={c.id} className="bg-vupth-accentPeach rounded-card p-4 gap-3">
-            <Text className="font-body text-sm text-vupth-forest">
+            <Text className="font-body text-sm text-vupth-onAccentPeach">
               {c.from_owner_name} quer passar a posse de {c.establishment_name} para você.
             </Text>
             <View className="flex-row gap-2">

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Image as ImageIcon, Trash2 } from "lucide-react-native";
 import { Avatar } from "@components/Avatar";
 import { EnquadrarFoto } from "@components/EnquadrarFoto";
+import { useTema } from "@hooks/useTema";
 import type { OrigemDaFoto, Enquadrar, FotoEscolhida, Recorte } from "@lib/fotoDePerfil";
 
 export type AcaoDaFoto = OrigemDaFoto | "remover";
@@ -38,6 +39,7 @@ export function FotoEditavel({
   titulo = "Foto",
   testID = "foto-editavel",
 }: Props) {
+  const { cores, veu } = useTema();
   const [aberta, setAberta] = useState(false);
   const [pendente, setPendente] = useState<Pendente | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -83,18 +85,19 @@ export function FotoEditavel({
         <Avatar nome={nome} uri={uri} tamanho={tamanho} testID={`${testID}-avatar`} />
         <View
           testID={`${testID}-selo`}
-          className="absolute bg-vupth-forest items-center justify-center border-2 border-white"
+          className="absolute bg-vupth-forest items-center justify-center border-2 border-vupth-background"
           style={{ width: selo, height: selo, borderRadius: selo / 2, right: 0, bottom: 0 }}
         >
-          <Camera size={Math.round(selo * 0.5)} color="#9FE870" />
+          <Camera size={Math.round(selo * 0.5)} color={cores.green} />
         </View>
         {enviando && (
           <View
             testID={`${testID}-enviando`}
             className="absolute items-center justify-center"
+            // tema-fixo: veu forest sobre a foto, igual nos dois temas
             style={{ width: tamanho, height: tamanho, borderRadius: tamanho / 2, backgroundColor: "rgba(22,51,0,0.55)" }}
           >
-            <ActivityIndicator color="#9FE870" />
+            <ActivityIndicator color={cores.green} />
           </View>
         )}
       </Pressable>
@@ -102,14 +105,14 @@ export function FotoEditavel({
         <Text className="mt-2 font-heading text-sm text-vupth-textSecondary">Enviando…</Text>
       ) : (
         <Pressable onPress={() => setAberta(true)} hitSlop={8} testID={`${testID}-editar`} className="mt-2 active:opacity-70">
-          <Text className="font-heading text-sm text-vupth-forest">{uri ? "Editar foto" : "Pôr foto"}</Text>
+          <Text className="font-heading text-sm text-vupth-textPrimary">{uri ? "Editar foto" : "Pôr foto"}</Text>
         </Pressable>
       )}
 
       <Modal visible={aberta} transparent animationType="slide" onRequestClose={() => setAberta(false)}>
         <View className="flex-1 justify-end">
           <Pressable
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: veu }}
             onPress={() => setAberta(false)}
             accessibilityLabel="Fechar opções da foto"
           />
@@ -123,7 +126,7 @@ export function FotoEditavel({
                 onPress={() => escolher(acao)}
                 className="flex-row items-center gap-3 py-3.5 px-3 rounded-card active:bg-vupth-surface"
               >
-                <Icone size={20} color={destrutiva ? "#B3261E" : "#163300"} />
+                <Icone size={20} color={destrutiva ? cores.danger : cores.textPrimary} />
                 <Text className={`font-body text-md flex-1 ${destrutiva ? "text-vupth-danger" : "text-vupth-textPrimary"}`}>
                   {texto}
                 </Text>
