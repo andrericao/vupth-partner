@@ -7,14 +7,19 @@ appId: ${APP_ID}
 - tapOn:
     id: "aba-fila"
     label: "PJ11.01 · toca em aba-fila"
+# O rotulo agora e "Iniciar" (era "Iniciar agora"), igual ao botao "Iniciar" do
+# cartao da fila: o texto sozinho e ambiguo, entao a bateria usa o indice do
+# botao na caixa (Agora não, Não ver mais, Pular hoje, Iniciar).
 - extendedWaitUntil:
-    visible: "Iniciar agora"
+    visible:
+      id: "dialogo-botao-3"
     timeout: 60000
     label: "PJ11.02 · espera a pergunta Hora do ${NOME}"
 - tapOn:
-    text: "Iniciar agora"
-    label: "PJ11.03 · toca em Iniciar agora"
+    id: "dialogo-botao-3"
+    label: "PJ11.03 · toca em Iniciar"
 - extendedWaitUntil:
-    notVisible: "Iniciar agora"
+    notVisible:
+      id: "dialogo-botao-3"
     timeout: 20000
     label: "PJ11.04 · a refeicao comecou"

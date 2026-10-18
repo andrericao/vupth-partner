@@ -8,6 +8,7 @@ import {
   rotuloRefeicaoIniciada,
   duracaoDoAtendimento,
   refeicaoCruzada,
+  tituloDaRefeicao,
   ADIANTAMENTO_MAX_MIN,
 } from "../meals";
 import { MINUTOS_PADRAO } from "../tempoDoServico";
@@ -110,6 +111,24 @@ describe("refeicoesDoDia", () => {
     const janta = { ...meal("18:00Z"), suppressedToday: false };
     const semCampo = meal("20:00Z");
     expect(refeicoesDoDia([almoco, janta, semCampo])).toEqual([janta, semCampo]);
+  });
+});
+
+// A Janta e feminina: `Hora do ${nome}` saia "Hora do Janta" (GUIA_DE_TEXTO §6).
+describe("tituloDaRefeicao", () => {
+  it("almoço é 'Hora do almoço' e janta é 'Hora da janta'", () => {
+    expect(tituloDaRefeicao("Lunch Break")).toBe("Hora do almoço");
+    expect(tituloDaRefeicao("Dinner")).toBe("Hora da janta");
+  });
+
+  it("refeição com outro nome serve aos dois gêneros: 'Hora de lanche'", () => {
+    expect(tituloDaRefeicao("Lanche")).toBe("Hora de lanche");
+  });
+
+  it("o título cabe nas quatro palavras do guia", () => {
+    for (const d of ["Lunch Break", "Dinner Break", "Lanche"]) {
+      expect(tituloDaRefeicao(d).split(" ").length).toBeLessThanOrEqual(4);
+    }
   });
 });
 

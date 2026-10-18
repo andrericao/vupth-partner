@@ -111,8 +111,8 @@ export function usePushRegistration() {
       ]).catch(() => {});
       // notificacao-com-botao (PAR-11): o "Hora de fechar?" com os botoes do aviso.
       Notifications.setNotificationCategoryAsync(CATEGORIA_FECHAMENTO, [
-        { identifier: ACAO_FECHAR_AGORA, buttonTitle: "Fechar agora", options: { opensAppToForeground: true } },
-        { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar atendendo", options: { opensAppToForeground: false } },
+        { identifier: ACAO_FECHAR_AGORA, buttonTitle: "Fechar", options: { opensAppToForeground: true } },
+        { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar", options: { opensAppToForeground: false } },
       ]).catch(() => {});
     } catch {
       // binario sem o modulo nativo de push.
