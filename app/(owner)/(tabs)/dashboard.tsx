@@ -118,7 +118,7 @@ export default function OwnerDashboardScreen() {
       if (code === "ESTABLISHMENT_NOT_READY") {
         confirmar({
           titulo: "Estabelecimento sem profissional pronto",
-          mensagem: getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com serviço cadastrado."),
+          mensagem: getApiErrorMessage(error, "Para abrir, é necessário ter pelo menos um profissional com serviço cadastrado."),
           confirmar: "Adicionar profissional",
         }).then((ok) => {
           if (ok)
@@ -131,7 +131,7 @@ export default function OwnerDashboardScreen() {
         confirmar({
           titulo: "Defina o horário de funcionamento",
           mensagem: getApiErrorMessage(error, "Defina o horário de funcionamento do estabelecimento antes de abrir."),
-          confirmar: "Definir Horário",
+          confirmar: "Definir horário",
         }).then((ok) => {
           if (ok) router.push("/(owner)/establishment-hours" as any);
         });

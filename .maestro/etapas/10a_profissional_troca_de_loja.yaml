@@ -27,8 +27,8 @@ appId: ${APP_ID}
     timeout: 20000
     label: "10.04 · espera ${output.LOJA}"
 - tapOn:
-    text: "Desafiliar do Estabelecimento"
-    label: "10.05 · toca em Desafiliar do Estabelecimento"
+    text: "Sair da loja"
+    label: "10.05 · toca em Sair da loja"
 - runFlow:
     file: ../apoio/confirmar.yaml
     label: "10.06 · confirma Desafiliar"

@@ -111,9 +111,9 @@ export default function OwnerMenuScreen() {
 
   const handleLeaveEstablishment = () => {
     confirmar({
-      titulo: "Sair do Estabelecimento",
+      titulo: "Sair da loja",
       mensagem: "Você será desvinculado deste estabelecimento. Deseja continuar?",
-      confirmar: "Sair do Estabelecimento",
+      confirmar: "Sair da loja",
       destrutivo: true,
     }).then((ok) => {
       if (!ok) return;
@@ -283,7 +283,7 @@ export default function OwnerMenuScreen() {
               {establishment?.id && (
                 <MenuItem
                   icon={LogOut}
-                  label="Sair do estabelecimento"
+                  label="Sair da loja"
                   onPress={handleLeaveEstablishment}
                   last
                 />
