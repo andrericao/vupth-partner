@@ -9,7 +9,13 @@
       "expo-font",
       "expo-router",
       "expo-secure-store",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/marca/v-notificacao-96.png",
+          "color": "#163300"
+        }
+      ],
       "@sentry/react-native/expo",
       [
         "expo-image-picker",
