@@ -115,7 +115,7 @@ export default function MealsScreen() {
       return;
     }
     if (isNaN(duration) || duration <= 0 || duration > 240) {
-      Alert.alert("Duracao inválida", "Informe a duracao em minutos (1 a 240).");
+      Alert.alert("Duração inválida", "Informe a duração em minutos (1 a 240).");
       return;
     }
     setIsSaving(true);
@@ -181,7 +181,7 @@ export default function MealsScreen() {
       return;
     }
     if (isNaN(duration) || duration <= 0 || duration > 240) {
-      Alert.alert("Duracao inválida", "Informe a duracao em minutos (1 a 240).");
+      Alert.alert("Duração inválida", "Informe a duração em minutos (1 a 240).");
       return;
     }
     setIsSaving(true);
@@ -243,7 +243,7 @@ export default function MealsScreen() {
                     </View>
                     <View className="flex-1">
                       <NwInput
-                        label="Duracao (min)"
+                        label="Duração (min)"
                         placeholder="60"
                         value={editDuration}
                         onChangeText={(t) => setEditDuration(t.replace(/\D/g, "").slice(0, 3))}
@@ -336,7 +336,7 @@ export default function MealsScreen() {
                 </View>
                 <View className="flex-1">
                   <NwInput
-                    label="Duracao (min)"
+                    label="Duração (min)"
                     placeholder="60"
                     value={addDuration}
                     onChangeText={(t) => setAddDuration(t.replace(/\D/g, "").slice(0, 3))}
