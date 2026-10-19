@@ -39,12 +39,11 @@ describe("vocabulário fixo: Excluir (conta, loja), nunca Deletar nem Apagar", (
   });
 });
 
-describe("convite de vínculo: o aviso se chama Aceitar, como a linha Vínculo do guia", () => {
-  it("settings-vinculo.tsx", () => {
-    const codigo = ler("app/(professional)/settings-vinculo.tsx");
-    const aviso = codigo.slice(codigo.indexOf("const handleAcceptInvite"), codigo.indexOf("const handleRejectInvite"));
-    expect(aviso).toMatch(/titulo: "Aceitar",[\s\S]*?confirmar: "Aceitar",/);
-    expect(codigo).not.toContain("Aceitar vinculação");
+describe("convite de vínculo: o aviso se chama Aceitar convite, o botão Aceitar", () => {
+  it("avisosDoVinculo.ts", () => {
+    const codigo = ler("src/lib/avisosDoVinculo.ts");
+    expect(codigo).toMatch(/titulo: "Aceitar convite",[\s\S]*?confirmar: "Aceitar",/);
+    expect(ler("app/(professional)/settings-vinculo.tsx")).not.toContain("Aceitar vinculação");
   });
 });
 
