@@ -19,6 +19,7 @@ import { avisar, confirmar } from "@lib/confirmar";
 import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
 import { validatePassword, getPasswordRules, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
+import { useTema } from "@hooks/useTema";
 
 // Esqueci minha senha (S7, backend fatia 1 2026-07-20).
 // Passo 1: e-mail -> POST /auth/forgot-password. Desde 03/10 (fd9a3af) o e-mail
@@ -30,6 +31,7 @@ import { PasswordRules } from "@components/PasswordRules";
 // ⚠️ Enquanto o SMTP (S8) nao estiver configurado no ambiente, o e-mail real
 // nao chega (NoOpEmailSender so loga o codigo no servidor).
 export default function ForgotPasswordScreen() {
+  const { cores } = useTema();
   // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
   // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
   // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
@@ -132,17 +134,17 @@ export default function ForgotPasswordScreen() {
             accessibilityRole="button"
             testID="back-button"
           >
-            <ChevronLeft size={20} color="#163300" />
+            <ChevronLeft size={20} color={cores.textPrimary} />
           </Pressable>
 
           {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
               recuperando a senha, esta criando uma nova. Mesma decisão do app
               do cliente. */}
           <View className="mt-10 gap-2">
-            <Text className="font-display text-f13 tracking-[2px] text-vupth-forest">
+            <Text className="font-display text-f13 tracking-[2px] text-vupth-textPrimary">
               VUPTH
             </Text>
-            <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
+            <Text className="font-display text-f30 leading-[32px] text-vupth-textPrimary">
               {step === "email" ? "Esqueceu a senha?" : "Nova senha"}
             </Text>
             <Text className="font-body text-f15 text-vupth-textSecondary">
@@ -179,7 +181,7 @@ export default function ForgotPasswordScreen() {
             <View className="mt-6">
               <Text className="font-body text-vupth-textSecondary mb-4">
                 Digite o código de 6 dígitos enviado para{" "}
-                <Text className="font-body font-bold text-vupth-forest">
+                <Text className="font-body font-bold text-vupth-textPrimary">
                   {email.trim()}
                 </Text>{" "}
                 e escolha a nova senha. O código vale por 15 minutos.

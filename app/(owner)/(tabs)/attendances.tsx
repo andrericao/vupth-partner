@@ -30,7 +30,7 @@ function AttendanceHistoryCard({
     <View className="bg-vupth-surface p-4 rounded-card mb-3">
       <View className="flex-row justify-between items-center">
         <View className="flex-1">
-          <Text className="font-heading text-vupth-forest">{item.clientName}</Text>
+          <Text className="font-heading text-vupth-textPrimary">{item.clientName}</Text>
           <Text className="font-body text-xs text-vupth-textSecondary">
             Prof: {item.professionalName}
           </Text>
@@ -56,7 +56,7 @@ function AttendanceHistoryCard({
       </Text>
 
       <View className="flex-row justify-end mt-2">
-        <Text className="font-heading text-vupth-forest">R$ {item.totalValue.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">R$ {item.totalValue.toFixed(2)}</Text>
       </View>
       {/* pagamento-pix (contrato 2a2b0ec): o dono tambem marca "Recebi". */}
       <LinhaDoPagamento status={item.payment_status} onRecebi={() => onRecebi(item)} />
@@ -156,13 +156,13 @@ export default function OwnerAttendancesScreen() {
               key={f.key}
               onPress={() => setFilter(f.key)}
               className={`py-2 px-4 rounded-full shrink-0 ${
-                filter === f.key ? "bg-vupth-forest" : "bg-vupth-surface"
+                filter === f.key ? "bg-vupth-selecionado" : "bg-vupth-surface"
               }`}
             >
               <Text
                 numberOfLines={1}
                 className={`font-body text-sm text-center ${
-                  filter === f.key ? "text-vupth-green" : "text-vupth-textSecondary"
+                  filter === f.key ? "text-vupth-onSelecionado" : "text-vupth-textSecondary"
                 }`}
               >
                 {f.label}
@@ -181,7 +181,7 @@ export default function OwnerAttendancesScreen() {
           <View className="bg-vupth-surface p-4 rounded-card mt-4">
             <Text className="font-body text-vupth-danger text-center">{errorMsg}</Text>
             <Pressable onPress={loadHistory} className="mt-2">
-              <Text className="font-body text-sm text-vupth-forest text-center">
+              <Text className="font-body text-sm text-vupth-textPrimary text-center">
                 Tentar novamente
               </Text>
             </Pressable>
@@ -191,10 +191,10 @@ export default function OwnerAttendancesScreen() {
         {loaded && !errorMsg && history.length > 0 && (
           <View className="bg-vupth-greenTint p-3 rounded-card mb-4">
             <View className="flex-row justify-between items-center">
-              <Text className="font-body text-sm text-vupth-forest">
+              <Text className="font-body text-sm text-vupth-onGreenTint">
                 {history.length} atendimento{history.length !== 1 ? "s" : ""}
               </Text>
-              <Text className="font-heading text-vupth-forest">
+              <Text className="font-heading text-vupth-onGreenTint">
                 R$ {totalRevenue.toFixed(2)}
               </Text>
             </View>

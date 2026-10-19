@@ -12,11 +12,13 @@ import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
 import { SENHA_DICA, SENHA_MAX, senhaNoTamanho } from "@lib/passwordValidation";
+import { useTema } from "@hooks/useTema";
 
 // 1a tela convertida p/ NativeWind (Gluestack v2, migracao faseada). A LOGICA e
 // identica ao v1 — so a apresentacao trocou (RN + className + nw/Input +
 // nw/Button). O `Header` segue no v1 (componente compartilhado, migra depois).
 export default function LoginScreen() {
+  const { cores } = useTema();
   // Rodape ancorado precisa do inset REAL: `pb-8` fixo nao conhece a barra
   // de navegacao do aparelho, e em device com barra por gestos o CTA invadia
   // ela (DS1, QA de device). O 32 e o piso pra tela sem barra nenhuma.
@@ -89,14 +91,14 @@ export default function LoginScreen() {
             accessibilityRole="button"
             testID="back-button"
           >
-            <ChevronLeft size={20} color="#163300" />
+            <ChevronLeft size={20} color={cores.textPrimary} />
           </Pressable>
 
           <View className="mt-10 gap-2">
-            <Text className="font-display text-f13 tracking-[2px] text-vupth-forest">
+            <Text className="font-display text-f13 tracking-[2px] text-vupth-textPrimary">
               VUPTH
             </Text>
-            <Text className="font-display text-f30 text-vupth-forest">Entrar</Text>
+            <Text className="font-display text-f30 text-vupth-textPrimary">Entrar</Text>
           </View>
 
           <View className="mt-8">
@@ -129,7 +131,7 @@ export default function LoginScreen() {
               onPress={() => router.push("/(auth)/forgot-password" as any)}
               className="self-end mt-1"
             >
-              <Text className="font-body text-f13 text-vupth-forest font-semibold">
+              <Text className="font-body text-f13 text-vupth-textPrimary font-semibold">
                 Esqueci minha senha
               </Text>
             </Pressable>
@@ -153,7 +155,7 @@ export default function LoginScreen() {
                 Não possui cadastro?
               </Text>
               <Pressable onPress={() => router.push("/(auth)")} testID="go-register">
-                <Text className="font-heading text-f13 text-vupth-forest">
+                <Text className="font-heading text-f13 text-vupth-textPrimary">
                   Criar conta
                 </Text>
               </Pressable>

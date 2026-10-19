@@ -27,7 +27,7 @@ const OPCOES: { valor: Modo; titulo: string; descricao: string }[] = [
 export function ModoDeFuncionamento({ atual, onEscolher, ocupado = false }: Props) {
   return (
     <View className="gap-2">
-      <Text className="font-heading text-base text-vupth-forest">Funcionamento</Text>
+      <Text className="font-heading text-base text-vupth-textPrimary">Funcionamento</Text>
       <Text className="font-body text-xs text-vupth-textSecondary">
         Escolha antes de começar a atender — depois do primeiro cliente da fila de hoje não muda mais.
       </Text>
@@ -42,10 +42,10 @@ export function ModoDeFuncionamento({ atual, onEscolher, ocupado = false }: Prop
             accessibilityLabel={o.titulo}
             testID={`modo-${o.valor}`}
             className={`p-4 rounded-card border-2 active:opacity-80 ${
-              escolhido ? "bg-vupth-greenTint border-vupth-forest" : "bg-vupth-surface border-transparent"
+              escolhido ? "bg-vupth-greenTint border-vupth-onGreenTint" : "bg-vupth-surface border-transparent"
             }`}
           >
-            <Text className="font-heading text-sm text-vupth-forest">{o.titulo}</Text>
+            <Text className={`font-heading text-sm ${escolhido ? "text-vupth-onGreenTint" : "text-vupth-textPrimary"}`}>{o.titulo}</Text>
             <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{o.descricao}</Text>
           </Pressable>
         );

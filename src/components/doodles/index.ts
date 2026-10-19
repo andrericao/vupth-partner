@@ -1,3 +1,4 @@
+import type { NomeDeCor } from "@theme/tema";
 import type { DoodleArtProps } from "./types";
 import { ChillingDoodle } from "./ChillingDoodle";
 import { SittingDoodle } from "./SittingDoodle";
@@ -6,17 +7,18 @@ import { UnboxingDoodle } from "./UnboxingDoodle";
 
 export type { DoodleArtProps };
 
-// Cores em HEX, nao em classe: estes valores entram como `fill` dentro de um
-// <Svg>, e className do NativeWind nao chega la. Mesmo caso do TabBarIcon.
-// A guarda contra divergencia e o teste em `__tests__/doodles.test.ts`, que
-// compara cada hex daqui com o token correspondente no tailwind.config.
-const FOREST = "#163300";
-const GREEN_TINT = "#E2F6D5";
-const ACCENT_BLUE = "#A0E1E1";
-const ACCENT_PEACH = "#FFC091";
-const ACCENT_PINK = "#FFD7EF";
+// As cores entram como `fill` dentro de um <Svg>, onde o className do
+// NativeWind nao chega, entao o registro guarda o NOME da cor do tema e o
+// <Doodle> a resolve com `useTema().cores`: no escuro o acento vira o escuro do
+// mesmo matiz e o traco (forest no claro) vira textPrimary, claro sobre escuro.
+// A guarda e o teste em `__tests__/doodles.test.ts`.
+const GREEN_TINT: NomeDeCor = "greenTint";
+const ACCENT_BLUE: NomeDeCor = "accentBlue";
+const ACCENT_PEACH: NomeDeCor = "accentPeach";
+const ACCENT_PINK: NomeDeCor = "accentPink";
 
-export const DOODLE_INK = FOREST;
+/** O traco: forest no claro (textPrimary), claro sobre escuro no escuro. */
+export const DOODLE_INK: NomeDeCor = "textPrimary";
 
 /**
  * Open Doodles, de Pablo Stanley (CC0). Mesmo autor do Open Peeps que os

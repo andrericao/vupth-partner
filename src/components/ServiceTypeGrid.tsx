@@ -12,6 +12,7 @@ import {
   CircleCheck,
 } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 
 // [#11] Seletor de "Tipo de servico" em grade de chips com icone (no lugar da
 // lista de pilulas de texto). 2 colunas, selecao verde com check. Idioma Verde
@@ -50,6 +51,7 @@ export function ServiceTypeGrid({
   selected: string;
   onSelect: (item: Item) => void;
 }) {
+  const { cores } = useTema();
   return (
     <View className="flex-row flex-wrap justify-between mb-2">
       {items.map((it) => {
@@ -62,12 +64,12 @@ export function ServiceTypeGrid({
             accessibilityState={{ selected: isSel }}
             onPress={() => onSelect(it)}
             className={`w-[48.5%] mb-2.5 relative rounded-card p-3 ${
-              isSel ? "bg-vupth-greenTint border-2 border-vupth-forest" : "bg-vupth-surface"
+              isSel ? "bg-vupth-greenTint border-2 border-vupth-onGreenTint" : "bg-vupth-surface"
             }`}
           >
             {isSel && (
               <View className="absolute top-1.5 right-1.5">
-                <CircleCheck size={16} color="#163300" />
+                <CircleCheck size={16} color={cores.onGreenTint} />
               </View>
             )}
             <View className="flex-row items-center gap-2">
@@ -76,15 +78,15 @@ export function ServiceTypeGrid({
                   dentro dele. */}
               <View
                 className={`w-8 h-8 rounded-lg items-center justify-center ${
-                  isSel ? "bg-vupth-forest" : "bg-vupth-greenTint"
+                  isSel ? "bg-vupth-selecionado" : "bg-vupth-greenTint"
                 }`}
               >
-                <Icon size={18} color={isSel ? "#FFFFFF" : "#163300"} />
+                <Icon size={18} color={isSel ? cores.onSelecionadoBranco : cores.onGreenTint} />
               </View>
               <Text
                 numberOfLines={2}
                 className={`flex-1 font-body text-sm ${
-                  isSel ? "font-bold text-vupth-forest" : "font-medium text-vupth-textSecondary"
+                  isSel ? "font-bold text-vupth-onGreenTint" : "font-medium text-vupth-textSecondary"
                 }`}
               >
                 {it.label}

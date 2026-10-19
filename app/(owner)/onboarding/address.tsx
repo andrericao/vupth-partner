@@ -21,8 +21,10 @@ import { pegarLocalizacao, preencherVazios } from "@lib/localizacao";
 import { mensagemDoEnderecoSalvo, perguntarPosicaoAoAbrir, mensagemDaPerguntaDoPonto } from "@lib/pontoNoMapa";
 import { pontoJaMarcado, marcarPonto } from "@lib/pontoPeloGps";
 import { MapPin } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 
 export default function AddressScreen() {
+  const { cores } = useTema();
   const establishment = useEstablishmentStore((s) => s.establishment);
   const addAddress = useEstablishmentStore((s) => s.addAddress);
   const updateAddress = useEstablishmentStore((s) => s.updateAddress);
@@ -228,7 +230,7 @@ export default function AddressScreen() {
             <NwButton
               title={coordenada ? "Localização registrada ✓" : "Usar minha localização"}
               variant="vupthOutline"
-              icon={<MapPin size={18} color="#163300" />}
+              icon={<MapPin size={18} color={cores.textPrimary} />}
               onPress={usarMinhaLocalizacao}
               isLoading={localizando}
               className="mb-4"
@@ -246,7 +248,7 @@ export default function AddressScreen() {
 
             {cepLoading && (
               <View className="flex-row items-center gap-2 mb-3 -mt-1">
-                <ActivityIndicator size="small" color="#163300" />
+                <ActivityIndicator size="small" color={cores.textPrimary} />
                 <Text className="font-body text-xs text-vupth-textSecondary">
                   Buscando endereço pelo CEP...
                 </Text>

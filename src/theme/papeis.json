@@ -47,6 +47,16 @@
       "claro": "border",
       "escuro": "surfaceAlt",
       "papel": "Bloco do esqueleto de carregamento, sobre o cartão surface. border no escuro é um verde vivo (4,4:1 sobre o fundo) e o esqueleto berraria; surfaceAlt é o segundo nível de bloco e fica discreto."
+    },
+    "trilho": {
+      "claro": "border",
+      "escuro": "surfaceAlt",
+      "papel": "Trilho vazio de uma barra de progresso sobre o cartão surface. Mesmo par do esqueleto: border no escuro é um verde vivo (4,4:1) e o trilho berraria."
+    },
+    "progressoSuave": {
+      "claro": "greenTint",
+      "escuro": "border",
+      "papel": "Preenchimento da barra de progresso de segundo plano (a do perfil, sobre o trilho). greenTint no escuro é #223D0D, que some sobre o trilho surfaceAlt; border (#5C8A3A) aparece e fica abaixo do green da barra principal."
     }
   }
 }

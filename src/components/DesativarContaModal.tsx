@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, View, Text } from "react-native";
 
 import { NwButton } from "@components/nw/Button";
+import { useTema } from "@hooks/useTema";
 import { NwInput } from "@components/nw/Input";
 import { SaibaMais } from "@components/SaibaMais";
 
@@ -22,6 +23,7 @@ type Props = {
 // resto mora no artigo do Suporte (guia de texto, regras 3 e 4); o campo ja se
 // chama "Senha atual", entao a frase mandando digita-la saiu.
 export function DesativarContaModal({ visible, ehDono, isDeactivating, error, onConfirm, onClose }: Props) {
+  const { veu } = useTema();
   const [password, setPassword] = useState("");
 
   function close() {
@@ -36,9 +38,9 @@ export function DesativarContaModal({ visible, ehDono, isDeactivating, error, on
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-        <View className="bg-white rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-forest">Desativar conta</Text>
+      <View className="flex-1 justify-center px-6" style={{ backgroundColor: veu }}>
+        <View className="bg-vupth-painel rounded-card p-6 gap-3">
+          <Text className="font-heading text-lg text-vupth-textPrimary">Desativar conta</Text>
 
           <Text className="font-body text-sm text-vupth-textSecondary">
             Nada é apagado. Para voltar, entre de novo.
@@ -73,7 +75,7 @@ export function DesativarContaModal({ visible, ehDono, isDeactivating, error, on
             onPress={confirm}
             testID="deactivate-account-confirm"
           />
-          <NwButton title="Cancelar" variant="secondary" onPress={close} disabled={isDeactivating} />
+          <NwButton title="Cancelar" variant="secondaryPainel" onPress={close} disabled={isDeactivating} />
         </View>
       </View>
     </Modal>

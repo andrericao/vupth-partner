@@ -228,9 +228,9 @@ export default function MealsScreen() {
               editingId === m.intervalId ? (
                 <View
                   key={m.intervalId}
-                  className="bg-vupth-surface p-3 rounded-md border border-vupth-forest"
+                  className="bg-vupth-surface p-3 rounded-md border border-vupth-textPrimary"
                 >
-                  <Text className="font-heading text-vupth-forest mb-2">{mealName(m.description)}</Text>
+                  <Text className="font-heading text-vupth-textPrimary mb-2">{mealName(m.description)}</Text>
                   <View className="flex-row gap-3">
                     <View className="flex-1">
                       <NwInput
@@ -254,7 +254,7 @@ export default function MealsScreen() {
                   <View className="flex-row gap-2 mt-1">
                     <NwButton
                       title="Cancelar"
-                      variant="secondary"
+                      variant="secondaryPainel"
                       onPress={() => setEditingId(null)}
                       className="flex-1"
                     />
@@ -272,7 +272,7 @@ export default function MealsScreen() {
                   className="flex-row items-center justify-between bg-vupth-surface p-3 rounded-card"
                 >
                   <View className="flex-1">
-                    <Text className="font-heading text-vupth-forest">{mealName(m.description)}</Text>
+                    <Text className="font-heading text-vupth-textPrimary">{mealName(m.description)}</Text>
                     <Text className="font-body text-xs text-vupth-textSecondary">
                       {parseApiTime(m.fixedStartTime) ?? "--:--"} • {m.durationMinutes}min •{" "}
                       {patternLabel(m.recurrencePattern)}
@@ -282,7 +282,7 @@ export default function MealsScreen() {
                     </Text>
                     <View className="flex-row gap-3 mt-1">
                       <Pressable onPress={() => startEdit(m)} accessibilityRole="button" hitSlop={6}>
-                        <Text className="font-body text-xs text-vupth-forest">Editar</Text>
+                        <Text className="font-body text-xs text-vupth-textPrimary">Editar</Text>
                       </Pressable>
                       <Pressable onPress={() => handleRemove(m)} accessibilityRole="button" hitSlop={6}>
                         <Text className="font-body text-xs text-vupth-danger">Remover</Text>
@@ -324,7 +324,7 @@ export default function MealsScreen() {
           {showAdd && (
             <View className="mt-6">
               <View className="h-px bg-vupth-border mb-4" />
-              <Text className="font-heading text-xl text-vupth-forest mb-3">Nova Refeição</Text>
+              <Text className="font-heading text-xl text-vupth-textPrimary mb-3">Nova Refeição</Text>
               <NwInput label="Nome" placeholder="Ex: Almoço" value={addDesc} onChangeText={setAddDesc} />
               <View className="flex-row gap-3">
                 <View className="flex-1">
@@ -358,11 +358,11 @@ export default function MealsScreen() {
                       accessibilityRole="button"
                       accessibilityState={{ selected }}
                       className={`py-1.5 px-3 rounded-full border mb-1 ${
-                        selected ? "bg-vupth-forest border-vupth-forest" : "bg-white border-vupth-border"
+                        selected ? "bg-vupth-selecionado border-vupth-selecionado" : "bg-vupth-background border-vupth-border"
                       }`}
                     >
                       <Text
-                        className={`font-body text-xs ${selected ? "text-white" : "text-vupth-textSecondary"}`}
+                        className={`font-body text-xs ${selected ? "text-vupth-onSelecionadoBranco" : "text-vupth-textSecondary"}`}
                       >
                         {p.label}
                       </Text>

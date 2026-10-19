@@ -31,12 +31,12 @@ export function PagamentosPendentes({
 
   return (
     <View testID="pagamentos-pendentes" className="mt-4 gap-3">
-      <Text className="font-heading text-xl text-vupth-forest">Pagamentos pendentes</Text>
+      <Text className="font-heading text-xl text-vupth-textPrimary">Pagamentos pendentes</Text>
       {itens.map((p) => (
         <View key={p.attendance_id} className="bg-vupth-surface rounded-card p-4 gap-2">
           <View className="flex-row items-center justify-between">
             <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{p.client_name}</Text>
-            <Text className="font-heading text-base text-vupth-forest">{formatarReais(p.amount)}</Text>
+            <Text className="font-heading text-base text-vupth-textPrimary">{formatarReais(p.amount)}</Text>
           </View>
           <View className="flex-row items-center gap-2">
             {p.status === "AWAITING_CONFIRMATION" && (

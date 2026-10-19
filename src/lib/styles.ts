@@ -19,7 +19,8 @@
  * import antigo continuar passando batido.
  */
 export const floatingShadow = {
-  shadowColor: "#163300", // [marca-vupth] $forest
+  // tema-fixo: a sombra e forest nos dois temas; no escuro ela some de proposito, e a separacao vem da surface
+  shadowColor: "#163300",
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08,
   shadowRadius: 16,

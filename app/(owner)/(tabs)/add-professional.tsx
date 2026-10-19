@@ -53,12 +53,12 @@ function PathCard({
       accessibilityLabel={title}
       accessibilityState={{ selected: !!selected }}
       className={`bg-vupth-surface p-4 rounded-card mb-3 border ${
-        selected ? "border-vupth-forest" : "border-transparent"
+        selected ? "border-vupth-textPrimary" : "border-transparent"
       } active:bg-vupth-surface`}
     >
       <View className="flex-row items-center">
         <View className="flex-1">
-          <Text className="font-heading text-vupth-forest">{title}</Text>
+          <Text className="font-heading text-vupth-textPrimary">{title}</Text>
           <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
         </View>
         <NotificationBadge count={badge} testID={testID ? `${testID}-badge` : undefined} />
@@ -245,7 +245,7 @@ export default function AddProfessionalScreen() {
           {/* O formulario do dono-profissional so abre depois da escolha. */}
           {!isProfessional && meAsProfessional && (
             <View className="mt-4">
-              <Text className="font-heading text-base text-vupth-forest mb-2">
+              <Text className="font-heading text-base text-vupth-textPrimary mb-2">
                 Seu perfil profissional
               </Text>
 
@@ -257,7 +257,7 @@ export default function AddProfessionalScreen() {
                 error={isInvalid ? "Nome obrigatório" : ""}
               />
 
-              <Text className="font-heading text-base text-vupth-forest mt-2 mb-2">
+              <Text className="font-heading text-base text-vupth-textPrimary mt-2 mb-2">
                 Especialidade
               </Text>
 

@@ -64,6 +64,8 @@ const DESENHO: Record<string, string> = {
   onSelecionadoBranco: "#FFFFFF", // era text-white sobre o chip forest
   pessego: "#FFC091", // o ponto e o texto pessego (era warning usado como cor)
   esqueleto: "#D7DDD3", // o bloco do esqueleto (era border)
+  trilho: "#D7DDD3", // o trilho vazio da barra de progresso (era border fixo)
+  progressoSuave: "#E2F6D5", // a barra do perfil (era greenTint fixo)
 };
 
 const noTailwind: Record<string, string> = tailwind.theme.extend.colors.vupth;
@@ -192,12 +194,14 @@ describe("contraste de cada variante do botao", () => {
   const VARIANTES = [
     "primary",
     "secondary",
+    "secondaryPainel",
     "danger",
     "outlineBrand",
     "outlineDanger",
     "vupthPrimary",
     "vupthSecondary",
     "vupthOutline",
+    "vupthOutlineNoVerde",
   ];
 
   it.each(VARIANTES)("%s passa no minimo AA (4.5:1)", (v) => {
@@ -220,9 +224,12 @@ describe("contraste de cada variante do botao", () => {
     const texto = hex(nome(LABEL, "text"));
     expect(texto).toBeTruthy();
     const fundoClasse = nome(BOX, "bg");
+    // Sobre o que cada variante transparente assenta: a tela, o cartao e o painel,
+    // menos a que vive so sobre o cartao verde do atendimento.
+    const SOBRE: Record<string, string[]> = { vupthOutlineNoVerde: [escuro.green] };
     const fundos =
       fundoClasse === "transparent"
-        ? [escuro.background, escuro.surface, escuro.painel]
+        ? (SOBRE[v] ?? [escuro.background, escuro.surface, escuro.painel])
         : [hex(fundoClasse) as string];
     for (const fundo of fundos) expect(razao(fundo, texto as string)).toBeGreaterThanOrEqual(4.5);
   });

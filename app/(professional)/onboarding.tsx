@@ -20,6 +20,7 @@ import { useEstablishmentStore, EstablishmentSearchResult } from "@store/establi
 import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { avisar } from "@lib/confirmar";
+import { useTema } from "@hooks/useTema";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -33,6 +34,7 @@ const SPECIALTIES = [
 type Step = "profile" | "path" | "search" | "confirm";
 
 export default function ProfessionalOnboardingScreen() {
+  const { cores } = useTema();
   const [step, setStep] = useState<Step>("profile");
 
   const [name, setName] = useState("");
@@ -189,12 +191,12 @@ export default function ProfessionalOnboardingScreen() {
                       accessibilityState={{ selected: isSelected }}
                       onPress={() => setSpecialty(isSelected ? "" : s.value)}
                       className={`py-2.5 px-4 rounded-md border ${
-                        isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
+                        isSelected ? "bg-vupth-selecionado border-vupth-selecionado" : "bg-vupth-surface border-vupth-border"
                       }`}
                     >
                       <Text
                         className={`font-body text-center ${
-                          isSelected ? "text-white" : "text-vupth-textSecondary"
+                          isSelected ? "text-vupth-onSelecionadoBranco" : "text-vupth-textSecondary"
                         }`}
                       >
                         {s.label}
@@ -277,7 +279,7 @@ export default function ProfessionalOnboardingScreen() {
               testID="search-establishment"
             />
 
-            {isSearching && <ActivityIndicator size="large" color="#163300" />}
+            {isSearching && <ActivityIndicator size="large" color={cores.textPrimary} />}
 
             {searchResults.length > 0 && (
               <View className="mt-2 gap-2">
@@ -289,14 +291,14 @@ export default function ProfessionalOnboardingScreen() {
                     onPress={() => handleSelectEstablishment(estab)}
                     className="bg-vupth-surface py-3 px-4 rounded-card"
                   >
-                    <Text className="font-heading text-vupth-forest">{estab.name}</Text>
+                    <Text className="font-heading text-vupth-textPrimary">{estab.name}</Text>
                     <View className="flex-row gap-2 mt-1">
                       <Text className="font-body text-sm text-vupth-textSecondary">
                         {estab.services?.join(", ")}
                       </Text>
                       <Text
                         className={`font-body text-sm ${
-                          estab.open_status === "OPEN" ? "text-vupth-forest" : "text-vupth-textSecondary"
+                          estab.open_status === "OPEN" ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
                         }`}
                       >
                         {estab.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
@@ -338,7 +340,7 @@ export default function ProfessionalOnboardingScreen() {
 
         {selectedEstablishment && (
           <View className="bg-vupth-surface p-6 rounded-card w-full mb-6">
-            <Text className="font-heading text-xl text-vupth-forest">
+            <Text className="font-heading text-xl text-vupth-textPrimary">
               {selectedEstablishment.name}
             </Text>
             <Text className="font-body text-vupth-textSecondary mt-1">
@@ -346,7 +348,7 @@ export default function ProfessionalOnboardingScreen() {
             </Text>
             <Text
               className={`font-body mt-1 ${
-                selectedEstablishment.open_status === "OPEN" ? "text-vupth-forest" : "text-vupth-textSecondary"
+                selectedEstablishment.open_status === "OPEN" ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
               }`}
             >
               {selectedEstablishment.open_status === "OPEN" ? "ABERTO" : "FECHADO"}
@@ -365,7 +367,7 @@ export default function ProfessionalOnboardingScreen() {
           onPress={() => setStep("search")}
           className="mt-4"
         >
-          <Text className="font-body text-center text-vupth-forest">
+          <Text className="font-body text-center text-vupth-textPrimary">
             Voltar e escolher outro
           </Text>
         </Pressable>

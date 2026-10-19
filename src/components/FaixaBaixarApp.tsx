@@ -52,8 +52,10 @@ export function FaixaBaixarApp({
 
   return (
     <View testID="faixa-baixar-app" className="flex-row items-center gap-3 bg-vupth-forest px-4 py-2.5">
+      {/* tema-fixo: a faixa e forest nos dois temas (mesmo hex) e o branco sobre ela passa nos dois */}
       <Text className="flex-1 font-body text-f13 text-white">O VUPTH Parceiro é melhor no app.</Text>
       <Pressable onPress={continuar} accessibilityRole="button" testID="continuar-na-web">
+        {/* tema-fixo: idem */}
         <Text className="font-body text-f13 text-white">Continuar na web</Text>
       </Pressable>
       <Pressable
@@ -62,7 +64,7 @@ export function FaixaBaixarApp({
         testID="baixar-o-app"
         className="rounded-full bg-vupth-green px-3.5 py-1.5"
       >
-        <Text className="font-heading text-f13 text-vupth-forest">Baixar o app</Text>
+        <Text className="font-heading text-f13 text-vupth-onGreen">Baixar o app</Text>
       </Pressable>
     </View>
   );

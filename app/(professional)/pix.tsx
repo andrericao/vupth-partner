@@ -8,7 +8,7 @@ import { useProfessionalStore } from "@store/professional.store";
 export default function PixScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+    <ScrollView className="flex-1 bg-vupth-background" contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
       <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Chave Pix"

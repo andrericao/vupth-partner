@@ -22,6 +22,7 @@ import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { podeAdicionarLoja } from "@lib/multiLoja";
+import { useTema } from "@hooks/useTema";
 
 // [marca-vupth] Era Ionicons (aproximacao); o Pencil (OWNER · 02 Menu)
 // especifica o glifo exato via icon+library do no ("users", "clipboard-list",
@@ -50,6 +51,7 @@ function MenuItem({
   badge,
   last = false,
 }: MenuItemProps) {
+  const { cores } = useTema();
   return (
     <>
       <Pressable
@@ -58,10 +60,10 @@ function MenuItem({
         accessibilityLabel={label}
         className="flex-row items-center gap-3 px-4 py-3.5 active:bg-vupth-greenTint"
       >
-        <Icon size={19} color="#163300" />
+        <Icon size={19} color={cores.textPrimary} />
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Text className="font-body text-sm font-semibold text-vupth-forest">{label}</Text>
+            <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{label}</Text>
             {dot && <PendingDot />}
           </View>
           {hint && (
@@ -72,7 +74,7 @@ function MenuItem({
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID={`menu-badge-${label.toLowerCase()}`} />
         )}
-        <ChevronRight size={16} color="#454745" />
+        <ChevronRight size={16} color={cores.textSecondary} />
       </Pressable>
       {!last && <View className="h-px bg-vupth-border" />}
     </>
@@ -92,6 +94,7 @@ function Grupo({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function OwnerMenuScreen() {
+  const { cores } = useTema();
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
@@ -167,11 +170,11 @@ export default function OwnerMenuScreen() {
                       acumula os dois papeis) — lucide por consistencia com o
                       resto do menu, já que os outros ícones deixaram de ser
                       Ionicons. */}
-                  <ArrowLeftRight size={19} color="#163300" />
-                  <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
+                  <ArrowLeftRight size={19} color={cores.onGreenTint} />
+                  <Text className="flex-1 font-body text-sm font-semibold text-vupth-onGreenTint">
                     Atender como profissional
                   </Text>
-                  <ChevronRight size={16} color="#163300" />
+                  <ChevronRight size={16} color={cores.onGreenTint} />
                 </View>
               </Pressable>
             )}

@@ -32,7 +32,7 @@ export function ConvitePorEmail({ pendentes, onConvidar, onCancelar, enviando = 
 
   return (
     <View className="mt-6 p-4 rounded-card bg-vupth-surface">
-      <Text className="font-heading text-sm text-vupth-forest">Não achou? Convide por e-mail</Text>
+      <Text className="font-heading text-sm text-vupth-textPrimary">Não achou? Convide por e-mail</Text>
       <Text className="font-body text-xs text-vupth-textSecondary mt-0.5 mb-3">
         A pessoa recebe um e-mail. Quando criar a conta de profissional, o convite aparece para ela aceitar.
       </Text>
@@ -59,7 +59,7 @@ export function ConvitePorEmail({ pendentes, onConvidar, onCancelar, enviando = 
           <Text className="font-heading text-xs text-vupth-textSecondary">Esperando criar a conta</Text>
           {pendentes.map((c) => (
             <View key={c.id} className="flex-row items-center justify-between">
-              <Text className="font-body text-sm text-vupth-forest flex-1" numberOfLines={1}>
+              <Text className="font-body text-sm text-vupth-textPrimary flex-1" numberOfLines={1}>
                 {c.email}
               </Text>
               <NwButton

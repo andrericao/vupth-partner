@@ -24,11 +24,11 @@ export function SelectService({ value, onValueChange }: Props) {
               accessibilityState={{ selected: isSelected }}
               onPress={() => onValueChange?.(type.value)}
               className={`py-2.5 px-4 rounded-md border ${
-                isSelected ? "bg-vupth-forest border-vupth-forest" : "bg-vupth-surface border-vupth-border"
+                isSelected ? "bg-vupth-selecionado border-vupth-selecionado" : "bg-vupth-surface border-vupth-border"
               }`}
             >
               <Text
-                className={`font-body text-center ${isSelected ? "text-white" : "text-vupth-textPrimary"}`}
+                className={`font-body text-center ${isSelected ? "text-vupth-onSelecionadoBranco" : "text-vupth-textPrimary"}`}
               >
                 {type.label}
               </Text>

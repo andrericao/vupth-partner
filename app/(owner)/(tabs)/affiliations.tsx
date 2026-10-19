@@ -133,7 +133,7 @@ export default function OwnerAffiliationsScreen() {
                 key={aff.id}
                 className="bg-vupth-surface p-4 rounded-md border border-vupth-warning mb-2"
               >
-                <Text className="font-heading text-vupth-forest">{aff.professionalName}</Text>
+                <Text className="font-heading text-vupth-textPrimary">{aff.professionalName}</Text>
                 <Text className="font-body text-xs text-vupth-textSecondary mt-1">
                   {aff.type === "REQUEST" ? "Solicitou vinculação" : "Convite enviado"}
                 </Text>
@@ -166,7 +166,7 @@ export default function OwnerAffiliationsScreen() {
                 className="flex-row items-center justify-between py-3 px-4 bg-vupth-surface rounded-card mb-2"
               >
                 <View className="flex-1">
-                  <Text className="font-body text-vupth-forest">{aff.professionalName}</Text>
+                  <Text className="font-body text-vupth-textPrimary">{aff.professionalName}</Text>
                   {!!diaDoVinculo(aff.resolvedAt) && (
                     <Text className="font-body text-xs text-vupth-textSecondary">
                       em {diaDoVinculo(aff.resolvedAt)}
@@ -180,7 +180,7 @@ export default function OwnerAffiliationsScreen() {
                 >
                   <Text
                     className={`font-body text-xs ${
-                      aff.status === "ACCEPTED" ? "text-vupth-forest" : "text-vupth-danger"
+                      aff.status === "ACCEPTED" ? "text-vupth-onGreenTint" : "text-vupth-danger"
                     }`}
                   >
                     {aff.status === "ACCEPTED"

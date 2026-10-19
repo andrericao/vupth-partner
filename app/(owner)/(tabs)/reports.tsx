@@ -99,13 +99,13 @@ export default function OwnerReportsScreen() {
               key={p.key}
               onPress={() => setPeriod(p.key)}
               className={`py-2 px-4 rounded-full shrink-0 ${
-                period === p.key ? "bg-vupth-forest" : "bg-vupth-surface"
+                period === p.key ? "bg-vupth-selecionado" : "bg-vupth-surface"
               }`}
             >
               <Text
                 numberOfLines={1}
                 className={`font-body text-sm text-center ${
-                  period === p.key ? "text-vupth-green" : "text-vupth-textSecondary"
+                  period === p.key ? "text-vupth-onSelecionado" : "text-vupth-textSecondary"
                 }`}
               >
                 {p.label}
@@ -148,7 +148,7 @@ export default function OwnerReportsScreen() {
                 value={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
               />
               <View className="flex-1 bg-vupth-surface p-4 rounded-card">
-                <Text className="font-display text-base text-vupth-forest">
+                <Text className="font-display text-base text-vupth-textPrimary">
                   {report?.topProfessional ?? "—"}
                 </Text>
                 <Text className="font-body text-xs text-vupth-textSecondary mt-1">destaque</Text>
@@ -157,7 +157,7 @@ export default function OwnerReportsScreen() {
 
             {avisoSemSplit(report?.attendancesWithoutSplit) && (
               <View className="bg-vupth-warning p-3 rounded-card mt-3">
-                <Text className="font-body text-xs text-vupth-forest">
+                <Text className="font-body text-xs text-vupth-onAccentPeach">
                   {avisoSemSplit(report?.attendancesWithoutSplit)}
                 </Text>
               </View>
@@ -183,13 +183,13 @@ export default function OwnerReportsScreen() {
                     <View key={p.id} className="bg-vupth-surface p-4 rounded-card">
                       <View className="flex-row justify-between items-center">
                         <View className="flex-1">
-                          <Text className="font-heading text-vupth-forest">{p.name}</Text>
+                          <Text className="font-heading text-vupth-textPrimary">{p.name}</Text>
                           <Text className="font-body text-xs text-vupth-textSecondary">
                             {nomeDaEspecialidade(p.specialty) || "Sem especialidade"}
                           </Text>
                         </View>
                         <View className="items-end">
-                          <Text className="font-heading text-vupth-forest">
+                          <Text className="font-heading text-vupth-textPrimary">
                             R$ {r.revenue.toFixed(2)}
                           </Text>
                           {/* O que o profissional recebeu, sem as Taxas Vupth

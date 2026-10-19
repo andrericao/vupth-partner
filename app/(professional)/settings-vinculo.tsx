@@ -179,14 +179,14 @@ export default function SettingsVinculoScreen() {
         </View>
 
         {invites.length > 0 && (
-          <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-forest gap-2">
-            <Text className="font-heading text-vupth-forest">
+          <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-onGreenTint gap-2">
+            <Text className="font-heading text-vupth-onGreenTint">
               Convites de vinculação
             </Text>
             {invites.map((inv) => (
-              <View key={inv.id} className="bg-white p-3 rounded-md border border-vupth-border">
+              <View key={inv.id} className="bg-vupth-background p-3 rounded-md border border-vupth-border">
                 <Text className="font-body text-sm text-vupth-textSecondary">Convite de</Text>
-                <Text className="font-heading text-vupth-forest mb-2">
+                <Text className="font-heading text-vupth-textPrimary mb-2">
                   {inv.establishmentName ?? "Estabelecimento"}
                 </Text>
                 <View className="flex-row gap-2">
@@ -223,7 +223,7 @@ export default function SettingsVinculoScreen() {
           ) : (
             <Text
               className={`font-heading mt-1 ${
-                professional.establishment_name ? "text-vupth-forest" : "text-vupth-textSecondary"
+                professional.establishment_name ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
               }`}
             >
               {professional.establishment_name ?? "Não vinculado"}

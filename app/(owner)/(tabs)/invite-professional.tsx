@@ -199,7 +199,7 @@ export default function InviteProfessionalScreen() {
                   className="flex-row items-center justify-between bg-vupth-surface p-3 rounded-card"
                 >
                   <View className="flex-1">
-                    <Text className="font-heading text-vupth-forest">
+                    <Text className="font-heading text-vupth-textPrimary">
                       {p.name ?? "Profissional"}
                       {p.nickname ? ` (${p.nickname})` : ""}
                     </Text>
@@ -208,7 +208,7 @@ export default function InviteProfessionalScreen() {
                     </Text>
                   </View>
                   {invited ? (
-                    <Text className="font-body text-sm text-vupth-forest">Convite enviado</Text>
+                    <Text className="font-body text-sm text-vupth-textPrimary">Convite enviado</Text>
                   ) : (
                     <NwButton
                       title="Convidar"
