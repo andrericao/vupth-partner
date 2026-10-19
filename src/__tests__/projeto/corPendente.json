@@ -5,7 +5,7 @@
   },
   "app/(auth)/index.tsx": {
     "hex": 2,
-    "textoForest": 5,
+    "textoForest": 4,
     "branco": 1
   },
   "app/(auth)/login.tsx": {
@@ -145,10 +145,6 @@
     "hex": 6
   },
   "src/components/ExpedienteCard.tsx": {
-    "textoForest": 1
-  },
-  "src/components/ExporPosicao.tsx": {
-    "hex": 2,
     "textoForest": 1
   },
   "src/components/LinhaComInterruptor.tsx": {
