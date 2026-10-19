@@ -39,6 +39,15 @@ describe("vocabulário fixo: Excluir (conta, loja), nunca Deletar nem Apagar", (
   });
 });
 
+describe("convite de vínculo: o aviso se chama Aceitar, como a linha Vínculo do guia", () => {
+  it("settings-vinculo.tsx", () => {
+    const codigo = ler("app/(professional)/settings-vinculo.tsx");
+    const aviso = codigo.slice(codigo.indexOf("const handleAcceptInvite"), codigo.indexOf("const handleRejectInvite"));
+    expect(aviso).toMatch(/titulo: "Aceitar",[\s\S]*?confirmar: "Aceitar",/);
+    expect(codigo).not.toContain("Aceitar vinculação");
+  });
+});
+
 describe("quem é dono escolhe em duas palavras: Também atendo / Só dono", () => {
   it("also-professional.tsx", () => {
     const codigo = ler("app/(owner)/onboarding/also-professional.tsx");
