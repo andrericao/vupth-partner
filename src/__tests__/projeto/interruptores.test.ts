@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 
+import { coresDoTema, interruptorDoTema } from "../../theme/tema";
+
 // DS7 (validacao de 17/10): a posicao na fila tinha o proprio trilho —
 // #C9CBC9, cor que nao existe na paleta, e forest quando ligado — enquanto os
 // outros tres interruptores usavam border/green. O mesmo gesto, duas cores no
@@ -25,10 +27,20 @@ describe("interruptores", () => {
     expect(comSwitch.length).toBeGreaterThanOrEqual(3);
   });
 
+  // O trilho vem de um de dois lugares: o literal da marca ou `useTema().interruptor`
+  // (que acompanha o tema). O que nao pode e um terceiro, como o #C9CBC9 que a
+  // posicao na fila tinha.
   it.each(comSwitch.map((f) => [path.relative(RAIZ, f), f]))(
     "%s usa o trilho da marca: border desligado, green ligado",
     (_nome, arquivo) => {
-      expect(fs.readFileSync(arquivo, "utf8")).toContain('{ false: "#D7DDD3", true: "#9FE870" }');
+      const fonte = fs.readFileSync(arquivo, "utf8");
+      const literal = fonte.includes('{ false: "#D7DDD3", true: "#9FE870" }');
+      const doTema = /useTema\(\)/.test(fonte) && /\{\.\.\.interruptor\}/.test(fonte);
+      expect(literal || doTema).toBe(true);
     }
   );
+
+  it("o interruptor do tema claro e o trilho da marca: border desligado, green ligado", () => {
+    expect(interruptorDoTema(coresDoTema("claro")).trackColor).toEqual({ false: "#D7DDD3", true: "#9FE870" });
+  });
 });
