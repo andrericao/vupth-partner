@@ -506,7 +506,7 @@ export default function ProfessionalQueueScreen() {
       mensagem:
         "Ninguém novo entra; quem está, é atendido.",
       artigo: "statusEFila",
-      confirmar: "Fechar fila",
+      confirmar: "Fechar",
       // Fechar a fila e rotina do dia e da pra reabrir (a nota do NwButton): e um
       // aviso de ATENCAO, nao uma acao destrutiva. O primario fica verde, como ja
       // esta no "Fechar fila" das Opcoes da fila.

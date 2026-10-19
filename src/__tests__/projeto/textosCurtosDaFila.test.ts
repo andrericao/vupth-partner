@@ -31,6 +31,16 @@ describe("fechar fila: uma linha de corpo e o Saiba mais, nas duas telas", () =>
     expect(codigo).toMatch(/confirmarComArtigo\(\{\s*titulo: "Fechar fila"[\s\S]*?artigo: "statusEFila"/);
     expect(codigo).not.toContain("Ninguém novo entra na sua fila");
   });
+
+  // O título já diz "Fechar fila"; repetir no botão obrigava a ler as duas
+  // linhas iguais para achar o verbo (regra 1 do guia: botão de uma palavra).
+  it.each([
+    ["a fila", FILA],
+    ["as opções da fila", OPCOES],
+  ])("%s: o botão é só Fechar, e o título segue Fechar fila", (_nome, codigo) => {
+    expect(codigo).toMatch(/titulo: "Fechar fila"[^}]*?confirmar: "Fechar",/);
+    expect(codigo).not.toMatch(/confirmar: "Fechar fila"/);
+  });
 });
 
 describe("pergunta da refeição: Iniciar / Agora não / Pular hoje", () => {
