@@ -8,7 +8,7 @@ import { LinhaComInterruptor } from "../LinhaComInterruptor";
 import { ReadinessFaixa } from "../ReadinessFaixa";
 import { ServerWarmup } from "../ServerWarmup";
 import { StatCard } from "../brand/StatCard";
-import { TabBarIcon } from "../TabBarIcon";
+import { TabBarIcon, divisorDaBarraDeAbas } from "../TabBarIcon";
 import { ownerCompletion } from "@lib/completion";
 import { useTemaStore } from "@store/tema.store";
 import { BRANCO, coresDoTema, interruptorDoTema, type Tema } from "@theme/tema";
@@ -254,5 +254,21 @@ describe("no claro as cores sao as de antes da conversao", () => {
     const { toJSON } = render(<ServerWarmup />);
     expect(tokenDaClasse(toJSON() as never, "bg")).toBe("background");
     expect(coresDoTema("claro").background).toBe("#FFFFFF");
+  });
+});
+
+// Escolha da Design (19/10): no escuro a barra, da cor da tela e sem sombra visivel, ficava sem
+// limite; ganha uma linha discreta (surfaceAlt, 1,5:1). No claro a sombra ja separa.
+describe("divisor da barra de abas", () => {
+  it("no claro nao ha linha", () => {
+    expect(divisorDaBarraDeAbas(false, coresDoTema("claro"))).toEqual({ borderTopWidth: 0, borderTopColor: "transparent" });
+  });
+
+  it("no escuro e uma linha de 1px em surfaceAlt, discreta: entre 1,3:1 e 2:1 com a tela", () => {
+    const c = coresDoTema("escuro");
+    const linha = divisorDaBarraDeAbas(true, c);
+    expect(linha).toEqual({ borderTopWidth: 1, borderTopColor: "#1F3F0B" });
+    expect(razao(linha.borderTopColor, c.background)).toBeGreaterThanOrEqual(1.3);
+    expect(razao(linha.borderTopColor, c.background)).toBeLessThan(2);
   });
 });

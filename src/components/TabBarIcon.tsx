@@ -4,6 +4,7 @@ import { House, Users, List, Hourglass, ChartColumn, User } from "lucide-react-n
 import type { ComponentType } from "react";
 import { EASE, movimentoReduzido } from "@lib/motion";
 import { useTema } from "@hooks/useTema";
+import type { Cores } from "@theme/tema";
 
 /**
  * Icone da tab bar. Os glifos sao os que o Pencil nomeia nos componentes
@@ -88,6 +89,21 @@ function usePilula(focused: boolean) {
     };
   }, [focused, v]);
   return { opacity: v, transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }] };
+}
+
+/**
+ * A linha que separa a barra do conteudo. No CLARO nao ha linha: a sombra da barra
+ * (abaixo) ja a descola da tela. No ESCURO a sombra some contra o fundo e a barra,
+ * da mesma cor da tela, ficava sem limite; entra uma linha de 1px em `surfaceAlt`
+ * (1,5:1 com a tela: marca o limite sem pesar, como a sombra faz no claro).
+ * `border` serviria (4,4:1), mas no escuro e um verde vivo que gritaria mais que a
+ * sombra do claro. Escolha da Design, 19/10. As duas barras (dono e profissional)
+ * usam esta funcao para nao divergirem.
+ */
+export function divisorDaBarraDeAbas(escuro: boolean, cores: Cores) {
+  return escuro
+    ? { borderTopWidth: 1, borderTopColor: cores.surfaceAlt }
+    : { borderTopWidth: 0, borderTopColor: "transparent" };
 }
 
 // [new-design] Sombra superior sutil da tab bar. E uma das POUCAS sombras
