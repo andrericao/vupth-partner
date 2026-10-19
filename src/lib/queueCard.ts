@@ -62,11 +62,14 @@ export function formatServices(services: { customName: string }[]): string {
 /**
  * O que acontece ao marcar "Nao chegou" — regra do backend de 26/09
  * (e328629): atraso 1 e 2 trocam de lugar com o proximo; no 3o o cliente leva
- * multa e vai para o fim da fila. O valor nao aparece: a multa e do app (DEC-83). O app nao sabe em qual atraso o
- * cliente esta, entao diz a regra inteira.
+ * multa e vai para o fim da fila. O valor nao aparece: a multa e do app (DEC-83).
+ * O app nao sabe em qual atraso o cliente esta, e a caixa diz so o que vale
+ * sempre — a troca de lugar. O 3o atraso, a multa e o fim da fila moram no
+ * "Saiba mais" (artigo de atrasos), em vez de entupir a linha (guia de texto,
+ * regras 3 e 4). O nome do cliente fica no titulo.
  */
-export function mensagemDoAtraso(nome: string): string {
-  return `${nome} troca de lugar com o próximo e continua na fila. No 3º atraso, vai para o fim da fila e leva multa. Continuar?`;
+export function mensagemDoAtraso(): string {
+  return "Troca de lugar com o próximo.";
 }
 
 /**

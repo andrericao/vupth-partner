@@ -64,6 +64,16 @@ describe("FotoEditavel", () => {
     expect(screen.getByText("Foto da loja")).toBeTruthy();
   });
 
+  // validacao de 17/10: o titulo da folha e rotulo, como o da folha de status.
+  it("o titulo da folha e rotulo: text-xs, textSecondary, a esquerda", () => {
+    render(<FotoEditavel nome="Ana" onEscolher={jest.fn()} rotulo="Pôr foto da loja" titulo="Foto da loja" />);
+    fireEvent.press(screen.getByText("Pôr foto"));
+    const classes: string = screen.getByText("Foto da loja").props.className;
+    expect(classes).toContain("text-xs");
+    expect(classes).toContain("text-vupth-textSecondary");
+    expect(classes).not.toContain("text-center");
+  });
+
   it("enquadrar abre o 'Ajuste a foto'; Usar foto responde e mostra Enviando… ate subir", async () => {
     let terminar!: () => void;
     let resposta: unknown;

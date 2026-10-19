@@ -1,6 +1,7 @@
 import { Alert } from "react-native";
 
 import { escolherOpcao, confirmar, avisar, confirmarComSaibaMais } from "../confirmar";
+import { useDialogoStore } from "@store/dialogo.store";
 
 // 🔴 DEFEITO REAL (issue #25, teste manual de 30/08): "botao de remover servico
 // nao funciona" e "o botao de aceitar novos nao funciona" — os dois na WEB.
@@ -430,5 +431,123 @@ describe("confirmarComSaibaMais()", () => {
         confirmImpl: () => true,
       })
     ).resolves.toBe(true);
+  });
+});
+
+// modais-de-alerta (design-modais, 17/10): o aviso com `tipo` ganha faixa e
+// selo no DialogoVupth. O Alert.alert nao tem onde carregar o tipo, entao o
+// aviso tipado fala direto com a caixa do app.
+describe("confirmar() e avisar() com tipo", () => {
+  const dialogo = (indice: number) => jest.fn().mockResolvedValue(indice);
+
+  it("confirmar com tipo abre a caixa do app com o tipo, sem passar pelo Alert", async () => {
+    const dialogoImpl = dialogo(1);
+    const alertImpl = jest.fn();
+
+    const ok = await confirmar(
+      { titulo: "Fechar fila", mensagem: "Ninguém novo entra.", confirmar: "Fechar", tipo: "atencao" },
+      { plataforma: "android", alertImpl: alertImpl as any, dialogoImpl, hostMontado: () => true }
+    );
+
+    expect(ok).toBe(true);
+    expect(alertImpl).not.toHaveBeenCalled();
+    expect(dialogoImpl).toHaveBeenCalledWith({
+      titulo: "Fechar fila",
+      mensagem: "Ninguém novo entra.",
+      tipo: "atencao",
+      selo: undefined,
+      botoes: [
+        { texto: "Cancelar", estilo: "cancel" },
+        { texto: "Fechar", estilo: "default" },
+      ],
+    });
+  });
+
+  it("cancelar (indice 0) resolve false; o selo e o destrutivo seguem junto", async () => {
+    const dialogoImpl = dialogo(0);
+    const ok = await confirmar(
+      { titulo: "Sair da fila", mensagem: "R$ 3,00.", confirmar: "Sair", destrutivo: true, tipo: "dinheiro", selo: "Multa" },
+      { plataforma: "ios", dialogoImpl, hostMontado: () => true }
+    );
+    expect(ok).toBe(false);
+    expect(dialogoImpl.mock.calls[0][0]).toMatchObject({
+      selo: "Multa",
+      botoes: [expect.anything(), { texto: "Sair", estilo: "destructive" }],
+    });
+  });
+
+  it("sem tipo, o caminho e o do Alert de sempre", async () => {
+    const dialogoImpl = dialogo(1);
+    const alert = jest.fn((_t, _m, botoes: any[]) => botoes[1].onPress());
+    const ok = await confirmar(
+      { titulo: "Remover", mensagem: "Tem certeza?" },
+      { plataforma: "ios", alertImpl: alert as any, dialogoImpl, hostMontado: () => true }
+    );
+    expect(ok).toBe(true);
+    expect(dialogoImpl).not.toHaveBeenCalled();
+  });
+
+  it("sem a caixa do app montada, o aviso sai pelo Alert sem tipo — nunca fica mudo", async () => {
+    const dialogoImpl = dialogo(1);
+    const alert = jest.fn((_t, _m, botoes: any[]) => botoes[1].onPress());
+    const ok = await confirmar(
+      { titulo: "Fechar fila", mensagem: "x", tipo: "atencao" },
+      { plataforma: "android", alertImpl: alert as any, dialogoImpl, hostMontado: () => false }
+    );
+    expect(ok).toBe(true);
+    expect(dialogoImpl).not.toHaveBeenCalled();
+    expect(alert).toHaveBeenCalled();
+  });
+
+  it("na web o tipo nao existe (o shim nao desenha faixa): segue o caminho da web", async () => {
+    const dialogoImpl = dialogo(1);
+    const confirmImpl = jest.fn(() => true);
+    const ok = await confirmar(
+      { titulo: "Fechar fila", mensagem: "x", tipo: "atencao" },
+      { plataforma: "web", confirmImpl, dialogoImpl, hostMontado: () => true }
+    );
+    expect(ok).toBe(true);
+    expect(dialogoImpl).not.toHaveBeenCalled();
+  });
+
+  it("avisar com tipo: um botao so, na caixa do app", async () => {
+    const dialogoImpl = dialogo(0);
+    await avisar(
+      { titulo: "Pedido enviado", mensagem: "Ana responde até 14:35.", tipo: "informacao", ok: "Ok" },
+      { plataforma: "ios", dialogoImpl, hostMontado: () => true }
+    );
+    expect(dialogoImpl).toHaveBeenCalledWith({
+      titulo: "Pedido enviado",
+      mensagem: "Ana responde até 14:35.",
+      tipo: "informacao",
+      selo: undefined,
+      botoes: [{ texto: "Ok", estilo: "default" }],
+    });
+  });
+
+  it("avisar sem a caixa montada cai no Alert e o fluxo segue", async () => {
+    const alert = jest.fn((_t, _m, botoes: any[]) => botoes[0].onPress());
+    await expect(
+      avisar(
+        { titulo: "Erro", mensagem: "x", tipo: "erro" },
+        { plataforma: "android", alertImpl: alert as any, hostMontado: () => false }
+      )
+    ).resolves.toBeUndefined();
+    expect(alert).toHaveBeenCalled();
+  });
+
+  it("de ponta a ponta com a loja de verdade: o pedido chega na fila com o tipo", async () => {
+    useDialogoStore.getState().fechar();
+    useDialogoStore.getState().marcarHost(true);
+
+    const p = confirmar(
+      { titulo: "Fechar fila", mensagem: "x", confirmar: "Fechar", tipo: "atencao" },
+      { plataforma: "android" }
+    );
+    expect(useDialogoStore.getState().atual).toMatchObject({ titulo: "Fechar fila", tipo: "atencao" });
+    useDialogoStore.getState().responder(1);
+    await expect(p).resolves.toBe(true);
+
+    useDialogoStore.getState().marcarHost(false);
   });
 });

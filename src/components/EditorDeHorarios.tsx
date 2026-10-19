@@ -185,7 +185,7 @@ export function EditorDeHorarios({
         ))}
         {primeiroAberto && (
           <NwButton
-            title={`Usar o horário de ${nomeDoDia(primeiroAberto.day).toLowerCase()} nos dias abertos`}
+            title={`Repetir ${nomeDoDia(primeiroAberto.day).toLowerCase()}`}
             variant="vupthOutline"
             onPress={() =>
               setSemana((s) =>

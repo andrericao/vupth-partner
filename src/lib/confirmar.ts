@@ -1,5 +1,8 @@
 import { Alert, Platform } from "react-native";
 
+import { abrirDialogo, useDialogoStore, type BotaoDialogo } from "@store/dialogo.store";
+import type { TipoDeDialogo } from "@lib/tipoDeDialogo";
+
 // A flag que o shim do web crava ao instalar (web-shims/alert.js) — mesmo nome
 // do Front-Client, para os dois apps poderem ler o estado um do outro em
 // qualquer investigacao conjunta.
@@ -37,13 +40,46 @@ type Texto = {
   cancelar?: string;
   /** Pinta o confirmar como destrutivo no iOS. */
   destrutivo?: boolean;
+  /**
+   * Identidade do aviso no DialogoVupth: faixa + selo (design-modais, 17/10).
+   * So o nativo desenha; na web (shim) e sem o host montado o aviso sai sem
+   * tipo, como sempre saiu. Destrutivo e para o que NAO tem volta: o primario
+   * de um aviso com tipo e verde, e o vermelho so aparece com `destrutivo`.
+   */
+  tipo?: TipoDeDialogo;
+  /** Troca o rotulo do selo ("Multa" em vez de "Pagamento"). */
+  selo?: string;
 };
 
 type Deps = {
   plataforma?: typeof Platform.OS;
   alertImpl?: typeof Alert.alert;
   confirmImpl?: (texto: string) => boolean;
+  /** Teste: quem desenha o aviso com tipo (default: o DialogoVupth, pela loja). */
+  dialogoImpl?: typeof abrirDialogo;
+  /** Teste: o DialogoVupth esta montado? (default: a loja diz). */
+  hostMontado?: () => boolean;
 };
+
+/**
+ * O caminho do aviso COM tipo. O `Alert.alert` nao tem onde carregar o tipo, e
+ * a interceptacao dele (alertNativo) so repassa titulo e botoes; entao o aviso
+ * tipado fala direto com a loja do DialogoVupth. Sem host montado (ou na web)
+ * devolve null e quem chama segue pelo Alert, sem tipo: feio e visivel e
+ * melhor que um aviso que ninguem desenha.
+ */
+function pelaCaixaComTipo(
+  texto: { titulo: string; mensagem: string; tipo?: TipoDeDialogo; selo?: string },
+  deps: Deps,
+  plataforma: typeof Platform.OS
+): ((botoes: BotaoDialogo[]) => Promise<number>) | null {
+  if (!texto.tipo || plataforma === "web") return null;
+  const hostMontado = deps.hostMontado ?? (() => useDialogoStore.getState().hostMontado);
+  if (!hostMontado()) return null;
+  const abrir = deps.dialogoImpl ?? abrirDialogo;
+  return (botoes) =>
+    abrir({ titulo: texto.titulo, mensagem: texto.mensagem, tipo: texto.tipo, selo: texto.selo, botoes });
+}
 
 export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
   const plataforma = deps.plataforma ?? Platform.OS;
@@ -62,6 +98,16 @@ export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
       // Bloqueado (iframe com sandbox, extensao): na duvida, NAO executa.
       return Promise.resolve(false);
     }
+  }
+
+  const comTipo = pelaCaixaComTipo(texto, deps, plataforma);
+  if (comTipo) {
+    // O indice 1 e o confirmar; o DialogoVupth mostra o primario em cima, mas
+    // devolve sempre o indice da lista original.
+    return comTipo([
+      { texto: rotuloCancelar, estilo: "cancel" },
+      { texto: rotuloOk, estilo: texto.destrutivo ? "destructive" : "default" },
+    ]).then((i) => i === 1);
   }
 
   const alertImpl = deps.alertImpl ?? Alert.alert;
@@ -115,12 +161,17 @@ type TextoAviso = {
   mensagem: string;
   /** Rotulo do botao unico (default "OK"). */
   ok?: string;
+  /** Faixa + selo no DialogoVupth (ver `Texto.tipo`). */
+  tipo?: TipoDeDialogo;
+  selo?: string;
 };
 
 type DepsAviso = {
   plataforma?: typeof Platform.OS;
   alertImpl?: typeof Alert.alert;
   alertaWebImpl?: (texto: string) => void;
+  dialogoImpl?: typeof abrirDialogo;
+  hostMontado?: () => boolean;
 };
 
 /**
@@ -152,6 +203,11 @@ export function avisar(texto: TextoAviso, deps: DepsAviso = {}): Promise<void> {
       // Caixa bloqueada nao pode virar navegacao perdida.
     }
     return Promise.resolve();
+  }
+
+  const comTipo = pelaCaixaComTipo(texto, deps, plataforma);
+  if (comTipo) {
+    return comTipo([{ texto: texto.ok ?? "OK", estilo: "default" }]).then(() => undefined);
   }
 
   const alertImpl = deps.alertImpl ?? Alert.alert;

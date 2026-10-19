@@ -164,7 +164,7 @@ export default function EstablishmentDataScreen() {
           </Text>
         </View>
 
-        {/* No fim e discreto: apagar a loja e raro e irreversivel. */}
+        {/* No fim e discreto: excluir a loja e raro e irreversivel. */}
         <Pressable
           onPress={() => {
             setErroApagar(null);
@@ -172,10 +172,10 @@ export default function EstablishmentDataScreen() {
           }}
           className="mt-10 self-center py-2"
           accessibilityRole="button"
-          accessibilityLabel="Apagar a loja"
+          accessibilityLabel="Excluir loja"
           testID="delete-store"
         >
-          <Text className="font-heading text-xs text-vupth-danger">Apagar a loja</Text>
+          <Text className="font-heading text-xs text-vupth-danger">Excluir loja</Text>
         </Pressable>
       </View>
 

@@ -4,7 +4,7 @@ import { resumoDoExpediente, type DiaDeExpediente } from "@lib/expediente";
 
 // Expediente nos relatorios do dono e do profissional (S4/S5; contrato do
 // Backend de 03/10). Hoje mostra a faixa HH:MM–HH:MM; Semana/Mes, o total
-// trabalhado. Sem dado (backend antigo ou dia antes do deploy): placeholder.
+// trabalhado. Sem dado (backend antigo ou dia antes do deploy): estado vazio.
 // Migrado p/ NativeWind (v2).
 export function ExpedienteCard({
   periodo,
@@ -25,9 +25,10 @@ export function ExpedienteCard({
           )}
         </View>
       ) : (
-        // [marca-vupth] Placeholder no textSecondary: a paleta nao tem um tom
-        // "muted" abaixo dele.
-        <Text className="font-heading text-xl text-vupth-textSecondary">--:-- – --:--</Text>
+        // Sem dado e estado VAZIO, nao erro (DESIGN.md §4; validacao de 17/10):
+        // "--:-- – --:--" parecia um horario que falhou ao carregar. Texto calmo,
+        // sem botao — nao ha nada que a pessoa possa fazer para ter expediente.
+        <Text className="font-body text-sm text-vupth-textSecondary">Sem expediente no período</Text>
       )}
     </View>
   );

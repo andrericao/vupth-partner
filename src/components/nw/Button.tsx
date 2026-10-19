@@ -58,9 +58,12 @@ type Props = Omit<PressableProps, "children"> & {
 // do aparelho — nunca desligamos allowFontScaling), altura cravada CORTA o
 // rotulo dentro do botao. Com altura minima o desenho fica identico no
 // tamanho padrao e cresce em vez de truncar. Ver DS4 no HANDOFF_DESIGN.
-const BASE = "min-h-[54px] rounded-full items-center justify-center px-4";
+// `active:scale-[0.97]`: o toque encolhe o botao um pouco, alem de perder opacidade.
+// Escala estatica no pressionado, sem `transition-*`: as transicoes do NativeWind
+// dependem do Reanimated, que o app nao importa em lugar nenhum.
+const BASE = "min-h-[54px] rounded-full items-center justify-center px-4 active:scale-[0.97]";
 // O ghost e o unico que NAO e pilula alta: raio 8, caixa de 10/12 (do desenho).
-const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
+const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center active:scale-[0.97]";
 
 // [marca-vupth] `primary` E o Button/Primary do Pencil: fundo brand-green com
 // texto forest. Na primeira passada ele ficou forest+branco — troca conservadora

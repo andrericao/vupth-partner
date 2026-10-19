@@ -169,7 +169,7 @@ appId: ${APP_ID}
     file: ../apoio/responder_pagamento.yaml
     env:
       RESPOSTA: "Ainda não"
-      FIM: "Atendimento concluído, aguardando o pagamento.*"
+      FIM: "Concluído. Pagamento pendente."
     label: "07.17a · pix · Ainda nao: fica aguardando o pagamento"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE_ENCAIXE}
@@ -222,7 +222,7 @@ appId: ${APP_ID}
     text: "Recebi de ${output.CLIENTE_ENCAIXE}"
     label: "07.23b · pix · toca em Recebi do encaixe"
 - tapOn:
-    text: "Sim, recebi"
+    id: "dialogo-botao-1"
     label: "07.23c · pix · confirma"
 - runFlow:
     file: ../apoio/pular_forma.yaml
