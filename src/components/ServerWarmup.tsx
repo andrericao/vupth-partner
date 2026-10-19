@@ -3,6 +3,7 @@ import { Animated, Easing, View, Text, useWindowDimensions } from "react-native"
 import { NwButton } from "@components/nw/Button";
 import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { EASE, MS, movimentoReduzido } from "@lib/motion";
+import { useTema } from "@hooks/useTema";
 
 // Tela do portao de readiness (ver src/lib/readiness.ts): o app espera a API
 // responder antes de liberar login e cadastro.
@@ -22,6 +23,12 @@ import { EASE, MS, movimentoReduzido } from "@lib/motion";
 // (o splash do Partner nao tem V, entao ele nunca aparece pela metade de outro
 // jeito), pulsa so de 1 a 0,92 e SAI inteiro para a esquerda quando o portao
 // abre. Nao ha mais minimo de splash: o unico tempo fixo e a varredura.
+//
+// Tema (DEC-75): a abertura SEGUE o tema. O fundo e o `background` e, no escuro,
+// o V passa a green (design.html#tokens-escuros: "o V e o icone em verde, so no
+// escuro", 12,25:1 sobre o background). O layout raiz so mostra esta tela depois
+// de ler o tema do aparelho, entao quem escolheu o escuro nao ve um clarao
+// branco. No claro nada muda: o V segue o PNG como esta.
 
 const LOGO_V = require("../../assets/logo-v.png");
 const V = { width: 96, height: 80 };
@@ -37,6 +44,10 @@ type Props = {
 
 export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props) {
   const { width } = useWindowDimensions();
+  const { escuro, cores } = useTema();
+  // O PNG do V e uma forma so, com transparencia: `tintColor` o repinta inteiro.
+  // Forest sobre o fundo escuro seria 1:1, entao la o V e green.
+  const tinta = escuro ? { tintColor: cores.green } : null;
   const [varredura] = useState(() => new Animated.Value(0));
   const [deslize] = useState(() => new Animated.Value(0));
   const [pulso] = useState(() => new Animated.Value(0));
@@ -114,7 +125,7 @@ export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props)
   }, [pronto, entrou, failed, saida]);
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6">
+    <View className="flex-1 items-center justify-center bg-vupth-background px-6">
       <View className="items-center gap-6 w-full">
         {failed ? (
           <Animated.Image
@@ -122,7 +133,7 @@ export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props)
             resizeMode="contain"
             accessibilityLabel="Vupth"
             testID="abertura-v"
-            style={V}
+            style={[V, tinta]}
           />
         ) : (
           <Animated.View
@@ -156,7 +167,7 @@ export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props)
                 <Animated.Image
                   source={LOGO_V}
                   resizeMode="contain"
-                  style={[V, { transform: [{ translateX: deslize.interpolate({ inputRange: [0, 1], outputRange: [-14, 0] }) }] }]}
+                  style={[V, tinta, { transform: [{ translateX: deslize.interpolate({ inputRange: [0, 1], outputRange: [-14, 0] }) }] }]}
                 />
               </Animated.View>
             </Animated.View>
@@ -165,7 +176,7 @@ export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props)
         {failed && (
           <>
             <View className="items-center gap-2">
-              <Text className="font-heading text-lg text-vupth-forest text-center">
+              <Text className="font-heading text-lg text-vupth-textPrimary text-center">
                 Não foi possível abrir o app
               </Text>
               <Text className="font-body text-sm text-vupth-textSecondary text-center">

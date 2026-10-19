@@ -15,7 +15,8 @@ import path from "path";
 // reprova. Converteu um grupo de telas? Rode
 //   VUPTH_ATUALIZAR_BASELINE=1 npx jest corQueNaoTrocaDeTema
 // que a lista baixa sozinha (ela nunca sobe: so grava se nada piorou).
-// Quando a lista esvaziar, apague o arquivo.
+// Quando a lista esvaziar, deixe `{}`: o teste le o arquivo (apaga-lo derruba a
+// suite) e ele continua barrando hex novo.
 //
 // `corAguardando.json` e o que PRs ainda abertas vao acrescentar quando entrarem
 // (cada arquivo diz qual PR): sem ele a primeira a ser mesclada deixaria a

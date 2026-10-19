@@ -26,6 +26,9 @@ type Props = {
   flex?: number;
 };
 
+// O texto sobre o verde-marca e o par dele (`onGreen`) e sobre o cartao surface
+// e `textPrimary`: forest como texto, no escuro, seria forest sobre o forest da
+// surface (1:1).
 export function StatCard({ label, value, hero = false, flex }: Props) {
   return (
     <View
@@ -37,11 +40,13 @@ export function StatCard({ label, value, hero = false, flex }: Props) {
       {/* Trocar o período (Hoje, 7 dias, 30 dias) troca o número: o salto mostra
           que mudou, e não que a tela travou. */}
       <NumeroComSalto valor={value}>
-        <Text className="font-display text-f26 text-vupth-forest">{value}</Text>
+        <Text className={`font-display text-f26 ${hero ? "text-vupth-onGreen" : "text-vupth-textPrimary"}`}>
+          {value}
+        </Text>
       </NumeroComSalto>
       <Text
         className={`font-body text-xs mt-1 ${
-          hero ? "text-vupth-forest" : "text-vupth-textSecondary"
+          hero ? "text-vupth-onGreen" : "text-vupth-textSecondary"
         }`}
       >
         {label}

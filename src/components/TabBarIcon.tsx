@@ -3,6 +3,7 @@ import { Animated, StyleSheet, View } from "react-native";
 import { House, Users, List, Hourglass, ChartColumn, User } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { EASE, movimentoReduzido } from "@lib/motion";
+import { useTema } from "@hooks/useTema";
 
 /**
  * Icone da tab bar. Os glifos sao os que o Pencil nomeia nos componentes
@@ -46,10 +47,8 @@ const ICONS = {
 
 export type TabIconName = keyof typeof ICONS;
 
-const ACTIVE = "#163300"; // [marca-vupth] $forest — nao aceita token, so hex
-const INACTIVE = "#454745"; // $text-secondary (era #9CA3AF, cinza generico)
-
 export function TabBarIcon({ name, focused }: { name: TabIconName; focused: boolean }) {
+  const { cores } = useTema();
   const Icon = ICONS[name];
   const pilula = usePilula(focused);
   // A pilula ocupa espaco SEMPRE (o inativo so nao a pinta), senao a linha de
@@ -61,7 +60,10 @@ export function TabBarIcon({ name, focused }: { name: TabIconName; focused: bool
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, pilula]}>
         <View className="flex-1 bg-vupth-greenTint rounded-full" />
       </Animated.View>
-      <Icon size={22} color={focused ? ACTIVE : INACTIVE} />
+      {/* O icone ativo repousa sobre a pilula greenTint: o par dele e `onGreenTint`
+          (forest no claro, green no escuro). O inativo repousa na barra
+          (`background`) e e o `textSecondary`, como o rotulo. */}
+      <Icon size={22} color={focused ? cores.onGreenTint : cores.textSecondary} />
     </View>
   );
 }
@@ -91,6 +93,7 @@ function usePilula(focused: boolean) {
 // [new-design] Sombra superior sutil da tab bar. E uma das POUCAS sombras
 // legitimas: a tab bar flutua sobre o conteudo (ver `floatingShadow`).
 export const tabBarShadow = {
+  // tema-fixo: sombra forest a 6%, o mesmo hex nos dois temas (como em lib/styles.ts); no escuro ela quase nao aparece sobre o fundo
   shadowColor: "#163300",
   shadowOffset: { width: 0, height: -4 },
   shadowOpacity: 0.06,

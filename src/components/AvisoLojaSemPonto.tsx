@@ -4,6 +4,7 @@ import { MapPin, ArrowRight } from "lucide-react-native";
 import { router } from "expo-router";
 import { situacaoDoPonto } from "@lib/pontoNoMapa";
 import { useEntradaDoAviso } from "@hooks/useEntradaDoAviso";
+import { useTema } from "@hooks/useTema";
 
 // loja-sem-coordenada (S25, contrato BAK d215d5a). Sem ponto no mapa a loja
 // some da busca por proximidade, e ate aqui o dono nao tinha como saber.
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function AvisoLojaSemPonto({ endereco, onReler }: Props) {
+  const { cores } = useTema();
   const situacao = situacaoDoPonto(endereco);
   const releituras = useRef(0);
   const entrada = useEntradaDoAviso(situacao === "sem-ponto");
@@ -44,17 +46,19 @@ export function AvisoLojaSemPonto({ endereco, onReler }: Props) {
   if (situacao !== "sem-ponto") return null;
 
   // Animated.View nao resolve className do NativeWind: o movimento fica na
-  // casca e o visual no View de dentro.
+  // casca e o visual no View de dentro. Sobre o pessego o texto e o icone sao o
+  // par dele (`onAccentPeach`): forest no claro, o proprio pessego no escuro,
+  // onde o fundo vira um marrom e forest sobre ele daria 1,1:1.
   return (
     <Animated.View testID="aviso-loja-sem-ponto" style={entrada}>
       <View className="bg-vupth-accentPeach rounded-card p-4 mt-4 gap-2">
         <View className="flex-row items-center gap-2">
-          <MapPin size={16} color="#163300" />
-          <Text className="font-display text-sm text-vupth-forest flex-1">
+          <MapPin size={16} color={cores.onAccentPeach} />
+          <Text className="font-display text-sm text-vupth-onAccentPeach flex-1">
             Sua loja não aparece para quem busca por perto
           </Text>
         </View>
-        <Text className="font-body text-xs text-vupth-forest">
+        <Text className="font-body text-xs text-vupth-onAccentPeach">
           Não achamos o endereço no mapa. Na loja, use a localização do aparelho — ou confira o endereço.
         </Text>
         <Pressable
@@ -63,8 +67,8 @@ export function AvisoLojaSemPonto({ endereco, onReler }: Props) {
           hitSlop={8}
           className="flex-row items-center gap-1 self-start"
         >
-          <Text className="font-heading text-sm text-vupth-forest">Usar localização</Text>
-          <ArrowRight size={16} color="#163300" />
+          <Text className="font-heading text-sm text-vupth-onAccentPeach">Usar localização</Text>
+          <ArrowRight size={16} color={cores.onAccentPeach} />
         </Pressable>
       </View>
     </Animated.View>

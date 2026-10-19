@@ -6,6 +6,7 @@ import type { Completion } from "@lib/completion";
 import { hasBasicPending } from "@lib/completion";
 import { useUiStore } from "@store/ui.store";
 import { EASE, MS, movimentoReduzido, useEntrada } from "@lib/motion";
+import { useTema } from "@hooks/useTema";
 
 // Faixa de prontidao na Home (dono e profissional). Mesma FORMA da faixa
 // "Em fila" do app do cliente, porem em tom AMBAR (aviso, nao urgencia).
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
+  const { cores } = useTema();
   const dismissed = useUiStore((s) => s.faixaDismissed);
   const dismiss = useUiStore((s) => s.dismissFaixa);
   const n = completion.basic.pending;
@@ -45,6 +47,9 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
     // `style` no Animated e `className` no View de dentro: o repositório só usa
     // `style` em componentes Animated, e a interop do NativeWind nao esta
     // garantida neles (o jest nao pega, porque so repassa a prop).
+    // Texto, icone e barra sobre o greenTint sao o par dele (`onGreenTint`): forest
+    // no claro, green no escuro, onde o greenTint vira #223D0D e um forest de texto
+    // ou de preenchimento da barra sumiria nele.
     <Animated.View style={entrada}>
     <View className="bg-vupth-greenTint rounded-card p-4 mt-4 gap-2.5">
       <Pressable
@@ -53,11 +58,11 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
         accessibilityLabel="Completar cadastro"
       >
         <View className="flex-row items-center justify-between">
-          <Text className="font-display text-sm text-vupth-forest">
+          <Text className="font-display text-sm text-vupth-onGreenTint">
             {n === 1 ? "Falta 1 passo para abrir" : `Faltam ${n} passos para abrir`}
           </Text>
           <View className="flex-row items-center gap-2">
-            <Text className="font-mono text-xs text-vupth-forest">
+            <Text className="font-mono text-xs text-vupth-onGreenTint">
               {feitos} de {total}
             </Text>
             <Pressable
@@ -66,19 +71,19 @@ export function ReadinessFaixa({ completion, targetRoute, goalNoun }: Props) {
               accessibilityLabel="Fechar aviso"
               hitSlop={8}
             >
-              <X size={16} color="#163300" />
+              <X size={16} color={cores.onGreenTint} />
             </Pressable>
           </View>
         </View>
 
         {/* A barra e o ponto: progresso feito ao lado do que falta. */}
-        <View className="h-1.5 rounded-full bg-vupth-forest/15 mt-2.5 overflow-hidden">
+        <View className="h-1.5 rounded-full bg-vupth-onGreenTint/15 mt-2.5 overflow-hidden">
           <Animated.View style={{ height: "100%", width: progresso.interpolate({ inputRange: [0, 100], outputRange: ["0%", "100%"] }) }}>
-            <View className="h-full w-full rounded-full bg-vupth-forest" />
+            <View className="h-full w-full rounded-full bg-vupth-onGreenTint" />
           </Animated.View>
         </View>
 
-        <Text className="font-body text-f11 font-semibold text-vupth-forest mt-2.5">
+        <Text className="font-body text-f11 font-semibold text-vupth-onGreenTint mt-2.5">
           {passos} para {goalNoun}.
         </Text>
       </Pressable>
