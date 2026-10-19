@@ -110,7 +110,7 @@ export default function SettingsVinculoScreen() {
   const handleAcceptInvite = (inv: any) => {
     const nome = inv.establishmentName ?? "este estabelecimento";
     confirmar({
-      titulo: "Aceitar vinculação",
+      titulo: "Aceitar",
       mensagem: `Deseja se vincular a ${nome}? Você passará a atender por este estabelecimento.`,
       confirmar: "Aceitar",
     }).then((ok) => {

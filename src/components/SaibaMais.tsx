@@ -15,7 +15,7 @@ export function SaibaMais({ artigo, testID = "saiba-mais" }: { artigo: Artigo; t
       hitSlop={8}
       className="self-start"
     >
-      <Text className="font-heading text-xs text-vupth-forest underline">Saiba mais</Text>
+      <Text className="font-heading text-xs text-vupth-textPrimary underline">Saiba mais</Text>
     </Pressable>
   );
 }
