@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
+import { EntradaSuave } from "@components/EntradaSuave";
+import { LinhaQueSeMove } from "@components/LinhaQueSeMove";
 import { View, Text, Pressable, ScrollView, Alert, RefreshControl, BackHandler, Modal, Platform } from "react-native";
 import { router } from "expo-router";
 import { ChevronRight, Info, Ellipsis, UserPlus, Users, Clock, UtensilsCrossed, Star, RotateCw } from "lucide-react-native";
@@ -16,6 +18,7 @@ import { useIntervalStore, mealName, type Interval } from "@store/interval.store
 import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
+import { confirmarComArtigo } from "@lib/confirmarComArtigo";
 import { perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
 import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
@@ -23,7 +26,7 @@ import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuAction
 import { ratingLabel } from "@lib/rating";
 import {
   mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN,
-  refeicoesDoDia, rotuloRefeicaoIniciada, refeicaoCruzada, duracaoDoAtendimento,
+  refeicoesDoDia, rotuloRefeicaoIniciada, refeicaoCruzada, duracaoDoAtendimento, tituloDaRefeicao,
 } from "@lib/meals";
 import { queueMenuCount } from "@lib/notifications";
 import { NotificationBadge } from "@components/NotificationBadge";
@@ -92,9 +95,9 @@ function ServingCard({
           <LiveDot size={7} color={isPaused ? "#FFFFFF" : cores.onGreen} pulsing={!isPaused} />
           <Text
             // tema-fixo: branco no cartao pausado, igual nos dois temas
-            className={`font-heading text-f10 tracking-widest ${isPaused ? "text-white" : "text-vupth-onGreen"}`}
+            className={`font-heading text-xs ${isPaused ? "text-white" : "text-vupth-onGreen"}`}
           >
-            {isPaused ? "ATENDIMENTO PAUSADO" : "ATENDENDO AGORA"}
+            {isPaused ? "Pausado" : "Atendendo"}
           </Text>
         </View>
         <View className="flex-row items-center gap-2">
@@ -409,18 +412,18 @@ export default function ProfessionalQueueScreen() {
       // sao QUATRO opcoes, e o `window.confirm` da web so faz duas. O nativo
       // fica intacto; na web degradamos para a pergunta principal.
       //
-      // O que se perde na web: "Nao ver mais" e "Nao almocar". Nenhuma das duas
+      // O que se perde na web: "Nao ver mais" e "Pular hoje". Nenhuma das duas
       // some do app — a primeira e reversivel em Configuracoes > Refeicoes, e a
       // refeicao segue no menu com dot e contagem. Quando existir o modal da
       // marca (pergunta aberta no PR #27 do design), as quatro voltam a caber.
       if (Platform.OS === "web") {
         const iniciar = await confirmar({
-          titulo: `Hora do ${mealName(due.description)}`,
+          titulo: tituloDaRefeicao(due.description),
           mensagem:
             count > 0
               ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
-              : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
-          confirmar: "Iniciar agora",
+              : `${due.durationMinutes} min. A fila espera.`,
+          confirmar: "Iniciar",
           cancelar: "Agora não",
         });
         if (iniciar) handleStartMeal(due);
@@ -428,18 +431,18 @@ export default function ProfessionalQueueScreen() {
       }
 
       Alert.alert(
-        `Hora do ${mealName(due.description)}`,
+        tituloDaRefeicao(due.description),
         count > 0
           ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
-          : `Iniciar ${mealName(due.description)} agora (${due.durationMinutes}min)?`,
+          : `${due.durationMinutes} min. A fila espera.`,
         [
           { text: "Agora não", style: "cancel" },
           // "Nao ver mais" desliga o popup DE VEZ (Andre 2026-07-20: "sem
           // intromissao na tela"). Depois disso o aviso fica so no menu — dot +
           // contagem. Reversivel em Configuracoes > Refeicoes.
           { text: "Não ver mais", onPress: () => disableMealNudge() },
-          { text: "Não almocar", style: "destructive", onPress: () => handleSkipMeal(due) },
-          { text: "Iniciar agora", onPress: () => handleStartMeal(due) },
+          { text: "Pular hoje", style: "destructive", onPress: () => handleSkipMeal(due) },
+          { text: "Iniciar", onPress: () => handleStartMeal(due) },
         ]
       );
     })();
@@ -509,12 +512,16 @@ export default function ProfessionalQueueScreen() {
     // rodava e a chave voltava sozinha — foi o "esse botao nao funciona" da
     // issue #25. Fechar a fila e justamente o lado que pede confirmacao, entao
     // na web SO o lado destrutivo estava morto: reabrir funcionava.
-    const ok = await confirmar({
+    const ok = await confirmarComArtigo({
       titulo: "Fechar fila",
       mensagem:
-        "Ninguém novo entra na sua fila. Quem já está continua sendo atendido; ao terminar o último você fica indisponível (e a loja fecha se você for o último). Continuar?",
+        "Ninguém novo entra; quem está, é atendido.",
+      artigo: "statusEFila",
       confirmar: "Fechar fila",
-      destrutivo: true,
+      // Fechar a fila e rotina do dia e da pra reabrir (a nota do NwButton): e um
+      // aviso de ATENCAO, nao uma acao destrutiva. O primario fica verde, como ja
+      // esta no "Fechar fila" das Opcoes da fila.
+      tipo: "atencao",
     });
     if (ok) aplicarAceitando(false);
   };
@@ -605,11 +612,11 @@ export default function ProfessionalQueueScreen() {
   };
 
   // pagamento-pix (adendos 1a0616c e 62295f1): todo Finalizar passa por aqui.
-  // Pendente -> "O pagamento foi efetuado?"; a resposta vai no finish. A
+  // Pendente -> "Recebeu o pagamento?"; a resposta vai no finish. A
   // mensagem do fim so aparece quando houve a pergunta.
   const finalizarComPagamento = async (attendanceId: string) => {
     const recebido = await perguntarPagamento(attendanceId);
-    // forma-de-recebimento: so quem disse "Sim, recebi" e so se quiser.
+    // forma-de-recebimento: so quem disse "Recebi" e so se quiser.
     const forma = recebido === true ? await perguntarForma() : undefined;
     const status = await finishAttendance(attendanceId, recebido, forma);
     const mensagem = recebido === undefined ? null : mensagemDoFim(status);
@@ -654,9 +661,9 @@ export default function ProfessionalQueueScreen() {
         const nome = mealName(cruzada.description);
         const adiantar = await confirmar({
           titulo: `${nome} às ${parseApiTime(cruzada.fixedStartTime)}`,
-          mensagem: `O atendimento de ${att.clientName} (~${duracao}min) passa do horário do ${nome.toLowerCase()}. Adiantar: ${nome.toLowerCase()} agora (${cruzada.durationMinutes}min) e ${att.clientName} depois. Adiar: atende ${att.clientName} e o ${nome.toLowerCase()} vem em seguida.`,
+          mensagem: `${att.clientName} (~${duracao} min) passa da hora.`,
           confirmar: `Adiantar ${nome.toLowerCase()}`,
-          cancelar: "Adiar",
+          cancelar: `Adiar ${nome.toLowerCase()}`,
         });
         if (adiantar) handleStartMeal(cruzada);
         else doStart();
@@ -679,9 +686,10 @@ export default function ProfessionalQueueScreen() {
   // "Nao chegou": o cliente da vez cai uma posicao e vira ATRASADO (repetivel,
   // sem teto). O proximo passa a ser o 1o.
   const confirmLate = async (att: AttendanceInQueue) => {
-    const ok = await confirmar({
-      titulo: "Cliente não chegou",
-      mensagem: mensagemDoAtraso(att.clientName),
+    const ok = await confirmarComArtigo({
+      titulo: `${att.clientName} não chegou`,
+      mensagem: mensagemDoAtraso(),
+      artigo: "atraso",
     });
     if (ok) handleAction(() => markLate(att.id));
   };
@@ -1022,13 +1030,19 @@ export default function ProfessionalQueueScreen() {
                 Lista de Espera ({waitingList.length})
               </Titulo>
               {waitingList.map((att, idx) => (
-                <QueueRow
-                  key={att.id}
-                  attendance={att}
-                  position={idx + 1}
-                  isFirst={idx === 0}
-                  onMenu={() => setMenuTarget(att)}
-                />
+                // O cartão que chega entra com fade e deslize; quem já estava
+                // montado não reanima a cada atualização da fila (a chave é o id).
+                // O atraso escalona só a primeira tela de cartões.
+                <EntradaSuave key={att.id} atraso={Math.min(idx, 5) * 50}>
+                  <LinhaQueSeMove>
+                    <QueueRow
+                      attendance={att}
+                      position={idx + 1}
+                      isFirst={idx === 0}
+                      onMenu={() => setMenuTarget(att)}
+                    />
+                  </LinhaQueSeMove>
+                </EntradaSuave>
               ))}
             </View>
           )}

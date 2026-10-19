@@ -15,7 +15,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { api, getApiErrorMessage } from "@lib/api";
-import { vinculoNaLojaNova } from "@lib/lojaPropria";
+import { vinculoNaLojaNova, textosDaEscolhaDeLoja } from "@lib/lojaPropria";
 
 const SPECIALTIES = [
   { label: "Barbeiro", value: "BARBER" },
@@ -47,7 +47,8 @@ export default function AlsoProfessionalScreen() {
   // OUTRA loja, pergunta — trocar tira a pessoa da fila de la. Antes a troca
   // era silenciosa.
   const nomeDaLojaNova = useEstablishmentStore((s) => s.establishment?.name);
-  const [lojaAtual, setLojaAtual] = useState<string | null>(null);
+  // `{ nome }` e nao so o nome: perguntar sem saber o nome ainda e perguntar.
+  const [lojaAtual, setLojaAtual] = useState<{ nome: string | null } | null>(null);
   const [trocando, setTrocando] = useState(false);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function AlsoProfessionalScreen() {
         const caminho = vinculoNaLojaNova(atual, establishmentId);
 
         if (caminho === "perguntar") {
-          setLojaAtual(data.establishment_name ?? data.establishmentName ?? "a loja de agora");
+          setLojaAtual({ nome: data.establishment_name ?? data.establishmentName ?? null });
           return;
         }
         if (caminho === "vincular") {
@@ -162,28 +163,29 @@ export default function AlsoProfessionalScreen() {
   };
 
   if (alreadyProfessional && lojaAtual) {
+    const textos = textosDaEscolhaDeLoja(lojaAtual.nome, nomeDaLojaNova);
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-1 pb-6 px-4">
           <ScreenHeader
             title="Onde você vai atender?"
-            subtitle={`Hoje você atende em ${lojaAtual}.`}
+            subtitle={textos.subtitulo}
             onBack={() => router.replace("/(owner)/dashboard" as any)}
           />
-          <Text className="font-body text-sm text-vupth-textSecondary mb-6">
-            Para atender {nomeDaLojaNova ? `em ${nomeDaLojaNova}` : "na sua loja nova"}, você deixa de atender em {lojaAtual}.
-            Dá para decidir depois, em Perfil → Vínculo.
-          </Text>
+          <Text className="font-body text-sm text-vupth-textSecondary mb-6">{textos.corpo}</Text>
+          {/* Escolha binaria: as duas metades sao pilulas da mesma altura, uma
+              primaria e uma secundaria — vupthOutline faria a segunda parecer
+              de outro app. */}
           <View className="gap-3">
             <NwButton
-              title={nomeDaLojaNova ? `Atender em ${nomeDaLojaNova}` : "Atender na loja nova"}
+              title={textos.atender}
               onPress={atenderNaLojaNova}
               isLoading={trocando}
               testID="atender-na-loja-nova"
             />
             <NwButton
-              title={`Continuar em ${lojaAtual}`}
-              variant="vupthOutline"
+              title={textos.continuar}
+              variant="secondary"
               onPress={() => router.replace("/(owner)/dashboard" as any)}
               testID="continuar-na-loja-atual"
             />
@@ -237,13 +239,13 @@ export default function AlsoProfessionalScreen() {
             </View>
 
             <NwButton
-              title="Sim, também serei profissional"
+              title="Também atendo"
               onPress={handleYes}
               isLoading={isLoading}
             />
 
             <NwButton
-              title="Não, apenas proprietário"
+              title="Só dono"
               onPress={handleNo}
               variant="secondary"
               className="mt-2"

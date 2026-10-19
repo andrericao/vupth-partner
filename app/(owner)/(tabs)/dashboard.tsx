@@ -26,6 +26,7 @@ import { AvisoLojaSemPonto } from "@components/AvisoLojaSemPonto";
 import type { ProfessionalWithQueue } from "@lib/types";
 import { confirmar } from "@lib/confirmar";
 import { avisoDeAberturaSemProfissional } from "@lib/abertura";
+import { confirmarComArtigo } from "@lib/confirmarComArtigo";
 import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
 import { linkDaLoja, mensagemDeDivulgacao } from "@lib/linkPublico";
 import { useTema } from "@hooks/useTema";
@@ -107,7 +108,7 @@ export default function OwnerDashboardScreen() {
     // Avisa e deixa seguir — decisao do Andre, 07/09. Ver src/lib/abertura.ts.
     if (newStatus === "OPEN") {
       const aviso = avisoDeAberturaSemProfissional(professionals);
-      if (aviso && !(await confirmar(aviso))) return;
+      if (aviso && !(await confirmarComArtigo({ ...aviso, artigo: "statusEFila" }))) return;
     }
 
     // A validacao de "estabelecimento pronto" (>=1 profissional com >=1 servico)
@@ -120,7 +121,7 @@ export default function OwnerDashboardScreen() {
       if (code === "ESTABLISHMENT_NOT_READY") {
         confirmar({
           titulo: "Estabelecimento sem profissional pronto",
-          mensagem: getApiErrorMessage(error, "Para abrir, e necessario ter pelo menos um profissional com serviço cadastrado."),
+          mensagem: getApiErrorMessage(error, "Para abrir, é necessário ter pelo menos um profissional com serviço cadastrado."),
           confirmar: "Adicionar profissional",
         }).then((ok) => {
           if (ok)
@@ -133,7 +134,7 @@ export default function OwnerDashboardScreen() {
         confirmar({
           titulo: "Defina o horário de funcionamento",
           mensagem: getApiErrorMessage(error, "Defina o horário de funcionamento do estabelecimento antes de abrir."),
-          confirmar: "Definir Horário",
+          confirmar: "Definir horário",
         }).then((ok) => {
           if (ok) router.push("/(owner)/establishment-hours" as any);
         });
@@ -394,7 +395,7 @@ export default function OwnerDashboardScreen() {
                           prof.is_available ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
                         }`}
                       >
-                        {prof.is_available ? "Disponivel" : "Indisponivel"}
+                        {prof.is_available ? "Disponível" : "Indisponível"}
                       </Text>
                     </View>
                   </View>

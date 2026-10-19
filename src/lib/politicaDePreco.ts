@@ -1,4 +1,4 @@
-import { abrirLink, linkDoSuporte } from "@lib/suporte";
+import { abrirLink, SUPORTE_URL } from "@lib/suporte";
 
 // politica-de-preco-saiba-mais (DEC-91) + saiba-mais-leva-ao-suporte (DEC-96,
 // Andre 18/10): no cadastro do servico a previa mostra a composicao do preco
@@ -8,12 +8,15 @@ import { abrirLink, linkDoSuporte } from "@lib/suporte";
 // A formula mora no pricing.ts (max(R$ 1,99; R$ 0,49 + 2,99% do preco)).
 
 /**
- * Onde o "Saiba mais" do preco abre. O artigo "Por que o preco muda conforme o
- * valor" ainda nao tem URL estavel (pedida ao Suporte, Solicitadas S54): ate
- * chegar, abre a home do profissional. Trocar so esta linha.
+ * O artigo "Por que o preco muda conforme o valor", na versao do Parceiro. A URL
+ * e estavel (Suporte, S54): se o artigo mudar de lugar, o link quebra sem que o
+ * app avise, entao o endereco mora em UMA constante e o teste o trava por inteiro.
  */
+export const ARTIGO_DO_PRECO = `${SUPORTE_URL}artigos/parceiro/por-que-o-preco-muda.html`;
+
+/** Onde o "Saiba mais" do preco abre. */
 export function linkDoSaibaMaisDoPreco(): string {
-  return linkDoSuporte("profissional");
+  return ARTIGO_DO_PRECO;
 }
 
 export function explicarPrecoDoServico(): Promise<void> {

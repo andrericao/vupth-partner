@@ -198,7 +198,7 @@ export default function MyDayScreen() {
     const ok = await confirmar({
       titulo: "Recebeu o pagamento?",
       mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}. Ele recebe o aviso de pagamento confirmado.`,
-      confirmar: "Sim, recebi",
+      confirmar: "Recebi",
     });
     if (!ok) return;
     const forma = await perguntarForma();

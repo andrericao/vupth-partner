@@ -17,23 +17,23 @@ describe("ClosingPrompt (auto-fechamento — CLOSING_PROMPT)", () => {
     useUiStore.getState().showClosingPrompt(FUTURE());
     const view = renderWithProvider(<ClosingPrompt />);
     expect(view.getByText(/Passou do horário de fechamento/)).toBeTruthy();
-    expect(view.getByText("Fechar agora")).toBeTruthy();
-    expect(view.getByText("Continuar atendendo")).toBeTruthy();
+    expect(view.getByText("Fechar")).toBeTruthy();
+    expect(view.getByText("Continuar")).toBeTruthy();
   });
 
-  it("'Continuar atendendo' apenas dispensa (segue drenando)", () => {
+  it("'Continuar' apenas dispensa (segue drenando)", () => {
     useUiStore.getState().showClosingPrompt(FUTURE());
     const view = renderWithProvider(<ClosingPrompt />);
-    fireEvent.press(view.getByText("Continuar atendendo"));
+    fireEvent.press(view.getByText("Continuar"));
     expect(useUiStore.getState().closingGraceUntil).toBeNull();
   });
 
-  it("'Fechar agora' chama updateMyStatus('OFF') e dispensa", async () => {
+  it("'Fechar' chama updateMyStatus('OFF') e dispensa", async () => {
     const off = jest.fn().mockResolvedValue(undefined);
     useProfessionalStore.setState({ updateMyStatus: off });
     useUiStore.getState().showClosingPrompt(FUTURE());
     const view = renderWithProvider(<ClosingPrompt />);
-    fireEvent.press(view.getByText("Fechar agora"));
+    fireEvent.press(view.getByText("Fechar"));
     await waitFor(() => expect(off).toHaveBeenCalledWith("OFF"));
     await waitFor(() => expect(useUiStore.getState().closingGraceUntil).toBeNull());
   });

@@ -1,17 +1,17 @@
 # pagamento-pix (adendos 1a0616c e 62295f1): no Finalizar (ou no Iniciar proximo
-# com alguem na cadeira) o app pergunta "O pagamento foi efetuado?" quando o
-# pagamento esta pendente. env: RESPOSTA ("Sim, recebi" | "Ainda não"),
+# com alguem na cadeira) o app pergunta "Recebeu o pagamento?" quando o
+# pagamento esta pendente. env: RESPOSTA ("Recebi" | "Ainda não"),
 # FIM (o texto que a mensagem do fim deve trazer). Sem a pergunta (ja pago),
 # segue sem tocar em nada.
 appId: ${APP_ID}
 ---
 - extendedWaitUntil:
-    visible: "O pagamento foi efetuado?"
+    visible: "Recebeu o pagamento?"
     timeout: 15000
     optional: true
 - runFlow:
     when:
-      visible: "O pagamento foi efetuado?"
+      visible: "Recebeu o pagamento?"
     commands:
       - tapOn: ${RESPOSTA}
       - runFlow: pular_forma.yaml

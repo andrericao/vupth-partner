@@ -94,9 +94,9 @@ appId: ${APP_ID}
     text: "Recebi"
     label: "08.11d · pix · o dono toca em Recebi"
 - tapOn:
-    text: "Sim, recebi"
+    id: "dialogo-botao-1"
     label: "08.11e · pix · confirma"
-# forma-de-recebimento (PAR, Backend 8b158e3): o "Sim, recebi" pergunta a forma;
+# forma-de-recebimento (PAR, Backend 8b158e3): o "Recebi" pergunta a forma;
 # aqui o dono escolhe Dinheiro (nas outras etapas a bateria pula).
 - extendedWaitUntil:
     visible: "Como recebeu?"

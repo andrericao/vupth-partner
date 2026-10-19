@@ -111,7 +111,7 @@ export default function SettingsVinculoScreen() {
     const nome = inv.establishmentName ?? "este estabelecimento";
     confirmar({
       titulo: "Aceitar vinculação",
-      mensagem: `Deseja se vincular a ${nome}? Você passara a atender por este estabelecimento.`,
+      mensagem: `Deseja se vincular a ${nome}? Você passará a atender por este estabelecimento.`,
       confirmar: "Aceitar",
     }).then((ok) => {
       if (ok) doAcceptInvite(inv);
@@ -132,9 +132,9 @@ export default function SettingsVinculoScreen() {
 
   const handleLeave = async () => {
     const ok = await confirmar({
-      titulo: "Desafiliar do estabelecimento",
+      titulo: "Sair da loja",
       mensagem: `Você deixará de atender em ${professional?.establishment_name ?? "este estabelecimento"} e não receberá novos clientes na fila. Deseja continuar?`,
-      confirmar: "Desafiliar",
+      confirmar: "Sair da loja",
       destrutivo: true,
     });
     if (!ok) return;
@@ -237,7 +237,7 @@ export default function SettingsVinculoScreen() {
             />
           ) : (
             <NwButton
-              title="Desafiliar do Estabelecimento"
+              title="Sair da loja"
               onPress={handleLeave}
               isLoading={isLeaving}
               variant="outlineDanger"
