@@ -1,8 +1,20 @@
-import { AccessibilityInfo, Animated, StyleSheet } from "react-native";
-import { render, fireEvent, act, screen } from "@testing-library/react-native";
+import { AccessibilityInfo, Animated, StyleSheet, type TextStyle, type ViewStyle } from "react-native";
+import { render, fireEvent, act, screen, within } from "@testing-library/react-native";
 
 import { DialogoVupth } from "../DialogoVupth";
 import { useDialogoStore, abrirDialogo } from "@store/dialogo.store";
+import { useTemaStore } from "@store/tema.store";
+import { TIPOS_DE_DIALOGO, aparenciaDoTipo } from "@lib/tipoDeDialogo";
+import { coresDoTema, veuDoTema, type Tema } from "@theme/tema";
+import { TEMAS, razao } from "../../test-utils/contraste";
+
+jest.mock("expo-secure-store", () => ({
+  getItemAsync: jest.fn(async () => null),
+  setItemAsync: jest.fn(async () => undefined),
+}));
+// O escuro so vale com a liberacao aberta (src/theme/liberacao.ts); o tema padrao
+// segue claro, entao os testes que nao escolhem tema nao notam.
+jest.mock("@theme/liberacao", () => ({ ESCURO_LIBERADO: true }));
 
 describe("DialogoVupth (o diálogo do app no nativo)", () => {
   beforeEach(() => useDialogoStore.getState().fechar());
@@ -265,5 +277,146 @@ describe("DialogoVupth: entrada e saida animadas", () => {
     const { toJSON } = render(<DialogoVupth />);
     expect(toJSON()).toBeNull();
     expect(chamadas).toHaveLength(0);
+  });
+});
+
+// DEC-75: o painel era #FFFFFF, o titulo forest e o corpo #454745, escritos a
+// mao. No escuro o painel e a surface (#163300) e um titulo forest seria 1:1. Aqui
+// se le a cor que o dialogo RESOLVE em cada tema, e se mede o contraste dela.
+describe.each(TEMAS)("DialogoVupth no tema %s", (tema) => {
+  const cores = coresDoTema(tema);
+  const usar = (t: Tema) =>
+    act(() => {
+      useTemaStore.setState({ preferencia: t, restaurado: true });
+    });
+  const cor = (el: { props: { style?: unknown } }, chave: "color" | "backgroundColor" | "borderColor") =>
+    StyleSheet.flatten(el.props.style as ViewStyle & TextStyle)?.[chave] as string;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    useDialogoStore.getState().fechar();
+    usar(tema);
+  });
+  afterEach(() => {
+    usar("claro");
+    jest.useRealTimers();
+  });
+
+  const abrir = (pedido: Parameters<typeof abrirDialogo>[0]) => {
+    render(<DialogoVupth />);
+    act(() => void abrirDialogo(pedido));
+  };
+
+  /** O veu: o unico Animated.View que cobre a tela (absoluteFill) e tem fundo. */
+  const veuNaTela = () => {
+    const achado = screen.UNSAFE_getAllByType(Animated.View).find((v) => {
+      const e = StyleSheet.flatten(v.props.style as ViewStyle);
+      return e?.position === "absolute" && e?.backgroundColor;
+    });
+    if (!achado) throw new Error("sem veu");
+    return cor(achado, "backgroundColor");
+  };
+
+  it("sem tipo: painel, titulo, corpo e botoes leem o tema e passam em 4,5:1", () => {
+    abrir({
+      titulo: "Sair da fila",
+      mensagem: "Você perde a vez.",
+      botoes: [{ texto: "Voltar", estilo: "cancel" }, { texto: "Sair", estilo: "destructive" }],
+    });
+    const painel = cor(screen.getByLabelText("Sair da fila"), "backgroundColor");
+    expect(painel).toBe(cores.painel);
+
+    const titulo = cor(screen.getByText("Sair da fila"), "color");
+    const corpo = cor(screen.getByText("Você perde a vez."), "color");
+    expect(titulo).toBe(cores.textPrimary);
+    expect(corpo).toBe(cores.textSecondary);
+    expect(razao(titulo, painel)).toBeGreaterThanOrEqual(4.5);
+    expect(razao(corpo, painel)).toBeGreaterThanOrEqual(4.5);
+
+    // o cancelar e a saida segura: solido, green com onGreen
+    const voltar = screen.getByTestId("dialogo-botao-0");
+    expect(cor(voltar, "backgroundColor")).toBe(cores.green);
+    expect(razao(cor(within(voltar).getByText("Voltar"), "color"), cores.green)).toBeGreaterThanOrEqual(4.5);
+
+    // a acao destrutiva e vazada: borda do texto, rotulo danger sobre o painel
+    const sair = screen.getByTestId("dialogo-botao-1");
+    expect(cor(sair, "backgroundColor")).toBe("transparent");
+    expect(cor(sair, "borderColor")).toBe(cores.textPrimary);
+    expect(razao(cor(sair, "borderColor"), painel)).toBeGreaterThanOrEqual(3);
+    const rotulo = cor(within(sair).getByText("Sair"), "color");
+    expect(rotulo).toBe(cores.danger);
+    expect(razao(rotulo, painel)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("sem tipo e vazado nao destrutivo: o rotulo e o textPrimary", () => {
+    abrir({ titulo: "Oi", mensagem: "x", botoes: [{ texto: "Voltar", estilo: "cancel" }] });
+    const voltar = screen.getByTestId("dialogo-botao-0");
+    expect(cor(within(voltar).getByText("Voltar"), "color")).toBe(cores.textPrimary);
+    expect(razao(cores.textPrimary, cores.painel)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(TIPOS_DE_DIALOGO)("tipo %s: painel, selo, faixa e botoes leem o tema", (tipo) => {
+    abrir({
+      titulo: "Título",
+      mensagem: "Uma linha.",
+      tipo,
+      botoes: [{ texto: "Agora não", estilo: "cancel" }, { texto: "Confirmar" }],
+    });
+    const aparencia = aparenciaDoTipo(tipo, undefined, tema);
+    const painel = cor(screen.getByLabelText("Título"), "backgroundColor");
+    expect(painel).toBe(cores.painel);
+
+    // titulo e corpo
+    expect(razao(cor(screen.getByText("Título"), "color"), painel)).toBeGreaterThanOrEqual(4.5);
+    expect(razao(cor(screen.getByText("Uma linha."), "color"), painel)).toBeGreaterThanOrEqual(4.5);
+
+    // selo: texto sobre o fundo dele (e o icone tem a mesma cor do texto)
+    const selo = screen.getByTestId("dialogo-selo");
+    expect(cor(selo, "backgroundColor")).toBe(aparencia.fundo);
+    const textoDoSelo = cor(within(selo).getByText(aparencia.selo), "color");
+    expect(textoDoSelo).toBe(aparencia.texto);
+    expect(razao(textoDoSelo, aparencia.fundo)).toBeGreaterThanOrEqual(4.5);
+
+    // faixa: a cor do tipo (so os tipos que tem faixa). No escuro ela se separa do
+    // painel em 3:1. No claro o desenho usa green e pessego, que sobre o branco dao
+    // 1,47 e 1,59:1: o claro nao muda, e o selo ao lado e quem carrega o tipo.
+    if (aparencia.corDaFaixa) {
+      expect(cor(screen.getByTestId("dialogo-faixa"), "backgroundColor")).toBe(aparencia.corDaFaixa);
+      if (tema === "escuro") expect(razao(aparencia.corDaFaixa, painel)).toBeGreaterThanOrEqual(3);
+    } else {
+      expect(screen.queryByTestId("dialogo-faixa")).toBeNull();
+    }
+
+    // o primario (indice 1) e green com onGreen; o secundario e o bloco do painel
+    const primario = screen.getByTestId("dialogo-botao-1");
+    expect(cor(primario, "backgroundColor")).toBe(cores.green);
+    expect(razao(cor(within(primario).getByText("Confirmar"), "color"), cores.green)).toBeGreaterThanOrEqual(4.5);
+    const secundario = screen.getByTestId("dialogo-botao-0");
+    expect(cor(secundario, "backgroundColor")).toBe(cores.sobrePainel);
+    expect(razao(cor(within(secundario).getByText("Agora não"), "color"), cores.sobrePainel)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("a acao destrutiva com tipo e danger com onDanger", () => {
+    abrir({
+      titulo: "Sair da fila",
+      mensagem: "R$ 3,00 de multa.",
+      tipo: "dinheiro",
+      botoes: [{ texto: "Cancelar", estilo: "cancel" }, { texto: "Sair", estilo: "destructive" }],
+    });
+    const sair = screen.getByTestId("dialogo-botao-1");
+    expect(cor(sair, "backgroundColor")).toBe(cores.danger);
+    const rotulo = cor(within(sair).getByText("Sair"), "color");
+    expect(rotulo).toBe(cores.onDanger);
+    expect(razao(rotulo, cores.danger)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("o veu: o do tema; so o dialogo SEM tipo no claro segue forest a 45% (preso a caixa da web)", () => {
+    abrir({ titulo: "Sem tipo", mensagem: "x" });
+    expect(veuNaTela()).toBe(tema === "claro" ? "#16330073" : veuDoTema("escuro"));
+  });
+
+  it("o veu do dialogo COM tipo e sempre o do tema", () => {
+    abrir({ titulo: "Com tipo", mensagem: "x", tipo: "informacao" });
+    expect(veuNaTela()).toBe(veuDoTema(tema));
   });
 });

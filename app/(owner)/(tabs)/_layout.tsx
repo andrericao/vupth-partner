@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import { useFs } from "@store/fonte.store";
 import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
+import { TabBarIcon, divisorDaBarraDeAbas, tabBarShadow } from "@components/TabBarIcon";
 import { rotulosCabem } from "@lib/rotulosDaAba";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -10,7 +10,7 @@ import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
 import { useTema } from "@hooks/useTema";
 
 export default function OwnerTabsLayout() {
-  const { cores } = useTema();
+  const { cores, escuro } = useTema();
   const fs = useFs();
   const insets = useSafeAreaInsets();
   // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
@@ -45,8 +45,7 @@ export default function OwnerTabsLayout() {
         tabBarStyle: {
           ...tabBarShadow,
           backgroundColor: cores.background,
-          borderTopColor: cores.border,
-          borderTopWidth: 0,
+          ...divisorDaBarraDeAbas(escuro, cores),
           // [marca-vupth] Rotulo cortado em device real (QA Alexia 2026-08-21):
           // 60 - 8(top) - 8(bottom) sobrava so 44px pro icone (24) + label —
           // sem folga, cortava embaixo dependendo do metrics da fonte. +12px.

@@ -222,7 +222,7 @@ export default function AlsoProfessionalScreen() {
               </Text>
             ) : null}
 
-            <Text className="font-heading text-base mb-2 text-vupth-forest">
+            <Text className="font-heading text-base mb-2 text-vupth-textPrimary">
               Especialidade
             </Text>
 

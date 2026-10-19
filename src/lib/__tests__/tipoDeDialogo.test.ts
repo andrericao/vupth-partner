@@ -1,10 +1,12 @@
 import {
   TIPOS_DE_DIALOGO,
   TOKENS_CLARO,
+  aparenciaDoBotao,
   aparenciaDoTipo,
   ordemDosBotoes,
   papelDoBotao,
   tipoValido,
+  tokensDoDialogo,
 } from "../tipoDeDialogo";
 import { coresDoTema } from "@theme/tema";
 
@@ -148,5 +150,65 @@ describe("a faixa e forte e o selo e o tom claro", () => {
 
   it("a faixa de dinheiro se separa do branco do cartao (3:1, componente grafico)", () => {
     expect(razao(aparenciaDoTipo("dinheiro").corDaFaixa as string, "#FFFFFF")).toBeGreaterThanOrEqual(3);
+  });
+});
+
+// DEC-75: a tabela passou a ler o tokens.json por tema. O claro tem de ser o de
+// antes (os testes acima), e o escuro e o da tabela "selo no escuro" do
+// design-modais.html (17/10).
+describe("o dialogo nos dois temas", () => {
+  const TEMAS = ["claro", "escuro"] as const;
+
+  it.each(TEMAS.flatMap((tema) => TIPOS_DE_DIALOGO.map((tipo) => [tipo, tema] as const)))(
+    "%s no tema %s: o texto do selo passa em 4,5:1 (e, no escuro, a faixa se separa do painel)",
+    (tipo, tema) => {
+      const a = aparenciaDoTipo(tipo, undefined, tema);
+      expect(razao(a.fundo, a.texto)).toBeGreaterThanOrEqual(4.5);
+      // No escuro a faixa se separa do painel. No claro o desenho usa green e
+      // pessego, que sobre o branco dao 1,47 e 1,59:1: o claro nao muda.
+      if (a.corDaFaixa && tema === "escuro") {
+        expect(razao(a.corDaFaixa, coresDoTema(tema).painel)).toBeGreaterThanOrEqual(3);
+      }
+    },
+  );
+
+  it("no escuro o selo inverte (fundo escuro, texto na cor) e a faixa fica, como no desenho", () => {
+    expect(aparenciaDoTipo("informacao", undefined, "escuro")).toEqual({ faixa: true, corDaFaixa: "#9FE870", fundo: "#223D0D", texto: "#9FE870", selo: "Aviso" });
+    // "no escuro, onAccentPeach, o mesmo pessego": a faixa continua #FFC091
+    expect(aparenciaDoTipo("atencao", undefined, "escuro")).toEqual({ faixa: true, corDaFaixa: "#FFC091", fundo: "#4A2A10", texto: "#FFC091", selo: "Atenção" });
+    expect(aparenciaDoTipo("dinheiro", undefined, "escuro")).toEqual({ faixa: true, corDaFaixa: "#FFB4AB", fundo: "#4A1A16", texto: "#FFB4AB", selo: "Pagamento" });
+    expect(aparenciaDoTipo("erro", undefined, "escuro")).toEqual({ faixa: false, corDaFaixa: null, fundo: "#4A1A16", texto: "#FFB4AB", selo: "Erro" });
+  });
+
+  it("sem dizer o tema e o claro, e o rotulo do selo continua trocando", () => {
+    for (const tipo of TIPOS_DE_DIALOGO) {
+      expect(aparenciaDoTipo(tipo)).toEqual(aparenciaDoTipo(tipo, undefined, "claro"));
+    }
+    expect(aparenciaDoTipo("dinheiro", "Multa", "escuro").selo).toBe("Multa");
+  });
+
+  it("os tokens do dialogo em cada tema sao os do tokens.json", () => {
+    expect(tokensDoDialogo("claro")).toEqual(TOKENS_CLARO);
+    expect(tokensDoDialogo("escuro").onGreenTint).toBe(coresDoTema("escuro").onGreenTint);
+    expect(Object.keys(tokensDoDialogo("escuro"))).toEqual(Object.keys(TOKENS_CLARO));
+  });
+
+  it.each(TEMAS)("cada papel de botao passa em 4,5:1 no tema %s", (tema) => {
+    for (const papel of ["primario", "secundario", "perigo"] as const) {
+      const { fundo, texto } = aparenciaDoBotao(papel, tema);
+      expect(razao(fundo, texto)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("o botao primario e o mesmo nos dois temas; o secundario e o bloco DENTRO do painel", () => {
+    expect(aparenciaDoBotao("primario", "escuro")).toEqual(aparenciaDoBotao("primario", "claro"));
+    expect(aparenciaDoBotao("secundario", "escuro").fundo).toBe(coresDoTema("escuro").sobrePainel);
+    // o .btn.sec do desenho: #F3F5F1 no claro, #1F3F0B no escuro; nunca a cor do proprio painel
+    expect(aparenciaDoBotao("secundario", "claro").fundo).toBe("#F3F5F1");
+    expect(aparenciaDoBotao("secundario", "escuro").fundo).toBe("#1F3F0B");
+    expect(aparenciaDoBotao("secundario", "escuro").fundo).not.toBe(coresDoTema("escuro").painel);
+    // o .btn.perigo: #FFB4AB com #4A1A16 no escuro
+    expect(aparenciaDoBotao("perigo", "escuro")).toEqual({ fundo: "#FFB4AB", texto: "#4A1A16" });
+    expect(aparenciaDoBotao("perigo")).toEqual({ fundo: "#B3261E", texto: "#FFFFFF" });
   });
 });

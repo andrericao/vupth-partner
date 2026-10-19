@@ -19,7 +19,7 @@ export function ExpedienteCard({
       <Text className="font-body text-xs text-vupth-textSecondary mb-1">Expediente</Text>
       {resumo ? (
         <View className="flex-row items-baseline gap-2">
-          <Text className="font-heading text-xl text-vupth-forest">{resumo.valor}</Text>
+          <Text className="font-heading text-xl text-vupth-textPrimary">{resumo.valor}</Text>
           {resumo.detalhe && (
             <Text className="font-body text-xs text-vupth-textSecondary">{resumo.detalhe}</Text>
           )}

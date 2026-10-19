@@ -9,6 +9,7 @@ import type { LucideIcon } from "lucide-react-native";
 import { getRoleCardRoute } from "@lib/routing";
 import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { useAuthStore } from "@store/auth.store";
+import { useTema } from "@hooks/useTema";
 
 type Papel = {
   role: "owner" | "professional";
@@ -63,19 +64,20 @@ const PAPEIS: Papel[] = [
 export default function RoleChoiceScreen() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-vupth-background">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingVertical: 48 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="px-4 gap-3 mb-12">
-          <Text className="font-display text-f15 tracking-[2px] text-vupth-forest">
+          <Text className="font-display text-f15 tracking-[2px] text-vupth-textPrimary">
             VUPTH
           </Text>
-          <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
+          <Text className="font-display text-f30 leading-[32px] text-vupth-textPrimary">
             {isAuthenticated ? "O que você quer criar?" : "Como você vai usar o Vupth?"}
           </Text>
           <Text className="font-body text-f15 text-vupth-textSecondary">
@@ -91,6 +93,9 @@ export default function RoleChoiceScreen() {
         <View className="px-4 gap-3">
           {PAPEIS.map((p) => {
             const Icone = p.icone;
+            // O cartao de destaque e green: o par dele e `onGreen`. O outro e surface:
+            // `textPrimary`. Forest como texto, no escuro, e forest sobre a surface (1:1).
+            const corDoTexto = p.destaque ? cores.onGreen : cores.textPrimary;
             return (
               <Pressable
                 key={p.role}
@@ -103,18 +108,22 @@ export default function RoleChoiceScreen() {
                 accessibilityRole="button"
                 testID={`role-${p.role}`}
               >
-                <Icone size={24} color="#163300" />
+                <Icone size={24} color={corDoTexto} />
                 <View className="flex-1 gap-0.5">
-                  <Text className="font-display text-base text-vupth-forest">{p.titulo}</Text>
+                  <Text
+                    className={`font-display text-base ${p.destaque ? "text-vupth-onGreen" : "text-vupth-textPrimary"}`}
+                  >
+                    {p.titulo}
+                  </Text>
                   <Text
                     className={`font-body text-xs ${
-                      p.destaque ? "text-vupth-forest opacity-70" : "text-vupth-textSecondary"
+                      p.destaque ? "text-vupth-onGreen opacity-70" : "text-vupth-textSecondary"
                     }`}
                   >
                     {p.descricao}
                   </Text>
                 </View>
-                <ChevronRight size={20} color="#163300" />
+                <ChevronRight size={20} color={corDoTexto} />
               </Pressable>
             );
           })}
