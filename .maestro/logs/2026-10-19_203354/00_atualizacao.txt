@@ -25,7 +25,7 @@ Running on vupth_android11
     Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
     Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
   Run ../apoio/fechar_anr.yaml... COMPLETED
-  Assert that (Optional) "Como você vai usar o Vupth?" is visible... WARNED
+  Assert that (Optional) "Como você vai usar o Vupth?" is visible... COMPLETED
 00.04a · espera a entrada (tocando em Wait no aviso do Android)... COMPLETED
 00.04 · espera a entrada... COMPLETED
 00.05 · entra como o profissional da 00...
