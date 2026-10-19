@@ -7,6 +7,7 @@ import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
+import { avisoDeSairDaLoja, avisoDoConvite } from "@lib/avisosDoVinculo";
 import { AvisoLojaDesativada } from "@components/AvisoLojaDesativada";
 import { ConvitesDePosse } from "@components/ConvitesDePosse";
 import {
@@ -108,12 +109,7 @@ export default function SettingsVinculoScreen() {
 
   // R3: confirmacao antes de decidir a vinculacao.
   const handleAcceptInvite = (inv: any) => {
-    const nome = inv.establishmentName ?? "este estabelecimento";
-    confirmar({
-      titulo: "Aceitar",
-      mensagem: `Deseja se vincular a ${nome}? Você passará a atender por este estabelecimento.`,
-      confirmar: "Aceitar",
-    }).then((ok) => {
+    confirmar(avisoDoConvite(inv.establishmentName)).then((ok) => {
       if (ok) doAcceptInvite(inv);
     });
   };
@@ -132,9 +128,7 @@ export default function SettingsVinculoScreen() {
 
   const handleLeave = async () => {
     const ok = await confirmar({
-      titulo: "Sair da loja",
-      mensagem: `Você deixará de atender em ${professional?.establishment_name ?? "este estabelecimento"} e não receberá novos clientes na fila. Deseja continuar?`,
-      confirmar: "Sair da loja",
+      ...avisoDeSairDaLoja(professional?.establishment_name),
       destrutivo: true,
     });
     if (!ok) return;
