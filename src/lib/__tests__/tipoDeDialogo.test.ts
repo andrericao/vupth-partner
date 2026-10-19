@@ -1,5 +1,3 @@
-import path from "path";
-
 import {
   TIPOS_DE_DIALOGO,
   TOKENS_CLARO,
@@ -8,13 +6,16 @@ import {
   papelDoBotao,
   tipoValido,
 } from "../tipoDeDialogo";
+import { coresDoTema } from "@theme/tema";
 
 // modais-de-alerta (design-modais, 17/10; DEC-50): o tipo e dito por uma faixa
 // no topo e um selo com icone, nunca pela cor do botao.
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const tailwind = require(path.resolve(__dirname, "../../../tailwind.config.js"));
-const vupth: Record<string, string> = tailwind.theme.extend.colors.vupth;
+// O tema do Partner e a fonte das cores: o tailwind so repassa `var(--vupth-x)`,
+// entao o hex claro de cada nome vem de `coresDoTema`, o mesmo que alimenta as
+// variaveis. O teste comparava com o objeto do tailwind e quebrou quando as cores
+// viraram variaveis (a `dev` ficou vermelha logo apos o merge do modo escuro).
+const vupth: Record<string, string> = coresDoTema("claro");
 
 function luminancia(hex: string): number {
   const c = hex.replace("#", "");
