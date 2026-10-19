@@ -157,7 +157,7 @@ export default function QueueOptionsScreen() {
         mensagem:
           "Ninguém novo entra; quem está, é atendido.",
         artigo: "statusEFila",
-        confirmar: "Fechar fila",
+        confirmar: "Fechar",
         // "Fechamento" e atencao (design-modais). Sem `destrutivo`: fechar a fila
         // e rotina do dia e da para reabrir, entao o primario e o verde da marca,
         // nao o vermelho de quem nao tem volta.
