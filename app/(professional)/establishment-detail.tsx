@@ -23,6 +23,7 @@ import {
 import { parseApiTime } from "@lib/time";
 import { maskPhone } from "@lib/masks";
 import { avisar } from "@lib/confirmar";
+import { useTema } from "@hooks/useTema";
 
 function formatAddress(a: EstablishmentDetail["address"]): string | null {
   if (!a) return null;
@@ -57,6 +58,7 @@ function DetailRow({ label, value }: { label: string; value: string | null }) {
 }
 
 export default function EstablishmentDetailScreen() {
+  const { cores } = useTema();
   const params = useLocalSearchParams<{
     id: string;
     name?: string;
@@ -156,10 +158,10 @@ export default function EstablishmentDetailScreen() {
           )}
 
           <View className="flex-row items-center justify-between mt-6">
-            <Text className="flex-1 font-heading text-2xl text-vupth-forest">{name}</Text>
+            <Text className="flex-1 font-heading text-2xl text-vupth-textPrimary">{name}</Text>
             <Text
               className={`font-body text-sm ${
-                isOpen ? "text-vupth-forest" : "text-vupth-textSecondary"
+                isOpen ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
               }`}
             >
               {isOpen ? "Aberto" : "Fechado"}
@@ -172,7 +174,7 @@ export default function EstablishmentDetailScreen() {
 
           {isLoading ? (
             <View className="items-center mt-8">
-              <ActivityIndicator size="large" color="#163300" />
+              <ActivityIndicator size="large" color={cores.textPrimary} />
             </View>
           ) : (
             <View className="mt-6 gap-4">

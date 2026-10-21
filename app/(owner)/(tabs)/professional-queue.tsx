@@ -24,6 +24,7 @@ import { finalizarAtendimento } from "@lib/finalizar";
 import { pedirFeedbackDoApp } from "@lib/feedbackDoApp";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
+import { useTema } from "@hooks/useTema";
 
 function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; position: number }) {
   const statusLabel =
@@ -33,12 +34,12 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
         ? "Pausado"
         : `#${position}`;
   const statusColor =
-    attendance.status === "PAUSED" ? "text-vupth-warning" : "text-vupth-forest";
+    attendance.status === "PAUSED" ? "text-vupth-pessego" : "text-vupth-textPrimary";
 
   return (
     <View className="flex-row items-center justify-between py-3 px-4 bg-vupth-surface rounded-card mb-2">
       <View className="flex-1">
-        <Text className="font-heading text-vupth-forest">{attendance.clientName}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{attendance.clientName}</Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
           {attendance.services.map((s) => s.customName).join(", ")}
         </Text>
@@ -89,20 +90,22 @@ function CurrentAttendanceCard({
   return (
     <View className="bg-vupth-greenTint p-4 rounded-card mb-4">
       <View className="flex-row items-center justify-between">
-        <Text className="font-heading text-lg text-vupth-forest">{attendance.clientName}</Text>
+        <Text className="font-heading text-lg text-vupth-onGreenTint">{attendance.clientName}</Text>
         {/* O Badge success do v1: fundo #EDFCF2, texto #2A7948 (config/theme/Badge.ts). */}
+        {/* tema-fixo: badge do v1 (paleta antiga), claro sobre o cartao; migra junto com a tela */}
         <View className="bg-[#EDFCF2] border border-[#66B584] rounded-md px-2 py-0.5">
+          {/* tema-fixo: idem */}
           <Text className="font-body text-xs font-bold text-[#2A7948]">
             {attendance.isPaused ? "PAUSADO" : "ATENDENDO"}
           </Text>
         </View>
       </View>
-      <Text className="font-body text-sm text-vupth-forest mt-1">
+      <Text className="font-body text-sm text-vupth-onGreenTint mt-1">
         {attendance.services?.map((s: any) => s.customName).join(", ")}
       </Text>
       <View className="flex-row justify-between mt-2">
-        <Text className="font-body text-sm text-vupth-forest">Tempo: {formatted}</Text>
-        <Text className="font-heading text-vupth-forest">
+        <Text className="font-body text-sm text-vupth-onGreenTint">Tempo: {formatted}</Text>
+        <Text className="font-heading text-vupth-onGreenTint">
           R$ {(attendance.totalValue ?? 0).toFixed(2)}
         </Text>
       </View>
@@ -130,6 +133,7 @@ function CurrentAttendanceCard({
 }
 
 export default function ProfessionalQueueScreen() {
+  const { cores } = useTema();
   const { professionalId, establishmentId, professionalName } = useLocalSearchParams<{
     professionalId: string;
     establishmentId: string;
@@ -224,7 +228,7 @@ export default function ProfessionalQueueScreen() {
                 hitSlop={8}
                 disabled={refreshing}
               >
-                <RotateCw size={20} color="#163300" />
+                <RotateCw size={20} color={cores.textPrimary} />
               </Pressable>
             ) : undefined
           }
@@ -236,12 +240,12 @@ export default function ProfessionalQueueScreen() {
 
             <View className="flex-row gap-3 my-4">
               <View className="flex-1 bg-vupth-greenTint p-3 rounded-card">
-                <Text className="font-body text-xs text-vupth-forest">Na fila</Text>
-                <Text className="font-heading text-xl text-vupth-forest">{data.size}</Text>
+                <Text className="font-body text-xs text-vupth-onGreenTint">Na fila</Text>
+                <Text className="font-heading text-xl text-vupth-onGreenTint">{data.size}</Text>
               </View>
               <View className="flex-1 bg-vupth-greenTint p-3 rounded-card border border-blue-200">
                 <Text className="font-body text-xs text-blue-700">Espera total</Text>
-                <Text className="font-heading text-xl text-vupth-forest">
+                <Text className="font-heading text-xl text-vupth-onGreenTint">
                   {data.totalRemainingMinutes} min
                 </Text>
               </View>
@@ -253,7 +257,7 @@ export default function ProfessionalQueueScreen() {
 
         {isLoading && !data && (
           <View className="flex-1 items-center justify-center mt-12">
-            <ActivityIndicator color="#163300" size="large" />
+            <ActivityIndicator color={cores.textPrimary} size="large" />
             <Text className="font-body text-vupth-textSecondary mt-4">Carregando fila...</Text>
           </View>
         )}

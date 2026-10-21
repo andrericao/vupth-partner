@@ -142,10 +142,10 @@ export function ChavePix({
                 setErros({});
               }}
               className={`flex-row items-center gap-1.5 rounded-full border-2 px-3.5 py-2 ${
-                ativo ? "bg-vupth-greenTint border-vupth-forest" : "bg-white border-vupth-border"
+                ativo ? "bg-vupth-greenTint border-vupth-onGreenTint" : "bg-vupth-background border-vupth-border"
               }`}
             >
-              <Text className="font-body text-sm text-vupth-forest">{t.rotulo}</Text>
+              <Text className={`font-body text-sm ${ativo ? "text-vupth-onGreenTint" : "text-vupth-textPrimary"}`}>{t.rotulo}</Text>
               {t.recomendada && <Text className="font-body text-xs text-vupth-textSecondary">recomendada</Text>}
             </Pressable>
           );

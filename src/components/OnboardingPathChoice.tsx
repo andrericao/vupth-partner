@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { Store, Search } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 
 // S23 — "Onde voce vai atender?", o passo que faltava entre criar o perfil de
 // profissional e buscar estabelecimento.
@@ -31,6 +32,7 @@ function Opcao({
   Icone: typeof Store;
   onPress: () => void;
 }) {
+  const { cores } = useTema();
   return (
     <Pressable
       onPress={onPress}
@@ -39,10 +41,10 @@ function Opcao({
       className="flex-row items-center gap-3 p-4 rounded-2xl border border-vupth-border bg-vupth-surface active:bg-vupth-greenTint"
     >
       <View className="w-10 h-10 rounded-full bg-vupth-greenTint items-center justify-center">
-        <Icone size={20} color="#163300" />
+        <Icone size={20} color={cores.onGreenTint} />
       </View>
       <View className="flex-1">
-        <Text className="font-heading text-f15 text-vupth-forest">{titulo}</Text>
+        <Text className="font-heading text-f15 text-vupth-textPrimary">{titulo}</Text>
         <Text className="font-body text-f13 text-vupth-textSecondary mt-0.5">{descricao}</Text>
       </View>
     </Pressable>

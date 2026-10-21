@@ -17,6 +17,7 @@ import {
   type HorarioDoDia,
   type HorariosDaLoja,
 } from "@lib/horarioSemanal";
+import { useTema } from "@hooks/useTema";
 
 // A semana + as datas especiais + os proximos dias (S27). Nasceu na tela do
 // horario da loja; a agenda-do-profissional (05/10) usa o mesmo editor com as
@@ -57,6 +58,7 @@ export function EditorDeHorarios({
   textoDaSemana,
   mensagemSemanaSalva,
 }: Props) {
+  const { cores } = useTema();
   const [estado, setEstado] = useState<"carregando" | "semana" | "sem-rota" | "erro">("carregando");
   const [horarios, setHorarios] = useState<HorariosDaLoja | null>(null);
   const [semana, setSemana] = useState<DiaSemanal[]>([]);
@@ -150,7 +152,7 @@ export function EditorDeHorarios({
     }
   };
 
-  if (estado === "carregando") return <ActivityIndicator className="mt-10" color="#163300" />;
+  if (estado === "carregando") return <ActivityIndicator className="mt-10" color={cores.textPrimary} />;
 
   if (estado === "erro") {
     return (
@@ -171,19 +173,19 @@ export function EditorDeHorarios({
     <View className="mt-2 gap-6">
       {!horarios.configured && (
         <View className="bg-vupth-greenTint rounded-card p-4">
-          <Text className="font-body text-sm text-vupth-forest">{avisoSemCadastro}</Text>
+          <Text className="font-body text-sm text-vupth-onGreenTint">{avisoSemCadastro}</Text>
         </View>
       )}
 
       <View className="gap-3">
-        <Text className="font-heading text-lg text-vupth-forest">Semana</Text>
+        <Text className="font-heading text-lg text-vupth-textPrimary">Semana</Text>
         <Text className="font-body text-sm text-vupth-textSecondary">{textoDaSemana}</Text>
         {semana.map((d) => (
           <DiaDaSemanaLinha key={d.day} dia={d} onChange={trocarDia} />
         ))}
         {primeiroAberto && (
           <NwButton
-            title={`Usar o horário de ${nomeDoDia(primeiroAberto.day).toLowerCase()} nos dias abertos`}
+            title={`Repetir ${nomeDoDia(primeiroAberto.day).toLowerCase()}`}
             variant="vupthOutline"
             onPress={() =>
               setSemana((s) =>
@@ -199,7 +201,7 @@ export function EditorDeHorarios({
       </View>
 
       <View className="gap-3">
-        <Text className="font-heading text-lg text-vupth-forest">Datas especiais</Text>
+        <Text className="font-heading text-lg text-vupth-textPrimary">Datas especiais</Text>
         <Text className="font-body text-sm text-vupth-textSecondary">
           Feriado ou um dia com horário diferente. Só vale para aquela data; a semana continua
           igual.
@@ -214,14 +216,14 @@ export function EditorDeHorarios({
 
       {horarios.upcoming.length > 0 && (
         <View className="gap-2">
-          <Text className="font-heading text-lg text-vupth-forest">Próximos dias</Text>
+          <Text className="font-heading text-lg text-vupth-textPrimary">Próximos dias</Text>
           {horarios.upcoming.slice(0, 7).map((u) => (
             <View key={u.date} className="flex-row justify-between">
               <Text className="font-body text-sm text-vupth-textSecondary">
                 {nomeDoDia(u.day)}, {isoParaBr(u.date).slice(0, 5)}
                 {u.exception ? " · especial" : ""}
               </Text>
-              <Text className="font-heading text-sm text-vupth-forest">{descreverHorario(u)}</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">{descreverHorario(u)}</Text>
             </View>
           ))}
         </View>

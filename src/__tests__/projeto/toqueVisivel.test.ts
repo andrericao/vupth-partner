@@ -22,6 +22,14 @@ describe("todo botão mostra que foi tocado", () => {
     for (const l of linhas) expect(l).toMatch(/active:opacity-\d+/);
   });
 
+  // O retorno ao toque tem dois sinais: a opacidade (visivel sobre qualquer fundo) e
+  // a escala, que mostra que o botao "afundou". As duas bases (pilula e ghost) a tem.
+  it("a pilula e o ghost encolhem um pouco ao toque", () => {
+    const src = ler("src/components/nw/Button.tsx");
+    expect(src).toMatch(/const BASE = "[^"]*active:scale-\[0\.97\]"/);
+    expect(src).toMatch(/const BASE_GHOST = "[^"]*active:scale-\[0\.97\]"/);
+  });
+
   it("os botões antigos (Gluestack) saíram — não há um segundo botão para esquecer", () => {
     // Migração concluída em 25/09: o NwButton é o único botão do app.
     for (const f of ["src/components/Button.tsx", "src/components/brand/Button.tsx"]) {

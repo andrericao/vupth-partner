@@ -6,10 +6,12 @@ import {
   avisoDeLoja,
   type StatusKey,
 } from "../workStatus";
+import { coresDoTema } from "@theme/tema";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const tailwind = require("../../../tailwind.config.js");
-const vupth: Record<string, string> = tailwind.theme.extend.colors.vupth;
+// As classes `vupth-*` do tailwind leem variaveis (modo escuro, DEC-75); o hex
+// de cada uma NO TEMA CLARO, que e o que estas cores fixas do codigo repetem,
+// vem de src/theme/tokens.json por tema.ts. O escuro tem teste proprio.
+const vupth: Record<string, string> = coresDoTema("claro");
 
 describe("mapa de status", () => {
   it.each(STATUS_ORDEM)("%s vai e volta sem perder o valor", (key) => {
@@ -77,5 +79,29 @@ describe("contraste da pilula", () => {
     expect(fundo).toBeTruthy();
     expect(frente).toBeTruthy();
     expect(razao(fundo, frente)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(STATUS_ORDEM)("%s passa no minimo AA tambem no tema ESCURO", (key) => {
+    // O texto e o par `on*` do fundo; um forest ou white fixo sobre o fundo do
+    // escuro daria 1:1 ou quase.
+    const { bg, texto } = STATUS_META[key];
+    const escuro = coresDoTema("escuro") as Record<string, string>;
+    const chave = (classe: string) => classe.replace(/^(bg|text)-vupth-/, "");
+    expect(razao(escuro[chave(bg)], escuro[chave(texto)])).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("o ponto de cada status", () => {
+  it("no CLARO sao os tres hex do semaforo de antes", () => {
+    const claro = coresDoTema("claro");
+    expect(STATUS_ORDEM.map((k) => claro[STATUS_META[k].cor])).toEqual(["#9FE870", "#FFC091", "#B3261E"]);
+  });
+
+  it("no ESCURO o ponto segue visivel sobre a surface (3:1 de componente grafico)", () => {
+    // O `warning` no escuro e o FUNDO marrom do bloco; como ponto ele sumiria.
+    const escuro = coresDoTema("escuro");
+    for (const key of STATUS_ORDEM) {
+      expect(razao(escuro[STATUS_META[key].cor], escuro.surface)).toBeGreaterThanOrEqual(3);
+    }
   });
 });

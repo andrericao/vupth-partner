@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react-native";
 import { NwButton } from "@components/nw/Button";
 import { router } from "expo-router";
 import { Titulo } from "@components/Titulo";
+import { useTema } from "@hooks/useTema";
 
 // Bloco de BLOQUEIO: "voce nao consegue usar esta tela, e este e o passo que
 // destrava". Nao confundir com estado VAZIO ("nada aqui ainda, e esta tudo
@@ -31,13 +32,14 @@ type Props = {
 };
 
 export function BlocoBloqueio({ titulo, texto, acao, rota }: Props) {
+  const { cores } = useTema();
   return (
     // bordas-do-card (Andre, 05/10 e 10/10): "caixa laranja quase sem borda" e o
     // botao colado na borda de baixo. Borda em forest a 20% (sem token novo) e
     // mais folga embaixo do botao.
-    <View testID="bloco-bloqueio" className="bg-vupth-accentPeach border-2 border-vupth-forest/20 rounded-card p-4 pb-6 gap-2.5">
+    <View testID="bloco-bloqueio" className="bg-vupth-accentPeach border-2 border-vupth-onAccentPeach/20 rounded-card p-4 pb-6 gap-2.5">
       <Titulo nivel={2}>{titulo}</Titulo>
-      <Text className="font-body text-f14 leading-5 text-vupth-forest">{texto}</Text>
+      <Text className="font-body text-f14 leading-5 text-vupth-onAccentPeach">{texto}</Text>
       {/* Button/Secondary do desenho: fundo `forest`, rotulo e seta em
           `brand-green`. E a unica variante que segura peso DENTRO de um cartao
           que ja e acento — `primary` seria verde-claro sobre pessego, duas
@@ -49,7 +51,7 @@ export function BlocoBloqueio({ titulo, texto, acao, rota }: Props) {
         variant="vupthSecondary"
         onPress={() => router.push(rota as any)}
         className="h-12 px-6 self-start mt-1"
-        icon={<ArrowRight size={18} color="#9FE870" />}
+        icon={<ArrowRight size={18} color={cores.green} />}
       />
     </View>
   );

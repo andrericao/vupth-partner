@@ -16,19 +16,21 @@
 
 export type Selo = { label: string; selo: string; texto: string };
 
+// O texto de cada selo e o par `on*` do fundo dele (onGreenTint, onAccentPeach):
+// forest sobre tudo so valia no claro; no escuro o forest e a surface.
 const SELOS: Record<string, Selo> = {
-  FINISHED: { label: "Finalizado", selo: "bg-vupth-greenTint", texto: "text-vupth-forest" },
+  FINISHED: { label: "Finalizado", selo: "bg-vupth-greenTint", texto: "text-vupth-onGreenTint" },
   CANCELLED: { label: "Cancelado", selo: "bg-vupth-dangerTint", texto: "text-vupth-danger" },
   // A loja agiu: nem sucesso nem erro do cliente — o tom de atenção da marca.
-  REMOVED: { label: "Retirado", selo: "bg-vupth-accentPeach", texto: "text-vupth-forest" },
-  IN_PROGRESS: { label: "Em andamento", selo: "bg-vupth-greenTint", texto: "text-vupth-forest" },
-  PAUSED: { label: "Pausado", selo: "bg-vupth-accentPeach", texto: "text-vupth-forest" },
-  SCHEDULED: { label: "Agendado", selo: "bg-white", texto: "text-vupth-textSecondary" },
-  LATE: { label: "Atrasado", selo: "bg-vupth-accentPeach", texto: "text-vupth-forest" },
+  REMOVED: { label: "Retirado", selo: "bg-vupth-accentPeach", texto: "text-vupth-onAccentPeach" },
+  IN_PROGRESS: { label: "Em andamento", selo: "bg-vupth-greenTint", texto: "text-vupth-onGreenTint" },
+  PAUSED: { label: "Pausado", selo: "bg-vupth-accentPeach", texto: "text-vupth-onAccentPeach" },
+  SCHEDULED: { label: "Agendado", selo: "bg-vupth-background", texto: "text-vupth-textSecondary" },
+  LATE: { label: "Atrasado", selo: "bg-vupth-accentPeach", texto: "text-vupth-onAccentPeach" },
 };
 
 // Um status que o app ainda não conhece não pode virar texto cru na tela.
-const DESCONHECIDO: Selo = { label: "Outro", selo: "bg-white", texto: "text-vupth-textSecondary" };
+const DESCONHECIDO: Selo = { label: "Outro", selo: "bg-vupth-background", texto: "text-vupth-textSecondary" };
 
 export function seloDoStatus(status: string | null | undefined): Selo {
   return (status && SELOS[status]) || DESCONHECIDO;

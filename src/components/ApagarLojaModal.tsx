@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, View, Text } from "react-native";
 
 import { NwButton } from "@components/nw/Button";
+import { useTema } from "@hooks/useTema";
 import { NwInput } from "@components/nw/Input";
 
 type Props = {
@@ -14,10 +15,14 @@ type Props = {
   onClose: () => void;
 };
 
-// desativar-conta (c0f5b17, item 5): apagar a loja e irreversivel. Diz o que
-// acontece de verdade: a equipe sai e e avisada, e o historico fica como
-// "Loja removida" (os atendimentos sao tambem do cliente e do profissional).
+// desativar-conta (c0f5b17, item 5): excluir a loja e irreversivel. O corpo e
+// uma linha; a equipe que sai e e avisada e o historico que fica como "Loja
+// removida" (os atendimentos sao tambem do cliente e do profissional) sao o que
+// o Suporte explica. Falta o artigo da loja (so ha o da conta), entao ainda nao
+// ha "Saiba mais" aqui. O campo ja se chama "Senha atual": a frase mandando
+// digita-la saiu (guia de texto, regra 3).
 export function ApagarLojaModal({ visible, nomeDaLoja, isDeleting, error, onConfirm, onClose }: Props) {
+  const { veu } = useTema();
   const [password, setPassword] = useState("");
 
   function close() {
@@ -32,16 +37,12 @@ export function ApagarLojaModal({ visible, nomeDaLoja, isDeleting, error, onConf
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-        <View className="bg-white rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-forest">Apagar a loja</Text>
+      <View className="flex-1 justify-center px-6" style={{ backgroundColor: veu }}>
+        <View className="bg-vupth-painel rounded-card p-6 gap-3">
+          <Text className="font-heading text-lg text-vupth-textPrimary">Excluir loja</Text>
 
           <Text className="font-body text-sm text-vupth-textSecondary">
-            {nomeDaLoja} sai do app de vez. Os profissionais saem da loja e são avisados. Os
-            atendimentos que já aconteceram continuam no histórico, como “Loja removida”.
-          </Text>
-          <Text className="font-body text-sm text-vupth-textSecondary">
-            Para confirmar que é você, digite sua senha atual.
+            {nomeDaLoja} sai do app. O histórico fica.
           </Text>
 
           <NwInput
@@ -61,13 +62,14 @@ export function ApagarLojaModal({ visible, nomeDaLoja, isDeleting, error, onConf
           )}
 
           <NwButton
-            title={isDeleting ? "Apagando..." : "Apagar a loja de vez"}
+            title="Excluir"
             variant="outlineDanger"
-            disabled={password.length === 0 || isDeleting}
+            isLoading={isDeleting}
+            disabled={password.length === 0}
             onPress={confirm}
             testID="delete-store-confirm"
           />
-          <NwButton title="Cancelar" variant="secondary" onPress={close} disabled={isDeleting} />
+          <NwButton title="Cancelar" variant="secondaryPainel" onPress={close} disabled={isDeleting} />
         </View>
       </View>
     </Modal>

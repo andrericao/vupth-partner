@@ -1,6 +1,7 @@
 import { View, TextInput, Pressable, type TextInputProps } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { RESET_WEB } from "./Input";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   value: string;
@@ -21,17 +22,18 @@ type Props = {
 //
 // O icone da direita TROCA de papel: com texto ele limpa; vazio, ele busca.
 export function CampoDeBusca({ value, placeholder, onChangeText, onBuscar, onLimpar, testID }: Props) {
+  const { cores } = useTema();
   const temTexto = !!value.trim();
   return (
     <View
       testID="campo-de-busca"
-      className="flex-row items-center min-h-[50px] mb-4 px-3 rounded-md border border-vupth-forest bg-white"
+      className="flex-row items-center min-h-[50px] mb-4 px-3 rounded-md border border-vupth-textPrimary bg-vupth-background"
     >
       <TextInput
-        className="flex-1 font-body text-vupth-forest"
+        className="flex-1 font-body text-vupth-textPrimary"
         style={RESET_WEB as TextInputProps["style"]}
         placeholder={placeholder}
-        placeholderTextColor="#6B706B"
+        placeholderTextColor={cores.textPlaceholder}
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onBuscar}
@@ -45,7 +47,7 @@ export function CampoDeBusca({ value, placeholder, onChangeText, onBuscar, onLim
         accessibilityLabel={temTexto ? "Limpar busca" : "Buscar"}
         className="pl-3"
       >
-        {temTexto ? <X size={18} color="#454745" /> : <Search size={18} color="#163300" />}
+        {temTexto ? <X size={18} color={cores.textSecondary} /> : <Search size={18} color={cores.textPrimary} />}
       </Pressable>
     </View>
   );

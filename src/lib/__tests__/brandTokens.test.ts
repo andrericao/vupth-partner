@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-// GUARDA DA MARCA (2026-08-12; revista em 25/09).
+// GUARDA DA MARCA (2026-08-12; revista em 25/09 e em 18/10).
 //
 // Ate 25/09 este teste comparava o tailwind com o tema do Gluestack, porque
 // telas das duas geracoes conviviam na mesma navegacao e dois tons da mesma
@@ -9,6 +9,14 @@ import path from "path";
 // agora a tabela abaixo prende os tokens aos VALORES DO ARQUIVO DE DESIGN
 // (Pencil, tokens `brand*`), os mesmos do app do client. Mudou um hex? Mude
 // aqui junto — de proposito, para a troca ser uma decisao e nao um acidente.
+//
+// Modo escuro (18/10, DEC-75): as cores do tailwind deixaram de ser hex e
+// viraram `rgb(var(--vupth-x) / <alpha-value>)`. A tabela continua sendo a do
+// TEMA CLARO e a asserção ficou mais forte: segue a cadeia inteira — a classe
+// do tailwind, a variavel que ela le e o valor que essa variavel tem no claro —
+// e exige o hex do desenho. O escuro e medido em src/theme/__tests__/tema.test.ts.
+
+import { coresDoTema, varsDoTema } from "../../theme/tema";
 
 const ROOT = path.resolve(__dirname, "../../..");
 
@@ -36,13 +44,59 @@ const DESENHO: Record<string, string> = {
   dangerTint: "#F7E4E2",
   warning: "#FFC091",
   success: "#9FE870",
+  // Pares on* e amber que o tokens.json (17/10) acrescentou. No claro cada
+  // texto sobre bloco colorido e forest, e o on-danger e branco.
+  onGreen: "#163300",
+  onGreenTint: "#163300",
+  onDanger: "#FFFFFF",
+  onAccentPeach: "#163300",
+  onAccentBlue: "#163300",
+  onAccentPink: "#163300",
+  onAccentPlum: "#F3F5F1",
+  amber: "#FFB703",
+  // Papeis (src/theme/papeis.json): no claro cada um e o token que a tela ja
+  // usava antes do escuro — painel de modal branco, bloco sobre o painel
+  // surface, opcao marcada forest com texto green.
+  painel: "#FFFFFF",
+  sobrePainel: "#F3F5F1",
+  selecionado: "#163300",
+  onSelecionado: "#9FE870",
+  onSelecionadoBranco: "#FFFFFF", // era text-white sobre o chip forest
+  pessego: "#FFC091", // o ponto e o texto pessego (era warning usado como cor)
+  esqueleto: "#D7DDD3", // o bloco do esqueleto (era border)
+  trilho: "#D7DDD3", // o trilho vazio da barra de progresso (era border fixo)
+  progressoSuave: "#E2F6D5", // a barra do perfil (era greenTint fixo)
 };
 
-const vupth: Record<string, string> = tailwind.theme.extend.colors.vupth;
+const noTailwind: Record<string, string> = tailwind.theme.extend.colors.vupth;
+
+// "159 232 112" -> "#9FE870"
+const hexDosCanais = (canais: string) =>
+  "#" +
+  canais
+    .split(" ")
+    .map((n) => Number(n).toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+
+// O hex que cada classe `vupth-*` tem no tema claro: classe do tailwind ->
+// variavel que ela le -> valor da variavel no claro.
+const vupth: Record<string, string> = Object.fromEntries(
+  Object.entries(noTailwind).map(([nome, valor]) => {
+    const variavel = /^rgb\(var\((--vupth-[a-z-]+)\) \/ <alpha-value>\)$/.exec(valor)?.[1];
+    return [nome, variavel ? hexDosCanais(varsDoTema("claro")[variavel]) : valor];
+  }),
+);
 
 describe("tokens da marca — os valores do arquivo de design", () => {
   it.each(Object.entries(DESENHO))("vupth.%s == %s", (token, hex) => {
     expect(vupth[token]?.toUpperCase()).toBe(hex);
+  });
+
+  it("o tema claro de tema.ts e a mesma tabela (nada muda para quem nao escolhe o escuro)", () => {
+    expect(coresDoTema("claro")).toEqual(
+      Object.fromEntries(Object.entries(DESENHO).map(([k, v]) => [k, v.toUpperCase()])),
+    );
   });
 
   it("nenhum token novo sem passar por aqui", () => {
@@ -140,12 +194,14 @@ describe("contraste de cada variante do botao", () => {
   const VARIANTES = [
     "primary",
     "secondary",
+    "secondaryPainel",
     "danger",
     "outlineBrand",
     "outlineDanger",
     "vupthPrimary",
     "vupthSecondary",
     "vupthOutline",
+    "vupthOutlineNoVerde",
   ];
 
   it.each(VARIANTES)("%s passa no minimo AA (4.5:1)", (v) => {
@@ -155,6 +211,27 @@ describe("contraste de cada variante do botao", () => {
     // medir aqui; o fundo real e coberto pela varredura de telas.
     if (!fundo || !texto) return;
     expect(razao(fundo, texto)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(VARIANTES)("%s passa no minimo AA tambem no tema ESCURO", (v) => {
+    // No escuro o rotulo tem de vir de um token que TROCA de tema: um `forest`
+    // ou `white` fixo daria forest sobre forest (1:1). O fundo transparente
+    // (outline, ghost) assenta sobre a tela, o cartao ou o painel do modal: o
+    // rotulo precisa passar nos tres.
+    const escuro = coresDoTema("escuro") as Record<string, string>;
+    const nome = (fonte: string, prefixo: string) => capturar(fonte, v, prefixo);
+    const hex = (classe: string | null) => (classe === "white" ? "#FFFFFF" : classe ? escuro[classe] : undefined);
+    const texto = hex(nome(LABEL, "text"));
+    expect(texto).toBeTruthy();
+    const fundoClasse = nome(BOX, "bg");
+    // Sobre o que cada variante transparente assenta: a tela, o cartao e o painel,
+    // menos a que vive so sobre o cartao verde do atendimento.
+    const SOBRE: Record<string, string[]> = { vupthOutlineNoVerde: [escuro.green] };
+    const fundos =
+      fundoClasse === "transparent"
+        ? (SOBRE[v] ?? [escuro.background, escuro.surface, escuro.painel])
+        : [hex(fundoClasse) as string];
+    for (const fundo of fundos) expect(razao(fundo, texto as string)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("brand-green como TEXTO so aparece sobre fundo escuro", () => {

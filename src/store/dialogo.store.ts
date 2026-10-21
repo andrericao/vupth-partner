@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { tipoValido, type TipoDeDialogo } from "@lib/tipoDeDialogo";
 
 // Ponte entre quem PEDE um diálogo e quem o DESENHA.
 //
@@ -25,12 +26,21 @@ export type PedidoDialogo = {
   titulo: string;
   mensagem?: string;
   botoes?: BotaoDialogo[];
+  /**
+   * Identidade do aviso (faixa + selo; design-modais, 17/10). Sem `tipo` o
+   * diálogo é o de sempre — as ~100 chamadas existentes não mudam.
+   */
+  tipo?: TipoDeDialogo;
+  /** Troca o rótulo do selo sem trocar o tipo ("Multa" em vez de "Pagamento"). */
+  selo?: string;
 };
 
-type DialogoNaTela = {
+export type DialogoNaTela = {
   titulo: string;
   mensagem?: string;
   botoes: Required<BotaoDialogo>[];
+  tipo?: TipoDeDialogo;
+  selo?: string;
   resolver: (indice: number) => void;
 };
 
@@ -79,6 +89,10 @@ export function abrirDialogo(pedido: PedidoDialogo): Promise<number> {
       titulo: pedido.titulo,
       mensagem: pedido.mensagem,
       botoes: normalizar(pedido.botoes),
+      // Um tipo que nao existe (JS solto, valor de API) vira diálogo sem tipo:
+      // melhor a caixa de sempre do que uma tela sem selo e sem explicação.
+      tipo: tipoValido(pedido.tipo) ? pedido.tipo : undefined,
+      selo: pedido.selo,
       resolver: resolve,
     });
   });

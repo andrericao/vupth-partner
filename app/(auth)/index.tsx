@@ -1,5 +1,7 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinksLegais } from "@components/LinksLegais";
+import { NwButton } from "@components/nw/Button";
 import { router } from "expo-router";
 import { Store, User, ChevronRight } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
@@ -7,6 +9,7 @@ import type { LucideIcon } from "lucide-react-native";
 import { getRoleCardRoute } from "@lib/routing";
 import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { useAuthStore } from "@store/auth.store";
+import { useTema } from "@hooks/useTema";
 
 type Papel = {
   role: "owner" | "professional";
@@ -21,7 +24,7 @@ const PAPEIS: Papel[] = [
   {
     role: "owner",
     icone: Store,
-    titulo: "Sou dono de estabelecimento",
+    titulo: "Sou dono de loja",
     descricao: "Gerencie sua loja, profissionais e filas",
     destaque: true,
   },
@@ -51,78 +54,97 @@ const PAPEIS: Papel[] = [
  * o que muda e ganhar o papel, e papel se ganha criando a entidade — loja ou
  * perfil profissional. Por isso, pra quem ja esta logado, o cartao leva ao
  * onboarding e nao ao cadastro.
+ *
+ * O rodape (Entrar, termos e privacidade) e FIXO e fica FORA da rolagem. Dentro
+ * dela, o botao rolava junto e, em aparelho com barra de gestos, parava atras
+ * da barra do sistema (DS1 e `entrar-atras-da-barra`: duas correcoes por rodape
+ * dentro da rolagem). O espaco de baixo vem do inset real — um `pb` fixo nao
+ * conhece a barra do aparelho.
  */
 export default function RoleChoiceScreen() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const insets = useSafeAreaInsets();
+  const { cores } = useTema();
 
   return (
-    <ScrollView
-      className="flex-1 bg-white"
-      contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingVertical: 48 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View className="px-4 gap-3 mb-12">
-        <Text className="font-display text-f15 tracking-[2px] text-vupth-forest">
-          VUPTH
-        </Text>
-        <Text className="font-display text-f30 leading-[32px] text-vupth-forest">
-          {isAuthenticated ? "O que você quer criar?" : "Como você vai usar o Vupth?"}
-        </Text>
-        <Text className="font-body text-f15 text-vupth-textSecondary">
-          {isAuthenticated
-            ? "É a mesma conta que você já usa — não precisa criar outra."
-            : "Escolha seu papel para começar."}
-        </Text>
-      </View>
-
-      {/* Cartoes em vez de dois botoes empilhados: a escolha tem consequencia
-          (papeis diferentes, apps diferentes por dentro) e a descricao e o que
-          permite decidir sem ter de adivinhar pelo titulo. */}
-      <View className="px-4 gap-3">
-        {PAPEIS.map((p) => {
-          const Icone = p.icone;
-          return (
-            <Pressable
-              key={p.role}
-              onPress={() => router.push(getRoleCardRoute(isAuthenticated, p.role) as any)}
-              className={`flex-row items-center gap-3.5 p-[18px] rounded-card ${
-                p.destaque
-                  ? "bg-vupth-green active:bg-vupth-success"
-                  : "bg-vupth-surface active:bg-vupth-border"
-              }`}
-              accessibilityRole="button"
-              testID={`role-${p.role}`}
-            >
-              <Icone size={24} color="#163300" />
-              <View className="flex-1 gap-0.5">
-                <Text className="font-display text-base text-vupth-forest">{p.titulo}</Text>
-                <Text
-                  className={`font-body text-xs ${
-                    p.destaque ? "text-vupth-forest opacity-70" : "text-vupth-textSecondary"
-                  }`}
-                >
-                  {p.descricao}
-                </Text>
-              </View>
-              <ChevronRight size={20} color="#163300" />
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {/* Some pra quem ja esta logado: oferecer "entrar" a quem ja entrou era
-          o que fechava o ciclo. */}
-      {!isAuthenticated && (
-        <View className="px-4 mt-8 flex-row justify-center items-center gap-1.5">
-          <Text className="font-body text-f13 text-vupth-textSecondary">Já tem conta?</Text>
-          <Pressable onPress={() => router.push("/(auth)/login" as any)} testID="go-login">
-            <Text className="font-heading text-f13 text-vupth-forest">Entrar</Text>
-          </Pressable>
+    <View className="flex-1 bg-vupth-background">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingVertical: 48 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="px-4 gap-3 mb-12">
+          <Text className="font-display text-f15 tracking-[2px] text-vupth-textPrimary">
+            VUPTH
+          </Text>
+          <Text className="font-display text-f30 leading-[32px] text-vupth-textPrimary">
+            {isAuthenticated ? "O que você quer criar?" : "Como você vai usar o Vupth?"}
+          </Text>
+          <Text className="font-body text-f15 text-vupth-textSecondary">
+            {isAuthenticated
+              ? "É a mesma conta que você já usa — não precisa criar outra."
+              : "Escolha seu papel para começar."}
+          </Text>
         </View>
-      )}
 
-      <LinksLegais className="mt-8" />
-      <CommitDoCodigo />
-    </ScrollView>
+        {/* Cartoes em vez de dois botoes empilhados: a escolha tem consequencia
+            (papeis diferentes, apps diferentes por dentro) e a descricao e o que
+            permite decidir sem ter de adivinhar pelo titulo. */}
+        <View className="px-4 gap-3">
+          {PAPEIS.map((p) => {
+            const Icone = p.icone;
+            // O cartao de destaque e green: o par dele e `onGreen`. O outro e surface:
+            // `textPrimary`. Forest como texto, no escuro, e forest sobre a surface (1:1).
+            const corDoTexto = p.destaque ? cores.onGreen : cores.textPrimary;
+            return (
+              <Pressable
+                key={p.role}
+                onPress={() => router.push(getRoleCardRoute(isAuthenticated, p.role) as any)}
+                className={`flex-row items-center gap-3.5 p-[18px] rounded-card ${
+                  p.destaque
+                    ? "bg-vupth-green active:bg-vupth-success"
+                    : "bg-vupth-surface active:bg-vupth-border"
+                }`}
+                accessibilityRole="button"
+                testID={`role-${p.role}`}
+              >
+                <Icone size={24} color={corDoTexto} />
+                <View className="flex-1 gap-0.5">
+                  <Text
+                    className={`font-display text-base ${p.destaque ? "text-vupth-onGreen" : "text-vupth-textPrimary"}`}
+                  >
+                    {p.titulo}
+                  </Text>
+                  <Text
+                    className={`font-body text-xs ${
+                      p.destaque ? "text-vupth-onGreen opacity-70" : "text-vupth-textSecondary"
+                    }`}
+                  >
+                    {p.descricao}
+                  </Text>
+                </View>
+                <ChevronRight size={20} color={corDoTexto} />
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      <View testID="entrada-rodape" className="px-4 pt-3 gap-4" style={{ paddingBottom: insets.bottom + 16 }}>
+        {/* Some pra quem ja esta logado: oferecer "entrar" a quem ja entrou era
+            o que fechava o ciclo. A pilula e a secundaria do par — a primaria
+            da tela e o cartao de papel (design-entrada, 17/10). */}
+        {!isAuthenticated && (
+          <NwButton
+            title="Entrar"
+            variant="secondary"
+            onPress={() => router.push("/(auth)/login" as any)}
+            testID="go-login"
+          />
+        )}
+        <LinksLegais />
+        <CommitDoCodigo />
+      </View>
+    </View>
   );
 }

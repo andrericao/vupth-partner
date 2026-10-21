@@ -1,4 +1,4 @@
-# forma-de-recebimento (Backend 8b158e3): depois do "Sim, recebi" o app pergunta
+# forma-de-recebimento (Backend 8b158e3): depois do "Recebi" o app pergunta
 # "Como recebeu?" (opcional). A bateria nao precisa da resposta: toca em Pular
 # se a caixa aparecer, e segue.
 appId: ${APP_ID}

@@ -1,5 +1,7 @@
 import { Pressable, Text, View, ActivityIndicator, type PressableProps } from "react-native";
 import type { ReactNode } from "react";
+import { useTema } from "@hooks/useTema";
+import type { Cores } from "@theme/tema";
 
 // Primitiva NativeWind (migracao Gluestack v2). API LIMPA por VARIANTE — sem
 // props de token do gluestack. Mesmo visual do Button v1 (pilula + sombra +
@@ -15,6 +17,15 @@ import type { ReactNode } from "react";
 type Variant =
   | "primary"
   | "secondary"
+  // `secondary` DENTRO de painel de modal: no escuro o painel e a surface, e um
+  // secondary (surface) sumiria. Usa o papel `sobrePainel` (surface no claro,
+  // surfaceAlt no escuro: design-modais.html, .btn.sec).
+  | "secondaryPainel"
+  // `vupthOutline` sobre o cartao VERDE do atendimento (o heroi: green nos dois
+  // temas). A borda e o rotulo sao `onGreen`: textPrimary no escuro e quase
+  // branco e sobre o green daria 1,4:1. Sem fundo no toque: o greenTint de
+  // `vupthOutline` no escuro e verde escuro e engoliria o rotulo.
+  | "vupthOutlineNoVerde"
   | "danger"
   | "outlineBrand"
   | "outlineDanger"
@@ -52,9 +63,12 @@ type Props = Omit<PressableProps, "children"> & {
 // do aparelho — nunca desligamos allowFontScaling), altura cravada CORTA o
 // rotulo dentro do botao. Com altura minima o desenho fica identico no
 // tamanho padrao e cresce em vez de truncar. Ver DS4 no HANDOFF_DESIGN.
-const BASE = "min-h-[54px] rounded-full items-center justify-center px-4";
+// `active:scale-[0.97]`: o toque encolhe o botao um pouco, alem de perder opacidade.
+// Escala estatica no pressionado, sem `transition-*`: as transicoes do NativeWind
+// dependem do Reanimated, que o app nao importa em lugar nenhum.
+const BASE = "min-h-[54px] rounded-full items-center justify-center px-4 active:scale-[0.97]";
 // O ghost e o unico que NAO e pilula alta: raio 8, caixa de 10/12 (do desenho).
-const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
+const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center active:scale-[0.97]";
 
 // [marca-vupth] `primary` E o Button/Primary do Pencil: fundo brand-green com
 // texto forest. Na primeira passada ele ficou forest+branco — troca conservadora
@@ -70,8 +84,9 @@ const BASE_GHOST = "py-2.5 px-3 rounded-md items-center justify-center";
 const BOX: Record<Variant, string> = {
   primary: "bg-vupth-green active:opacity-70",
   secondary: "bg-vupth-surface active:bg-vupth-border active:opacity-80",
+  secondaryPainel: "bg-vupth-sobrePainel active:bg-vupth-border active:opacity-80",
   danger: "bg-vupth-danger active:opacity-70",
-  outlineBrand: "bg-white border border-vupth-forest active:bg-vupth-greenTint active:opacity-80",
+  outlineBrand: "bg-vupth-background border border-vupth-textPrimary active:bg-vupth-greenTint active:opacity-80",
   outlineDanger: "bg-transparent border border-vupth-danger active:bg-vupth-dangerTint active:opacity-80",
   // `vupthPrimary` ficou IDENTICO ao primary depois do alinhamento acima —
   // mantido como apelido pra nao quebrar quem ja chamava por ele.
@@ -82,21 +97,38 @@ const BOX: Record<Variant, string> = {
   // sistema, o unico botao que segura peso sobre um fundo ja colorido.
   // Zero chamadas fora do proprio teste, entao a correcao nao tem raio.
   vupthSecondary: "bg-vupth-forest active:opacity-70",
-  vupthOutline: "bg-transparent border-2 border-vupth-forest active:bg-vupth-greenTint active:opacity-80",
+  vupthOutline: "bg-transparent border-2 border-vupth-textPrimary active:bg-vupth-greenTint active:opacity-80",
   vupthGhost: "bg-transparent active:bg-vupth-surface active:opacity-80",
+  vupthOutlineNoVerde: "bg-transparent border-2 border-vupth-onGreen active:opacity-70",
 };
 
+// Texto e borda usam os tokens que TROCAM de tema (textPrimary, onGreen,
+// onDanger, background), nunca forest/white: no escuro o forest e a surface, e
+// um rotulo forest sobre ela daria 1:1 (invisivel). No claro cada um vale o
+// mesmo hex de antes. O botao primario nao muda de tema (onGreen sobre green).
 const LABEL: Record<Variant, string> = {
-  primary: "text-vupth-forest",
+  primary: "text-vupth-onGreen",
   secondary: "text-vupth-textPrimary",
-  danger: "text-white",
-  outlineBrand: "text-vupth-forest",
+  secondaryPainel: "text-vupth-textPrimary",
+  danger: "text-vupth-onDanger",
+  outlineBrand: "text-vupth-textPrimary",
   outlineDanger: "text-vupth-danger",
-  vupthPrimary: "text-vupth-forest",
+  vupthPrimary: "text-vupth-onGreen",
   vupthSecondary: "text-vupth-green",
-  vupthOutline: "text-vupth-forest",
-  vupthGhost: "text-vupth-forest",
+  vupthOutline: "text-vupth-textPrimary",
+  vupthGhost: "text-vupth-textPrimary",
+  vupthOutlineNoVerde: "text-vupth-onGreen",
 };
+
+// A cor do spinner e a do rotulo da variante: o spinner e uma prop, nao uma
+// classe, entao vem do tema.
+function corDoSpinner(variant: Variant, cores: Cores): string {
+  if (variant === "danger") return cores.onDanger;
+  if (variant === "outlineDanger") return cores.danger;
+  if (variant === "vupthSecondary") return cores.green;
+  if (variant === "primary" || variant === "vupthPrimary" || variant === "vupthOutlineNoVerde") return cores.onGreen;
+  return cores.textPrimary;
+}
 
 export function NwButton({
   title,
@@ -108,6 +140,7 @@ export function NwButton({
   disabled,
   ...rest
 }: Props) {
+  const { cores } = useTema();
   return (
     <Pressable
       accessibilityRole="button"
@@ -117,17 +150,7 @@ export function NwButton({
       {...rest}
     >
       {isLoading ? (
-        <ActivityIndicator
-          color={
-            variant === "danger"
-              ? "#fff"
-              : variant === "outlineDanger"
-                ? "#B3261E"
-                : variant === "vupthSecondary"
-                  ? "#9FE870"
-                  : "#163300"
-          }
-        />
+        <ActivityIndicator color={corDoSpinner(variant, cores)} />
       ) : (
         <View className="flex-row items-center gap-2">
           <Text className={`font-heading text-base ${textClassName ?? LABEL[variant]}`}>

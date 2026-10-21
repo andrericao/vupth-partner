@@ -5,6 +5,7 @@ import { BackHandler, View, Text, Pressable, Image } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 import type { ReactNode } from "react";
 
 // logo-no-menu (Andre, 16/10, DEC-42): por enquanto a logo e so o V
@@ -61,6 +62,7 @@ type Props = {
  */
 export function ScreenHeader({ title, subtitle, onBack, action, marca = false, carregando = false }: Props) {
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
 
   useEffect(() => {
     if (!onBack) return;
@@ -95,7 +97,7 @@ export function ScreenHeader({ title, subtitle, onBack, action, marca = false, c
             hitSlop={8}
             className="w-10 h-10 rounded-full bg-vupth-greenTint items-center justify-center active:bg-vupth-surface"
           >
-            <ChevronLeft size={20} color="#163300" />
+            <ChevronLeft size={20} color={cores.onGreenTint} />
           </Pressable>
         ) : null}
 

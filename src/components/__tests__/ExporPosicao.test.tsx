@@ -1,3 +1,4 @@
+import { Switch } from "react-native";
 import { render, fireEvent, screen } from "@testing-library/react-native";
 import { ExporPosicao } from "../ExporPosicao";
 
@@ -21,5 +22,15 @@ describe("ExporPosicao", () => {
   it("enquanto salva, o interruptor fica travado", () => {
     render(<ExporPosicao expor onMudar={jest.fn()} ocupado />);
     expect(screen.getByTestId("expor-posicao").props.disabled).toBe(true);
+  });
+
+  // validacao de 17/10 (DS7): o trilho era #C9CBC9 (fora da paleta) e forest
+  // ligado; os outros tres interruptores do app usam border/green.
+  it("o trilho e o dos outros interruptores: border desligado, green ligado, bolinha branca", () => {
+    render(<ExporPosicao expor onMudar={jest.fn()} />);
+    const sw = screen.UNSAFE_getByType(Switch);
+    expect(sw.props.trackColor).toEqual({ false: "#D7DDD3", true: "#9FE870" });
+    expect(sw.props.thumbColor).toBe("#FFFFFF");
+    expect(sw.props.ios_backgroundColor).toBe("#D7DDD3");
   });
 });

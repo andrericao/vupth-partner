@@ -26,7 +26,7 @@ export function LinkDeIndicacao({ carregar = meuLinkDeIndicacao, compartilhar = 
   return (
     <View testID="link-indicacao" className="bg-vupth-surface rounded-card px-4 py-4 mb-6">
       <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEU LINK</Text>
-      <Text selectable testID="link-indicacao-link" className="font-heading text-sm text-vupth-forest mt-1">
+      <Text selectable testID="link-indicacao-link" className="font-heading text-sm text-vupth-textPrimary mt-1">
         {meu.link}
       </Text>
       <Text
@@ -36,7 +36,7 @@ export function LinkDeIndicacao({ carregar = meuLinkDeIndicacao, compartilhar = 
         {clientesQueChegaram(meu.referred_clients)}
       </Text>
       {receber ? (
-        <Text testID="link-indicacao-receber" className="font-heading text-xs text-vupth-forest mt-1 mb-3">
+        <Text testID="link-indicacao-receber" className="font-heading text-xs text-vupth-textPrimary mt-1 mb-3">
           {receber}
         </Text>
       ) : null}

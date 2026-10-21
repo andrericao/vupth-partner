@@ -18,10 +18,10 @@ describe("StatCard", () => {
     expect(getByText("Na fila").props.className).toContain("text-vupth-textSecondary");
   });
 
-  it("herói: fundo verde-marca, e o rótulo passa a forest para contrastar", () => {
+  it("herói: fundo verde-marca, e o rótulo passa a onGreen (forest no claro) para contrastar", () => {
     const { getByTestId, getByText } = render(<StatCard label="Na fila" value="7" hero />);
     expect(getByTestId("stat-card").props.className).toContain("bg-vupth-green");
-    expect(getByText("Na fila").props.className).toContain("text-vupth-forest");
+    expect(getByText("Na fila").props.className).toContain("text-vupth-onGreen");
   });
 
   it("o número usa a fonte de display da marca", () => {

@@ -19,4 +19,11 @@ describe("LinhaComInterruptor", () => {
     fireEvent(screen.getByRole("switch"), "valueChange", true);
     expect(onMudar).toHaveBeenCalledWith(true);
   });
+
+  it("desabilitado trava o interruptor; por padrao ele esta livre", () => {
+    const { rerender } = render(<LinhaComInterruptor rotulo="Aviso" descricao="" ligado onMudar={jest.fn()} />);
+    expect(screen.getByRole("switch").props.disabled).toBe(false);
+    rerender(<LinhaComInterruptor rotulo="Aviso" descricao="" ligado onMudar={jest.fn()} desabilitado />);
+    expect(screen.getByRole("switch").props.disabled).toBe(true);
+  });
 });

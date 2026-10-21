@@ -13,10 +13,10 @@ export function AvisoLojaDesativada({ status, nomeDaLoja }: Props) {
   if (status !== "DEACTIVATED") return null;
   return (
     <View className="bg-vupth-accentPeach rounded-card p-4 gap-1" testID="aviso-loja-desativada">
-      <Text className="font-heading text-sm text-vupth-forest">
+      <Text className="font-heading text-sm text-vupth-onAccentPeach">
         {nomeDaLoja ?? "A loja"} foi desativada
       </Text>
-      <Text className="font-body text-sm text-vupth-forest">
+      <Text className="font-body text-sm text-vupth-onAccentPeach">
         Ela não aparece mais para os clientes. Recomendamos que você saia dela e procure outra loja.
       </Text>
     </View>

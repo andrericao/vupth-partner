@@ -28,7 +28,7 @@ export default function SistemaScreen() {
   const { from } = useLocalSearchParams<{ from?: string }>();
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
+    <ScrollView className="flex-1 bg-vupth-background" contentContainerStyle={{ flexGrow: 1 }}>
       <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Sistema"

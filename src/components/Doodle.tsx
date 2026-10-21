@@ -1,6 +1,8 @@
 import { View, type ViewStyle } from "react-native";
 
 import { DOODLES, DOODLE_INK, type DoodleName } from "./doodles";
+import type { NomeDeCor } from "@theme/tema";
+import { useTema } from "@hooks/useTema";
 
 // Todos os doodles compartilham o mesmo viewBox 1024x768.
 const ART_RATIO = 768 / 1024;
@@ -9,10 +11,10 @@ type Props = {
   name: DoodleName;
   /** Largura do desenho. A altura sai da proporcao original. */
   size?: number;
-  /** Sobrepoe a cor de apoio do registro, para casar com o cartao. */
-  accent?: string;
-  /** Cor do traco. */
-  ink?: string;
+  /** Sobrepoe a cor de apoio do registro, para casar com o cartao (nome da cor do tema). */
+  accent?: NomeDeCor;
+  /** Cor do traco (nome da cor do tema). */
+  ink?: NomeDeCor;
   style?: ViewStyle;
 };
 
@@ -28,6 +30,7 @@ type Props = {
  * anunciasse "imagem" aqui so atrasaria quem ja recebeu a informacao.
  */
 export function Doodle({ name, size = 132, accent, ink = DOODLE_INK, style }: Props) {
+  const { cores } = useTema();
   const { art: Art, accent: defaultAccent } = DOODLES[name];
 
   return (
@@ -36,7 +39,7 @@ export function Doodle({ name, size = 132, accent, ink = DOODLE_INK, style }: Pr
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <Art ink={ink} accent={accent ?? defaultAccent} width={size} height={size * ART_RATIO} />
+      <Art ink={cores[ink]} accent={cores[accent ?? defaultAccent]} width={size} height={size * ART_RATIO} />
     </View>
   );
 }

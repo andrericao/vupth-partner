@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, Platform, type TextInputProps } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 
 // Primitiva NativeWind (migracao Gluestack v2). Substitui Input + InputPassword
 // do v1 num so componente: passe `secure` p/ virar campo de senha com olho.
@@ -36,16 +37,18 @@ type Props = TextInputProps & {
 export const RESET_WEB = Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0, borderWidth: 0 } as const) : null;
 
 export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "words", style, ...rest }: Props) {
+  const { cores } = useTema();
   const [focused, setFocused] = useState(false);
   const [show, setShow] = useState(false);
   const invalid = !!error;
 
-  // Foco no forest e erro no vupth-danger: o `border-brand` era a paleta
-  // ANTIGA (#3b7a3f) — ficava um verde diferente do resto da tela.
+  // Foco em textPrimary (forest no claro, quase branco no escuro: design.html,
+  // "foco (input)") e erro no vupth-danger: o `border-brand` era a paleta
+  // ANTIGA — ficava um verde diferente do resto da tela.
   const border = invalid
     ? "border border-vupth-danger"
     : focused
-      ? "border-2 border-vupth-forest"
+      ? "border-2 border-vupth-textPrimary"
       : "border border-vupth-border";
 
   return (
@@ -55,12 +58,12 @@ export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "wo
       </Text>
       {/* `min-h`, e nao `h`: altura cravada corta o texto digitado quando a
           fonte do sistema esta ampliada. Ver DS4 no HANDOFF_DESIGN. */}
-      <View className={`flex-row items-center gap-2 bg-white rounded-xl px-4 min-h-[50px] ${border}`}>
-        {Icon && <Icon size={18} color="#454745" />}
+      <View className={`flex-row items-center gap-2 bg-vupth-background rounded-xl px-4 min-h-[50px] ${border}`}>
+        {Icon && <Icon size={18} color={cores.textSecondary} />}
         <TextInput
           className="flex-1 font-body text-vupth-textPrimary"
           style={[RESET_WEB, style] as TextInputProps["style"]}
-          placeholderTextColor="#6B706B"
+          placeholderTextColor={cores.textPlaceholder}
           autoCorrect={false}
           autoCapitalize={autoCapitalize}
           secureTextEntry={secure && !show}
@@ -75,7 +78,7 @@ export function NwInput({ label, error, secure, icon: Icon, autoCapitalize = "wo
             accessibilityRole="button"
             accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
           >
-            {show ? <EyeOff size={20} color="#163300" /> : <Eye size={20} color="#163300" />}
+            {show ? <EyeOff size={20} color={cores.textPrimary} /> : <Eye size={20} color={cores.textPrimary} />}
           </Pressable>
         )}
       </View>

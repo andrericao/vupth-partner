@@ -21,7 +21,7 @@ export function NaoRealizadosCard({
     <View testID="nao-realizados-por-motivo" className="bg-vupth-surface p-4 rounded-card gap-1">
       {total > 0 && naoRealizados && (
         <>
-          <Text className="font-heading text-vupth-forest">Não realizados</Text>
+          <Text className="font-heading text-vupth-textPrimary">Não realizados</Text>
           {MOTIVOS_DO_NAO_REALIZADO.map((m) => (
             <View key={m.campo} className="flex-row justify-between">
               <Text className="font-body text-xs text-vupth-textSecondary">{m.rotulo}</Text>

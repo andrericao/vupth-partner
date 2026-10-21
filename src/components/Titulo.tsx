@@ -19,9 +19,9 @@ import { Text, type TextProps } from "react-native";
 type Nivel = 1 | 2 | 3;
 
 const ESTILO: Record<Nivel, string> = {
-  1: "font-display text-xxl text-vupth-forest",
-  2: "font-heading text-xl text-vupth-forest",
-  3: "font-heading text-md text-vupth-forest",
+  1: "font-display text-xxl text-vupth-textPrimary",
+  2: "font-heading text-xl text-vupth-textPrimary",
+  3: "font-heading text-md text-vupth-textPrimary",
 };
 
 type Props = TextProps & {

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   size?: number;
-  /** Cor do ponto. Hex cru: Animated.View nao resolve token do NativeWind. */
+  /** Cor do ponto (vem de `useTema().cores`: Animated.View nao resolve classe). Sem ela, textPrimary. */
   color?: string;
   /**
    * Pulsa? Default `true`.
@@ -25,7 +26,8 @@ type Props = {
  * preferencia existe pra desligar, e o estado segue legivel sem ele — a cor e
  * o rotulo ao lado ja dizem tudo.
  */
-export function LiveDot({ size = 8, color = "#163300", pulsing = true }: Props) {
+export function LiveDot({ size = 8, color, pulsing = true }: Props) {
+  const { cores } = useTema();
   const [opacity] = useState(() => new Animated.Value(1));
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -66,7 +68,7 @@ export function LiveDot({ size = 8, color = "#163300", pulsing = true }: Props) 
         width: size,
         height: size,
         borderRadius: size / 2,
-        backgroundColor: color,
+        backgroundColor: color ?? cores.textPrimary,
         opacity,
       }}
     />

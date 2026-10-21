@@ -15,16 +15,11 @@ import {
   type Excecao,
   type HorarioDoDia,
 } from "@lib/horarioSemanal";
+import { useTema } from "@hooks/useTema";
 
 // Pecas da tela de horario por dia (S27). Sem desenho do Design ainda: segue os
 // componentes que o app ja usa (NwInput, NwButton, o Switch do "aceitando
 // novos"). A tela em si mora em app/(owner)/(tabs)/establishment-hours.tsx.
-
-const SWITCH = {
-  trackColor: { false: "#D7DDD3", true: "#9FE870" },
-  thumbColor: "#FFFFFF",
-  ios_backgroundColor: "#D7DDD3",
-};
 
 function Horarios({
   rotulo,
@@ -71,11 +66,12 @@ export function DiaDaSemanaLinha({
   dia: DiaSemanal;
   onChange: (dia: DiaSemanal) => void;
 }) {
+  const { interruptor } = useTema();
   const nome = nomeDoDia(dia.day);
   return (
     <View className="bg-vupth-surface rounded-card p-4 gap-2">
       <View className="flex-row items-center justify-between">
-        <Text className="font-heading text-base text-vupth-forest">{nome}</Text>
+        <Text className="font-heading text-base text-vupth-textPrimary">{nome}</Text>
         <View className="flex-row items-center gap-2">
           <Text className="font-body text-sm text-vupth-textSecondary">
             {dia.closed ? "Fechado" : "Aberto"}
@@ -84,7 +80,7 @@ export function DiaDaSemanaLinha({
             value={!dia.closed}
             onValueChange={(aberto) => onChange({ ...dia, closed: !aberto })}
             accessibilityLabel={`${nome} aberto`}
-            {...SWITCH}
+            {...interruptor}
           />
         </View>
       </View>
@@ -111,6 +107,7 @@ export function DataEspecialForm({
   salvando?: boolean;
   onAdicionar: (dataIso: string, h: HorarioDoDia) => void;
 }) {
+  const { interruptor } = useTema();
   const [data, setData] = useState("");
   const [fechado, setFechado] = useState(false);
   const [opens, setOpens] = useState("");
@@ -145,7 +142,7 @@ export function DataEspecialForm({
           value={fechado}
           onValueChange={setFechado}
           accessibilityLabel="Fechado nesse dia"
-          {...SWITCH}
+          {...interruptor}
         />
       </View>
       {!fechado && (
@@ -191,7 +188,7 @@ export function ListaDeExcecoes({
         return (
           <View key={e.date} className="flex-row items-center justify-between bg-vupth-surface rounded-card px-4 py-3">
             <View>
-              <Text className="font-heading text-sm text-vupth-forest">{br}</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">{br}</Text>
               <Text className="font-body text-sm text-vupth-textSecondary">{descreverHorario(e)}</Text>
             </View>
             <NwButton

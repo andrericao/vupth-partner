@@ -1,5 +1,5 @@
 import "../global.css"; // NativeWind: habilita as classes Tailwind
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Alert, LogBox, Platform, View } from "react-native";
 import { vars } from "nativewind";
 import { StatusBar } from "expo-status-bar";
@@ -7,7 +7,7 @@ import { Slot } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@lib/queryClient";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ThemeProvider, DefaultTheme } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
 // ⚠️ As fontes vem de `assets/fonts/`, NAO de `@expo-google-fonts`.
 // A Cloudflare Pages EXCLUI `node_modules` do deploy, por design — e o
@@ -25,7 +25,11 @@ import { instalarDialogoNativo } from "@lib/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
 import { ReativarContaDoApp } from "@components/ReativarContaDoApp";
 import { useFonteStore } from "@store/fonte.store";
+import { useTemaStore } from "@store/tema.store";
+import { useTema } from "@hooks/useTema";
+import { useAplicarTema } from "@hooks/useAplicarTema";
 import { varsDaFonte } from "@lib/fonte";
+import { temaDeNavegacao } from "@lib/aplicarTema";
 import Constants from "expo-constants";
 import { iniciarSentry } from "@lib/sentry";
 import { commitDoCodigo } from "@lib/commitDoCodigo";
@@ -52,10 +56,7 @@ iniciarSentry({
 // navegador, entao o cinza do tema cobria por cima. O client ja fazia isso
 // certo (src/routes/index.tsx tem tema custom desde sempre) — o partner era o
 // unico sem, porque o Expo Router monta o navegador sem ThemeProvider.
-const navTheme = {
-  ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: "#FFFFFF" }, // $brandBackground
-};
+// O tema do navegador agora sai de `temaDeNavegacao` (claro e escuro).
 
 // O React Native Web nao implementa `Alert`: a chamada nao falha, nao loga e
 // nao pinta NADA. Eram 100 avisos mudos no navegador — inclusive o motivo de
@@ -112,37 +113,59 @@ export default function RootLayout() {
     restaurarFonte();
   }, [restaurarFonte]);
 
+  // Tema (DEC-75): claro por padrao; Perfil → Aparencia escolhe. O layout le a
+  // escolha guardada no aparelho e a leva as variaveis, a barra de status, ao
+  // navegador e ao sistema; quem pinta e cada classe `bg-vupth-*`.
+  const { escuro, cores, vars: varsDoTema } = useTema();
+  const temaRestaurado = useTemaStore((s) => s.restaurado);
+  const restaurarTema = useTemaStore((s) => s.restaurar);
+  useEffect(() => {
+    restaurarTema();
+  }, [restaurarTema]);
+  useAplicarTema();
+  const navTheme = useMemo(() => temaDeNavegacao(escuro, cores), [escuro, cores]);
+  // Tema + tamanho da letra numa so folha de variaveis, refeita so quando um dos
+  // dois muda (vars() devolve um objeto novo a cada chamada).
+  const variaveis = useMemo(
+    () => vars({ ...varsDoTema, ...varsDaFonte(passoDaFonte) }),
+    [varsDoTema, passoDaFonte],
+  );
+
   useEffect(() => {
     if (Platform.OS === "android") {
       // Com edge-to-edge, setBackgroundColorAsync nao e suportado (vira no-op e
       // emite warning) — a cor da barra fica por conta do sistema. Mantemos so
-      // o estilo dos botoes (icones escuros).
-      NavigationBar.setButtonStyleAsync("dark");
+      // o estilo dos botoes: escuros no tema claro, claros no escuro.
+      NavigationBar.setButtonStyleAsync(escuro ? "light" : "dark");
     }
-  }, []);
+  }, [escuro]);
 
   return (
-    // [marca-vupth] Fundo BRANCO (#FFFFFF) em todo o app. Era #F7FAF8, o
+    // [marca-vupth] Fundo BRANCO (#FFFFFF, `background` do tema claro) em todo o
+    // app. Era #F7FAF8, o
     // off-white da paleta ANTIGA — com a marca nova ele ficava um cinza-esverdeado
     // competindo com o `surface` (#F3F5F1), que e justamente quem deve carregar
     // o tom claro nos cards. Fundo branco + surface cinza recria a separacao que
     // o off-white apagava.
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: cores.background }}>
       <QueryClientProvider client={queryClient}>
         {/* ThemeProvider ENVOLVE o Slot: e ele que pinta o fundo das telas
             (ver `navTheme` acima). Sem isso o navegador usava o cinza
             #F2F2F2 do tema padrao, por cima do branco do SafeAreaProvider. */}
         <ThemeProvider value={navTheme}>
           {/* expo-status-bar e mais confiavel que o StatusBar do RN no Expo:
-              style="dark" = icones escuros (visiveis sobre fundo claro). */}
-          <StatusBar style="dark" backgroundColor="#FFFFFF" />
+              style="dark" = icones escuros (visiveis sobre fundo claro); no
+              tema escuro os icones sao claros. */}
+          <StatusBar style={escuro ? "light" : "dark"} backgroundColor={cores.background} />
           {/* O erro entra no portao de proposito: fonte que nao carrega deve
               degradar para a fonte do sistema, nunca prender o app numa tela
               de carregamento. Foi o spinner eterno de 2026-08-27. */}
-          <View style={[{ flex: 1 }, vars(varsDaFonte(passoDaFonte))]}>
+          <View style={[{ flex: 1 }, variaveis]}>
             {/* baixar-do-parceiro (11/10): so no site, so fora do iPhone. */}
             <FaixaBaixarApp />
-            {fontLoaded || fontError ? <Slot /> : <Loading />}
+            {/* A tela so entra com o tema ja lido do aparelho: quem escolheu o
+                escuro nao ve a abertura piscar em claro. */}
+            {(fontLoaded || fontError) && temaRestaurado ? <Slot /> : <Loading />}
             {/* Um so na arvore, e ACIMA de tudo: um aviso disparado por uma tela
                 nao pode ser coberto por ela. Fica fora do portao das fontes de
                 proposito — erro no boot precisa aparecer mesmo antes delas. */}

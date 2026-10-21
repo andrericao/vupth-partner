@@ -25,6 +25,7 @@ import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
 import { formatCurrency } from "@utils/summaryCalculations";
 import { EstadoVazio } from "@components/EstadoVazio";
+import { useTema } from "@hooks/useTema";
 
 // Tela "Encaixes" (Pencil PROF · 02): mesma feature de C2 (solicitacoes de
 // corte) que ja funcionava dentro de um bottom-sheet em "Opcoes da fila"
@@ -33,6 +34,7 @@ import { EstadoVazio } from "@components/EstadoVazio";
 // modal"). Store/logica identicas; so o layout e novo. Acessada pela linha
 // "Solicitacoes" em Opcoes da fila (so aparece com pedido pendente).
 export default function CutRequestsScreen() {
+  const { cores } = useTema();
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
@@ -139,7 +141,7 @@ export default function CutRequestsScreen() {
                   >
                     <View className="flex-row items-start justify-between">
                       <View className="flex-1 pr-3">
-                        <Text className="font-display text-base text-vupth-forest">{who}</Text>
+                        <Text className="font-display text-base text-vupth-textPrimary">{who}</Text>
                         <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
                           {services}
                           {total > 0 ? ` · ${formatCurrency(total)}` : ""}
@@ -147,12 +149,12 @@ export default function CutRequestsScreen() {
                       </View>
                       <View
                         className={`flex-row items-center gap-1 px-2.5 h-6 rounded-full ${
-                          urgent ? "bg-vupth-danger" : "bg-white border border-vupth-border"
+                          urgent ? "bg-vupth-danger" : "bg-vupth-background border border-vupth-border"
                         }`}
                       >
-                        <Clock size={12} color={urgent ? "#FFFFFF" : "#454745"} />
+                        <Clock size={12} color={urgent ? cores.onDanger : cores.textSecondary} />
                         <Text
-                          className={`font-mono text-f11 ${urgent ? "text-white" : "text-vupth-textSecondary"}`}
+                          className={`font-mono text-f11 ${urgent ? "text-vupth-onDanger" : "text-vupth-textSecondary"}`}
                         >
                           {prazo}
                         </Text>
@@ -161,7 +163,7 @@ export default function CutRequestsScreen() {
   
                     <Text
                       testID="encaixe-quando"
-                      className="font-body text-sm text-vupth-forest"
+                      className="font-body text-sm text-vupth-textPrimary"
                     >
                       {quandoOClienteQuer(req.desired_time, nowMs)}
                     </Text>

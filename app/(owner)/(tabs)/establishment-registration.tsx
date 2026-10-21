@@ -13,7 +13,7 @@ function Field({ label, value }: { label: string; value?: string | null }) {
     <>
       <Text className="font-body text-sm text-vupth-textSecondary mt-3">{label}</Text>
       <Text
-        className={`font-heading mt-0.5 ${value ? "text-vupth-forest" : "text-vupth-textSecondary"}`}
+        className={`font-heading mt-0.5 ${value ? "text-vupth-textPrimary" : "text-vupth-textSecondary"}`}
       >
         {value || "—"}
       </Text>
@@ -107,7 +107,7 @@ export default function EstablishmentRegistrationScreen() {
                   <NwButton
                     title="Cancelar"
                     onPress={() => setEditing(false)}
-                    variant="secondary"
+                    variant="secondaryPainel"
                     className="flex-1 h-9 mt-0"
                   />
                   <NwButton

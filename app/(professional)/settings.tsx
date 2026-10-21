@@ -32,6 +32,7 @@ import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
 import { CUPOM_NO_AR } from "@lib/campanhas";
+import { useTema } from "@hooks/useTema";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -58,6 +59,7 @@ type CardProps = {
 // Escopo de MODULO (licao do segfault do tsc: componente definido dentro do
 // componente estourava a inferencia e remonta a subarvore a cada render).
 function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }: CardProps) {
+  const { cores } = useTema();
   return (
     <>
       <Pressable
@@ -66,10 +68,10 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         accessibilityLabel={title}
         className="flex-row items-center gap-3 px-4 py-3.5 active:bg-vupth-surface"
       >
-        <Icon size={19} color="#163300" />
+        <Icon size={20} color={cores.textPrimary} />
         <View className="flex-1">
           <View className="flex-row items-center gap-1">
-            <Text className="font-body text-sm font-semibold text-vupth-forest">{title}</Text>
+            <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{title}</Text>
             {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendência" mas nao
                 ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
             {dot && (
@@ -84,7 +86,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
-        <ChevronRight size={16} color="#454745" />
+        <ChevronRight size={16} color={cores.textPrimary} />
       </Pressable>
       {!last && <View className="h-px bg-vupth-border" />}
     </>
@@ -95,7 +97,7 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
 function Grupo({ label, children }: { label: string; children: ReactNode }) {
   return (
     <View className="gap-2">
-      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
+      <Text className="font-body text-xs font-bold tracking-wider text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
       <View className="bg-vupth-surface rounded-card overflow-hidden">{children}</View>
@@ -109,6 +111,7 @@ export default function ProfessionalSettingsScreen() {
   const pilula = usePilulaTopo(rolagemRef);
 
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
   const professional = useProfessionalStore((s) => s.professional);
   const minhaFoto = useMinhaFoto();
   const fetchMyAffiliations = useProfessionalStore((s) => s.fetchMyAffiliations);
@@ -156,8 +159,8 @@ export default function ProfessionalSettingsScreen() {
 
   const handleLogout = () => {
     confirmar({
-      titulo: "Sair",
-      mensagem: "Tem certeza que deseja sair da conta?",
+      titulo: "Sair da conta",
+      mensagem: "",
       confirmar: "Sair",
       destrutivo: true,
     }).then(async (ok) => {
@@ -180,7 +183,8 @@ export default function ProfessionalSettingsScreen() {
         {/* [marca-vupth] Cabecalho proprio (Pencil PROF · 04): forest + avatar
             com iniciais + nome. Substitui o Header padrao nesta tela — o .pen
             não repete a barra VUPTH/icone de papel aqui, o avatar já identifica
-            quem esta logado. */}
+            quem esta logado. O fundo `forest` e o mesmo hex nos dois temas, entao
+            o que ha sobre ele (branco, green) tambem vale nos dois. */}
         <View
           className="bg-vupth-forest items-center px-4 pb-7"
           style={{ paddingTop: insets.top + 24 }}
@@ -211,20 +215,22 @@ export default function ProfessionalSettingsScreen() {
               className="absolute right-4 active:opacity-70"
               style={{ top: insets.top + 16 }}
             >
-              <Share2 size={22} color="#9FE870" />
+              <Share2 size={22} color={cores.green} />
             </Pressable>
           )}
           {/* Sem o perfil ainda: skeleton, nunca "Profissional" — com conta ja
               criada o texto generico parecia erro (Andre, 02/10). */}
           {professional ? (
             <>
+              {/* tema-fixo: branco sobre o forest do cabecalho, igual nos dois temas */}
               <Text className="font-display text-xl text-white mt-3">{professional.name}</Text>
               <Text className="font-body text-sm text-vupth-green mt-0.5">{subtitle}</Text>
               {/* avaliacao-no-resumo: a nota geral. A nota POR TIPO DE CORTE vem
                   depois (so o lugar fica pensado: esta linha). */}
               {ratingLabel(professional.rating_average, professional.rating_count) && (
                 <View className="flex-row items-center gap-1.5 mt-1" testID="perfil-avaliacao">
-                  <Star size={13} color="#9FE870" fill="#9FE870" />
+                  <Star size={13} color={cores.green} fill={cores.green} />
+                  {/* tema-fixo: idem */}
                   <Text className="font-body text-sm text-white">
                     {ratingLabel(professional.rating_average, professional.rating_count)} · sua avaliação
                   </Text>
@@ -234,7 +240,7 @@ export default function ProfessionalSettingsScreen() {
           ) : (
             <View className="items-center mt-3 gap-2">
               <SkeletonTexto largura={160} altura={22} escuro testID="perfil-nome-carregando" />
-              <SkeletonTexto largura={120} altura={12} escuro />
+              <SkeletonTexto largura={120} altura={14} escuro />
             </View>
           )}
         </View>
@@ -255,11 +261,11 @@ export default function ProfessionalSettingsScreen() {
               onPress={() => router.replace("/(owner)/dashboard" as any)}
               className="flex-row items-center gap-3 bg-vupth-greenTint rounded-card px-4 py-3.5"
             >
-              <ArrowLeftRight size={19} color="#163300" />
-              <Text className="flex-1 font-body text-sm font-semibold text-vupth-forest">
+              <ArrowLeftRight size={20} color={cores.onGreenTint} />
+              <Text className="flex-1 font-body text-sm font-semibold text-vupth-onGreenTint">
                 Área do dono
               </Text>
-              <ChevronRight size={16} color="#163300" />
+              <ChevronRight size={16} color={cores.onGreenTint} />
             </Pressable>
           )}
   

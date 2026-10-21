@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Animated, Pressable, Text } from "react-native";
 import { ArrowUp } from "lucide-react-native";
+import { useTema } from "@hooks/useTema";
 
 // A pílula "↑ Voltar ao topo" (Andre, 24/09 — "como a do Spotify, que aparece
 // suave no rodapé"). Desenho escolhido por ele: pílula com TEXTO, centralizada,
@@ -21,6 +22,7 @@ export function PilulaVoltarAoTopo({
   onPress: () => void;
 }) {
   const [anim] = useState(() => new Animated.Value(0));
+  const { cores } = useTema();
 
   useEffect(() => {
     Animated.timing(anim, {
@@ -52,7 +54,7 @@ export function PilulaVoltarAoTopo({
         accessibilityLabel="Voltar ao topo"
         className="flex-row items-center gap-1.5 bg-vupth-forest rounded-full px-5 py-2.5 active:opacity-80"
       >
-        <ArrowUp size={16} color="#9FE870" />
+        <ArrowUp size={16} color={cores.green} />
         <Text className="font-heading text-sm text-vupth-green">Voltar ao topo</Text>
       </Pressable>
     </Animated.View>

@@ -7,6 +7,7 @@ import { NwButton } from "@components/nw/Button";
 import { useProfessionalStore } from "@store/professional.store";
 import { getApiErrorMessage } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
+import { avisoDeSairDaLoja, avisoDoConvite } from "@lib/avisosDoVinculo";
 import { AvisoLojaDesativada } from "@components/AvisoLojaDesativada";
 import { ConvitesDePosse } from "@components/ConvitesDePosse";
 import {
@@ -108,12 +109,7 @@ export default function SettingsVinculoScreen() {
 
   // R3: confirmacao antes de decidir a vinculacao.
   const handleAcceptInvite = (inv: any) => {
-    const nome = inv.establishmentName ?? "este estabelecimento";
-    confirmar({
-      titulo: "Aceitar vinculação",
-      mensagem: `Deseja se vincular a ${nome}? Você passara a atender por este estabelecimento.`,
-      confirmar: "Aceitar",
-    }).then((ok) => {
+    confirmar(avisoDoConvite(inv.establishmentName)).then((ok) => {
       if (ok) doAcceptInvite(inv);
     });
   };
@@ -132,9 +128,7 @@ export default function SettingsVinculoScreen() {
 
   const handleLeave = async () => {
     const ok = await confirmar({
-      titulo: "Desafiliar do estabelecimento",
-      mensagem: `Você deixará de atender em ${professional?.establishment_name ?? "este estabelecimento"} e não receberá novos clientes na fila. Deseja continuar?`,
-      confirmar: "Desafiliar",
+      ...avisoDeSairDaLoja(professional?.establishment_name),
       destrutivo: true,
     });
     if (!ok) return;
@@ -179,14 +173,14 @@ export default function SettingsVinculoScreen() {
         </View>
 
         {invites.length > 0 && (
-          <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-forest gap-2">
-            <Text className="font-heading text-vupth-forest">
+          <View className="mt-6 bg-vupth-greenTint p-4 rounded-lg border border-vupth-onGreenTint gap-2">
+            <Text className="font-heading text-vupth-onGreenTint">
               Convites de vinculação
             </Text>
             {invites.map((inv) => (
-              <View key={inv.id} className="bg-white p-3 rounded-md border border-vupth-border">
+              <View key={inv.id} className="bg-vupth-background p-3 rounded-md border border-vupth-border">
                 <Text className="font-body text-sm text-vupth-textSecondary">Convite de</Text>
-                <Text className="font-heading text-vupth-forest mb-2">
+                <Text className="font-heading text-vupth-textPrimary mb-2">
                   {inv.establishmentName ?? "Estabelecimento"}
                 </Text>
                 <View className="flex-row gap-2">
@@ -223,7 +217,7 @@ export default function SettingsVinculoScreen() {
           ) : (
             <Text
               className={`font-heading mt-1 ${
-                professional.establishment_name ? "text-vupth-forest" : "text-vupth-textSecondary"
+                professional.establishment_name ? "text-vupth-textPrimary" : "text-vupth-textSecondary"
               }`}
             >
               {professional.establishment_name ?? "Não vinculado"}
@@ -237,7 +231,7 @@ export default function SettingsVinculoScreen() {
             />
           ) : (
             <NwButton
-              title="Desafiliar do Estabelecimento"
+              title="Sair da loja"
               onPress={handleLeave}
               isLoading={isLeaving}
               variant="outlineDanger"

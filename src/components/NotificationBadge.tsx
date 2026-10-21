@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import { useFs } from "@store/fonte.store";
 import { badgeLabel } from "@lib/notifications";
+import { useTema } from "@hooks/useTema";
 
 // Badge vermelho com CONTAGEM (1..9, depois "9+"). Substitui o dot mudo do
 // botao de Opcoes da fila e o badge cru das linhas do menu. Em RN puro de
@@ -13,6 +14,7 @@ type Props = {
 
 export function NotificationBadge({ count, testID = "notification-badge" }: Props) {
   const fs = useFs();
+  const { cores } = useTema();
   const label = badgeLabel(count);
   if (!label) return null;
 
@@ -26,14 +28,14 @@ export function NotificationBadge({ count, testID = "notification-badge" }: Prop
         height: fs(18),
         paddingHorizontal: 5,
         borderRadius: fs(18) / 2,
-        backgroundColor: "#B3261E", // [marca-vupth] $brandDanger
+        backgroundColor: cores.danger,
         alignItems: "center",
         justifyContent: "center",
       }}
     >
       <Text
         style={{
-          color: "#FFFFFF",
+          color: cores.onDanger,
           fontSize: fs(11),
           lineHeight: fs(14),
           fontWeight: "700",

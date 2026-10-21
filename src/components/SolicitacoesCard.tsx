@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react-native";
 import { Titulo } from "@components/Titulo";
 import { LiveDot } from "@components/LiveDot";
 import type { ResumoSolicitacoes } from "@lib/cutRequests";
+import { useTema } from "@hooks/useTema";
 
 // O pedido de encaixe, DENTRO da Fila.
 //
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export function SolicitacoesCard({ resumo, onPress }: Props) {
+  const { cores } = useTema();
   // 5 minutos e o TTL do backend. Abaixo de 2, o pedido morre antes de o
   // profissional terminar o que esta fazendo — entao o relogio pisca.
   // Sem prazo (so pedidos de outro dia, DEC-27): nada expira, nada pisca.
@@ -38,15 +40,15 @@ export function SolicitacoesCard({ resumo, onPress }: Props) {
       className="bg-vupth-accentPeach rounded-card p-4 mt-4 gap-1.5 active:opacity-90"
     >
       <View className="flex-row items-center gap-1.5">
-        <LiveDot size={7} color="#163300" pulsing={urgente} />
+        <LiveDot size={7} color={cores.onAccentPeach} pulsing={urgente} />
         <Titulo nivel={2}>{resumo.titulo}</Titulo>
       </View>
 
-      <Text className="font-body text-f14 text-vupth-forest">{resumo.quem}</Text>
+      <Text className="font-body text-f14 text-vupth-onAccentPeach">{resumo.quem}</Text>
 
       <View className="flex-row items-center justify-between mt-1">
         {/* O relogio e do MAIS urgente: e ele que decide se da tempo. */}
-        <Text testID="solicitacoes-expira" className="font-mono text-xs text-vupth-forest">
+        <Text testID="solicitacoes-expira" className="font-mono text-xs text-vupth-onAccentPeach">
           {resumo.expiraEm === null
             ? "sem prazo"
             : resumo.expiraEm <= 0
@@ -56,8 +58,8 @@ export function SolicitacoesCard({ resumo, onPress }: Props) {
                 : `expira em ${resumo.expiraEm} min`}
         </Text>
         <View className="flex-row items-center gap-1">
-          <Text className="font-heading text-f13 text-vupth-forest">Ver solicitações</Text>
-          <ArrowRight size={15} color="#163300" />
+          <Text className="font-heading text-f13 text-vupth-onAccentPeach">Ver solicitações</Text>
+          <ArrowRight size={15} color={cores.onAccentPeach} />
         </View>
       </View>
     </Pressable>

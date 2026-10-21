@@ -3,13 +3,14 @@ import { useFs } from "@store/fonte.store";
 import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { rotulosCabem } from "@lib/rotulosDaAba";
-import { TabBarIcon, tabBarShadow } from "@components/TabBarIcon";
+import { TabBarIcon, divisorDaBarraDeAbas, tabBarShadow } from "@components/TabBarIcon";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { hasAnyPending } from "@lib/completion";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { useProfessionalStore } from "@store/professional.store";
+import { useTema } from "@hooks/useTema";
 
 // RODAPE = LUGARES. Quatro abas, como o Pencil desenha em `Tab Bar Professional`:
 // Fila · Encaixes · Relatórios · Perfil.
@@ -30,6 +31,7 @@ import { useProfessionalStore } from "@store/professional.store";
 const HIDDEN = { href: null } as const;
 
 export default function ProfessionalLayout() {
+  const { cores, escuro } = useTema();
   const fs = useFs();
   const insets = useSafeAreaInsets();
   // DS4 — a barra NAO cresce: quando o rotulo deixa de caber, ele SAI e fica
@@ -54,8 +56,8 @@ export default function ProfessionalLayout() {
       backBehavior="history"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#163300", // [marca-vupth] $forest
-        tabBarInactiveTintColor: "#454745", // $text-secondary
+        tabBarActiveTintColor: cores.textPrimary, // forest no claro
+        tabBarInactiveTintColor: cores.textSecondary,
         // Rotulo SEMPRE embaixo do icone. Sem isto o React Navigation decide
         // sozinho e, faltando altura, joga o rotulo AO LADO — que com a pilula
         // (larga) cai por cima do icone. Aconteceu no app do cliente em
@@ -65,9 +67,8 @@ export default function ProfessionalLayout() {
         tabBarShowLabel: mostrarRotulo,
         tabBarStyle: {
           ...tabBarShadow,
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#D7DDD3", // [marca-vupth] $brandBorder
-          borderTopWidth: 0,
+          backgroundColor: cores.background,
+          ...divisorDaBarraDeAbas(escuro, cores),
           // [marca-vupth] Rotulo cortado em device real (QA Alexia 2026-08-21):
           // 60 - 8(top) - 8(bottom) sobrava so 44px pro icone (24) + label —
           // sem folga, cortava embaixo dependendo do metrics da fonte. +12px.
@@ -127,7 +128,7 @@ export default function ProfessionalLayout() {
                     width: 9,
                     height: 9,
                     borderRadius: 5,
-                    backgroundColor: "#B3261E", // [marca-vupth] $brandDanger, como o dot do Perfil
+                    backgroundColor: cores.danger, // como o dot do Perfil
                   }}
                 />
               )}
@@ -154,7 +155,7 @@ export default function ProfessionalLayout() {
                     width: 9,
                     height: 9,
                     borderRadius: 5,
-                    backgroundColor: "#B3261E", // [marca-vupth] $brandDanger
+                    backgroundColor: cores.danger,
                   }}
                 />
               )}
