@@ -17,13 +17,13 @@ type Props = {
   onToggle: () => void;
 };
 
-// botoes-no-topo-da-fila (Andre, 22/10): a chave sobe para a linha do titulo
-// "Lista de espera", a direita. Sem espaco para a legenda, ela vira dica de
+// botoes-no-topo-da-fila (Andre, 22/10): a chave sobe para o topo da Fila; desde
+// o fila-cabecalho-corrigido (22/10) fica logo abaixo do titulo "Lista de Espera". Sem espaco para a legenda, ela vira dica de
 // acessibilidade (o que acontece com quem ja esta na fila continua dito).
 export function AceitandoNovos({ aceitando, onToggle }: Props) {
   const { interruptor } = useTema();
   return (
-    <View className="flex-row items-center gap-2">
+    <View className="flex-row items-center gap-2 self-start">
       <Text className="font-heading text-xs text-vupth-textPrimary">Aceitando novos</Text>
       <Switch
         testID="aceitando-novos"

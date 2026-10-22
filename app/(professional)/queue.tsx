@@ -19,7 +19,7 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
-import { perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
+import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
 import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -611,15 +611,28 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
-  // pagamento-pix (adendos 1a0616c e 62295f1): todo Finalizar passa por aqui.
-  // Pendente -> "Recebeu o pagamento?"; a resposta vai no finish. A
-  // mensagem do fim so aparece quando houve a pergunta.
+  // finalizar-e-depois-receber (Andre, 22/10): todo Finalizar passa por aqui. O
+  // corte e finalizado NA HORA, sem corpo; so depois vem "Recebeu o pagamento?".
+  // Recebi -> a forma (Pix, cartao, dinheiro, nota) e o payment/confirm (PAID).
+  // Ainda nao -> o pagamento fica pendente e ele marca depois em Relatorios.
+  // A pergunta so aparece quando ha o que receber (ja pago ou sem pagamento: nada).
   const finalizarComPagamento = async (attendanceId: string) => {
+    await finishAttendance(attendanceId);
     const recebido = await perguntarPagamento(attendanceId);
-    // forma-de-recebimento: so quem disse "Recebi" e so se quiser.
-    const forma = recebido === true ? await perguntarForma() : undefined;
-    const status = await finishAttendance(attendanceId, recebido, forma);
-    const mensagem = recebido === undefined ? null : mensagemDoFim(status);
+    if (recebido === undefined) return;
+    if (recebido) {
+      const forma = await perguntarForma();
+      try {
+        await confirmarRecebimento(attendanceId, forma);
+      } catch (error: any) {
+        Alert.alert(
+          "Atendimento finalizado",
+          getApiErrorMessage(error, "O corte foi finalizado, mas não deu para registrar o recebimento. Marque em Relatórios.")
+        );
+        return;
+      }
+    }
+    const mensagem = mensagemDoFim(recebido ? "PAID" : "PENDING");
     if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
   };
 
@@ -1017,15 +1030,16 @@ export default function ProfessionalQueueScreen() {
             </View>
           )}
   
-          {/* botoes-no-topo-da-fila (Andre, 22/10): "Adicionar cliente" e "Aceitando
-              novos" na linha do titulo, a direita. A linha vale tambem com a fila
-              vazia (e quando o cliente que chega andando mais importa). */}
+          {/* fila-cabecalho-corrigido (Andre, 22/10, corrige o 6d6a20a): o titulo
+              "Lista de Espera" a esquerda e "Adicionar cliente" (com icone) na
+              mesma linha, a direita; a chave "Aceitando novos" logo abaixo do
+              titulo. A linha vale tambem com a fila vazia. */}
           {!isLoading && myProfessional && (
-            <View className="mt-6 mb-2 flex-row flex-wrap items-center justify-between gap-2">
-              <Titulo nivel={2}>
-                {waitingList.length > 0 ? `Lista de Espera (${waitingList.length})` : "Lista de Espera"}
-              </Titulo>
-              <View className="flex-row items-center gap-3">
+            <View className="mt-6 mb-2">
+              <View className="flex-row items-center justify-between gap-2">
+                <Titulo nivel={2}>
+                  {waitingList.length > 0 ? `Lista de Espera (${waitingList.length})` : "Lista de Espera"}
+                </Titulo>
                 <NwButton
                   testID="adicionar-cliente-topo"
                   title="Adicionar cliente"
@@ -1034,8 +1048,8 @@ export default function ProfessionalQueueScreen() {
                   className="h-9 px-3"
                   icon={<UserPlus size={16} color={cores.textPrimary} />}
                 />
-                <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
               </View>
+              <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
             </View>
           )}
 
