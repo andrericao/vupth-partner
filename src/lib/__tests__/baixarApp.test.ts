@@ -1,4 +1,4 @@
-import { ehIOS, linkDeBaixar, raizDoSitePartner, APK_PARCEIRO } from "@lib/baixarApp";
+import { APK_NO_AR, ehIOS, linkDeBaixar, raizDoSitePartner, APK_PARCEIRO } from "@lib/baixarApp";
 
 // baixar-do-parceiro (Andre, 11/10): "so vale oferecer para Android, pois nao
 // criamos para iOS, e o link deve levar certo para o cliente e para parceiros".
@@ -25,6 +25,10 @@ describe("baixarApp", () => {
   it("o /baixar fica na raiz do site, sem barra dobrada", () => {
     expect(linkDeBaixar("https://vupth-partner.pages.dev/")).toBe("https://vupth-partner.pages.dev/baixar");
     expect(linkDeBaixar("https://dev.vupth-partner.pages.dev")).toBe("https://dev.vupth-partner.pages.dev/baixar");
+  });
+
+  it("o APK ja esta no R2: a faixa Baixar o app esta ligada (ligar-apk-no-ar)", () => {
+    expect(APK_NO_AR).toBe(true);
   });
 
   it("o APK do parceiro tem nome proprio no bucket (nao o do cliente)", () => {

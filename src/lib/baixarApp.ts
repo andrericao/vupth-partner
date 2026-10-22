@@ -13,7 +13,7 @@ export const APK_PARCEIRO = "apk/vupth-parceiro.apk";
  * O APK do parceiro ja esta no R2? So o Andre o sobe (build prod-apk +
  * tools/apk-para-o-r2.sh). Ate la a faixa fica escondida: o /baixar daria 404.
  */
-export const APK_NO_AR = false;
+export const APK_NO_AR = true;
 
 /** iPhone/iPad: nao ha app para iOS, entao a faixa "Baixar o app" nao aparece. */
 export function ehIOS(userAgent: string | undefined | null): boolean {
