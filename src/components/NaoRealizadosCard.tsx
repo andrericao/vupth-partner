@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { SecaoRecolhivel } from "@components/SecaoRecolhivel";
 import { MOTIVOS_DO_NAO_REALIZADO, type NaoRealizados } from "@lib/relatorioDasLojas";
 
 // relatorio-sem-multa (DEC-83): o profissional e a loja ficam com o REGISTRO do
@@ -18,23 +19,22 @@ export function NaoRealizadosCard({
   if (total === 0 && atraso === 0) return null;
 
   return (
-    <View testID="nao-realizados-por-motivo" className="bg-vupth-surface p-4 rounded-card gap-1">
+    <SecaoRecolhivel testID="nao-realizados-por-motivo" titulo="Não realizados">
       {total > 0 && naoRealizados && (
-        <>
-          <Text className="font-heading text-vupth-textPrimary">Não realizados</Text>
+        <View className="gap-1">
           {MOTIVOS_DO_NAO_REALIZADO.map((m) => (
             <View key={m.campo} className="flex-row justify-between">
               <Text className="font-body text-xs text-vupth-textSecondary">{m.rotulo}</Text>
               <Text className="font-body text-xs text-vupth-textSecondary">{naoRealizados[m.campo] ?? 0}</Text>
             </View>
           ))}
-        </>
+        </View>
       )}
       {atraso > 0 && (
         <Text className="font-body text-xs text-vupth-textSecondary mt-1">
           {atraso} concluídos com atraso do cliente
         </Text>
       )}
-    </View>
+    </SecaoRecolhivel>
   );
 }

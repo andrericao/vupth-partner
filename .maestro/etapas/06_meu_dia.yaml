@@ -14,11 +14,20 @@ appId: ${APP_ID}
     timeout: 20000
     label: "06.03 · espera Você recebeu"
 # relatorio-todas-as-linhas (DEC-55): o topo traz a conta do periodo, linha a linha.
+# relatorios-com-dropdown (22/10): a conta do periodo vem recolhida; o toque abre.
+- scrollUntilVisible:
+    element:
+      id: "conta-do-periodo-secao-titulo"
+    direction: DOWN
+    label: "06.03a · conta · o dropdown A conta do periodo aparece"
+- tapOn:
+    id: "conta-do-periodo-secao-titulo"
+    label: "06.03a1 · conta · abre o dropdown"
 - scrollUntilVisible:
     element:
       id: "conta-do-periodo"
     direction: DOWN
-    label: "06.03a · conta · a conta do periodo aparece"
+    label: "06.03a2 · conta · a conta do periodo aparece aberta"
 - assertVisible:
     text: "Arredondamento"
     label: "06.03b · conta · com todas as linhas"
@@ -29,6 +38,9 @@ appId: ${APP_ID}
     element: "Não realizados"
     direction: DOWN
     label: "06.03c · nao-realizados · o resumo traz Não realizados"
+- tapOn:
+    id: "nao-realizados-por-motivo-titulo"
+    label: "06.03c1 · nao-realizados · abre o dropdown"
 - assertVisible:
     text: "Profissional removeu o cliente"
     label: "06.03d · nao-realizados · com o motivo (a loja removeu o cliente)"
@@ -71,6 +83,9 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Retirado"
     label: "06.09 · confere Retirado"
+- tapOn:
+    id: "nao-realizados-por-motivo-titulo"
+    label: "06.03c1 · nao-realizados · abre o dropdown"
 - assertVisible:
     text: "Profissional removeu o cliente"
     label: "06.09a · nao-realizados · o atendimento retirado diz o motivo"
