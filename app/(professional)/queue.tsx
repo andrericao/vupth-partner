@@ -917,13 +917,6 @@ export default function ProfessionalQueueScreen() {
             </View>
           )}
   
-          {/* aceitando-novos-fixo (PAR-13, Andre 15/10): a chave fica FIXA acima
-              dos cards de atendimento. No pe da lista ela descia a cada card
-              acrescentado. */}
-          {!isLoading && myProfessional && (
-            <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
-          )}
-
           {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
           {/* O card inteiro abre o menu, alem dos botoes: quem tentou finalizar
               pelo MENU (e nao pelos botoes) tem que achar as acoes onde procurou —
@@ -1024,11 +1017,30 @@ export default function ProfessionalQueueScreen() {
             </View>
           )}
   
-          {waitingList.length > 0 && (
-            <View className="mt-6">
-              <Titulo nivel={2} className="mb-2">
-                Lista de Espera ({waitingList.length})
+          {/* botoes-no-topo-da-fila (Andre, 22/10): "Adicionar cliente" e "Aceitando
+              novos" na linha do titulo, a direita. A linha vale tambem com a fila
+              vazia (e quando o cliente que chega andando mais importa). */}
+          {!isLoading && myProfessional && (
+            <View className="mt-6 mb-2 flex-row flex-wrap items-center justify-between gap-2">
+              <Titulo nivel={2}>
+                {waitingList.length > 0 ? `Lista de Espera (${waitingList.length})` : "Lista de Espera"}
               </Titulo>
+              <View className="flex-row items-center gap-3">
+                <NwButton
+                  testID="adicionar-cliente-topo"
+                  title="Adicionar cliente"
+                  variant="vupthGhost"
+                  onPress={() => router.push("/(professional)/add-guest" as any)}
+                  className="h-9 px-3"
+                  icon={<UserPlus size={16} color={cores.textPrimary} />}
+                />
+                <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
+              </View>
+            </View>
+          )}
+
+          {waitingList.length > 0 && (
+            <View>
               {waitingList.map((att, idx) => (
                 // O cartão que chega entra com fade e deslize; quem já estava
                 // montado não reanima a cada atualização da fila (a chave é o id).
@@ -1073,23 +1085,6 @@ export default function ProfessionalQueueScreen() {
                 className="h-9 px-4"
               />
             </View>
-          )}
-  
-          {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao
-              mais frequente do dia e estava enterrada tres toques adentro, no
-              mesmo lugar do status. Vive ABAIXO da lista, porque e sobre ela que
-              se age, e em `ghost` pra nao brigar com o "Iniciar proximo" fixo do
-              rodape — dois botoes cheios na mesma tela e uma escolha, nao uma
-              acao. Aparece tambem com a fila vazia, que e quando o cliente que
-              chega andando importa mais. */}
-          {!isLoading && myProfessional && (
-            <NwButton
-              title="Adicionar cliente"
-              variant="vupthGhost"
-              onPress={() => router.push("/(professional)/add-guest" as any)}
-              className="self-start mt-3"
-              icon={<UserPlus size={16} color={cores.textPrimary} />}
-            />
           )}
   
           {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (

@@ -17,27 +17,25 @@ type Props = {
   onToggle: () => void;
 };
 
+// botoes-no-topo-da-fila (Andre, 22/10): a chave sobe para a linha do titulo
+// "Lista de espera", a direita. Sem espaco para a legenda, ela vira dica de
+// acessibilidade (o que acontece com quem ja esta na fila continua dito).
 export function AceitandoNovos({ aceitando, onToggle }: Props) {
   const { interruptor } = useTema();
   return (
-    <View className="flex-row items-center gap-3 mt-4 bg-vupth-surface rounded-card px-4 py-3">
-      <View className="flex-1">
-        <Text className="font-heading text-sm text-vupth-textPrimary">
-          Aceitando novos
-        </Text>
-        <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
-          {aceitando
-            ? "Entrada na fila liberada"
-            : "Fila fechada — só quem já está espera"}
-        </Text>
-      </View>
+    <View className="flex-row items-center gap-2">
+      <Text className="font-heading text-xs text-vupth-textPrimary">Aceitando novos</Text>
       <Switch
         testID="aceitando-novos"
         value={aceitando}
         onValueChange={onToggle}
         accessibilityLabel="Aceitando novos clientes"
+        accessibilityHint={aceitando ? LEGENDA_ABERTA : LEGENDA_FECHADA}
         {...interruptor}
       />
     </View>
   );
 }
+
+export const LEGENDA_ABERTA = "Entrada na fila liberada";
+export const LEGENDA_FECHADA = "Fila fechada — só quem já está espera";

@@ -3,20 +3,28 @@ import { renderWithProvider } from "../../test-utils/renderWithProvider";
 import { AceitandoNovos } from "../AceitandoNovos";
 
 describe("AceitandoNovos", () => {
-  it("aberta: a legenda diz que dá para entrar", () => {
-    const { getByText } = renderWithProvider(
+  it("mostra o rotulo curto, sem a legenda (ela virou dica de acessibilidade)", () => {
+    const { getByText, queryByText } = renderWithProvider(
       <AceitandoNovos aceitando onToggle={jest.fn()} />
     );
-    getByText("Entrada na fila liberada");
+    getByText("Aceitando novos");
+    expect(queryByText("Entrada na fila liberada")).toBeNull();
+  });
+
+  it("aberta: a dica diz que dá para entrar", () => {
+    const { getByTestId } = renderWithProvider(
+      <AceitandoNovos aceitando onToggle={jest.fn()} />
+    );
+    expect(getByTestId("aceitando-novos").props.accessibilityHint).toBe("Entrada na fila liberada");
   });
 
   it("fechada: a legenda diz o que acontece com quem JA esta", () => {
     // O medo de fechar e "e quem esta esperando?". A legenda responde antes de
     // perguntarem.
-    const { getByText } = renderWithProvider(
+    const { getByTestId } = renderWithProvider(
       <AceitandoNovos aceitando={false} onToggle={jest.fn()} />
     );
-    getByText("Fila fechada — só quem já está espera");
+    expect(getByTestId("aceitando-novos").props.accessibilityHint).toBe("Fila fechada — só quem já está espera");
   });
 
   it("a chave reflete o estado, nao so a legenda", () => {
