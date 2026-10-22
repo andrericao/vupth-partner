@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { FotoEditavel } from "@components/FotoEditavel";
 import { CompartilharPerfil } from "@components/CompartilharPerfil";
@@ -38,12 +38,12 @@ function MenuItem({ label, description, onPress }: MenuItemProps) {
 export default function EstablishmentDataScreen() {
   // Checklist de prontidao (2 completes) mora aqui, nas Configuracoes — a Home
   // so mostra a faixa. Ver useOwnerCompletion / CompletionCard.
-  const { completion, professionalsCount, routeFor } = useOwnerCompletion();
+  const { completion, professionalsCount, detail, routeFor } = useOwnerCompletion();
   const establishment = useEstablishmentStore((s) => s.establishment);
   // A foto da loja (Andre, 26/09) — url_image, que ate aqui ninguem preenchia.
-  const [fotoDaLoja, setFotoDaLoja] = useState<string | null>(establishment?.url_image ?? null);
+  const [fotoEscolhida, setFotoDaLoja] = useState<string | null | undefined>(undefined);
+  const fotoDaLoja = fotoEscolhida !== undefined ? fotoEscolhida : (establishment?.url_image ?? detail?.url_image ?? null);
   // A lista /mine pode nao trazer a foto: o detalhe traz (urlImage/url_image).
-  const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
   const deleteEstablishment = useEstablishmentStore((s) => s.deleteEstablishment);
 
   // desativar-conta (c0f5b17, item 5): apagar a loja, com a senha.
@@ -65,12 +65,6 @@ export default function EstablishmentDataScreen() {
       setApagando(false);
     }
   };
-  useEffect(() => {
-    if (!establishment?.id) return;
-    fetchEstablishmentById(establishment.id)
-      .then((d) => setFotoDaLoja((atual) => atual ?? d.url_image ?? null))
-      .catch(() => {});
-  }, [establishment?.id, fetchEstablishmentById]);
   const aoMudarFoto = (uri: string | null) => {
     setFotoDaLoja(uri);
     const atual = useEstablishmentStore.getState().establishment;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useIsFocused } from "@react-navigation/native";
 import { useEstablishmentStore } from "@store/establishment.store";
 import type { EstablishmentDetail } from "@store/establishment.store";
@@ -8,6 +8,8 @@ import type { Completion } from "@lib/completion";
 import { buscarHorarios } from "@lib/horariosApi";
 import { temHorarioDefinido } from "@lib/horarioSemanal";
 
+const STALE_MS = 5000;
+
 // Fonte unica da completude do DONO — usada pela faixa (Home/dashboard), pelo
 // checklist (Dados do Estabelecimento) e pelo dot (menu). Evita duplicar o
 // mapeamento de flags. A query da fila e deduplicada pelo React Query (mesma
@@ -15,26 +17,44 @@ import { temHorarioDefinido } from "@lib/horarioSemanal";
 export function useOwnerCompletion(): {
   completion: Completion;
   professionalsCount: number;
+  /** O detalhe da loja (o mesmo da completude), para a tela nao buscar de novo. */
+  detail: EstablishmentDetail | null;
   routeFor: (key: string) => string | undefined;
 } {
   const establishment = useEstablishmentStore((s) => s.establishment);
   const fetchEstablishmentById = useEstablishmentStore((s) => s.fetchEstablishmentById);
   const establishmentId = establishment?.id ?? null;
   const isFocused = useIsFocused();
-  const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
 
   const { data: queueData } = useProfessionalsWithQueueQuery(establishmentId);
   const professionals = queueData?.professionals ?? [];
 
+  // cache-nas-telas-de-requisitos (Andre, 22/10): o dashboard, o menu e os Dados
+  // do Estabelecimento usam este hook ao mesmo tempo. Com `useState` + `useEffect`
+  // cada um buscava o seu detalhe e a sua semana e a barra de progresso enchia uma
+  // vez por tela (e de novo a cada foco). No React Query a busca e uma so
+  // (deduplicada), o ultimo valor aparece na hora e a atualizacao vem em segundo
+  // plano — so se o valor guardado tiver mais de 5s.
+  const ativo = !!establishmentId && isFocused;
+  const detailQuery = useQuery({
+    queryKey: ["owner-completion-detail", establishmentId],
+    queryFn: () => fetchEstablishmentById(establishmentId as string),
+    enabled: ativo,
+    staleTime: STALE_MS,
+    retry: false,
+  });
+  const detail = detailQuery.data ?? null;
+
   // A semana (S27). `undefined` = ainda nao chegou; `null` = backend sem a
   // rota. Nos dois casos o horario unico decide, como antes.
-  const [semana, setSemana] = useState<{ configured: boolean } | null | undefined>(undefined);
-
-  useEffect(() => {
-    if (!establishmentId || !isFocused) return;
-    fetchEstablishmentById(establishmentId).then(setDetail).catch(() => {});
-    buscarHorarios(establishmentId).then(setSemana).catch(() => {});
-  }, [establishmentId, isFocused, fetchEstablishmentById]);
+  const semanaQuery = useQuery({
+    queryKey: ["owner-completion-semana", establishmentId],
+    queryFn: () => buscarHorarios(establishmentId as string),
+    enabled: ativo,
+    staleTime: STALE_MS,
+    retry: false,
+  });
+  const semana: { configured: boolean } | null | undefined = semanaQuery.data;
 
   // `detail` (GET /establishment/id/{id}) e a fonte FRESCA e completa — traz
   // name/service_type/hours/address/phone/instagram do banco. A store
@@ -67,5 +87,5 @@ export function useOwnerCompletion(): {
     return map[key];
   };
 
-  return { completion, professionalsCount: professionals.length, routeFor };
+  return { completion, professionalsCount: professionals.length, detail, routeFor };
 }
