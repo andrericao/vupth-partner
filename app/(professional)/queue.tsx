@@ -19,7 +19,7 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
-import { perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
+import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
 import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -611,15 +611,28 @@ export default function ProfessionalQueueScreen() {
     }
   };
 
-  // pagamento-pix (adendos 1a0616c e 62295f1): todo Finalizar passa por aqui.
-  // Pendente -> "Recebeu o pagamento?"; a resposta vai no finish. A
-  // mensagem do fim so aparece quando houve a pergunta.
+  // finalizar-e-depois-receber (Andre, 22/10): todo Finalizar passa por aqui. O
+  // corte e finalizado NA HORA, sem corpo; so depois vem "Recebeu o pagamento?".
+  // Recebi -> a forma (Pix, cartao, dinheiro, nota) e o payment/confirm (PAID).
+  // Ainda nao -> o pagamento fica pendente e ele marca depois em Relatorios.
+  // A pergunta so aparece quando ha o que receber (ja pago ou sem pagamento: nada).
   const finalizarComPagamento = async (attendanceId: string) => {
+    await finishAttendance(attendanceId);
     const recebido = await perguntarPagamento(attendanceId);
-    // forma-de-recebimento: so quem disse "Recebi" e so se quiser.
-    const forma = recebido === true ? await perguntarForma() : undefined;
-    const status = await finishAttendance(attendanceId, recebido, forma);
-    const mensagem = recebido === undefined ? null : mensagemDoFim(status);
+    if (recebido === undefined) return;
+    if (recebido) {
+      const forma = await perguntarForma();
+      try {
+        await confirmarRecebimento(attendanceId, forma);
+      } catch (error: any) {
+        Alert.alert(
+          "Atendimento finalizado",
+          getApiErrorMessage(error, "O corte foi finalizado, mas não deu para registrar o recebimento. Marque em Relatórios.")
+        );
+        return;
+      }
+    }
+    const mensagem = mensagemDoFim(recebido ? "PAID" : "PENDING");
     if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
   };
 
@@ -917,13 +930,6 @@ export default function ProfessionalQueueScreen() {
             </View>
           )}
   
-          {/* aceitando-novos-fixo (PAR-13, Andre 15/10): a chave fica FIXA acima
-              dos cards de atendimento. No pe da lista ela descia a cada card
-              acrescentado. */}
-          {!isLoading && myProfessional && (
-            <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
-          )}
-
           {/* Atendimento em andamento manda na tela: vem ANTES de tudo. */}
           {/* O card inteiro abre o menu, alem dos botoes: quem tentou finalizar
               pelo MENU (e nao pelos botoes) tem que achar as acoes onde procurou —
@@ -1024,11 +1030,31 @@ export default function ProfessionalQueueScreen() {
             </View>
           )}
   
+          {/* fila-cabecalho-corrigido (Andre, 22/10, corrige o 6d6a20a): o titulo
+              "Lista de Espera" a esquerda e "Adicionar cliente" (com icone) na
+              mesma linha, a direita; a chave "Aceitando novos" logo abaixo do
+              titulo. A linha vale tambem com a fila vazia. */}
+          {!isLoading && myProfessional && (
+            <View className="mt-6 mb-2">
+              <View className="flex-row items-center justify-between gap-2">
+                <Titulo nivel={2}>
+                  {waitingList.length > 0 ? `Lista de Espera (${waitingList.length})` : "Lista de Espera"}
+                </Titulo>
+                <NwButton
+                  testID="adicionar-cliente-topo"
+                  title="Adicionar cliente"
+                  variant="vupthGhost"
+                  onPress={() => router.push("/(professional)/add-guest" as any)}
+                  className="h-9 px-3"
+                  icon={<UserPlus size={16} color={cores.textPrimary} />}
+                />
+              </View>
+              <AceitandoNovos aceitando={aceitandoNovos} onToggle={alternarAceitando} />
+            </View>
+          )}
+
           {waitingList.length > 0 && (
-            <View className="mt-6">
-              <Titulo nivel={2} className="mb-2">
-                Lista de Espera ({waitingList.length})
-              </Titulo>
+            <View>
               {waitingList.map((att, idx) => (
                 // O cartão que chega entra com fade e deslize; quem já estava
                 // montado não reanima a cada atualização da fila (a chave é o id).
@@ -1073,23 +1099,6 @@ export default function ProfessionalQueueScreen() {
                 className="h-9 px-4"
               />
             </View>
-          )}
-  
-          {/* DS3 — "Adicionar cliente" saiu do menu (decisao da Alexia). E a acao
-              mais frequente do dia e estava enterrada tres toques adentro, no
-              mesmo lugar do status. Vive ABAIXO da lista, porque e sobre ela que
-              se age, e em `ghost` pra nao brigar com o "Iniciar proximo" fixo do
-              rodape — dois botoes cheios na mesma tela e uma escolha, nao uma
-              acao. Aparece tambem com a fila vazia, que e quando o cliente que
-              chega andando importa mais. */}
-          {!isLoading && myProfessional && (
-            <NwButton
-              title="Adicionar cliente"
-              variant="vupthGhost"
-              onPress={() => router.push("/(professional)/add-guest" as any)}
-              className="self-start mt-3"
-              icon={<UserPlus size={16} color={cores.textPrimary} />}
-            />
           )}
   
           {!isLoading && myProfessional && !currentAttendance && waitingList.length === 0 && (

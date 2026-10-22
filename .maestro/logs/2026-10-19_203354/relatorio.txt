@@ -1,4 +1,4 @@
-Rodada 2026-10-12_012554 · TAG 012554 · commit esperado ca655d9,2cffd16,6ac7e3b
+Rodada 2026-10-19_203354 · TAG 203354 · commit esperado a27703b,1c14365
 ✅ 00_atualizacao
 ⏭  etapa_01a (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_01b (já passou no 01381b1 — a completa roda de novo)
@@ -6,16 +6,17 @@ Rodada 2026-10-12_012554 · TAG 012554 · commit esperado ca655d9,2cffd16,6ac7e3
 ⏭  etapa_03 (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_04a (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_04b (já passou no 01381b1 — a completa roda de novo)
-✅ etapa_05a
+⏭  etapa_05a (já passou no ca655d9 — a completa roda de novo)
 ⏭  etapa_05b (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_06 (já passou no 01381b1 — a completa roda de novo)
-✅ etapa_07a
-✅ etapa_07b
+⏭  etapa_07a (já passou no ca655d9 — a completa roda de novo)
+⏭  etapa_07b (já passou no ca655d9 — a completa roda de novo)
 ⏭  etapa_08a (já passou no 5921c10 — a completa roda de novo)
 ⏭  etapa_08b (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_09 (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_10a (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_10b (já passou no 01381b1 — a completa roda de novo)
 ⏭  etapa_11 (já passou no 5921c10 — a completa roda de novo)
-❌ etapa_12 — parou em 12.07 · espera o push Pedido de vínculo
-   print: .maestro/logs/2026-10-12_012554/FALHA_12.07_espera-o-push-pedido-de-vinculo.png
+❌ etapa_12 — parou em 12.A7 · abre o app do zero, ja com o OTA
+   print: .maestro/logs/2026-10-19_203354/FALHA_12.A7_abre-o-app-do-zero-ja-com-o-ota.png
+⏭  etapa_14 (já passou no a27703b — a completa roda de novo)

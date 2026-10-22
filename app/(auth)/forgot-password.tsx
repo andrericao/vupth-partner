@@ -17,7 +17,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { avisar, confirmar } from "@lib/confirmar";
 import { classificarErroDeAcesso, rotaDoCadastro } from "@lib/erroDeAcesso";
-import { validatePassword, getPasswordRules, SENHA_DICA, SENHA_MAX } from "@lib/passwordValidation";
+import { validatePassword, getPasswordRules, SENHA_MAX } from "@lib/passwordValidation";
 import { PasswordRules } from "@components/PasswordRules";
 import { useTema } from "@hooks/useTema";
 
@@ -204,7 +204,6 @@ export default function ForgotPasswordScreen() {
 
               <NwInput
                 label="Nova senha"
-                placeholder={SENHA_DICA}
                 secure
                 maxLength={SENHA_MAX}
                 value={password}

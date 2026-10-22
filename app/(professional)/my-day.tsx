@@ -29,6 +29,7 @@ import { useRelatorioDoPeriodo, type Periodo } from "@hooks/useRelatorioDoPeriod
 import type { AttendanceHistoryItem } from "@lib/types";
 import { getApiErrorMessage } from "@lib/api";
 import { NaoRealizadosCard } from "@components/NaoRealizadosCard";
+import { SecaoRecolhivel } from "@components/SecaoRecolhivel";
 import { seloDoStatus, observacaoDoAtendimento } from "@lib/statusAtendimento";
 import {
   composicaoDoAtendimento,
@@ -410,10 +411,9 @@ export default function MyDayScreen() {
               </View>
 
               {contaDoPeriodo ? (
-                <View className="bg-vupth-surface p-4 rounded-card">
-                  <Text className="font-heading text-sm text-vupth-textPrimary">A conta do período</Text>
+                <SecaoRecolhivel testID="conta-do-periodo-secao" titulo="A conta do período">
                   <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
-                </View>
+                </SecaoRecolhivel>
               ) : (
                 report?.netRevenue != null && (
                   <Text className="font-body text-xs text-vupth-textSecondary">
