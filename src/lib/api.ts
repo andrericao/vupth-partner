@@ -73,7 +73,6 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
     "Você já está vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
   USER_ALREADY_PROFESSIONAL: "Você já possui um perfil profissional.",
   ESTABLISHMENT_NOT_FOUND: "Estabelecimento não encontrado.",
-  PROFESSIONAL_NOT_FOUND: "Perfil profissional não encontrado.",
   AFFILIATION_NOT_FOUND: "Solicitação de vinculação não encontrada.",
   ESTABLISHMENT_NOT_READY:
     "O estabelecimento precisa de pelo menos um profissional com serviço cadastrado para abrir.",
@@ -187,6 +186,11 @@ export function getApiErrorMessage(error: any, fallback: string): string {
   const data = error.response.data;
 
   const code = data?.code;
+  // Backend 23/10 (S64): o message do PROFESSIONAL_NOT_FOUND ja vem em portugues
+  // e diz o que fazer; o texto fixo so vale sem ele.
+  if (code === "PROFESSIONAL_NOT_FOUND") {
+    return data?.message || "Perfil profissional não encontrado.";
+  }
   if (code && ERROR_MESSAGES_PT[code]) {
     return ERROR_MESSAGES_PT[code];
   }
