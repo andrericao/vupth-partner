@@ -3,7 +3,7 @@ import { useEffect, useMemo } from "react";
 import { Alert, LogBox, Platform, View } from "react-native";
 import { vars } from "nativewind";
 import { StatusBar } from "expo-status-bar";
-import { Slot } from "expo-router";
+import { Slot, router } from "expo-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@lib/queryClient";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -34,7 +34,7 @@ import { temaDeNavegacao } from "@lib/aplicarTema";
 import Constants from "expo-constants";
 import { iniciarSentry } from "@lib/sentry";
 import { commitDoCodigo } from "@lib/commitDoCodigo";
-import { API_ENV } from "@lib/api";
+import { API_ENV, aoCienciaDePrecoExigida } from "@lib/api";
 
 LogBox.ignoreLogs(["Invalid prop `fill` supplied to `React.Fragment`"]);
 
@@ -104,6 +104,10 @@ export default function RootLayout() {
   // Push: registra o device quando autenticado e trata o toque na notificacao.
   usePushRegistration();
   useContextoDoSentry();
+  useEffect(() => {
+    aoCienciaDePrecoExigida(() => router.push("/(professional)/ciencia-de-preco" as any));
+    return () => aoCienciaDePrecoExigida(null);
+  }, []);
 
   // "Tamanho da fonte" (Andre, 26/09, igual ao Client): o passo escolhido vira
   // as variaveis de tamanho que as classes de texto leem (src/lib/fonte.ts). Sem

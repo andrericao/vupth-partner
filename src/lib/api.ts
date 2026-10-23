@@ -176,6 +176,7 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   INTENTION_OUTSIDE_BUSINESS_HOURS: "Esse horário está fora do funcionamento da loja.",
   INVALID_PATH_VARIABLE: "Não foi possível abrir esta página.",
   METHOD_NOT_ALLOWED: "Ação não permitida.",
+  PRICE_POLICY_ACK_REQUIRED: "Leia a política de preços e confirme a ciência para continuar.",
   STORAGE_NOT_CONFIGURED: "O envio de fotos está indisponível agora. Tente mais tarde.",
 };
 
@@ -279,10 +280,23 @@ export function aoContaDesativada(fn: (() => void) | null) {
   avisarContaDesativada = fn;
 }
 
+// ciencia-de-preco (DEC-100): passado o prazo sem a ciencia, abrir loja/fila e
+// ficar trabalhando devolvem 409 PRICE_POLICY_ACK_REQUIRED. O layout registra
+// aqui a abertura da tela da politica (o api nao importa o router).
+let abrirCienciaDePreco: (() => void) | null = null;
+export function aoCienciaDePrecoExigida(fn: (() => void) | null) {
+  abrirCienciaDePreco = fn;
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (error.response?.status === 409 && error.response?.data?.code === "PRICE_POLICY_ACK_REQUIRED") {
+      abrirCienciaDePreco?.();
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 403 && error.response?.data?.code === "ACCOUNT_DEACTIVATED") {
       avisarContaDesativada?.();

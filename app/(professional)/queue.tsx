@@ -40,6 +40,7 @@ import { buscarNoShowStatus, podeMarcarFalta, contagemDaFalta } from "@lib/noSho
 import { useQuery } from "@tanstack/react-query";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
+import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
@@ -935,6 +936,7 @@ export default function ProfessionalQueueScreen() {
             }
           />
   
+          <AvisoCienciaDePreco />
           <CarrosselDeCampanhas />
 
           {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
