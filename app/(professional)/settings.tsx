@@ -292,6 +292,12 @@ export default function ProfessionalSettingsScreen() {
               hint="dias e horários em que você atende"
               onPress={() => router.push("/(professional)/agenda" as any)}
             />
+            <MenuCard
+              icon={CalendarDays}
+              title="Agendamentos"
+              hint="os clientes marcados nos próximos dias"
+              onPress={() => router.push("/(professional)/agendados" as any)}
+            />
             {/* pagamento-pix (contrato BAK 2a2b0ec): a chave com que o cliente paga. */}
             <MenuCard
               icon={QrCode}
