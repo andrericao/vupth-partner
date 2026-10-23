@@ -1,4 +1,5 @@
 import type { AttendanceInQueue } from "@lib/types";
+import { formatarReais } from "@lib/dinheiro";
 
 export type DaySummary = {
   totalAttendances: number;
@@ -83,5 +84,5 @@ export function calculatePeriodSummary(
 }
 
 export function formatCurrency(value: number): string {
-  return `R$ ${value.toFixed(2).replace(".", ",")}`;
+  return formatarReais(value);
 }

@@ -51,6 +51,7 @@ import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
 import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import * as SecureStore from "expo-secure-store";
 import { useTema } from "@hooks/useTema";
+import { formatarReais } from "@lib/dinheiro";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
 // design/queue-layout-combined.html). Fica no TOPO da tela e concentra as acoes
@@ -134,7 +135,7 @@ function ServingCard({
               app ficou branco no meio de um atendimento (08/09) — a rede local
               alimentou o card com o payload do `/start`, que nao trazia
               `totalValue`, e `undefined.toFixed` levou o render junto. */}
-          {formatServices(attendance.services ?? [])} · R$ {(attendance.totalValue ?? 0).toFixed(2)}
+          {formatServices(attendance.services ?? [])} · {formatarReais((attendance.totalValue ?? 0))}
         </Text>
       </View>
 
@@ -202,7 +203,7 @@ function QueueRow({
   const { cores } = useTema();
   const isLate = attendance.status === "LATE";
   const services = formatServices(attendance.services ?? []);
-  const price = `R$ ${(attendance.totalValue ?? 0).toFixed(2)}`;
+  const price = `${formatarReais((attendance.totalValue ?? 0))}`;
 
   return (
     <Pressable

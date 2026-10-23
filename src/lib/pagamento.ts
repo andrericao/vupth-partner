@@ -1,6 +1,7 @@
 import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { abrirDialogo } from "@store/dialogo.store";
+import { formatarReais } from "@lib/dinheiro";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -11,7 +12,7 @@ import { abrirDialogo } from "@store/dialogo.store";
 
 type StatusDoPagamento = "PENDING" | "AWAITING_CONFIRMATION" | "PAID";
 
-const reais = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
+const reais = formatarReais;
 
 /**
  * undefined = nao perguntar (ja pago, atendimento sem pagamento ou falha ao

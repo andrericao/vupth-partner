@@ -1,4 +1,5 @@
 import { api } from "@lib/api";
+import { formatarReais } from "@lib/dinheiro";
 
 // link-de-indicacao (Andre 15/10, DEC-70; contrato do Backend 3fdcec1): o
 // profissional ou o dono compartilha o proprio link e ve quantos clientes
@@ -32,7 +33,7 @@ export function aReceber(meu: Pick<MeuLink, "credited_clients" | "to_receive">):
   const n = meu.credited_clients;
   if (n === undefined || n === null) return null;
   const valor = Number(meu.to_receive ?? 0);
-  const reais = `R$ ${(Number.isFinite(valor) ? valor : 0).toFixed(2).replace(".", ",")}`;
+  const reais = formatarReais(Number.isFinite(valor) ? valor : 0);
   const quem = n === 1 ? "1 concluiu o corte" : `${n} concluíram o corte`;
   return `${quem} · ${reais} a receber`;
 }

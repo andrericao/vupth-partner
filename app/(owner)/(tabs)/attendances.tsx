@@ -56,7 +56,7 @@ function AttendanceHistoryCard({
       </Text>
 
       <View className="flex-row justify-end mt-2">
-        <Text className="font-heading text-vupth-textPrimary">R$ {item.totalValue.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{formatarReais(item.totalValue)}</Text>
       </View>
       {/* pagamento-pix (contrato 2a2b0ec): o dono tambem marca "Recebi". */}
       <LinhaDoPagamento status={item.payment_status} onRecebi={() => onRecebi(item)} />
@@ -195,7 +195,7 @@ export default function OwnerAttendancesScreen() {
                 {history.length} atendimento{history.length !== 1 ? "s" : ""}
               </Text>
               <Text className="font-heading text-vupth-onGreenTint">
-                R$ {totalRevenue.toFixed(2)}
+                {formatarReais(totalRevenue)}
               </Text>
             </View>
           </View>

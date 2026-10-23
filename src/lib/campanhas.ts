@@ -1,5 +1,6 @@
 import { api, getApiErrorMessage, API_ENV } from "@lib/api";
 import type { ApiEnv } from "@lib/apiEnv";
+import { formatarReais } from "@lib/dinheiro";
 
 // cupom-no-app (DEC-61, DEC-63; contrato do Backend 4a94610): o profissional ou
 // o dono digita o cupom que o Andre deu e ve o beneficio. Texto curto: campo e
@@ -57,7 +58,7 @@ export function mensagemDoCupom(erro: any): string {
 }
 
 function reais(valor: number): string {
-  return `R$ ${valor.toFixed(2).replace(".", ",")}`;
+  return formatarReais(valor);
 }
 
 /** O beneficio em poucas palavras: "R$ 5,00 por cliente", "Sem taxa", "10% de desconto". */

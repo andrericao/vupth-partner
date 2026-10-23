@@ -68,7 +68,7 @@ function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor:
         {rotulo}
       </Text>
       <Text className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}>
-        R$ {valor.toFixed(2)}
+        {formatarReais(valor)}
       </Text>
     </View>
   );
@@ -137,7 +137,7 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
 
       <View className="flex-row items-center justify-between mt-2">
         <Text className="font-body text-xs text-vupth-textSecondary">{aberto ? "Esconder a conta" : "Ver a conta"}</Text>
-        <Text className="font-heading text-vupth-textPrimary">R$ {item.totalValue.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{formatarReais(item.totalValue)}</Text>
       </View>
       <LinhaDoPagamento status={item.payment_status} />
       {aberto && <ContaDoAtendimento conta={conta} />}
@@ -389,9 +389,7 @@ export default function MyDayScreen() {
               <View className="flex-row gap-3">
                 <Numero
                   rotulo={contaDoPeriodo || report?.netRevenue != null ? "Você recebeu" : "Receita"}
-                  valor={`R$ ${Number(
-                    contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0
-                  ).toFixed(2)}`}
+                  valor={formatarReais(contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0)}
                   destaque
                 />
                 <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
@@ -417,7 +415,7 @@ export default function MyDayScreen() {
               ) : (
                 report?.netRevenue != null && (
                   <Text className="font-body text-xs text-vupth-textSecondary">
-                    {`Clientes pagaram R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}. Para ver a conta do período linha a linha, role o histórico até o fim em Todos ou Finalizados.`}
+                    {`Clientes pagaram ${formatarReais(Number(report?.totalRevenue ?? 0))}. Para ver a conta do período linha a linha, role o histórico até o fim em Todos ou Finalizados.`}
                   </Text>
                 )
               )}
