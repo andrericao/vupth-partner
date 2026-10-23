@@ -29,7 +29,39 @@ export type Campanha = {
   ends_at?: string | null;
   code?: string | null;
   redeemed_at?: string | null;
+  status?: "ACTIVE" | "USED" | "EXPIRED" | null;
 };
+
+export type CreditoDeCupom = {
+  attendance_id: string;
+  campaign: string;
+  amount: number;
+  created_at?: string | null;
+  paid_at?: string | null;
+};
+
+export type CreditosDeCupom = {
+  open_amount: number;
+  next_payout?: string | null;
+  items: CreditoDeCupom[];
+};
+
+/** O desconto que o cliente teve no corte vira credito do profissional, pago no repasse da campanha. */
+export async function meusCreditosDeCupom(): Promise<CreditosDeCupom> {
+  const { data } = await api.get<CreditosDeCupom>("/professional/me/credits");
+  return {
+    open_amount: Number(data?.open_amount) || 0,
+    next_payout: data?.next_payout ?? null,
+    items: Array.isArray(data?.items) ? data.items : [],
+  };
+}
+
+const ROTULO_DO_ESTADO: Record<string, string> = { USED: "usado", EXPIRED: "vencido" };
+
+/** "usado" ou "vencido"; cupom ativo nao leva rotulo. */
+export function estadoDaCampanha(c: Campanha): string | null {
+  return (c.status && ROTULO_DO_ESTADO[c.status]) || null;
+}
 
 /** As campanhas em andamento para o meu papel (Home). Sem login/campanha: lista vazia. */
 export async function campanhasAtivas(): Promise<Campanha[]> {

@@ -6,6 +6,8 @@ import {
   mensagemDoCupom,
   beneficioDaCampanha,
   validadeDaCampanha,
+  estadoDaCampanha,
+  meusCreditosDeCupom,
   type Campanha,
 } from "@lib/campanhas";
 
@@ -63,5 +65,29 @@ describe("campanhas", () => {
     expect(validadeDaCampanha({ ...BASE, ends_at: "2026-11-30T12:00:00-03:00" })).toBe("até 30/11");
     expect(validadeDaCampanha(BASE)).toBeNull();
     expect(validadeDaCampanha({ ...BASE, ends_at: "nao-e-data" })).toBeNull();
+  });
+});
+
+describe("cupom ativado em Configuracoes (BAK-1)", () => {
+  it("estadoDaCampanha: so usado e vencido levam rotulo", () => {
+    expect(estadoDaCampanha({ ...BASE, status: "USED" })).toBe("usado");
+    expect(estadoDaCampanha({ ...BASE, status: "EXPIRED" })).toBe("vencido");
+    expect(estadoDaCampanha({ ...BASE, status: "ACTIVE" })).toBeNull();
+    expect(estadoDaCampanha(BASE)).toBeNull();
+  });
+
+  it("meusCreditosDeCupom le GET /professional/me/credits", async () => {
+    (api.get as jest.Mock).mockResolvedValueOnce({
+      data: { open_amount: "3", next_payout: "2026-10-30", items: [{ attendance_id: "a", campaign: "X", amount: 3 }] },
+    });
+    const r = await meusCreditosDeCupom();
+    expect(api.get).toHaveBeenCalledWith("/professional/me/credits");
+    expect(r.open_amount).toBe(3);
+    expect(r.items).toHaveLength(1);
+  });
+
+  it("meusCreditosDeCupom: resposta torta vira vazio", async () => {
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: null });
+    expect(await meusCreditosDeCupom()).toEqual({ open_amount: 0, next_payout: null, items: [] });
   });
 });

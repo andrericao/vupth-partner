@@ -18,6 +18,13 @@ describe("Cupom", () => {
     expect(await findByText("Sem taxa · até 30/11")).toBeTruthy();
   });
 
+  it("cupom usado ou vencido leva o rotulo", async () => {
+    const { findByText } = render(
+      <Cupom usar={jest.fn()} listar={jest.fn().mockResolvedValue([{ ...CAMPANHA, status: "EXPIRED" }])} />,
+    );
+    expect(await findByText("Sem taxa · até 30/11 · vencido")).toBeTruthy();
+  });
+
   it("vazio: pede o cupom e nao chama a API", async () => {
     const usar = jest.fn();
     const { getByTestId, findByText } = render(<Cupom usar={usar} listar={jest.fn().mockResolvedValue([])} />);
