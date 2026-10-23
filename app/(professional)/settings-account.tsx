@@ -9,6 +9,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { FotoEditavel } from "@components/FotoEditavel";
 import { CompartilharPerfil } from "@components/CompartilharPerfil";
+import { QrDoLink } from "@components/QrDoLink";
 import { useMinhaFoto } from "@hooks/useMinhaFoto";
 import { editarFoto, ROTA_DO_PERFIL } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
@@ -341,14 +342,20 @@ export default function SettingsAccountScreen() {
           </View>
           {professional?.establishment_id && (
             <View className="mt-4">
-              <CompartilharPerfil
-                link={linkDoProfissional(API_ENV, professional.establishment_id, professional.id)}
-                titulo={professional.establishment_name ?? "Minha fila"}
-                mensagem={mensagemDeDivulgacao(
-                  professional.establishment_name,
-                  professional.nickname || professional.name
-                )}
-              />
+              <View className="flex-row justify-center gap-4">
+                <CompartilharPerfil
+                  link={linkDoProfissional(API_ENV, professional.establishment_id, professional.id)}
+                  titulo={professional.establishment_name ?? "Minha fila"}
+                  mensagem={mensagemDeDivulgacao(
+                    professional.establishment_name,
+                    professional.nickname || professional.name
+                  )}
+                />
+                <QrDoLink
+                  alvo="do perfil"
+                  link={linkDoProfissional(API_ENV, professional.establishment_id, professional.id)}
+                />
+              </View>
             </View>
           )}
 
