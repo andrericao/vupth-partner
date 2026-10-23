@@ -1,4 +1,4 @@
-import { paramsDosAgendados, agruparPorDia, tituloDoDia, horaDoAgendado } from "../agendados";
+import { paramsDosAgendados, agruparPorDia, tituloDoDia, horaDoAgendado, etiquetaDoAgendado } from "../agendados";
 import type { AttendanceHistoryItem } from "../types";
 
 const agora = new Date(2026, 9, 23, 10, 0);
@@ -40,5 +40,13 @@ describe("agendados", () => {
   it("hora local do agendamento", () => {
     expect(horaDoAgendado(item("a", new Date(2026, 9, 23, 9, 5)))).toBe("09:05");
     expect(horaDoAgendado({ scheduledTime: "" } as any)).toBe("--:--");
+  });
+});
+
+describe("etiquetaDoAgendado", () => {
+  it("so quem precisa pagar adiantado leva a etiqueta", () => {
+    expect(etiquetaDoAgendado({ prepay_required: true } as AttendanceHistoryItem)).toBe("Pagamento adiantado");
+    expect(etiquetaDoAgendado({ prepay_required: false } as AttendanceHistoryItem)).toBeNull();
+    expect(etiquetaDoAgendado({} as AttendanceHistoryItem)).toBeNull();
   });
 });

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useProfessionalStore } from "@store/professional.store";
-import { buscarAgendados, agruparPorDia, horaDoAgendado, DIAS_A_FRENTE } from "@lib/agendados";
+import { buscarAgendados, agruparPorDia, horaDoAgendado, etiquetaDoAgendado, DIAS_A_FRENTE } from "@lib/agendados";
 import { formatarReais } from "@lib/dinheiro";
 
 // agenda-do-profissional-partner: os agendamentos dos proximos dias, por dia.
@@ -51,6 +51,11 @@ export default function AgendadosScreen() {
                     <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
                       {(i.services ?? []).map((s) => s.customName).filter(Boolean).join(", ")}
                     </Text>
+                    {etiquetaDoAgendado(i) && (
+                      <View testID="agendado-adiantado" className="self-start mt-1 rounded-full bg-vupth-greenTint px-2 py-0.5">
+                        <Text className="font-body text-xs text-vupth-onGreenTint">{etiquetaDoAgendado(i)}</Text>
+                      </View>
+                    )}
                   </View>
                   <Text className="font-heading text-sm text-vupth-textPrimary">{formatarReais(i.totalValue)}</Text>
                 </View>

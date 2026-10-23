@@ -56,3 +56,8 @@ export function agruparPorDia(itens: AttendanceHistoryItem[], agora: Date = new 
 export function horaDoAgendado(i: AttendanceHistoryItem): string {
   return hhmmFromIso(i.scheduledTime) ?? "--:--";
 }
+
+/** Etiqueta do agendamento de quem tem 3 faltas ou saidas (tres-faltas-pagar-adiantado). */
+export function etiquetaDoAgendado(i: AttendanceHistoryItem): string | null {
+  return i.prepay_required ? "Pagamento adiantado" : null;
+}

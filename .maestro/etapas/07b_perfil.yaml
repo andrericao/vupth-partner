@@ -251,6 +251,9 @@ appId: ${APP_ID}
     visible: "Nenhum agendamento nos próximos dias."
     timeout: 20000
     label: "07.43m · agendamentos · conta nova: nenhum agendamento"
+- assertNotVisible:
+    text: "Pagamento adiantado"
+    label: "07.43m2 · agendamentos · sem etiqueta de pagamento adiantado"
 - back:
     label: "07.43n · agendamentos · volta ao Perfil"
 
