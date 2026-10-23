@@ -73,6 +73,27 @@ export type ProfessionalReport = {
   /** relatorio-sem-multa (Backend 0112396): so a contagem; a multa e do app. */
   notRealized?: NaoRealizados | null;
   finishedLate?: number | null;
+  /**
+   * relatorio-com-pendencias (Backend de0af2e, DEC-109): o que recebe, as taxas e
+   * a divida do pagamento por fora, no periodo e por corte. Sem multa nem lucro
+   * do app. Ausente em backend antigo.
+   */
+  receives_total?: number | null;
+  fees_total?: number | null;
+  pending_debt_total?: number | null;
+  pending_debt_simulated_total?: number | null;
+  cuts?: CorteDoRelatorio[] | null;
+};
+
+export type CorteDoRelatorio = {
+  attendance_id: string;
+  finished_at?: string | null;
+  total_value?: number | null;
+  /** Nulos em servico legado (sem divisao congelada). */
+  receives?: number | null;
+  fees?: number | null;
+  pending_debt?: number | null;
+  pending_debt_simulated?: number | null;
 };
 
 type ProfessionalState = {
