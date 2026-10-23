@@ -7,6 +7,8 @@ jest.mock("@lib/api", () => ({
 }));
 
 // cupom-no-app (DEC-61, DEC-63): campo, "Usar" e os cupons ja usados.
+// O primeiro render a frio passa de 5 s com a maquina carregada (pre-push de 23/10).
+jest.setTimeout(20000);
 const CAMPANHA = { id: "c1", name: "Lançamento", type: "FEE_WAIVER", ends_at: "2026-11-30T12:00:00-03:00" };
 
 describe("Cupom", () => {
