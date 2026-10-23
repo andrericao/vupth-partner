@@ -23,7 +23,8 @@ import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { confirmarRecebimento, formatarReais, perguntarForma } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { buscarGateway, CHAVE_GATEWAY } from "@lib/gateway";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -196,6 +197,7 @@ export default function MyDayScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const queryClient = useQueryClient();
   const { itens: pagamentos } = usePagamentosPendentes(!!professional?.id);
+  const { data: gateway } = useQuery({ queryKey: CHAVE_GATEWAY, queryFn: buscarGateway, staleTime: 60_000, retry: false });
   const recebi = async (attendanceId: string) => {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
     const ok = await confirmar({
@@ -366,7 +368,7 @@ export default function MyDayScreen() {
 
           {/* pagamento-pix (Andre, 10/10): os atendimentos com pagamento pendente
               e o "Recebi". O dot da aba some quando nao ha o que conferir. */}
-          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} />
+          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} gateway={gateway} />
 
           <View className="h-px bg-vupth-border my-6" />
 
