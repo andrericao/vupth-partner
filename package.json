@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@sentry/react-native": "~7.2.0",
+    "@sentry/react-native": "~8.31.0",
     "@stomp/stompjs": "^7.4.0",
     "@tanstack/react-query": "^5.104.2",
     "axios": "^1.17.1",
