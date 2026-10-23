@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
+import { QuantoCobrarCard } from "@components/QuantoCobrarCard";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
@@ -360,6 +361,7 @@ export default function MyDayScreen() {
           </View>
 
           <ExpedienteCard periodo={period} workdays={report?.workdays} />
+          <QuantoCobrarCard />
 
           {/* pagamento-pix (Andre, 10/10): os atendimentos com pagamento pendente
               e o "Recebi". O dot da aba some quando nao ha o que conferir. */}

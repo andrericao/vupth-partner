@@ -89,3 +89,18 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Profissional removeu o cliente"
     label: "06.09a · nao-realizados · o atendimento retirado diz o motivo"
+- scrollUntilVisible:
+    element:
+      id: "quanto-cobrar-card"
+    direction: UP
+    label: "06.10 · aba-de-custos · rola ate o cartao Quanto cobrar?"
+- tapOn:
+    id: "quanto-cobrar-card"
+    label: "06.10a · aba-de-custos · abre a calculadora"
+- assertVisible:
+    text: "Preencha o que você gasta. O app faz a conta."
+    label: "06.10b · aba-de-custos · mostra os campos"
+- assertVisible:
+    id: "custos-calcular"
+    label: "06.10c · aba-de-custos · o botao Calcular"
+- back
