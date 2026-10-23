@@ -5,6 +5,7 @@
 #       bash .maestro/setup.sh --completa   # roda todas, sem perguntar
 #       bash .maestro/setup.sh --falhas     # so as que nao passaram, sem perguntar
 #       bash .maestro/setup.sh --so-preparar  # so prepara (imprime o comando)
+#       bash .maestro/setup.sh --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #       bash .maestro/setup.sh --device emulator-5554  # num aparelho escolhido
 #                                       (o emulador do PC, comandos.html#emulador)
 #
@@ -38,8 +39,10 @@ echo "=== VUPTH Partner — bateria Maestro (staging) ==="
 SO_PREPARAR=0
 COMPLETA=""
 APARELHO=""
+PUBLICAR_OTA=0
 while [ $# -gt 0 ]; do
   case "$1" in
+    --publicar-ota) PUBLICAR_OTA=1 ;;
     --so-preparar) SO_PREPARAR=1 ;;
     --completa) COMPLETA=1 ;;
     --falhas) COMPLETA=0 ;;
@@ -159,6 +162,13 @@ if [ "$CODE" != "200" ]; then
 fi
 
 echo ""
+# 5b. maestro-publica-o-ota (22/10): com --publicar-ota o script publica o EAS Update
+#     da dev (canal preview) e so entao a bateria segue. Se falhar, diz o motivo e
+#     para; o Andre publica a mao (comando no topo do publicar-ota.sh).
+if [ "$PUBLICAR_OTA" = "1" ]; then
+  bash "$(dirname "$0")/publicar-ota.sh" || { echo "ERRO: OTA nao publicado — a bateria parou."; exit 1; }
+fi
+
 # 6. O commit esperado: a bateria confere o do app antes de comecar (Andre,
 #    03/10). O OTA da dev sai do GitHub (job ota do ci.yml, depois do CI verde) com o commit do push;
 #    push so de .maestro, .md ou docs nao publica OTA (paths-ignore). Vale,
