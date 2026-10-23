@@ -18,6 +18,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
 import { usePushRegistration } from "@hooks/usePushRegistration";
+import { useContextoDoSentry } from "@hooks/useContextoDoSentry";
 import { instalarAlertWeb } from "../web-shims/alert";
 import { FaixaBaixarApp } from "@components/FaixaBaixarApp";
 import { pedirParaNaoTraduzir } from "@lib/naoTraduzir";
@@ -102,6 +103,7 @@ export default function RootLayout() {
 
   // Push: registra o device quando autenticado e trata o toque na notificacao.
   usePushRegistration();
+  useContextoDoSentry();
 
   // "Tamanho da fonte" (Andre, 26/09, igual ao Client): o passo escolhido vira
   // as variaveis de tamanho que as classes de texto leem (src/lib/fonte.ts). Sem

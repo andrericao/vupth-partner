@@ -21,7 +21,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket } from "lucide-react-native";
+  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket, Bug } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -31,6 +31,8 @@ import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
+import { sentryLigado } from "@lib/sentry";
+import { ReportarProblema } from "@components/ReportarProblema";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { useTema } from "@hooks/useTema";
 
@@ -109,6 +111,7 @@ export default function ProfessionalSettingsScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
+  const [reportando, setReportando] = useState(false);
 
   const insets = useSafeAreaInsets();
   const { cores } = useTema();
@@ -363,9 +366,19 @@ export default function ProfessionalSettingsScreen() {
               icon={LifeBuoy}
               title="Suporte"
               hint="dúvidas e passo a passo do app"
-              last
+              last={!sentryLigado()}
               onPress={() => abrirSuporte("profissional")}
             />
+            {/* sentry-feedback-do-usuario: so com o Sentry ligado no binario. */}
+            {sentryLigado() && (
+              <MenuCard
+                icon={Bug}
+                title="Reportar problema"
+                hint="conte o que deu errado"
+                last
+                onPress={() => setReportando(true)}
+              />
+            )}
           </Grupo>
   
           <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
@@ -378,6 +391,7 @@ export default function ProfessionalSettingsScreen() {
         </View>
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+      <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
     </View>
   );
 }

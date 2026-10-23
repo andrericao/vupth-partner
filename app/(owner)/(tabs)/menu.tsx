@@ -1,3 +1,4 @@
+import { useState } from "react";
 
 import { LinksLegais } from "@components/LinksLegais";
 import { View, Text, Pressable, ScrollView } from "react-native";
@@ -16,10 +17,13 @@ import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
   Info, LifeBuoy, QrCode, Ticket, Check, Plus,
+  Bug,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
+import { sentryLigado } from "@lib/sentry";
+import { ReportarProblema } from "@components/ReportarProblema";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { podeAdicionarLoja } from "@lib/multiLoja";
 import { useTema } from "@hooks/useTema";
@@ -97,6 +101,7 @@ export default function OwnerMenuScreen() {
   const { cores } = useTema();
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const [reportando, setReportando] = useState(false);
   const pilula = usePilulaTopo(rolagemRef);
 
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -322,8 +327,18 @@ export default function OwnerMenuScreen() {
                 label="Suporte"
                 hint="dúvidas e passo a passo do app"
                 onPress={() => abrirSuporte("dono")}
-                last
+                last={!sentryLigado()}
               />
+              {/* sentry-feedback-do-usuario: so com o Sentry ligado no binario. */}
+              {sentryLigado() && (
+                <MenuItem
+                  icon={Bug}
+                  label="Reportar problema"
+                  hint="conte o que deu errado"
+                  onPress={() => setReportando(true)}
+                  last
+                />
+              )}
             </Grupo>
   
             {/* Sair da conta fica solto e em vermelho: e a unica acao aqui que
@@ -340,6 +355,7 @@ export default function OwnerMenuScreen() {
         </View>
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+      <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
     </View>
   );
 }
