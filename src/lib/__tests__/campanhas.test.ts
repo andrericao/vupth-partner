@@ -4,6 +4,8 @@ import {
   usarCupom,
   minhasCampanhas,
   campanhasAtivas,
+  diasDaCampanha,
+  validadeAoAtivar,
   mensagemDoCupom,
   beneficioDaCampanha,
   validadeDaCampanha,
@@ -102,5 +104,21 @@ describe("cupom ativado em Configuracoes (BAK-1)", () => {
   it("meusCreditosDeCupom: resposta torta vira vazio", async () => {
     (api.get as jest.Mock).mockResolvedValueOnce({ data: null });
     expect(await meusCreditosDeCupom()).toEqual({ open_amount: 0, next_payout: null, items: [] });
+  });
+
+  it("os dias em que vale, por extenso", () => {
+    expect(diasDaCampanha({})).toBe("todos os dias");
+    expect(diasDaCampanha({ weekdays: "SATURDAY" })).toBe("sábados");
+    expect(diasDaCampanha({ weekdays: "MONDAY, FRIDAY" })).toBe("segundas e sextas");
+    expect(diasDaCampanha({ weekdays: "TUESDAY,WEDNESDAY,THURSDAY" })).toBe("terças, quartas e quintas");
+    expect(diasDaCampanha({ weekdays: "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY" })).toBe("todos os dias");
+    expect(diasDaCampanha({ weekdays: "XYZ" })).toBe("todos os dias");
+  });
+
+  it("a validade ao ativar usa a hora de Brasilia", () => {
+    expect(validadeAoAtivar({ ends_at: "2026-11-17T00:00:00-03:00" })).toBe("Válido até 17/11 às 00:00");
+    expect(validadeAoAtivar({ ends_at: "2026-11-18T00:30:00Z" })).toBe("Válido até 17/11 às 21:30");
+    expect(validadeAoAtivar({ ends_at: null })).toBeNull();
+    expect(validadeAoAtivar({ ends_at: "lixo" })).toBeNull();
   });
 });

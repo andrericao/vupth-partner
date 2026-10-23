@@ -27,6 +27,7 @@ export type Campanha = {
   value_percent?: number | null;
   starts_at?: string | null;
   ends_at?: string | null;
+  weekdays?: string | null;
   code?: string | null;
   redeemed_at?: string | null;
   status?: "ACTIVE" | "USED" | "EXPIRED" | null;
@@ -122,4 +123,36 @@ export function validadeDaCampanha(c: Campanha): string | null {
   const d = new Date(c.ends_at);
   if (isNaN(d.getTime())) return null;
   return `até ${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`;
+}
+
+const DIAS: Record<string, string> = {
+  MONDAY: "segundas",
+  TUESDAY: "terças",
+  WEDNESDAY: "quartas",
+  THURSDAY: "quintas",
+  FRIDAY: "sextas",
+  SATURDAY: "sábados",
+  SUNDAY: "domingos",
+};
+
+/** "terças, quartas e quintas"; sem o campo, "todos os dias". */
+export function diasDaCampanha(c: Pick<Campanha, "weekdays">): string {
+  const dias = (c.weekdays ?? "")
+    .split(",")
+    .map((d) => DIAS[d.trim().toUpperCase()])
+    .filter(Boolean);
+  if (dias.length === 0 || dias.length === 7) return "todos os dias";
+  if (dias.length === 1) return dias[0];
+  return `${dias.slice(0, -1).join(", ")} e ${dias[dias.length - 1]}`;
+}
+
+/** DEC-124: "Válido até 17/11 às 00:00" (hora do Painel, Brasília); sem fim, null. */
+export function validadeAoAtivar(c: Pick<Campanha, "ends_at">): string | null {
+  if (!c.ends_at) return null;
+  const d = new Date(c.ends_at);
+  if (isNaN(d.getTime())) return null;
+  const fuso = "America/Sao_Paulo";
+  const dia = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: fuso });
+  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: fuso });
+  return `Válido até ${dia} às ${hora}`;
 }

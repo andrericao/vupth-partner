@@ -9,6 +9,8 @@ import {
   beneficioDaCampanha,
   validadeDaCampanha,
   estadoDaCampanha,
+  validadeAoAtivar,
+  diasDaCampanha,
   type Campanha,
 } from "@lib/campanhas";
 
@@ -24,6 +26,8 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
   const [usando, setUsando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
+  const [ativado, setAtivado] = useState<Campanha | null>(null);
+  const [saibaMais, setSaibaMais] = useState(false);
 
   useEffect(() => {
     listar()
@@ -42,6 +46,8 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
       const nova = await usar(codigo);
       setCampanhas((atuais) => [nova, ...atuais.filter((c) => c.id !== nova.id)]);
       setCodigo("");
+      setAtivado(nova);
+      setSaibaMais(false);
     } catch (e) {
       setErro(mensagemDoCupom(e));
     } finally {
@@ -64,6 +70,29 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
         testID="cupom-codigo"
       />
       <NwButton title="Usar" onPress={aoUsar} isLoading={usando} testID="cupom-usar" />
+
+      {ativado && validadeAoAtivar(ativado) && (
+        <View testID="cupom-validade" className="mt-3 bg-vupth-greenTint rounded-card px-4 py-3">
+          <Text className="font-heading text-sm text-vupth-textPrimary">{validadeAoAtivar(ativado)}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">Se não usar até lá, perde o cupom.</Text>
+          {saibaMais ? (
+            <View testID="cupom-saiba-mais" className="mt-2">
+              <Text className="font-body text-xs text-vupth-textSecondary">Vale {diasDaCampanha(ativado)}.</Text>
+              {ativado.description ? (
+                <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{ativado.description}</Text>
+              ) : null}
+            </View>
+          ) : (
+            <NwButton
+              title="Saiba mais"
+              variant="vupthOutline"
+              className="h-12 mt-2"
+              testID="cupom-saiba-mais-abrir"
+              onPress={() => setSaibaMais(true)}
+            />
+          )}
+        </View>
+      )}
 
       {campanhas.length > 0 && (
         <View className="mt-6 gap-2">

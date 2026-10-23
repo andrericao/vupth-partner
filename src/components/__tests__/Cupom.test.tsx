@@ -52,4 +52,32 @@ describe("Cupom", () => {
     fireEvent.press(getByTestId("cupom-usar"));
     expect(await findByText("Você já usou este cupom.")).toBeTruthy();
   });
+
+  // DEC-124: ao ativar, a validade (hora do Painel) e o Saiba mais.
+  it("ao ativar, mostra ate quando vale e o Saiba mais traz dias e regras", async () => {
+    const nova = {
+      ...CAMPANHA,
+      id: "c2",
+      ends_at: "2026-11-17T21:30:00-03:00",
+      weekdays: "TUESDAY,WEDNESDAY,THURSDAY",
+      description: "R$ 5 de desconto no primeiro corte.",
+    };
+    const r = render(<Cupom usar={jest.fn().mockResolvedValue(nova)} listar={jest.fn().mockResolvedValue([])} />);
+    fireEvent.changeText(r.getByTestId("cupom-codigo"), "lancamento");
+    fireEvent.press(r.getByTestId("cupom-usar"));
+    expect(await r.findByText("Válido até 17/11 às 21:30")).toBeTruthy();
+    expect(r.getByText("Se não usar até lá, perde o cupom.")).toBeTruthy();
+    fireEvent.press(r.getByTestId("cupom-saiba-mais-abrir"));
+    expect(r.getByText("Vale terças, quartas e quintas.")).toBeTruthy();
+    expect(r.getByText("R$ 5 de desconto no primeiro corte.")).toBeTruthy();
+  });
+
+  it("campanha sem fim nao mostra o aviso de validade", async () => {
+    const sem = { id: "c3", name: "Aberta", type: "DISCOUNT" };
+    const r = render(<Cupom usar={jest.fn().mockResolvedValue(sem)} listar={jest.fn().mockResolvedValue([])} />);
+    fireEvent.changeText(r.getByTestId("cupom-codigo"), "aberta");
+    fireEvent.press(r.getByTestId("cupom-usar"));
+    await r.findAllByText("Aberta");
+    expect(r.queryByTestId("cupom-validade")).toBeNull();
+  });
 });
