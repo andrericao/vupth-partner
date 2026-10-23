@@ -68,7 +68,7 @@ describe("Cupom", () => {
     expect(await r.findByText("Válido até 17/11 às 21:30")).toBeTruthy();
     expect(r.getByText("Se não usar até lá, perde o cupom.")).toBeTruthy();
     fireEvent.press(r.getByTestId("cupom-saiba-mais-abrir"));
-    expect(r.getByText("Vale terças, quartas e quintas.")).toBeTruthy();
+    expect(r.getByText("Vale terças, quartas e quintas, para qualquer serviço.")).toBeTruthy();
     expect(r.getByText("R$ 5 de desconto no primeiro corte.")).toBeTruthy();
   });
 
@@ -79,5 +79,30 @@ describe("Cupom", () => {
     fireEvent.press(r.getByTestId("cupom-usar"));
     await r.findAllByText("Aberta");
     expect(r.queryByTestId("cupom-validade")).toBeNull();
+  });
+
+  // DEC-124: encerrada e esgotada, no cupom.
+  it("cupom ativado fora do prazo abre Promocao encerrada; sem vaga, esgotada", async () => {
+    const vencida = { ...CAMPANHA, id: "v", ends_at: "2020-01-01T00:00:00-03:00" };
+    const r = render(<Cupom usar={jest.fn().mockResolvedValue(vencida)} listar={jest.fn().mockResolvedValue([])} />);
+    fireEvent.changeText(r.getByTestId("cupom-codigo"), "velho");
+    fireEvent.press(r.getByTestId("cupom-usar"));
+    expect((await r.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção encerrada");
+    fireEvent.press(r.getByTestId("promocao-modal-fechar"));
+    r.unmount();
+
+    const cheia = { ...CAMPANHA, id: "e", ends_at: "2999-01-01T00:00:00-03:00", remaining_slots: 0 };
+    const r2 = render(<Cupom usar={jest.fn().mockResolvedValue(cheia)} listar={jest.fn().mockResolvedValue([])} />);
+    fireEvent.changeText(r2.getByTestId("cupom-codigo"), "cheio");
+    fireEvent.press(r2.getByTestId("cupom-usar"));
+    expect((await r2.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção esgotada");
+  });
+
+  it("tocar no cupom vencido que a pessoa ativou e nao usou abre Promocao encerrada", async () => {
+    const r = render(
+      <Cupom usar={jest.fn()} listar={jest.fn().mockResolvedValue([{ ...CAMPANHA, status: "EXPIRED" }])} />
+    );
+    fireEvent.press(await r.findByTestId("cupom-campanha"));
+    expect(r.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção encerrada");
   });
 });

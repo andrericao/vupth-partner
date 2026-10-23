@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { PromocaoEncerradaModal, type MotivoDaPromocao } from "@components/PromocaoEncerradaModal";
 import {
   usarCupom,
   minhasCampanhas,
@@ -10,6 +11,7 @@ import {
   validadeDaCampanha,
   estadoDaCampanha,
   validadeAoAtivar,
+  estadoDoPrazo,
   diasDaCampanha,
   type Campanha,
 } from "@lib/campanhas";
@@ -28,6 +30,7 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
   const [ativado, setAtivado] = useState<Campanha | null>(null);
   const [saibaMais, setSaibaMais] = useState(false);
+  const [motivo, setMotivo] = useState<MotivoDaPromocao | null>(null);
 
   useEffect(() => {
     listar()
@@ -44,6 +47,12 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
     setErro(null);
     try {
       const nova = await usar(codigo);
+      const fora = estadoDoPrazo(nova);
+      if (fora) {
+        setMotivo(fora);
+        setCodigo("");
+        return;
+      }
       setCampanhas((atuais) => [nova, ...atuais.filter((c) => c.id !== nova.id)]);
       setCodigo("");
       setAtivado(nova);
@@ -77,7 +86,7 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
           <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">Se não usar até lá, perde o cupom.</Text>
           {saibaMais ? (
             <View testID="cupom-saiba-mais" className="mt-2">
-              <Text className="font-body text-xs text-vupth-textSecondary">Vale {diasDaCampanha(ativado)}.</Text>
+              <Text className="font-body text-xs text-vupth-textSecondary">Vale {diasDaCampanha(ativado)}, para qualquer serviço.</Text>
               {ativado.description ? (
                 <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{ativado.description}</Text>
               ) : null}
@@ -98,15 +107,22 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
         <View className="mt-6 gap-2">
           <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEUS CUPONS</Text>
           {campanhas.map((c) => (
-            <View key={c.id} testID="cupom-campanha" className="bg-vupth-surface rounded-card px-4 py-3">
+            <Pressable
+              key={c.id}
+              testID="cupom-campanha"
+              accessibilityRole="button"
+              onPress={() => setMotivo(c.status === "EXPIRED" ? "ENCERRADA" : estadoDoPrazo(c))}
+              className="bg-vupth-surface rounded-card px-4 py-3"
+            >
               <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
               <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
                 {[beneficioDaCampanha(c), validadeDaCampanha(c), estadoDaCampanha(c)].filter(Boolean).join(" · ")}
               </Text>
-            </View>
+            </Pressable>
           ))}
         </View>
       )}
+      <PromocaoEncerradaModal motivo={motivo} aoFechar={() => setMotivo(null)} />
     </View>
   );
 }

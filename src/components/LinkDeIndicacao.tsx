@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { NwButton } from "@components/nw/Button";
+import { PromocaoEncerradaModal, type MotivoDaPromocao } from "@components/PromocaoEncerradaModal";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
 import {
   meuLinkDeIndicacao,
@@ -12,7 +13,7 @@ import {
   mensagemDaAdesao,
   type MeuLink,
 } from "@lib/indicacao";
-import { campanhasAtivas, beneficioDaCampanha, validadeDaCampanha, type Campanha } from "@lib/campanhas";
+import { campanhasAtivas, beneficioDaCampanha, validadeDaCampanha, estadoDoPrazo, type Campanha } from "@lib/campanhas";
 
 // link-de-indicacao (DEC-70): o link para compartilhar e quantos clientes
 // chegaram por ele. Sem resposta da API, o bloco nao aparece (o cupom segue).
@@ -34,6 +35,7 @@ export function LinkDeIndicacao({
   const [meu, setMeu] = useState<MeuLink | null>(null);
   const [abertas, setAbertas] = useState<Campanha[]>([]);
   const [erro, setErro] = useState<string | null>(null);
+  const [motivo, setMotivo] = useState<MotivoDaPromocao | null>(null);
 
   const recarregar = useCallback(() => {
     carregar()
@@ -56,6 +58,11 @@ export function LinkDeIndicacao({
 
   const entrar = async (c: Campanha) => {
     setErro(null);
+    const fora = estadoDoPrazo(c);
+    if (fora) {
+      setMotivo(fora);
+      return;
+    }
     try {
       await participar(c.id);
       recarregar();
@@ -132,6 +139,7 @@ export function LinkDeIndicacao({
           />
         </View>
       ))}
+      <PromocaoEncerradaModal motivo={motivo} aoFechar={() => setMotivo(null)} />
       {erro ? (
         <Text testID="link-indicacao-erro" className="font-body text-xs text-vupth-textSecondary mt-2">
           {erro}

@@ -92,4 +92,30 @@ describe("LinkDeIndicacao", () => {
     await waitFor(() => expect(listar).toHaveBeenCalled());
     expect(r.queryByTestId("link-indicacao-aberta")).toBeNull();
   });
+
+  // DEC-124: campanha vencida ou esgotada nao entra; mostra o modal.
+  it("Participar numa campanha encerrada ou esgotada abre o modal e nao chama o Backend", async () => {
+    const participar = jest.fn();
+    const r = render(
+      <LinkDeIndicacao
+        carregar={jest.fn().mockResolvedValue(MEU)}
+        participar={participar}
+        listarCampanhas={jest.fn().mockResolvedValue([{ ...ABERTA, ends_at: "2020-01-01T00:00:00-03:00" }])}
+      />
+    );
+    fireEvent.press(await r.findByTestId("link-indicacao-participar"));
+    expect(r.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção encerrada");
+    r.unmount();
+
+    const r2 = render(
+      <LinkDeIndicacao
+        carregar={jest.fn().mockResolvedValue(MEU)}
+        participar={participar}
+        listarCampanhas={jest.fn().mockResolvedValue([{ ...ABERTA, remaining_slots: 0 }])}
+      />
+    );
+    fireEvent.press(await r2.findByTestId("link-indicacao-participar"));
+    expect(r2.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção esgotada");
+    expect(participar).not.toHaveBeenCalled();
+  });
 });

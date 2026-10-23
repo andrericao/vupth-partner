@@ -5,6 +5,7 @@ import {
   minhasCampanhas,
   campanhasAtivas,
   diasDaCampanha,
+  estadoDoPrazo,
   validadeAoAtivar,
   mensagemDoCupom,
   beneficioDaCampanha,
@@ -120,5 +121,16 @@ describe("cupom ativado em Configuracoes (BAK-1)", () => {
     expect(validadeAoAtivar({ ends_at: "2026-11-18T00:30:00Z" })).toBe("Válido até 17/11 às 21:30");
     expect(validadeAoAtivar({ ends_at: null })).toBeNull();
     expect(validadeAoAtivar({ ends_at: "lixo" })).toBeNull();
+  });
+
+  // DEC-124: primeiro o prazo, depois a vaga.
+  it("encerrada, esgotada ou valendo", () => {
+    const agora = new Date("2026-11-10T12:00:00-03:00");
+    expect(estadoDoPrazo({ ends_at: "2026-11-09T23:59:00-03:00", remaining_slots: 5 }, agora)).toBe("ENCERRADA");
+    expect(estadoDoPrazo({ ends_at: "2026-11-09T23:59:00-03:00", remaining_slots: 0 }, agora)).toBe("ENCERRADA");
+    expect(estadoDoPrazo({ ends_at: "2026-11-17T00:00:00-03:00", remaining_slots: 0 }, agora)).toBe("ESGOTADA");
+    expect(estadoDoPrazo({ ends_at: "2026-11-17T00:00:00-03:00", remaining_slots: 3 }, agora)).toBeNull();
+    expect(estadoDoPrazo({ ends_at: null, remaining_slots: null }, agora)).toBeNull();
+    expect(estadoDoPrazo({ ends_at: "lixo" })).toBeNull();
   });
 });

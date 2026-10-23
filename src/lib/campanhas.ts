@@ -28,6 +28,8 @@ export type Campanha = {
   starts_at?: string | null;
   ends_at?: string | null;
   weekdays?: string | null;
+  max_redemptions?: number | null;
+  remaining_slots?: number | null;
   code?: string | null;
   redeemed_at?: string | null;
   status?: "ACTIVE" | "USED" | "EXPIRED" | null;
@@ -155,4 +157,20 @@ export function validadeAoAtivar(c: Pick<Campanha, "ends_at">): string | null {
   const dia = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: fuso });
   const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: fuso });
   return `Válido até ${dia} às ${hora}`;
+}
+
+/**
+ * DEC-124: primeiro o prazo, depois a vaga. Passou do ends_at = ENCERRADA (para
+ * todos, inclusive quem ativou e nao usou); no prazo e sem vaga = ESGOTADA.
+ */
+export function estadoDoPrazo(
+  c: Pick<Campanha, "ends_at" | "remaining_slots">,
+  agora: Date = new Date()
+): "ENCERRADA" | "ESGOTADA" | null {
+  if (c.ends_at) {
+    const fim = new Date(c.ends_at).getTime();
+    if (!isNaN(fim) && fim < agora.getTime()) return "ENCERRADA";
+  }
+  if (c.remaining_slots === 0) return "ESGOTADA";
+  return null;
 }
