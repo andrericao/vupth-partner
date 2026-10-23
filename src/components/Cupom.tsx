@@ -12,6 +12,7 @@ import {
   estadoDaCampanha,
   validadeAoAtivar,
   estadoDoPrazo,
+  motivoDoErro,
   diasDaCampanha,
   type Campanha,
 } from "@lib/campanhas";
@@ -58,7 +59,13 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
       setAtivado(nova);
       setSaibaMais(false);
     } catch (e) {
-      setErro(mensagemDoCupom(e));
+      const fora = motivoDoErro(e);
+      if (fora) {
+        setMotivo(fora);
+        setCodigo("");
+      } else {
+        setErro(mensagemDoCupom(e));
+      }
     } finally {
       setUsando(false);
     }

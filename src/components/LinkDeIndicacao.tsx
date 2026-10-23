@@ -13,7 +13,7 @@ import {
   mensagemDaAdesao,
   type MeuLink,
 } from "@lib/indicacao";
-import { campanhasAtivas, beneficioDaCampanha, validadeDaCampanha, estadoDoPrazo, type Campanha } from "@lib/campanhas";
+import { campanhasAtivas, beneficioDaCampanha, validadeDaCampanha, estadoDoPrazo, motivoDoErro, type Campanha } from "@lib/campanhas";
 
 // link-de-indicacao (DEC-70): o link para compartilhar e quantos clientes
 // chegaram por ele. Sem resposta da API, o bloco nao aparece (o cupom segue).
@@ -67,7 +67,9 @@ export function LinkDeIndicacao({
       await participar(c.id);
       recarregar();
     } catch (e) {
-      setErro(mensagemDaAdesao(e));
+      const fora = motivoDoErro(e);
+      if (fora) setMotivo(fora);
+      else setErro(mensagemDaAdesao(e));
     }
   };
 

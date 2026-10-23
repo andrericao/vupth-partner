@@ -105,4 +105,17 @@ describe("Cupom", () => {
     fireEvent.press(await r.findByTestId("cupom-campanha"));
     expect(r.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção encerrada");
   });
+
+  it("o Backend recusa com CAMPAIGN_ENDED ou CAMPAIGN_SOLD_OUT: abre o modal, sem erro no campo", async () => {
+    const recusa = (code: string) => jest.fn().mockRejectedValue({ response: { data: { code } } });
+    const r = render(<Cupom usar={recusa("CAMPAIGN_ENDED")} listar={jest.fn().mockResolvedValue([])} />);
+    fireEvent.changeText(r.getByTestId("cupom-codigo"), "velho");
+    fireEvent.press(r.getByTestId("cupom-usar"));
+    expect((await r.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção encerrada");
+    r.unmount();
+    const r2 = render(<Cupom usar={recusa("CAMPAIGN_SOLD_OUT")} listar={jest.fn().mockResolvedValue([])} />);
+    fireEvent.changeText(r2.getByTestId("cupom-codigo"), "cheio");
+    fireEvent.press(r2.getByTestId("cupom-usar"));
+    expect((await r2.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção esgotada");
+  });
 });

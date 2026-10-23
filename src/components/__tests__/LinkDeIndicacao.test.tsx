@@ -118,4 +118,18 @@ describe("LinkDeIndicacao", () => {
     expect(r2.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção esgotada");
     expect(participar).not.toHaveBeenCalled();
   });
+
+  it("o Backend recusa a adesao com CAMPAIGN_SOLD_OUT: abre Promocao esgotada", async () => {
+    const participar = jest.fn().mockRejectedValue({ response: { data: { code: "CAMPAIGN_SOLD_OUT" } } });
+    const r = render(
+      <LinkDeIndicacao
+        carregar={jest.fn().mockResolvedValue(MEU)}
+        participar={participar}
+        listarCampanhas={jest.fn().mockResolvedValue([ABERTA])}
+      />
+    );
+    fireEvent.press(await r.findByTestId("link-indicacao-participar"));
+    expect((await r.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção esgotada");
+    expect(r.queryByTestId("link-indicacao-erro")).toBeNull();
+  });
 });

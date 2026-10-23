@@ -6,6 +6,7 @@ import {
   campanhasAtivas,
   diasDaCampanha,
   estadoDoPrazo,
+  motivoDoErro,
   validadeAoAtivar,
   mensagemDoCupom,
   beneficioDaCampanha,
@@ -132,5 +133,13 @@ describe("cupom ativado em Configuracoes (BAK-1)", () => {
     expect(estadoDoPrazo({ ends_at: "2026-11-17T00:00:00-03:00", remaining_slots: 3 }, agora)).toBeNull();
     expect(estadoDoPrazo({ ends_at: null, remaining_slots: null }, agora)).toBeNull();
     expect(estadoDoPrazo({ ends_at: "lixo" })).toBeNull();
+  });
+
+  it("os erros do Backend viram o modal certo", () => {
+    const erro = (code: string) => ({ response: { data: { code } } });
+    expect(motivoDoErro(erro("CAMPAIGN_ENDED"))).toBe("ENCERRADA");
+    expect(motivoDoErro(erro("CAMPAIGN_SOLD_OUT"))).toBe("ESGOTADA");
+    expect(motivoDoErro(erro("CAMPAIGN_NOT_AVAILABLE"))).toBeNull();
+    expect(motivoDoErro(new Error("rede"))).toBeNull();
   });
 });

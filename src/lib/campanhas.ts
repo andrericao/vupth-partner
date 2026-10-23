@@ -160,6 +160,17 @@ export function validadeAoAtivar(c: Pick<Campanha, "ends_at">): string | null {
 }
 
 /**
+ * DEC-124 (Backend campanha-vaga-e-prazo): 409 CAMPAIGN_ENDED = passou do prazo;
+ * 409 CAMPAIGN_SOLD_OUT = no prazo e sem vaga. Sai de join, redeem e claim.
+ */
+export function motivoDoErro(erro: any): "ENCERRADA" | "ESGOTADA" | null {
+  const codigo = erro?.response?.data?.code;
+  if (codigo === "CAMPAIGN_ENDED") return "ENCERRADA";
+  if (codigo === "CAMPAIGN_SOLD_OUT") return "ESGOTADA";
+  return null;
+}
+
+/**
  * DEC-124: primeiro o prazo, depois a vaga. Passou do ends_at = ENCERRADA (para
  * todos, inclusive quem ativou e nao usou); no prazo e sem vaga = ESGOTADA.
  */
