@@ -121,7 +121,7 @@ export default function EstablishmentDetailScreen() {
       // continuava na mesma tela, achava que nao tinha ido, e enviava de novo.
       await avisar({
         titulo: "Solicitação enviada",
-        mensagem: `Sua solicitação para ${name} foi enviada. Aguarde a aprovação do proprietário.`,
+        mensagem: `Aguarde o dono de ${name} aprovar.`,
       });
       router.navigate("/(professional)/queue" as any);
     } catch (error: any) {

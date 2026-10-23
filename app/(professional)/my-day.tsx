@@ -199,7 +199,7 @@ export default function MyDayScreen() {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
     const ok = await confirmar({
       titulo: "Recebeu o pagamento?",
-      mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}. Ele recebe o aviso de pagamento confirmado.`,
+      mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}.`,
       confirmar: "Recebi",
     });
     if (!ok) return;
@@ -417,7 +417,7 @@ export default function MyDayScreen() {
               ) : (
                 report?.netRevenue != null && (
                   <Text className="font-body text-xs text-vupth-textSecondary">
-                    {`Clientes pagaram ${formatarReais(Number(report?.totalRevenue ?? 0))}. Para ver a conta do período linha a linha, role o histórico até o fim em Todos ou Finalizados.`}
+                    {`Clientes pagaram ${formatarReais(Number(report?.totalRevenue ?? 0))}. A conta linha a linha está no fim do histórico.`}
                   </Text>
                 )
               )}

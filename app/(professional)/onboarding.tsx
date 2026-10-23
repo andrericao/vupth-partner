@@ -131,7 +131,7 @@ export default function ProfessionalOnboardingScreen() {
       // ficava na mesma tela e enviava de novo.
       await avisar({
         titulo: "Solicitação enviada",
-        mensagem: `Sua solicitação para ${selectedEstablishment.name} foi enviada. Aguarde a aprovação do proprietário.`,
+        mensagem: `Aguarde o dono de ${selectedEstablishment.name} aprovar.`,
       });
       router.replace("/(professional)/queue" as any);
     } catch (error: any) {

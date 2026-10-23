@@ -138,7 +138,7 @@ export default function SettingsVinculoScreen() {
         await leaveEstablishment();
         Alert.alert(
           "Desafiliado",
-          "Você não está mais vinculado ao estabelecimento. Busque um novo estabelecimento quando quiser voltar a atender."
+          "Você saiu da loja. Busque outra para voltar a atender."
         );
       } catch (error: any) {
         Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível desafiliar do estabelecimento. Tente novamente."));

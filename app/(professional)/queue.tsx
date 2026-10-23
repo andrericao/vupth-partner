@@ -427,7 +427,7 @@ export default function ProfessionalQueueScreen() {
           titulo: tituloDaRefeicao(due.description),
           mensagem:
             count > 0
-              ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
+              ? `${count} na fila. Iniciar adia o próximo em ~${due.durationMinutes}min.`
               : `${due.durationMinutes} min. A fila espera.`,
           confirmar: "Iniciar",
           cancelar: "Agora não",
@@ -439,7 +439,7 @@ export default function ProfessionalQueueScreen() {
       Alert.alert(
         tituloDaRefeicao(due.description),
         count > 0
-          ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
+          ? `${count} na fila. Iniciar adia o próximo em ~${due.durationMinutes}min.`
           : `${due.durationMinutes} min. A fila espera.`,
         [
           { text: "Agora não", style: "cancel" },
@@ -488,7 +488,7 @@ export default function ProfessionalQueueScreen() {
         await updateMyStatus("WORKING");
         await avisar({
           titulo: "Você voltou para a fila",
-          mensagem: "Abrir a fila marca você como Trabalhando — não dá para receber cliente estando fora.",
+          mensagem: "Abrir a fila marca você como Trabalhando.",
         });
       }
       await setAcceptingNew(valor);
@@ -564,7 +564,7 @@ export default function ProfessionalQueueScreen() {
         await avisar({
           titulo: "Fila fechada junto",
           mensagem:
-            "Como você saiu, a fila parou de aceitar novos clientes — ninguém entra numa fila sem quem atenda. Quem já estava esperando continua na lista.",
+            "Sem quem atenda, a fila para de aceitar. Quem espera continua.",
         });
       }
       const fresh = await refetch();
@@ -693,7 +693,7 @@ export default function ProfessionalQueueScreen() {
     }
     const msg = runningName
       ? `Isso finaliza o atendimento de ${runningName} e ${advance ? `atende ${att.clientName} na frente da fila` : `inicia ${att.clientName}`}. Continuar?`
-      : `${att.clientName} será atendido agora, na frente da fila. Tem certeza?`;
+      : `${att.clientName} será atendido agora, na frente da fila.`;
     const ok = await confirmar({
       titulo: advance ? "Adiantar cliente" : "Iniciar atendimento",
       mensagem: msg,
@@ -753,7 +753,7 @@ export default function ProfessionalQueueScreen() {
   const confirmPromote = async (att: AttendanceInQueue) => {
     const ok = await confirmar({
       titulo: "Promover ao topo",
-      mensagem: `${att.clientName} vai para o 1o lugar da fila, sem iniciar o atendimento. Continuar?`,
+      mensagem: `${att.clientName} sobe para o 1º lugar, sem iniciar o atendimento.`,
       confirmar: "Promover",
     });
     if (ok) handleAction(() => promoteAttendance(att.id));
@@ -829,7 +829,7 @@ export default function ProfessionalQueueScreen() {
         <View className="mt-4">
           <BlocoBloqueio
             titulo="Você ainda não tem fila"
-            texto="Para receber clientes você precisa estar vinculado a um estabelecimento. O dono confirma a solicitação e você passa a aparecer na fila."
+            texto="Vincule-se a uma loja. O dono confirma e você entra na fila."
             acao="Buscar estabelecimento"
             rota="/(professional)/find-establishment"
           />
@@ -1004,7 +1004,7 @@ export default function ProfessionalQueueScreen() {
             <View className="mt-4">
               <BlocoBloqueio
                 titulo="Você ainda não aparece para os clientes"
-                texto="Você está vinculado, mas precisa de pelo menos um serviço cadastrado para entrar na fila e receber clientes."
+                texto="Cadastre um serviço para aparecer na fila."
                 acao="Adicionar serviço"
                 rota="/(professional)/my-services?from=queue"
               />

@@ -181,7 +181,7 @@ export default function ProfessionalQueueScreen() {
     const name = data?.professionalName ?? professionalName ?? "este profissional";
     const ok = await confirmar({
       titulo: "Desvincular profissional",
-      mensagem: `Deseja desvincular ${name} do estabelecimento? Ele deixará de atender aqui.`,
+      mensagem: `${name} deixa de atender aqui.`,
       confirmar: "Desvincular",
       destrutivo: true,
     });
