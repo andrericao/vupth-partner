@@ -36,7 +36,7 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   // onde estao os pendentes com o "Recebi"; "Hora de fechar?" leva a Fila, onde
   // o aviso de fechamento aparece; a loja removida leva ao Vinculo.
   if (type === "PAYMENT_CLAIMED") return "/(professional)/my-day";
-  if (type === "CLOSING_PROMPT") return "/(professional)/queue";
+  if (type === "CLOSING_PROMPT" || type === "NO_SHOW_AVAILABLE") return "/(professional)/queue";
   if (type === "ESTABLISHMENT_REMOVED") return "/(professional)/settings-vinculo";
   // desativar-conta (Backend 01c785e): o convite de posse e o aviso de loja
   // desativada/reativada sao do profissional; a resposta da posse e do dono —

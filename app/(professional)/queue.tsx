@@ -36,6 +36,8 @@ import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
 import { EstadoVazio } from "@components/EstadoVazio";
+import { buscarNoShowStatus, podeMarcarFalta, contagemDaFalta } from "@lib/noShowStatus";
+import { useQuery } from "@tanstack/react-query";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
@@ -774,6 +776,16 @@ export default function ProfessionalQueueScreen() {
   // instante que filtrou os expirados. Ver resumoDeSolicitacoes.
   const resumoSolicitacoes = resumoDeSolicitacoes(pedidosPendentes, agoraDosPedidos);
 
+  // atraso-na-fila-vazia-partner: so o 1o da vez tem "Nao compareceu", e so
+  // depois dos 10 min (no-show-status). Reconsulta enquanto o menu esta aberto.
+  const { data: noShow } = useQuery({
+    queryKey: ["no-show-status", menuTarget?.id],
+    queryFn: () => buscarNoShowStatus(menuTarget!.id),
+    enabled: !!menuTarget && menuIsFirst && menuTarget.status !== "IN_PROGRESS" && menuTarget.status !== "PAUSED",
+    refetchInterval: 15_000,
+    retry: false,
+  });
+
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
     else if (action === "adiantar") startClient(att, true);
@@ -1184,7 +1196,7 @@ export default function ProfessionalQueueScreen() {
                 <Text className="font-heading text-vupth-textSecondary mb-1">
                   {menuTarget.clientName}
                 </Text>
-                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => (
+                {queueMenuActions(menuIsFirst, menuTarget.status, podeMarcarFalta(noShow)).map((action) => (
                   <Pressable
                     key={action}
                     accessibilityRole="button"
@@ -1204,6 +1216,11 @@ export default function ProfessionalQueueScreen() {
                     </Text>
                   </Pressable>
                 ))}
+                {contagemDaFalta(noShow) && (
+                  <Text testID="falta-contagem" className="font-body text-xs text-vupth-textSecondary py-1">
+                    {contagemDaFalta(noShow)}
+                  </Text>
+                )}
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => setMenuTarget(null)}

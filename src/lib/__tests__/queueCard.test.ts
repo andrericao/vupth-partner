@@ -24,6 +24,9 @@ describe("queueMenuActions", () => {
     expect(queueMenuActions(true)).toContain("nao-compareceu");
     expect(queueMenuActions(false)).not.toContain("nao-compareceu");
   });
+  it("sem o aval do Backend (antes dos 10 min), a falta some do menu do 1o", () => {
+    expect(queueMenuActions(true, "SCHEDULED", false)).toEqual(["iniciar", "nao-chegou", "remover"]);
+  });
   it("toda ação tem rotulo", () => {
     [...queueMenuActions(true), ...queueMenuActions(false)].forEach((a) => {
       expect(QUEUE_ACTION_LABEL[a]).toBeTruthy();
