@@ -30,6 +30,7 @@ import {
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { TIPOS_DE_SERVICO, tiposDaEspecialidade, tipoDoServico } from "@lib/tiposDeServico";
 import { formatarReais } from "@lib/dinheiro";
+import { confirmarValorMinimo } from "@lib/valorMinimo";
 
 
 
@@ -269,6 +270,8 @@ export default function MyServicesScreen() {
       Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
       return;
     }
+    // aviso-valor-minimo (DEC-121): igual ou abaixo do minimo avisa; pode seguir.
+    if (!(await confirmarValorMinimo(editPriceNum))) return;
     // Preco do cliente + a divisao gravada, sempre juntos: price sozinho
     // apagaria a divisao no backend.
     setIsEditSaving(true);
@@ -329,6 +332,9 @@ export default function MyServicesScreen() {
       Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
       return;
     }
+
+    // aviso-valor-minimo (DEC-121): igual ou abaixo do minimo avisa; pode seguir.
+    if (!(await confirmarValorMinimo(priceNum))) return;
 
     setIsLoading(true);
 
