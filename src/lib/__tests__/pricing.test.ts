@@ -204,4 +204,27 @@ describe("calculatePricing", () => {
       expect(r.proReceives).toBe(c / 100);
     }
   });
+
+  // preco-baixo-pelo-pior-caso (Andre, 22/10): serviço de qualquer valor, inclusive
+  // abaixo de R$ 30, pela mesma conta do PriceSplit.clientPriceFor do Backend.
+  it("varredura de R$ 0,01 a R$ 29,99, centavo a centavo: nunca barra, o preco termina em ,90 e a prova real passa", () => {
+    for (let c = 1; c <= 2999; c++) {
+      const r = calculatePricing(c / 100, 0);
+      const preco = Math.round(r.clientPrice * 100);
+      expect(preco % 100).toBe(90);
+      expect(r.proReceives).toBe(c / 100);
+      expect(passaNaProvaReal(preco, c)).toBe(true);
+      // o menor X,90 que passa: um real a menos nao passa
+      if (preco - 100 > 0) expect(passaNaProvaReal(preco - 100, c)).toBe(false);
+      expect(Math.round(r.intermediaryFee * 100)).toBe(taxaDoGatewayEmCentavos(preco));
+      expect(Math.round((r.proReceives + r.platformFee) * 100)).toBe(preco);
+      expect(r.appFee).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("R$ 1,99 (o Pix) e R$ 0,01: o cliente paga o X,90 que cobre o pior caso", () => {
+    expect(calculatePricing(0.01, 0).clientPrice).toBe(2.9);
+    expect(calculatePricing(1.99, 0).clientPrice).toBe(4.9);
+    expect(calculatePricing(29.99, 0).clientPrice).toBe(32.9);
+  });
 });
