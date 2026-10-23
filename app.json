@@ -34,7 +34,7 @@
         }
       ]
     ],
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.vupth.partner"
     },
