@@ -37,6 +37,7 @@ import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
 import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
+import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
@@ -922,6 +923,8 @@ export default function ProfessionalQueueScreen() {
             }
           />
   
+          <CarrosselDeCampanhas />
+
           {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
             <View className="flex-row items-center gap-1.5 mt-1">
               <Star size={13} color={cores.textSecondary} fill={cores.textSecondary} />

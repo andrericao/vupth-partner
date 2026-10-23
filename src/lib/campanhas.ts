@@ -31,6 +31,12 @@ export type Campanha = {
   redeemed_at?: string | null;
 };
 
+/** As campanhas em andamento para o meu papel (Home). Sem login/campanha: lista vazia. */
+export async function campanhasAtivas(): Promise<Campanha[]> {
+  const { data } = await api.get<Campanha[]>("/campaigns/active");
+  return Array.isArray(data) ? data : [];
+}
+
 /** Usa o cupom. O Backend nao diferencia maiuscula; mandamos sem espacos. */
 export async function usarCupom(codigo: string): Promise<Campanha> {
   const { data } = await api.post<Campanha>("/campaigns/redeem", { code: codigo.trim() });

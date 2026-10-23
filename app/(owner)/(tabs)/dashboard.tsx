@@ -22,6 +22,7 @@ import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { ReadinessFaixa } from "@components/ReadinessFaixa";
+import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoLojaSemPonto } from "@components/AvisoLojaSemPonto";
 import type { ProfessionalWithQueue } from "@lib/types";
 import { confirmar } from "@lib/confirmar";
@@ -233,6 +234,8 @@ export default function OwnerDashboardScreen() {
             targetRoute={`/(owner)/establishment-data?establishmentId=${establishmentId ?? ""}`}
             goalNoun="aparecer aos clientes"
           />
+
+          <CarrosselDeCampanhas de="owner" />
 
           <AvisoLojaSemPonto endereco={establishment.address} onReler={relerLoja} />
   
