@@ -1,27 +1,68 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { NwButton } from "@components/nw/Button";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
-import { meuLinkDeIndicacao, clientesQueChegaram, aReceber, type MeuLink } from "@lib/indicacao";
+import {
+  meuLinkDeIndicacao,
+  clientesQueChegaram,
+  aReceber,
+  aLiberar,
+  andamentoDaCampanha,
+  participarDaCampanha,
+  mensagemDaAdesao,
+  type MeuLink,
+} from "@lib/indicacao";
+import { campanhasAtivas, beneficioDaCampanha, validadeDaCampanha, type Campanha } from "@lib/campanhas";
 
 // link-de-indicacao (DEC-70): o link para compartilhar e quantos clientes
 // chegaram por ele. Sem resposta da API, o bloco nao aparece (o cupom segue).
+// compartilhe-e-ganhe-no-partner (DEC-113): as campanhas de link entram por
+// adesao ("Participar"); cada uma traz o link dela e o andamento.
 type Props = {
   carregar?: () => Promise<MeuLink>;
   compartilhar?: typeof compartilharComAviso;
+  listarCampanhas?: () => Promise<Campanha[]>;
+  participar?: (id: string) => Promise<void>;
 };
 
-export function LinkDeIndicacao({ carregar = meuLinkDeIndicacao, compartilhar = compartilharComAviso }: Props) {
+export function LinkDeIndicacao({
+  carregar = meuLinkDeIndicacao,
+  compartilhar = compartilharComAviso,
+  listarCampanhas = campanhasAtivas,
+  participar = participarDaCampanha,
+}: Props) {
   const [meu, setMeu] = useState<MeuLink | null>(null);
+  const [abertas, setAbertas] = useState<Campanha[]>([]);
+  const [erro, setErro] = useState<string | null>(null);
 
-  useEffect(() => {
+  const recarregar = useCallback(() => {
     carregar()
       .then(setMeu)
       .catch(() => {});
   }, [carregar]);
 
+  useEffect(() => {
+    recarregar();
+    listarCampanhas()
+      .then((l) => setAbertas(l.filter((c) => c.type === "REFERRAL_BONUS")))
+      .catch(() => {});
+  }, [recarregar, listarCampanhas]);
+
   if (!meu) return null;
   const receber = aReceber(meu);
+  const liberar = aLiberar(meu);
+  const dasCampanhas = meu.campaigns ?? [];
+  const aParticipar = abertas.filter((c) => !dasCampanhas.some((d) => d.campaign_id === c.id));
+
+  const entrar = async (c: Campanha) => {
+    setErro(null);
+    try {
+      await participar(c.id);
+      recarregar();
+    } catch (e) {
+      setErro(mensagemDaAdesao(e));
+    }
+  };
 
   return (
     <View testID="link-indicacao" className="bg-vupth-surface rounded-card px-4 py-4 mb-6">
@@ -40,6 +81,11 @@ export function LinkDeIndicacao({ carregar = meuLinkDeIndicacao, compartilhar = 
           {receber}
         </Text>
       ) : null}
+      {liberar ? (
+        <Text testID="link-indicacao-liberar" className="font-body text-xs text-vupth-textSecondary mb-3">
+          {liberar}
+        </Text>
+      ) : null}
       <NwButton
         title="Compartilhar"
         testID="link-indicacao-compartilhar"
@@ -50,6 +96,47 @@ export function LinkDeIndicacao({ carregar = meuLinkDeIndicacao, compartilhar = 
           })
         }
       />
+      {dasCampanhas.map((c) => (
+        <View key={c.campaign_id} testID="link-indicacao-campanha" className="mt-4">
+          <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
+          <Text selectable className="font-body text-xs text-vupth-textSecondary mt-0.5">
+            {c.link}
+          </Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5 mb-2">{andamentoDaCampanha(c)}</Text>
+          <NwButton
+            title="Compartilhar"
+            variant="vupthOutline"
+            className="h-12"
+            testID="link-indicacao-campanha-compartilhar"
+            onPress={() =>
+              compartilhar(c.link, {
+                titulo: "Vupth",
+                mensagem: "Entre na fila da barbearia pelo app Vupth:",
+              })
+            }
+          />
+        </View>
+      ))}
+      {aParticipar.map((c) => (
+        <View key={c.id} testID="link-indicacao-aberta" className="mt-4">
+          <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
+          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5 mb-2">
+            {[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
+          </Text>
+          <NwButton
+            title="Participar"
+            variant="vupthOutline"
+            className="h-12"
+            testID="link-indicacao-participar"
+            onPress={() => entrar(c)}
+          />
+        </View>
+      ))}
+      {erro ? (
+        <Text testID="link-indicacao-erro" className="font-body text-xs text-vupth-textSecondary mt-2">
+          {erro}
+        </Text>
+      ) : null}
     </View>
   );
 }

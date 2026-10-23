@@ -63,6 +63,9 @@ export function estadoDaCampanha(c: Campanha): string | null {
   return (c.status && ROTULO_DO_ESTADO[c.status]) || null;
 }
 
+// DEC-122: quem emite, compartilha e usa vem da configuracao da campanha, nao do
+// codigo. O Backend so lista o que o papel de quem chama pode ver; o app nao
+// poe regra de papel fixa por cima (travado em campanhas.test.ts).
 /** As campanhas em andamento para o meu papel (Home). Sem login/campanha: lista vazia. */
 export async function campanhasAtivas(): Promise<Campanha[]> {
   const { data } = await api.get<Campanha[]>("/campaigns/active");

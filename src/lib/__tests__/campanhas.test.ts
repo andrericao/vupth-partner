@@ -3,6 +3,7 @@ import {
   cupomNoAr,
   usarCupom,
   minhasCampanhas,
+  campanhasAtivas,
   mensagemDoCupom,
   beneficioDaCampanha,
   validadeDaCampanha,
@@ -40,6 +41,18 @@ describe("campanhas", () => {
     (api.get as jest.Mock).mockResolvedValueOnce({ data: null });
     await expect(minhasCampanhas()).resolves.toEqual([]);
     expect(api.get).toHaveBeenCalledWith("/campaigns/me");
+  });
+
+  // DEC-122: nenhuma regra de papel fixa no app; o que o Backend lista, o app mostra.
+  it("nao filtra campanha por papel no codigo", async () => {
+    const lista = [
+      { ...BASE, id: "p", audience: "PROFESSIONAL" },
+      { ...BASE, id: "c", audience: "CLIENT" },
+      { ...BASE, id: "n", audience: null },
+    ];
+    (api.get as jest.Mock).mockResolvedValue({ data: lista });
+    expect((await campanhasAtivas()).map((c) => c.id)).toEqual(["p", "c", "n"]);
+    expect((await minhasCampanhas()).map((c) => c.id)).toEqual(["p", "c", "n"]);
   });
 
   it("cada recusa em uma frase curta", () => {

@@ -1,7 +1,15 @@
 import { api } from "@lib/api";
-import { meuLinkDeIndicacao, clientesQueChegaram, aReceber } from "@lib/indicacao";
+import {
+  meuLinkDeIndicacao,
+  clientesQueChegaram,
+  aReceber,
+  participarDaCampanha,
+  mensagemDaAdesao,
+  aLiberar,
+  andamentoDaCampanha,
+} from "@lib/indicacao";
 
-jest.mock("@lib/api", () => ({ api: { get: jest.fn() } }));
+jest.mock("@lib/api", () => ({ api: { get: jest.fn(), post: jest.fn() } }));
 
 // link-de-indicacao (DEC-70, Backend 3fdcec1).
 describe("indicacao", () => {
@@ -29,5 +37,36 @@ describe("indicacao", () => {
   it("Backend antigo, sem os campos: sem a linha", () => {
     expect(aReceber({})).toBeNull();
     expect(aReceber({ credited_clients: null })).toBeNull();
+  });
+
+  // compartilhe-e-ganhe-no-partner (Backend fcd4fd3, DEC-113).
+  it("participa da campanha em POST /campaigns/{id}/join", async () => {
+    (api.post as jest.Mock).mockResolvedValue({ data: {} });
+    await participarDaCampanha("c1");
+    expect(api.post).toHaveBeenCalledWith("/campaigns/c1/join");
+  });
+
+  it("a recusa da adesao em uma frase", () => {
+    const erro = (code: string) => ({ response: { data: { code } } });
+    expect(mensagemDaAdesao(erro("CAMPAIGN_NOT_FOUND"))).toBe("Campanha não encontrada.");
+    expect(mensagemDaAdesao(erro("CAMPAIGN_NOT_AVAILABLE"))).toBe("Esta campanha não está valendo agora.");
+    expect(mensagemDaAdesao(erro("CAMPAIGN_ALREADY_REDEEMED"))).toBe("Você já participa desta campanha.");
+    expect(mensagemDaAdesao(erro("CAMPAIGN_NOT_FOR_YOU"))).toBe("Esta campanha não é para o seu perfil.");
+    expect(mensagemDaAdesao(erro("OUTRO"))).toBe("Não foi possível participar agora.");
+    expect(mensagemDaAdesao(new Error("rede"))).toBe("Não foi possível participar agora.");
+  });
+
+  it("o ganho que espera o Andre liberar", () => {
+    expect(aLiberar({ pending_release: 10 })).toBe("R$ 10,00 a liberar pelo VUPTH");
+    expect(aLiberar({ pending_release: "2.5" })).toBe("R$ 2,50 a liberar pelo VUPTH");
+    expect(aLiberar({ pending_release: 0 })).toBeNull();
+    expect(aLiberar({ pending_release: null })).toBeNull();
+    expect(aLiberar({})).toBeNull();
+  });
+
+  it("o andamento da campanha", () => {
+    expect(andamentoDaCampanha({ referred: 2, credited: 1 })).toBe("2 chegaram · 1 concluiu o corte");
+    expect(andamentoDaCampanha({ referred: 1, credited: 2 })).toBe("1 chegou · 2 concluíram o corte");
+    expect(andamentoDaCampanha({})).toBe("0 chegaram · 0 concluíram o corte");
   });
 });
