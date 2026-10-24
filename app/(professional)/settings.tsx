@@ -35,6 +35,7 @@ import { sentryLigado } from "@lib/sentry";
 import { ReportarProblema } from "@components/ReportarProblema";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { useTema } from "@hooks/useTema";
+import { DotNoCanto } from "@components/DotNoCanto";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida — dados cadastrais, servicos, refeicoes". Esta tela virou um
@@ -76,15 +77,15 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
             <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{title}</Text>
             {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendência" mas nao
                 ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
-            {dot && (
-              <View
-                testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
-                className="w-2 h-2 rounded-full bg-vupth-danger"
-              />
-            )}
           </View>
           <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
         </View>
+        {/* dot-no-canto-do-card: canto superior direito do card. */}
+        {dot && (
+          <DotNoCanto dentro testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}>
+            <View className="w-2 h-2 rounded-full bg-vupth-danger" />
+          </DotNoCanto>
+        )}
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID="settings-badge-invites" />
         )}
