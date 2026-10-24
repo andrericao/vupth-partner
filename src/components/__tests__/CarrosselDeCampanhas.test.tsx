@@ -1,7 +1,7 @@
 import { fireEvent, waitFor } from "@testing-library/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderWithProvider } from "../../test-utils/renderWithProvider";
-import { CarrosselDeCampanhas } from "../CarrosselDeCampanhas";
+import { CarrosselDeCampanhas, ESPACO_DO_CARROSSEL } from "../CarrosselDeCampanhas";
 import type { Campanha } from "@lib/campanhas";
 
 const c = (id: string, name: string): Campanha => ({ id, name, type: "REFERRAL_BONUS", value_amount: 5 });
@@ -36,5 +36,10 @@ describe("CarrosselDeCampanhas", () => {
     await findByText("Acesse os cupons");
     fireEvent.press(getAllByTestId("campanha-da-home")[1]);
     expect(aoTocar).toHaveBeenCalledWith(expect.objectContaining({ id: "2" }));
+  });
+
+  it("o vao entre os cards passa do picote (10px de cada lado), sem encostar na Fila", () => {
+    expect(ESPACO_DO_CARROSSEL.gap).toBeGreaterThan(20);
+    expect(ESPACO_DO_CARROSSEL.paddingHorizontal).toBeGreaterThanOrEqual(12);
   });
 });

@@ -13,6 +13,10 @@ import {
 // carrossel-de-campanhas-no-partner: bloco discreto na Home. Some inteiro sem
 // campanha (ou se a chamada falhar); com mais de uma, rola de lado. O titulo e o
 // nome que o Andre deu no Painel. Por ora o toque abre Promocoes (cupom e link).
+// carrossel-de-campanhas-espacamento: o picote do ticket sai 10px de cada lado, entao
+// o vao entre cards tem de passar de 20px, senao os picotes se encostam.
+export const ESPACO_DO_CARROSSEL = { gap: 28, paddingHorizontal: 16 } as const;
+
 type Props = {
   listar?: () => Promise<Campanha[]>;
   /** "owner" abre Promocoes pela rota do dono. */
@@ -38,11 +42,11 @@ export function CarrosselDeCampanhas({ listar = campanhasAtivas, de = "professio
   const largura = campanhas.length > 1 ? Math.max(width - 64, 220) : undefined;
 
   return (
-    <View className="mt-3" testID="campanhas-da-home">
+    <View className="mt-3 mb-4" testID="campanhas-da-home">
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 10 }}
+        contentContainerStyle={ESPACO_DO_CARROSSEL}
         scrollEnabled={campanhas.length > 1}
       >
         {campanhas.map((c) => (
