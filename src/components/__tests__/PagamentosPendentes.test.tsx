@@ -49,24 +49,26 @@ describe("PagamentosPendentes", () => {
   });
 
   // pagamento-pelo-asaas-no-partner (DEC-119).
-  it("Asaas conectado no sandbox: sem Recebi, o app confirma, e a faixa de teste aparece", () => {
-    const { getByTestId, queryByTestId } = render(
+  // pagamento-ja-recebi (Andre, 24/10): o Recebi fica sempre visivel.
+  it("Asaas conectado no sandbox: o Recebi segue visivel, o app avisa que confirma sozinho, e a faixa de teste aparece", () => {
+    const { getByTestId } = render(
       <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: true, mode: "SANDBOX" }} />
     );
-    expect(queryByTestId("recebi-a1")).toBeNull();
-    expect(queryByTestId("recebi-a2")).toBeNull();
+    expect(getByTestId("recebi-a1")).toBeTruthy();
+    expect(getByTestId("recebi-a2")).toBeTruthy();
     expect(getByTestId("pelo-app-a1")).toBeTruthy();
     expect(getByTestId("pagamentos-faixa-teste")).toBeTruthy();
   });
 
-  it("Asaas real: sem Recebi e sem faixa de teste; desconectado: o Recebi de sempre", () => {
+  it("Asaas real: Recebi visivel e sem faixa de teste; desconectado: o Recebi de sempre e sem o aviso", () => {
     const real = render(
       <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: true, mode: "REAL" }} />
     );
-    expect(real.queryByTestId("recebi-a1")).toBeNull();
+    expect(real.getByTestId("recebi-a1")).toBeTruthy();
     expect(real.queryByTestId("pagamentos-faixa-teste")).toBeNull();
     real.unmount();
     const fora = render(<PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: false }} />);
     expect(fora.getByTestId("recebi-a1")).toBeTruthy();
+    expect(fora.queryByTestId("pelo-app-a1")).toBeNull();
   });
 });

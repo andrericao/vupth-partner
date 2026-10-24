@@ -22,6 +22,8 @@ import {
   ACAO_ACEITAR,
   ACAO_RECUSAR,
   CATEGORIA_ACEITAR_RECUSAR,
+  CATEGORIA_CONFIRMAR_RECUSAR,
+  ACAO_CONFIRMAR,
   CANAL_ALERTAS,
 } from "../push";
 
@@ -379,6 +381,8 @@ describe("notificacao-com-botao", () => {
 
   it("a categoria do pedido que pergunta e a combinada com o Backend (7584964)", () => {
     expect(CATEGORIA_ACEITAR_RECUSAR).toBe("ACEITAR_RECUSAR");
+    expect(CATEGORIA_CONFIRMAR_RECUSAR).toBe("CONFIRMAR_RECUSAR");
+    expect(acaoDoPush({ actionIdentifier: ACAO_CONFIRMAR })).toBe("aceitar");
   });
 
   it("o Hora de fechar? traz a carencia; os outros nao", () => {

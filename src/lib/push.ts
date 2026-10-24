@@ -220,6 +220,14 @@ export const CATEGORIA_ACEITAR_RECUSAR = "ACEITAR_RECUSAR";
 export const ACAO_ACEITAR = "ACEITAR";
 export const ACAO_RECUSAR = "RECUSAR";
 
+/**
+ * pagamento-ja-recebi (Backend 9f2f6fb): o PAYMENT_CLAIMED ("[nome] diz que pagou")
+ * sai com categoryId "CONFIRMAR_RECUSAR". Confirmar = POST .../payment/confirm,
+ * Recusar = POST .../payment/refuse (volta a PENDING). Mesmos botoes, sem abrir o app.
+ */
+export const CATEGORIA_CONFIRMAR_RECUSAR = "CONFIRMAR_RECUSAR";
+export const ACAO_CONFIRMAR = "CONFIRMAR";
+
 export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "aceitar" | "recusar" | "abrir";
 
 /** O que fazer com o toque: um dos botoes, ou o corpo da notificacao (abrir). */
@@ -227,7 +235,7 @@ export function acaoDoPush(resposta: { actionIdentifier: string }): AcaoDoPush {
   if (resposta.actionIdentifier === ACAO_OK) return "ok";
   if (resposta.actionIdentifier === ACAO_FECHAR_AGORA) return "fechar-agora";
   if (resposta.actionIdentifier === ACAO_CONTINUAR) return "continuar";
-  if (resposta.actionIdentifier === ACAO_ACEITAR) return "aceitar";
+  if (resposta.actionIdentifier === ACAO_ACEITAR || resposta.actionIdentifier === ACAO_CONFIRMAR) return "aceitar";
   if (resposta.actionIdentifier === ACAO_RECUSAR) return "recusar";
   return "abrir";
 }

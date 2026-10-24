@@ -39,6 +39,18 @@ describe("decidirPeloPush", () => {
     ]);
   });
 
+  it("ja paguei do cliente: confirma e recusa pelo attendanceId", async () => {
+    mock.onPost("/attendances/a1/payment/confirm").reply(200, {});
+    mock.onPost("/attendances/a1/payment/refuse").reply(200, {});
+    const data = { type: "PAYMENT_CLAIMED", attendanceId: "a1" };
+    expect(await decidirPeloPush(data, "aceitar")).toBe(true);
+    expect(await decidirPeloPush(data, "recusar")).toBe(true);
+    expect(mock.history.post.map((r) => r.url)).toEqual([
+      "/attendances/a1/payment/confirm",
+      "/attendances/a1/payment/refuse",
+    ]);
+  });
+
   it("sem o id, ou de outro tipo, nao chama nada e devolve false", async () => {
     expect(await decidirPeloPush({ type: "CUT_REQUESTED" }, "aceitar")).toBe(false);
     expect(await decidirPeloPush({ type: "OWNERSHIP_TRANSFER_REQUESTED", transferId: "" }, "recusar")).toBe(false);

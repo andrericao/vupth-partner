@@ -18,7 +18,7 @@ export function PagamentosPendentes({
 }: {
   itens: PagamentoPendente[];
   onRecebi: (attendanceId: string) => Promise<void>;
-  /** DEC-119: com o Asaas conectado, o webhook quita; sem "Recebi". */
+  /** DEC-119: com o Asaas conectado, o webhook quita sozinho, mas o "Recebi" segue visivel. */
   gateway?: Gateway | null;
 }) {
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -55,21 +55,23 @@ export function PagamentosPendentes({
             )}
             <Text className="flex-1 font-body text-xs text-vupth-textSecondary">{observacaoDoPagamento(p.status)}</Text>
           </View>
-          {pagaPeloApp(gateway, p.amount) ? (
+          {/* pagamento-ja-recebi (Andre, 24/10): o "Recebi" fica SEMPRE visivel — o Asaas
+              e a confirmacao manual quitam o mesmo atendimento e quem chega primeiro vence
+              (o Backend cancela a cobranca do Asaas ao confirmar a mao). */}
+          {pagaPeloApp(gateway, p.amount) && (
             <Text testID={`pelo-app-${p.attendance_id}`} className="font-body text-xs text-vupth-textSecondary">
-              O app confirma o pagamento sozinho.
+              O app confirma o pagamento sozinho. Se já recebeu, toque em Recebi.
             </Text>
-          ) : (
-            <NwButton
-              title="Recebi"
-              variant="vupthOutline"
-              className="h-12 self-start px-6"
-              isLoading={confirmando === p.attendance_id}
-              onPress={() => recebi(p.attendance_id)}
-              testID={`recebi-${p.attendance_id}`}
-              accessibilityLabel={`Recebi de ${p.client_name}`}
-            />
           )}
+          <NwButton
+            title="Recebi"
+            variant="vupthOutline"
+            className="h-12 self-start px-6"
+            isLoading={confirmando === p.attendance_id}
+            onPress={() => recebi(p.attendance_id)}
+            testID={`recebi-${p.attendance_id}`}
+            accessibilityLabel={`Recebi de ${p.client_name}`}
+          />
         </View>
       ))}
     </View>

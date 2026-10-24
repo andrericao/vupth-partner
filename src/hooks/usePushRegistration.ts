@@ -18,6 +18,8 @@ import {
   CATEGORIA_FECHAMENTO,
   CATEGORIA_ACEITAR_RECUSAR,
   ACAO_ACEITAR,
+  CATEGORIA_CONFIRMAR_RECUSAR,
+  ACAO_CONFIRMAR,
   ACAO_RECUSAR,
   ACAO_OK,
   ACAO_FECHAR_AGORA,
@@ -122,6 +124,11 @@ export function usePushRegistration() {
       // propria notificacao, sem abrir o app.
       Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_RECUSAR, [
         { identifier: ACAO_ACEITAR, buttonTitle: "Aceitar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      // pagamento-ja-recebi: o "[nome] diz que pagou" com Confirmar e Recusar.
+      Notifications.setNotificationCategoryAsync(CATEGORIA_CONFIRMAR_RECUSAR, [
+        { identifier: ACAO_CONFIRMAR, buttonTitle: "Confirmar", options: { opensAppToForeground: false } },
         { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
       ]).catch(() => {});
     } catch {
