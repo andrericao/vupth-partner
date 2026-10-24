@@ -185,3 +185,11 @@ export function estadoDoPrazo(
   if (c.remaining_slots === 0) return "ESGOTADA";
   return null;
 }
+
+/** O destaque do card ticket: "R$ 5,00", "10%" ou "Sem taxa"; tipo sem valor, o nome. */
+export function valorDoCard(c: Pick<Campanha, "type" | "value_amount" | "value_percent" | "name">): string {
+  if (c.type === "FEE_WAIVER") return "Sem taxa";
+  if (c.value_amount != null && c.value_amount > 0) return formatarReais(c.value_amount);
+  if (c.value_percent != null && c.value_percent > 0) return `${c.value_percent}%`;
+  return c.type === "REFERRAL_BONUS" ? "Bônus" : c.name;
+}

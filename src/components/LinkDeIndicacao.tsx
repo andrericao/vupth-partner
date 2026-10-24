@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { NwButton } from "@components/nw/Button";
+import { CardDeCampanha } from "@components/CardDeCampanha";
 import { PromocaoEncerradaModal, type MotivoDaPromocao } from "@components/PromocaoEncerradaModal";
 import { compartilharComAviso } from "@lib/compartilharComAviso";
 import {
@@ -145,53 +146,57 @@ export function LinkDeIndicacao({
         onPress={() => compartilhar(linkDoPerfil, mensagem)}
       />
 
-      {dasCampanhas.map((c) => (
-        <View key={c.campaign_id} testID="link-indicacao-campanha" className="mt-4 bg-vupth-greenTint rounded-card px-4 py-3">
-          <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
-          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5 mb-2">{andamentoDaCampanha(c)}</Text>
-          <NwButton
-            title="Compartilhar link"
-            variant="vupthOutline"
-            className="h-12"
-            testID="link-indicacao-campanha-compartilhar"
-            onPress={() => compartilhar(c.link, mensagem)}
-          />
-        </View>
-      ))}
+      {dasCampanhas.map((c) => {
+        const base = abertas.find((a) => a.id === c.campaign_id);
+        return (
+          <View key={c.campaign_id} testID="link-indicacao-campanha" className="mt-4">
+            <CardDeCampanha
+              campanha={base ?? { type: "REFERRAL_BONUS", name: c.name }}
+              linha={andamentoDaCampanha(c)}
+            >
+              <NwButton
+                title="Compartilhar link"
+                variant="vupthOutline"
+                className="h-12 mt-3"
+                testID="link-indicacao-campanha-compartilhar"
+                onPress={() => compartilhar(c.link, mensagem)}
+              />
+            </CardDeCampanha>
+          </View>
+        );
+      })}
 
       {aParticipar.map((c) => (
-        <Pressable
-          key={c.id}
-          testID="link-indicacao-aberta"
-          accessibilityRole="button"
-          accessibilityState={{ expanded: explicando === c.id }}
-          onPress={() => setExplicando((atual) => (atual === c.id ? null : c.id))}
-          className="mt-4 bg-vupth-greenTint rounded-card px-4 py-3 active:opacity-80"
-        >
-          <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
-          <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
-            {[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
-          </Text>
-          {explicando === c.id && (
-            <View testID="link-indicacao-explicacao" className="mt-3 gap-1">
-              {c.description ? (
-                <Text className="font-body text-xs text-vupth-textSecondary">{c.description}</Text>
-              ) : null}
-              <Text className="font-body text-xs text-vupth-textSecondary">
-                {`Vale ${diasDaCampanha(c)}, para qualquer serviço.`}
-              </Text>
-              {validadeAoAtivar(c) ? (
-                <Text className="font-body text-xs text-vupth-textSecondary">{`${validadeAoAtivar(c)}.`}</Text>
-              ) : null}
-              <NwButton
-                title="Participar"
-                className="h-12 mt-2"
-                testID="link-indicacao-participar"
-                onPress={() => entrar(c)}
-              />
-            </View>
-          )}
-        </Pressable>
+        <View key={c.id} className="mt-4">
+          <CardDeCampanha
+            campanha={c}
+            linha={[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
+            estado={estadoDoPrazo(c)}
+            onPress={() => setExplicando((atual) => (atual === c.id ? null : c.id))}
+            testID="link-indicacao-aberta"
+            acessibilidade={c.name}
+          >
+            {explicando === c.id && (
+              <View testID="link-indicacao-explicacao" className="mt-3 gap-1">
+                {c.description ? (
+                  <Text className="font-body text-xs text-vupth-textSecondary">{c.description}</Text>
+                ) : null}
+                <Text className="font-body text-xs text-vupth-textSecondary">
+                  {`Vale ${diasDaCampanha(c)}, para qualquer serviço.`}
+                </Text>
+                {validadeAoAtivar(c) ? (
+                  <Text className="font-body text-xs text-vupth-textSecondary">{`${validadeAoAtivar(c)}.`}</Text>
+                ) : null}
+                <NwButton
+                  title="Participar"
+                  className="h-12 mt-2"
+                  testID="link-indicacao-participar"
+                  onPress={() => entrar(c)}
+                />
+              </View>
+            )}
+          </CardDeCampanha>
+        </View>
       ))}
       <PromocaoEncerradaModal motivo={motivo} aoFechar={() => setMotivo(null)} />
       {erro ? (

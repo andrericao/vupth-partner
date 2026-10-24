@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { NwInput } from "@components/nw/Input";
 import { NwButton } from "@components/nw/Button";
+import { CardDeCampanha } from "@components/CardDeCampanha";
 import { PromocaoEncerradaModal, type MotivoDaPromocao } from "@components/PromocaoEncerradaModal";
 import {
   usarCupom,
@@ -114,18 +115,15 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
         <View className="mt-6 gap-2">
           <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEUS CUPONS</Text>
           {campanhas.map((c) => (
-            <Pressable
+            <CardDeCampanha
               key={c.id}
-              testID="cupom-campanha"
-              accessibilityRole="button"
+              campanha={c}
+              linha={[beneficioDaCampanha(c), validadeDaCampanha(c), estadoDaCampanha(c)].filter(Boolean).join(" · ")}
+              estado={c.status === "EXPIRED" ? "ENCERRADA" : estadoDoPrazo(c)}
               onPress={() => setMotivo(c.status === "EXPIRED" ? "ENCERRADA" : estadoDoPrazo(c))}
-              className="bg-vupth-surface rounded-card px-4 py-3"
-            >
-              <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
-              <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
-                {[beneficioDaCampanha(c), validadeDaCampanha(c), estadoDaCampanha(c)].filter(Boolean).join(" · ")}
-              </Text>
-            </Pressable>
+              testID="cupom-campanha"
+              acessibilidade={c.name}
+            />
           ))}
         </View>
       )}

@@ -1,10 +1,12 @@
-import { View, Text, Pressable, ScrollView, useWindowDimensions } from "react-native";
+import { View, ScrollView, useWindowDimensions } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { CardDeCampanha } from "@components/CardDeCampanha";
 import {
   campanhasAtivas,
   beneficioDaCampanha,
   validadeDaCampanha,
+  estadoDoPrazo,
   type Campanha,
 } from "@lib/campanhas";
 
@@ -40,24 +42,20 @@ export function CarrosselDeCampanhas({ listar = campanhasAtivas, de = "professio
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8 }}
+        contentContainerStyle={{ gap: 8, paddingHorizontal: 10 }}
         scrollEnabled={campanhas.length > 1}
       >
         {campanhas.map((c) => (
-          <Pressable
-            key={c.id}
-            onPress={() => abrir(c)}
-            accessibilityRole="button"
-            accessibilityLabel={c.name}
-            testID="campanha-da-home"
-            style={largura ? { width: largura } : undefined}
-            className="bg-vupth-greenTint rounded-card px-4 py-3 active:opacity-80"
-          >
-            <Text className="font-heading text-sm text-vupth-textPrimary">{c.name}</Text>
-            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
-              {[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
-            </Text>
-          </Pressable>
+          <View key={c.id} style={largura ? { width: largura } : undefined}>
+            <CardDeCampanha
+              campanha={c}
+              linha={[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
+              estado={estadoDoPrazo(c)}
+              onPress={() => abrir(c)}
+              testID="campanha-da-home"
+              acessibilidade={c.name}
+            />
+          </View>
         ))}
       </ScrollView>
     </View>
