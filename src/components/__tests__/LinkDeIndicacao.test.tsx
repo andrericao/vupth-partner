@@ -62,7 +62,8 @@ describe("LinkDeIndicacao", () => {
         listarCampanhas={jest.fn().mockResolvedValue([ABERTA, { ...ABERTA, id: "d", type: "DISCOUNT" }])}
       />
     );
-    fireEvent.press(await r.findByTestId("link-indicacao-participar"));
+    fireEvent.press(await r.findByTestId("link-indicacao-aberta"));
+    fireEvent.press(r.getByTestId("link-indicacao-participar"));
     expect(participar).toHaveBeenCalledWith("c1");
     expect(await r.findByTestId("link-indicacao-campanha")).toBeTruthy();
     expect(r.queryByTestId("link-indicacao-aberta")).toBeNull();
@@ -80,7 +81,8 @@ describe("LinkDeIndicacao", () => {
         listarCampanhas={jest.fn().mockResolvedValue([ABERTA])}
       />
     );
-    fireEvent.press(await r.findByTestId("link-indicacao-participar"));
+    fireEvent.press(await r.findByTestId("link-indicacao-aberta"));
+    fireEvent.press(r.getByTestId("link-indicacao-participar"));
     expect((await r.findByTestId("link-indicacao-erro")).props.children).toBe("Esta campanha não é para o seu perfil.");
     expect(r.getByTestId("link-indicacao-participar")).toBeTruthy();
   });
@@ -103,7 +105,8 @@ describe("LinkDeIndicacao", () => {
         listarCampanhas={jest.fn().mockResolvedValue([{ ...ABERTA, ends_at: "2020-01-01T00:00:00-03:00" }])}
       />
     );
-    fireEvent.press(await r.findByTestId("link-indicacao-participar"));
+    fireEvent.press(await r.findByTestId("link-indicacao-aberta"));
+    fireEvent.press(r.getByTestId("link-indicacao-participar"));
     expect(r.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção encerrada");
     r.unmount();
 
@@ -114,7 +117,8 @@ describe("LinkDeIndicacao", () => {
         listarCampanhas={jest.fn().mockResolvedValue([{ ...ABERTA, remaining_slots: 0 }])}
       />
     );
-    fireEvent.press(await r2.findByTestId("link-indicacao-participar"));
+    fireEvent.press(await r2.findByTestId("link-indicacao-aberta"));
+    fireEvent.press(r2.getByTestId("link-indicacao-participar"));
     expect(r2.getByTestId("promocao-modal-titulo").props.children).toBe("Promoção esgotada");
     expect(participar).not.toHaveBeenCalled();
   });
@@ -128,8 +132,87 @@ describe("LinkDeIndicacao", () => {
         listarCampanhas={jest.fn().mockResolvedValue([ABERTA])}
       />
     );
-    fireEvent.press(await r.findByTestId("link-indicacao-participar"));
+    fireEvent.press(await r.findByTestId("link-indicacao-aberta"));
+    fireEvent.press(r.getByTestId("link-indicacao-participar"));
     expect((await r.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção esgotada");
     expect(r.queryByTestId("link-indicacao-erro")).toBeNull();
+  });
+
+  // participar-da-promocao (Andre, 24/10): card -> explicacao -> Participar -> Compartilhar link.
+  it("tocar no card abre a explicacao; Participar vira Compartilhar link", async () => {
+    const com = {
+      ...MEU,
+      campaigns: [{ campaign_id: "c1", name: "Indique e ganhe", link: "https://x/i/ABC?c=c1", referred: 0, credited: 0 }],
+    };
+    const carregar = jest.fn().mockResolvedValueOnce(MEU).mockResolvedValue(com);
+    const compartilhar = jest.fn().mockResolvedValue(undefined);
+    const r = render(
+      <LinkDeIndicacao
+        carregar={carregar}
+        compartilhar={compartilhar}
+        participar={jest.fn().mockResolvedValue(undefined)}
+        listarCampanhas={jest.fn().mockResolvedValue([{ ...ABERTA, description: "R$ 5 por cliente que cortar." }])}
+      />
+    );
+    const card = await r.findByTestId("link-indicacao-aberta");
+    expect(r.queryByTestId("link-indicacao-explicacao")).toBeNull();
+    expect(r.queryByTestId("link-indicacao-participar")).toBeNull();
+    fireEvent.press(card);
+    expect(r.getByTestId("link-indicacao-explicacao")).toBeTruthy();
+    expect(r.getByText("R$ 5 por cliente que cortar.")).toBeTruthy();
+    expect(r.getByText("Vale todos os dias, para qualquer serviço.")).toBeTruthy();
+    fireEvent.press(r.getByTestId("link-indicacao-participar"));
+    const compartilharLink = await r.findByTestId("link-indicacao-campanha-compartilhar");
+    expect(compartilharLink.props.accessibilityLabel ?? "").toBeDefined();
+    fireEvent.press(compartilharLink);
+    expect(compartilhar).toHaveBeenCalledWith("https://x/i/ABC?c=c1", expect.objectContaining({ titulo: "Vupth" }));
+    expect(r.queryByTestId("link-indicacao-aberta")).toBeNull();
+  });
+
+  it("tocar de novo no card recolhe a explicacao", async () => {
+    const r = render(
+      <LinkDeIndicacao
+        carregar={jest.fn().mockResolvedValue(MEU)}
+        listarCampanhas={jest.fn().mockResolvedValue([ABERTA])}
+      />
+    );
+    const card = await r.findByTestId("link-indicacao-aberta");
+    fireEvent.press(card);
+    expect(r.getByTestId("link-indicacao-explicacao")).toBeTruthy();
+    fireEvent.press(card);
+    expect(r.queryByTestId("link-indicacao-explicacao")).toBeNull();
+  });
+
+  it("com promocao de compartilhamento, o link do perfil e o dela; sem, o geral", async () => {
+    const compartilhar = jest.fn().mockResolvedValue(undefined);
+    const sem = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(MEU)} compartilhar={compartilhar} listarCampanhas={SEM_CAMPANHAS} />);
+    expect((await sem.findByTestId("link-indicacao-link")).props.children).toBe(MEU.link);
+    sem.unmount();
+    const com = {
+      ...MEU,
+      campaigns: [{ campaign_id: "c1", name: "Indique e ganhe", link: "https://x/i/ABC?c=c1", referred: 1, credited: 0 }],
+    };
+    const r = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(com)} compartilhar={compartilhar} listarCampanhas={SEM_CAMPANHAS} />);
+    expect((await r.findByTestId("link-indicacao-link")).props.children).toBe("https://x/i/ABC?c=c1");
+    expect(r.queryByTestId("link-indicacao-escolha")).toBeNull();
+    fireEvent.press(r.getByTestId("link-indicacao-compartilhar"));
+    expect(compartilhar).toHaveBeenCalledWith("https://x/i/ABC?c=c1", expect.objectContaining({ titulo: "Vupth" }));
+  });
+
+  it("em mais de uma promocao, ele escolhe qual link compartilhar", async () => {
+    const compartilhar = jest.fn().mockResolvedValue(undefined);
+    const com = {
+      ...MEU,
+      campaigns: [
+        { campaign_id: "c1", name: "Primeira", link: "https://x/i/ABC?c=c1", referred: 0, credited: 0 },
+        { campaign_id: "c2", name: "Segunda", link: "https://x/i/ABC?c=c2", referred: 0, credited: 0 },
+      ],
+    };
+    const r = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(com)} compartilhar={compartilhar} listarCampanhas={SEM_CAMPANHAS} />);
+    expect((await r.findByTestId("link-indicacao-link")).props.children).toBe("https://x/i/ABC?c=c1");
+    fireEvent.press(r.getByTestId("link-indicacao-escolher-c2"));
+    expect(r.getByTestId("link-indicacao-link").props.children).toBe("https://x/i/ABC?c=c2");
+    fireEvent.press(r.getByTestId("link-indicacao-compartilhar"));
+    expect(compartilhar).toHaveBeenCalledWith("https://x/i/ABC?c=c2", expect.objectContaining({ titulo: "Vupth" }));
   });
 });

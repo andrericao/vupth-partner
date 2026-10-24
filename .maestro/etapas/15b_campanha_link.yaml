@@ -32,9 +32,13 @@ appId: ${APP_ID}
     direction: DOWN
     label: "15b.10 · a campanha aparece em Promoções"
 - tapOn:
+    text: ${NOME_CAMPANHA}
+    label: "15b.10a · toca no card: abre a explicacao"
+- assertVisible:
+    text: ".*para qualquer serviço.*"
+    label: "15b.10b · a explicacao diz que vale para qualquer servico"
+- tapOn:
     text: "Participar"
-    below:
-      text: ${NOME_CAMPANHA}
     label: "15b.11 · Participar"
 - runFlow:
     when:
@@ -58,8 +62,8 @@ appId: ${APP_ID}
           id: "link-indicacao-campanha"
           label: "15b.13a · entrou: o link da campanha"
       - assertVisible:
-          id: "link-indicacao-campanha-compartilhar"
-          label: "15b.13b · o botao Compartilhar"
+          text: "Compartilhar link"
+          label: "15b.13b · o botao vira Compartilhar link"
       - assertVisible:
           text: ".*chegaram.*"
           label: "15b.13c · o andamento da campanha"
