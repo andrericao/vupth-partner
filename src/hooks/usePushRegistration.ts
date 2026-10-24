@@ -26,7 +26,8 @@ import {
   ACAO_CONTINUAR,
   CANAL_ALERTAS,
 } from "@lib/push";
-import { decidirPeloPush } from "@lib/pushDecisao";
+import { resolverAcaoDoPush } from "@lib/pushDecisao";
+import { definirTarefaDoPush, TAREFA_DO_PUSH } from "@lib/pushBackground";
 import { useAuthStore } from "@store/auth.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
@@ -46,6 +47,9 @@ const Notifications: typeof import("expo-notifications") | null = pushSupported(
   ? // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("expo-notifications")
   : null;
+
+// push-resolve-sem-abrir-o-app: a tarefa de segundo plano tem de existir no escopo do modulo.
+const tarefaDefinida = definirTarefaDoPush();
 
 // Chave onde guardamos o Expo Push Token registrado, para o logout conseguir
 // desregistrar (DELETE /devices/{token}) — ver auth.store.logout.
@@ -120,6 +124,8 @@ export function usePushRegistration() {
         { identifier: ACAO_FECHAR_AGORA, buttonTitle: "Fechar", options: { opensAppToForeground: true } },
         { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar", options: { opensAppToForeground: false } },
       ]).catch(() => {});
+      // push-resolve-sem-abrir-o-app: o botao do push roda esta tarefa com o app fechado.
+      if (tarefaDefinida) Notifications.registerTaskAsync(TAREFA_DO_PUSH).catch(() => {});
       // push-acoes-por-pergunta: pedido de corte e convite de dono, decididos na
       // propria notificacao, sem abrir o app.
       Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_RECUSAR, [
@@ -227,8 +233,8 @@ export function usePushRegistration() {
           if (acao === "ok" || acao === "continuar") return;
           if (acao === "aceitar" || acao === "recusar") {
             // Decide em segundo plano; se a chamada falhar, abre a tela da pergunta.
-            decidirPeloPush(data, acao).then((ok) => {
-              if (ok) return;
+            resolverAcaoDoPush(response).then((r) => {
+              if (r !== "falhou") return;
               const rota = notificationRoute(data, useEstablishmentStore.getState().establishment?.id);
               if (rota) router.push(rota as any);
             });
