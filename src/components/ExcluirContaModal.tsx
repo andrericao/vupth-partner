@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Modal, View, Text } from "react-native";
+import { Text } from "react-native";
 
 import { NwButton } from "@components/nw/Button";
-import { useTema } from "@hooks/useTema";
+import { ModalBase } from "@components/ModalBase";
 import { NwInput } from "@components/nw/Input";
 
 type Props = {
@@ -24,7 +24,6 @@ type Props = {
 // sobrevive sem o nome. "Todos os seus dados serao perdidos" seria mentira.
 // `Alert.prompt` nao serve: so existe no iOS.
 export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClose }: Props) {
-  const { veu } = useTema();
   const [password, setPassword] = useState("");
 
   function close() {
@@ -39,31 +38,12 @@ export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClo
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 justify-center px-6" style={{ backgroundColor: veu }}>
-        <View className="bg-vupth-painel rounded-card p-6 gap-3">
-          <Text className="font-heading text-lg text-vupth-textPrimary">Excluir conta</Text>
-
-          <Text className="font-body text-sm text-vupth-textSecondary">
-            Seus dados são apagados; o histórico da loja fica sem o seu nome.
-          </Text>
-
-          <NwInput
-            label="Senha atual"
-            placeholder="Senha atual"
-            value={password}
-            onChangeText={setPassword}
-            secure
-            autoCapitalize="none"
-            testID="delete-account-password"
-          />
-
-          {error && (
-            <Text testID="delete-account-error" className="font-body text-xs text-vupth-danger">
-              {error}
-            </Text>
-          )}
-
+    <ModalBase
+      visible={visible}
+      aoFechar={close}
+      titulo="Excluir conta"
+      rodape={
+        <>
           <NwButton
             title="Excluir"
             variant="outlineDanger"
@@ -73,8 +53,28 @@ export function ExcluirContaModal({ visible, isDeleting, error, onConfirm, onClo
             testID="delete-account-confirm"
           />
           <NwButton title="Cancelar" variant="secondaryPainel" onPress={close} disabled={isDeleting} />
-        </View>
-      </View>
-    </Modal>
+        </>
+      }
+    >
+      <Text className="font-body text-sm text-vupth-textSecondary">
+        Seus dados são apagados; o histórico da loja fica sem o seu nome.
+      </Text>
+
+      <NwInput
+        label="Senha atual"
+        placeholder="Senha atual"
+        value={password}
+        onChangeText={setPassword}
+        secure
+        autoCapitalize="none"
+        testID="delete-account-password"
+      />
+
+      {error && (
+        <Text testID="delete-account-error" className="font-body text-xs text-vupth-danger">
+          {error}
+        </Text>
+      )}
+    </ModalBase>
   );
 }
