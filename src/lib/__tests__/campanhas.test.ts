@@ -142,4 +142,21 @@ describe("cupom ativado em Configuracoes (BAK-1)", () => {
     expect(motivoDoErro(erro("CAMPAIGN_NOT_AVAILABLE"))).toBeNull();
     expect(motivoDoErro(new Error("rede"))).toBeNull();
   });
+
+  // cards-de-promocao-em-portugues (Andre, 24/10): nenhum card mostra codigo em ingles.
+  it("o texto dos cards nunca traz codigo cru (REFERRAL_BONUS, EXPIRED, SATURDAY...)", () => {
+    const CODIGO = /\b[A-Z]{2,}(?:_[A-Z]+)+\b|\b(?:ACTIVE|USED|EXPIRED|SATURDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SUNDAY)\b/;
+    const tipos = ["REFERRAL_BONUS", "FEE_WAIVER", "DISCOUNT", "TIPO_NOVO"];
+    for (const type of tipos) {
+      for (const valor of [{}, { value_amount: 5 }, { value_percent: 10 }]) {
+        const c: Campanha = { id: "x", name: "Semana de lançamento", type, weekdays: "SATURDAY,SUNDAY", ends_at: "2026-11-17T00:00:00-03:00", ...valor };
+        for (const texto of [beneficioDaCampanha(c), validadeDaCampanha(c), validadeAoAtivar(c), diasDaCampanha(c)]) {
+          expect(texto ?? "").not.toMatch(CODIGO);
+        }
+      }
+    }
+    for (const status of ["ACTIVE", "USED", "EXPIRED"] as const) {
+      expect(estadoDaCampanha({ ...BASE, status }) ?? "").not.toMatch(CODIGO);
+    }
+  });
 });
