@@ -19,6 +19,9 @@ import {
   ACAO_OK,
   ACAO_FECHAR_AGORA,
   ACAO_CONTINUAR,
+  ACAO_ACEITAR,
+  ACAO_RECUSAR,
+  CATEGORIA_ACEITAR_RECUSAR,
   CANAL_ALERTAS,
 } from "../push";
 
@@ -369,7 +372,13 @@ describe("notificacao-com-botao", () => {
     expect(acaoDoPush({ actionIdentifier: ACAO_OK })).toBe("ok");
     expect(acaoDoPush({ actionIdentifier: ACAO_FECHAR_AGORA })).toBe("fechar-agora");
     expect(acaoDoPush({ actionIdentifier: ACAO_CONTINUAR })).toBe("continuar");
+    expect(acaoDoPush({ actionIdentifier: ACAO_ACEITAR })).toBe("aceitar");
+    expect(acaoDoPush({ actionIdentifier: ACAO_RECUSAR })).toBe("recusar");
     expect(acaoDoPush({ actionIdentifier: "expo.modules.notifications.actions.DEFAULT" })).toBe("abrir");
+  });
+
+  it("a categoria do pedido que pergunta e a combinada com o Backend (7584964)", () => {
+    expect(CATEGORIA_ACEITAR_RECUSAR).toBe("ACEITAR_RECUSAR");
   });
 
   it("o Hora de fechar? traz a carencia; os outros nao", () => {

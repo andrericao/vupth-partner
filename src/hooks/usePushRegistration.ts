@@ -16,11 +16,15 @@ import {
   carenciaDoFechamento,
   CATEGORIA_CIENCIA,
   CATEGORIA_FECHAMENTO,
+  CATEGORIA_ACEITAR_RECUSAR,
+  ACAO_ACEITAR,
+  ACAO_RECUSAR,
   ACAO_OK,
   ACAO_FECHAR_AGORA,
   ACAO_CONTINUAR,
   CANAL_ALERTAS,
 } from "@lib/push";
+import { decidirPeloPush } from "@lib/pushDecisao";
 import { useAuthStore } from "@store/auth.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
@@ -113,6 +117,12 @@ export function usePushRegistration() {
       Notifications.setNotificationCategoryAsync(CATEGORIA_FECHAMENTO, [
         { identifier: ACAO_FECHAR_AGORA, buttonTitle: "Fechar", options: { opensAppToForeground: true } },
         { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      // push-acoes-por-pergunta: pedido de corte e convite de dono, decididos na
+      // propria notificacao, sem abrir o app.
+      Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_RECUSAR, [
+        { identifier: ACAO_ACEITAR, buttonTitle: "Aceitar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
       ]).catch(() => {});
     } catch {
       // binario sem o modulo nativo de push.
@@ -208,6 +218,15 @@ export function usePushRegistration() {
             Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
           }
           if (acao === "ok" || acao === "continuar") return;
+          if (acao === "aceitar" || acao === "recusar") {
+            // Decide em segundo plano; se a chamada falhar, abre a tela da pergunta.
+            decidirPeloPush(data, acao).then((ok) => {
+              if (ok) return;
+              const rota = notificationRoute(data, useEstablishmentStore.getState().establishment?.id);
+              if (rota) router.push(rota as any);
+            });
+            return;
+          }
           const carencia = carenciaDoFechamento(data);
           if (acao === "fechar-agora") {
             // Fecha direto; se o backend barrar (atendimento em andamento), a

@@ -210,13 +210,25 @@ export const CATEGORIA_FECHAMENTO = "FECHAMENTO";
 export const ACAO_FECHAR_AGORA = "FECHAR_AGORA";
 export const ACAO_CONTINUAR = "CONTINUAR";
 
-export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "abrir";
+/**
+ * push-acoes-por-pergunta (Backend 7584964, 24/10): so o push que PERGUNTA algo
+ * tem acao, e a acao e a mesma decisao da tela. CUT_REQUESTED e
+ * OWNERSHIP_TRANSFER_REQUESTED chegam com categoryId "ACEITAR_RECUSAR" e o app
+ * escolhe o endpoint pelo data.type; os botoes resolvem em segundo plano.
+ */
+export const CATEGORIA_ACEITAR_RECUSAR = "ACEITAR_RECUSAR";
+export const ACAO_ACEITAR = "ACEITAR";
+export const ACAO_RECUSAR = "RECUSAR";
+
+export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "aceitar" | "recusar" | "abrir";
 
 /** O que fazer com o toque: um dos botoes, ou o corpo da notificacao (abrir). */
 export function acaoDoPush(resposta: { actionIdentifier: string }): AcaoDoPush {
   if (resposta.actionIdentifier === ACAO_OK) return "ok";
   if (resposta.actionIdentifier === ACAO_FECHAR_AGORA) return "fechar-agora";
   if (resposta.actionIdentifier === ACAO_CONTINUAR) return "continuar";
+  if (resposta.actionIdentifier === ACAO_ACEITAR) return "aceitar";
+  if (resposta.actionIdentifier === ACAO_RECUSAR) return "recusar";
   return "abrir";
 }
 
