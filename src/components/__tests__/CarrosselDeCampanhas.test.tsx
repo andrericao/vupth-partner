@@ -38,8 +38,8 @@ describe("CarrosselDeCampanhas", () => {
     expect(aoTocar).toHaveBeenCalledWith(expect.objectContaining({ id: "2" }));
   });
 
-  it("o vao entre os cards passa do picote (10px de cada lado), sem encostar na Fila", () => {
-    expect(ESPACO_DO_CARROSSEL.gap).toBeGreaterThan(20);
+  it("o vao entre os cards e de 12px e o picote sai so de um lado, sem encostar no vizinho", () => {
+    expect(ESPACO_DO_CARROSSEL.gap).toBe(12);
     expect(ESPACO_DO_CARROSSEL.paddingHorizontal).toBeGreaterThanOrEqual(12);
   });
 });

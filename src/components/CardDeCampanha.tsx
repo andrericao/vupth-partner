@@ -4,7 +4,7 @@ import { View, Text, Pressable } from "react-native";
 import { valorDoCard, type Campanha } from "@lib/campanhas";
 
 // card-ticket-pontilhado (Andre, 24/10): o ticket do mockup 2 do Client, nos dois
-// apps — surface, borda tracejada, picote nos lados, valor em Archivo 800. Os tres
+// apps — surface, borda tracejada, picote so no lado esquerdo (ticket-picote-so-na-esquerda), valor em Archivo 800. Os tres
 // tipos (desconto, sem taxa, indicacao) e os estados encerrada e esgotada
 // (esmaecidos, com selo). Cor so por token; sem sombra.
 export type EstadoDoCard = "ENCERRADA" | "ESGOTADA" | null;
@@ -30,14 +30,10 @@ export function CardDeCampanha({ campanha, linha, estado = null, onPress, testID
         estado ? "opacity-60" : ""
       }`}
     >
-      {/* o picote: dois meios-circulos na cor da tela, sobre a borda */}
+      {/* o picote: um meio-circulo na cor da tela, so na esquerda, sobre a borda */}
       <View
         pointerEvents="none"
         className="absolute -left-2.5 top-1/2 -mt-2 w-4 h-4 rounded-full bg-vupth-background border-2 border-dashed border-vupth-border"
-      />
-      <View
-        pointerEvents="none"
-        className="absolute -right-2.5 top-1/2 -mt-2 w-4 h-4 rounded-full bg-vupth-background border-2 border-dashed border-vupth-border"
       />
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1">

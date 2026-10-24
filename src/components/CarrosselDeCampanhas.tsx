@@ -13,9 +13,9 @@ import {
 // carrossel-de-campanhas-no-partner: bloco discreto na Home. Some inteiro sem
 // campanha (ou se a chamada falhar); com mais de uma, rola de lado. O titulo e o
 // nome que o Andre deu no Painel. Por ora o toque abre Promocoes (cupom e link).
-// carrossel-de-campanhas-espacamento: o picote do ticket sai 10px de cada lado, entao
-// o vao entre cards tem de passar de 20px, senao os picotes se encostam.
-export const ESPACO_DO_CARROSSEL = { gap: 28, paddingHorizontal: 16 } as const;
+// ticket-picote-so-na-esquerda (Andre, 24/10): vao de 12px entre os cards e picote so
+// no lado esquerdo (sai 10px), entao um card nunca bate no vizinho.
+export const ESPACO_DO_CARROSSEL = { gap: 12, paddingHorizontal: 16 } as const;
 
 type Props = {
   listar?: () => Promise<Campanha[]>;
