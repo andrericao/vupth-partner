@@ -20,9 +20,9 @@ import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
 import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
-import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
+import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
-import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
+import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import {
   mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN,
@@ -36,8 +36,6 @@ import { BlocoBloqueio } from "@components/BlocoBloqueio";
 import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
 import { EstadoVazio } from "@components/EstadoVazio";
-import { buscarNoShowStatus, podeMarcarFalta, contagemDaFalta } from "@lib/noShowStatus";
-import { useQuery } from "@tanstack/react-query";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
@@ -298,7 +296,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, markNoShow, removeFromQueue, promoteAttendance, atendimentoIniciado,
+    markLate, removeFromQueue, promoteAttendance, atendimentoIniciado,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -714,29 +712,6 @@ export default function ProfessionalQueueScreen() {
     if (ok) handleAction(() => markLate(att.id));
   };
 
-  // "Nao compareceu" (botao-nao-compareceu, DEC-83): a falta, que agora vale como atraso (DEC-86). Antes dos 10 min o
-  // Backend recusa (409 NO_SHOW_TOO_EARLY) e diz a hora em `available_at`.
-  const confirmNoShow = async (att: AttendanceInQueue) => {
-    const ok = await confirmar({
-      titulo: "Cliente não compareceu",
-      mensagem: mensagemDaFalta(att.clientName),
-      confirmar: "Não compareceu",
-      destrutivo: false,
-    });
-    if (!ok) return;
-    try {
-      await markNoShow(att.id);
-      await refetch();
-    } catch (error: any) {
-      const data = error?.response?.data;
-      if (data?.code === "NO_SHOW_TOO_EARLY") {
-        Alert.alert("Ainda é cedo", mensagemDaFaltaCedo(hhmmFromIso(data.available_at)));
-      } else {
-        Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar ação."));
-      }
-    }
-  };
-
   // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
   // remover a qualquer momento, inclusive no 1o atraso.
   const confirmRemove = async (att: AttendanceInQueue) => {
@@ -779,22 +754,11 @@ export default function ProfessionalQueueScreen() {
   // instante que filtrou os expirados. Ver resumoDeSolicitacoes.
   const resumoSolicitacoes = resumoDeSolicitacoes(pedidosPendentes, agoraDosPedidos);
 
-  // atraso-na-fila-vazia-partner: so o 1o da vez tem "Nao compareceu", e so
-  // depois dos 10 min (no-show-status). Reconsulta enquanto o menu esta aberto.
-  const { data: noShow } = useQuery({
-    queryKey: ["no-show-status", menuTarget?.id],
-    queryFn: () => buscarNoShowStatus(menuTarget!.id),
-    enabled: !!menuTarget && menuIsFirst && menuTarget.status !== "IN_PROGRESS" && menuTarget.status !== "PAUSED",
-    refetchInterval: 15_000,
-    retry: false,
-  });
-
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
     else if (action === "adiantar") startClient(att, true);
     else if (action === "promover") confirmPromote(att);
     else if (action === "nao-chegou") confirmLate(att);
-    else if (action === "nao-compareceu") confirmNoShow(att);
     else if (action === "remover") confirmRemove(att);
     // As tres de quem JA esta na cadeira. Elas nao existiam: o menu era por
     // posicao, e quem esta sendo atendido nao tem posicao na espera.
@@ -1202,7 +1166,7 @@ export default function ProfessionalQueueScreen() {
                 <Text className="font-heading text-vupth-textSecondary mb-1">
                   {menuTarget.clientName}
                 </Text>
-                {queueMenuActions(menuIsFirst, menuTarget.status, podeMarcarFalta(noShow)).map((action) => (
+                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => (
                   <Pressable
                     key={action}
                     accessibilityRole="button"
@@ -1222,11 +1186,6 @@ export default function ProfessionalQueueScreen() {
                     </Text>
                   </Pressable>
                 ))}
-                {contagemDaFalta(noShow) && (
-                  <Text testID="falta-contagem" className="font-body text-xs text-vupth-textSecondary py-1">
-                    {contagemDaFalta(noShow)}
-                  </Text>
-                )}
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => setMenuTarget(null)}

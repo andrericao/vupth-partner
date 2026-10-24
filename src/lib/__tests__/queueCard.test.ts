@@ -1,11 +1,11 @@
-import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCard";
+import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL } from "../queueCard";
 
 describe("queueMenuActions", () => {
   it("1o da vez: não chegou + remover (sem adiantar)", () => {
     // "Iniciar" entrou no menu do 1o em 2026-08-11 (pedido do Andre): e
     // REDUNDANTE com o botao do rodape de proposito — quem abriu o menu do
     // proximo espera poder inicia-lo dali, sem fechar e procurar o botao.
-    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "nao-compareceu", "remover"]);
+    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "remover"]);
   });
   it("demais: adiantar + promover + remover (sem não chegou)", () => {
     expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
@@ -20,12 +20,17 @@ describe("queueMenuActions", () => {
     expect(queueMenuActions(true)).toContain("remover");
     expect(queueMenuActions(false)).toContain("remover");
   });
-  it("a falta (nao compareceu) so existe para o 1o da vez", () => {
-    expect(queueMenuActions(true)).toContain("nao-compareceu");
-    expect(queueMenuActions(false)).not.toContain("nao-compareceu");
-  });
-  it("sem o aval do Backend (antes dos 10 min), a falta some do menu do 1o", () => {
-    expect(queueMenuActions(true, "SCHEDULED", false)).toEqual(["iniciar", "nao-chegou", "remover"]);
+  // tirar-nao-compareceu (Andre, 24/10): o profissional tem so "Nao chegou".
+  it("o Nao compareceu saiu: nenhum menu o oferece e nao ha rotulo para ele", () => {
+    const todas = [
+      ...queueMenuActions(true),
+      ...queueMenuActions(false),
+      ...queueMenuActions(true, "IN_PROGRESS"),
+      ...queueMenuActions(true, "PAUSED"),
+    ];
+    expect(todas).not.toContain("nao-compareceu");
+    expect(Object.values(QUEUE_ACTION_LABEL)).not.toContain("Não compareceu");
+    expect(queueMenuActions(true)).toContain("nao-chegou");
   });
   it("toda ação tem rotulo", () => {
     [...queueMenuActions(true), ...queueMenuActions(false)].forEach((a) => {
@@ -69,7 +74,7 @@ describe("queueMenuActions — quem já está sendo atendido", () => {
   });
 
   it("sem status, nada muda — a fila comum segue como sempre foi", () => {
-    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "nao-compareceu", "remover"]);
+    expect(queueMenuActions(true)).toEqual(["iniciar", "nao-chegou", "remover"]);
     expect(queueMenuActions(false)).toEqual(["adiantar", "promover", "remover"]);
     expect(queueMenuActions(false, "SCHEDULED")).toEqual(["adiantar", "promover", "remover"]);
   });
@@ -83,7 +88,7 @@ describe("queueMenuActions — quem já está sendo atendido", () => {
 
 // Regra dos atrasos refeita pelo backend em 26/09 (e328629): atraso 1 e 2 troca
 // de lugar com o proximo; no 3o, multa de R$ 5,00 e o cliente vai para o FIM da
-// fila. O "Nao compareceu" saiu. O profissional precisa saber disso ao marcar.
+// fila. O profissional precisa saber disso ao marcar.
 //
 // Guia de texto (§4.9): a caixa diz so o que vale sempre, em uma linha; o 3o
 // atraso, a multa e o fim da fila moram no "Saiba mais" (artigo de atrasos).
@@ -93,20 +98,5 @@ describe("mensagemDoAtraso", () => {
     expect(m).toBe("Troca de lugar com o próximo.");
     expect(m.length).toBeLessThanOrEqual(70);
     expect(m).not.toMatch(/R\$/);
-  });
-});
-
-describe("a falta (DEC-83)", () => {
-  it("a confirmacao diz que o cliente vira atrasado e a multa so no 3o, sem valor", () => {
-    const m = mensagemDaFalta("Ana");
-    expect(m).toMatch(/Ana não compareceu/);
-    expect(m).toMatch(/atrasado/);
-    expect(m).toMatch(/3º atraso/);
-    expect(m).toMatch(/multa/);
-    expect(m).not.toMatch(/R\$/);
-  });
-  it("antes dos 10 min diz a hora; sem hora, so avisa", () => {
-    expect(mensagemDaFaltaCedo("14:10")).toContain("14:10");
-    expect(mensagemDaFaltaCedo(null)).toBe("Ainda é cedo para marcar a falta.");
   });
 });

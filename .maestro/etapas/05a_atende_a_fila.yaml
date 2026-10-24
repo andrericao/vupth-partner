@@ -130,10 +130,8 @@ appId: ${APP_ID}
     timeout: 20000
     label: "05.20 · espera"
 
-# atraso-na-fila-vazia-partner (DEC-101, Backend 4ca782e): "Nao compareceu" so
-# aparece 10 min depois da hora (GET /attendances/{id}/no-show-status). O
-# CLIENTE2 acabou de entrar na fila, entao a acao NAO existe no menu dele; a
-# confirmacao (mensagemDaFalta) e o 409 ficam no jest (queueCard.test.ts).
+# tirar-nao-compareceu (Andre, 24/10): o profissional tem so "Nao chegou"; o
+# "Nao compareceu" saiu do menu em qualquer momento.
 - tapOn:
     text: "Opções de ${output.CLIENTE2}"
     label: "05.20a · falta · toca em Opções de ${output.CLIENTE2}"
@@ -142,7 +140,7 @@ appId: ${APP_ID}
     label: "05.20b · falta · o menu abriu"
 - assertNotVisible:
     text: "Não compareceu"
-    label: "05.20c · falta · antes dos 10 min a falta não aparece"
+    label: "05.20c · falta · o Não compareceu não existe mais"
 - tapOn:
     text: "Cancelar"
     label: "05.20e · falta · fecha o menu (o CLIENTE2 continua na fila)"

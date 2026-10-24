@@ -58,7 +58,6 @@ type AttendanceState = {
   resumeAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
   markLate: (attendanceId: string) => Promise<void>;
   undoLate: (attendanceId: string) => Promise<void>;
-  markNoShow: (attendanceId: string) => Promise<void>;
   removeFromQueue: (attendanceId: string) => Promise<void>;
   promoteAttendance: (attendanceId: string) => Promise<void>;
   acceptCutRequest: (cutRequestId: string) => Promise<CutRequestResponse>;
@@ -173,12 +172,6 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
   // continua na fila. Repetir derruba mais; undoLate volta a SCHEDULED.
   markLate: async (attendanceId) => {
     await api.patch(`/attendances/${attendanceId}/late`);
-  },
-
-  // A falta (DEC-83): so vale com o cliente na 1a vaga e 10 min depois da hora;
-  // antes disso 409 NO_SHOW_TOO_EARLY com `available_at`. 200 com a fila da loja.
-  markNoShow: async (attendanceId) => {
-    await api.patch(`/attendances/${attendanceId}/no-show`);
   },
 
   undoLate: async (attendanceId) => {

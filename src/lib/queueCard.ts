@@ -2,8 +2,8 @@
 // - 1o da vez: "Iniciar" (botao) + ⋮ [Nao chegou (atrasa), Remover]
 // - demais:    ⋮ [Adiantar, Promover, Remover]
 // "Atrasado" e so um selo no card; nao muda o menu. Sem escalonamento:
-// atrasar e ilimitado e Remover nao exige LATE antes. "Nao compareceu" (a falta,
-// DEC-83) e outra coisa: so vale 10 min depois da hora, e o cliente leva multa.
+// atrasar e ilimitado e Remover nao exige LATE antes. tirar-nao-compareceu (Andre,
+// 24/10): o profissional tem so "Nao chegou"; o "Nao compareceu" saiu do app.
 // "Adiantar" inicia o atendimento na hora (/start); "Promover" (S4, backend
 // 2026-07-18) so reordena ao 1o lugar SEM iniciar (/promote).
 
@@ -12,7 +12,6 @@ export type QueueAction =
   | "adiantar"
   | "promover"
   | "nao-chegou"
-  | "nao-compareceu"
   | "remover"
   | "finalizar"
   | "pausar"
@@ -29,10 +28,7 @@ export type QueueAction =
  */
 export function queueMenuActions(
   isFirst: boolean,
-  status?: string | null,
-  // atraso-na-fila-vazia-partner: "Nao compareceu" so aparece quando o Backend
-  // diz que ja passaram os 10 min (no-show-status).
-  podeFalta: boolean = true
+  status?: string | null
 ): QueueAction[] {
   // 🔴 O menu foi desenhado por POSICAO, e por isso nunca contemplou quem JA
   // ESTA SENDO ATENDIDO: as cinco acoes originais sao todas sobre quem espera.
@@ -43,11 +39,7 @@ export function queueMenuActions(
     return ["finalizar", status === "PAUSED" ? "retomar" : "pausar", "remover"];
   }
 
-  return isFirst
-    ? podeFalta
-      ? ["iniciar", "nao-chegou", "nao-compareceu", "remover"]
-      : ["iniciar", "nao-chegou", "remover"]
-    : ["adiantar", "promover", "remover"];
+  return isFirst ? ["iniciar", "nao-chegou", "remover"] : ["adiantar", "promover", "remover"];
 }
 
 export const QUEUE_ACTION_LABEL: Record<QueueAction, string> = {
@@ -55,7 +47,6 @@ export const QUEUE_ACTION_LABEL: Record<QueueAction, string> = {
   adiantar: "Adiantar",
   promover: "Promover ao topo",
   "nao-chegou": "Não chegou",
-  "nao-compareceu": "Não compareceu",
   remover: "Remover",
   finalizar: "Finalizar atendimento",
   pausar: "Pausar atendimento",
@@ -78,20 +69,4 @@ export function formatServices(services: { customName: string }[]): string {
  */
 export function mensagemDoAtraso(): string {
   return "Troca de lugar com o próximo.";
-}
-
-/**
- * nao-compareceu-vira-atraso (DEC-86, Backend d1d738c): a falta vale como atraso.
- * O cliente fica atrasado, troca de lugar com o proximo e continua na fila; a multa
- * so no 3o atraso. O profissional nao ve o valor (e do app).
- */
-export function mensagemDaFalta(nome: string): string {
-  return `${nome} não compareceu? Ele fica como atrasado, troca de lugar com o próximo e continua na fila. No 3º atraso, vai para o fim da fila e leva multa.`;
-}
-
-/** 409 NO_SHOW_TOO_EARLY: ainda nao passaram os 10 min; diz a partir de quando. */
-export function mensagemDaFaltaCedo(horaLocal: string | null): string {
-  return horaLocal
-    ? `Ainda é cedo para marcar a falta. Disponível a partir das ${horaLocal}.`
-    : "Ainda é cedo para marcar a falta.";
 }
