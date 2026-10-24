@@ -133,7 +133,7 @@ export default function FindEstablishmentScreen() {
     if (!pendingAffiliationId) return;
     const ok = await confirmar({
       titulo: "Cancelar solicitação",
-      mensagem: `Deseja cancelar sua solicitação para ${blockedName ?? "este estabelecimento"}? Você poderá solicitar a outro estabelecimento depois.`,
+      mensagem: `Cancelar a solicitação para ${blockedName ?? "esta loja"}?`,
       confirmar: "Cancelar solicitação",
       destrutivo: true,
     });

@@ -56,7 +56,7 @@ function AttendanceHistoryCard({
       </Text>
 
       <View className="flex-row justify-end mt-2">
-        <Text className="font-heading text-vupth-textPrimary">R$ {item.totalValue.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{formatarReais(item.totalValue)}</Text>
       </View>
       {/* pagamento-pix (contrato 2a2b0ec): o dono tambem marca "Recebi". */}
       <LinhaDoPagamento status={item.payment_status} onRecebi={() => onRecebi(item)} />
@@ -105,7 +105,7 @@ export default function OwnerAttendancesScreen() {
   const recebi = async (item: AttendanceHistoryItem) => {
     const ok = await confirmar({
       titulo: "Recebeu o pagamento?",
-      mensagem: `Confirme que ${item.clientName} pagou ${formatarReais(item.totalValue)}. O cliente recebe o aviso de pagamento confirmado.`,
+      mensagem: `Confirme que ${item.clientName} pagou ${formatarReais(item.totalValue)}.`,
       confirmar: "Recebi",
     });
     if (!ok) return;
@@ -195,7 +195,7 @@ export default function OwnerAttendancesScreen() {
                 {history.length} atendimento{history.length !== 1 ? "s" : ""}
               </Text>
               <Text className="font-heading text-vupth-onGreenTint">
-                R$ {totalRevenue.toFixed(2)}
+                {formatarReais(totalRevenue)}
               </Text>
             </View>
           </View>

@@ -6,6 +6,7 @@ import { comingSoon } from "@components/comingSoon";
 import { NotificationBadge } from "@components/NotificationBadge";
 import type { MealSignal } from "@lib/meals";
 import { useTema } from "@hooks/useTema";
+import { DotNoCanto } from "@components/DotNoCanto";
 import type { NomeDeCor } from "@theme/tema";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
@@ -100,13 +101,13 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
         </View>
         {children}
         {badge != null && <NotificationBadge count={badge} testID="menu-badge-requests" />}
-        {dot && (
-          <View
-            testID="menu-dot-meals"
-            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: cores.danger }}
-          />
-        )}
       </View>
+      {/* dot-no-canto-do-card: sobre a borda arredondada, canto superior direito. */}
+      {dot && (
+        <DotNoCanto testID="menu-dot-meals">
+          <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: cores.danger }} />
+        </DotNoCanto>
+      )}
     </Pressable>
   );
 }

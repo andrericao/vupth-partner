@@ -47,4 +47,26 @@ describe("PagamentosPendentes", () => {
     fireEvent.press(getByTestId("recebi-a2"));
     await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a2"));
   });
+
+  // pagamento-pelo-asaas-no-partner (DEC-119).
+  it("Asaas conectado no sandbox: sem Recebi, o app confirma, e a faixa de teste aparece", () => {
+    const { getByTestId, queryByTestId } = render(
+      <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: true, mode: "SANDBOX" }} />
+    );
+    expect(queryByTestId("recebi-a1")).toBeNull();
+    expect(queryByTestId("recebi-a2")).toBeNull();
+    expect(getByTestId("pelo-app-a1")).toBeTruthy();
+    expect(getByTestId("pagamentos-faixa-teste")).toBeTruthy();
+  });
+
+  it("Asaas real: sem Recebi e sem faixa de teste; desconectado: o Recebi de sempre", () => {
+    const real = render(
+      <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: true, mode: "REAL" }} />
+    );
+    expect(real.queryByTestId("recebi-a1")).toBeNull();
+    expect(real.queryByTestId("pagamentos-faixa-teste")).toBeNull();
+    real.unmount();
+    const fora = render(<PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: false }} />);
+    expect(fora.getByTestId("recebi-a1")).toBeTruthy();
+  });
 });

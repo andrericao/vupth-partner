@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { FotoEditavel } from "@components/FotoEditavel";
 import { CompartilharPerfil } from "@components/CompartilharPerfil";
+import { QrDoLink } from "@components/QrDoLink";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { editarFoto, rotaDaFotoDaLoja } from "@lib/fotoDePerfil";
 import { avisar } from "@lib/confirmar";
@@ -110,12 +111,15 @@ export default function EstablishmentDataScreen() {
                 })
               }
             />
-            <CompartilharPerfil
-              rotulo="Compartilhar a loja"
-              link={linkDaLoja(API_ENV, establishment.id)}
-              titulo={establishment.name ?? "Minha loja"}
-              mensagem={mensagemDeDivulgacao(establishment.name)}
-            />
+            <View className="flex-row justify-center gap-4">
+              <CompartilharPerfil
+                rotulo="Compartilhar a loja"
+                link={linkDaLoja(API_ENV, establishment.id)}
+                titulo={establishment.name ?? "Minha loja"}
+                mensagem={mensagemDeDivulgacao(establishment.name)}
+              />
+              <QrDoLink alvo="da loja" link={linkDaLoja(API_ENV, establishment.id)} />
+            </View>
           </View>
         )}
 

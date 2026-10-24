@@ -1,0 +1,73 @@
+# maestro-campanha-cupom-e-link-no-partner (Andre, 23/10): o cupom da campanha
+# "MAESTRO PARTNER CUPOM" (desconto com cupom), criada por ele no Painel. O fluxo
+# nao fixa valor: acha a campanha pelo nome e confere o que o app mostra.
+#   15.0x entra e abre Perfil -> Promocoes
+#   15.1x ativa o cupom: "Valido ate" e o Saiba mais; ou, se a campanha ja
+#         encerrou/esgotou, o modal certo (DEC-124)
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_CAMP}
+    label: "15.01 · entra como o profissional da campanha"
+- extendedWaitUntil:
+    visible:
+      id: "aba-perfil"
+    timeout: 30000
+    label: "15.02 · espera aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "15.03 · roda fechar_aviso"
+- tapOn:
+    id: "aba-perfil"
+    label: "15.04 · abre o Perfil"
+- scrollUntilVisible:
+    element: "Promoções"
+    direction: DOWN
+    label: "15.05 · rola ate Promoções"
+- tapOn:
+    text: "Promoções"
+    label: "15.06 · abre Promoções"
+- tapOn:
+    id: "cupom-codigo"
+    label: "15.10 · toca no campo do cupom"
+- inputText: ${output.CODIGO}
+- hideKeyboard
+- tapOn:
+    id: "cupom-usar"
+    label: "15.11 · ativa o cupom"
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU == 'sim'}
+    commands:
+      - assertVisible:
+          id: "promocao-modal-titulo"
+          label: "15.12a · campanha encerrada · modal"
+      - assertVisible:
+          text: "Promoção encerrada"
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU != 'sim' && output.SEM_VAGA == 'sim'}
+    commands:
+      - assertVisible:
+          text: "Promoção esgotada"
+          label: "15.12b · campanha esgotada · modal"
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU != 'sim' && output.SEM_VAGA != 'sim'}
+    commands:
+      - assertVisible:
+          id: "cupom-validade"
+          label: "15.13a · mostra ate quando vale"
+      - assertVisible:
+          text: "Válido até.*"
+      - tapOn:
+          id: "cupom-saiba-mais-abrir"
+          label: "15.13b · Saiba mais"
+      - assertVisible:
+          text: ".*para qualquer serviço.*"
+          label: "15.13c · o Saiba mais diz que vale para qualquer serviço"
+      - assertVisible:
+          text: ${NOME_CAMPANHA}
+          label: "15.13d · o cupom aparece em Promoções"

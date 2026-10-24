@@ -96,7 +96,7 @@ export default function QueueOptionsScreen() {
         await avisar({
           titulo: "Fila fechada junto",
           mensagem:
-            "Como você saiu, a fila parou de aceitar novos clientes. Quem já estava esperando continua na lista.",
+            "Sem quem atenda, a fila para de aceitar. Quem espera continua.",
         });
       }
       const fresh = await refetchQueue();
@@ -104,7 +104,7 @@ export default function QueueOptionsScreen() {
       if (!wasOpen && nowOpen && next === "trabalhando") {
         Alert.alert(
           "Loja aberta",
-          "Você foi o primeiro a comecar — a loja agora aparece para os clientes e recebe a fila."
+          "Você abriu a fila. A loja já aparece para os clientes."
         );
       } else if (wasOpen && !nowOpen) {
         Alert.alert(
@@ -137,7 +137,7 @@ export default function QueueOptionsScreen() {
         await updateMyStatus("WORKING");
         await avisar({
           titulo: "Você voltou para a fila",
-          mensagem: "Abrir a fila marca você como Trabalhando — não dá para receber cliente estando fora.",
+          mensagem: "Abrir a fila marca você como Trabalhando.",
         });
       }
       await setAcceptingNew(value);

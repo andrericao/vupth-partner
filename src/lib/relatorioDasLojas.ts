@@ -1,4 +1,5 @@
 import { isoDate } from "@lib/time";
+import { formatarReais } from "@lib/dinheiro";
 
 // multi-loja-do-dono (Andre, 15/10): o relatorio do dono com todas as lojas
 // juntas ou uma so, por Hoje, 7 dias, 30 dias, Mes ou periodo personalizado.
@@ -97,7 +98,7 @@ export function caminhoDoRelatorio(
 }
 
 export function reais(valor: number | null | undefined): string {
-  return `R$ ${Number(valor ?? 0).toFixed(2)}`;
+  return formatarReais(valor);
 }
 
 /** "2026-10-17" -> "17/10" (a linha da serie). */

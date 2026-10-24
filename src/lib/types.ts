@@ -169,4 +169,6 @@ export type AttendanceHistoryItem = {
   not_realized_reason?: "CLIENT_CANCELLED" | "PROFESSIONAL_REMOVED" | "REMOVED_FOR_LATENESS" | null;
   /** Corte concluido com observacao de atraso do cliente. */
   late_arrival?: boolean | null;
+  /** tres-faltas-pagar-adiantado (Backend 5d04760): cliente com 3 faltas/saidas em 90 dias. */
+  prepay_required?: boolean | null;
 };

@@ -9,6 +9,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { getApiErrorMessage } from "@lib/api";
 import { avisar } from "@lib/confirmar";
+import { formatarReais } from "@lib/dinheiro";
 
 export default function AddGuestScreen() {
   const professional = useProfessionalStore((s) => s.professional);
@@ -150,7 +151,7 @@ export default function AddGuestScreen() {
                     <Text
                       className={`font-heading ${isSelected ? "text-vupth-onSelecionadoBranco" : "text-vupth-textPrimary"}`}
                     >
-                      R$ {svc.price.toFixed(2)}
+                      {formatarReais(svc.price)}
                     </Text>
                   </View>
                 </Pressable>
@@ -162,7 +163,7 @@ export default function AddGuestScreen() {
             <View className="bg-vupth-greenTint p-3 rounded-md border border-vupth-onGreenTint flex-row justify-between items-center mb-4">
               <Text className="font-body text-vupth-onGreenTint">Total:</Text>
               <Text className="font-heading text-lg text-vupth-onGreenTint">
-                R$ {selectedTotal.toFixed(2)}
+                {formatarReais(selectedTotal)}
               </Text>
             </View>
           )}

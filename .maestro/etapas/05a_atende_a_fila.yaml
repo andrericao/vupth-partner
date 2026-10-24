@@ -130,27 +130,22 @@ appId: ${APP_ID}
     timeout: 20000
     label: "05.20 · espera"
 
-# botao-nao-compareceu (PAR, DEC-83, Backend falta-do-cliente): o 1o da vez tem a
-# acao "Nao compareceu". A confirmacao diz que o cliente vira atrasado e a multa so no 3o atraso; que nao traz
-# valor o jest trava (queueCard.test.ts).
-# Nao confirma: o Backend so aceita a falta 10 min depois da hora, e o proximo
-# passo (Remover) precisa do CLIENTE2 na fila. O 409 ("Ainda e cedo") fica no jest.
+# atraso-na-fila-vazia-partner (DEC-101, Backend 4ca782e): "Nao compareceu" so
+# aparece 10 min depois da hora (GET /attendances/{id}/no-show-status). O
+# CLIENTE2 acabou de entrar na fila, entao a acao NAO existe no menu dele; a
+# confirmacao (mensagemDaFalta) e o 409 ficam no jest (queueCard.test.ts).
 - tapOn:
     text: "Opções de ${output.CLIENTE2}"
     label: "05.20a · falta · toca em Opções de ${output.CLIENTE2}"
-- tapOn:
-    text: "Não compareceu"
-    label: "05.20b · falta · toca em Não compareceu"
-- extendedWaitUntil:
-    visible: "Cliente não compareceu"
-    timeout: 10000
-    label: "05.20c · falta · a confirmação aparece"
 - assertVisible:
-    text: ".*3º atraso.*"
-    label: "05.20d · falta · diz que vira atrasado e a multa só no 3º"
+    text: "Remover"
+    label: "05.20b · falta · o menu abriu"
+- assertNotVisible:
+    text: "Não compareceu"
+    label: "05.20c · falta · antes dos 10 min a falta não aparece"
 - tapOn:
-    id: "dialogo-botao-0"
-    label: "05.20e · falta · Cancelar (o CLIENTE2 continua na fila)"
+    text: "Cancelar"
+    label: "05.20e · falta · fecha o menu (o CLIENTE2 continua na fila)"
 
 # O segundo sai pela loja: Remover
 - tapOn:

@@ -16,7 +16,13 @@
           "color": "#163300"
         }
       ],
-      "@sentry/react-native/expo",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "vupth",
+          "project": "vupth-partner"
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -34,7 +40,7 @@
         }
       ]
     ],
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.vupth.partner"
     },

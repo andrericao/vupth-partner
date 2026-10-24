@@ -1,6 +1,8 @@
 import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { abrirDialogo } from "@store/dialogo.store";
+import { formatarReais } from "@lib/dinheiro";
+import { buscarGateway, pagaPeloApp, type Gateway } from "@lib/gateway";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -11,7 +13,7 @@ import { abrirDialogo } from "@store/dialogo.store";
 
 type StatusDoPagamento = "PENDING" | "AWAITING_CONFIRMATION" | "PAID";
 
-const reais = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
+const reais = formatarReais;
 
 /**
  * undefined = nao perguntar (ja pago, atendimento sem pagamento ou falha ao
@@ -19,7 +21,7 @@ const reais = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
  */
 export async function perguntarPagamento(
   attendanceId: string,
-  deps: { perguntar?: typeof confirmar } = {}
+  deps: { perguntar?: typeof confirmar; gateway?: () => Promise<Gateway> } = {}
 ): Promise<boolean | undefined> {
   const perguntar = deps.perguntar ?? confirmar;
   let status: StatusDoPagamento;
@@ -32,6 +34,9 @@ export async function perguntarPagamento(
     return undefined;
   }
   if (status !== "PENDING" && status !== "AWAITING_CONFIRMATION") return undefined;
+  // pagamento-pelo-asaas-no-partner (DEC-119): com a conexao ligada o webhook
+  // quita sozinho; o profissional nao pede o "Recebi".
+  if (pagaPeloApp(await (deps.gateway ?? buscarGateway)(), valor)) return undefined;
 
   return perguntar({
     titulo: "Recebeu o pagamento?",

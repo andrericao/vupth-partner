@@ -219,7 +219,7 @@ export default function MealsScreen() {
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader
             title="Refeições"
-            subtitle="Entram no cálculo da fila. O horário é previsão — a refeição começa quando você inicia (aqui ou no aviso da fila)."
+            subtitle="O horário é previsão. A refeição começa quando você inicia."
             onBack={() => router.navigate(backTarget as any)}
           />
 

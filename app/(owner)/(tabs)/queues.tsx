@@ -14,6 +14,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { ratingLabel } from "@lib/rating";
 import type { ProfessionalWithQueue, AttendanceInQueue } from "@lib/types";
 import { useTema } from "@hooks/useTema";
+import { formatarReais } from "@lib/dinheiro";
 
 function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
   const statusLabel =
@@ -39,7 +40,7 @@ function AttendanceItem({ attendance }: { attendance: AttendanceInQueue }) {
       <View className="items-end">
         <Text className={`font-body text-xs ${statusClasse}`}>{statusLabel}</Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
-          R$ {attendance.totalValue.toFixed(2)}
+          {formatarReais(attendance.totalValue)}
         </Text>
       </View>
     </View>

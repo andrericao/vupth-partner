@@ -385,6 +385,8 @@ describe("notificacao-com-botao", () => {
   it("o toque leva a tela certa: pagamento, fechamento e loja removida", () => {
     expect(notificationRoute({ type: "PAYMENT_CLAIMED" })).toBe("/(professional)/my-day");
     expect(notificationRoute({ type: "CLOSING_PROMPT" })).toBe("/(professional)/queue");
+    expect(notificationRoute({ type: "PRICE_POLICY", policyVersion: 2 })).toBe("/(professional)/ciencia-de-preco");
+    expect(notificationRoute({ type: "NO_SHOW_AVAILABLE", attendanceId: "a1" })).toBe("/(professional)/queue");
     expect(notificationRoute({ type: "ESTABLISHMENT_REMOVED" })).toBe("/(professional)/settings-vinculo");
   });
 });

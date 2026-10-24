@@ -27,7 +27,13 @@ export type QueueAction =
  * demais ele continua FORA: a regra atende-primeiro nao admite iniciar do meio
  * da fila (p/ isso existe "Adiantar", que troca a posicao antes de iniciar).
  */
-export function queueMenuActions(isFirst: boolean, status?: string | null): QueueAction[] {
+export function queueMenuActions(
+  isFirst: boolean,
+  status?: string | null,
+  // atraso-na-fila-vazia-partner: "Nao compareceu" so aparece quando o Backend
+  // diz que ja passaram os 10 min (no-show-status).
+  podeFalta: boolean = true
+): QueueAction[] {
   // 🔴 O menu foi desenhado por POSICAO, e por isso nunca contemplou quem JA
   // ESTA SENDO ATENDIDO: as cinco acoes originais sao todas sobre quem espera.
   // Quem esta na cadeira nao tinha entrada nenhuma aqui — e era exatamente por
@@ -38,7 +44,9 @@ export function queueMenuActions(isFirst: boolean, status?: string | null): Queu
   }
 
   return isFirst
-    ? ["iniciar", "nao-chegou", "nao-compareceu", "remover"]
+    ? podeFalta
+      ? ["iniciar", "nao-chegou", "nao-compareceu", "remover"]
+      : ["iniciar", "nao-chegou", "remover"]
     : ["adiantar", "promover", "remover"];
 }
 

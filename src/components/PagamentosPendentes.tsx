@@ -3,6 +3,7 @@ import { View, Text } from "react-native";
 import { NwButton } from "@components/nw/Button";
 import { PendingDot } from "@components/PendingDot";
 import { formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@lib/pagamento";
+import { avisoDeTeste, pagaPeloApp, type Gateway } from "@lib/gateway";
 
 /**
  * pagamento-pix (Andre, 10/10): "Card do atendimento: status Pendente com uma
@@ -13,9 +14,12 @@ import { formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@l
 export function PagamentosPendentes({
   itens,
   onRecebi,
+  gateway,
 }: {
   itens: PagamentoPendente[];
   onRecebi: (attendanceId: string) => Promise<void>;
+  /** DEC-119: com o Asaas conectado, o webhook quita; sem "Recebi". */
+  gateway?: Gateway | null;
 }) {
   const [confirmando, setConfirmando] = useState<string | null>(null);
   if (itens.length === 0) return null;
@@ -32,6 +36,11 @@ export function PagamentosPendentes({
   return (
     <View testID="pagamentos-pendentes" className="mt-4 gap-3">
       <Text className="font-heading text-xl text-vupth-textPrimary">Pagamentos pendentes</Text>
+      {avisoDeTeste(gateway) && (
+        <View testID="pagamentos-faixa-teste" className="bg-vupth-warning px-3 py-2 rounded-card">
+          <Text className="font-body text-xs text-vupth-onAccentPeach">{avisoDeTeste(gateway)}</Text>
+        </View>
+      )}
       {itens.map((p) => (
         <View key={p.attendance_id} className="bg-vupth-surface rounded-card p-4 gap-2">
           <View className="flex-row items-center justify-between">
@@ -46,15 +55,21 @@ export function PagamentosPendentes({
             )}
             <Text className="flex-1 font-body text-xs text-vupth-textSecondary">{observacaoDoPagamento(p.status)}</Text>
           </View>
-          <NwButton
-            title="Recebi"
-            variant="vupthOutline"
-            className="h-12 self-start px-6"
-            isLoading={confirmando === p.attendance_id}
-            onPress={() => recebi(p.attendance_id)}
-            testID={`recebi-${p.attendance_id}`}
-            accessibilityLabel={`Recebi de ${p.client_name}`}
-          />
+          {pagaPeloApp(gateway, p.amount) ? (
+            <Text testID={`pelo-app-${p.attendance_id}`} className="font-body text-xs text-vupth-textSecondary">
+              O app confirma o pagamento sozinho.
+            </Text>
+          ) : (
+            <NwButton
+              title="Recebi"
+              variant="vupthOutline"
+              className="h-12 self-start px-6"
+              isLoading={confirmando === p.attendance_id}
+              onPress={() => recebi(p.attendance_id)}
+              testID={`recebi-${p.attendance_id}`}
+              accessibilityLabel={`Recebi de ${p.client_name}`}
+            />
+          )}
         </View>
       ))}
     </View>

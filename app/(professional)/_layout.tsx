@@ -173,6 +173,8 @@ export default function ProfessionalLayout() {
       <Tabs.Screen name="establishment-detail" options={HIDDEN} />
       <Tabs.Screen name="meals" options={HIDDEN} />
       <Tabs.Screen name="agenda" options={HIDDEN} />
+      <Tabs.Screen name="agendados" options={HIDDEN} />
+      <Tabs.Screen name="ciencia-de-preco" options={HIDDEN} />
       {/* ⚠️ SEM esta linha a tela vira ABA. O expo-router registra como aba
           toda tela da pasta que o layout nao declara — e era o unico arquivo
           aqui que ninguem tinha declarado. O diagnostico do WebSocket mora
@@ -182,6 +184,7 @@ export default function ProfessionalLayout() {
       <Tabs.Screen name="sistema" options={HIDDEN} />
       <Tabs.Screen name="aparencia" options={HIDDEN} />
       <Tabs.Screen name="pix" options={HIDDEN} />
+      <Tabs.Screen name="custos" options={HIDDEN} />
       <Tabs.Screen name="promocoes" options={HIDDEN} />
       {/* PILOTO Gluestack v2 (NativeWind) — rota temporaria, remover ao concluir */}
     </Tabs>

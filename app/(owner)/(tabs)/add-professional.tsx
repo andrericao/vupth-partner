@@ -123,7 +123,7 @@ export default function AddProfessionalScreen() {
       await refreshToken();
       confirmar({
         titulo: "Perfil profissional criado",
-        mensagem: `${result.name} já aparece como profissional da sua loja. Falta só cadastrar seus serviços para a loja poder abrir.`,
+        mensagem: `${result.name} já é profissional da loja. Falta cadastrar os serviços.`,
         confirmar: "Cadastrar serviços",
         cancelar: "Depois",
       }).then((ok) => {

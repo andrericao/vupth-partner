@@ -43,6 +43,23 @@ describe("perguntarPagamento", () => {
     expect(pergunta).toHaveBeenCalledWith(expect.objectContaining({ mensagem: expect.stringMatching(/diz que pagou/) }));
   });
 
+  // pagamento-pelo-asaas-no-partner (DEC-119): conectado, o webhook quita; sem "Recebi".
+  it("Asaas conectado: nao pergunta; abaixo de R$ 5,00 ou desconectado, pergunta como antes", async () => {
+    const conectado = async () => ({ connected: true, mode: "SANDBOX" as const });
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 31.9 } });
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, gateway: conectado })).resolves.toBeUndefined();
+    expect(pergunta).not.toHaveBeenCalled();
+
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 4 } });
+    pergunta.mockResolvedValueOnce(true);
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, gateway: conectado })).resolves.toBe(true);
+
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 31.9 } });
+    pergunta.mockResolvedValueOnce(false);
+    const desligado = async () => ({ connected: false });
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, gateway: desligado })).resolves.toBe(false);
+  });
+
   it("sem deps, usa a caixa de confirmacao do app; sem valor, mostra R$ 0,00", async () => {
     (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING" } });
     mockConfirmar.mockResolvedValueOnce(false);
