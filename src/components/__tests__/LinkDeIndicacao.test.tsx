@@ -10,6 +10,15 @@ const SEM_CAMPANHAS = jest.fn().mockResolvedValue([]);
 const ABERTA = { id: "c1", name: "Indique e ganhe", type: "REFERRAL_BONUS", value_amount: 5 };
 
 describe("LinkDeIndicacao", () => {
+  // ci-teste-linkdeindicacao-timeout (Andre, 24/10): a PRIMEIRA renderizacao do bloco carrega,
+  // sob demanda, o NwButton, o card e o css-interop (3 s sem cache, como no CI), e estourava o
+  // 1 s do findBy do primeiro teste. O aquecimento paga esse custo uma vez, fora dos testes.
+  beforeAll(async () => {
+    const r = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(MEU)} listarCampanhas={SEM_CAMPANHAS} />);
+    await r.findByTestId("link-indicacao-link", {}, { timeout: 20000 });
+    r.unmount();
+  }, 30000);
+
   it("mostra o link e quantos clientes chegaram", async () => {
     const { findByTestId, getByTestId } = render(<LinkDeIndicacao carregar={jest.fn().mockResolvedValue(MEU)} listarCampanhas={SEM_CAMPANHAS} />);
     expect((await findByTestId("link-indicacao-link")).props.children).toBe(MEU.link);
