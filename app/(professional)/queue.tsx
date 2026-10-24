@@ -42,6 +42,7 @@ import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
 import { AvisoDeDivida } from "@components/AvisoDeDivida";
+import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
@@ -939,6 +940,7 @@ export default function ProfessionalQueueScreen() {
   
           <AvisoCienciaDePreco />
           <AvisoDeDivida />
+          <AvisoDeAgenda />
           <CarrosselDeCampanhas />
 
           {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (

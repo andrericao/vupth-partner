@@ -25,6 +25,8 @@ import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
 import { formatCurrency } from "@utils/summaryCalculations";
 import { EstadoVazio } from "@components/EstadoVazio";
+import { DotNoCanto } from "@components/DotNoCanto";
+import { PendingDot } from "@components/PendingDot";
 import { useTema } from "@hooks/useTema";
 
 // Tela "Encaixes" (Pencil PROF · 02): mesma feature de C2 (solicitacoes de
@@ -139,6 +141,11 @@ export default function CutRequestsScreen() {
                     key={req.id}
                     className="bg-vupth-surface rounded-card p-4 gap-3"
                   >
+                    {req.agenda_requested && (
+                      <DotNoCanto testID={`encaixe-dot-${req.id}`}>
+                        <PendingDot />
+                      </DotNoCanto>
+                    )}
                     <View className="flex-row items-start justify-between">
                       <View className="flex-1 pr-3">
                         <Text className="font-display text-base text-vupth-textPrimary">{who}</Text>

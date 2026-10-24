@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { WS_URL } from "@lib/api";
 import type { EstablishmentWithProfessionals, QueueNotification } from "@lib/types";
-import { isCutRequestEvent } from "@lib/cutRequests";
+import { isCutRequestEvent, isAgendaReleasePromptEvent } from "@lib/cutRequests";
 import { isPaymentEvent } from "@lib/pagamento";
 import { isClosingPromptEvent } from "@lib/closing";
 import { needsRefresh, tokenRecusado } from "@lib/socketAuth";
@@ -156,7 +156,11 @@ export function useQueueSocket(establishmentId: string | null) {
             useWsDiagnosticsStore.getState().markMessage("personal");
             try {
               const notification = JSON.parse(message.body) as QueueNotification;
-              if (isCutRequestEvent(notification.type)) {
+              if (isAgendaReleasePromptEvent(notification.type)) {
+                // Primeira solicitacao sem agenda: aviso dentro do app (pode ser fechado).
+                useUiStore.getState().showAvisoDeAgenda();
+                queryClient.invalidateQueries({ queryKey: ["cut-requests"] });
+              } else if (isCutRequestEvent(notification.type)) {
                 queryClient.invalidateQueries({ queryKey: ["cut-requests"] });
               } else if (isPaymentEvent(notification.type)) {
                 // pagamento-pix (adendo 1a0616c): "Ja paguei" do cliente, mesmo

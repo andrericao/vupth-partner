@@ -402,4 +402,8 @@ describe("notificacao-com-botao", () => {
     expect(notificationRoute({ type: "NO_SHOW_AVAILABLE", attendanceId: "a1" })).toBe("/(professional)/queue");
     expect(notificationRoute({ type: "ESTABLISHMENT_REMOVED" })).toBe("/(professional)/settings-vinculo");
   });
+
+  it("Libere a sua agenda leva a agenda", () => {
+    expect(notificationRoute({ type: "AGENDA_RELEASE_PROMPT", target: "agenda" })).toBe("/(professional)/agenda");
+  });
 });

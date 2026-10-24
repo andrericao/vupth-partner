@@ -57,6 +57,8 @@ export type CutRequestResponse = {
   resulting_attendance_id: string | null;
   /** Quando o cliente quer (S26, 36c4359); null = assim que abrir. So informa. */
   desired_time?: string | null;
+  /** solicitar-agendamento (Backend 651514f): o dia pedido esta fechado na agenda; o dot vai nesses itens. */
+  agenda_requested?: boolean;
 };
 
 export type AttendanceInQueue = {

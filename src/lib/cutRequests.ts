@@ -91,6 +91,10 @@ export function cutRequestTotal(
  * lista de pedidos. Prefixo `CUT_` cobre CUT_REQUESTED (o unico dirigido ao
  * profissional hoje) e qualquer evento de corte futuro sem retocar o hook.
  */
+export function isAgendaReleasePromptEvent(type: string | null | undefined): boolean {
+  return type === "AGENDA_RELEASE_PROMPT";
+}
+
 export function isCutRequestEvent(type: string | null | undefined): boolean {
   return !!type && type.startsWith("CUT_");
 }
@@ -215,7 +219,7 @@ function diaLocal(ms: number): number {
   return d.getTime();
 }
 
-type PedidoComDia = { desired_time?: string | null; expires_at: string | null };
+type PedidoComDia = { desired_time?: string | null; expires_at: string | null; agenda_requested?: boolean };
 
 /**
  * texto-do-aceite (Backend aceite-vira-agendamento, ba38b81): o pedido para
@@ -234,6 +238,8 @@ export function ehDeOutroDia(req: PedidoComDia, nowMs: number): boolean {
 
 /** O que acontece ao aceitar, na linha do card. */
 export function oQueAconteceAoAceitar(req: PedidoComDia, nowMs: number): string {
+  // avisos-de-agenda-e-solicitacao: aceitar a solicitacao de um dia fechado abre a agenda dele.
+  if (req.agenda_requested && ehDeOutroDia(req, nowMs)) return "abre a agenda desse dia";
   return ehDeOutroDia(req, nowMs) ? "fica agendado para esse dia" : "entra no fim da sua fila";
 }
 

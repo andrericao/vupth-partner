@@ -15,6 +15,11 @@ type UiState = {
   closingGraceUntil: string | null;
   showClosingPrompt: (graceUntil: string | null) => void;
   dismissClosingPrompt: () => void;
+  // avisos-de-agenda-e-solicitacao: o aviso "Libere a sua agenda" dentro do app
+  // (WS AGENDA_RELEASE_PROMPT); pode ser fechado. Efemero.
+  avisoDeAgenda: boolean;
+  showAvisoDeAgenda: () => void;
+  dismissAvisoDeAgenda: () => void;
 };
 
 export const useUiStore = create<UiState>((set) => ({
@@ -24,4 +29,7 @@ export const useUiStore = create<UiState>((set) => ({
   closingGraceUntil: null,
   showClosingPrompt: (graceUntil) => set({ closingGraceUntil: graceUntil }),
   dismissClosingPrompt: () => set({ closingGraceUntil: null }),
+  avisoDeAgenda: false,
+  showAvisoDeAgenda: () => set({ avisoDeAgenda: true }),
+  dismissAvisoDeAgenda: () => set({ avisoDeAgenda: false }),
 }));

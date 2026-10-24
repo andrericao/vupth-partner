@@ -32,6 +32,8 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
   if (type === "CUT_REQUESTED") return "/(professional)/cut-requests";
+  // avisos-de-agenda-e-solicitacao (Backend 651514f): "Libere a sua agenda" leva a agenda.
+  if (type === "AGENDA_RELEASE_PROMPT") return "/(professional)/agenda";
   // notificacao-com-botao (PAR-11): "Confira o pagamento" leva aos Relatorios,
   // onde estao os pendentes com o "Recebi"; "Hora de fechar?" leva a Fila, onde
   // o aviso de fechamento aparece; a loja removida leva ao Vinculo.
