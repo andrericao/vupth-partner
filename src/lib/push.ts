@@ -229,6 +229,11 @@ export const ACAO_RECUSAR = "RECUSAR";
  */
 export const CATEGORIA_CONFIRMAR_RECUSAR = "CONFIRMAR_RECUSAR";
 export const ACAO_CONFIRMAR = "CONFIRMAR";
+// push-confirmar-pagamento-textos (Andre, 24/10): os botoes do "Confirmar pagamento" sao
+// "Confirmar" e "Nao recebi". O titulo e o corpo ("Pagamento de R$ XX,XX do cliente <nome>")
+// vem do Backend (BAK:push-confirmar-pagamento-texto); so os rotulos sao do app.
+export const BOTAO_CONFIRMAR_PAGAMENTO = "Confirmar";
+export const BOTAO_NAO_RECEBI = "Não recebi";
 
 export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "aceitar" | "recusar" | "abrir";
 

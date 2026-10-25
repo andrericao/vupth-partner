@@ -20,6 +20,8 @@ import {
   ACAO_ACEITAR,
   CATEGORIA_CONFIRMAR_RECUSAR,
   ACAO_CONFIRMAR,
+  BOTAO_CONFIRMAR_PAGAMENTO,
+  BOTAO_NAO_RECEBI,
   ACAO_RECUSAR,
   ACAO_OK,
   ACAO_FECHAR_AGORA,
@@ -134,8 +136,8 @@ export function usePushRegistration() {
       ]).catch(() => {});
       // pagamento-ja-recebi: o "[nome] diz que pagou" com Confirmar e Recusar.
       Notifications.setNotificationCategoryAsync(CATEGORIA_CONFIRMAR_RECUSAR, [
-        { identifier: ACAO_CONFIRMAR, buttonTitle: "Confirmar", options: { opensAppToForeground: false } },
-        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_CONFIRMAR, buttonTitle: BOTAO_CONFIRMAR_PAGAMENTO, options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: BOTAO_NAO_RECEBI, options: { opensAppToForeground: false } },
       ]).catch(() => {});
     } catch {
       // binario sem o modulo nativo de push.

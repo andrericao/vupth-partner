@@ -24,6 +24,8 @@ import {
   CATEGORIA_ACEITAR_RECUSAR,
   CATEGORIA_CONFIRMAR_RECUSAR,
   ACAO_CONFIRMAR,
+  BOTAO_CONFIRMAR_PAGAMENTO,
+  BOTAO_NAO_RECEBI,
   CANAL_ALERTAS,
 } from "../push";
 
@@ -383,6 +385,9 @@ describe("notificacao-com-botao", () => {
     expect(CATEGORIA_ACEITAR_RECUSAR).toBe("ACEITAR_RECUSAR");
     expect(CATEGORIA_CONFIRMAR_RECUSAR).toBe("CONFIRMAR_RECUSAR");
     expect(acaoDoPush({ actionIdentifier: ACAO_CONFIRMAR })).toBe("aceitar");
+    // push-confirmar-pagamento-textos: os rotulos do push do "ja paguei".
+    expect(BOTAO_CONFIRMAR_PAGAMENTO).toBe("Confirmar");
+    expect(BOTAO_NAO_RECEBI).toBe("Não recebi");
   });
 
   it("o Hora de fechar? traz a carencia; os outros nao", () => {
