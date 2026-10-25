@@ -183,7 +183,7 @@ describe("rotuloDoPagamento (adendo 62295f1: ao lado de qualquer status)", () =>
 // forma-de-recebimento (Backend 8b158e3): so registro, opcional.
 describe("forma de recebimento", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { perguntarForma, FORMAS_DE_RECEBIMENTO } = require("@lib/pagamento");
+  const { perguntarForma, FORMAS_DE_RECEBIMENTO, MOSTRAR_FORMA_NOTA, formasVisiveis } = require("@lib/pagamento");
 
   it("tem as quatro formas do Backend", () => {
     expect(FORMAS_DE_RECEBIMENTO.map((f: { valor: string }) => f.valor)).toEqual([
@@ -194,20 +194,27 @@ describe("forma de recebimento", () => {
     ]);
   });
 
-  it("devolve a forma escolhida; pular devolve undefined", async () => {
-    expect(await perguntarForma({ perguntar: async () => 1 })).toBe("CARTAO");
-    expect(await perguntarForma({ perguntar: async () => 3 })).toBe("NOTA");
-    expect(await perguntarForma({ perguntar: async () => 4 })).toBeUndefined();
+  // ocultar-forma-nota (Andre, 25/10): a Nota esta escondida (flag), sem apagar.
+  it("a Nota esta escondida da caixa, mas continua na lista do Backend", () => {
+    expect(MOSTRAR_FORMA_NOTA).toBe(false);
+    expect(formasVisiveis().map((f: { valor: string }) => f.valor)).toEqual(["PIX", "CARTAO", "DINHEIRO"]);
+    expect(FORMAS_DE_RECEBIMENTO.map((f: { valor: string }) => f.valor)).toContain("NOTA");
   });
 
-  it("a caixa tem as quatro formas e o Pular", async () => {
+  it("devolve a forma escolhida; pular devolve undefined", async () => {
+    expect(await perguntarForma({ perguntar: async () => 1 })).toBe("CARTAO");
+    expect(await perguntarForma({ perguntar: async () => 2 })).toBe("DINHEIRO");
+    expect(await perguntarForma({ perguntar: async () => 3 })).toBeUndefined();
+  });
+
+  it("a caixa tem Pix, Cartao e Dinheiro e o Pular (sem Nota)", async () => {
     let botoes: { texto: string }[] = [];
     await perguntarForma({
       perguntar: async (p: { botoes: { texto: string }[] }) => {
         botoes = p.botoes;
-        return 4;
+        return 3;
       },
     });
-    expect(botoes.map((b) => b.texto)).toEqual(["Pix", "Cartão", "Dinheiro", "Nota", "Pular"]);
+    expect(botoes.map((b) => b.texto)).toEqual(["Pix", "Cartão", "Dinheiro", "Pular"]);
   });
 });

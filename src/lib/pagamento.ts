@@ -92,6 +92,15 @@ export const FORMAS_DE_RECEBIMENTO: { valor: FormaDeRecebimento; rotulo: string 
   { valor: "NOTA", rotulo: "Nota" },
 ];
 
+// ocultar-forma-nota (Andre, 25/10): "Nota" e redundante com dinheiro; some da caixa, mas fica
+// no tipo e na lista do Backend (so esconder). Religar e trocar a flag.
+export const MOSTRAR_FORMA_NOTA = false;
+
+/** As formas que a caixa mostra. */
+export function formasVisiveis(): { valor: FormaDeRecebimento; rotulo: string }[] {
+  return FORMAS_DE_RECEBIMENTO.filter((f) => MOSTRAR_FORMA_NOTA || f.valor !== "NOTA");
+}
+
 /** Depois do "Recebi": como? `undefined` = pulou (o fluxo segue igual). */
 export async function perguntarForma(
   deps: { perguntar?: typeof abrirDialogo } = {}
@@ -101,11 +110,11 @@ export async function perguntarForma(
     titulo: "Como recebeu?",
     mensagem: "Só para o seu registro. Pode pular.",
     botoes: [
-      ...FORMAS_DE_RECEBIMENTO.map((f) => ({ texto: f.rotulo })),
+      ...formasVisiveis().map((f) => ({ texto: f.rotulo })),
       { texto: "Pular", estilo: "cancel" as const },
     ],
   });
-  return FORMAS_DE_RECEBIMENTO[escolha]?.valor;
+  return formasVisiveis()[escolha]?.valor;
 }
 
 /** "Recebi": de PENDING ou AWAITING_CONFIRMATION para PAID (push ao cliente). */
