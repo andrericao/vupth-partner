@@ -16,12 +16,12 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
-import { QuantoCobrarCard } from "@components/QuantoCobrarCard";
+import { QuantoCobrarCard, MOSTRAR_QUANTO_COBRAR } from "@components/QuantoCobrarCard";
 import { PendenciasDoRelatorio } from "@components/PendenciasDoRelatorio";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
-import { confirmarRecebimento, formatarReais, perguntarForma } from "@lib/pagamento";
+import { confirmarRecebimento, formatarReais, perguntarForma, recusarRecebimento } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { buscarGateway, CHAVE_GATEWAY } from "@lib/gateway";
@@ -198,13 +198,15 @@ export default function MyDayScreen() {
   const queryClient = useQueryClient();
   const { itens: pagamentos } = usePagamentosPendentes(!!professional?.id);
   const { data: gateway } = useQuery({ queryKey: CHAVE_GATEWAY, queryFn: buscarGateway, staleTime: 60_000, retry: false });
-  const recebi = async (attendanceId: string) => {
+  const recebi = async (attendanceId: string, jaConfirmou = false) => {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
-    const ok = await confirmar({
-      titulo: "Recebeu o pagamento?",
-      mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}.`,
-      confirmar: "Recebi",
-    });
+    const ok =
+      jaConfirmou ||
+      (await confirmar({
+        titulo: "Recebeu o pagamento?",
+        mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}.`,
+        confirmar: "Recebi",
+      }));
     if (!ok) return;
     const forma = await perguntarForma();
     try {
@@ -212,6 +214,14 @@ export default function MyDayScreen() {
       await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));
+    }
+  };
+  const recusar = async (attendanceId: string) => {
+    try {
+      await recusarRecebimento(attendanceId);
+      await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível recusar o pagamento."));
     }
   };
   const isFocused = useIsFocused();
@@ -364,11 +374,12 @@ export default function MyDayScreen() {
           </View>
 
           <ExpedienteCard periodo={period} workdays={report?.workdays} />
-          <QuantoCobrarCard />
+          {/* ocultar-quanto-cobrar-relatorios (Andre, 24/10): so esconder; o codigo fica. */}
+          {MOSTRAR_QUANTO_COBRAR && <QuantoCobrarCard />}
 
           {/* pagamento-pix (Andre, 10/10): os atendimentos com pagamento pendente
               e o "Recebi". O dot da aba some quando nao ha o que conferir. */}
-          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} gateway={gateway} />
+          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
 
           <View className="h-px bg-vupth-border my-6" />
 

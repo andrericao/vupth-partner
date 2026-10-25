@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { abrirDialogo } from "@store/dialogo.store";
 import { NwButton } from "@components/nw/Button";
 import { PendingDot } from "@components/PendingDot";
 import { formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@lib/pagamento";
@@ -14,23 +15,47 @@ import { avisoDeTeste, pagaPeloApp, type Gateway } from "@lib/gateway";
 export function PagamentosPendentes({
   itens,
   onRecebi,
+  onRecusar,
   gateway,
+  abrir = abrirDialogo,
 }: {
   itens: PagamentoPendente[];
-  onRecebi: (attendanceId: string) => Promise<void>;
+  /** `jaConfirmou`: o profissional ja confirmou na caixa do card; nao pergunta de novo. */
+  onRecebi: (attendanceId: string, jaConfirmou?: boolean) => Promise<void>;
+  /** Recusar o "ja paguei" do cliente (so de AWAITING_CONFIRMATION). */
+  onRecusar?: (attendanceId: string) => Promise<void>;
+  abrir?: typeof abrirDialogo;
   /** DEC-119: com o Asaas conectado, o webhook quita sozinho, mas o "Recebi" segue visivel. */
   gateway?: Gateway | null;
 }) {
   const [confirmando, setConfirmando] = useState<string | null>(null);
   if (itens.length === 0) return null;
 
-  async function recebi(id: string) {
+  async function recebi(id: string, jaConfirmou = false) {
     setConfirmando(id);
     try {
-      await onRecebi(id);
+      await onRecebi(id, jaConfirmou);
     } finally {
       setConfirmando(null);
     }
+  }
+
+  // relatorios-pendentes-clicaveis (Andre, 24/10): tocar no card abre o atendimento com
+  // "Confirmar recebimento" e "Recusar" (Recusar so existe depois do "ja paguei").
+  async function abrirPagamento(p: PagamentoPendente) {
+    const recusavel = p.status === "AWAITING_CONFIRMATION" && !!onRecusar;
+    const botoes = [
+      { texto: "Confirmar recebimento" },
+      ...(recusavel ? [{ texto: "Recusar", estilo: "destructive" as const }] : []),
+      { texto: "Fechar", estilo: "cancel" as const },
+    ];
+    const escolha = await abrir({
+      titulo: p.client_name,
+      mensagem: `${formatarReais(p.amount)} · ${observacaoDoPagamento(p.status)}`,
+      botoes,
+    });
+    if (escolha === 0) await recebi(p.attendance_id, true);
+    else if (recusavel && escolha === 1) await onRecusar!(p.attendance_id);
   }
 
   return (
@@ -42,7 +67,15 @@ export function PagamentosPendentes({
         </View>
       )}
       {itens.map((p) => (
-        <View key={p.attendance_id} className="bg-vupth-surface rounded-card p-4 gap-2">
+        <Pressable
+          key={p.attendance_id}
+          testID={`pagamento-${p.attendance_id}`}
+          // Nao agrupa para a acessibilidade: o botao "Recebi de <nome>" dentro do card continua
+          // achavel pelo leitor de tela e pela bateria Maestro.
+          accessible={false}
+          onPress={() => abrirPagamento(p)}
+          className="bg-vupth-surface rounded-card p-4 gap-2 active:opacity-80"
+        >
           <View className="flex-row items-center justify-between">
             <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{p.client_name}</Text>
             <Text className="font-heading text-base text-vupth-textPrimary">{formatarReais(p.amount)}</Text>
@@ -72,7 +105,7 @@ export function PagamentosPendentes({
             testID={`recebi-${p.attendance_id}`}
             accessibilityLabel={`Recebi de ${p.client_name}`}
           />
-        </View>
+        </Pressable>
       ))}
     </View>
   );

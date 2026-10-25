@@ -115,6 +115,14 @@ export async function confirmarRecebimento(
   );
 }
 
+/**
+ * "Recusar" (Backend 9f2f6fb): o profissional nao recebeu o que o cliente disse que pagou.
+ * So vale de AWAITING_CONFIRMATION (senao 409 PAYMENT_INVALID_STATUS); volta a PENDING.
+ */
+export async function recusarRecebimento(attendanceId: string): Promise<void> {
+  await api.post(`/attendances/${attendanceId}/payment/refuse`);
+}
+
 /** PAYMENT_CLAIMED / PAYMENT_CONFIRMED no WS pessoal: re-busca os pendentes. */
 export function isPaymentEvent(type: string | null | undefined): boolean {
   return !!type && type.startsWith("PAYMENT_");
