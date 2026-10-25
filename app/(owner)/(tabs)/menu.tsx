@@ -10,7 +10,6 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
 import { PendingDot } from "@components/PendingDot";
-import { DotNoCanto } from "@components/DotNoCanto";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { useSolicitacoesDeVinculo } from "@hooks/useSolicitacoesDeVinculo";
@@ -69,17 +68,18 @@ function MenuItem({
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
             <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{label}</Text>
+            {/* dot-ao-lado-do-nome-em-menu-empilhado (Andre, 24/10): em item com titulo e subtitulo
+                o dot fica ao lado do titulo, nunca solto no canto. */}
+            {dot && (
+              <View testID={`menu-dot-${label.toLowerCase().replace(/\s+/g, "-")}`}>
+                <PendingDot />
+              </View>
+            )}
           </View>
           {hint && (
             <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
           )}
         </View>
-        {/* dot-no-canto-do-card: canto superior direito do card, nao ao lado do nome. */}
-        {dot && (
-          <DotNoCanto dentro testID={`menu-dot-${label.toLowerCase().replace(/\s+/g, "-")}`}>
-            <PendingDot />
-          </DotNoCanto>
-        )}
         {/* O mesmo badge das Configuracoes do profissional (1..9, depois "9+"). */}
         {badge != null && badge > 0 && (
           <NotificationBadge count={badge} testID={`menu-badge-${label.toLowerCase()}`} />

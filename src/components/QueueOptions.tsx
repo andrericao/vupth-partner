@@ -6,7 +6,6 @@ import { comingSoon } from "@components/comingSoon";
 import { NotificationBadge } from "@components/NotificationBadge";
 import type { MealSignal } from "@lib/meals";
 import { useTema } from "@hooks/useTema";
-import { DotNoCanto } from "@components/DotNoCanto";
 import type { NomeDeCor } from "@theme/tema";
 
 // Conteudo da tela "OPCOES DA FILA" (nav v2, Andre 2026-07-23, mockup
@@ -92,9 +91,18 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
       <View className="flex-row items-center gap-3">
         <View className="w-6 items-center">{icon}</View>
         <View className="flex-1">
-          <Text className="font-body text-base font-medium text-vupth-textPrimary">
-            {label}
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="font-body text-base font-medium text-vupth-textPrimary">
+              {label}
+            </Text>
+            {/* dot-ao-lado-do-nome-em-menu-empilhado (Andre, 24/10): ao lado do titulo. */}
+            {dot && (
+              <View
+                testID="menu-dot-meals"
+                style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: cores.danger }}
+              />
+            )}
+          </View>
           {hint && (
             <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
           )}
@@ -102,12 +110,6 @@ function Row({ icon, label, hint, dot, badge, onPress, children }: RowProps) {
         {children}
         {badge != null && <NotificationBadge count={badge} testID="menu-badge-requests" />}
       </View>
-      {/* dot-no-canto-do-card: sobre a borda arredondada, canto superior direito. */}
-      {dot && (
-        <DotNoCanto testID="menu-dot-meals">
-          <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: cores.danger }} />
-        </DotNoCanto>
-      )}
     </Pressable>
   );
 }
