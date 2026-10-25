@@ -132,4 +132,58 @@ describe("Cupom", () => {
     fireEvent.press(r2.getByTestId("cupom-usar"));
     expect((await r2.findByTestId("promocao-modal-titulo")).props.children).toBe("Promoção esgotada");
   });
+
+  // promocoes-ticket-do-profissional-como-cliente (Andre, 25/10).
+  describe("ticket do profissional como cliente", () => {
+    const NO_AR = { id: "d1", name: "Dez por cento", type: "DISCOUNT", value_percent: 10, code: "DEZ10" };
+
+    it("mostra o ticket da campanha no ar com o codigo e o Ativar; ativar chama o Backend com o codigo e move para os ativados", async () => {
+      const usar = jest.fn().mockResolvedValue({ ...NO_AR, status: "ACTIVE" });
+      const r = render(
+        <Cupom usar={usar} listar={jest.fn().mockResolvedValue([])} disponiveis={jest.fn().mockResolvedValue([NO_AR])} />
+      );
+      expect((await r.findByTestId("cupom-ativavel-card-codigo")).props.children).toBe("Código: DEZ10");
+      fireEvent.press(r.getByTestId("cupom-ativar-d1"));
+      await waitFor(() => expect(usar).toHaveBeenCalledWith("DEZ10"));
+      await waitFor(() => expect(r.queryByTestId("cupom-ativavel")).toBeNull());
+      expect((await r.findByTestId("cupom-ativado")).props.children).toBe("Cupom ativado");
+      expect(r.getByTestId("cupom-campanha")).toBeTruthy();
+    });
+
+    it("o Backend recusa (nao cumpre os requisitos): mostra a frase que ele devolve e o ticket fica", async () => {
+      const usar = jest.fn().mockRejectedValue({ response: { data: { code: "CAMPAIGN_NOT_FOR_YOU" } } });
+      const r = render(
+        <Cupom usar={usar} listar={jest.fn().mockResolvedValue([])} disponiveis={jest.fn().mockResolvedValue([NO_AR])} />
+      );
+      fireEvent.press(await r.findByTestId("cupom-ativar-d1"));
+      expect((await r.findByTestId("cupom-ativar-erro-d1")).props.children).toBe("Este cupom não é para o seu perfil.");
+      expect(r.getByTestId("cupom-ativavel")).toBeTruthy();
+    });
+
+    it("nao oferece: campanha de indicacao (tem o cartao dela), sem codigo, ja ativada ou encerrada", async () => {
+      const lista = [
+        { ...NO_AR, id: "i", type: "REFERRAL_BONUS" },
+        { ...NO_AR, id: "s", code: null },
+        { ...NO_AR, id: "a" },
+        { ...NO_AR, id: "e", ends_at: "2020-01-01T00:00:00-03:00" },
+      ];
+      const r = render(
+        <Cupom
+          usar={jest.fn()}
+          listar={jest.fn().mockResolvedValue([{ ...NO_AR, id: "a", status: "ACTIVE" }])}
+          disponiveis={jest.fn().mockResolvedValue(lista)}
+        />
+      );
+      await r.findByTestId("cupom-campanha");
+      expect(r.queryByTestId("cupom-ativavel")).toBeNull();
+    });
+
+    it("falha ao listar as campanhas no ar nao derruba a tela", async () => {
+      const r = render(
+        <Cupom usar={jest.fn()} listar={jest.fn().mockResolvedValue([])} disponiveis={jest.fn().mockRejectedValue(new Error("x"))} />
+      );
+      expect(r.getByTestId("cupom-usar")).toBeTruthy();
+      await waitFor(() => expect(r.queryByTestId("cupom-ativavel")).toBeNull());
+    });
+  });
 });

@@ -7,6 +7,7 @@ import { PromocaoEncerradaModal, type MotivoDaPromocao } from "@components/Promo
 import {
   usarCupom,
   minhasCampanhas,
+  campanhasAtivas,
   mensagemDoCupom,
   CUPOM_ATIVADO,
   beneficioDaCampanha,
@@ -24,9 +25,11 @@ import {
 type Props = {
   usar?: (codigo: string) => Promise<Campanha>;
   listar?: () => Promise<Campanha[]>;
+  /** promocoes-ticket-do-profissional-como-cliente: as campanhas no ar, para o ticket com Ativar. */
+  disponiveis?: () => Promise<Campanha[]>;
 };
 
-export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
+export function Cupom({ usar = usarCupom, listar = minhasCampanhas, disponiveis = campanhasAtivas }: Props) {
   const [codigo, setCodigo] = useState("");
   const [usando, setUsando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -34,12 +37,49 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
   const [ativado, setAtivado] = useState<Campanha | null>(null);
   const [saibaMais, setSaibaMais] = useState(false);
   const [motivo, setMotivo] = useState<MotivoDaPromocao | null>(null);
+  const [noAr, setNoAr] = useState<Campanha[]>([]);
+  const [erroDoTicket, setErroDoTicket] = useState<{ id: string; mensagem: string } | null>(null);
+  const [ativandoId, setAtivandoId] = useState<string | null>(null);
 
   useEffect(() => {
     listar()
       .then(setCampanhas)
       .catch(() => {});
   }, [listar]);
+
+  useEffect(() => {
+    disponiveis()
+      .then(setNoAr)
+      .catch(() => {});
+  }, [disponiveis]);
+
+  // promocoes-ticket-do-profissional-como-cliente (Andre, 25/10): como um cliente, ele ve o
+  // ticket da campanha (cupom: desconto ou sem taxa) com o codigo e o botao Ativar. So entra
+  // quem cumpre os requisitos: o Backend decide e devolve a frase, o app mostra.
+  const ativaveis = noAr.filter(
+    (c) =>
+      c.type !== "REFERRAL_BONUS" &&
+      !!c.code &&
+      !campanhas.some((m) => m.id === c.id) &&
+      !estadoDoPrazo(c)
+  );
+
+  async function ativarDoTicket(c: Campanha) {
+    setErroDoTicket(null);
+    setAtivandoId(c.id);
+    try {
+      const nova = await usar(c.code as string);
+      setCampanhas((atuais) => [nova, ...atuais.filter((x) => x.id !== nova.id)]);
+      setAtivado(nova);
+      setSaibaMais(false);
+    } catch (e) {
+      const fora = motivoDoErro(e);
+      if (fora) setMotivo(fora);
+      else setErroDoTicket({ id: c.id, mensagem: mensagemDoCupom(e) });
+    } finally {
+      setAtivandoId(null);
+    }
+  }
 
   async function aoUsar() {
     if (!codigo.trim()) {
@@ -117,9 +157,34 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
         </View>
       )}
 
-      {campanhas.length > 0 && (
+      {(campanhas.length > 0 || ativaveis.length > 0) && (
         <View className="mt-6 gap-2">
           <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEUS CUPONS</Text>
+          {ativaveis.map((c) => (
+            <View key={c.id} testID="cupom-ativavel">
+              <CardDeCampanha
+                campanha={c}
+                linha={[beneficioDaCampanha(c), validadeDaCampanha(c)].filter(Boolean).join(" · ")}
+                codigo={c.code}
+                testID="cupom-ativavel-card"
+                acessibilidade={c.name}
+              >
+                <NwButton
+                  title="Ativar"
+                  variant="vupthOutline"
+                  className="h-12 mt-3"
+                  isLoading={ativandoId === c.id}
+                  testID={`cupom-ativar-${c.id}`}
+                  onPress={() => ativarDoTicket(c)}
+                />
+                {erroDoTicket?.id === c.id ? (
+                  <Text testID={`cupom-ativar-erro-${c.id}`} className="font-body text-xs text-vupth-textSecondary mt-2">
+                    {erroDoTicket.mensagem}
+                  </Text>
+                ) : null}
+              </CardDeCampanha>
+            </View>
+          ))}
           {campanhas.map((c) => (
             <CardDeCampanha
               key={c.id}
