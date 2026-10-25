@@ -45,7 +45,7 @@ describe("PagamentosPendentes", () => {
     const onRecebi = jest.fn().mockResolvedValue(undefined);
     const { getByTestId } = render(<PagamentosPendentes itens={ITENS} onRecebi={onRecebi} />);
     fireEvent.press(getByTestId("recebi-a2"));
-    await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a2"));
+    await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a2", false));
   });
 
   // pagamento-pelo-asaas-no-partner (DEC-119).
