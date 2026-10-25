@@ -625,7 +625,9 @@ export default function ProfessionalQueueScreen() {
   // A pergunta so aparece quando ha o que receber (ja pago ou sem pagamento: nada).
   const finalizarComPagamento = async (attendanceId: string) => {
     await finishAttendance(attendanceId);
-    const recebido = await perguntarPagamento(attendanceId);
+    const recebido = await perguntarPagamento(attendanceId, {
+      cliente: currentAttendance?.id === attendanceId ? currentAttendance.clientName : null,
+    });
     if (recebido === undefined) return;
     if (recebido) {
       const forma = await perguntarForma();

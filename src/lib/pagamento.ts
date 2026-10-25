@@ -2,7 +2,6 @@ import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { abrirDialogo } from "@store/dialogo.store";
 import { formatarReais } from "@lib/dinheiro";
-import { buscarGateway, pagaPeloApp, type Gateway } from "@lib/gateway";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -21,7 +20,7 @@ const reais = formatarReais;
  */
 export async function perguntarPagamento(
   attendanceId: string,
-  deps: { perguntar?: typeof confirmar; gateway?: () => Promise<Gateway> } = {}
+  deps: { perguntar?: typeof confirmar; cliente?: string | null } = {}
 ): Promise<boolean | undefined> {
   const perguntar = deps.perguntar ?? confirmar;
   let status: StatusDoPagamento;
@@ -34,19 +33,24 @@ export async function perguntarPagamento(
     return undefined;
   }
   if (status !== "PENDING" && status !== "AWAITING_CONFIRMATION") return undefined;
-  // pagamento-pelo-asaas-no-partner (DEC-119): com a conexao ligada o webhook
-  // quita sozinho; o profissional nao pede o "Recebi".
-  if (pagaPeloApp(await (deps.gateway ?? buscarGateway)(), valor)) return undefined;
-
-  return perguntar({
+  // recebi-ao-finalizar-corte (Andre, 25/10): logo apos o Finalizar, com o pagamento ainda
+  // pendente, o profissional sempre ve "Recebeu o pagamento?" — com ou sem Asaas conectado
+  // (o Asaas e o "Confirmar" quitam o mesmo atendimento; quem chega primeiro vence).
+  const quem = deps.cliente ? `${deps.cliente} · ` : "";
+  const recebeu = await perguntar({
     titulo: "Recebeu o pagamento?",
     mensagem:
       status === "AWAITING_CONFIRMATION"
-        ? `O cliente diz que pagou ${reais(valor)}. Confira no seu banco antes de confirmar.`
-        : `${reais(valor)}. Se ainda não, fica pendente.`,
-    confirmar: "Recebi",
-    cancelar: "Ainda não",
+        ? `${deps.cliente ?? "O cliente"} diz que pagou ${reais(valor)}. Confira no seu banco.`
+        : `${quem}${reais(valor)}. Se ainda não, fica pendente.`,
+    confirmar: "Confirmar",
+    cancelar: "Não recebi",
   });
+  // "Não recebi" diante de um "já paguei" do cliente = Recusar (volta a pendente e o cliente e avisado).
+  if (!recebeu && status === "AWAITING_CONFIRMATION") {
+    await recusarRecebimento(attendanceId).catch(() => {});
+  }
+  return recebeu;
 }
 
 /** A mensagem do fim, na tela do profissional (o backend nao manda push a quem tocou). */

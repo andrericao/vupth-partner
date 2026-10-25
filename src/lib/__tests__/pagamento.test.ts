@@ -43,21 +43,27 @@ describe("perguntarPagamento", () => {
     expect(pergunta).toHaveBeenCalledWith(expect.objectContaining({ mensagem: expect.stringMatching(/diz que pagou/) }));
   });
 
-  // pagamento-pelo-asaas-no-partner (DEC-119): conectado, o webhook quita; sem "Recebi".
-  it("Asaas conectado: nao pergunta; abaixo de R$ 5,00 ou desconectado, pergunta como antes", async () => {
-    const conectado = async () => ({ connected: true, mode: "SANDBOX" as const });
-    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 31.9 } });
-    await expect(perguntarPagamento("a1", { perguntar: pergunta, gateway: conectado })).resolves.toBeUndefined();
-    expect(pergunta).not.toHaveBeenCalled();
-
-    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 4 } });
+  // recebi-ao-finalizar-corte (Andre, 25/10): a pergunta aparece sempre que o pagamento segue
+  // pendente, com ou sem Asaas; com o nome do cliente quando se sabe.
+  it("mostra o nome do cliente e o valor; Confirmar = true, Nao recebi = false", async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: { status: "PENDING", amount: 31.9 } });
     pergunta.mockResolvedValueOnce(true);
-    await expect(perguntarPagamento("a1", { perguntar: pergunta, gateway: conectado })).resolves.toBe(true);
-
-    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 31.9 } });
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Ana" })).resolves.toBe(true);
+    expect(pergunta).toHaveBeenCalledWith(
+      expect.objectContaining({ mensagem: "Ana · R$ 31,90. Se ainda não, fica pendente.", confirmar: "Confirmar", cancelar: "Não recebi" })
+    );
     pergunta.mockResolvedValueOnce(false);
-    const desligado = async () => ({ connected: false });
-    await expect(perguntarPagamento("a1", { perguntar: pergunta, gateway: desligado })).resolves.toBe(false);
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Ana" })).resolves.toBe(false);
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it("'Nao recebi' diante do 'ja paguei' do cliente recusa o pagamento (volta a pendente)", async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: { status: "AWAITING_CONFIRMATION", amount: 45 } });
+    (api.post as jest.Mock).mockResolvedValue({});
+    pergunta.mockResolvedValueOnce(false);
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Bia" })).resolves.toBe(false);
+    expect(api.post).toHaveBeenCalledWith("/attendances/a1/payment/refuse");
+    expect(pergunta).toHaveBeenCalledWith(expect.objectContaining({ mensagem: "Bia diz que pagou R$ 45,00. Confira no seu banco." }));
   });
 
   it("sem deps, usa a caixa de confirmacao do app; sem valor, mostra R$ 0,00", async () => {
@@ -88,7 +94,7 @@ describe("a pergunta do pagamento segue o guia de texto", () => {
   const pergunta = jest.fn();
   const palavras = (texto: string) => texto.trim().split(/\s+/).length;
 
-  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Recebi · Ainda não", async () => {
+  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Confirmar · Não recebi", async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: { status: "PENDING", amount: 31.9 } });
     pergunta.mockResolvedValue(true);
     await perguntarPagamento("a1", { perguntar: pergunta });
@@ -96,8 +102,8 @@ describe("a pergunta do pagamento segue o guia de texto", () => {
     expect(texto).toEqual({
       titulo: "Recebeu o pagamento?",
       mensagem: "R$ 31,90. Se ainda não, fica pendente.",
-      confirmar: "Recebi",
-      cancelar: "Ainda não",
+      confirmar: "Confirmar",
+      cancelar: "Não recebi",
     });
     expect(texto.mensagem.length).toBeLessThanOrEqual(70);
     expect(palavras(texto.confirmar)).toBe(1);
