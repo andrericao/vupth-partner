@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { NwButton } from "@components/nw/Button";
 import { CardDeCampanha } from "@components/CardDeCampanha";
 import { PromocaoEncerradaModal, type MotivoDaPromocao } from "@components/PromocaoEncerradaModal";
@@ -47,7 +47,6 @@ export function LinkDeIndicacao({
   const [erro, setErro] = useState<string | null>(null);
   const [motivo, setMotivo] = useState<MotivoDaPromocao | null>(null);
   const [explicando, setExplicando] = useState<string | null>(null);
-  const [escolhida, setEscolhida] = useState<string | null>(null);
 
   const recarregar = useCallback(() => {
     carregar()
@@ -67,10 +66,6 @@ export function LinkDeIndicacao({
   const liberar = aLiberar(meu);
   const dasCampanhas = meu.campaigns ?? [];
   const aParticipar = abertas.filter((c) => !dasCampanhas.some((d) => d.campaign_id === c.id));
-  // participar-da-promocao (Andre, 24/10): com promocao de compartilhamento
-  // ativa, o link do perfil e o da promocao; com mais de uma, ele escolhe.
-  const doLink = dasCampanhas.find((c) => c.campaign_id === escolhida) ?? dasCampanhas[0] ?? null;
-  const linkDoPerfil = doLink?.link ?? meu.link;
   const mensagem = { titulo: "Vupth", mensagem: "Entre na fila da barbearia pelo app Vupth:" };
 
   const entrar = async (c: Campanha) => {
@@ -83,7 +78,6 @@ export function LinkDeIndicacao({
     try {
       await participar(c.id);
       setExplicando(null);
-      setEscolhida(c.id);
       recarregar();
     } catch (e) {
       const fora = motivoDoErro(e);
@@ -92,79 +86,74 @@ export function LinkDeIndicacao({
     }
   };
 
-  return (
-    <View testID="link-indicacao" className="bg-vupth-surface rounded-card px-4 py-4 mb-6">
-      <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">
-        {doLink ? `SEU LINK · ${doLink.name}` : "SEU LINK"}
-      </Text>
-      <Text selectable testID="link-indicacao-link" className="font-heading text-sm text-vupth-textPrimary mt-1">
-        {linkDoPerfil}
-      </Text>
-      {dasCampanhas.length > 1 && (
-        <View testID="link-indicacao-escolha" className="flex-row flex-wrap gap-2 mt-2">
-          {dasCampanhas.map((c) => (
-            <Pressable
-              key={c.campaign_id}
-              testID={`link-indicacao-escolher-${c.campaign_id}`}
-              accessibilityRole="button"
-              accessibilityState={{ selected: doLink?.campaign_id === c.campaign_id }}
-              onPress={() => setEscolhida(c.campaign_id)}
-              className={`px-3 py-1.5 rounded-full ${
-                doLink?.campaign_id === c.campaign_id ? "bg-vupth-green" : "bg-vupth-background"
-              }`}
-            >
-              <Text
-                className={`font-body text-xs ${
-                  doLink?.campaign_id === c.campaign_id ? "text-vupth-onGreen" : "text-vupth-textPrimary"
-                }`}
-              >
-                {c.name}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
-      <Text
-        testID="link-indicacao-clientes"
-        className={`font-body text-xs text-vupth-textSecondary mt-1 ${receber ? "" : "mb-3"}`}
-      >
+  // promocoes-um-cartao-por-campanha (Andre, 24/10): UM cartao por campanha, com UM
+  // Compartilhar; o cartao "SEU LINK" separado some quando ha campanha de que ele
+  // participa. O link geral so aparece enquanto nao participa de nenhuma.
+  const resumo = (
+    <>
+      <Text testID="link-indicacao-clientes" className={`font-body text-xs text-vupth-textSecondary mt-1 ${receber ? "" : "mb-1"}`}>
         {clientesQueChegaram(meu.referred_clients)}
       </Text>
       {receber ? (
-        <Text testID="link-indicacao-receber" className="font-heading text-xs text-vupth-textPrimary mt-1 mb-3">
+        <Text testID="link-indicacao-receber" className="font-heading text-xs text-vupth-textPrimary mt-1">
           {receber}
         </Text>
       ) : null}
       {liberar ? (
-        <Text testID="link-indicacao-liberar" className="font-body text-xs text-vupth-textSecondary mb-3">
+        <Text testID="link-indicacao-liberar" className="font-body text-xs text-vupth-textSecondary mt-1">
           {liberar}
         </Text>
       ) : null}
-      <NwButton
-        title="Compartilhar"
-        testID="link-indicacao-compartilhar"
-        onPress={() => compartilhar(linkDoPerfil, mensagem)}
-      />
+    </>
+  );
 
-      {dasCampanhas.map((c) => {
-        const base = abertas.find((a) => a.id === c.campaign_id);
-        return (
-          <View key={c.campaign_id} testID="link-indicacao-campanha" className="mt-4">
-            <CardDeCampanha
-              campanha={base ?? { type: "REFERRAL_BONUS", name: c.name }}
-              linha={andamentoDaCampanha(c)}
-            >
-              <NwButton
-                title="Compartilhar link"
-                variant="vupthOutline"
-                className="h-12 mt-3"
-                testID="link-indicacao-campanha-compartilhar"
-                onPress={() => compartilhar(c.link, mensagem)}
-              />
-            </CardDeCampanha>
-          </View>
-        );
-      })}
+  return (
+    <View testID="link-indicacao" className="mb-6">
+      {dasCampanhas.length === 0 ? (
+        <View className="bg-vupth-surface rounded-card px-4 py-4">
+          <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEU LINK</Text>
+          <Text selectable testID="link-indicacao-link" className="font-heading text-sm text-vupth-textPrimary mt-1">
+            {meu.link}
+          </Text>
+          {resumo}
+          <NwButton
+            title="Compartilhar"
+            className="mt-3"
+            testID="link-indicacao-compartilhar"
+            onPress={() => compartilhar(meu.link, mensagem)}
+          />
+        </View>
+      ) : (
+        <>
+          {dasCampanhas.map((c) => {
+            const base = abertas.find((a) => a.id === c.campaign_id);
+            return (
+              <View key={c.campaign_id} testID="link-indicacao-campanha" className="mb-4">
+                <CardDeCampanha
+                  campanha={base ?? { type: "REFERRAL_BONUS", name: c.name }}
+                  linha={andamentoDaCampanha(c)}
+                >
+                  <Text
+                    selectable
+                    testID={`link-indicacao-link-${c.campaign_id}`}
+                    className="font-heading text-xs text-vupth-textPrimary mt-2"
+                  >
+                    {c.link}
+                  </Text>
+                  <NwButton
+                    title="Compartilhar link"
+                    variant="vupthOutline"
+                    className="h-12 mt-3"
+                    testID="link-indicacao-campanha-compartilhar"
+                    onPress={() => compartilhar(c.link, mensagem)}
+                  />
+                </CardDeCampanha>
+              </View>
+            );
+          })}
+          <View className="px-1 mb-2">{resumo}</View>
+        </>
+      )}
 
       {aParticipar.map((c) => (
         <View key={c.id} className="mt-4">
