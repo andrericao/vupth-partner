@@ -41,6 +41,8 @@ import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
 import { AvisoDeDivida } from "@components/AvisoDeDivida";
 import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
+import { useQuery } from "@tanstack/react-query";
+import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
@@ -754,6 +756,21 @@ export default function ProfessionalQueueScreen() {
   // instante que filtrou os expirados. Ver resumoDeSolicitacoes.
   const resumoSolicitacoes = resumoDeSolicitacoes(pedidosPendentes, agoraDosPedidos);
 
+  // menu-da-fila-nao-chegou-tolerancia: so o 1o da vez tem tolerancia; o Backend diz quanto
+  // falta. Reconsulta enquanto o menu esta aberto.
+  const { data: noShow } = useQuery({
+    queryKey: ["no-show-status", menuTarget?.id],
+    queryFn: () => buscarNoShowStatus(menuTarget!.id),
+    enabled: !!menuTarget && menuIsFirst && menuTarget.status !== "IN_PROGRESS" && menuTarget.status !== "PAUSED",
+    refetchInterval: 15_000,
+    retry: false,
+  });
+  const naTolerancia = dentroDaTolerancia(noShow);
+  // Sozinho na fila e dentro da tolerancia: "Nao chegou" desativado. Com outros: segue
+  // valendo, e a faixa mostra quanto falta.
+  const naoChegouDesativado = naTolerancia && waitingList.length <= 1;
+  const faixaDeTolerancia = naTolerancia && waitingList.length > 1 ? faixaDaTolerancia(noShow) : null;
+
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
     else if (action === "adiantar") startClient(att, true);
@@ -1166,26 +1183,41 @@ export default function ProfessionalQueueScreen() {
                 <Text className="font-heading text-vupth-textSecondary mb-1">
                   {menuTarget.clientName}
                 </Text>
-                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => (
-                  <Pressable
-                    key={action}
-                    accessibilityRole="button"
-                    onPress={() => {
-                      const t = menuTarget;
-                      setMenuTarget(null);
-                      if (t) runMenuAction(action, t);
-                    }}
-                    className="py-3"
-                  >
-                    <Text
-                      className={`font-body text-base ${
-                        action === "remover" ? "text-vupth-danger" : "text-vupth-textPrimary"
-                      }`}
+                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => {
+                  const desativado = action === "nao-chegou" && naoChegouDesativado;
+                  return (
+                    <Pressable
+                      key={action}
+                      testID={`menu-acao-${action}`}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: desativado }}
+                      onPress={() => {
+                        if (desativado) {
+                          Alert.alert("Tolerância", avisoDaTolerancia(noShow));
+                          return;
+                        }
+                        const t = menuTarget;
+                        setMenuTarget(null);
+                        if (t) runMenuAction(action, t);
+                      }}
+                      className={`py-3 ${desativado ? "opacity-40" : ""}`}
                     >
-                      {QUEUE_ACTION_LABEL[action]}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        className={`font-body text-base ${
+                          action === "remover" ? "text-vupth-danger" : "text-vupth-textPrimary"
+                        }`}
+                      >
+                        {QUEUE_ACTION_LABEL[action]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+                {/* Mesmo tamanho dos itens do menu (Andre, 24/10). */}
+                {faixaDeTolerancia && (
+                  <Text testID="faixa-de-tolerancia" className="font-body text-base text-vupth-textSecondary py-3">
+                    {faixaDeTolerancia}
+                  </Text>
+                )}
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => setMenuTarget(null)}
