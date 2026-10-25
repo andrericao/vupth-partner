@@ -63,10 +63,10 @@ describe("campanhas", () => {
     const erro = (code: string) => ({ response: { data: { code } } });
     expect(mensagemDoCupom(erro("CAMPAIGN_NOT_FOUND"))).toBe("Cupom não encontrado.");
     expect(mensagemDoCupom(erro("CAMPAIGN_NOT_AVAILABLE"))).toBe("Este cupom não está valendo agora.");
-    expect(mensagemDoCupom(erro("CAMPAIGN_ALREADY_REDEEMED"))).toBe("Você já usou este cupom.");
+    expect(mensagemDoCupom(erro("CAMPAIGN_ALREADY_REDEEMED"))).toBe("Este cupom já está ativado.");
     expect(mensagemDoCupom(erro("CAMPAIGN_NOT_FOR_YOU"))).toBe("Este cupom não é para o seu perfil.");
-    expect(mensagemDoCupom(erro("OUTRO"))).toBe("Não foi possível usar o cupom.");
-    expect(mensagemDoCupom(undefined)).toBe("Não foi possível usar o cupom.");
+    expect(mensagemDoCupom(erro("OUTRO"))).toBe("Não foi possível ativar o cupom.");
+    expect(mensagemDoCupom(undefined)).toBe("Não foi possível ativar o cupom.");
   });
 
   it("o beneficio em poucas palavras", () => {

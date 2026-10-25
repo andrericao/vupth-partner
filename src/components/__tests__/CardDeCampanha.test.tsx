@@ -14,6 +14,17 @@ describe("CardDeCampanha", () => {
     expect(valorDoCard({ type: "NOVO", name: "Outra" })).toBe("Outra");
   });
 
+  // promocoes-ativar-e-codigo (Andre, 24/10): na tela de ativar, o ticket mostra o codigo.
+  it("o ticket mostra o codigo do cupom quando ele vem; sem codigo, nada", () => {
+    const com = render(
+      <CardDeCampanha campanha={{ type: "DISCOUNT", name: "Lancamento", value_percent: 10 }} codigo="VUPTH10" testID="c" />
+    );
+    expect(com.getByTestId("c-codigo").props.children).toBe("Código: VUPTH10");
+    com.unmount();
+    const sem = render(<CardDeCampanha campanha={{ type: "DISCOUNT", name: "Lancamento", value_percent: 10 }} testID="c" />);
+    expect(sem.queryByTestId("c-codigo")).toBeNull();
+  });
+
   it("mostra o valor, o nome e a linha; sem toque nao e botao", () => {
     const r = render(
       <CardDeCampanha

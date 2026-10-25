@@ -228,7 +228,7 @@ appId: ${APP_ID}
 - hideKeyboard
 - tapOn:
     id: "cupom-usar"
-    label: "07.43h · cupom · toca em Usar"
+    label: "07.43h · cupom · toca em Ativar"
 - extendedWaitUntil:
     visible: "Cupom não encontrado."
     timeout: 20000

@@ -8,6 +8,7 @@ import {
   usarCupom,
   minhasCampanhas,
   mensagemDoCupom,
+  CUPOM_ATIVADO,
   beneficioDaCampanha,
   validadeDaCampanha,
   estadoDaCampanha,
@@ -19,7 +20,7 @@ import {
 } from "@lib/campanhas";
 
 // cupom-no-app (DEC-61, DEC-63): campo do cupom, um botao de uma palavra e os
-// cupons ja usados. As dependencias entram por props para o teste.
+// cupons ja ativados. promocoes-ativar-e-codigo (Andre, 24/10): "Ativar", e o ticket mostra o codigo. As dependencias entram por props para o teste.
 type Props = {
   usar?: (codigo: string) => Promise<Campanha>;
   listar?: () => Promise<Campanha[]>;
@@ -86,8 +87,13 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
         error={erro ?? undefined}
         testID="cupom-codigo"
       />
-      <NwButton title="Usar" onPress={aoUsar} isLoading={usando} testID="cupom-usar" />
+      <NwButton title="Ativar" onPress={aoUsar} isLoading={usando} testID="cupom-usar" />
 
+      {ativado && (
+        <Text testID="cupom-ativado" className="font-heading text-sm text-vupth-textPrimary mt-3">
+          {CUPOM_ATIVADO}
+        </Text>
+      )}
       {ativado && validadeAoAtivar(ativado) && (
         <View testID="cupom-validade" className="mt-3 bg-vupth-greenTint rounded-card px-4 py-3">
           <Text className="font-heading text-sm text-vupth-textPrimary">{validadeAoAtivar(ativado)}</Text>
@@ -120,6 +126,7 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas }: Props) {
               campanha={c}
               linha={[beneficioDaCampanha(c), validadeDaCampanha(c), estadoDaCampanha(c)].filter(Boolean).join(" · ")}
               estado={c.status === "EXPIRED" ? "ENCERRADA" : estadoDoPrazo(c)}
+              codigo={c.code}
               onPress={() => setMotivo(c.status === "EXPIRED" ? "ENCERRADA" : estadoDoPrazo(c))}
               testID="cupom-campanha"
               acessibilidade={c.name}

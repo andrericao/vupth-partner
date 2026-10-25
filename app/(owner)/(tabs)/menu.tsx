@@ -282,7 +282,7 @@ export default function OwnerMenuScreen() {
                 <MenuItem
                   icon={Ticket}
                   label="Promoções"
-                  hint="usar um cupom"
+                  hint="ativar um cupom"
                   onPress={() => router.push("/(owner)/promocoes?from=owner" as any)}
                 />
               )}

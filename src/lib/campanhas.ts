@@ -90,15 +90,18 @@ export async function minhasCampanhas(): Promise<Campanha[]> {
 const MENSAGENS: Record<string, string> = {
   CAMPAIGN_NOT_FOUND: "Cupom não encontrado.",
   CAMPAIGN_NOT_AVAILABLE: "Este cupom não está valendo agora.",
-  CAMPAIGN_ALREADY_REDEEMED: "Você já usou este cupom.",
+  CAMPAIGN_ALREADY_REDEEMED: "Este cupom já está ativado.",
   CAMPAIGN_NOT_FOR_YOU: "Este cupom não é para o seu perfil.",
 };
+
+/** promocoes-ativar-e-codigo (Andre, 24/10): o cupom e ATIVADO (nao "usado"); "usado" e so o cupom aplicado em corte. */
+export const CUPOM_ATIVADO = "Cupom ativado";
 
 /** A recusa do cupom em uma frase curta (DEC-63). */
 export function mensagemDoCupom(erro: any): string {
   const codigo = erro?.response?.data?.code;
   if (typeof codigo === "string" && MENSAGENS[codigo]) return MENSAGENS[codigo];
-  return getApiErrorMessage(erro, "Não foi possível usar o cupom.");
+  return getApiErrorMessage(erro, "Não foi possível ativar o cupom.");
 }
 
 function reais(valor: number): string {

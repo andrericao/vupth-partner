@@ -331,7 +331,7 @@ export default function ProfessionalSettingsScreen() {
               <MenuCard
                 icon={Ticket}
                 title="Promoções"
-                hint="usar um cupom"
+                hint="ativar um cupom"
                 onPress={() => router.push("/(professional)/promocoes" as any)}
               />
             )}

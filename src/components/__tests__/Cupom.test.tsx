@@ -6,7 +6,7 @@ jest.mock("@lib/api", () => ({
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
 }));
 
-// cupom-no-app (DEC-61, DEC-63): campo, "Usar" e os cupons ja usados.
+// cupom-no-app (DEC-61, DEC-63): campo, "Ativar" e os cupons ja ativados.
 // O primeiro render a frio passa de 5 s com a maquina carregada (pre-push de 23/10).
 jest.setTimeout(20000);
 const CAMPANHA = { id: "c1", name: "Lançamento", type: "FEE_WAIVER", ends_at: "2026-11-30T12:00:00-03:00" };
@@ -52,7 +52,19 @@ describe("Cupom", () => {
     );
     fireEvent.changeText(getByTestId("cupom-codigo"), "VUPTH10");
     fireEvent.press(getByTestId("cupom-usar"));
-    expect(await findByText("Você já usou este cupom.")).toBeTruthy();
+    expect(await findByText("Este cupom já está ativado.")).toBeTruthy();
+  });
+
+  // promocoes-ativar-e-codigo (Andre, 24/10).
+  it("o botao diz Ativar, o aviso diz Cupom ativado e o ticket mostra o codigo", async () => {
+    const nova = { ...CAMPANHA, id: "c3", code: "VUPTH10", ends_at: undefined };
+    const r = render(<Cupom usar={jest.fn().mockResolvedValue(nova)} listar={jest.fn().mockResolvedValue([])} />);
+    expect(r.getByText("Ativar")).toBeTruthy();
+    expect(r.queryByText("Usar")).toBeNull();
+    fireEvent.changeText(r.getByTestId("cupom-codigo"), "vupth10");
+    fireEvent.press(r.getByTestId("cupom-usar"));
+    expect((await r.findByTestId("cupom-ativado")).props.children).toBe("Cupom ativado");
+    expect((await r.findByTestId("cupom-campanha-codigo")).props.children).toBe("Código: VUPTH10");
   });
 
   // DEC-124: ao ativar, a validade (hora do Painel) e o Saiba mais.

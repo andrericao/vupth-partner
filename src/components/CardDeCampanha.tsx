@@ -17,13 +17,15 @@ type Props = {
   onPress?: () => void;
   testID?: string;
   acessibilidade?: string;
+  /** promocoes-ativar-e-codigo: o codigo do cupom, no ticket (so na tela de ativar). */
+  codigo?: string | null;
   /** Conteudo extra no fim do ticket (explicacao, botao, andamento). */
   children?: ReactNode;
 };
 
 const ROTULO: Record<Exclude<EstadoDoCard, null>, string> = { ENCERRADA: "Encerrada", ESGOTADA: "Esgotada" };
 
-export function CardDeCampanha({ campanha, linha, estado = null, onPress, testID, acessibilidade, children }: Props) {
+export function CardDeCampanha({ campanha, linha, estado = null, onPress, testID, acessibilidade, codigo, children }: Props) {
   const conteudo = (
     <View
       className={`bg-vupth-surface border-2 border-dashed border-vupth-border rounded-card px-5 py-4 ${
@@ -49,6 +51,14 @@ export function CardDeCampanha({ campanha, linha, estado = null, onPress, testID
         )}
       </View>
       {linha ? <Text className="font-body text-xs text-vupth-textSecondary mt-1">{linha}</Text> : null}
+      {codigo ? (
+        <Text
+          testID={testID ? `${testID}-codigo` : undefined}
+          className="font-mono text-xs text-vupth-textPrimary mt-1"
+        >
+          {`Código: ${codigo}`}
+        </Text>
+      ) : null}
       {children}
     </View>
   );
