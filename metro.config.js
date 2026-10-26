@@ -1,7 +1,10 @@
-const { getDefaultConfig } = require("expo/metro-config");
+// Sentry: o serializer do Metro grava o Debug ID em cada bundle e mapa, que e
+// o que o upload (plugin do app.json + SENTRY_AUTH_TOKEN no EAS) usa para
+// casar o erro com a linha real.
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 const { withNativeWind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== "svg");
 config.resolver.sourceExts = [...config.resolver.sourceExts, "svg"];

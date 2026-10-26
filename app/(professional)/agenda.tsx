@@ -34,7 +34,7 @@ export default function AgendaScreen() {
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader
             title="Minha agenda"
-            subtitle="Os dias e horários em que você atende. O cliente só agenda dentro deles."
+            subtitle="Os dias e horários em que você atende."
             onBack={() => router.navigate("/(professional)/settings" as any)}
           />
           <EditorDeHorarios

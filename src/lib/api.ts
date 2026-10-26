@@ -73,7 +73,6 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
     "Você já está vinculado a um estabelecimento. Desafilie-se antes de solicitar a outro.",
   USER_ALREADY_PROFESSIONAL: "Você já possui um perfil profissional.",
   ESTABLISHMENT_NOT_FOUND: "Estabelecimento não encontrado.",
-  PROFESSIONAL_NOT_FOUND: "Perfil profissional não encontrado.",
   AFFILIATION_NOT_FOUND: "Solicitação de vinculação não encontrada.",
   ESTABLISHMENT_NOT_READY:
     "O estabelecimento precisa de pelo menos um profissional com serviço cadastrado para abrir.",
@@ -176,6 +175,7 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   INTENTION_OUTSIDE_BUSINESS_HOURS: "Esse horário está fora do funcionamento da loja.",
   INVALID_PATH_VARIABLE: "Não foi possível abrir esta página.",
   METHOD_NOT_ALLOWED: "Ação não permitida.",
+  PRICE_POLICY_ACK_REQUIRED: "Leia a política de preços e confirme a ciência para continuar.",
   STORAGE_NOT_CONFIGURED: "O envio de fotos está indisponível agora. Tente mais tarde.",
 };
 
@@ -186,6 +186,11 @@ export function getApiErrorMessage(error: any, fallback: string): string {
   const data = error.response.data;
 
   const code = data?.code;
+  // Backend 23/10 (S64): o message do PROFESSIONAL_NOT_FOUND ja vem em portugues
+  // e diz o que fazer; o texto fixo so vale sem ele.
+  if (code === "PROFESSIONAL_NOT_FOUND") {
+    return data?.message || "Perfil profissional não encontrado.";
+  }
   if (code && ERROR_MESSAGES_PT[code]) {
     return ERROR_MESSAGES_PT[code];
   }
@@ -279,10 +284,23 @@ export function aoContaDesativada(fn: (() => void) | null) {
   avisarContaDesativada = fn;
 }
 
+// ciencia-de-preco (DEC-100): passado o prazo sem a ciencia, abrir loja/fila e
+// ficar trabalhando devolvem 409 PRICE_POLICY_ACK_REQUIRED. O layout registra
+// aqui a abertura da tela da politica (o api nao importa o router).
+let abrirCienciaDePreco: (() => void) | null = null;
+export function aoCienciaDePrecoExigida(fn: (() => void) | null) {
+  abrirCienciaDePreco = fn;
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (error.response?.status === 409 && error.response?.data?.code === "PRICE_POLICY_ACK_REQUIRED") {
+      abrirCienciaDePreco?.();
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 403 && error.response?.data?.code === "ACCOUNT_DEACTIVATED") {
       avisarContaDesativada?.();

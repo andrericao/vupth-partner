@@ -1,0 +1,37 @@
+# Etapa 15a AVULSA (maestro-campanha-cupom-e-link-no-partner, Andre 23/10): consulta
+# pela API se a campanha "MAESTRO PARTNER CUPOM" esta no ar; se nao estiver, PULA (nao
+# falha) e a bateria segue. Se estiver, abre o app do zero e roda
+# etapas/15a_campanha_cupom.yaml. A campanha e criada pelo Andre no Painel, com o nome exato.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.partner.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+# ⚠️ TAG e COMMIT NAO entram no env (ver 00_atualizacao.yaml).
+---
+- evalScript:
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
+    label: "15a.A1 · etiqueta da rodada (TAG)"
+- evalScript:
+    script: ${output.NOME_CAMPANHA = 'MAESTRO PARTNER CUPOM'}
+    label: "15a.A2 · nome da campanha"
+- runScript:
+    file: ../scripts/campanha_ativa.js
+    env:
+      TAG: ${output.TAG}
+      NOME: ${output.NOME_CAMPANHA}
+      SUFIXO: "cupom"
+    label: "15a.A3 · a campanha esta no ar? (pela API)"
+- runFlow:
+    when:
+      true: ${output.EXISTE == 'sim'}
+    commands:
+      - runFlow:
+          file: ../apoio/abrir_com_ota.yaml
+          label: "15a.A4 · abre o app do zero, ja com o OTA"
+      - runFlow:
+          file: ../etapas/15a_campanha_cupom.yaml
+          env:
+            NOME_CAMPANHA: ${output.NOME_CAMPANHA}
+          label: "15a.00 · roda 15a_campanha_cupom"
+    label: "15a.A5 · so roda se a campanha existe (senao, pulada)"

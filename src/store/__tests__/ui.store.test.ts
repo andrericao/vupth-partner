@@ -41,3 +41,14 @@ describe("ui.store — prompt de auto-fechamento (CLOSING_PROMPT)", () => {
     expect(useUiStore.getState().closingGraceUntil).toBeNull();
   });
 });
+
+describe("ui.store — aviso de agenda (AGENDA_RELEASE_PROMPT)", () => {
+  it("abre com o WS e fecha ao dispensar", () => {
+    useUiStore.getState().dismissAvisoDeAgenda();
+    expect(useUiStore.getState().avisoDeAgenda).toBe(false);
+    useUiStore.getState().showAvisoDeAgenda();
+    expect(useUiStore.getState().avisoDeAgenda).toBe(true);
+    useUiStore.getState().dismissAvisoDeAgenda();
+    expect(useUiStore.getState().avisoDeAgenda).toBe(false);
+  });
+});

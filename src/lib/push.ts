@@ -32,11 +32,14 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
   if (type === "CUT_REQUESTED") return "/(professional)/cut-requests";
+  // avisos-de-agenda-e-solicitacao (Backend 651514f): "Libere a sua agenda" leva a agenda.
+  if (type === "AGENDA_RELEASE_PROMPT") return "/(professional)/agenda";
   // notificacao-com-botao (PAR-11): "Confira o pagamento" leva aos Relatorios,
   // onde estao os pendentes com o "Recebi"; "Hora de fechar?" leva a Fila, onde
   // o aviso de fechamento aparece; a loja removida leva ao Vinculo.
   if (type === "PAYMENT_CLAIMED") return "/(professional)/my-day";
-  if (type === "CLOSING_PROMPT") return "/(professional)/queue";
+  if (type === "PRICE_POLICY") return "/(professional)/ciencia-de-preco";
+  if (type === "CLOSING_PROMPT" || type === "NO_SHOW_AVAILABLE") return "/(professional)/queue";
   if (type === "ESTABLISHMENT_REMOVED") return "/(professional)/settings-vinculo";
   // desativar-conta (Backend 01c785e): o convite de posse e o aviso de loja
   // desativada/reativada sao do profissional; a resposta da posse e do dono —
@@ -209,13 +212,38 @@ export const CATEGORIA_FECHAMENTO = "FECHAMENTO";
 export const ACAO_FECHAR_AGORA = "FECHAR_AGORA";
 export const ACAO_CONTINUAR = "CONTINUAR";
 
-export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "abrir";
+/**
+ * push-acoes-por-pergunta (Backend 7584964, 24/10): so o push que PERGUNTA algo
+ * tem acao, e a acao e a mesma decisao da tela. CUT_REQUESTED e
+ * OWNERSHIP_TRANSFER_REQUESTED chegam com categoryId "ACEITAR_RECUSAR" e o app
+ * escolhe o endpoint pelo data.type; os botoes resolvem em segundo plano.
+ */
+export const CATEGORIA_ACEITAR_RECUSAR = "ACEITAR_RECUSAR";
+export const ACAO_ACEITAR = "ACEITAR";
+export const ACAO_RECUSAR = "RECUSAR";
+
+/**
+ * pagamento-ja-recebi (Backend 9f2f6fb): o PAYMENT_CLAIMED ("[nome] diz que pagou")
+ * sai com categoryId "CONFIRMAR_RECUSAR". Confirmar = POST .../payment/confirm,
+ * Recusar = POST .../payment/refuse (volta a PENDING). Mesmos botoes, sem abrir o app.
+ */
+export const CATEGORIA_CONFIRMAR_RECUSAR = "CONFIRMAR_RECUSAR";
+export const ACAO_CONFIRMAR = "CONFIRMAR";
+// push-confirmar-pagamento-textos (Andre, 24/10): os botoes do "Confirmar pagamento" sao
+// "Confirmar" e "Nao recebi". O titulo e o corpo ("Pagamento de R$ XX,XX do cliente <nome>")
+// vem do Backend (BAK:push-confirmar-pagamento-texto); so os rotulos sao do app.
+export const BOTAO_CONFIRMAR_PAGAMENTO = "Confirmar";
+export const BOTAO_NAO_RECEBI = "Não recebi";
+
+export type AcaoDoPush = "ok" | "fechar-agora" | "continuar" | "aceitar" | "recusar" | "abrir";
 
 /** O que fazer com o toque: um dos botoes, ou o corpo da notificacao (abrir). */
 export function acaoDoPush(resposta: { actionIdentifier: string }): AcaoDoPush {
   if (resposta.actionIdentifier === ACAO_OK) return "ok";
   if (resposta.actionIdentifier === ACAO_FECHAR_AGORA) return "fechar-agora";
   if (resposta.actionIdentifier === ACAO_CONTINUAR) return "continuar";
+  if (resposta.actionIdentifier === ACAO_ACEITAR || resposta.actionIdentifier === ACAO_CONFIRMAR) return "aceitar";
+  if (resposta.actionIdentifier === ACAO_RECUSAR) return "recusar";
   return "abrir";
 }
 

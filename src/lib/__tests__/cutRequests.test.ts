@@ -12,6 +12,7 @@ import {
   ehDeOutroDia,
   oQueAconteceAoAceitar,
   seloDoPrazo,
+  isAgendaReleasePromptEvent,
 } from "../cutRequests";
 import type { CutRequestResponse } from "@lib/types";
 
@@ -364,6 +365,25 @@ describe("oQueAconteceAoAceitar", () => {
     expect(oQueAconteceAoAceitar(amanha, agora)).toBe("fica agendado para esse dia");
   });
 
+  // avisos-de-agenda-e-solicitacao (Backend 651514f): o dia pedido estava fechado.
+  it("solicitacao de outro dia (agenda_requested): aceitar abre a agenda desse dia", () => {
+    const amanha = {
+      desired_time: local(2026, 10, 11, 10, 0),
+      expires_at: local(2026, 10, 11, 10, 0),
+      agenda_requested: true,
+    };
+    expect(oQueAconteceAoAceitar(amanha, agora)).toBe("abre a agenda desse dia");
+  });
+
+  it("solicitacao de hoje (agenda_requested): o aceite nao abre dia nenhum, entra na fila", () => {
+    const hoje = {
+      desired_time: local(2026, 10, 10, 18, 0),
+      expires_at: local(2026, 10, 10, 18, 0),
+      agenda_requested: true,
+    };
+    expect(oQueAconteceAoAceitar(hoje, agora)).toBe("entra no fim da sua fila");
+  });
+
   it("desired_time hoje: entra no fim da fila", () => {
     const hoje = { desired_time: local(2026, 10, 10, 18, 0), expires_at: local(2026, 10, 10, 18, 0) };
     expect(ehDeOutroDia(hoje, agora)).toBe(false);
@@ -409,5 +429,14 @@ describe("seloDoPrazo", () => {
 
   it("data invalida: 0 min, urgente", () => {
     expect(seloDoPrazo("banana", agora)).toEqual({ texto: "0 min", urgente: true });
+  });
+});
+
+describe("isAgendaReleasePromptEvent", () => {
+  it("so o AGENDA_RELEASE_PROMPT do Backend (nao e um CUT_*)", () => {
+    expect(isAgendaReleasePromptEvent("AGENDA_RELEASE_PROMPT")).toBe(true);
+    expect(isAgendaReleasePromptEvent("CUT_REQUESTED")).toBe(false);
+    expect(isAgendaReleasePromptEvent(undefined)).toBe(false);
+    expect(isCutRequestEvent("AGENDA_RELEASE_PROMPT")).toBe(false);
   });
 });

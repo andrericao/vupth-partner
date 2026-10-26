@@ -228,13 +228,34 @@ appId: ${APP_ID}
 - hideKeyboard
 - tapOn:
     id: "cupom-usar"
-    label: "07.43h · cupom · toca em Usar"
+    label: "07.43h · cupom · toca em Ativar"
 - extendedWaitUntil:
     visible: "Cupom não encontrado."
     timeout: 20000
     label: "07.43i · cupom · Cupom não encontrado."
 - back:
     label: "07.43j · cupom · volta ao Perfil"
+
+# agenda-do-profissional-partner: Agendamentos (conta nova: nada marcado).
+- scrollUntilVisible:
+    element: "Agendamentos"
+    direction: DOWN
+    visibilityPercentage: 50
+    centerElement: true
+    timeout: 30000
+    label: "07.43k · agendamentos · rola ate Agendamentos"
+- tapOn:
+    text: "Agendamentos"
+    label: "07.43l · agendamentos · toca em Agendamentos"
+- extendedWaitUntil:
+    visible: "Nenhum agendamento nos próximos dias."
+    timeout: 20000
+    label: "07.43m · agendamentos · conta nova: nenhum agendamento"
+- assertNotVisible:
+    text: "Pagamento adiantado"
+    label: "07.43m2 · agendamentos · sem etiqueta de pagamento adiantado"
+- back:
+    label: "07.43n · agendamentos · volta ao Perfil"
 
 - runFlow:
     file: ../apoio/sair_profissional.yaml

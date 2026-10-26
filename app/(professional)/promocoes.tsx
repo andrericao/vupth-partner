@@ -2,6 +2,7 @@ import { View, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Cupom } from "@components/Cupom";
+import { CreditosDeCupom } from "@components/CreditosDeCupom";
 import { LinkDeIndicacao } from "@components/LinkDeIndicacao";
 
 // cupom-no-app (DEC-61, DEC-63): Perfil → Promoções. O dono abre pela rota do
@@ -21,6 +22,7 @@ export default function PromocoesScreen() {
         <View className="mt-6">
           <LinkDeIndicacao />
           <Cupom />
+          <CreditosDeCupom />
         </View>
       </View>
     </ScrollView>

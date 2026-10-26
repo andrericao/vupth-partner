@@ -1,6 +1,6 @@
 # pagamento-pix (adendos 1a0616c e 62295f1): no Finalizar (ou no Iniciar proximo
 # com alguem na cadeira) o app pergunta "Recebeu o pagamento?" quando o
-# pagamento esta pendente. env: RESPOSTA ("Recebi" | "Ainda não"),
+# pagamento esta pendente. env: RESPOSTA ("Confirmar" | "Não recebi"),
 # FIM (o texto que a mensagem do fim deve trazer). Sem a pergunta (ja pago),
 # segue sem tocar em nada.
 appId: ${APP_ID}

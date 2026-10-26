@@ -16,11 +16,20 @@ import {
   carenciaDoFechamento,
   CATEGORIA_CIENCIA,
   CATEGORIA_FECHAMENTO,
+  CATEGORIA_ACEITAR_RECUSAR,
+  ACAO_ACEITAR,
+  CATEGORIA_CONFIRMAR_RECUSAR,
+  ACAO_CONFIRMAR,
+  BOTAO_CONFIRMAR_PAGAMENTO,
+  BOTAO_NAO_RECEBI,
+  ACAO_RECUSAR,
   ACAO_OK,
   ACAO_FECHAR_AGORA,
   ACAO_CONTINUAR,
   CANAL_ALERTAS,
 } from "@lib/push";
+import { resolverAcaoDoPush } from "@lib/pushDecisao";
+import { definirTarefaDoPush, TAREFA_DO_PUSH } from "@lib/pushBackground";
 import { useAuthStore } from "@store/auth.store";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { useWsDiagnosticsStore } from "@store/wsDiagnostics.store";
@@ -40,6 +49,9 @@ const Notifications: typeof import("expo-notifications") | null = pushSupported(
   ? // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("expo-notifications")
   : null;
+
+// push-resolve-sem-abrir-o-app: a tarefa de segundo plano tem de existir no escopo do modulo.
+const tarefaDefinida = definirTarefaDoPush();
 
 // Chave onde guardamos o Expo Push Token registrado, para o logout conseguir
 // desregistrar (DELETE /devices/{token}) — ver auth.store.logout.
@@ -113,6 +125,19 @@ export function usePushRegistration() {
       Notifications.setNotificationCategoryAsync(CATEGORIA_FECHAMENTO, [
         { identifier: ACAO_FECHAR_AGORA, buttonTitle: "Fechar", options: { opensAppToForeground: true } },
         { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      // push-resolve-sem-abrir-o-app: o botao do push roda esta tarefa com o app fechado.
+      if (tarefaDefinida) Notifications.registerTaskAsync(TAREFA_DO_PUSH).catch(() => {});
+      // push-acoes-por-pergunta: pedido de corte e convite de dono, decididos na
+      // propria notificacao, sem abrir o app.
+      Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_RECUSAR, [
+        { identifier: ACAO_ACEITAR, buttonTitle: "Aceitar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      // pagamento-ja-recebi: o "[nome] diz que pagou" com Confirmar e Recusar.
+      Notifications.setNotificationCategoryAsync(CATEGORIA_CONFIRMAR_RECUSAR, [
+        { identifier: ACAO_CONFIRMAR, buttonTitle: BOTAO_CONFIRMAR_PAGAMENTO, options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: BOTAO_NAO_RECEBI, options: { opensAppToForeground: false } },
       ]).catch(() => {});
     } catch {
       // binario sem o modulo nativo de push.
@@ -208,6 +233,15 @@ export function usePushRegistration() {
             Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
           }
           if (acao === "ok" || acao === "continuar") return;
+          if (acao === "aceitar" || acao === "recusar") {
+            // Decide em segundo plano; se a chamada falhar, abre a tela da pergunta.
+            resolverAcaoDoPush(response).then((r) => {
+              if (r !== "falhou") return;
+              const rota = notificationRoute(data, useEstablishmentStore.getState().establishment?.id);
+              if (rota) router.push(rota as any);
+            });
+            return;
+          }
           const carencia = carenciaDoFechamento(data);
           if (acao === "fechar-agora") {
             // Fecha direto; se o backend barrar (atendimento em andamento), a

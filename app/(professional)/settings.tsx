@@ -21,7 +21,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket } from "lucide-react-native";
+  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket, Bug } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -31,6 +31,8 @@ import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
 import { NotificationBadge } from "@components/NotificationBadge";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
+import { sentryLigado } from "@lib/sentry";
+import { ReportarProblema } from "@components/ReportarProblema";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { useTema } from "@hooks/useTema";
 
@@ -73,7 +75,8 @@ function MenuCard({ icon: Icon, title, hint, badge, dot, last = false, onPress }
           <View className="flex-row items-center gap-1">
             <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{title}</Text>
             {/* Dot POR CARD: sem ele o dot da aba dizia "ha pendência" mas nao
-                ONDE (feedback Andre 2026-07-24). Agora acende no card exato. */}
+                ONDE (feedback Andre 2026-07-24). Agora acende no card exato, ao lado do
+                titulo (dot-ao-lado-do-nome-em-menu-empilhado, Andre 24/10). */}
             {dot && (
               <View
                 testID={`settings-dot-${title.toLowerCase().replace(/\s+/g, "-")}`}
@@ -109,6 +112,7 @@ export default function ProfessionalSettingsScreen() {
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
+  const [reportando, setReportando] = useState(false);
 
   const insets = useSafeAreaInsets();
   const { cores } = useTema();
@@ -289,6 +293,12 @@ export default function ProfessionalSettingsScreen() {
               hint="dias e horários em que você atende"
               onPress={() => router.push("/(professional)/agenda" as any)}
             />
+            <MenuCard
+              icon={CalendarDays}
+              title="Agendamentos"
+              hint="os clientes marcados nos próximos dias"
+              onPress={() => router.push("/(professional)/agendados" as any)}
+            />
             {/* pagamento-pix (contrato BAK 2a2b0ec): a chave com que o cliente paga. */}
             <MenuCard
               icon={QrCode}
@@ -321,7 +331,7 @@ export default function ProfessionalSettingsScreen() {
               <MenuCard
                 icon={Ticket}
                 title="Promoções"
-                hint="usar um cupom"
+                hint="ativar um cupom"
                 onPress={() => router.push("/(professional)/promocoes" as any)}
               />
             )}
@@ -363,9 +373,19 @@ export default function ProfessionalSettingsScreen() {
               icon={LifeBuoy}
               title="Suporte"
               hint="dúvidas e passo a passo do app"
-              last
+              last={!sentryLigado()}
               onPress={() => abrirSuporte("profissional")}
             />
+            {/* sentry-feedback-do-usuario: so com o Sentry ligado no binario. */}
+            {sentryLigado() && (
+              <MenuCard
+                icon={Bug}
+                title="Reportar problema"
+                hint="conte o que deu errado"
+                last
+                onPress={() => setReportando(true)}
+              />
+            )}
           </Grupo>
   
           <Pressable onPress={handleLogout} className="py-1" accessibilityRole="button" accessibilityLabel="Sair">
@@ -378,6 +398,7 @@ export default function ProfessionalSettingsScreen() {
         </View>
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+      <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
     </View>
   );
 }

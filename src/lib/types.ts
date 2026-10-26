@@ -57,6 +57,8 @@ export type CutRequestResponse = {
   resulting_attendance_id: string | null;
   /** Quando o cliente quer (S26, 36c4359); null = assim que abrir. So informa. */
   desired_time?: string | null;
+  /** solicitar-agendamento (Backend 651514f): o dia pedido esta fechado na agenda; o dot vai nesses itens. */
+  agenda_requested?: boolean;
 };
 
 export type AttendanceInQueue = {
@@ -169,4 +171,6 @@ export type AttendanceHistoryItem = {
   not_realized_reason?: "CLIENT_CANCELLED" | "PROFESSIONAL_REMOVED" | "REMOVED_FOR_LATENESS" | null;
   /** Corte concluido com observacao de atraso do cliente. */
   late_arrival?: boolean | null;
+  /** tres-faltas-pagar-adiantado (Backend 5d04760): cliente com 3 faltas/saidas em 90 dias. */
+  prepay_required?: boolean | null;
 };

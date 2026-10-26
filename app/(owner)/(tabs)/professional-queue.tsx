@@ -25,6 +25,7 @@ import { pedirFeedbackDoApp } from "@lib/feedbackDoApp";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useTema } from "@hooks/useTema";
+import { formatarReais } from "@lib/dinheiro";
 
 function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; position: number }) {
   const statusLabel =
@@ -47,7 +48,7 @@ function QueueItem({ attendance, position }: { attendance: AttendanceInQueue; po
       <View className="items-end">
         <Text className={`font-body text-sm font-bold ${statusColor}`}>{statusLabel}</Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
-          R$ {attendance.totalValue.toFixed(2)}
+          {formatarReais(attendance.totalValue)}
         </Text>
       </View>
     </View>
@@ -106,7 +107,7 @@ function CurrentAttendanceCard({
       <View className="flex-row justify-between mt-2">
         <Text className="font-body text-sm text-vupth-onGreenTint">Tempo: {formatted}</Text>
         <Text className="font-heading text-vupth-onGreenTint">
-          R$ {(attendance.totalValue ?? 0).toFixed(2)}
+          {formatarReais((attendance.totalValue ?? 0))}
         </Text>
       </View>
 
@@ -180,7 +181,7 @@ export default function ProfessionalQueueScreen() {
     const name = data?.professionalName ?? professionalName ?? "este profissional";
     const ok = await confirmar({
       titulo: "Desvincular profissional",
-      mensagem: `Deseja desvincular ${name} do estabelecimento? Ele deixará de atender aqui.`,
+      mensagem: `${name} deixa de atender aqui.`,
       confirmar: "Desvincular",
       destrutivo: true,
     });

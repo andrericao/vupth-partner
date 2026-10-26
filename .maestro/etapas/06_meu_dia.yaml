@@ -89,3 +89,7 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Profissional removeu o cliente"
     label: "06.09a · nao-realizados · o atendimento retirado diz o motivo"
+# ocultar-quanto-cobrar-relatorios (Andre, 24/10): o cartao "Quanto cobrar?" esta escondido.
+- assertNotVisible:
+    id: "quanto-cobrar-card"
+    label: "06.10 · aba-de-custos · o cartao Quanto cobrar? esta escondido em Relatorios"

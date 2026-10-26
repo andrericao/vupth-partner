@@ -48,8 +48,8 @@ describe("relatorioDasLojas", () => {
 
   it("formata dia e dinheiro", () => {
     expect(diaMes("2026-10-17")).toBe("17/10");
-    expect(reais(12.5)).toBe("R$ 12.50");
-    expect(reais(null)).toBe("R$ 0.00");
+    expect(reais(12.5)).toBe("R$ 12,50");
+    expect(reais(null)).toBe("R$ 0,00");
   });
 });
 

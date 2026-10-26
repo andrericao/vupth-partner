@@ -1,6 +1,7 @@
 import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { abrirDialogo } from "@store/dialogo.store";
+import { formatarReais } from "@lib/dinheiro";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -11,7 +12,7 @@ import { abrirDialogo } from "@store/dialogo.store";
 
 type StatusDoPagamento = "PENDING" | "AWAITING_CONFIRMATION" | "PAID";
 
-const reais = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
+const reais = formatarReais;
 
 /**
  * undefined = nao perguntar (ja pago, atendimento sem pagamento ou falha ao
@@ -19,7 +20,7 @@ const reais = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
  */
 export async function perguntarPagamento(
   attendanceId: string,
-  deps: { perguntar?: typeof confirmar } = {}
+  deps: { perguntar?: typeof confirmar; cliente?: string | null } = {}
 ): Promise<boolean | undefined> {
   const perguntar = deps.perguntar ?? confirmar;
   let status: StatusDoPagamento;
@@ -32,16 +33,24 @@ export async function perguntarPagamento(
     return undefined;
   }
   if (status !== "PENDING" && status !== "AWAITING_CONFIRMATION") return undefined;
-
-  return perguntar({
+  // recebi-ao-finalizar-corte (Andre, 25/10): logo apos o Finalizar, com o pagamento ainda
+  // pendente, o profissional sempre ve "Recebeu o pagamento?" — com ou sem Asaas conectado
+  // (o Asaas e o "Confirmar" quitam o mesmo atendimento; quem chega primeiro vence).
+  const quem = deps.cliente ? `${deps.cliente} · ` : "";
+  const recebeu = await perguntar({
     titulo: "Recebeu o pagamento?",
     mensagem:
       status === "AWAITING_CONFIRMATION"
-        ? `O cliente diz que pagou ${reais(valor)}. Confira no seu banco antes de confirmar.`
-        : `${reais(valor)}. Se ainda não, fica pendente.`,
-    confirmar: "Recebi",
-    cancelar: "Ainda não",
+        ? `${deps.cliente ?? "O cliente"} diz que pagou ${reais(valor)}. Confira no seu banco.`
+        : `${quem}${reais(valor)}. Se ainda não, fica pendente.`,
+    confirmar: "Confirmar",
+    cancelar: "Não recebi",
   });
+  // "Não recebi" diante de um "já paguei" do cliente = Recusar (volta a pendente e o cliente e avisado).
+  if (!recebeu && status === "AWAITING_CONFIRMATION") {
+    await recusarRecebimento(attendanceId).catch(() => {});
+  }
+  return recebeu;
 }
 
 /** A mensagem do fim, na tela do profissional (o backend nao manda push a quem tocou). */
@@ -83,6 +92,15 @@ export const FORMAS_DE_RECEBIMENTO: { valor: FormaDeRecebimento; rotulo: string 
   { valor: "NOTA", rotulo: "Nota" },
 ];
 
+// ocultar-forma-nota (Andre, 25/10): "Nota" e redundante com dinheiro; some da caixa, mas fica
+// no tipo e na lista do Backend (so esconder). Religar e trocar a flag.
+export const MOSTRAR_FORMA_NOTA = false;
+
+/** As formas que a caixa mostra. */
+export function formasVisiveis(): { valor: FormaDeRecebimento; rotulo: string }[] {
+  return FORMAS_DE_RECEBIMENTO.filter((f) => MOSTRAR_FORMA_NOTA || f.valor !== "NOTA");
+}
+
 /** Depois do "Recebi": como? `undefined` = pulou (o fluxo segue igual). */
 export async function perguntarForma(
   deps: { perguntar?: typeof abrirDialogo } = {}
@@ -92,11 +110,11 @@ export async function perguntarForma(
     titulo: "Como recebeu?",
     mensagem: "Só para o seu registro. Pode pular.",
     botoes: [
-      ...FORMAS_DE_RECEBIMENTO.map((f) => ({ texto: f.rotulo })),
+      ...formasVisiveis().map((f) => ({ texto: f.rotulo })),
       { texto: "Pular", estilo: "cancel" as const },
     ],
   });
-  return FORMAS_DE_RECEBIMENTO[escolha]?.valor;
+  return formasVisiveis()[escolha]?.valor;
 }
 
 /** "Recebi": de PENDING ou AWAITING_CONFIRMATION para PAID (push ao cliente). */
@@ -108,6 +126,14 @@ export async function confirmarRecebimento(
     `/attendances/${attendanceId}/payment/confirm`,
     forma ? { method: forma } : undefined
   );
+}
+
+/**
+ * "Recusar" (Backend 9f2f6fb): o profissional nao recebeu o que o cliente disse que pagou.
+ * So vale de AWAITING_CONFIRMATION (senao 409 PAYMENT_INVALID_STATUS); volta a PENDING.
+ */
+export async function recusarRecebimento(attendanceId: string): Promise<void> {
+  await api.post(`/attendances/${attendanceId}/payment/refuse`);
 }
 
 /** PAYMENT_CLAIMED / PAYMENT_CONFIRMED no WS pessoal: re-busca os pendentes. */

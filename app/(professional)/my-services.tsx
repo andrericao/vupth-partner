@@ -29,6 +29,8 @@ import {
 } from "@lib/pricing";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { TIPOS_DE_SERVICO, tiposDaEspecialidade, tipoDoServico } from "@lib/tiposDeServico";
+import { formatarReais } from "@lib/dinheiro";
+import { confirmarValorMinimo } from "@lib/valorMinimo";
 
 
 
@@ -105,18 +107,18 @@ function PreviaDePreco({
 
       <View className="flex-row justify-between mb-1">
         <Text className="font-body text-sm text-vupth-textSecondary">Cliente paga:</Text>
-        <Text className="font-heading text-lg text-vupth-textPrimary">R$ {pricing.clientPrice.toFixed(2)}</Text>
+        <Text className="font-heading text-lg text-vupth-textPrimary">{formatarReais(pricing.clientPrice)}</Text>
       </View>
 
       <View className="flex-row justify-between mb-1">
         <Text className="font-body text-sm text-vupth-textSecondary">Você recebe:</Text>
-        <Text className="font-heading text-vupth-textPrimary">R$ {pricing.proReceives.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{formatarReais(pricing.proReceives)}</Text>
       </View>
 
       <View className="flex-row justify-between">
         <Text className="font-body text-sm text-vupth-textSecondary">Taxas Vupth:</Text>
         <Text className="font-body text-sm text-vupth-textSecondary">
-          R$ {pricing.platformFee.toFixed(2)}
+          {formatarReais(pricing.platformFee)}
         </Text>
       </View>
 
@@ -124,13 +126,13 @@ function PreviaDePreco({
       <View className="flex-row justify-between mt-1">
         <Text className="font-body text-xs text-vupth-textSecondary">· Empresa de pagamento</Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
-          R$ {pricing.intermediaryFee.toFixed(2)}
+          {formatarReais(pricing.intermediaryFee)}
         </Text>
       </View>
       <View className="flex-row justify-between">
         <Text className="font-body text-xs text-vupth-textSecondary">· App Vupth</Text>
         <Text className="font-body text-xs text-vupth-textSecondary">
-          R$ {pricing.appFee.toFixed(2)}
+          {formatarReais(pricing.appFee)}
         </Text>
       </View>
       <Pressable
@@ -268,6 +270,8 @@ export default function MyServicesScreen() {
       Alert.alert("Tempo inválido", "Informe o tempo do serviço entre 5 e 480 minutos.");
       return;
     }
+    // aviso-valor-minimo (DEC-121): igual ou abaixo do minimo avisa; pode seguir.
+    if (!(await confirmarValorMinimo(editPriceNum))) return;
     // Preco do cliente + a divisao gravada, sempre juntos: price sozinho
     // apagaria a divisao no backend.
     setIsEditSaving(true);
@@ -329,6 +333,9 @@ export default function MyServicesScreen() {
       return;
     }
 
+    // aviso-valor-minimo (DEC-121): igual ou abaixo do minimo avisa; pode seguir.
+    if (!(await confirmarValorMinimo(priceNum))) return;
+
     setIsLoading(true);
 
     // Preco do cliente + a divisao gravada (contrato de 18/09).
@@ -337,7 +344,7 @@ export default function MyServicesScreen() {
 
     try {
       await addMyServiceItem(tipo, customName.trim(), split, minutos);
-      Alert.alert("Serviço adicionado", `${customName.trim()} — R$ ${finalPrice.toFixed(2)}`);
+      Alert.alert("Serviço adicionado", `${customName.trim()} — ${formatarReais(finalPrice)}`);
       setShowForm(false);
       setServiceItemType("");
       setCustomName("");
@@ -460,7 +467,7 @@ export default function MyServicesScreen() {
                         </Pressable>
                       </View>
                     </View>
-                    <Text className="font-heading text-vupth-textPrimary">R$ {svc.price.toFixed(2)}</Text>
+                    <Text className="font-heading text-vupth-textPrimary">{formatarReais(svc.price)}</Text>
                   </View>
                 )
               )}

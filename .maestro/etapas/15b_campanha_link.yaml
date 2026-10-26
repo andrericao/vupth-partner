@@ -1,0 +1,69 @@
+# maestro-campanha-cupom-e-link-no-partner (Andre, 23/10): o link da campanha
+# "MAESTRO PARTNER LINK" (bonus de indicacao), criada por ele no Painel. O fluxo
+# acha a campanha pelo nome, participa e confere o link e o Compartilhar; se a
+# campanha ja encerrou/esgotou, confere o modal certo (DEC-124).
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_CAMP}
+    label: "15b.01 · entra como o profissional da campanha"
+- extendedWaitUntil:
+    visible:
+      id: "aba-perfil"
+    timeout: 30000
+    label: "15b.02 · espera aba-perfil"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "15b.03 · roda fechar_aviso"
+- tapOn:
+    id: "aba-perfil"
+    label: "15b.04 · abre o Perfil"
+- scrollUntilVisible:
+    element: "Promoções"
+    direction: DOWN
+    label: "15b.05 · rola ate Promoções"
+- tapOn:
+    text: "Promoções"
+    label: "15b.06 · abre Promoções"
+- scrollUntilVisible:
+    element: ${NOME_CAMPANHA}
+    direction: DOWN
+    label: "15b.10 · a campanha aparece em Promoções"
+- tapOn:
+    text: ${NOME_CAMPANHA}
+    label: "15b.10a · toca no card: abre a explicacao"
+- assertVisible:
+    text: ".*para qualquer serviço.*"
+    label: "15b.10b · a explicacao diz que vale para qualquer servico"
+- tapOn:
+    text: "Participar"
+    label: "15b.11 · Participar"
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU == 'sim'}
+    commands:
+      - assertVisible:
+          text: "Promoção encerrada"
+          label: "15b.12a · campanha encerrada · modal"
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU != 'sim' && output.SEM_VAGA == 'sim'}
+    commands:
+      - assertVisible:
+          text: "Promoção esgotada"
+          label: "15b.12b · campanha esgotada · modal"
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU != 'sim' && output.SEM_VAGA != 'sim'}
+    commands:
+      - assertVisible:
+          id: "link-indicacao-campanha"
+          label: "15b.13a · entrou: o link da campanha"
+      - assertVisible:
+          text: "Compartilhar link"
+          label: "15b.13b · o botao vira Compartilhar link"
+      - assertVisible:
+          text: ".*chegaram.*"
+          label: "15b.13c · o andamento da campanha"

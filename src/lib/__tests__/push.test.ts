@@ -19,6 +19,13 @@ import {
   ACAO_OK,
   ACAO_FECHAR_AGORA,
   ACAO_CONTINUAR,
+  ACAO_ACEITAR,
+  ACAO_RECUSAR,
+  CATEGORIA_ACEITAR_RECUSAR,
+  CATEGORIA_CONFIRMAR_RECUSAR,
+  ACAO_CONFIRMAR,
+  BOTAO_CONFIRMAR_PAGAMENTO,
+  BOTAO_NAO_RECEBI,
   CANAL_ALERTAS,
 } from "../push";
 
@@ -369,7 +376,18 @@ describe("notificacao-com-botao", () => {
     expect(acaoDoPush({ actionIdentifier: ACAO_OK })).toBe("ok");
     expect(acaoDoPush({ actionIdentifier: ACAO_FECHAR_AGORA })).toBe("fechar-agora");
     expect(acaoDoPush({ actionIdentifier: ACAO_CONTINUAR })).toBe("continuar");
+    expect(acaoDoPush({ actionIdentifier: ACAO_ACEITAR })).toBe("aceitar");
+    expect(acaoDoPush({ actionIdentifier: ACAO_RECUSAR })).toBe("recusar");
     expect(acaoDoPush({ actionIdentifier: "expo.modules.notifications.actions.DEFAULT" })).toBe("abrir");
+  });
+
+  it("a categoria do pedido que pergunta e a combinada com o Backend (7584964)", () => {
+    expect(CATEGORIA_ACEITAR_RECUSAR).toBe("ACEITAR_RECUSAR");
+    expect(CATEGORIA_CONFIRMAR_RECUSAR).toBe("CONFIRMAR_RECUSAR");
+    expect(acaoDoPush({ actionIdentifier: ACAO_CONFIRMAR })).toBe("aceitar");
+    // push-confirmar-pagamento-textos: os rotulos do push do "ja paguei".
+    expect(BOTAO_CONFIRMAR_PAGAMENTO).toBe("Confirmar");
+    expect(BOTAO_NAO_RECEBI).toBe("Não recebi");
   });
 
   it("o Hora de fechar? traz a carencia; os outros nao", () => {
@@ -385,6 +403,12 @@ describe("notificacao-com-botao", () => {
   it("o toque leva a tela certa: pagamento, fechamento e loja removida", () => {
     expect(notificationRoute({ type: "PAYMENT_CLAIMED" })).toBe("/(professional)/my-day");
     expect(notificationRoute({ type: "CLOSING_PROMPT" })).toBe("/(professional)/queue");
+    expect(notificationRoute({ type: "PRICE_POLICY", policyVersion: 2 })).toBe("/(professional)/ciencia-de-preco");
+    expect(notificationRoute({ type: "NO_SHOW_AVAILABLE", attendanceId: "a1" })).toBe("/(professional)/queue");
     expect(notificationRoute({ type: "ESTABLISHMENT_REMOVED" })).toBe("/(professional)/settings-vinculo");
+  });
+
+  it("Libere a sua agenda leva a agenda", () => {
+    expect(notificationRoute({ type: "AGENDA_RELEASE_PROMPT", target: "agenda" })).toBe("/(professional)/agenda");
   });
 });

@@ -16,12 +16,15 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
+import { QuantoCobrarCard, MOSTRAR_QUANTO_COBRAR } from "@components/QuantoCobrarCard";
+import { PendenciasDoRelatorio } from "@components/PendenciasDoRelatorio";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
-import { confirmarRecebimento, formatarReais, perguntarForma } from "@lib/pagamento";
+import { confirmarRecebimento, formatarReais, perguntarForma, recusarRecebimento } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { buscarGateway, CHAVE_GATEWAY } from "@lib/gateway";
 import { useQueuePolling } from "@hooks/useQueuePolling";
 import { useAttendanceStore } from "@store/attendance.store";
 import { useProfessionalStore } from "@store/professional.store";
@@ -68,7 +71,7 @@ function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor:
         {rotulo}
       </Text>
       <Text className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}>
-        R$ {valor.toFixed(2)}
+        {formatarReais(valor)}
       </Text>
     </View>
   );
@@ -137,7 +140,7 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
 
       <View className="flex-row items-center justify-between mt-2">
         <Text className="font-body text-xs text-vupth-textSecondary">{aberto ? "Esconder a conta" : "Ver a conta"}</Text>
-        <Text className="font-heading text-vupth-textPrimary">R$ {item.totalValue.toFixed(2)}</Text>
+        <Text className="font-heading text-vupth-textPrimary">{formatarReais(item.totalValue)}</Text>
       </View>
       <LinhaDoPagamento status={item.payment_status} />
       {aberto && <ContaDoAtendimento conta={conta} />}
@@ -194,13 +197,16 @@ export default function MyDayScreen() {
   const professional = useProfessionalStore((s) => s.professional);
   const queryClient = useQueryClient();
   const { itens: pagamentos } = usePagamentosPendentes(!!professional?.id);
-  const recebi = async (attendanceId: string) => {
+  const { data: gateway } = useQuery({ queryKey: CHAVE_GATEWAY, queryFn: buscarGateway, staleTime: 60_000, retry: false });
+  const recebi = async (attendanceId: string, jaConfirmou = false) => {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
-    const ok = await confirmar({
-      titulo: "Recebeu o pagamento?",
-      mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}. Ele recebe o aviso de pagamento confirmado.`,
-      confirmar: "Recebi",
-    });
+    const ok =
+      jaConfirmou ||
+      (await confirmar({
+        titulo: "Recebeu o pagamento?",
+        mensagem: `Confirme que ${p?.client_name ?? "o cliente"} pagou ${formatarReais(p?.amount ?? 0)}.`,
+        confirmar: "Recebi",
+      }));
     if (!ok) return;
     const forma = await perguntarForma();
     try {
@@ -208,6 +214,14 @@ export default function MyDayScreen() {
       await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));
+    }
+  };
+  const recusar = async (attendanceId: string) => {
+    try {
+      await recusarRecebimento(attendanceId);
+      await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
+    } catch (error: any) {
+      Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível recusar o pagamento."));
     }
   };
   const isFocused = useIsFocused();
@@ -360,10 +374,12 @@ export default function MyDayScreen() {
           </View>
 
           <ExpedienteCard periodo={period} workdays={report?.workdays} />
+          {/* ocultar-quanto-cobrar-relatorios (Andre, 24/10): so esconder; o codigo fica. */}
+          {MOSTRAR_QUANTO_COBRAR && <QuantoCobrarCard />}
 
           {/* pagamento-pix (Andre, 10/10): os atendimentos com pagamento pendente
               e o "Recebi". O dot da aba some quando nao ha o que conferir. */}
-          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} />
+          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
 
           <View className="h-px bg-vupth-border my-6" />
 
@@ -389,9 +405,7 @@ export default function MyDayScreen() {
               <View className="flex-row gap-3">
                 <Numero
                   rotulo={contaDoPeriodo || report?.netRevenue != null ? "Você recebeu" : "Receita"}
-                  valor={`R$ ${Number(
-                    contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0
-                  ).toFixed(2)}`}
+                  valor={formatarReais(contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0)}
                   destaque
                 />
                 <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
@@ -417,10 +431,11 @@ export default function MyDayScreen() {
               ) : (
                 report?.netRevenue != null && (
                   <Text className="font-body text-xs text-vupth-textSecondary">
-                    {`Clientes pagaram R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}. Para ver a conta do período linha a linha, role o histórico até o fim em Todos ou Finalizados.`}
+                    {`Clientes pagaram ${formatarReais(Number(report?.totalRevenue ?? 0))}. A conta linha a linha está no fim do histórico.`}
                   </Text>
                 )
               )}
+              <PendenciasDoRelatorio report={report} />
               <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
               {avisoDoPrecoAntigo(precoAntigo) && (
                 <View className="bg-vupth-warning p-3 rounded-card">

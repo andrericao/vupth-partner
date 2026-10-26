@@ -43,6 +43,29 @@ describe("perguntarPagamento", () => {
     expect(pergunta).toHaveBeenCalledWith(expect.objectContaining({ mensagem: expect.stringMatching(/diz que pagou/) }));
   });
 
+  // recebi-ao-finalizar-corte (Andre, 25/10): a pergunta aparece sempre que o pagamento segue
+  // pendente, com ou sem Asaas; com o nome do cliente quando se sabe.
+  it("mostra o nome do cliente e o valor; Confirmar = true, Nao recebi = false", async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: { status: "PENDING", amount: 31.9 } });
+    pergunta.mockResolvedValueOnce(true);
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Ana" })).resolves.toBe(true);
+    expect(pergunta).toHaveBeenCalledWith(
+      expect.objectContaining({ mensagem: "Ana · R$ 31,90. Se ainda não, fica pendente.", confirmar: "Confirmar", cancelar: "Não recebi" })
+    );
+    pergunta.mockResolvedValueOnce(false);
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Ana" })).resolves.toBe(false);
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it("'Nao recebi' diante do 'ja paguei' do cliente recusa o pagamento (volta a pendente)", async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: { status: "AWAITING_CONFIRMATION", amount: 45 } });
+    (api.post as jest.Mock).mockResolvedValue({});
+    pergunta.mockResolvedValueOnce(false);
+    await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Bia" })).resolves.toBe(false);
+    expect(api.post).toHaveBeenCalledWith("/attendances/a1/payment/refuse");
+    expect(pergunta).toHaveBeenCalledWith(expect.objectContaining({ mensagem: "Bia diz que pagou R$ 45,00. Confira no seu banco." }));
+  });
+
   it("sem deps, usa a caixa de confirmacao do app; sem valor, mostra R$ 0,00", async () => {
     (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING" } });
     mockConfirmar.mockResolvedValueOnce(false);
@@ -71,7 +94,7 @@ describe("a pergunta do pagamento segue o guia de texto", () => {
   const pergunta = jest.fn();
   const palavras = (texto: string) => texto.trim().split(/\s+/).length;
 
-  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Recebi · Ainda não", async () => {
+  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Confirmar · Não recebi", async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: { status: "PENDING", amount: 31.9 } });
     pergunta.mockResolvedValue(true);
     await perguntarPagamento("a1", { perguntar: pergunta });
@@ -79,8 +102,8 @@ describe("a pergunta do pagamento segue o guia de texto", () => {
     expect(texto).toEqual({
       titulo: "Recebeu o pagamento?",
       mensagem: "R$ 31,90. Se ainda não, fica pendente.",
-      confirmar: "Recebi",
-      cancelar: "Ainda não",
+      confirmar: "Confirmar",
+      cancelar: "Não recebi",
     });
     expect(texto.mensagem.length).toBeLessThanOrEqual(70);
     expect(palavras(texto.confirmar)).toBe(1);
@@ -160,7 +183,7 @@ describe("rotuloDoPagamento (adendo 62295f1: ao lado de qualquer status)", () =>
 // forma-de-recebimento (Backend 8b158e3): so registro, opcional.
 describe("forma de recebimento", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { perguntarForma, FORMAS_DE_RECEBIMENTO } = require("@lib/pagamento");
+  const { perguntarForma, FORMAS_DE_RECEBIMENTO, MOSTRAR_FORMA_NOTA, formasVisiveis } = require("@lib/pagamento");
 
   it("tem as quatro formas do Backend", () => {
     expect(FORMAS_DE_RECEBIMENTO.map((f: { valor: string }) => f.valor)).toEqual([
@@ -171,20 +194,27 @@ describe("forma de recebimento", () => {
     ]);
   });
 
-  it("devolve a forma escolhida; pular devolve undefined", async () => {
-    expect(await perguntarForma({ perguntar: async () => 1 })).toBe("CARTAO");
-    expect(await perguntarForma({ perguntar: async () => 3 })).toBe("NOTA");
-    expect(await perguntarForma({ perguntar: async () => 4 })).toBeUndefined();
+  // ocultar-forma-nota (Andre, 25/10): a Nota esta escondida (flag), sem apagar.
+  it("a Nota esta escondida da caixa, mas continua na lista do Backend", () => {
+    expect(MOSTRAR_FORMA_NOTA).toBe(false);
+    expect(formasVisiveis().map((f: { valor: string }) => f.valor)).toEqual(["PIX", "CARTAO", "DINHEIRO"]);
+    expect(FORMAS_DE_RECEBIMENTO.map((f: { valor: string }) => f.valor)).toContain("NOTA");
   });
 
-  it("a caixa tem as quatro formas e o Pular", async () => {
+  it("devolve a forma escolhida; pular devolve undefined", async () => {
+    expect(await perguntarForma({ perguntar: async () => 1 })).toBe("CARTAO");
+    expect(await perguntarForma({ perguntar: async () => 2 })).toBe("DINHEIRO");
+    expect(await perguntarForma({ perguntar: async () => 3 })).toBeUndefined();
+  });
+
+  it("a caixa tem Pix, Cartao e Dinheiro e o Pular (sem Nota)", async () => {
     let botoes: { texto: string }[] = [];
     await perguntarForma({
       perguntar: async (p: { botoes: { texto: string }[] }) => {
         botoes = p.botoes;
-        return 4;
+        return 3;
       },
     });
-    expect(botoes.map((b) => b.texto)).toEqual(["Pix", "Cartão", "Dinheiro", "Nota", "Pular"]);
+    expect(botoes.map((b) => b.texto)).toEqual(["Pix", "Cartão", "Dinheiro", "Pular"]);
   });
 });

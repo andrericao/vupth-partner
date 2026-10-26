@@ -17,7 +17,7 @@ export default function PixDoDonoScreen() {
       <View className="flex-1 pb-12 px-4">
         <ScreenHeader
           title="Chave Pix (alternativa)"
-          subtitle="Vale quando o profissional que atendeu não tem chave. Cada profissional cadastra a dele."
+          subtitle="Vale quando o profissional que atendeu não tem chave."
           onBack={() => router.navigate("/(owner)/menu" as any)}
         />
         <View className="mt-6">

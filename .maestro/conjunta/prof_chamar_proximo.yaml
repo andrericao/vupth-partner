@@ -18,7 +18,7 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/responder_pagamento.yaml
     env:
-      RESPOSTA: "Recebi"
+      RESPOSTA: "Confirmar"
       FIM: "Atendimento concluído e pago."
     label: "PJ10.03a · pix · Recebi, se perguntar"
 - extendedWaitUntil:

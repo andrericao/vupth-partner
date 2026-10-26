@@ -45,6 +45,83 @@ describe("PagamentosPendentes", () => {
     const onRecebi = jest.fn().mockResolvedValue(undefined);
     const { getByTestId } = render(<PagamentosPendentes itens={ITENS} onRecebi={onRecebi} />);
     fireEvent.press(getByTestId("recebi-a2"));
-    await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a2"));
+    await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a2", false));
+  });
+
+  // pagamento-pelo-asaas-no-partner (DEC-119).
+  // pagamento-ja-recebi (Andre, 24/10): o Recebi fica sempre visivel.
+  it("Asaas conectado no sandbox: o Recebi segue visivel, o app avisa que confirma sozinho, e a faixa de teste aparece", () => {
+    const { getByTestId } = render(
+      <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: true, mode: "SANDBOX" }} />
+    );
+    expect(getByTestId("recebi-a1")).toBeTruthy();
+    expect(getByTestId("recebi-a2")).toBeTruthy();
+    expect(getByTestId("pelo-app-a1")).toBeTruthy();
+    expect(getByTestId("pagamentos-faixa-teste")).toBeTruthy();
+  });
+
+  it("Asaas real: Recebi visivel e sem faixa de teste; desconectado: o Recebi de sempre e sem o aviso", () => {
+    const real = render(
+      <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: true, mode: "REAL" }} />
+    );
+    expect(real.getByTestId("recebi-a1")).toBeTruthy();
+    expect(real.queryByTestId("pagamentos-faixa-teste")).toBeNull();
+    real.unmount();
+    const fora = render(<PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} gateway={{ connected: false }} />);
+    expect(fora.getByTestId("recebi-a1")).toBeTruthy();
+    expect(fora.queryByTestId("pelo-app-a1")).toBeNull();
+  });
+
+  // relatorios-pendentes-clicaveis (Andre, 24/10): tocar no card abre o atendimento.
+  describe("tocar no card", () => {
+    it("abre a caixa com Confirmar recebimento e Recusar (ja paguei) e confirma sem perguntar de novo", async () => {
+      const abrir = jest.fn().mockResolvedValue(0);
+      const onRecebi = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = render(
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={jest.fn()} abrir={abrir} />
+      );
+      fireEvent.press(getByTestId("pagamento-a1"));
+      await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a1", true));
+      const pedido = abrir.mock.calls[0][0];
+      expect(pedido.titulo).toBe("Ana");
+      expect(pedido.botoes.map((b: { texto: string }) => b.texto)).toEqual(["Confirmar recebimento", "Recusar", "Fechar"]);
+    });
+
+    it("Recusar chama onRecusar", async () => {
+      const abrir = jest.fn().mockResolvedValue(1);
+      const onRecusar = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = render(
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} onRecusar={onRecusar} abrir={abrir} />
+      );
+      fireEvent.press(getByTestId("pagamento-a1"));
+      await waitFor(() => expect(onRecusar).toHaveBeenCalledWith("a1"));
+    });
+
+    it("pendente sem 'ja paguei': so Confirmar recebimento e Fechar (nao ha o que recusar)", async () => {
+      const abrir = jest.fn().mockResolvedValue(2);
+      const onRecusar = jest.fn();
+      const onRecebi = jest.fn();
+      const { getByTestId } = render(
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} />
+      );
+      fireEvent.press(getByTestId("pagamento-a2"));
+      await waitFor(() => expect(abrir).toHaveBeenCalled());
+      expect(abrir.mock.calls[0][0].botoes.map((b: { texto: string }) => b.texto)).toEqual(["Confirmar recebimento", "Fechar"]);
+      expect(onRecusar).not.toHaveBeenCalled();
+      expect(onRecebi).not.toHaveBeenCalled();
+    });
+
+    it("Fechar nao faz nada", async () => {
+      const abrir = jest.fn().mockResolvedValue(2);
+      const onRecebi = jest.fn();
+      const onRecusar = jest.fn();
+      const { getByTestId } = render(
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} />
+      );
+      fireEvent.press(getByTestId("pagamento-a1"));
+      await waitFor(() => expect(abrir).toHaveBeenCalled());
+      expect(onRecebi).not.toHaveBeenCalled();
+      expect(onRecusar).not.toHaveBeenCalled();
+    });
   });
 });

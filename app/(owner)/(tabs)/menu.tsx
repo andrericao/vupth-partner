@@ -1,3 +1,4 @@
+import { useState } from "react";
 
 import { LinksLegais } from "@components/LinksLegais";
 import { View, Text, Pressable, ScrollView } from "react-native";
@@ -16,10 +17,13 @@ import { hasAnyPending } from "@lib/completion";
 import { serviceTypeLabel } from "@lib/serviceTypes";
 import { Users, ClipboardList, ChartColumn, Store, User, LogOut, ChevronRight, ArrowLeftRight, Palette,
   Info, LifeBuoy, QrCode, Ticket, Check, Plus,
+  Bug,
 } from "lucide-react-native";
 import type { ComponentType } from "react";
 import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
+import { sentryLigado } from "@lib/sentry";
+import { ReportarProblema } from "@components/ReportarProblema";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { podeAdicionarLoja } from "@lib/multiLoja";
 import { useTema } from "@hooks/useTema";
@@ -64,7 +68,13 @@ function MenuItem({
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
             <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{label}</Text>
-            {dot && <PendingDot />}
+            {/* dot-ao-lado-do-nome-em-menu-empilhado (Andre, 24/10): em item com titulo e subtitulo
+                o dot fica ao lado do titulo, nunca solto no canto. */}
+            {dot && (
+              <View testID={`menu-dot-${label.toLowerCase().replace(/\s+/g, "-")}`}>
+                <PendingDot />
+              </View>
+            )}
           </View>
           {hint && (
             <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">{hint}</Text>
@@ -97,6 +107,7 @@ export default function OwnerMenuScreen() {
   const { cores } = useTema();
   // Tocar na aba JA ATIVA volta ao topo (Andre, 18/09).
   const rolagemRef = useVoltarAoTopo();
+  const [reportando, setReportando] = useState(false);
   const pilula = usePilulaTopo(rolagemRef);
 
   const establishment = useEstablishmentStore((s) => s.establishment);
@@ -271,7 +282,7 @@ export default function OwnerMenuScreen() {
                 <MenuItem
                   icon={Ticket}
                   label="Promoções"
-                  hint="usar um cupom"
+                  hint="ativar um cupom"
                   onPress={() => router.push("/(owner)/promocoes?from=owner" as any)}
                 />
               )}
@@ -322,8 +333,18 @@ export default function OwnerMenuScreen() {
                 label="Suporte"
                 hint="dúvidas e passo a passo do app"
                 onPress={() => abrirSuporte("dono")}
-                last
+                last={!sentryLigado()}
               />
+              {/* sentry-feedback-do-usuario: so com o Sentry ligado no binario. */}
+              {sentryLigado() && (
+                <MenuItem
+                  icon={Bug}
+                  label="Reportar problema"
+                  hint="conte o que deu errado"
+                  onPress={() => setReportando(true)}
+                  last
+                />
+              )}
             </Grupo>
   
             {/* Sair da conta fica solto e em vermelho: e a unica acao aqui que
@@ -331,15 +352,16 @@ export default function OwnerMenuScreen() {
             <Pressable
               onPress={handleLogout}
               accessibilityRole="button"
-              className="py-2 self-start active:opacity-70"
+              className="py-2 self-center active:opacity-70"
             >
-              <Text className="font-body text-sm font-semibold text-vupth-danger">Sair da conta</Text>
+              <Text className="font-body text-sm font-semibold text-vupth-danger text-center">Sair da conta</Text>
             </Pressable>
             <LinksLegais className="mt-2" />
           </View>
         </View>
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
+      <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
     </View>
   );
 }

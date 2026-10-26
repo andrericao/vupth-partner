@@ -20,9 +20,9 @@ import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
 import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
-import { parseApiTime, isoDate, hhmmFromIso } from "@lib/time";
+import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
-import { mensagemDoAtraso, mensagemDaFalta, mensagemDaFaltaCedo, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
+import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
 import { ratingLabel } from "@lib/rating";
 import {
   mealSignal, hhmmToMinutes, MEAL_NUDGE_WINDOW_MIN,
@@ -37,6 +37,12 @@ import { Titulo } from "@components/Titulo";
 import { StatusPill } from "@components/StatusPill";
 import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
+import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
+import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
+import { AvisoDeDivida } from "@components/AvisoDeDivida";
+import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
+import { useQuery } from "@tanstack/react-query";
+import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
@@ -51,6 +57,7 @@ import { CompartilharNoTopo } from "@components/CompartilharNoTopo";
 import { linkDoProfissional, mensagemDeDivulgacao } from "@lib/linkPublico";
 import * as SecureStore from "expo-secure-store";
 import { useTema } from "@hooks/useTema";
+import { formatarReais } from "@lib/dinheiro";
 
 // Card "ATENDENDO AGORA" (design Andre 2026-07-18, mockup
 // design/queue-layout-combined.html). Fica no TOPO da tela e concentra as acoes
@@ -134,7 +141,7 @@ function ServingCard({
               app ficou branco no meio de um atendimento (08/09) — a rede local
               alimentou o card com o payload do `/start`, que nao trazia
               `totalValue`, e `undefined.toFixed` levou o render junto. */}
-          {formatServices(attendance.services ?? [])} · R$ {(attendance.totalValue ?? 0).toFixed(2)}
+          {formatServices(attendance.services ?? [])} · {formatarReais((attendance.totalValue ?? 0))}
         </Text>
       </View>
 
@@ -202,7 +209,7 @@ function QueueRow({
   const { cores } = useTema();
   const isLate = attendance.status === "LATE";
   const services = formatServices(attendance.services ?? []);
-  const price = `R$ ${(attendance.totalValue ?? 0).toFixed(2)}`;
+  const price = `${formatarReais((attendance.totalValue ?? 0))}`;
 
   return (
     <Pressable
@@ -291,7 +298,7 @@ export default function ProfessionalQueueScreen() {
   const { data, isLoading, refetch } = useQueuePolling(establishmentId ?? null);
   const {
     startAttendance, finishAttendance, pauseAttendance, resumeAttendance,
-    markLate, markNoShow, removeFromQueue, promoteAttendance, atendimentoIniciado,
+    markLate, removeFromQueue, promoteAttendance, atendimentoIniciado,
   } = useAttendanceStore();
 
   const intervals = useIntervalStore((s) => s.intervals);
@@ -421,7 +428,7 @@ export default function ProfessionalQueueScreen() {
           titulo: tituloDaRefeicao(due.description),
           mensagem:
             count > 0
-              ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
+              ? `${count} na fila. Iniciar adia o próximo em ~${due.durationMinutes}min.`
               : `${due.durationMinutes} min. A fila espera.`,
           confirmar: "Iniciar",
           cancelar: "Agora não",
@@ -433,7 +440,7 @@ export default function ProfessionalQueueScreen() {
       Alert.alert(
         tituloDaRefeicao(due.description),
         count > 0
-          ? `Você tem ${count} cliente(s) na fila. Iniciar agora adia o próximo em ~${due.durationMinutes}min.`
+          ? `${count} na fila. Iniciar adia o próximo em ~${due.durationMinutes}min.`
           : `${due.durationMinutes} min. A fila espera.`,
         [
           { text: "Agora não", style: "cancel" },
@@ -482,7 +489,7 @@ export default function ProfessionalQueueScreen() {
         await updateMyStatus("WORKING");
         await avisar({
           titulo: "Você voltou para a fila",
-          mensagem: "Abrir a fila marca você como Trabalhando — não dá para receber cliente estando fora.",
+          mensagem: "Abrir a fila marca você como Trabalhando.",
         });
       }
       await setAcceptingNew(valor);
@@ -558,7 +565,7 @@ export default function ProfessionalQueueScreen() {
         await avisar({
           titulo: "Fila fechada junto",
           mensagem:
-            "Como você saiu, a fila parou de aceitar novos clientes — ninguém entra numa fila sem quem atenda. Quem já estava esperando continua na lista.",
+            "Sem quem atenda, a fila para de aceitar. Quem espera continua.",
         });
       }
       const fresh = await refetch();
@@ -618,7 +625,9 @@ export default function ProfessionalQueueScreen() {
   // A pergunta so aparece quando ha o que receber (ja pago ou sem pagamento: nada).
   const finalizarComPagamento = async (attendanceId: string) => {
     await finishAttendance(attendanceId);
-    const recebido = await perguntarPagamento(attendanceId);
+    const recebido = await perguntarPagamento(attendanceId, {
+      cliente: currentAttendance?.id === attendanceId ? currentAttendance.clientName : null,
+    });
     if (recebido === undefined) return;
     if (recebido) {
       const forma = await perguntarForma();
@@ -687,7 +696,7 @@ export default function ProfessionalQueueScreen() {
     }
     const msg = runningName
       ? `Isso finaliza o atendimento de ${runningName} e ${advance ? `atende ${att.clientName} na frente da fila` : `inicia ${att.clientName}`}. Continuar?`
-      : `${att.clientName} será atendido agora, na frente da fila. Tem certeza?`;
+      : `${att.clientName} será atendido agora, na frente da fila.`;
     const ok = await confirmar({
       titulo: advance ? "Adiantar cliente" : "Iniciar atendimento",
       mensagem: msg,
@@ -707,29 +716,6 @@ export default function ProfessionalQueueScreen() {
     if (ok) handleAction(() => markLate(att.id));
   };
 
-  // "Nao compareceu" (botao-nao-compareceu, DEC-83): a falta, que agora vale como atraso (DEC-86). Antes dos 10 min o
-  // Backend recusa (409 NO_SHOW_TOO_EARLY) e diz a hora em `available_at`.
-  const confirmNoShow = async (att: AttendanceInQueue) => {
-    const ok = await confirmar({
-      titulo: "Cliente não compareceu",
-      mensagem: mensagemDaFalta(att.clientName),
-      confirmar: "Não compareceu",
-      destrutivo: false,
-    });
-    if (!ok) return;
-    try {
-      await markNoShow(att.id);
-      await refetch();
-    } catch (error: any) {
-      const data = error?.response?.data;
-      if (data?.code === "NO_SHOW_TOO_EARLY") {
-        Alert.alert("Ainda é cedo", mensagemDaFaltaCedo(hhmmFromIso(data.available_at)));
-      } else {
-        Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar ação."));
-      }
-    }
-  };
-
   // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
   // remover a qualquer momento, inclusive no 1o atraso.
   const confirmRemove = async (att: AttendanceInQueue) => {
@@ -747,7 +733,7 @@ export default function ProfessionalQueueScreen() {
   const confirmPromote = async (att: AttendanceInQueue) => {
     const ok = await confirmar({
       titulo: "Promover ao topo",
-      mensagem: `${att.clientName} vai para o 1o lugar da fila, sem iniciar o atendimento. Continuar?`,
+      mensagem: `${att.clientName} sobe para o 1º lugar, sem iniciar o atendimento.`,
       confirmar: "Promover",
     });
     if (ok) handleAction(() => promoteAttendance(att.id));
@@ -772,12 +758,26 @@ export default function ProfessionalQueueScreen() {
   // instante que filtrou os expirados. Ver resumoDeSolicitacoes.
   const resumoSolicitacoes = resumoDeSolicitacoes(pedidosPendentes, agoraDosPedidos);
 
+  // menu-da-fila-nao-chegou-tolerancia: so o 1o da vez tem tolerancia; o Backend diz quanto
+  // falta. Reconsulta enquanto o menu esta aberto.
+  const { data: noShow } = useQuery({
+    queryKey: ["no-show-status", menuTarget?.id],
+    queryFn: () => buscarNoShowStatus(menuTarget!.id),
+    enabled: !!menuTarget && menuIsFirst && menuTarget.status !== "IN_PROGRESS" && menuTarget.status !== "PAUSED",
+    refetchInterval: 15_000,
+    retry: false,
+  });
+  const naTolerancia = dentroDaTolerancia(noShow);
+  // Sozinho na fila e dentro da tolerancia: "Nao chegou" desativado. Com outros: segue
+  // valendo, e a faixa mostra quanto falta.
+  const naoChegouDesativado = naTolerancia && waitingList.length <= 1;
+  const faixaDeTolerancia = naTolerancia && waitingList.length > 1 ? faixaDaTolerancia(noShow) : null;
+
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
     if (action === "iniciar") startClient(att, false);
     else if (action === "adiantar") startClient(att, true);
     else if (action === "promover") confirmPromote(att);
     else if (action === "nao-chegou") confirmLate(att);
-    else if (action === "nao-compareceu") confirmNoShow(att);
     else if (action === "remover") confirmRemove(att);
     // As tres de quem JA esta na cadeira. Elas nao existiam: o menu era por
     // posicao, e quem esta sendo atendido nao tem posicao na espera.
@@ -813,7 +813,7 @@ export default function ProfessionalQueueScreen() {
         <View className="mt-4">
           <BlocoBloqueio
             titulo="Você ainda não tem fila"
-            texto="Para receber clientes você precisa estar vinculado a um estabelecimento. O dono confirma a solicitação e você passa a aparecer na fila."
+            texto="Vincule-se a uma loja. O dono confirma e você entra na fila."
             acao="Buscar estabelecimento"
             rota="/(professional)/find-establishment"
           />
@@ -921,6 +921,11 @@ export default function ProfessionalQueueScreen() {
             }
           />
   
+          <AvisoCienciaDePreco />
+          <AvisoDeDivida />
+          <AvisoDeAgenda />
+          <CarrosselDeCampanhas />
+
           {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (
             <View className="flex-row items-center gap-1.5 mt-1">
               <Star size={13} color={cores.textSecondary} fill={cores.textSecondary} />
@@ -984,7 +989,7 @@ export default function ProfessionalQueueScreen() {
             <View className="mt-4">
               <BlocoBloqueio
                 titulo="Você ainda não aparece para os clientes"
-                texto="Você está vinculado, mas precisa de pelo menos um serviço cadastrado para entrar na fila e receber clientes."
+                texto="Cadastre um serviço para aparecer na fila."
                 acao="Adicionar serviço"
                 rota="/(professional)/my-services?from=queue"
               />
@@ -1180,26 +1185,41 @@ export default function ProfessionalQueueScreen() {
                 <Text className="font-heading text-vupth-textSecondary mb-1">
                   {menuTarget.clientName}
                 </Text>
-                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => (
-                  <Pressable
-                    key={action}
-                    accessibilityRole="button"
-                    onPress={() => {
-                      const t = menuTarget;
-                      setMenuTarget(null);
-                      if (t) runMenuAction(action, t);
-                    }}
-                    className="py-3"
-                  >
-                    <Text
-                      className={`font-body text-base ${
-                        action === "remover" ? "text-vupth-danger" : "text-vupth-textPrimary"
-                      }`}
+                {queueMenuActions(menuIsFirst, menuTarget.status).map((action) => {
+                  const desativado = action === "nao-chegou" && naoChegouDesativado;
+                  return (
+                    <Pressable
+                      key={action}
+                      testID={`menu-acao-${action}`}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: desativado }}
+                      onPress={() => {
+                        if (desativado) {
+                          Alert.alert("Tolerância", avisoDaTolerancia(noShow));
+                          return;
+                        }
+                        const t = menuTarget;
+                        setMenuTarget(null);
+                        if (t) runMenuAction(action, t);
+                      }}
+                      className={`py-3 ${desativado ? "opacity-40" : ""}`}
                     >
-                      {QUEUE_ACTION_LABEL[action]}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        className={`font-body text-base ${
+                          action === "remover" ? "text-vupth-danger" : "text-vupth-textPrimary"
+                        }`}
+                      >
+                        {QUEUE_ACTION_LABEL[action]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+                {/* Mesmo tamanho dos itens do menu (Andre, 24/10). */}
+                {faixaDeTolerancia && (
+                  <Text testID="faixa-de-tolerancia" className="font-body text-base text-vupth-textSecondary py-3">
+                    {faixaDeTolerancia}
+                  </Text>
+                )}
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => setMenuTarget(null)}

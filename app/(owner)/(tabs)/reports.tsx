@@ -12,6 +12,7 @@ import { StatCard } from "@components/brand/StatCard";
 import { avisoSemSplit } from "@lib/split";
 import { RelatorioDasLojas } from "@components/RelatorioDasLojas";
 import { NaoRealizadosCard } from "@components/NaoRealizadosCard";
+import { formatarReais } from "@lib/dinheiro";
 
 type Period = Periodo;
 
@@ -135,7 +136,7 @@ export default function OwnerReportsScreen() {
               <StatCard
                 flex={1}
                 label="Receita"
-                value={`R$ ${Number(report?.totalRevenue ?? 0).toFixed(2)}`}
+                value={`${formatarReais(Number(report?.totalRevenue ?? 0))}`}
                 hero
               />
               <StatCard flex={1} label="Atendimentos" value={String(report?.totalAttendances ?? 0)} />
@@ -190,13 +191,13 @@ export default function OwnerReportsScreen() {
                         </View>
                         <View className="items-end">
                           <Text className="font-heading text-vupth-textPrimary">
-                            R$ {r.revenue.toFixed(2)}
+                            {formatarReais(r.revenue)}
                           </Text>
                           {/* O que o profissional recebeu, sem as Taxas Vupth
                               — a base da comissao. Rotulo a validar com o Design. */}
                           {r.netRevenue != null && (
                             <Text className="font-body text-xs text-vupth-textSecondary">
-                              recebe R$ {r.netRevenue.toFixed(2)}
+                              recebe {formatarReais(r.netRevenue)}
                             </Text>
                           )}
                         </View>
