@@ -1,0 +1,4 @@
+Rodada 2026-10-26_091730 · TAG 091731 · commit esperado 6bf8bea
+❌ 00_atualizacao — parou em ?
+   print: .maestro/logs/2026-10-26_091730/FALHA_00_atualizacao.png
+   (as etapas nao rodaram: com a versao errada o teste nao serve)
