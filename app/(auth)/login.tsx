@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { NwButton } from "@components/nw/Button";
 import { ChevronLeft, Mail, Lock } from "lucide-react-native";
 import { NwInput } from "@components/nw/Input";
+import { LinksLegais } from "@components/LinksLegais";
 import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
@@ -158,6 +159,11 @@ export default function LoginScreen() {
                   Criar conta
                 </Text>
               </Pressable>
+            </View>
+            {/* termos-e-politica-nas-telas-de-entrada (Andre, 28/10): os dois links num
+                bloco proprio, separado do formulario e dos botoes. */}
+            <View className="mt-4 pt-4 border-t border-vupth-border" testID="bloco-legal">
+              <LinksLegais />
             </View>
             {/* O commit sem login, tambem aqui: o Andre confere o OTA no
                 aparelho sem entrar (commit-visivel, 03/10). */}

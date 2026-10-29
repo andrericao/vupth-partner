@@ -10,6 +10,7 @@ import { getPostLoginRoute } from "@lib/routing";
 import { getApiErrorMessage } from "@lib/api";
 import { segundosDeEspera, textoDaEspera } from "@lib/erroDeAcesso";
 import { validatePassword, getPasswordRules, SENHA_MAX } from "@lib/passwordValidation";
+import { LinksLegais } from "@components/LinksLegais";
 import { PasswordRules } from "@components/PasswordRules";
 import { useTema } from "@hooks/useTema";
 
@@ -182,6 +183,11 @@ export default function RegisterScreen() {
               >
                 <Text className="font-heading text-f13 text-vupth-textPrimary">Entrar</Text>
               </Pressable>
+            </View>
+            {/* termos-e-politica-nas-telas-de-entrada (Andre, 28/10): os dois links num
+                bloco proprio, separado do formulario e dos botoes. */}
+            <View className="mt-4 pt-4 border-t border-vupth-border" testID="bloco-legal">
+              <LinksLegais />
             </View>
           </View>
         </View>
