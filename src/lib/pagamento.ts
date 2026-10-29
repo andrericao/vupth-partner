@@ -35,7 +35,7 @@ export async function perguntarPagamento(
   if (status !== "PENDING" && status !== "AWAITING_CONFIRMATION") return undefined;
   // recebi-ao-finalizar-corte (Andre, 25/10): logo apos o Finalizar, com o pagamento ainda
   // pendente, o profissional sempre ve "Recebeu o pagamento?" — com ou sem Asaas conectado
-  // (o Asaas e o "Confirmar" quitam o mesmo atendimento; quem chega primeiro vence).
+  // (o Asaas e o "Recebi" quitam o mesmo atendimento; quem chega primeiro vence).
   const quem = deps.cliente ? `${deps.cliente} · ` : "";
   const recebeu = await perguntar({
     titulo: "Recebeu o pagamento?",
@@ -43,7 +43,7 @@ export async function perguntarPagamento(
       status === "AWAITING_CONFIRMATION"
         ? `${deps.cliente ?? "O cliente"} diz que pagou ${reais(valor)}. Confira no seu banco.`
         : `${quem}${reais(valor)}. Se ainda não, fica pendente.`,
-    confirmar: "Confirmar",
+    confirmar: "Recebi",
     cancelar: "Não recebi",
   });
   // "Não recebi" diante de um "já paguei" do cliente = Recusar (volta a pendente e o cliente e avisado).
@@ -51,14 +51,6 @@ export async function perguntarPagamento(
     await recusarRecebimento(attendanceId).catch(() => {});
   }
   return recebeu;
-}
-
-/** A mensagem do fim, na tela do profissional (o backend nao manda push a quem tocou). */
-export function mensagemDoFim(paymentStatus: string | null | undefined): string | null {
-  if (paymentStatus === "PAID") return "Atendimento concluído e pago.";
-  if (paymentStatus === "PENDING" || paymentStatus === "AWAITING_CONFIRMATION")
-    return "Concluído. Pagamento pendente.";
-  return null;
 }
 
 // ── Pendentes do profissional (adendo 1a0616c): os finalizados com PENDING e

@@ -19,7 +19,7 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
-import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
+import { confirmarRecebimento, perguntarPagamento, perguntarForma } from "@lib/pagamento";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -641,8 +641,6 @@ export default function ProfessionalQueueScreen() {
         return;
       }
     }
-    const mensagem = mensagemDoFim(recebido ? "PAID" : "PENDING");
-    if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
   };
 
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
