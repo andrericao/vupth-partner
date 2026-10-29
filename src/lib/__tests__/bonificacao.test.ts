@@ -2,6 +2,7 @@ import { api } from "@lib/api";
 import {
   FLAG_COM_DESCONTO,
   buscarCalculo,
+  buscarCalculoComPrazo,
   linhasDoCalculo,
   perguntarValorRecebido,
   saldosDoRelatorio,
@@ -121,5 +122,19 @@ describe("saldosDoRelatorio", () => {
   });
   it("sem net_total: calcula receber - pagar", () => {
     expect(saldosDoRelatorio({ to_receive_total: 10, to_pay_total: 4 })?.saldo).toBe(6);
+  });
+});
+
+describe("buscarCalculoComPrazo", () => {
+  afterEach(() => jest.useRealTimers());
+  it("rede rapida: devolve o calculo", async () => {
+    expect(await buscarCalculoComPrazo("a1", 2000, async () => COM_DESCONTO)).toEqual(COM_DESCONTO);
+  });
+  it("rede lenta: passou do prazo, segue sem o calculo (nao segura a tela)", async () => {
+    jest.useFakeTimers();
+    const lenta = () => new Promise<Calculo | null>(() => {});
+    const p = buscarCalculoComPrazo("a1", 2000, lenta);
+    await jest.advanceTimersByTimeAsync(2000);
+    expect(await p).toBeNull();
   });
 });

@@ -69,6 +69,27 @@ export async function buscarCalculo(attendanceId: string): Promise<Calculo | nul
 }
 
 /**
+ * O calculo, mas sem segurar a tela: passou de `prazoMs` (rede lenta, Render frio), segue sem ele.
+ * A caixa do card abre na hora; o calculo e um extra, nao um pedagio (CI 29/10: o teste do card
+ * esperava a rede e estourava o 1 s do waitFor).
+ */
+export async function buscarCalculoComPrazo(
+  attendanceId: string,
+  prazoMs = 2000,
+  buscar: typeof buscarCalculo = buscarCalculo
+): Promise<Calculo | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limite = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), prazoMs);
+  });
+  try {
+    return await Promise.race([buscar(attendanceId), limite]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/**
  * Depois do "Recebi", so com desconto: quanto o cliente pagou? O padrao (valor com desconto) vai sem
  * `received_amount`; se pagou o cheio ao profissional, informa o cheio (corte + multa) e o saldo muda.
  * `undefined` = padrao (ou sem desconto, ou falha ao ler: o fluxo segue como era).

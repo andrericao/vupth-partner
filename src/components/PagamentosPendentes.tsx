@@ -4,7 +4,7 @@ import { abrirDialogo } from "@store/dialogo.store";
 import { NwButton } from "@components/nw/Button";
 import { PendingDot } from "@components/PendingDot";
 import { formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@lib/pagamento";
-import { buscarCalculo, textoDoCalculo } from "@lib/bonificacao";
+import { buscarCalculoComPrazo, textoDoCalculo, type Calculo } from "@lib/bonificacao";
 import { avisoDeTeste, pagaPeloApp, type Gateway } from "@lib/gateway";
 
 /**
@@ -19,6 +19,7 @@ export function PagamentosPendentes({
   onRecusar,
   gateway,
   abrir = abrirDialogo,
+  buscarCalculo = buscarCalculoComPrazo,
 }: {
   itens: PagamentoPendente[];
   /** `jaConfirmou`: o profissional ja confirmou na caixa do card; nao pergunta de novo. */
@@ -26,6 +27,8 @@ export function PagamentosPendentes({
   /** Recusar o "ja paguei" do cliente (so de AWAITING_CONFIRMATION). */
   onRecusar?: (attendanceId: string) => Promise<void>;
   abrir?: typeof abrirDialogo;
+  /** O calculo do desconto (DEC-127) do atendimento; null = sem desconto. Injetavel nos testes. */
+  buscarCalculo?: (attendanceId: string) => Promise<Calculo | null>;
   /** DEC-119: com o Asaas conectado, o webhook quita sozinho, mas o "Recebi" segue visivel. */
   gateway?: Gateway | null;
 }) {

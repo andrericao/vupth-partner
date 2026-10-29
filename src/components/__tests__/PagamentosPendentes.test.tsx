@@ -20,6 +20,10 @@ const ITENS = [
   },
 ];
 
+// Sem rede no teste: o calculo do desconto (DEC-127) vem injetado. Antes o card chamava a API de
+// verdade e o CI, mais lento que o PC, estourava o waitFor (29/10).
+const semCalculo = async () => null;
+
 describe("PagamentosPendentes", () => {
   it("sem pendencia, nao aparece", () => {
     const { queryByTestId } = render(<PagamentosPendentes itens={[]} onRecebi={jest.fn()} />);
@@ -78,7 +82,7 @@ describe("PagamentosPendentes", () => {
       const abrir = jest.fn().mockResolvedValue(0);
       const onRecebi = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={jest.fn()} abrir={abrir} />
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={jest.fn()} abrir={abrir} buscarCalculo={semCalculo} />
       );
       fireEvent.press(getByTestId("pagamento-a1"));
       await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a1", true));
@@ -91,7 +95,7 @@ describe("PagamentosPendentes", () => {
       const abrir = jest.fn().mockResolvedValue(1);
       const onRecusar = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} onRecusar={onRecusar} abrir={abrir} />
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} />
       );
       fireEvent.press(getByTestId("pagamento-a1"));
       await waitFor(() => expect(onRecusar).toHaveBeenCalledWith("a1"));
@@ -102,7 +106,7 @@ describe("PagamentosPendentes", () => {
       const onRecusar = jest.fn();
       const onRecebi = jest.fn();
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} />
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} />
       );
       fireEvent.press(getByTestId("pagamento-a2"));
       await waitFor(() => expect(abrir).toHaveBeenCalled());
@@ -116,12 +120,44 @@ describe("PagamentosPendentes", () => {
       const onRecebi = jest.fn();
       const onRecusar = jest.fn();
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} />
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} />
       );
       fireEvent.press(getByTestId("pagamento-a1"));
       await waitFor(() => expect(abrir).toHaveBeenCalled());
       expect(onRecebi).not.toHaveBeenCalled();
       expect(onRecusar).not.toHaveBeenCalled();
+    });
+
+    it("com desconto: a caixa do card traz a flag e o calculo (DEC-127)", async () => {
+      const abrir = jest.fn().mockResolvedValue(2);
+      const calculo = {
+        discounted: true,
+        list_price: 32.9,
+        discount: 10,
+        penalties: 0,
+        client_pays: 22.9,
+        pro_receives: 30,
+        app_pays: 7.1,
+      };
+      const { getByTestId } = render(
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} abrir={abrir} buscarCalculo={async () => calculo} />
+      );
+      fireEvent.press(getByTestId("pagamento-a2"));
+      await waitFor(() => expect(abrir).toHaveBeenCalled());
+      const mensagem: string = abrir.mock.calls[0][0].mensagem;
+      expect(mensagem).toContain("PAGAMENTO COM DESCONTO");
+      expect(mensagem).toContain("Valor do corte: R$ 32,90");
+      expect(mensagem).toContain("O app cobre: R$ 7,10");
+    });
+
+    it("sem desconto: a mensagem fica como era", async () => {
+      const abrir = jest.fn().mockResolvedValue(2);
+      const { getByTestId } = render(
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} abrir={abrir} buscarCalculo={semCalculo} />
+      );
+      fireEvent.press(getByTestId("pagamento-a2"));
+      await waitFor(() => expect(abrir).toHaveBeenCalled());
+      expect(abrir.mock.calls[0][0].mensagem).toBe("R$ 31,90 · Aguardando o cliente efetuar o pagamento");
     });
   });
 });
