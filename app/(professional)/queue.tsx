@@ -39,7 +39,6 @@ import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
-import { AvisoDeDivida } from "@components/AvisoDeDivida";
 import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
 import { useQuery } from "@tanstack/react-query";
 import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
@@ -920,7 +919,6 @@ export default function ProfessionalQueueScreen() {
           />
   
           <AvisoCienciaDePreco />
-          <AvisoDeDivida />
           <AvisoDeAgenda />
           <CarrosselDeCampanhas />
 

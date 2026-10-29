@@ -211,6 +211,11 @@ appId: ${APP_ID}
 # pagamento-pix, fatia 3 (Andre, 10/10): o encaixe ficou "Ainda nao" (07.17a).
 # Em Relatorios ele aparece em Pagamentos pendentes; "Recebi" confirma e ele sai.
 # O botao diz de quem e ("Recebi de <cliente>"): o nome tambem esta no historico.
+# dividas-e-pendentes-no-relatorio (Andre, 29/10): Pagamentos pendentes e Dividas viraram
+# abas no topo do Relatorios; o pendente esta na aba Pendentes.
+- tapOn:
+    id: "aba-relatorio-pendentes"
+    label: "07.23a0 · pix · abre a aba Pendentes"
 - scrollUntilVisible:
     element: "Recebi de ${output.CLIENTE_ENCAIXE}"
     direction: DOWN
@@ -230,6 +235,17 @@ appId: ${APP_ID}
     notVisible: "Recebi de ${output.CLIENTE_ENCAIXE}"
     timeout: 20000
     label: "07.23d · pix · o encaixe saiu dos pendentes"
+- tapOn:
+    id: "aba-relatorio-historico"
+- tapOn:
+    id: "aba-relatorio-dividas"
+    label: "07.23e0 · abre a aba Dívidas"
+- extendedWaitUntil:
+    visible:
+      id: "dividas-do-relatorio"
+    timeout: 20000
+    label: "07.23e1 · a aba Dívidas abre (lista ou 'Nenhuma dívida')"
+    label: "07.23e · volta para a aba Histórico"
 
 # conferencia-por-print (Andre, 10/10): expediente-no-card — Semana e Mes mostram
 # o total trabalhado.
