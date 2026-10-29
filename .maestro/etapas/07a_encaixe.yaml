@@ -169,7 +169,6 @@ appId: ${APP_ID}
     file: ../apoio/responder_pagamento.yaml
     env:
       RESPOSTA: "Não recebi"
-      FIM: "Concluído. Pagamento pendente."
     label: "07.17a · pix · Ainda nao: fica aguardando o pagamento"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE_ENCAIXE}

@@ -1,8 +1,10 @@
 # pagamento-pix (adendos 1a0616c e 62295f1): no Finalizar (ou no Iniciar proximo
 # com alguem na cadeira) o app pergunta "Recebeu o pagamento?" quando o
-# pagamento esta pendente. env: RESPOSTA ("Confirmar" | "Não recebi"),
-# FIM (o texto que a mensagem do fim deve trazer). Sem a pergunta (ja pago),
-# segue sem tocar em nada.
+# pagamento esta pendente. env: RESPOSTA ("Recebi" | "Não recebi"; "Confirmar", o
+# nome antigo do botao, vale como "Recebi" — confirmar-vira-recebi, 29/10). FIM nao
+# e mais usado: o popup "Atendimento concluido e pago" saiu (tirar-popup-concluido-e-pago),
+# entao o fim da resposta e a pergunta sumir. Sem a pergunta (ja pago), segue sem
+# tocar em nada.
 appId: ${APP_ID}
 ---
 - extendedWaitUntil:
@@ -13,12 +15,11 @@ appId: ${APP_ID}
     when:
       visible: "Recebeu o pagamento?"
     commands:
-      - tapOn: ${RESPOSTA}
+      - tapOn: "${RESPOSTA == 'Confirmar' ? 'Recebi' : RESPOSTA}"
       - runFlow: pular_forma.yaml
       - extendedWaitUntil:
-          visible: ${FIM}
+          notVisible: "Recebeu o pagamento?"
           timeout: 20000
-      - runFlow: fechar_aviso.yaml
 # pedido-de-feedback (PAR-13): depois do finalizar vem a caixa "Ajude a melhorar
 # o app" (no maximo a cada 30 dias). Dispensa, para nao cobrir a fila.
 - extendedWaitUntil:

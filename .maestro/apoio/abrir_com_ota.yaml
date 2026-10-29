@@ -51,5 +51,12 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible: "Como você vai usar o Vupth?"
           timeout: 120000
+# maestro-trava-na-atualizacao: o repeat acima acaba sem erro mesmo sem o commit na
+# tela (OTA que nao chegou). Aqui reprova, com o nome do problema.
+- extendedWaitUntil:
+    visible:
+      id: "app-commit"
+    timeout: 20000
+    label: "reprova se o OTA nao chegou (sem commit no rodape da entrada)"
 - runFlow:
     file: fechar_cortina.yaml
