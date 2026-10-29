@@ -1,5 +1,5 @@
 import { render, fireEvent, screen } from "@testing-library/react-native";
-import { EnquadrarFoto, recorteDoVisor } from "../EnquadrarFoto";
+import { EnquadrarFoto, recorteDoVisor, toquesAtivos } from "../EnquadrarFoto";
 
 jest.mock("react-native-safe-area-context", () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
 
@@ -180,5 +180,56 @@ describe("EnquadrarFoto: pinca", () => {
     });
     fireEvent.press(screen.getByTestId("foto-perfil-usar"));
     expect(onUsar).toHaveBeenLastCalledWith(expect.objectContaining({ width: 400, height: 400 }));
+  });
+});
+
+describe("toquesAtivos", () => {
+  const dedo = (x: number) => ({ pageX: x, pageY: 0 });
+  it("usa o nativeEvent.touches quando ha dois", () => {
+    expect(toquesAtivos({ nativeEvent: { touches: [dedo(1), dedo(2)] } })).toHaveLength(2);
+  });
+  it("com um so no nativeEvent, le os ativos do historico do PanResponder", () => {
+    const bank = [
+      { touchActive: true, currentPageX: 10, currentPageY: 0 },
+      { touchActive: true, currentPageX: 50, currentPageY: 0 },
+      { touchActive: false, currentPageX: 99, currentPageY: 0 },
+    ];
+    expect(toquesAtivos({ nativeEvent: { touches: [dedo(10)] }, touchHistory: { touchBank: bank } })).toEqual([dedo(10), dedo(50)]);
+  });
+  it("sem dois dedos em lugar nenhum: devolve o que tem", () => {
+    expect(toquesAtivos({ nativeEvent: { touches: [dedo(1)] } })).toHaveLength(1);
+    expect(toquesAtivos({})).toEqual([]);
+  });
+});
+
+describe("EnquadrarFoto: o zoom nao pula entre quadros", () => {
+  const foto = { uri: "file:///f.jpg", width: 800, height: 800 };
+  const hist = (n: number, ts = 1) => ({
+    numberActiveTouches: n,
+    indexOfSingleActiveTouch: 0,
+    mostRecentTimeStamp: ts,
+    touchBank: Array.from({ length: n }, () => ({
+      touchActive: true, startPageX: 0, startPageY: 0, startTimeStamp: 0,
+      currentPageX: 0, currentPageY: 0, currentTimeStamp: ts, previousPageX: 0, previousPageY: 0, previousTimeStamp: 0,
+    })),
+  });
+  let quadro = 0;
+  const mover = (visor: any, abertura: number) => {
+    quadro += 1;
+    const t = [{ pageX: 200 - abertura / 2, pageY: 100 }, { pageX: 200 + abertura / 2, pageY: 100 }];
+    fireEvent(visor, "responderMove", { nativeEvent: { touches: t, changedTouches: t }, touchHistory: hist(2, quadro) });
+  };
+
+  it("pinca em varios quadros: o recorte fica centrado no mesmo ponto", () => {
+    const onUsar = jest.fn();
+    render(<EnquadrarFoto foto={foto} onUsar={onUsar} onCancelar={jest.fn()} testID="f" />);
+    const visor = screen.getByTestId("f-visor");
+    fireEvent(visor, "responderGrant", { nativeEvent: { touches: [{}], changedTouches: [{}] }, touchHistory: hist(1, 0) });
+    mover(visor, 100); // comeca
+    mover(visor, 120);
+    mover(visor, 150);
+    mover(visor, 200); // 2x no total
+    fireEvent.press(screen.getByTestId("f-usar"));
+    expect(onUsar).toHaveBeenLastCalledWith({ originX: 200, originY: 200, width: 400, height: 400 });
   });
 });

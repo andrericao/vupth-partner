@@ -36,7 +36,24 @@ export function recorteDoVisor(
 /** zoom-na-foto (Andre, 29/10): de 1x (a foto toda no quadrado) ate 4x. */
 export const ZOOM_MAX = 4;
 
-const distancia = (t: { pageX: number; pageY: number }[]) => Math.hypot(t[0].pageX - t[1].pageX, t[0].pageY - t[1].pageY);
+type Toque = { pageX: number; pageY: number };
+const distancia = (t: Toque[]) => Math.hypot(t[0].pageX - t[1].pageX, t[0].pageY - t[1].pageY);
+
+/**
+ * Os dedos na tela. O `nativeEvent.touches` e o normal; se vier com um so (alguns Androids em Modal),
+ * o historico de toques do PanResponder (`touchHistory`) ainda sabe os que estao ativos.
+ */
+export function toquesAtivos(e: {
+  nativeEvent?: { touches?: Toque[] };
+  touchHistory?: { touchBank?: { touchActive?: boolean; currentPageX: number; currentPageY: number }[] };
+}): Toque[] {
+  const nativos = e.nativeEvent?.touches ?? [];
+  if (nativos.length >= 2) return nativos;
+  const ativos = (e.touchHistory?.touchBank ?? [])
+    .filter((t) => t && t.touchActive)
+    .map((t) => ({ pageX: t.currentPageX, pageY: t.currentPageY }));
+  return ativos.length >= 2 ? ativos : nativos;
+}
 
 // foto-ux (Andre, 15/10): "a seleção de foto ainda está ruim, a UX está
 // complicada, os botões não são claros". O recorte do Android (allowsEditing)
@@ -74,7 +91,7 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
         onMoveShouldSetPanResponder: () => true,
         onPanResponderGrant: () => setPos((p) => ({ ...p, ix: p.x, iy: p.y, g: { dedos: 1, d0: 0, z0: p.z, bx: 0, by: 0 } })),
         onPanResponderMove: (e, gs) => {
-          const toques = e.nativeEvent.touches;
+          const toques = toquesAtivos(e as unknown as Parameters<typeof toquesAtivos>[0]);
           const dedos = toques.length >= 2 ? 2 : 1;
           const dist = dedos === 2 ? distancia(toques) || 1 : 0;
           setPos((p) => {
@@ -83,8 +100,10 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
             }
             const z = dedos === 2 ? limitar(p.g.z0 * (dist / p.g.d0), 1, ZOOM_MAX) : p.z;
             const c = visor / 2;
-            // o ponto sob o centro do visor fica no lugar enquanto o zoom muda
-            const base = z === p.z ? { x: p.ix, y: p.iy } : { x: c - ((c - p.ix) * z) / p.z, y: c - ((c - p.iy) * z) / p.z };
+            // o ponto sob o centro do visor fica no lugar enquanto o zoom muda. A conta parte do
+            // INICIO do gesto (ix, iy e z0), nao do quadro anterior: com p.z a foto pulava a cada
+            // quadro (zoom-na-foto-nao-funcionou, 29/10).
+            const base = { x: c - ((c - p.ix) * z) / p.g.z0, y: c - ((c - p.iy) * z) / p.g.z0 };
             return {
               ...p,
               z,
