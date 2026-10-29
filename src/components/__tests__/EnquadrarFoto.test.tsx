@@ -22,6 +22,22 @@ describe("recorteDoVisor", () => {
   });
 });
 
+describe("recorteDoVisor com zoom (zoom-na-foto, Andre 29/10)", () => {
+  it("2x: metade do lado, no canto ou no centro conforme o arraste", () => {
+    // 1200x800, visor 320, zoom 2: lado 400; foto no visor mede 960x640
+    expect(recorteDoVisor({ width: 1200, height: 800 }, 320, 0, 0, 2)).toEqual({ originX: 0, originY: 0, width: 400, height: 400 });
+    expect(recorteDoVisor({ width: 1200, height: 800 }, 320, -320, -160, 2)).toEqual({
+      originX: 400,
+      originY: 200,
+      width: 400,
+      height: 400,
+    });
+  });
+  it("arrastada alem da borda com zoom: fica dentro da foto", () => {
+    expect(recorteDoVisor({ width: 1200, height: 800 }, 320, -9999, -9999, 2)).toMatchObject({ originX: 800, originY: 400 });
+  });
+});
+
 describe("EnquadrarFoto", () => {
   const foto = { uri: "file:///f.jpg", width: 1200, height: 800 };
 
@@ -97,5 +113,72 @@ describe("EnquadrarFoto", () => {
     rerender(<EnquadrarFoto foto={{ uri: "file:///g.jpg", width: 800, height: 1200 }} onUsar={onUsar} onCancelar={onCancelar} />);
     fireEvent.press(screen.getByText("Usar foto"));
     expect(onUsar).toHaveBeenCalledWith({ originX: 0, originY: 200, width: 800, height: 800 });
+  });
+});
+
+describe("EnquadrarFoto: pinca", () => {
+  const foto = { uri: "file:///f.jpg", width: 800, height: 800 };
+  const toque = (pageX: number, pageY: number) => ({ pageX, pageY });
+  const historico = (n: number, t: number) => ({
+    numberActiveTouches: n,
+    indexOfSingleActiveTouch: 0,
+    mostRecentTimeStamp: t,
+    touchBank: Array.from({ length: n }, () => ({
+      touchActive: true,
+      startPageX: 0,
+      startPageY: 0,
+      startTimeStamp: 0,
+      currentPageX: 0,
+      currentPageY: 0,
+      currentTimeStamp: t,
+      previousPageX: 0,
+      previousPageY: 0,
+      previousTimeStamp: 0,
+    })),
+  });
+  const mover = (visor: any, toques: { pageX: number; pageY: number }[], t: number) =>
+    fireEvent(visor, "responderMove", {
+      nativeEvent: { touches: toques, changedTouches: toques },
+      touchHistory: historico(toques.length, t),
+    });
+
+  function abrirComPinca() {
+    const onUsar = jest.fn();
+    render(<EnquadrarFoto foto={foto} onUsar={onUsar} onCancelar={jest.fn()} testID="foto-perfil" />);
+    const visor = screen.getByTestId("foto-perfil-visor");
+    fireEvent(visor, "responderGrant", { nativeEvent: { touches: [{}], changedTouches: [{}] }, touchHistory: historico(1, 0) });
+    return { onUsar, visor };
+  }
+
+  it("afastar os dois dedos amplia: o recorte encolhe e fica centralizado", () => {
+    const { onUsar, visor } = abrirComPinca();
+    mover(visor, [toque(100, 100), toque(200, 100)], 1); // comeca a pinca
+    mover(visor, [toque(50, 100), toque(250, 100)], 2); // distancia 100 -> 200: 2x
+    fireEvent.press(screen.getByTestId("foto-perfil-usar"));
+    expect(onUsar).toHaveBeenLastCalledWith({ originX: 200, originY: 200, width: 400, height: 400 });
+  });
+
+  it("o zoom para em 4x e nao desce de 1x", () => {
+    const { onUsar, visor } = abrirComPinca();
+    mover(visor, [toque(100, 100), toque(110, 100)], 1);
+    mover(visor, [toque(0, 100), toque(900, 100)], 2); // 90x: trava em 4x
+    fireEvent.press(screen.getByTestId("foto-perfil-usar"));
+    expect(onUsar).toHaveBeenLastCalledWith(expect.objectContaining({ width: 200, height: 200 }));
+    mover(visor, [toque(100, 100), toque(110, 100)], 3); // volta quase a zero: trava em 1x
+    fireEvent.press(screen.getByTestId("foto-perfil-usar"));
+    expect(onUsar).toHaveBeenLastCalledWith({ originX: 0, originY: 0, width: 800, height: 800 });
+  });
+
+  it("depois de ampliar, um dedo arrasta e escolhe a parte do centro", () => {
+    const { onUsar, visor } = abrirComPinca();
+    mover(visor, [toque(100, 100), toque(200, 100)], 1);
+    mover(visor, [toque(50, 100), toque(250, 100)], 2); // 2x
+    mover(visor, [toque(10, 10)], 3); // um dedo: recomeca a base
+    fireEvent(visor, "responderMove", {
+      nativeEvent: { touches: [toque(10, 10)], changedTouches: [toque(10, 10)] },
+      touchHistory: historico(1, 4),
+    });
+    fireEvent.press(screen.getByTestId("foto-perfil-usar"));
+    expect(onUsar).toHaveBeenLastCalledWith(expect.objectContaining({ width: 400, height: 400 }));
   });
 });

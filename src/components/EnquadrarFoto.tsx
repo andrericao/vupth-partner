@@ -16,16 +16,27 @@ type Props = {
 const limitar = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 /** O quadrado da original que aparece no visor, com a foto arrastada em (dx, dy). */
-export function recorteDoVisor(foto: { width: number; height: number }, visor: number, dx: number, dy: number): Recorte {
-  const lado = Math.min(foto.width, foto.height);
+export function recorteDoVisor(
+  foto: { width: number; height: number },
+  visor: number,
+  dx: number,
+  dy: number,
+  zoom = 1
+): Recorte {
+  const lado = Math.min(foto.width, foto.height) / zoom;
   const escala = visor / lado;
   return {
     originX: Math.round(limitar(-dx / escala, 0, foto.width - lado)),
     originY: Math.round(limitar(-dy / escala, 0, foto.height - lado)),
-    width: lado,
-    height: lado,
+    width: Math.round(lado),
+    height: Math.round(lado),
   };
 }
+
+/** zoom-na-foto (Andre, 29/10): de 1x (a foto toda no quadrado) ate 4x. */
+export const ZOOM_MAX = 4;
+
+const distancia = (t: { pageX: number; pageY: number }[]) => Math.hypot(t[0].pageX - t[1].pageX, t[0].pageY - t[1].pageY);
 
 // foto-ux (Andre, 15/10): "a seleção de foto ainda está ruim, a UX está
 // complicada, os botões não são claros". O recorte do Android (allowsEditing)
@@ -44,7 +55,7 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
   const centro = { x: (visor - largura) / 2, y: (visor - altura) / 2 };
 
   // x/y: onde a foto esta; ix/iy: onde estava quando o dedo encostou.
-  const noCentro = { ...centro, ix: centro.x, iy: centro.y };
+  const noCentro = { ...centro, ix: centro.x, iy: centro.y, z: 1, g: { dedos: 1, d0: 0, z0: 1, bx: 0, by: 0 } };
   const [pos, setPos] = useState(noCentro);
   const [chaveAnterior, setChaveAnterior] = useState(foto?.uri);
   if (chaveAnterior !== foto?.uri) {
@@ -53,22 +64,40 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
     setPos(noCentro);
   }
 
+  // Gesto: um dedo arrasta; dois dedos (pinca) ampliam em torno do centro do visor. Ao mudar
+  // o numero de dedos o gesto recomeca (nova base), senao a foto pularia. A base vive no
+  // proprio estado (g: dedos, distancia, zoom e arraste de partida).
   const arrastar = useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => setPos((p) => ({ ...p, ix: p.x, iy: p.y })),
-        onPanResponderMove: (_e, g) =>
-          setPos((p) => ({
-            ...p,
-            x: limitar(p.ix + g.dx, visor - largura, 0),
-            y: limitar(p.iy + g.dy, visor - altura, 0),
-          })),
+        onPanResponderGrant: () => setPos((p) => ({ ...p, ix: p.x, iy: p.y, g: { dedos: 1, d0: 0, z0: p.z, bx: 0, by: 0 } })),
+        onPanResponderMove: (e, gs) => {
+          const toques = e.nativeEvent.touches;
+          const dedos = toques.length >= 2 ? 2 : 1;
+          const dist = dedos === 2 ? distancia(toques) || 1 : 0;
+          setPos((p) => {
+            if (dedos !== p.g.dedos) {
+              return { ...p, ix: p.x, iy: p.y, g: { dedos, d0: dist, z0: p.z, bx: gs.dx, by: gs.dy } };
+            }
+            const z = dedos === 2 ? limitar(p.g.z0 * (dist / p.g.d0), 1, ZOOM_MAX) : p.z;
+            const c = visor / 2;
+            // o ponto sob o centro do visor fica no lugar enquanto o zoom muda
+            const base = z === p.z ? { x: p.ix, y: p.iy } : { x: c - ((c - p.ix) * z) / p.z, y: c - ((c - p.iy) * z) / p.z };
+            return {
+              ...p,
+              z,
+              x: limitar(base.x + gs.dx - p.g.bx, visor - largura * z, 0),
+              y: limitar(base.y + gs.dy - p.g.by, visor - altura * z, 0),
+            };
+          });
+        },
       }),
     [visor, largura, altura]
   );
-  const usar = () => onUsar(temTamanho ? recorteDoVisor(foto as Required<FotoEscolhida>, visor, pos.x, pos.y) : undefined);
+  const usar = () =>
+    onUsar(temTamanho ? recorteDoVisor(foto as Required<FotoEscolhida>, visor, pos.x, pos.y, pos.z) : undefined);
 
   return (
     <Modal visible={!!foto} animationType="fade" onRequestClose={onCancelar} statusBarTranslucent>
@@ -94,7 +123,7 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
           {foto && (
             <Image
               source={{ uri: foto.uri }}
-              style={{ position: "absolute", width: largura, height: altura, left: pos.x, top: pos.y }}
+              style={{ position: "absolute", width: largura * pos.z, height: altura * pos.z, left: pos.x, top: pos.y }}
               resizeMode={temTamanho ? "stretch" : "cover"}
             />
           )}
