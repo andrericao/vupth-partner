@@ -4,6 +4,7 @@ import { abrirDialogo } from "@store/dialogo.store";
 import { NwButton } from "@components/nw/Button";
 import { PendingDot } from "@components/PendingDot";
 import { formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@lib/pagamento";
+import { buscarCalculo, textoDoCalculo } from "@lib/bonificacao";
 import { avisoDeTeste, pagaPeloApp, type Gateway } from "@lib/gateway";
 
 /**
@@ -49,9 +50,11 @@ export function PagamentosPendentes({
       ...(recusavel ? [{ texto: "Recusar", estilo: "destructive" as const }] : []),
       { texto: "Fechar", estilo: "cancel" as const },
     ];
+    // recebi-mostra-cliente-e-app (DEC-127): com desconto, a flag e o calculo vem junto.
+    const calculo = textoDoCalculo(await buscarCalculo(p.attendance_id));
     const escolha = await abrir({
       titulo: p.client_name,
-      mensagem: `${formatarReais(p.amount)} · ${observacaoDoPagamento(p.status)}`,
+      mensagem: `${formatarReais(p.amount)} · ${observacaoDoPagamento(p.status)}${calculo ? `\n\n${calculo}` : ""}`,
       botoes,
     });
     if (escolha === 0) await recebi(p.attendance_id, true);

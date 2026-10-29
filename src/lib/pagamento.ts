@@ -2,6 +2,7 @@ import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { abrirDialogo } from "@store/dialogo.store";
 import { formatarReais } from "@lib/dinheiro";
+import { textoDoCalculo, type Calculo } from "@lib/bonificacao";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -25,10 +26,12 @@ export async function perguntarPagamento(
   const perguntar = deps.perguntar ?? confirmar;
   let status: StatusDoPagamento;
   let valor: number;
+  let calculo: Calculo | null = null;
   try {
     const { data } = await api.get(`/attendances/${attendanceId}/payment`);
     status = data?.status;
     valor = Number(data?.amount ?? 0);
+    calculo = data?.breakdown ?? null;
   } catch {
     return undefined;
   }
@@ -40,9 +43,11 @@ export async function perguntarPagamento(
   const recebeu = await perguntar({
     titulo: "Recebeu o pagamento?",
     mensagem:
-      status === "AWAITING_CONFIRMATION"
+      (status === "AWAITING_CONFIRMATION"
         ? `${deps.cliente ?? "O cliente"} diz que pagou ${reais(valor)}. Confira no seu banco.`
-        : `${quem}${reais(valor)}. Se ainda não, fica pendente.`,
+        : `${quem}${reais(valor)}. Se ainda não, fica pendente.`) +
+      // recebi-mostra-cliente-e-app (DEC-127): com desconto, a flag e o calculo que bate.
+      (textoDoCalculo(calculo) ? `\n\n${textoDoCalculo(calculo)}` : ""),
     confirmar: "Recebi",
     cancelar: "Não recebi",
   });
@@ -112,11 +117,17 @@ export async function perguntarForma(
 /** "Recebi": de PENDING ou AWAITING_CONFIRMATION para PAID (push ao cliente). */
 export async function confirmarRecebimento(
   attendanceId: string,
-  forma?: FormaDeRecebimento
+  forma?: FormaDeRecebimento,
+  valorRecebido?: number
 ): Promise<void> {
+  // received_amount (DEC-127): so quando o cliente pagou diferente do valor com desconto.
+  const corpo = {
+    ...(forma ? { method: forma } : {}),
+    ...(valorRecebido !== undefined ? { received_amount: valorRecebido } : {}),
+  };
   await api.post(
     `/attendances/${attendanceId}/payment/confirm`,
-    forma ? { method: forma } : undefined
+    Object.keys(corpo).length > 0 ? corpo : undefined
   );
 }
 

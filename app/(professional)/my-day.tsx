@@ -18,6 +18,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { QuantoCobrarCard, MOSTRAR_QUANTO_COBRAR } from "@components/QuantoCobrarCard";
 import { PendenciasDoRelatorio } from "@components/PendenciasDoRelatorio";
+import { SaldosComOApp } from "@components/SaldosComOApp";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { AbasDoRelatorio, type AbaDoRelatorio } from "@components/AbasDoRelatorio";
 import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
@@ -26,6 +27,7 @@ import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { confirmarRecebimento, formatarReais, perguntarForma, recusarRecebimento } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
+import { perguntarValorRecebido } from "@lib/bonificacao";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { buscarGateway, CHAVE_GATEWAY } from "@lib/gateway";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -214,9 +216,10 @@ export default function MyDayScreen() {
         confirmar: "Recebi",
       }));
     if (!ok) return;
+    const valorRecebido = await perguntarValorRecebido(attendanceId);
     const forma = await perguntarForma();
     try {
-      await confirmarRecebimento(attendanceId, forma);
+      await confirmarRecebimento(attendanceId, forma, valorRecebido);
       await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));
@@ -461,6 +464,7 @@ export default function MyDayScreen() {
                   )
                 )}
                 <PendenciasDoRelatorio report={report} />
+                <SaldosComOApp report={report} />
                 <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
                 {avisoDoPrecoAntigo(precoAntigo) && (
                   <View className="bg-vupth-warning p-3 rounded-card">
