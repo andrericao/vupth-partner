@@ -1,0 +1,4 @@
+Rodada 2026-10-30_150513 · TAG 150513 · commit esperado 44d451e
+❌ 00_atualizacao — parou em ?
+   print: .maestro/logs/2026-10-30_150513/FALHA_00_atualizacao.png
+   (as etapas nao rodaram: com a versao errada o teste nao serve)
