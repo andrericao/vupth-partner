@@ -85,9 +85,16 @@ env:
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "00.07 · roda fechar_aviso"
+# A memoria do commit verificado pode mentir (emulador restaurado, OTA nao aplicado:
+# 30/10, instalado 41914ff com a memoria de 44d451e). Se o rodape nao bate com o
+# esperado, a 00 atualiza em vez de reprovar de cara.
+- evalScript:
+    script: >-
+      ${output.ATUALIZAR = !output.PULAR || !String(typeof COMMIT === 'undefined' ? '' : COMMIT).split(',').map(function (c) { return c.trim(); }).filter(function (c) { return c; }).some(function (e) { var i = String(output.INSTALADO || '').trim(); return i && (i.indexOf(e) === 0 || e.indexOf(i) === 0); })}
+    label: "00.07b · precisa verificar atualização? (memória não bate com o rodapé)"
 - runFlow:
     when:
-      true: ${!output.PULAR}
+      true: ${output.ATUALIZAR}
     file: ../apoio/atualizar.yaml
     label: "00.08 · Perfil → Versão do app → Verificar atualização"
 - runScript:
