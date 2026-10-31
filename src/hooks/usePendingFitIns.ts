@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useProfessionalStore } from "@store/professional.store";
+import { ENCAIXE_NOVO_LIGADO } from "@lib/recursos";
 import { encaixesEsperandoOCliente, encaixesParaResponder, listarEncaixes, type PedidoDeEncaixe } from "@lib/fitIn";
 
 /**
@@ -7,8 +8,9 @@ import { encaixesEsperandoOCliente, encaixesParaResponder, listarEncaixes, type 
  * na Fila e na tela de Solicitacoes: o cache e um so. O push FIT_IN_REQUESTED
  * avisa; o refetch de 30s e o fallback. So conta o que espera a resposta do
  * profissional (a contraproposta dele espera o cliente, nao vira badge).
+ * Desligado (DEC-144, `ENCAIXE_NOVO_LIGADO`): nao consulta e devolve vazio.
  */
-export function usePendingFitIns(): {
+export function usePendingFitIns(ligado: boolean = ENCAIXE_NOVO_LIGADO): {
   count: number;
   paraResponder: PedidoDeEncaixe[];
   esperandoOCliente: PedidoDeEncaixe[];
@@ -20,14 +22,14 @@ export function usePendingFitIns(): {
   const { data, refetch, isFetching } = useQuery({
     queryKey: ["fit-in-requests", profId],
     queryFn: listarEncaixes,
-    enabled: !!profId && !!professional?.establishment_id,
+    enabled: ligado && !!profId && !!professional?.establishment_id,
     refetchInterval: 30000,
   });
-  const paraResponder = encaixesParaResponder(data);
+  const paraResponder = ligado ? encaixesParaResponder(data) : [];
   return {
     count: paraResponder.length,
     paraResponder,
-    esperandoOCliente: encaixesEsperandoOCliente(data),
+    esperandoOCliente: ligado ? encaixesEsperandoOCliente(data) : [],
     refetch,
     isFetching,
   };
