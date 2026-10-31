@@ -1,0 +1,105 @@
+Running on vupth_android11
+ > Flow 04a
+04.A1 · etiqueta da rodada (TAG)... COMPLETED
+04.A2 · e-mail do dono... COMPLETED
+04.A3 · e-mail do profissional... COMPLETED
+04.A4 · nome da loja... COMPLETED
+04.A5 · nome do profissional... COMPLETED
+04.A6 · preparo pela API (o que as etapas anteriores deixariam)... COMPLETED
+04.A7 · abre o app do zero, ja com o OTA...
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+  Launch app "${APP_ID}"... COMPLETED
+  Assert that (Optional) id: (aba-perfil|aba-menu) is visible... WARNED
+  Run fechar_aviso.yaml...
+    Wait for animation to end within 6000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run fechar_aviso.yaml... COMPLETED
+  Run sair_profissional.yaml when id: aba-perfil is visible...
+  Run sair_profissional.yaml when id: aba-perfil is visible... SKIPPED
+  Run sair_dono.yaml when id: aba-menu is visible...
+  Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
+  Launch app "${APP_ID}" with clear state... COMPLETED
+  Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while id: app-commit is not visible (up to 4 times)...
+  Repeat while id: app-commit is not visible (up to 4 times)... SKIPPED
+  reprova se o OTA nao chegou (sem commit no rodape da entrada)... COMPLETED
+  Run fechar_cortina.yaml...
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible...
+    Run flow when "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)" is visible... SKIPPED
+  Run fechar_cortina.yaml... COMPLETED
+04.A7 · abre o app do zero, ja com o OTA... COMPLETED
+04.00 · roda 04a_profissional_monta_o_servico...
+  04.01 · roda entrar...
+    Tap on id: go-login... COMPLETED
+    Tap on id: login-email... COMPLETED
+    Input text ${EMAIL}... COMPLETED
+    Tap on id: login-password... COMPLETED
+    Input text ${SENHA}... COMPLETED
+    Hide Keyboard... COMPLETED
+    Tap on id: login-submit... COMPLETED
+  04.01 · roda entrar... COMPLETED
+  04.02 · espera aba-perfil... COMPLETED
+  04.03 · toca em aba-perfil... COMPLETED
+  04.04 · roda fechar_aviso...
+    Wait for animation to end within 6000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  04.04 · roda fechar_aviso... COMPLETED
+  04.05 · espera ${output.LOJA}... COMPLETED
+  04.06 · confere que nao tem …NAIL_TECH…... COMPLETED
+  04.07 · toca em Meus serviços... COMPLETED
+  04.08 · toca em Adicionar serviço... COMPLETED
+  04.08a · tipos · a grade de tipos da manicure aparece... COMPLETED
+  04.09 · toca em service-name... COMPLETED
+  04.10 · apaga 40... COMPLETED
+  04.11 · digita Manicure ${output.TAG}... COMPLETED
+  04.12 · toca em service-minutes... COMPLETED
+  Assert that (Optional) id: service-minutes, focused is visible... COMPLETED
+  04.13 · apaga 5... COMPLETED
+  04.14 · digita 45... COMPLETED
+  Hide Keyboard... COMPLETED
+  04.15 · toca em service-price ate ele ficar focado...
+    Tap on id: service-price... COMPLETED
+    Wait for animation to end within 4000 ms... COMPLETED
+  04.15 · toca em service-price ate ele ficar focado... COMPLETED
+  04.16 · digita 3000... COMPLETED
+  04.17 · fecha o teclado... COMPLETED
+  04.17a · preco · o cliente paga R$ 32.90... FAILED
+04.00 · roda 04a_profissional_monta_o_servico... FAILED
+
+Assertion is false: "R$ 32.90" is visible
+
+Assertion '"R$ 32.90" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-project/vupth-partner/.maestro/logs/2026-10-30_193632/etapa_04a

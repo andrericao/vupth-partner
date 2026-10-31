@@ -1,3 +1,4 @@
+import type { Calculo } from "@lib/bonificacao";
 import type { NaoRealizados } from "@lib/relatorioDasLojas";
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
@@ -83,6 +84,10 @@ export type ProfessionalReport = {
   pending_debt_total?: number | null;
   pending_debt_simulated_total?: number | null;
   cuts?: CorteDoRelatorio[] | null;
+  /** DEC-127: os saldos compensados do periodo (a receber do app, a pagar ao app, o liquido). */
+  to_receive_total?: number | null;
+  to_pay_total?: number | null;
+  net_total?: number | null;
 };
 
 export type CorteDoRelatorio = {
@@ -94,6 +99,8 @@ export type CorteDoRelatorio = {
   fees?: number | null;
   pending_debt?: number | null;
   pending_debt_simulated?: number | null;
+  /** DEC-127: o calculo do corte, com a flag PAGAMENTO COM DESCONTO (discounted). */
+  breakdown?: Calculo | null;
 };
 
 type ProfessionalState = {

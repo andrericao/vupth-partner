@@ -1,0 +1,7 @@
+Running on vupth_android11
+ > Flow 15a
+15a.A1 · etiqueta da rodada (TAG)... COMPLETED
+15a.A2 · nome da campanha... COMPLETED
+15a.A3 · a campanha esta no ar? (pela API)... COMPLETED
+15a.A5 · so roda se a campanha existe (senao, pulada)...
+15a.A5 · so roda se a campanha existe (senao, pulada)... SKIPPED

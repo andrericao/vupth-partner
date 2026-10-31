@@ -60,3 +60,32 @@ describe("CardDeCampanha", () => {
     expect(r.getByText("dentro")).toBeTruthy();
   });
 });
+
+// cards-de-promocao-iguais-ao-client (Andre, 29/10): as mesmas cores, borda e raio do CartaoTicket do
+// Client — greenTint com onGreenTint, borda tracejada de 2 px, picote so na esquerda, sem hex solto.
+describe("CardDeCampanha igual ao do Client", () => {
+  const campanha = { type: "DISCOUNT", name: "Lancamento", value_percent: 10 } as const;
+  const classes = (r: ReturnType<typeof render>) =>
+    String(r.UNSAFE_root.findAll((n: { props: Record<string, unknown> }) => typeof n.props.className === "string" && n.props.className.includes("border-dashed"))[0].props.className);
+
+  it("fundo greenTint, borda tracejada de 2 px em onGreenTint, raio do card e padding vertical 16", () => {
+    const c = classes(render(<CardDeCampanha campanha={campanha} testID="c" />));
+    expect(c).toContain("bg-vupth-greenTint");
+    expect(c).toContain("border-2");
+    expect(c).toContain("border-dashed");
+    expect(c).toContain("border-vupth-onGreenTint");
+    expect(c).toContain("rounded-card");
+    expect(c).toContain("py-4");
+    expect(c).not.toMatch(/bg-vupth-surface|border-vupth-border|#[0-9a-fA-F]{3,6}/);
+  });
+
+  it("texto em onGreenTint (valor, nome e linha) e so um picote, na esquerda", () => {
+    const r = render(<CardDeCampanha campanha={campanha} linha="ate 30/11" testID="c" />);
+    expect(r.getByTestId("c-valor").props.className).toContain("text-vupth-onGreenTint");
+    expect(r.getByText("Lancamento").props.className).toContain("text-vupth-onGreenTint");
+    expect(r.getByText("ate 30/11").props.className).toContain("text-vupth-onGreenTint");
+    const picotes = r.UNSAFE_root.findAll((n: { props: Record<string, unknown> }) => typeof n.props.className === "string" && n.props.className.includes("-left-2.5"));
+    expect(picotes.length).toBeGreaterThan(0);
+    expect(r.UNSAFE_root.findAll((n: { props: Record<string, unknown> }) => typeof n.props.className === "string" && n.props.className.includes("-right-2.5")).length).toBe(0);
+  });
+});

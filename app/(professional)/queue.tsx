@@ -19,7 +19,8 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
-import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
+import { confirmarRecebimento, perguntarPagamento, perguntarForma } from "@lib/pagamento";
+import { perguntarValorRecebido } from "@lib/bonificacao";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -39,7 +40,6 @@ import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
-import { AvisoDeDivida } from "@components/AvisoDeDivida";
 import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
 import { useQuery } from "@tanstack/react-query";
 import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
@@ -630,9 +630,10 @@ export default function ProfessionalQueueScreen() {
     });
     if (recebido === undefined) return;
     if (recebido) {
+      const valorRecebido = await perguntarValorRecebido(attendanceId);
       const forma = await perguntarForma();
       try {
-        await confirmarRecebimento(attendanceId, forma);
+        await confirmarRecebimento(attendanceId, forma, valorRecebido);
       } catch (error: any) {
         Alert.alert(
           "Atendimento finalizado",
@@ -641,8 +642,6 @@ export default function ProfessionalQueueScreen() {
         return;
       }
     }
-    const mensagem = mensagemDoFim(recebido ? "PAID" : "PENDING");
-    if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
   };
 
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
@@ -922,7 +921,6 @@ export default function ProfessionalQueueScreen() {
           />
   
           <AvisoCienciaDePreco />
-          <AvisoDeDivida />
           <AvisoDeAgenda />
           <CarrosselDeCampanhas />
 
