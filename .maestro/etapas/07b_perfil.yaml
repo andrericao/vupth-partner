@@ -135,6 +135,16 @@ appId: ${APP_ID}
     visible: "Os dias e horários em que você atende.*"
     timeout: 20000
     label: "07.64 · agenda · confere o titulo"
+# abrir-agenda (DEC-130): os dots para abrir os dias vem acima do editor da semana.
+# So confere (nao abre dia: isso mudaria a agenda que outras etapas usam).
+- extendedWaitUntil:
+    visible:
+      id: "abrir-agenda"
+    timeout: 20000
+    label: "07.64a · abrir-agenda · o cartao com os dias aparece"
+- assertVisible:
+    text: "Repetir a minha agenda padrão"
+    label: "07.64b · abrir-agenda · confere Repetir a minha agenda padrão"
 - runFlow:
     file: ../apoio/para_o_andre.yaml
     env:

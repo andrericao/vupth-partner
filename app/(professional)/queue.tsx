@@ -41,6 +41,7 @@ import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
 import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
+import { useAvisoDaVespera } from "@hooks/useAvisoDaVespera";
 import { useQuery } from "@tanstack/react-query";
 import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
@@ -742,6 +743,8 @@ export default function ProfessionalQueueScreen() {
   // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
   // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
   // handleAction, que traduz a mensagem.
+  // abrir-agenda (DEC-130): no domingo, a caixa da vespera para quem esta em modo agenda.
+  useAvisoDaVespera(professional?.operation_mode === "AGENDA_ONLY");
   // C2: contagem de encaixes pendentes pelo hook compartilhado — a MESMA
   // queryKey do rodape e da tela de Encaixes, entao e um cache so. O WS
   // pessoal (eventos CUT_*, assinado no useQueueSocket) invalida; o refetch
