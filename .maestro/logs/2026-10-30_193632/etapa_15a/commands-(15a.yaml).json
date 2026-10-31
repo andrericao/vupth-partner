@@ -1,0 +1,2463 @@
+[ {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123",
+        "COMMIT" : "73200e1,0a886ae,acb895f,44d451e",
+        "SUPERVISAO" : "0",
+        "TAG" : "193632",
+        "MAESTRO_FILENAME" : "15a",
+        "MAESTRO_DEVICE_UDID" : "emulator-5554",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406331801,
+    "duration" : 20,
+    "sequenceNumber" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123",
+          "COMMIT" : "73200e1,0a886ae,acb895f,44d451e",
+          "SUPERVISAO" : "0",
+          "TAG" : "193632",
+          "MAESTRO_FILENAME" : "15a",
+          "MAESTRO_DEVICE_UDID" : "emulator-5554",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "textRegex" : "(Wait|Aguardar|Esperar)",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      }, {
+                        "waitForAnimationToEndCommand" : {
+                          "timeout" : "6000",
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_anr.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "pressKeyCommand" : {
+                      "code" : "BACK",
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "swipeCommand" : {
+                          "startRelative" : "50%, 95%",
+                          "endRelative" : "50%, 5%",
+                          "duration" : 400,
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_cortina.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "launchAppCommand" : {
+              "appId" : "${APP_ID}",
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "(aba-perfil|aba-menu)",
+                  "optional" : false
+                }
+              },
+              "timeout" : "30000",
+              "optional" : true
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "textRegex" : "(Wait|Aguardar|Esperar)",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      }, {
+                        "waitForAnimationToEndCommand" : {
+                          "timeout" : "6000",
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_anr.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_aviso.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "aba-perfil",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "waitForAnimationToEndCommand" : {
+                      "timeout" : "6000",
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "applyConfigurationCommand" : {
+                          "config" : {
+                            "appId" : "${APP_ID}"
+                          },
+                          "optional" : false
+                        }
+                      }, {
+                        "runFlowCommand" : {
+                          "commands" : [ {
+                            "tapOnElement" : {
+                              "selector" : {
+                                "textRegex" : "(Wait|Aguardar|Esperar)",
+                                "optional" : false
+                              },
+                              "retryIfNoChange" : false,
+                              "waitUntilVisible" : false,
+                              "longPress" : false,
+                              "optional" : false
+                            }
+                          }, {
+                            "waitForAnimationToEndCommand" : {
+                              "timeout" : "6000",
+                              "optional" : false
+                            }
+                          } ],
+                          "condition" : {
+                            "visible" : {
+                              "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                              "optional" : false
+                            }
+                          },
+                          "optional" : false
+                        }
+                      } ],
+                      "sourceDescription" : "fechar_anr.yaml",
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "idRegex" : "dialogo-botao-0",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "idRegex" : "dialogo-botao-0",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "idRegex" : "android:id/button1",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "idRegex" : "android:id/button1",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_aviso.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "scrollUntilVisible" : {
+                  "selector" : {
+                    "textRegex" : "Sair da conta",
+                    "optional" : false
+                  },
+                  "direction" : "DOWN",
+                  "scrollDuration" : "40",
+                  "visibilityPercentage" : 50,
+                  "timeout" : "20000",
+                  "centerElement" : false,
+                  "originalSpeedValue" : "40",
+                  "optional" : false,
+                  "visibilityPercentageNormalized" : 0.0
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "Sair da conta",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "assertConditionCommand" : {
+                      "condition" : {
+                        "visible" : {
+                          "idRegex" : "dialogo-botao-1",
+                          "optional" : false
+                        }
+                      },
+                      "timeout" : "30000",
+                      "optional" : false
+                    }
+                  }, {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "confirmar.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "Como você vai usar o Vupth?",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "40000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "aba-perfil",
+                  "optional" : false
+                }
+              },
+              "sourceDescription" : "sair_profissional.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "aba-menu",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "scrollUntilVisible" : {
+                  "selector" : {
+                    "textRegex" : "Sair da conta",
+                    "optional" : false
+                  },
+                  "direction" : "DOWN",
+                  "scrollDuration" : "40",
+                  "visibilityPercentage" : 100,
+                  "timeout" : "20000",
+                  "centerElement" : false,
+                  "originalSpeedValue" : "40",
+                  "optional" : false,
+                  "visibilityPercentageNormalized" : 1.0
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "textRegex" : "Sair da conta",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "assertConditionCommand" : {
+                      "condition" : {
+                        "visible" : {
+                          "idRegex" : "dialogo-botao-1",
+                          "optional" : false
+                        }
+                      },
+                      "timeout" : "30000",
+                      "optional" : false
+                    }
+                  }, {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "confirmar.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "Como você vai usar o Vupth?",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "40000",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "aba-menu",
+                  "optional" : false
+                }
+              },
+              "sourceDescription" : "sair_dono.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "launchAppCommand" : {
+              "appId" : "${APP_ID}",
+              "clearState" : true,
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "textRegex" : "Como você vai usar o Vupth?",
+                  "optional" : false
+                }
+              },
+              "timeout" : "240000",
+              "optional" : false
+            }
+          }, {
+            "repeatCommand" : {
+              "times" : "4",
+              "condition" : {
+                "notVisible" : {
+                  "idRegex" : "app-commit",
+                  "optional" : false
+                }
+              },
+              "commands" : [ {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "app-commit",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "30000",
+                  "optional" : true
+                }
+              }, {
+                "stopAppCommand" : {
+                  "appId" : "${APP_ID}",
+                  "optional" : false
+                }
+              }, {
+                "launchAppCommand" : {
+                  "appId" : "${APP_ID}",
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "Como você vai usar o Vupth?",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "240000",
+                  "optional" : false
+                }
+              } ],
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "app-commit",
+                  "optional" : false
+                }
+              },
+              "timeout" : "40000",
+              "label" : "reprova se o OTA nao chegou (sem commit no rodape da entrada)",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "textRegex" : "(Wait|Aguardar|Esperar)",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      }, {
+                        "waitForAnimationToEndCommand" : {
+                          "timeout" : "6000",
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_anr.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "pressKeyCommand" : {
+                      "code" : "BACK",
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "swipeCommand" : {
+                          "startRelative" : "50%, 95%",
+                          "endRelative" : "50%, 5%",
+                          "duration" : 400,
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "fechar_cortina.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "../apoio/abrir_com_ota.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "label" : "15a.A4 · abre o app do zero, ja com o OTA",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "defineVariablesCommand" : {
+              "env" : {
+                "NOME_CAMPANHA" : "${output.NOME_CAMPANHA}"
+              },
+              "optional" : false
+            }
+          }, {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "defineVariablesCommand" : {
+                  "env" : {
+                    "EMAIL" : "${output.EMAIL_CAMP}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "go-login",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "login-email",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "inputTextCommand" : {
+                  "text" : "${EMAIL}",
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "login-password",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              }, {
+                "inputTextCommand" : {
+                  "text" : "${SENHA}",
+                  "optional" : false
+                }
+              }, {
+                "hideKeyboardCommand" : {
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "login-submit",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "../apoio/entrar.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "label" : "15.01 · entra como o profissional da campanha",
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "aba-perfil",
+                  "optional" : false
+                }
+              },
+              "timeout" : "60000",
+              "label" : "15.02 · espera aba-perfil",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "waitForAnimationToEndCommand" : {
+                  "timeout" : "6000",
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "applyConfigurationCommand" : {
+                      "config" : {
+                        "appId" : "${APP_ID}"
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "textRegex" : "(Wait|Aguardar|Esperar)",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      }, {
+                        "waitForAnimationToEndCommand" : {
+                          "timeout" : "6000",
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  } ],
+                  "sourceDescription" : "fechar_anr.yaml",
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "android:id/button1",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "../apoio/fechar_aviso.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "label" : "15.03 · roda fechar_aviso",
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "aba-perfil",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "label" : "15.04 · abre o Perfil",
+              "optional" : false
+            }
+          }, {
+            "scrollUntilVisible" : {
+              "selector" : {
+                "textRegex" : "Promoções",
+                "optional" : false
+              },
+              "direction" : "DOWN",
+              "scrollDuration" : "40",
+              "visibilityPercentage" : 100,
+              "timeout" : "20000",
+              "centerElement" : false,
+              "originalSpeedValue" : "40",
+              "label" : "15.05 · rola ate Promoções",
+              "optional" : false,
+              "visibilityPercentageNormalized" : 1.0
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "Promoções",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "label" : "15.06 · abre Promoções",
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "cupom-codigo",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "label" : "15.10 · toca no campo do cupom",
+              "optional" : false
+            }
+          }, {
+            "inputTextCommand" : {
+              "text" : "${output.CODIGO}",
+              "optional" : false
+            }
+          }, {
+            "hideKeyboardCommand" : {
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "cupom-usar",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "label" : "15.11 · ativa o cupom",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "promocao-modal-titulo",
+                      "optional" : false
+                    }
+                  },
+                  "label" : "15.12a · campanha encerrada · modal",
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "Promoção encerrada",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "scriptCondition" : "${output.FIM_PASSOU == 'sim'}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "Promoção esgotada",
+                      "optional" : false
+                    }
+                  },
+                  "label" : "15.12b · campanha esgotada · modal",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "scriptCondition" : "${output.FIM_PASSOU != 'sim' && output.SEM_VAGA == 'sim'}"
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "cupom-validade",
+                      "optional" : false
+                    }
+                  },
+                  "label" : "15.13a · mostra ate quando vale",
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "Válido até.*",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "cupom-saiba-mais-abrir",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "label" : "15.13b · Saiba mais",
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : ".*para qualquer serviço.*",
+                      "optional" : false
+                    }
+                  },
+                  "label" : "15.13c · o Saiba mais diz que vale para qualquer serviço",
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "textRegex" : "${NOME_CAMPANHA}",
+                      "optional" : false
+                    }
+                  },
+                  "label" : "15.13d · o cupom aparece em Promoções",
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "scriptCondition" : "${output.FIM_PASSOU != 'sim' && output.SEM_VAGA != 'sim'}"
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "../etapas/15a_campanha_cupom.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "label" : "15a.00 · roda 15a_campanha_cupom",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "scriptCondition" : "${output.EXISTE == 'sim'}"
+      },
+      "label" : "15a.A5 · so roda se a campanha existe (senao, pulada)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1793406338743,
+    "sequenceNumber" : 6,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "textRegex" : "(Wait|Aguardar|Esperar)",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        }, {
+                          "waitForAnimationToEndCommand" : {
+                            "timeout" : "6000",
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_anr.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "pressKeyCommand" : {
+                        "code" : "BACK",
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "swipeCommand" : {
+                            "startRelative" : "50%, 95%",
+                            "endRelative" : "50%, 5%",
+                            "duration" : 400,
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_cortina.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "launchAppCommand" : {
+                "appId" : "${APP_ID}",
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "(aba-perfil|aba-menu)",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "30000",
+                "optional" : true
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "textRegex" : "(Wait|Aguardar|Esperar)",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        }, {
+                          "waitForAnimationToEndCommand" : {
+                            "timeout" : "6000",
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_anr.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-0",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "android:id/button1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_aviso.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "aba-perfil",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "waitForAnimationToEndCommand" : {
+                        "timeout" : "6000",
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "applyConfigurationCommand" : {
+                            "config" : {
+                              "appId" : "${APP_ID}"
+                            },
+                            "optional" : false
+                          }
+                        }, {
+                          "runFlowCommand" : {
+                            "commands" : [ {
+                              "tapOnElement" : {
+                                "selector" : {
+                                  "textRegex" : "(Wait|Aguardar|Esperar)",
+                                  "optional" : false
+                                },
+                                "retryIfNoChange" : false,
+                                "waitUntilVisible" : false,
+                                "longPress" : false,
+                                "optional" : false
+                              }
+                            }, {
+                              "waitForAnimationToEndCommand" : {
+                                "timeout" : "6000",
+                                "optional" : false
+                              }
+                            } ],
+                            "condition" : {
+                              "visible" : {
+                                "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                                "optional" : false
+                              }
+                            },
+                            "optional" : false
+                          }
+                        } ],
+                        "sourceDescription" : "fechar_anr.yaml",
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "idRegex" : "dialogo-botao-0",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "idRegex" : "dialogo-botao-0",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "idRegex" : "android:id/button1",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "idRegex" : "android:id/button1",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_aviso.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "scrollUntilVisible" : {
+                    "selector" : {
+                      "textRegex" : "Sair da conta",
+                      "optional" : false
+                    },
+                    "direction" : "DOWN",
+                    "scrollDuration" : "40",
+                    "visibilityPercentage" : 50,
+                    "timeout" : "20000",
+                    "centerElement" : false,
+                    "originalSpeedValue" : "40",
+                    "optional" : false,
+                    "visibilityPercentageNormalized" : 0.0
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "Sair da conta",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "assertConditionCommand" : {
+                        "condition" : {
+                          "visible" : {
+                            "idRegex" : "dialogo-botao-1",
+                            "optional" : false
+                          }
+                        },
+                        "timeout" : "30000",
+                        "optional" : false
+                      }
+                    }, {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "confirmar.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "Como você vai usar o Vupth?",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "40000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "aba-perfil",
+                    "optional" : false
+                  }
+                },
+                "sourceDescription" : "sair_profissional.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "aba-menu",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "scrollUntilVisible" : {
+                    "selector" : {
+                      "textRegex" : "Sair da conta",
+                      "optional" : false
+                    },
+                    "direction" : "DOWN",
+                    "scrollDuration" : "40",
+                    "visibilityPercentage" : 100,
+                    "timeout" : "20000",
+                    "centerElement" : false,
+                    "originalSpeedValue" : "40",
+                    "optional" : false,
+                    "visibilityPercentageNormalized" : 1.0
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "textRegex" : "Sair da conta",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "assertConditionCommand" : {
+                        "condition" : {
+                          "visible" : {
+                            "idRegex" : "dialogo-botao-1",
+                            "optional" : false
+                          }
+                        },
+                        "timeout" : "30000",
+                        "optional" : false
+                      }
+                    }, {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "confirmar.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "Como você vai usar o Vupth?",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "40000",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "aba-menu",
+                    "optional" : false
+                  }
+                },
+                "sourceDescription" : "sair_dono.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "launchAppCommand" : {
+                "appId" : "${APP_ID}",
+                "clearState" : true,
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "textRegex" : "Como você vai usar o Vupth?",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "240000",
+                "optional" : false
+              }
+            }, {
+              "repeatCommand" : {
+                "times" : "4",
+                "condition" : {
+                  "notVisible" : {
+                    "idRegex" : "app-commit",
+                    "optional" : false
+                  }
+                },
+                "commands" : [ {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "app-commit",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "30000",
+                    "optional" : true
+                  }
+                }, {
+                  "stopAppCommand" : {
+                    "appId" : "${APP_ID}",
+                    "optional" : false
+                  }
+                }, {
+                  "launchAppCommand" : {
+                    "appId" : "${APP_ID}",
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "Como você vai usar o Vupth?",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "240000",
+                    "optional" : false
+                  }
+                } ],
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "app-commit",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "40000",
+                "label" : "reprova se o OTA nao chegou (sem commit no rodape da entrada)",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "textRegex" : "(Wait|Aguardar|Esperar)",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        }, {
+                          "waitForAnimationToEndCommand" : {
+                            "timeout" : "6000",
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_anr.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "pressKeyCommand" : {
+                        "code" : "BACK",
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "swipeCommand" : {
+                            "startRelative" : "50%, 95%",
+                            "endRelative" : "50%, 5%",
+                            "duration" : 400,
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "(Clear all|Limpar tudo|Manage|Gerenciar|Bluetooth)",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "fechar_cortina.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "../apoio/abrir_com_ota.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "label" : "15a.A4 · abre o app do zero, ja com o OTA",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "defineVariablesCommand" : {
+                "env" : {
+                  "NOME_CAMPANHA" : "${output.NOME_CAMPANHA}"
+                },
+                "optional" : false
+              }
+            }, {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "defineVariablesCommand" : {
+                    "env" : {
+                      "EMAIL" : "${output.EMAIL_CAMP}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "go-login",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "login-email",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "inputTextCommand" : {
+                    "text" : "${EMAIL}",
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "login-password",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                }, {
+                  "inputTextCommand" : {
+                    "text" : "${SENHA}",
+                    "optional" : false
+                  }
+                }, {
+                  "hideKeyboardCommand" : {
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "login-submit",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "../apoio/entrar.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "label" : "15.01 · entra como o profissional da campanha",
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "aba-perfil",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "60000",
+                "label" : "15.02 · espera aba-perfil",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "waitForAnimationToEndCommand" : {
+                    "timeout" : "6000",
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "applyConfigurationCommand" : {
+                        "config" : {
+                          "appId" : "${APP_ID}"
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "textRegex" : "(Wait|Aguardar|Esperar)",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        }, {
+                          "waitForAnimationToEndCommand" : {
+                            "timeout" : "6000",
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "textRegex" : ".*(isn't responding|não está respondendo|nao esta respondendo).*",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    } ],
+                    "sourceDescription" : "fechar_anr.yaml",
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "dialogo-botao-0",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "dialogo-botao-0",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "android:id/button1",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "android:id/button1",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "../apoio/fechar_aviso.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "label" : "15.03 · roda fechar_aviso",
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "aba-perfil",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "label" : "15.04 · abre o Perfil",
+                "optional" : false
+              }
+            }, {
+              "scrollUntilVisible" : {
+                "selector" : {
+                  "textRegex" : "Promoções",
+                  "optional" : false
+                },
+                "direction" : "DOWN",
+                "scrollDuration" : "40",
+                "visibilityPercentage" : 100,
+                "timeout" : "20000",
+                "centerElement" : false,
+                "originalSpeedValue" : "40",
+                "label" : "15.05 · rola ate Promoções",
+                "optional" : false,
+                "visibilityPercentageNormalized" : 1.0
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "Promoções",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "label" : "15.06 · abre Promoções",
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "cupom-codigo",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "label" : "15.10 · toca no campo do cupom",
+                "optional" : false
+              }
+            }, {
+              "inputTextCommand" : {
+                "text" : "${output.CODIGO}",
+                "optional" : false
+              }
+            }, {
+              "hideKeyboardCommand" : {
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "cupom-usar",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "label" : "15.11 · ativa o cupom",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "promocao-modal-titulo",
+                        "optional" : false
+                      }
+                    },
+                    "label" : "15.12a · campanha encerrada · modal",
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "Promoção encerrada",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "scriptCondition" : "${output.FIM_PASSOU == 'sim'}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "Promoção esgotada",
+                        "optional" : false
+                      }
+                    },
+                    "label" : "15.12b · campanha esgotada · modal",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "scriptCondition" : "${output.FIM_PASSOU != 'sim' && output.SEM_VAGA == 'sim'}"
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "cupom-validade",
+                        "optional" : false
+                      }
+                    },
+                    "label" : "15.13a · mostra ate quando vale",
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "Válido até.*",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "cupom-saiba-mais-abrir",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "label" : "15.13b · Saiba mais",
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : ".*para qualquer serviço.*",
+                        "optional" : false
+                      }
+                    },
+                    "label" : "15.13c · o Saiba mais diz que vale para qualquer serviço",
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "textRegex" : "${NOME_CAMPANHA}",
+                        "optional" : false
+                      }
+                    },
+                    "label" : "15.13d · o cupom aparece em Promoções",
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "scriptCondition" : "${output.FIM_PASSOU != 'sim' && output.SEM_VAGA != 'sim'}"
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "../etapas/15a_campanha_cupom.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "label" : "15a.00 · roda 15a_campanha_cupom",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "scriptCondition" : "false"
+        },
+        "label" : "15a.A5 · so roda se a campanha existe (senao, pulada)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406331831,
+    "duration" : 3460,
+    "sequenceNumber" : 2,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.partner.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+      "label" : "15a.A1 · etiqueta da rodada (TAG)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406335292,
+    "duration" : 102,
+    "sequenceNumber" : 3,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}",
+        "label" : "15a.A1 · etiqueta da rodada (TAG)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.partner.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406331823,
+    "duration" : 5,
+    "sequenceNumber" : 1,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.partner.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.NOME_CAMPANHA = 'MAESTRO PARTNER CUPOM'}",
+      "label" : "15a.A2 · nome da campanha",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406335401,
+    "duration" : 22,
+    "sequenceNumber" : 4,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.NOME_CAMPANHA = 'MAESTRO PARTNER CUPOM'}",
+        "label" : "15a.A2 · nome da campanha",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// maestro-campanha-cupom-e-link-no-partner (Andre, 23/10): a campanha de teste e\n// criada por ele no Painel, com nome exato e os valores que quiser. Este script\n// cria (ou reaproveita) um profissional so deste fluxo, consulta GET\n// /campaigns/active e diz se a campanha com aquele nome esta no ar. Se nao\n// estiver, o fluxo PULA (nao falha) e a bateria segue.\n//\n// Entradas (env do runScript): API, SENHA, TAG, NOME, SUFIXO\n// Saidas: output.EMAIL_CAMP, EXISTE (\"sim\"/\"nao\"), CODIGO, FIM_PASSOU, SEM_VAGA\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = null;\n  for (var vez = 0; vez < 4; vez++) {\n    r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n    if (r.status !== 429 || vez === 3) break;\n    var n = /in (\\d+) s/.exec(r.body || \"\");\n    var ate = Date.now() + ((n ? parseInt(n[1], 10) : 30) + 2) * 1000;\n    while (Date.now() < ate) {}\n  }\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"campanha: \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\nvar email = \"prof_m\" + TAG + \"_\" + SUFIXO + \"@teste.com\";\nif (chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA }).status >= 300) {\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n}\nvar token = pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\nif (chamar(\"GET\", \"/professional/me\", null, token).status >= 300) {\n  pedir(\"POST\", \"/professional/register\", { name: \"Camp\" + TAG + SUFIXO, specialty: \"NAIL_TECH\" }, token);\n}\n\noutput.EMAIL_CAMP = email;\noutput.EXISTE = \"nao\";\noutput.CODIGO = \"\";\noutput.FIM_PASSOU = \"nao\";\noutput.SEM_VAGA = \"nao\";\n\nvar r = chamar(\"GET\", \"/campaigns/active\", null, token);\nvar lista = r.status < 300 && r.corpo && r.corpo.length !== undefined ? r.corpo : [];\nfor (var i = 0; i < lista.length; i++) {\n  if (lista[i].name === NOME) {\n    output.EXISTE = \"sim\";\n    output.CODIGO = lista[i].code || \"\";\n    output.FIM_PASSOU = lista[i].ends_at && new Date(lista[i].ends_at).getTime() < Date.now() ? \"sim\" : \"nao\";\n    output.SEM_VAGA = lista[i].remaining_slots === 0 ? \"sim\" : \"nao\";\n    break;\n  }\n}\n",
+      "env" : {
+        "TAG" : "${output.TAG}",
+        "NOME" : "${output.NOME_CAMPANHA}",
+        "SUFIXO" : "cupom"
+      },
+      "sourceDescription" : "/tmp/tmp.vQIGyepRnh/scripts/campanha_ativa.js",
+      "label" : "15a.A3 · a campanha esta no ar? (pela API)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406335427,
+    "duration" : 3314,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// maestro-campanha-cupom-e-link-no-partner (Andre, 23/10): a campanha de teste e\n// criada por ele no Painel, com nome exato e os valores que quiser. Este script\n// cria (ou reaproveita) um profissional so deste fluxo, consulta GET\n// /campaigns/active e diz se a campanha com aquele nome esta no ar. Se nao\n// estiver, o fluxo PULA (nao falha) e a bateria segue.\n//\n// Entradas (env do runScript): API, SENHA, TAG, NOME, SUFIXO\n// Saidas: output.EMAIL_CAMP, EXISTE (\"sim\"/\"nao\"), CODIGO, FIM_PASSOU, SEM_VAGA\n\nfunction chamar(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = null;\n  for (var vez = 0; vez < 4; vez++) {\n    r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === \"GET\" || metodo === \"DELETE\" ? undefined : \"{}\") });\n    if (r.status !== 429 || vez === 3) break;\n    var n = /in (\\d+) s/.exec(r.body || \"\");\n    var ate = Date.now() + ((n ? parseInt(n[1], 10) : 30) + 2) * 1000;\n    while (Date.now() < ate) {}\n  }\n  return { status: r.status, corpo: r.body ? json(r.body) : null };\n}\n\nfunction pedir(metodo, url, corpo, token) {\n  var r = chamar(metodo, url, corpo, token);\n  if (r.status >= 300) throw new Error(\"campanha: \" + metodo + \" \" + url + \" -> \" + r.status + \" \" + JSON.stringify(r.corpo));\n  return r.corpo;\n}\n\nvar email = \"prof_m\" + TAG + \"_\" + SUFIXO + \"@teste.com\";\nif (chamar(\"POST\", \"/auth/login\", { email: email, password: SENHA }).status >= 300) {\n  pedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\n}\nvar token = pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens.access_token;\nif (chamar(\"GET\", \"/professional/me\", null, token).status >= 300) {\n  pedir(\"POST\", \"/professional/register\", { name: \"Camp\" + TAG + SUFIXO, specialty: \"NAIL_TECH\" }, token);\n}\n\noutput.EMAIL_CAMP = email;\noutput.EXISTE = \"nao\";\noutput.CODIGO = \"\";\noutput.FIM_PASSOU = \"nao\";\noutput.SEM_VAGA = \"nao\";\n\nvar r = chamar(\"GET\", \"/campaigns/active\", null, token);\nvar lista = r.status < 300 && r.corpo && r.corpo.length !== undefined ? r.corpo : [];\nfor (var i = 0; i < lista.length; i++) {\n  if (lista[i].name === NOME) {\n    output.EXISTE = \"sim\";\n    output.CODIGO = lista[i].code || \"\";\n    output.FIM_PASSOU = lista[i].ends_at && new Date(lista[i].ends_at).getTime() < Date.now() ? \"sim\" : \"nao\";\n    output.SEM_VAGA = lista[i].remaining_slots === 0 ? \"sim\" : \"nao\";\n    break;\n  }\n}\n",
+        "env" : {
+          "TAG" : "193632",
+          "NOME" : "MAESTRO PARTNER CUPOM",
+          "SUFIXO" : "cupom"
+        },
+        "sourceDescription" : "/tmp/tmp.vQIGyepRnh/scripts/campanha_ativa.js",
+        "label" : "15a.A3 · a campanha esta no ar? (pela API)",
+        "optional" : false
+      }
+    }
+  }
+} ]
