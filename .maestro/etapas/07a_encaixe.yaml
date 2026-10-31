@@ -8,9 +8,14 @@ appId: ${APP_ID}
     env:
       STATUS: indisponivel
     label: "07.01 · roda status"
-- assertVisible:
-    text: "Você está: Fora.*"
-    label: "07.02 · confere Você está: Fora…"
+# Log 2026-10-31_174548 (07.02): o aviso "Loja fechada" ainda cobria a Fila; fecha
+# e espera. A pílula da Fila mostra só "Fora"; o "Você está: Fora" fica nas Opções.
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+- extendedWaitUntil:
+    visible: "(Você está: Fora.*|Fora)"
+    timeout: 15000
+    label: "07.02 · confere Fora"
 - runScript:
     file: ../scripts/pedido_de_encaixe.js
     env:

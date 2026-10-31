@@ -18,8 +18,10 @@ appId: ${APP_ID}
 - tapOn:
     text: "Dados do estabelecimento"
     label: "01.15 · toca em Dados do estabelecimento"
+# Log 2026-10-31_174548 (01.17): "Horário de funcionamento" também é uma linha da
+# lista de passos (sem toque, e vem antes do card); toca na descrição do card.
 - tapOn:
-    text: "Horário de Funcionamento"
+    text: "Abertura e fechamento"
     label: "01.16 · toca em Horário de Funcionamento"
 - extendedWaitUntil:
     visible: "Semana"
