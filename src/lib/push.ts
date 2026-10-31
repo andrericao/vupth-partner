@@ -32,9 +32,12 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
   // aceitar-encaixe (DEC-136 a 141): o pedido e a contraproposta do cliente caem em Solicitacoes.
-  if (type === "CUT_REQUESTED" || type === "FIT_IN_REQUESTED" || type === "FIT_IN_COUNTERED") {
+  // Backend 482e711: o profissional recebe REQUESTED, COUNTERED e CANCELLED (caem em
+  // Solicitacoes) e ACCEPTED (o cliente aceitou o valor: ele ja esta na fila).
+  if (type === "CUT_REQUESTED" || type === "FIT_IN_REQUESTED" || type === "FIT_IN_COUNTERED" || type === "FIT_IN_CANCELLED") {
     return "/(professional)/cut-requests";
   }
+  if (type === "FIT_IN_ACCEPTED") return "/(professional)/queue";
   // avisos-de-agenda-e-solicitacao (Backend 651514f): "Libere a sua agenda" leva a agenda.
   if (type === "AGENDA_RELEASE_PROMPT" || type === "AGENDA_NOT_OPEN") return "/(professional)/agenda";
   // notificacao-com-botao (PAR-11): "Confira o pagamento" leva aos Relatorios,
