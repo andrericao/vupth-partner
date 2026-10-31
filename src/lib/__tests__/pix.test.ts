@@ -8,6 +8,8 @@ import {
   obterChavePix,
   salvarChavePix,
   apagarChavePix,
+  obterOfertaPixDoDono,
+  salvarOfertaPixDoDono,
 } from "@lib/pix";
 
 jest.mock("@lib/api", () => ({ api: { get: jest.fn(), put: jest.fn(), delete: jest.fn() } }));
@@ -137,5 +139,24 @@ describe("pix — a API", () => {
     (api.delete as jest.Mock).mockResolvedValueOnce({});
     await apagarChavePix();
     expect(api.delete).toHaveBeenCalledWith("/professional/me/pix");
+  });
+});
+
+// interruptor-pix-do-dono (Backend 31/10): GET/PUT /professional/me/owner-pix-offer.
+describe("pix — oferecer o Pix do dono", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("le a oferta; ausente vale desligado", async () => {
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { offers_owner_pix: true } });
+    expect(await obterOfertaPixDoDono()).toBe(true);
+    expect(api.get).toHaveBeenCalledWith("/professional/me/owner-pix-offer");
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: {} });
+    expect(await obterOfertaPixDoDono()).toBe(false);
+  });
+
+  it("salva a escolha e devolve o que o servidor guardou", async () => {
+    (api.put as jest.Mock).mockResolvedValueOnce({ data: { offers_owner_pix: true } });
+    expect(await salvarOfertaPixDoDono(true)).toBe(true);
+    expect(api.put).toHaveBeenCalledWith("/professional/me/owner-pix-offer", { offers_owner_pix: true });
   });
 });
