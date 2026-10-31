@@ -31,7 +31,7 @@ describe("AbrirAgenda", () => {
   });
 
   it("tudo ou nada: se a API recusar, mostra o erro e nao marca como aberto", async () => {
-    const abrir = jest.fn().mockRejectedValue(new Error("x"));
+    const abrir = jest.fn().mockRejectedValue({ response: { status: 400, data: {} } });
     render(<AbrirAgenda hoje={hoje} buscar={jest.fn().mockResolvedValue([dia("2026-11-02")])} abrir={abrir} repetir={jest.fn()} />);
     fireEvent.press(await screen.findByTestId("agenda-dot-2026-11-02"));
     fireEvent.press(screen.getByText("Abrir 1 dia"));

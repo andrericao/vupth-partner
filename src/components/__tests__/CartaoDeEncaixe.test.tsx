@@ -1,4 +1,4 @@
-import { render, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { render, fireEvent, screen, waitFor, act } from "@testing-library/react-native";
 import { CartaoDeEncaixe } from "../CartaoDeEncaixe";
 import type { ApoioDoEncaixe, PedidoDeEncaixe } from "@lib/fitIn";
 
@@ -10,6 +10,9 @@ const apoio: ApoioDoEncaixe = {
   aheadNow: 2, behindNow: 1, durationMinutes: 30, sliceMinutesPerClient: 10, absorbedUnnoticed: false,
   estimatedFinish: null, closesAt: "18:00:00", passesClosing: true,
 };
+
+// Sem `response` o getApiErrorMessage diz "Sem conexao"; a frase propria do cartao vem do 400 sem message.
+const erroDaApi = { response: { status: 400, data: {} } };
 
 function montar(extra: Partial<React.ComponentProps<typeof CartaoDeEncaixe>> = {}) {
   const props = {
@@ -36,6 +39,8 @@ describe("CartaoDeEncaixe", () => {
     const p = montar();
     fireEvent.press(screen.getByTestId("encaixe-aceitar"));
     await waitFor(() => expect(p.onAceitar).toHaveBeenCalledWith("e1"));
+    // o botao fica desabilitado ate o `finally` do cartao soltar o ocupado
+    await act(async () => {});
     fireEvent.press(screen.getByText("Recusar"));
     await waitFor(() => expect(p.onRecusar).toHaveBeenCalledWith("e1"));
   });
@@ -51,7 +56,7 @@ describe("CartaoDeEncaixe", () => {
   });
 
   it("erro do servidor aparece no cartao", async () => {
-    montar({ onAceitar: jest.fn().mockRejectedValue(new Error("x")) });
+    montar({ onAceitar: jest.fn().mockRejectedValue(erroDaApi) });
     fireEvent.press(screen.getByTestId("encaixe-aceitar"));
     expect(await screen.findByText(/Não foi possível responder o encaixe/)).toBeTruthy();
   });

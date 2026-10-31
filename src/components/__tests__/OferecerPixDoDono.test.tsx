@@ -20,7 +20,7 @@ describe("OferecerPixDoDono", () => {
   });
 
   it("se salvar falhar, mantem o valor e avisa", async () => {
-    const salvar = jest.fn().mockRejectedValue(new Error("x"));
+    const salvar = jest.fn().mockRejectedValue({ response: { status: 400, data: {} } });
     render(<OferecerPixDoDono obter={jest.fn().mockResolvedValue(false)} salvar={salvar} />);
     fireEvent(await screen.findByTestId("oferecer-pix-do-dono"), "valueChange", true);
     expect(await screen.findByText(/Não foi possível salvar/)).toBeTruthy();

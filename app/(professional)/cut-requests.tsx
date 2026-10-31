@@ -152,7 +152,7 @@ export default function CutRequestsScreen() {
               <EstadoVazio
                 doodle="tempo"
                 titulo="Nenhum pedido de corte"
-                texto="Quando alguém pedir um corte com a fila fechada, o pedido aparece aqui."
+                texto="Quando alguém pedir um corte com a fila fechada, ele aparece aqui."
                 className="mt-2"
               />
             ) : (
