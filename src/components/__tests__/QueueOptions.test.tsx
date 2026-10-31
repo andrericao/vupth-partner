@@ -170,9 +170,10 @@ describe("QueueOptions", () => {
   });
 
   describe("solicitações de corte", () => {
-    it("sem pendentes o item não aparece", () => {
+    it("sem pendentes a linha aparece, sem badge", () => {
       const view = renderWithProvider(<QueueOptions />);
-      expect(view.queryByLabelText("Solicitações")).toBeNull();
+      expect(view.getByLabelText("Solicitações")).toBeTruthy();
+      expect(view.queryByTestId("menu-badge-requests")).toBeNull();
     });
 
     it("com pendentes: badge + onOpenRequests abre a lista", () => {

@@ -13,7 +13,7 @@ import { TabRouter, TabActions, CommonActions } from "@react-navigation/routers"
 // (href: null): pelo histórico, todas caíam na Fila.
 //
 // Com `backBehavior: "history"`, voltar leva à aba visitada antes.
-const ROTAS = ["queue", "cut-requests", "my-day", "settings", "sistema"];
+const ROTAS = ["queue", "my-day", "settings", "sistema"];
 const params = Object.fromEntries(ROTAS.map((r) => [r, undefined]));
 
 function voltarDoSistema(backBehavior: "firstRoute" | "history") {

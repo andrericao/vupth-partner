@@ -114,7 +114,7 @@ export default function CutRequestsScreen() {
       >
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader
-            title="Encaixes"
+            title="Solicitações"
             subtitle="Sem resposta, o pedido é negado sozinho."
             onBack={() => router.back()}
           />
@@ -123,8 +123,8 @@ export default function CutRequestsScreen() {
             {pending.length === 0 ? (
               <EstadoVazio
                 doodle="tempo"
-                titulo="Nenhum pedido de encaixe"
-                texto="Quando alguém pedir para encaixar, o pedido aparece aqui."
+                titulo="Nenhum pedido de corte"
+                texto="Quando alguém pedir um corte com a fila fechada, o pedido aparece aqui."
                 className="mt-2"
               />
             ) : (

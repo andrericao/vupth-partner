@@ -37,10 +37,10 @@ appId: ${APP_ID}
     label: "07.03a · confere o card da Fila: vale até 23:59"
 # Bateria 20:08: o push do pedido virou caixa ("Novo pedido de corte") no
 # instante do toque e o comeu — a tela ficou na Fila. Fecha a caixa e tenta de
-# novo ate os Encaixes mostrarem o pedido.
+# novo ate as Solicitacoes mostrarem o pedido.
 # Bateria 19:21 (emulador): o nome do cliente tambem aparece no card de
 # solicitacoes da Fila — o laco parava sem sair da Fila. Agora espera o
-# encaixe-quando, que so a tela Encaixes tem.
+# encaixe-quando, que so a tela Solicitacoes tem.
 - repeat:
     times: 4
     while:
@@ -49,14 +49,19 @@ appId: ${APP_ID}
     commands:
       - runFlow:
           file: ../apoio/fechar_aviso.yaml
+      # DEC-142: a aba Encaixes morreu; Solicitacoes mora em Opcoes da fila.
       - tapOn:
-          id: "aba-encaixes"
+          id: "aba-fila"
+      - tapOn:
+          text: "Opções da fila"
+      - tapOn:
+          text: "Solicitações"
       - extendedWaitUntil:
           visible:
             id: "encaixe-quando"
           timeout: 15000
           optional: true
-    label: "07.04 · toca em aba-encaixes (fecha a caixa do push, se vier)"
+    label: "07.04 · abre Solicitações (fecha a caixa do push, se vier)"
 - extendedWaitUntil:
     visible: ".*${output.CLIENTE_RECUSADO}.*"
     timeout: 60000
@@ -77,7 +82,7 @@ appId: ${APP_ID}
     timeout: 20000
     label: "07.07 · espera o pedido sumir"
 - assertVisible:
-    text: "Nenhum pedido de encaixe"
+    text: "Nenhum pedido de corte"
     label: "07.08 · confere a lista vazia"
 # aviso-de-corte-sem-ok (11d393f): com o app aberto, o push do pedido vira
 # caixa com OK. pedido-de-corte-outro-dia (817b0c5) e pedido-vence-no-horario
