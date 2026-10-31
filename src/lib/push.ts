@@ -31,7 +31,10 @@ export function notificationRoute(data: any, minhaLoja?: string | null): string 
   const solicitacoes = loja ? `/(owner)/affiliations?establishmentId=${loja}` : null;
   if (type === "AFFILIATION_REQUESTED") return solicitacoes;
   if (type === "AFFILIATION_INVITED") return "/(professional)/settings-vinculo";
-  if (type === "CUT_REQUESTED") return "/(professional)/cut-requests";
+  // aceitar-encaixe (DEC-136 a 141): o pedido e a contraproposta do cliente caem em Solicitacoes.
+  if (type === "CUT_REQUESTED" || type === "FIT_IN_REQUESTED" || type === "FIT_IN_COUNTERED") {
+    return "/(professional)/cut-requests";
+  }
   // avisos-de-agenda-e-solicitacao (Backend 651514f): "Libere a sua agenda" leva a agenda.
   if (type === "AGENDA_RELEASE_PROMPT" || type === "AGENDA_NOT_OPEN") return "/(professional)/agenda";
   // notificacao-com-botao (PAR-11): "Confira o pagamento" leva aos Relatorios,

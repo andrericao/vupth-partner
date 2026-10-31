@@ -410,6 +410,9 @@ describe("notificacao-com-botao", () => {
 
   it("Libere a sua agenda leva a agenda", () => {
     expect(notificationRoute({ type: "AGENDA_RELEASE_PROMPT", target: "agenda" })).toBe("/(professional)/agenda");
+    // aceitar-encaixe: o pedido e a contraproposta levam a Solicitacoes.
+    expect(notificationRoute({ type: "FIT_IN_REQUESTED" })).toBe("/(professional)/cut-requests");
+    expect(notificationRoute({ type: "FIT_IN_COUNTERED" })).toBe("/(professional)/cut-requests");
     // abrir-agenda (DEC-130): o push de domingo 10h leva a mesma agenda.
     expect(notificationRoute({ type: "AGENDA_NOT_OPEN", weekStart: "2026-11-02" })).toBe("/(professional)/agenda");
   });

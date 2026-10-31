@@ -10,6 +10,7 @@ import { viraTrabalhandoAoAbrirFila, fechaFilaAoSair } from "@lib/coerenciaFila"
 import { useIntervalStore, mealName } from "@store/interval.store";
 import { useProfessionalsWithQueueQuery } from "@hooks/useQueuePolling";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
+import { usePendingFitIns } from "@hooks/usePendingFitIns";
 import { getApiErrorMessage } from "@lib/api";
 import { parseApiTime } from "@lib/time";
 import { mealSignal, refeicoesDoDia } from "@lib/meals";
@@ -182,7 +183,9 @@ export default function QueueOptionsScreen() {
 
   // ---- Encaixes: contagem vem do hook compartilhado (mesma queryKey do
   // rodape e da tela de Encaixes — cache unico, sem requisicao extra).
-  const { count: pendingCutRequests } = usePendingCutRequests();
+  const { count: pedidosDeCorte } = usePendingCutRequests();
+  const { count: encaixesNovos } = usePendingFitIns();
+  const pendingCutRequests = pedidosDeCorte + encaixesNovos;
 
   return (
     <ScrollView className="w-full" contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
