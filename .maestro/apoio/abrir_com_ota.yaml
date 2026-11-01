@@ -30,6 +30,12 @@ appId: ${APP_ID}
       visible:
         id: "aba-menu"
     file: sair_dono.yaml
+# Logs 2026-10-31_213501 e 221040 (07a): o APK traz um bundle embutido que TAMBEM
+# mostra o app-commit (o do build). Esperar so o id parava no bundle velho e a
+# etapa rodava a tela antiga. Agora espera o commit ESPERADO (COMMIT do setup.sh,
+# lista separada por virgula); sem COMMIT (maestro test direto), qualquer um serve.
+- evalScript:
+    script: "${output.COMMIT_ESPERADO = (typeof COMMIT !== 'undefined' && COMMIT) ? '.*(' + String(COMMIT).split(',').map(function (c) { return c.trim(); }).filter(function (c) { return c; }).join('|') + ').*' : '.+'}"
 - launchApp:
     clearState: true
 - extendedWaitUntil:
@@ -40,10 +46,12 @@ appId: ${APP_ID}
     while:
       notVisible:
         id: "app-commit"
+        text: ${output.COMMIT_ESPERADO}
     commands:
       - extendedWaitUntil:
           visible:
             id: "app-commit"
+            text: ${output.COMMIT_ESPERADO}
           timeout: 15000
           optional: true
       - stopApp
@@ -56,7 +64,8 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "app-commit"
+      text: ${output.COMMIT_ESPERADO}
     timeout: 20000
-    label: "reprova se o OTA nao chegou (sem commit no rodape da entrada)"
+    label: "reprova se o OTA nao chegou (sem o commit esperado no rodape da entrada)"
 - runFlow:
     file: fechar_cortina.yaml
