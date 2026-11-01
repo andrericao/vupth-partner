@@ -32,7 +32,10 @@ import { useAplicarTema } from "@hooks/useAplicarTema";
 import { varsDaFonte } from "@lib/fonte";
 import { temaDeNavegacao } from "@lib/aplicarTema";
 import Constants from "expo-constants";
-import { iniciarSentry } from "@lib/sentry";
+import { iniciarSentry, capturarErro, marcarOta } from "@lib/sentry";
+import { iniciarAbertura, aberturaEstavel, JANELA_MS } from "@lib/aberturas";
+import { AvisoModoSeguro } from "@components/AvisoModoSeguro";
+import { TelaDeRecuperacao } from "@components/TelaDeRecuperacao";
 import { commitDoCodigo } from "@lib/commitDoCodigo";
 import { API_ENV, aoCienciaDePrecoExigida } from "@lib/api";
 
@@ -45,6 +48,20 @@ iniciarSentry({
   commit: commitDoCodigo(Constants.expoConfig),
   emTeste: !!process.env.JEST_WORKER_ID,
 });
+marcarOta();
+
+// log-de-falha-na-abertura: a marca "abrindo" (laco de queda -> modo seguro). Nunca derruba.
+if (!process.env.JEST_WORKER_ID) {
+  void iniciarAbertura(undefined, (r) => capturarErro(new Error(`queda na abertura x${r.quedas}`)));
+}
+
+// Uma tela que quebra mostra a recuperacao em vez de fechar o app (Expo Router).
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  useEffect(() => {
+    capturarErro(error);
+  }, [error]);
+  return <TelaDeRecuperacao onTentarDeNovo={retry} />;
+}
 
 // [marca-vupth] O fundo das telas vinha do DEFAULT do React Navigation —
 // `rgb(242,242,242)` (#F2F2F2), que nao e cor nenhuma da marca. Medido no
@@ -129,6 +146,18 @@ export default function RootLayout() {
     restaurarTema();
   }, [restaurarTema]);
   useAplicarTema();
+  // A primeira tela esta de pe (fontes e tema lidos) ou a janela acabou, o que vier
+  // primeiro: a abertura deu certo e a marca "abrindo" sai (log-de-falha-na-abertura).
+  const telaDePe = (fontLoaded || !!fontError) && temaRestaurado;
+  useEffect(() => {
+    if (process.env.JEST_WORKER_ID) return;
+    if (telaDePe) {
+      void aberturaEstavel();
+      return;
+    }
+    const t = setTimeout(() => void aberturaEstavel(), JANELA_MS);
+    return () => clearTimeout(t);
+  }, [telaDePe]);
   const navTheme = useMemo(() => temaDeNavegacao(escuro, cores), [escuro, cores]);
   // Tema + tamanho da letra numa so folha de variaveis, refeita so quando um dos
   // dois muda (vars() devolve um objeto novo a cada chamada).
@@ -169,6 +198,7 @@ export default function RootLayout() {
           <View style={[{ flex: 1 }, variaveis]}>
             {/* baixar-do-parceiro (11/10): so no site, so fora do iPhone. */}
             <FaixaBaixarApp />
+            <AvisoModoSeguro />
             {/* A tela so entra com o tema ja lido do aparelho: quem escolheu o
                 escuro nao ve a abertura piscar em claro. */}
             {(fontLoaded || fontError) && temaRestaurado ? <Slot /> : <Loading />}

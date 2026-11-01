@@ -29,6 +29,7 @@ import {
   CANAL_ALERTAS,
 } from "@lib/push";
 import { resolverAcaoDoPush } from "@lib/pushDecisao";
+import { emModoSeguro } from "@lib/aberturas";
 import { definirTarefaDoPush, TAREFA_DO_PUSH } from "@lib/pushBackground";
 import { useAuthStore } from "@store/auth.store";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -127,7 +128,7 @@ export function usePushRegistration() {
         { identifier: ACAO_CONTINUAR, buttonTitle: "Continuar", options: { opensAppToForeground: false } },
       ]).catch(() => {});
       // push-resolve-sem-abrir-o-app: o botao do push roda esta tarefa com o app fechado.
-      if (tarefaDefinida) Notifications.registerTaskAsync(TAREFA_DO_PUSH).catch(() => {});
+      if (tarefaDefinida && !emModoSeguro()) Notifications.registerTaskAsync(TAREFA_DO_PUSH).catch(() => {});
       // push-acoes-por-pergunta: pedido de corte e convite de dono, decididos na
       // propria notificacao, sem abrir o app.
       Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_RECUSAR, [

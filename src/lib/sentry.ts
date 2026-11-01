@@ -162,6 +162,48 @@ export function iniciarSentry({ dsn, ambiente, commit, emTeste, carregar = carre
   }
 }
 
+/** Manda um erro capturado (error boundary, queda na abertura) ao Sentry, ja limpo de dado pessoal. */
+export function capturarErro(erro: unknown, sdk: Sentry | null = sdkLigado): void {
+  if (!sdk) return;
+  try {
+    const e = erro instanceof Error ? erro : new Error(String(erro));
+    const limpo = new Error(limparTexto(e.message));
+    limpo.name = e.name;
+    limpo.stack = e.stack ? limparTexto(e.stack) : undefined;
+    sdk.captureException(limpo);
+  } catch {
+    // reportar nunca derruba o app
+  }
+}
+
+export type DadosDoOta = { updateId?: string | null; runtimeVersion?: string | null; embutido?: boolean | null };
+
+/** Qual OTA e qual runtime estavam rodando: liga a queda ao OTA (log-de-falha-na-abertura). */
+export function lerOta(): DadosDoOta {
+  try {
+    const Updates = require("expo-updates");
+    return {
+      updateId: Updates.updateId ?? null,
+      runtimeVersion: Updates.runtimeVersion ?? null,
+      embutido: Updates.isEmbeddedLaunch ?? null,
+    };
+  } catch {
+    return {};
+  }
+}
+
+export function marcarOta(sdk: Sentry | null = sdkLigado, dados: () => DadosDoOta = lerOta): void {
+  if (!sdk) return;
+  try {
+    const d = dados();
+    sdk.setTag("ota", d.updateId ?? "embutido");
+    sdk.setTag("runtime", d.runtimeVersion ?? "desconhecido");
+    if (d.embutido != null) sdk.setTag("bundle_embutido", String(d.embutido));
+  } catch {
+    // enfeite: nunca derruba o app
+  }
+}
+
 /** O Sentry esta ligado neste binario (DSN no build e modulo nativo)? So entao o botao "Reportar problema" aparece. */
 export function sentryLigado(sdk: Sentry | null = sdkLigado): boolean {
   return sdk !== null;

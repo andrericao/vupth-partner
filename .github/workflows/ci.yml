@@ -90,6 +90,9 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         env:
           MSG: ${{ github.event.head_commit.message }}
+          # Mesma variante do build preview (eas.json): sem isto o runtimeVersion por
+          # fingerprint sai diferente do build e o OTA nunca casa (app.config.js).
+          APP_VARIANT: preview
         run: eas update --branch preview --environment preview --message "$MSG" --non-interactive
 
       - name: Publish OTA (main -> production)

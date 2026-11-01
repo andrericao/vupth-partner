@@ -13,7 +13,8 @@
       "channel": "development",
       "env": {
         "EXPO_PUBLIC_API_ENV": "staging",
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "APP_VARIANT": "development"
       }
     },
     "preview": {
@@ -23,7 +24,8 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_ENV": "staging"
+        "EXPO_PUBLIC_API_ENV": "staging",
+        "APP_VARIANT": "preview"
       }
     },
     "production": {

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@lib/api";
+import { intervaloDaFilaAoVivo } from "@lib/pollingFila";
 import type { QueueResponse } from "@lib/types";
 import { useQueueSocket } from "@hooks/useQueueSocket";
 
@@ -21,7 +22,7 @@ export function useProfessionalQueue(
       return data;
     },
     enabled: !!professionalId && !!establishmentId,
-    refetchInterval: 60000,
+    refetchInterval: intervaloDaFilaAoVivo(60000),
     staleTime: 15000,
   });
 }
