@@ -423,9 +423,20 @@ if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml" "$ATUALIZACAO_MA
 else
   [ -n "$INSTALACAO" ] && echo "$CHAVE_DO_COMMIT" > "$MEMORIA"
   EXTRAS=()
+  # teste de fumaca (DEC-157): o portao. Falhou, nada mais roda (⛔); a marca verde vale por commit.
+  FUMACA_OK=1
+  if grep -qx "00b $MARCA" "$APROVADOS"; then
+    echo "⏭  etapa_00b (fumaca ja passou neste commit)" >> "$RELATORIO"
+  elif rodar "etapa_00b_fumaca" "$FLUXOS/avulsas/00b_fumaca.yaml" 300; then
+    aprovar 00b
+  else
+    FUMACA_OK=0
+    RESULTADO=1
+    echo "   ⛔ a fumaca falhou: o resto da bateria nao rodou" >> "$RELATORIO"
+  fi
   # etapas-curtas (Andre, 11/10): a etapa longa vira partes (07a, 07b...), cada
   # uma com a sua aprovacao; a F repete so a parte que falhou.
-  for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do
+  [ "$FUMACA_OK" = 1 ] && for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do
     NN=$(basename "$ARQ" .yaml)
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"
