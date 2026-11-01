@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { ligarFocoAoAppState } from "@lib/pollingFila";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -8,3 +9,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Segundo plano nao consulta (refetchInterval so roda com o app em foco).
+ligarFocoAoAppState();
