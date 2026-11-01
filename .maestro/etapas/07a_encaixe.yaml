@@ -255,6 +255,10 @@ appId: ${APP_ID}
       id: "dividas-do-relatorio"
     timeout: 20000
     label: "07.23e1 · a aba Dívidas abre (lista ou 'Nenhuma dívida')"
+# Log 2026-10-31_222450 (07.24): o passo de voltar ao Histórico tinha ficado só como
+# um `label` repetido, e a Semana/Mês (do Histórico) não aparecia na aba Dívidas.
+- tapOn:
+    id: "aba-relatorio-historico"
     label: "07.23e · volta para a aba Histórico"
 
 # conferencia-por-print (Andre, 10/10): expediente-no-card — Semana e Mes mostram
