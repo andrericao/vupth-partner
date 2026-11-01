@@ -6,6 +6,7 @@ import { useEstablishmentStore } from "@store/establishment.store";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { unregisterDevice } from "@lib/push";
+import { limparUltimaFila } from "@lib/ultimaFila";
 
 type User = {
   id: string;
@@ -46,6 +47,7 @@ type AuthState = {
 async function limparSessaoLocal() {
   await SecureStore.deleteItemAsync("vupth_access_token");
   await SecureStore.deleteItemAsync("vupth_refresh_token");
+  await limparUltimaFila();
 
   useEstablishmentStore.getState().reset();
   useProfessionalStore.getState().reset();

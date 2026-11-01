@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@lib/api";
+import { lerUltimaFila, salvarUltimaFila } from "@lib/ultimaFila";
 import { intervaloDaFilaAoVivo } from "@lib/pollingFila";
 import type { EstablishmentWithProfessionals } from "@lib/types";
 import { useQueueSocket } from "@hooks/useQueueSocket";
@@ -12,8 +14,26 @@ import { resumirAtendimento, linhaDoResumo } from "@lib/snapshotDiag";
 // so precisam do snapshot (checklist/dot de prontidao) e NAO devem abrir um
 // segundo socket para o mesmo topico.
 export function useProfessionalsWithQueueQuery(establishmentId: string | null) {
+  const queryClient = useQueryClient();
+  const queryKey = ["professionals-with-queue", establishmentId];
+
+  // Abre pintado com o ultimo dado guardado; o GET real chega por cima.
+  useEffect(() => {
+    if (!establishmentId) return;
+    let vivo = true;
+    lerUltimaFila(establishmentId).then((guardado) => {
+      if (vivo && guardado && queryClient.getQueryData(queryKey) === undefined) {
+        queryClient.setQueryData(queryKey, guardado);
+      }
+    });
+    return () => {
+      vivo = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [establishmentId, queryClient]);
+
   return useQuery({
-    queryKey: ["professionals-with-queue", establishmentId],
+    queryKey,
     queryFn: async () => {
       const { data } = await api.get<EstablishmentWithProfessionals>(
         `/establishment/id/${establishmentId}/professionals-with-queue`
@@ -24,6 +44,7 @@ export function useProfessionalsWithQueueQuery(establishmentId: string | null) {
       useWsDiagnosticsStore
         .getState()
         .marcarSnapshot("GET", linhaDoResumo("GET", resumirAtendimento(data, meuId)));
+      if (establishmentId) void salvarUltimaFila(establishmentId, data);
       return data;
     },
     enabled: !!establishmentId,
