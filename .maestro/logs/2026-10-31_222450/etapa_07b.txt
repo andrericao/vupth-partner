@@ -54,11 +54,16 @@ Running on ZF524LC5HC
   Run sair_profissional.yaml when id: aba-perfil is visible... COMPLETED
   Run sair_dono.yaml when id: aba-menu is visible...
   Run sair_dono.yaml when id: aba-menu is visible... SKIPPED
+  Run ${output.COMMIT_ESPERADO = (typeof COMMIT !== 'undefined' && COMMIT) ? '.*(' + String(COMMIT).split(',').map(function (c) { return c.trim(); }).filter(function (c) { return c; }).join('|') + ').*' : '.+'}... COMPLETED
   Launch app "${APP_ID}" with clear state... COMPLETED
   Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
-  Repeat while id: app-commit is not visible (up to 4 times)...
-  Repeat while id: app-commit is not visible (up to 4 times)... SKIPPED
-  reprova se o OTA nao chegou (sem commit no rodape da entrada)... COMPLETED
+  Repeat while "${output.COMMIT_ESPERADO}", id: app-commit is not visible (up to 4 times)...
+    Assert that (Optional) "${output.COMMIT_ESPERADO}", id: app-commit is visible... WARNED
+    Stop ${APP_ID}... COMPLETED
+    Launch app "${APP_ID}"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  Repeat while "${output.COMMIT_ESPERADO}", id: app-commit is not visible (up to 4 times)... COMPLETED
+  reprova se o OTA nao chegou (sem o commit esperado no rodape da entrada)... COMPLETED
   Run fechar_cortina.yaml...
     Run fechar_anr.yaml...
       Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
@@ -167,20 +172,116 @@ Running on ZF524LC5HC
   07.57 · pix-sem-nome · sem o campo do nome... COMPLETED
   07.59 · pix · toca em Salvar chave... COMPLETED
   07.60 · pix · a chave aparece cadastrada... COMPLETED
-  07.60a · pix-do-dono · rola ate Oferecer o Pix do dono... FAILED
-07.00 · roda 07b_perfil... FAILED
-
-No visible element found: id: oferecer-pix-do-dono
-
-Could not find a visible element matching selector: id: oferecer-pix-do-dono
-Tip: Try adjusting the following settings to improve detection:
-- `timeout`: current = 20000ms → Increase if you need more time to find the element
-- `speed`: current = 40 (0-100 scale) → Increase for faster scrolling if element is far away
-- `waitToSettleTimeoutMs`: current = Not defined → Set this value (e.g., 500ms) if your UI updates frequently between scrolls
-- `visibilityPercentage`: current = 100% → Lower this value if you want to detect partially visible elements
-- `centerElement`: current = false → Enable if you want the element to be centered after finding it
-
-
-==== Debug output (logs & screenshots) ====
-
-/home/andre/Documentos/programacao/vupth-project/vupth-partner/.maestro/logs/2026-10-31_221040/etapa_07b
+  07.60a · pix-do-dono · rola ate Oferecer o Pix do dono... COMPLETED
+  07.60b · pix-do-dono · vem desligado... COMPLETED
+  07.60c · pix-do-dono · liga... COMPLETED
+  07.60d · pix-do-dono · salvou e o texto mudou... COMPLETED
+  07.60e · pix-do-dono · desliga de volta... COMPLETED
+  07.60f · pix-do-dono · voltou ao padrao... COMPLETED
+  07.61 · pix · volta para o Perfil... COMPLETED
+  Run ../apoio/fechar_aviso.yaml...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run ../apoio/fechar_aviso.yaml... COMPLETED
+  07.62 · agenda · rola ate Minha agenda... COMPLETED
+  07.63 · agenda · toca em Minha agenda... COMPLETED
+  07.64 · agenda · confere o titulo... COMPLETED
+  07.64a · abrir-agenda · o cartao com os dias aparece... COMPLETED
+  07.64b · abrir-agenda · confere Repetir a minha agenda padrão... COMPLETED
+  07.65 · agenda · print antes...
+    Take screenshot para-o-andre_${NOME}... COMPLETED
+    Run ${console.log('PARA-O-ANDRE: ' + NOME + ' — ' + O_QUE)}... COMPLETED
+  07.65 · agenda · print antes... COMPLETED
+  07.66 · agenda · rola ate Salvar semana... COMPLETED
+  07.67 · agenda · toca em Salvar semana... COMPLETED
+  07.68 · agenda · salvou (ou o aviso do horario da loja)... COMPLETED
+  07.69 · agenda · print depois...
+    Take screenshot para-o-andre_${NOME}... COMPLETED
+    Run ${console.log('PARA-O-ANDRE: ' + NOME + ' — ' + O_QUE)}... COMPLETED
+  07.69 · agenda · print depois... COMPLETED
+  Run ../apoio/fechar_aviso.yaml...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+      Tap on id: dialogo-botao-0... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible... COMPLETED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  Run ../apoio/fechar_aviso.yaml... COMPLETED
+  07.70 · agenda · volta para o Perfil... COMPLETED
+  07.31 · aparencia · toca em aba-perfil... COMPLETED
+  07.32 · roda fechar_aviso...
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run fechar_anr.yaml...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+      Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+    Run fechar_anr.yaml... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Run flow when id: android:id/button1 is visible...
+    Run flow when id: android:id/button1 is visible... SKIPPED
+  07.32 · roda fechar_aviso... COMPLETED
+  07.33 · aparencia · rola ate Aparência... COMPLETED
+  07.34 · aparencia · toca em Aparência... COMPLETED
+  07.35 · aparencia · toca em Tamanho da fonte... COMPLETED
+  07.36 · aparencia · escolhe +2... COMPLETED
+  07.37 · aparencia · toca em Salvar... COMPLETED
+  07.38 · aparencia · continua na tela Aparência... COMPLETED
+  07.39 · aparencia · confere +2... COMPLETED
+  07.40 · aparencia · toca em Tamanho da fonte... COMPLETED
+  07.41 · aparencia · escolhe Normal... COMPLETED
+  07.42 · aparencia · toca em Salvar... COMPLETED
+  07.43 · aparencia · confere Normal... COMPLETED
+  07.43a · suporte · volta para o Perfil... COMPLETED
+  07.43b · suporte · rola ate Suporte... COMPLETED
+  07.43c · suporte · o botao Suporte esta no Perfil... COMPLETED
+  07.43d · cupom · rola ate Promoções... COMPLETED
+  07.43e · cupom · toca em Promoções... COMPLETED
+  07.43e1 · indicacao · o bloco Seu link aparece... COMPLETED
+  07.43e2 · indicacao · conta nova: nenhum cliente ainda... COMPLETED
+  07.43e3 · indicacao · conta nova: R$ 0,00 a receber... COMPLETED
+  07.43f · cupom · toca no campo Cupom... COMPLETED
+  07.43g · cupom · digita um cupom que nao existe... COMPLETED
+  Hide Keyboard... COMPLETED
+  07.43h · cupom · toca em Ativar... COMPLETED
+  07.43i · cupom · Cupom não encontrado.... COMPLETED
+  07.43j · cupom · volta ao Perfil... COMPLETED
+  07.43k · agendamentos · rola ate Agendamentos... COMPLETED
+  07.43l · agendamentos · toca em Agendamentos... COMPLETED
+  07.43m · agendamentos · conta nova: nenhum agendamento... COMPLETED
+  07.43m2 · agendamentos · sem etiqueta de pagamento adiantado... COMPLETED
+  07.43n · agendamentos · volta ao Perfil... COMPLETED
+  07.44 · roda sair_profissional...
+    Tap on id: aba-perfil... COMPLETED
+    Run fechar_aviso.yaml...
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run fechar_anr.yaml...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+        Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+      Run fechar_anr.yaml... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Run flow when id: android:id/button1 is visible...
+      Run flow when id: android:id/button1 is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+    Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 50%, timeout 20000 ms, with centering disabled... COMPLETED
+    Tap on "Sair da conta"... COMPLETED
+    Run flow when id: dialogo-botao-1 is not visible...
+    Run flow when id: dialogo-botao-1 is not visible... SKIPPED
+    Run confirmar.yaml...
+      Assert that id: dialogo-botao-1 is visible... COMPLETED
+      Tap on id: dialogo-botao-1... COMPLETED
+    Run confirmar.yaml... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+  07.44 · roda sair_profissional... COMPLETED
+07.00 · roda 07b_perfil... COMPLETED
