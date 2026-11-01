@@ -75,4 +75,14 @@ describe("eas.json e CI: a variante vem do env", () => {
     const linhas = f.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
     expect(linhas.sort()).toEqual(["/android", "/ios"]);
   });
+
+  it("o commit (extra) fica fora do fingerprint: senao cada commit mudaria o hash e nenhum OTA casaria", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { SourceSkips } = require("@expo/fingerprint");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const cfg = require(path.join(raiz, "fingerprint.config.js"));
+    expect(cfg.sourceSkips & SourceSkips.ExpoConfigExtraSection).toBeTruthy();
+    // o app.config.js e quem grava o commit em extra: o motivo de ele ter de sair do hash
+    expect(fs.readFileSync(path.join(raiz, "app.config.js"), "utf8")).toMatch(/extra:\s*\{[^}]*commit/);
+  });
 });
