@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { memo, useState, useCallback, useEffect, useRef } from "react";
 import { useVoltarAoTopo, usePilulaTopo } from "@hooks/useVoltarAoTopo";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { EntradaSuave } from "@components/EntradaSuave";
@@ -197,7 +197,10 @@ function ServingCard({
 // que sempre atende o 1o. O 1o segue em destaque com o selo "Proximo"
 // (redundancia proposital). "Atrasado" e so um selo; as acoes seguem a POSICAO
 // (ver src/lib/queueCard.ts).
-function QueueRow({
+// memo (estudo-desempenho, 3): a fila re-renderiza a cada poll/WS e o relogio; a
+// linha so refaz se o atendimento, a posicao ou o destaque mudarem. Por isso o
+// `onMenu` recebe o atendimento (o setMenuTarget e estavel), nao um closure novo.
+const QueueRow = memo(function QueueRow({
   attendance,
   position,
   isFirst,
@@ -206,7 +209,7 @@ function QueueRow({
   attendance: AttendanceInQueue;
   position: number;
   isFirst: boolean;
-  onMenu: () => void;
+  onMenu: (att: AttendanceInQueue) => void;
 }) {
   const { cores } = useTema();
   const isLate = attendance.status === "LATE";
@@ -215,7 +218,7 @@ function QueueRow({
 
   return (
     <Pressable
-      onPress={onMenu}
+      onPress={() => onMenu(attendance)}
       accessibilityRole="button"
       accessibilityLabel={`Opções de ${attendance.clientName}`}
       className={`bg-vupth-surface pl-4 active:bg-vupth-greenTint ${
@@ -283,7 +286,7 @@ function QueueRow({
       </View>
     </Pressable>
   );
-}
+});
 
 export default function ProfessionalQueueScreen() {
   const { cores, veu } = useTema();
@@ -1074,7 +1077,7 @@ export default function ProfessionalQueueScreen() {
                       attendance={att}
                       position={idx + 1}
                       isFirst={idx === 0}
-                      onMenu={() => setMenuTarget(att)}
+                      onMenu={setMenuTarget}
                     />
                   </LinhaQueSeMove>
                 </EntradaSuave>
