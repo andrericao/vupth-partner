@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { EstablishmentWithProfessionals } from "@lib/types";
-import { lerUltimaFila, limparUltimaFila, salvarUltimaFila } from "../ultimaFila";
+import { carregarArmazem, lerUltimaFila, limparUltimaFila, salvarUltimaFila } from "../ultimaFila";
 
 const dado = { id: "e1" } as unknown as EstablishmentWithProfessionals;
 
@@ -39,5 +39,26 @@ describe("ultimaFila", () => {
     await expect(salvarUltimaFila("e1", dado)).resolves.toBeUndefined();
     await expect(lerUltimaFila("e1")).resolves.toBeNull();
     await expect(limparUltimaFila()).resolves.toBeUndefined();
+  });
+
+  it("build sem o modulo nativo: o import lanca e nada quebra", async () => {
+    jest.isolateModules(() => {
+      jest.doMock("@react-native-async-storage/async-storage", () => {
+        throw new Error("[@RNC/AsyncStorage]: NativeModule: AsyncStorage is null.");
+      });
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const m = require("../ultimaFila") as typeof import("../ultimaFila");
+      expect(m.carregarArmazem()).toBeNull();
+      return Promise.all([
+        expect(m.salvarUltimaFila("e1", dado)).resolves.toBeUndefined(),
+        expect(m.lerUltimaFila("e1")).resolves.toBeNull(),
+        expect(m.limparUltimaFila()).resolves.toBeUndefined(),
+      ]);
+    });
+    jest.dontMock("@react-native-async-storage/async-storage");
+  });
+
+  it("com o modulo, carregarArmazem devolve o armazem", () => {
+    expect(carregarArmazem()).not.toBeNull();
   });
 });

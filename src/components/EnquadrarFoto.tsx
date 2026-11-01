@@ -215,6 +215,9 @@ export function EnquadrarFoto({ foto, onUsar, onCancelar, testID = "foto-editave
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
+        // Nao entregar o gesto a ninguem no meio da pinca (o Modal do Android pode
+        // pedir o responder e a segunda ponta se perde).
+        onPanResponderTerminationRequest: () => false,
         onPanResponderGrant: () =>
           setPos((p) => ({
             ...p,
