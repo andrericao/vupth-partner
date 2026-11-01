@@ -1,18 +1,18 @@
-Rodada 2026-10-31_213501 · TAG 213501 · commit esperado 464de0f
+Rodada 2026-10-31_221040 · TAG 221040 · commit esperado 464de0f
 ✅ 00_atualizacao
-✅ etapa_01a
-✅ etapa_01b
+⏭  etapa_01a (já passou no 464de0f — a completa roda de novo)
+⏭  etapa_01b (já passou no 464de0f — a completa roda de novo)
 ⏭  etapa_02 (já passou no f25bda8 — a completa roda de novo)
 ⏭  etapa_03 (já passou no 73200e1 — a completa roda de novo)
-✅ etapa_04a
+⏭  etapa_04a (já passou no 464de0f — a completa roda de novo)
 ⏭  etapa_04b (já passou no f25bda8 — a completa roda de novo)
 ⏭  etapa_05a (já passou no 73200e1 — a completa roda de novo)
 ⏭  etapa_05b (já passou no f25bda8 — a completa roda de novo)
 ⏭  etapa_06 (já passou no f25bda8 — a completa roda de novo)
 ❌ etapa_07a — parou em 07.08 · confere a lista vazia
-   print: .maestro/logs/2026-10-31_213501/FALHA_07.08_confere-a-lista-vazia.png
+   print: .maestro/logs/2026-10-31_221040/FALHA_07.08_confere-a-lista-vazia.png
 ❌ etapa_07b — parou em 07.60a · pix-do-dono · rola ate Oferecer o Pix do dono
-   print: .maestro/logs/2026-10-31_213501/FALHA_07.60a_pix-do-dono-rola-ate-oferecer-o-pix-do-dono.png
+   print: .maestro/logs/2026-10-31_221040/FALHA_07.60a_pix-do-dono-rola-ate-oferecer-o-pix-do-dono.png
 ⏭  etapa_08a (já passou no f25bda8 — a completa roda de novo)
 ⏭  etapa_08b (já passou no 73200e1 — a completa roda de novo)
 ⏭  etapa_09 (já passou no 73200e1 — a completa roda de novo)
