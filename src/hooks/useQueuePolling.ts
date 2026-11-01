@@ -21,11 +21,17 @@ export function useProfessionalsWithQueueQuery(establishmentId: string | null) {
   useEffect(() => {
     if (!establishmentId) return;
     let vivo = true;
-    lerUltimaFila(establishmentId).then((guardado) => {
-      if (vivo && guardado && queryClient.getQueryData(queryKey) === undefined) {
-        queryClient.setQueryData(queryKey, guardado);
-      }
-    });
+    try {
+      lerUltimaFila(establishmentId)
+        .then((guardado) => {
+          if (vivo && guardado && queryClient.getQueryData(queryKey) === undefined) {
+            queryClient.setQueryData(queryKey, guardado);
+          }
+        })
+        .catch(() => {});
+    } catch {
+      // opcional: nunca derruba o efeito
+    }
     return () => {
       vivo = false;
     };

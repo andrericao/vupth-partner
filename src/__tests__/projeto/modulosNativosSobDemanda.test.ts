@@ -26,6 +26,17 @@ describe("modulos nativos sob demanda", () => {
   const raiz = path.resolve(__dirname, "../../..");
   const todos = [...arquivos(path.join(raiz, "src")), ...arquivos(path.join(raiz, "app"))];
 
+  // (d) o async-storage so pode ser tocado por armazenamentoOpcional.ts: nenhum outro
+  // arquivo cita o pacote nem usa AsyncStorage direto (chamada fora do modulo reprova).
+  it("o async-storage so e citado em armazenamentoOpcional.ts", () => {
+    const fora = todos
+      .filter((f) => !f.endsWith(path.join("lib", "armazenamentoOpcional.ts")))
+      .filter((f) => !f.includes(`${path.sep}test-utils${path.sep}`)) // apoio de teste, nao entra no app
+      .filter((f) => /async-storage|AsyncStorage/.test(fs.readFileSync(f, "utf8")))
+      .map((f) => path.relative(raiz, f));
+    expect(fora).toEqual([]);
+  });
+
   it.each(SOB_DEMANDA)("%s nunca e importado de forma estatica", (modulo) => {
     const estatico = new RegExp(
       `^\\s*(import|export)\\s+(?!type\\b)[^;]*?from\\s+["']${modulo}["']|^\\s*import\\s+["']${modulo}["']`,
