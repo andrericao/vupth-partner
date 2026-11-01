@@ -76,6 +76,22 @@ appId: ${APP_ID}
     visible: "O cliente vê a posição dele na fila."
     timeout: 20000
     label: "05.40e · espera o cliente ve a posicao"
+# agenda-no-menu-da-fila e agenda-mes-e-ano (01/11): os atalhos do menu levam a agenda,
+# e a agenda diz o mes e o ano.
+- scrollUntilVisible:
+    element: "Minha agenda"
+    direction: DOWN
+    label: "05.40f · rola ate Minha agenda no menu da fila"
+- assertVisible:
+    text: "Agendamentos"
+    label: "05.40g · o menu da fila tem Agendamentos"
+- tapOn:
+    text: "Minha agenda"
+    label: "05.40h · toca em Minha agenda"
+- extendedWaitUntil:
+    visible: ".* de 20[0-9][0-9].*"
+    timeout: 20000
+    label: "05.40i · a agenda mostra o mes e o ano"
 - tapOn:
     id: "aba-fila"
     label: "05.41 · toca em aba-fila"

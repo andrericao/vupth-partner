@@ -15,6 +15,8 @@ describe("QueueOptions", () => {
   describe("navegacao (só o que NAO esta no rodape)", () => {
     it.each([
       ["Refeições", "/(professional)/meals?from=queue-options"],
+      ["Agendamentos", "/(professional)/agendados"],
+      ["Minha agenda", "/(professional)/agenda"],
     ])("'%s' navega para %s", (label, route) => {
       const view = renderWithProvider(<QueueOptions />);
       fireEvent.press(view.getByLabelText(label));
