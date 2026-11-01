@@ -1,3 +1,4 @@
+import { emModoSeguro } from "@lib/aberturas";
 import { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -95,7 +96,7 @@ export function carregarGestosNativos(
   nativo: unknown = TurboModuleRegistry.get("RNGestureHandlerModule") ?? NativeModules.RNGestureHandlerModule
 ): GestosNativos | null {
   try {
-    if (!nativo) return null;
+    if (!nativo || emModoSeguro()) return null; // modo seguro: so o PanResponder
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require("react-native-gesture-handler") as GestosNativos;
   } catch {

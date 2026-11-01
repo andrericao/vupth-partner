@@ -1,4 +1,5 @@
 import type { EstablishmentWithProfessionals } from "@lib/types";
+import { aguardarAbertura, emModoSeguro } from "@lib/aberturas";
 
 // estudo-desempenho 5 (DEC-151): o ULTIMO snapshot da fila fica guardado so para
 // o app abrir pintado enquanto o GET real atualiza. Sem persister do React Query:
@@ -33,6 +34,8 @@ export async function salvarUltimaFila(
   data: EstablishmentWithProfessionals
 ): Promise<void> {
   try {
+    await aguardarAbertura();
+    if (emModoSeguro()) return; // modo seguro: o opcional fica desligado
     const a = carregarArmazem();
     if (!a) return;
     const g: Guardado = { establishmentId, data };
@@ -47,6 +50,8 @@ export async function lerUltimaFila(
   establishmentId: string
 ): Promise<EstablishmentWithProfessionals | null> {
   try {
+    await aguardarAbertura();
+    if (emModoSeguro()) return null;
     const a = carregarArmazem();
     if (!a) return null;
     const bruto = await a.getItem(CHAVE);

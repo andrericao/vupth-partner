@@ -10,6 +10,9 @@ import {
   marcarContexto,
   reportarProblema,
   sentryLigado,
+  capturarErro,
+  marcarOta,
+  lerOta,
 } from "../sentry";
 
 // sentry (Andre, 09/10): inerte sem DSN e nos testes; com DSN, liga com o
@@ -187,5 +190,43 @@ describe("reportarProblema", () => {
     expect(sdk.captureFeedback).not.toHaveBeenCalled();
     const quebra = { captureFeedback: () => { throw new Error("x"); } } as any;
     expect(reportarProblema({ mensagem: "oi" }, quebra)).toBe(false);
+  });
+});
+
+// log-de-falha-na-abertura (Andre, 01/11)
+describe("capturarErro e marcarOta", () => {
+  it("manda o erro ao Sentry sem e-mail, token nem chave Pix", () => {
+    const sdk = { captureException: jest.fn() } as any;
+    capturarErro(new Error("falhou para ana@x.com com Bearer abc.def e pix 1b4e28ba-2fa1-11d2-883f-0016d3cca427"), sdk);
+    const enviado = sdk.captureException.mock.calls[0][0] as Error;
+    expect(enviado.message).not.toMatch(/ana@x\.com|abc\.def|1b4e28ba/);
+    expect(enviado.message).toMatch(/\[e-mail\]/);
+  });
+
+  it("aceita valor que nao e Error; sem SDK ou com SDK quebrado nao lanca", () => {
+    const sdk = { captureException: jest.fn() } as any;
+    capturarErro("texto solto", sdk);
+    expect(sdk.captureException).toHaveBeenCalled();
+    expect(() => capturarErro(new Error("x"), null)).not.toThrow();
+    const quebra = { captureException: () => { throw new Error("x"); } } as any;
+    expect(() => capturarErro(new Error("x"), quebra)).not.toThrow();
+  });
+
+  it("marca o OTA, o runtime e se o bundle e o embutido", () => {
+    const sdk = { setTag: jest.fn() } as any;
+    marcarOta(sdk, () => ({ updateId: "u-1", runtimeVersion: "rv", embutido: false }));
+    expect(sdk.setTag).toHaveBeenCalledWith("ota", "u-1");
+    expect(sdk.setTag).toHaveBeenCalledWith("runtime", "rv");
+    expect(sdk.setTag).toHaveBeenCalledWith("bundle_embutido", "false");
+    marcarOta(sdk, () => ({}));
+    expect(sdk.setTag).toHaveBeenCalledWith("ota", "embutido");
+    expect(sdk.setTag).toHaveBeenCalledWith("runtime", "desconhecido");
+  });
+
+  it("sem SDK ou com leitura quebrada nao lanca; lerOta nunca lanca", () => {
+    expect(() => marcarOta(null)).not.toThrow();
+    const sdk = { setTag: jest.fn() } as any;
+    expect(() => marcarOta(sdk, () => { throw new Error("x"); })).not.toThrow();
+    expect(typeof lerOta()).toBe("object");
   });
 });
