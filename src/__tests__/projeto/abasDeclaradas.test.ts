@@ -28,11 +28,11 @@ describe("toda tela do profissional é declarada no layout", () => {
     expect(declaradas.has(tela)).toBe(true);
   });
 
-  it("o rodapé tem as QUATRO abas do desenho, e nada além", () => {
+  it("o rodapé tem as TRES abas do desenho, e nada além", () => {
     // Quem some daqui vira aba fantasma; quem entra sem desenho vira surpresa.
     const visiveis = [...LAYOUT.matchAll(/<Tabs\.Screen[\s\S]{0,400}?name="([a-z-]+)"/g)]
       .map((m) => m[1])
       .filter((n) => !new RegExp(`name="${n}"\\s+options=\\{HIDDEN\\}`).test(LAYOUT));
-    expect(visiveis).toEqual(["queue", "cut-requests", "my-day", "settings"]);
+    expect(visiveis).toEqual(["queue", "my-day", "settings"]);
   });
 });

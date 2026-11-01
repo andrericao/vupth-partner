@@ -4,6 +4,11 @@ import { FotoEditavel } from "../FotoEditavel";
 
 jest.mock("react-native-safe-area-context", () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
 
+// O jest-expo finge o modulo nativo do gesture-handler; aqui vale o caminho sem ele (PanResponder).
+jest.mock("react-native-gesture-handler", () => {
+  throw new Error("sem o modulo nativo");
+});
+
 // Como nas redes sociais (Andre, 02/10 — o selo sozinho parecia icone de
 // "crop"): foto tocavel + selo de camera + "Editar foto" embaixo; o toque abre
 // uma folha de baixo com Tirar foto · Escolher da galeria · Remover foto.

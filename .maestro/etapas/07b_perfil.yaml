@@ -91,6 +91,30 @@ appId: ${APP_ID}
     visible: "E-mail · pix_m${output.TAG}@teste.com"
     timeout: 20000
     label: "07.60 · pix · a chave aparece cadastrada"
+# interruptor-pix-do-dono (DEC-138): padrao desligado; ligar salva e o texto muda.
+- scrollUntilVisible:
+    element:
+      id: "oferecer-pix-do-dono"
+    direction: DOWN
+    timeout: 20000
+    label: "07.60a · pix-do-dono · rola ate Oferecer o Pix do dono"
+- assertVisible:
+    text: "O cliente paga só na sua chave Pix."
+    label: "07.60b · pix-do-dono · vem desligado"
+- tapOn:
+    id: "oferecer-pix-do-dono"
+    label: "07.60c · pix-do-dono · liga"
+- extendedWaitUntil:
+    visible: ".*pagar também no Pix do dono.*"
+    timeout: 20000
+    label: "07.60d · pix-do-dono · salvou e o texto mudou"
+- tapOn:
+    id: "oferecer-pix-do-dono"
+    label: "07.60e · pix-do-dono · desliga de volta"
+- extendedWaitUntil:
+    visible: "O cliente paga só na sua chave Pix."
+    timeout: 20000
+    label: "07.60f · pix-do-dono · voltou ao padrao"
 - back:
     label: "07.61 · pix · volta para o Perfil"
 # conferencia-por-print (Andre, 10/10): agenda-do-profissional — Perfil → Minha
@@ -111,6 +135,16 @@ appId: ${APP_ID}
     visible: "Os dias e horários em que você atende.*"
     timeout: 20000
     label: "07.64 · agenda · confere o titulo"
+# abrir-agenda (DEC-130): os dots para abrir os dias vem acima do editor da semana.
+# So confere (nao abre dia: isso mudaria a agenda que outras etapas usam).
+- extendedWaitUntil:
+    visible:
+      id: "abrir-agenda"
+    timeout: 20000
+    label: "07.64a · abrir-agenda · o cartao com os dias aparece"
+- assertVisible:
+    text: "Repetir a minha agenda padrão"
+    label: "07.64b · abrir-agenda · confere Repetir a minha agenda padrão"
 - runFlow:
     file: ../apoio/para_o_andre.yaml
     env:

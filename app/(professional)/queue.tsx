@@ -19,7 +19,8 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
-import { confirmarRecebimento, perguntarPagamento, perguntarForma, mensagemDoFim } from "@lib/pagamento";
+import { confirmarRecebimento, perguntarPagamento, perguntarForma } from "@lib/pagamento";
+import { perguntarValorRecebido } from "@lib/bonificacao";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -39,8 +40,9 @@ import { EstadoVazio } from "@components/EstadoVazio";
 import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
-import { AvisoDeDivida } from "@components/AvisoDeDivida";
 import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
+import { useAvisoDaVespera } from "@hooks/useAvisoDaVespera";
+import { usePendingFitIns } from "@hooks/usePendingFitIns";
 import { useQuery } from "@tanstack/react-query";
 import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
@@ -630,9 +632,10 @@ export default function ProfessionalQueueScreen() {
     });
     if (recebido === undefined) return;
     if (recebido) {
+      const valorRecebido = await perguntarValorRecebido(attendanceId);
       const forma = await perguntarForma();
       try {
-        await confirmarRecebimento(attendanceId, forma);
+        await confirmarRecebimento(attendanceId, forma, valorRecebido);
       } catch (error: any) {
         Alert.alert(
           "Atendimento finalizado",
@@ -641,8 +644,6 @@ export default function ProfessionalQueueScreen() {
         return;
       }
     }
-    const mensagem = mensagemDoFim(recebido ? "PAID" : "PENDING");
-    if (mensagem) await avisar({ titulo: "Atendimento finalizado", mensagem });
   };
 
   // Inicia o atendimento escolhido. Se houver um atendimento EM ANDAMENTO, ele e
@@ -743,6 +744,10 @@ export default function ProfessionalQueueScreen() {
   // backend aceita profissional afiliado no PATCH /open-status; o gate de fechar
   // com fila ativa (409 ESTABLISHMENT_HAS_ACTIVE_ATTENDANCES) e tratado pelo
   // handleAction, que traduz a mensagem.
+  // aceitar-encaixe: os encaixes novos somam no badge do menu ⋯ (DEC-142).
+  const { count: encaixesNovos } = usePendingFitIns();
+  // abrir-agenda (DEC-130): no domingo, a caixa da vespera para quem esta em modo agenda.
+  useAvisoDaVespera(professional?.operation_mode === "AGENDA_ONLY");
   // C2: contagem de encaixes pendentes pelo hook compartilhado — a MESMA
   // queryKey do rodape e da tela de Encaixes, entao e um cache so. O WS
   // pessoal (eventos CUT_*, assinado no useQueueSocket) invalida; o refetch
@@ -911,7 +916,7 @@ export default function ProfessionalQueueScreen() {
                 <NotificationBadge
                   testID="menu-dot"
                   count={queueMenuCount({
-                    pendingRequests: pendingCutRequests,
+                    pendingRequests: pendingCutRequests + encaixesNovos,
                     mealPending: currentMealSignal != null,
                   })}
                 />
@@ -922,7 +927,6 @@ export default function ProfessionalQueueScreen() {
           />
   
           <AvisoCienciaDePreco />
-          <AvisoDeDivida />
           <AvisoDeAgenda />
           <CarrosselDeCampanhas />
 

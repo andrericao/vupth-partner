@@ -121,3 +121,19 @@ export async function salvarChavePix(p: { tipo: TipoDeChave; chave: string; titu
 export async function apagarChavePix(): Promise<void> {
   await api.delete("/professional/me/pix");
 }
+
+/**
+ * interruptor-pix-do-dono (Backend, 31/10; Andre DEC-138): o profissional
+ * escolhe se o cliente tambem pode pagar no Pix do dono. Padrao: desligado.
+ */
+export async function obterOfertaPixDoDono(): Promise<boolean> {
+  const { data } = await api.get<{ offers_owner_pix: boolean }>("/professional/me/owner-pix-offer");
+  return !!data?.offers_owner_pix;
+}
+
+export async function salvarOfertaPixDoDono(oferecer: boolean): Promise<boolean> {
+  const { data } = await api.put<{ offers_owner_pix: boolean }>("/professional/me/owner-pix-offer", {
+    offers_owner_pix: oferecer,
+  });
+  return !!data?.offers_owner_pix;
+}

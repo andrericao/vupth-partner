@@ -11,6 +11,18 @@ appId: ${APP_ID}
     direction: DOWN
     visibilityPercentage: 50
 - tapOn: "Sair da conta"
+# Log 2026-10-30_193632 (01.A7): o Perfil recarregou (cadastro incompleto) e o scroll
+# voltou ao topo antes do toque pegar; sem caixa, rola e toca de novo.
+- runFlow:
+    when:
+      notVisible:
+        id: "dialogo-botao-1"
+    commands:
+      - scrollUntilVisible:
+          element: "Sair da conta"
+          direction: DOWN
+          visibilityPercentage: 50
+      - tapOn: "Sair da conta"
 - runFlow: confirmar.yaml
 - extendedWaitUntil:
     visible: "Como você vai usar o Vupth?"

@@ -4,27 +4,20 @@ import { View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { rotulosCabem } from "@lib/rotulosDaAba";
 import { TabBarIcon, divisorDaBarraDeAbas, tabBarShadow } from "@components/TabBarIcon";
-import { NotificationBadge } from "@components/NotificationBadge";
 import { useProfessionalCompletion } from "@hooks/useProfessionalCompletion";
-import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { hasAnyPending } from "@lib/completion";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { useProfessionalStore } from "@store/professional.store";
 import { useTema } from "@hooks/useTema";
 
-// RODAPE = LUGARES. Quatro abas, como o Pencil desenha em `Tab Bar Professional`:
-// Fila · Encaixes · Relatórios · Perfil.
+// RODAPE = LUGARES. Tres abas: Fila · Relatórios · Perfil (DEC-142, Andre,
+// 31/10).
 //
-// [marca-vupth] ENCAIXES virou ABA (correcao, 2026-08-21). Ela era rota OCULTA,
-// alcancavel so por Fila -> Opcoes da fila -> Solicitacoes, e a linha de
-// Solicitacoes so aparece QUANDO ja existe pedido. Isso nao e so divergencia de
-// desenho: o pedido de encaixe EXPIRA EM 5 MINUTOS (auto-negado server-side).
-// Enterrado dois niveis abaixo, o profissional podia simplesmente nao ver a
-// tempo — e quem perde e o cliente, que fica sem resposta. Como aba com badge,
-// a pendencia fica visivel de qualquer lugar do app.
-//
-// Mesma logica que ja tinha promovido `queues` no rodape do DONO: quem decide o
-// rodape e a frequencia/urgencia de uso, nao a categoria.
+// A aba ENCAIXES morreu. O que o cliente pede (hoje, os pedidos de corte com a
+// fila fechada; depois, os encaixes novos) entra pela linha "Solicitações" de
+// Opções da fila (menu ⋯ da Fila), que aparece SEMPRE e leva o badge da soma —
+// o mesmo badge vai ao botão ⋯. A tela `cut-requests` segue existindo, so que
+// oculta: e o destino da linha e do toque na push (`@lib/push`).
 //
 // As ACOES do dia seguem em "Opcoes da fila" (banco no header da Fila), sem
 // duplicar o rodape.
@@ -41,7 +34,6 @@ export default function ProfessionalLayout() {
   const mostrarRotulo = rotulosCabem(width, fontScale, "profissional");
   const { completion } = useProfessionalCompletion();
   const perfilDot = hasAnyPending(completion);
-  const { count: encaixes } = usePendingCutRequests();
   // pagamento-pix: dot na aba Relatorios quando um cliente diz que pagou.
   const temProfissional = !!useProfessionalStore((s) => s.professional?.id);
   const { aguardando: pagamentosAConferir } = usePagamentosPendentes(temProfissional);
@@ -90,24 +82,6 @@ export default function ProfessionalLayout() {
           title: "Fila",
           tabBarButtonTestID: "aba-fila",
           tabBarIcon: ({ focused }) => <TabBarIcon name="queue" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="cut-requests"
-        options={{
-          title: "Encaixes",
-          tabBarButtonTestID: "aba-encaixes",
-          tabBarIcon: ({ focused }) => (
-            <View>
-              <TabBarIcon name="fits" focused={focused} />
-              {/* Badge com CONTAGEM (nao dot): o Pencil desenha o numero, e
-                  aqui ele importa — sao pedidos distintos, cada um com o seu
-                  relogio de 5min correndo. */}
-              <View style={{ position: "absolute", top: -6, right: -12 }}>
-                <NotificationBadge count={encaixes} testID="tab-badge-encaixes" />
-              </View>
-            </View>
-          ),
         }}
       />
       <Tabs.Screen
@@ -164,6 +138,7 @@ export default function ProfessionalLayout() {
         }}
       />
       <Tabs.Screen name="queue-options" options={HIDDEN} />
+      <Tabs.Screen name="cut-requests" options={HIDDEN} />
       <Tabs.Screen name="settings-account" options={HIDDEN} />
       <Tabs.Screen name="settings-vinculo" options={HIDDEN} />
       <Tabs.Screen name="my-services" options={HIDDEN} />

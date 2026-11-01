@@ -86,9 +86,10 @@ appId: ${APP_ID}
     label: "04.16 · digita 3000"
 - hideKeyboard:
     label: "04.17 · fecha o teclado"
-# preco-sobre-o-total (DEC-54): R$ 30 digitados -> o cliente paga R$ 32.90.
+# preco-sobre-o-total (DEC-54): R$ 30 digitados -> o cliente paga R$ 32,90.
+# Log 2026-10-31_174548 (04.17a): "$" é âncora de regex e o valor sai com vírgula.
 - assertVisible:
-    text: "R$ 32.90"
+    text: "R\\$ 32,90"
     label: "04.17a · preco · o cliente paga R$ 32.90"
 - scrollUntilVisible:
     element: "Adicionar serviço"

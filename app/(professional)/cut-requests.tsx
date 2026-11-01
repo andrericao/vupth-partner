@@ -25,6 +25,9 @@ import { hhmmFromIso } from "@lib/time";
 import { getApiErrorMessage } from "@lib/api";
 import { formatCurrency } from "@utils/summaryCalculations";
 import { EstadoVazio } from "@components/EstadoVazio";
+import { CartaoDeEncaixe } from "@components/CartaoDeEncaixe";
+import { usePendingFitIns } from "@hooks/usePendingFitIns";
+import { aceitarEncaixe, contraporEncaixe, recusarEncaixe } from "@lib/fitIn";
 import { DotNoCanto } from "@components/DotNoCanto";
 import { PendingDot } from "@components/PendingDot";
 import { useTema } from "@hooks/useTema";
@@ -67,6 +70,22 @@ export default function CutRequestsScreen() {
     refetchInterval: 30000,
   });
   const pending = activeCutRequests(data, nowMs);
+
+  // aceitar-encaixe (DEC-136 a 141): os encaixes novos entram aqui, junto dos
+  // pedidos de corte (DEC-142). Aceitar poe o cliente na fila, entao a Fila relê.
+  const encaixes = usePendingFitIns();
+  const responderEncaixe = (acao: () => Promise<unknown>, entrouNaFila: boolean) => async () => {
+    await acao();
+    await encaixes.refetch();
+    if (entrouNaFila) {
+      await releDepoisDeDecidir(true, {
+        releStatus: fetchMe,
+        statusAtual: () => useProfessionalStore.getState().professional?.work_status,
+        ficarTrabalhando: () => updateMyStatus("WORKING"),
+        invalidar: (chave) => queryClient.invalidateQueries({ queryKey: chave }),
+      });
+    }
+  };
 
   const [busyId, setBusyId] = useState<string | null>(null);
   const decide = async (id: string, accept: boolean) => {
@@ -114,17 +133,26 @@ export default function CutRequestsScreen() {
       >
         <View className="flex-1 pb-12 px-4">
           <ScreenHeader
-            title="Encaixes"
+            title="Solicitações"
             subtitle="Sem resposta, o pedido é negado sozinho."
             onBack={() => router.back()}
           />
   
           <View className="gap-3">
-            {pending.length === 0 ? (
+            {encaixes.paraResponder.map((p) => (
+              <CartaoDeEncaixe
+                key={p.id}
+                pedido={p}
+                onAceitar={(id) => responderEncaixe(() => aceitarEncaixe(id), true)()}
+                onRecusar={(id) => responderEncaixe(() => recusarEncaixe(id), false)()}
+                onContrapor={(id, extra) => responderEncaixe(() => contraporEncaixe(id, extra), false)()}
+              />
+            ))}
+            {pending.length === 0 && encaixes.paraResponder.length === 0 ? (
               <EstadoVazio
                 doodle="tempo"
-                titulo="Nenhum pedido de encaixe"
-                texto="Quando alguém pedir para encaixar, o pedido aparece aqui."
+                titulo="Nenhum pedido de corte"
+                texto="Quando alguém pedir um corte com a fila fechada, ele aparece aqui."
                 className="mt-2"
               />
             ) : (

@@ -39,6 +39,8 @@ export function CarrosselDeCampanhas({ listar = campanhasAtivas, de = "professio
     if (aoTocar) return aoTocar(c);
     router.push((de === "owner" ? "/(owner)/promocoes?from=owner" : "/(professional)/promocoes") as any);
   };
+  // Largura do card = medida padrao dos dois apps (Andre, 29/10): um card so ocupa a tela menos as
+  // margens de 16; com varios, tela - 64 (no minimo 220).
   const largura = campanhas.length > 1 ? Math.max(width - 64, 220) : undefined;
 
   return (

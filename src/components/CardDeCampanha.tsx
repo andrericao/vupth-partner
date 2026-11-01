@@ -4,9 +4,11 @@ import { View, Text, Pressable } from "react-native";
 import { valorDoCard, type Campanha } from "@lib/campanhas";
 
 // card-ticket-pontilhado (Andre, 24/10): o ticket do mockup 2 do Client, nos dois
-// apps — surface, borda tracejada, picote so no lado esquerdo (ticket-picote-so-na-esquerda), valor em Archivo 800. Os tres
-// tipos (desconto, sem taxa, indicacao) e os estados encerrada e esgotada
-// (esmaecidos, com selo). Cor so por token; sem sombra.
+// apps, valor em Archivo 800. Os tres tipos (desconto, sem taxa, indicacao) e os estados
+// encerrada e esgotada (esmaecidos, com selo). Cor so por token; sem sombra.
+// cards-de-promocao-iguais-ao-client (Andre, 29/10): este e o card PADRAO dos dois apps (altura e largura
+// daqui; o Client copia). Cor: fundo greenTint, texto e borda onGreenTint, borda tracejada de 2 px, raio 20,
+// picote redondo de 16 px so na esquerda (cor de background + a mesma borda), padding vertical 16.
 export type EstadoDoCard = "ENCERRADA" | "ESGOTADA" | null;
 
 type Props = {
@@ -28,33 +30,33 @@ const ROTULO: Record<Exclude<EstadoDoCard, null>, string> = { ENCERRADA: "Encerr
 export function CardDeCampanha({ campanha, linha, estado = null, onPress, testID, acessibilidade, codigo, children }: Props) {
   const conteudo = (
     <View
-      className={`bg-vupth-surface border-2 border-dashed border-vupth-border rounded-card px-5 py-4 ${
+      className={`bg-vupth-greenTint border-2 border-dashed border-vupth-onGreenTint rounded-card px-5 py-4 ${
         estado ? "opacity-60" : ""
       }`}
     >
       {/* o picote: um meio-circulo na cor da tela, so na esquerda, sobre a borda */}
       <View
         pointerEvents="none"
-        className="absolute -left-2.5 top-1/2 -mt-2 w-4 h-4 rounded-full bg-vupth-background border-2 border-dashed border-vupth-border"
+        className="absolute -left-2.5 top-1/2 -mt-2 w-4 h-4 rounded-full bg-vupth-background border-2 border-dashed border-vupth-onGreenTint"
       />
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1">
-          <Text testID={testID ? `${testID}-valor` : undefined} className="font-display text-xxl text-vupth-textPrimary">
+          <Text testID={testID ? `${testID}-valor` : undefined} className="font-display text-xxl text-vupth-onGreenTint">
             {valorDoCard(campanha)}
           </Text>
-          <Text className="font-heading text-sm text-vupth-textSecondary">{campanha.name}</Text>
+          <Text className="font-heading text-sm text-vupth-onGreenTint">{campanha.name}</Text>
         </View>
         {estado && (
-          <View testID={testID ? `${testID}-estado` : undefined} className="bg-vupth-border px-2.5 py-1 rounded-full">
-            <Text className="font-body text-f11 font-bold text-vupth-textPrimary">{ROTULO[estado]}</Text>
+          <View testID={testID ? `${testID}-estado` : undefined} className="bg-vupth-onGreenTint px-2.5 py-1 rounded-full">
+            <Text className="font-body text-f11 font-bold text-vupth-greenTint">{ROTULO[estado]}</Text>
           </View>
         )}
       </View>
-      {linha ? <Text className="font-body text-xs text-vupth-textSecondary mt-1">{linha}</Text> : null}
+      {linha ? <Text className="font-body text-xs text-vupth-onGreenTint mt-1">{linha}</Text> : null}
       {codigo ? (
         <Text
           testID={testID ? `${testID}-codigo` : undefined}
-          className="font-mono text-xs text-vupth-textPrimary mt-1"
+          className="font-mono text-xs text-vupth-onGreenTint mt-1"
         >
           {`Código: ${codigo}`}
         </Text>

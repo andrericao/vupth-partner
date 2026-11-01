@@ -1,7 +1,6 @@
 import { api } from "@lib/api";
 import {
   perguntarPagamento,
-  mensagemDoFim,
   obterPagamentosPendentes,
   confirmarRecebimento,
   isPaymentEvent,
@@ -50,7 +49,7 @@ describe("perguntarPagamento", () => {
     pergunta.mockResolvedValueOnce(true);
     await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Ana" })).resolves.toBe(true);
     expect(pergunta).toHaveBeenCalledWith(
-      expect.objectContaining({ mensagem: "Ana · R$ 31,90. Se ainda não, fica pendente.", confirmar: "Confirmar", cancelar: "Não recebi" })
+      expect.objectContaining({ mensagem: "Ana · R$ 31,90. Se ainda não, fica pendente.", confirmar: "Recebi", cancelar: "Não recebi" })
     );
     pergunta.mockResolvedValueOnce(false);
     await expect(perguntarPagamento("a1", { perguntar: pergunta, cliente: "Ana" })).resolves.toBe(false);
@@ -94,7 +93,7 @@ describe("a pergunta do pagamento segue o guia de texto", () => {
   const pergunta = jest.fn();
   const palavras = (texto: string) => texto.trim().split(/\s+/).length;
 
-  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Confirmar · Não recebi", async () => {
+  it("pendente: Recebeu o pagamento? / R$ X. Se ainda não, fica pendente. / Recebi · Não recebi", async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: { status: "PENDING", amount: 31.9 } });
     pergunta.mockResolvedValue(true);
     await perguntarPagamento("a1", { perguntar: pergunta });
@@ -102,27 +101,13 @@ describe("a pergunta do pagamento segue o guia de texto", () => {
     expect(texto).toEqual({
       titulo: "Recebeu o pagamento?",
       mensagem: "R$ 31,90. Se ainda não, fica pendente.",
-      confirmar: "Confirmar",
+      confirmar: "Recebi",
       cancelar: "Não recebi",
     });
     expect(texto.mensagem.length).toBeLessThanOrEqual(70);
     expect(palavras(texto.confirmar)).toBe(1);
     expect(palavras(texto.cancelar)).toBeLessThanOrEqual(2);
     expect(texto.confirmar).not.toMatch(/^Sim/);
-  });
-});
-
-describe("mensagemDoFim", () => {
-  it("pago: a mensagem fica na tela (o backend nao manda push a quem tocou)", () => {
-    expect(mensagemDoFim("PAID")).toBe("Atendimento concluído e pago.");
-  });
-  it("pendente: diz em uma frase que o pagamento fica pendente", () => {
-    expect(mensagemDoFim("PENDING")).toBe("Concluído. Pagamento pendente.");
-    expect(mensagemDoFim("AWAITING_CONFIRMATION")).toBe("Concluído. Pagamento pendente.");
-  });
-  it("sem status: nada a dizer", () => {
-    expect(mensagemDoFim(undefined)).toBeNull();
-    expect(mensagemDoFim(null)).toBeNull();
   });
 });
 

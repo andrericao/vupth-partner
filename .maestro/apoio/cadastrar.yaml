@@ -17,11 +17,6 @@ appId: ${APP_ID}
     optional: true
 - inputText: ${EMAIL}
 - hideKeyboard
-# senha-min-max-visivel (DEC-79) + cadastro-pendente-no-partner (22/10): o minimo e o
-# maximo ficam so na lista de requisitos da senha, nao dentro do campo.
-- assertVisible:
-    text: "De 6 a 64 caracteres"
-    label: "senha · a lista de requisitos mostra De 6 a 64 caracteres"
 - repeat:
     times: 4
     while:
@@ -35,6 +30,13 @@ appId: ${APP_ID}
           timeout: 2000
 - inputText: ${SENHA}
 - hideKeyboard
+# senha-min-max-visivel (DEC-79) + cadastro-pendente-no-partner (22/10): o minimo e o
+# maximo ficam so na lista de requisitos da senha, nao dentro do campo. A lista so
+# aparece com a senha digitada (register.tsx: password.length > 0); antes disso o
+# campo vazio nao a mostra (log 2026-10-31_174548, 01.01).
+- assertVisible:
+    text: "De 6 a 64 caracteres"
+    label: "senha · a lista de requisitos mostra De 6 a 64 caracteres"
 - repeat:
     times: 4
     while:

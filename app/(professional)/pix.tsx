@@ -2,6 +2,7 @@ import { View, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { ChavePix } from "@components/ChavePix";
+import { OferecerPixDoDono } from "@components/OferecerPixDoDono";
 import { useProfessionalStore } from "@store/professional.store";
 
 // pagamento-pix (contrato do Backend 2a2b0ec): Perfil → Chave Pix.
@@ -17,6 +18,9 @@ export default function PixScreen() {
         />
         <View className="mt-6">
           <ChavePix nomeDaConta={professional?.name} />
+        </View>
+        <View className="mt-6">
+          <OferecerPixDoDono />
         </View>
       </View>
     </ScrollView>

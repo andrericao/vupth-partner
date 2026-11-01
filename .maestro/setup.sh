@@ -350,9 +350,19 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   # antes de cada etapa, pelo adb, para a proxima nao abrir o app por baixo dela.
   adb -s "$SERIAL" shell cmd statusbar collapse >/dev/null 2>&1 || true
   foto_na_frente || echo "⚠️  $1 — a imagem de teste nao entrou de novo na galeria (a foto pode sair errada)"
-  "${CMD[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
+  # maestro-trava-na-atualizacao (Andre, 28/10): etapa que passa do limite REPROVA
+  # (rc 124), em vez de ficar parada sem contar como erro. Quem fecha e o timeout;
+  # o pkill tira o Maestro que sobrar, para a proxima etapa nao brigar com ele.
+  local limite="${3:-$ETAPA_MAX}"
+  timeout -k 30 "$limite" "${CMD[@]}" "${EXTRAS[@]}" -e "TAG=$TAG" --debug-output "$RODADA/$1" --flatten-debug-output \
     --test-output-dir "$RODADA/$1" "$2" 2>&1 | tee "$saida"
   local rc="${PIPESTATUS[0]}"
+  if [ "$rc" = "124" ] || [ "$rc" = "137" ]; then
+    pkill -f "maestro.cli.AppKt test" 2>/dev/null
+    local parado
+    parado=$(grep -E '^ *[0-9]{2}\.[0-9A-Z]{1,2}[0-9a-z]* · ' "$saida" | tail -1 | sed -E 's/^ +//; s/\.\.\. .*$//')
+    echo "TRAVOU: a etapa passou de ${limite}s e foi encerrada${parado:+ — ultimo passo visto: $parado}" | tee -a "$saida"
+  fi
   juntar_para_o_andre "$1"
   if [ "$rc" = "0" ]; then
     echo "✅ $1" >> "$RELATORIO"
@@ -362,6 +372,10 @@ rodar() { # $1 = nome no relatorio, $2 = arquivo da etapa
   grep -q "device '.*' not found" "$saida" && motivo=" — o celular saiu do adb (nao e o app)"
   local passo
   passo=$(onde_parou "$saida")
+  if [ "$rc" = "124" ] || [ "$rc" = "137" ]; then
+    passo=$(grep -m1 -oP '^TRAVOU: .*ultimo passo visto: \K.*' "$saida")
+    motivo=" — TRAVOU: passou de ${limite}s (reprovada pelo limite de tempo)"
+  fi
   echo "❌ $1 — parou em ${passo:-?}$motivo" >> "$RELATORIO"
   print_da_falha "$1" "$passo" | tee -a "$RELATORIO"
   return 1
@@ -380,11 +394,35 @@ if [ "$EMULADOR" = "1" ]; then
   echo "Emulador: esperas x$FATOR ($FLUXOS)"
 fi
 
+# Limites de tempo (maestro-trava-na-atualizacao): a 00 (atualizacao) e cada etapa.
+# No emulador valem FATOR vezes, como as esperas dos fluxos. Mude por variavel:
+# ETAPA_MAX=3600 ATUALIZACAO_MAX=900 bash .maestro/setup.sh ...
+MULT=1; [ "$EMULADOR" = "1" ] && MULT="${FATOR:-2}"
+ATUALIZACAO_MAX="${ATUALIZACAO_MAX:-$((600 * MULT))}"
+ETAPA_MAX="${ETAPA_MAX:-$((2400 * MULT))}"
+
+# maestro-atualizacao-por-commit (Andre, 28/10): o commit ja verificado fica em
+# .maestro/.commit_verificado (no .gitignore), junto do aparelho e da hora da
+# instalacao do APK (reinstalar o app zera a memoria). Igual ao de agora: a 00 nao
+# toca em "Verificar atualizacao" (so confere o commit do rodape). Diferente: atualiza
+# e, passando a 00, grava o novo. --completa nao muda isso: o OTA so muda com um push.
+MEMORIA="$RAIZ/.maestro/.commit_verificado"
+INSTALACAO=$(adb -s "$SERIAL" shell dumpsys package com.vupth.partner.preview 2>/dev/null | grep -m1 lastUpdateTime | tr -d ' \r')
+CHAVE_DO_COMMIT="$SERIAL|$INSTALACAO|$MARCA"
+EXTRAS=()
+if [ -n "$INSTALACAO" ] && [ "$(cat "$MEMORIA" 2>/dev/null)" = "$CHAVE_DO_COMMIT" ]; then
+  echo "Commit $MARCA ja verificado neste aparelho: a 00 nao verifica atualizacao de novo."
+  EXTRAS=(-e PULAR_ATUALIZACAO=1)
+fi
+
 RESULTADO=0
-if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml"; then
+if ! rodar 00_atualizacao "$FLUXOS/avulsas/00_atualizacao.yaml" "$ATUALIZACAO_MAX"; then
   RESULTADO=1
   echo "   (as etapas nao rodaram: com a versao errada o teste nao serve)" >> "$RELATORIO"
+  rm -f "$MEMORIA"
 else
+  [ -n "$INSTALACAO" ] && echo "$CHAVE_DO_COMMIT" > "$MEMORIA"
+  EXTRAS=()
   # etapas-curtas (Andre, 11/10): a etapa longa vira partes (07a, 07b...), cada
   # uma com a sua aprovacao; a F repete so a parte que falhou.
   for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do

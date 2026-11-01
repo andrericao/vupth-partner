@@ -18,11 +18,16 @@ import { SkeletonList } from "@components/Skeleton";
 import { ExpedienteCard } from "@components/ExpedienteCard";
 import { QuantoCobrarCard, MOSTRAR_QUANTO_COBRAR } from "@components/QuantoCobrarCard";
 import { PendenciasDoRelatorio } from "@components/PendenciasDoRelatorio";
+import { SaldosComOApp } from "@components/SaldosComOApp";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
+import { AbasDoRelatorio, type AbaDoRelatorio } from "@components/AbasDoRelatorio";
+import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
+import { buscarDivida, CHAVE_DIVIDA } from "@lib/dividaPorFora";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { confirmarRecebimento, formatarReais, perguntarForma, recusarRecebimento } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
+import { perguntarValorRecebido } from "@lib/bonificacao";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { buscarGateway, CHAVE_GATEWAY } from "@lib/gateway";
 import { useQueuePolling } from "@hooks/useQueuePolling";
@@ -196,7 +201,10 @@ export default function MyDayScreen() {
 
   const professional = useProfessionalStore((s) => s.professional);
   const queryClient = useQueryClient();
-  const { itens: pagamentos } = usePagamentosPendentes(!!professional?.id);
+  const { itens: pagamentos, aguardando } = usePagamentosPendentes(!!professional?.id);
+  // dividas-e-pendentes-no-relatorio: as abas do topo; a divida com o app saiu da Fila.
+  const [aba, setAba] = useState<AbaDoRelatorio>("historico");
+  const { data: divida } = useQuery({ queryKey: CHAVE_DIVIDA, queryFn: buscarDivida, staleTime: 60_000, retry: false });
   const { data: gateway } = useQuery({ queryKey: CHAVE_GATEWAY, queryFn: buscarGateway, staleTime: 60_000, retry: false });
   const recebi = async (attendanceId: string, jaConfirmou = false) => {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
@@ -208,9 +216,10 @@ export default function MyDayScreen() {
         confirmar: "Recebi",
       }));
     if (!ok) return;
+    const valorRecebido = await perguntarValorRecebido(attendanceId);
     const forma = await perguntarForma();
     try {
-      await confirmarRecebimento(attendanceId, forma);
+      await confirmarRecebimento(attendanceId, forma, valorRecebido);
       await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));
@@ -367,139 +376,161 @@ export default function MyDayScreen() {
             onBack={() => router.navigate("/(professional)/queue" as any)}
           />
 
-          <View className="flex-row flex-wrap gap-2 mt-6">
-            {periods.map((p) => (
-              <Chip key={p.key} label={p.label} ativo={period === p.key} onPress={() => setPeriod(p.key)} />
-            ))}
-          </View>
+          <AbasDoRelatorio
+            aba={aba}
+            onMudar={setAba}
+            pendentes={pagamentos.length}
+            dividas={divida?.items?.length ?? 0}
+            precisaConferir={aguardando > 0}
+          />
 
-          <ExpedienteCard periodo={period} workdays={report?.workdays} />
-          {/* ocultar-quanto-cobrar-relatorios (Andre, 24/10): so esconder; o codigo fica. */}
-          {MOSTRAR_QUANTO_COBRAR && <QuantoCobrarCard />}
-
-          {/* pagamento-pix (Andre, 10/10): os atendimentos com pagamento pendente
-              e o "Recebi". O dot da aba some quando nao ha o que conferir. */}
-          <PagamentosPendentes itens={pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
-
-          <View className="h-px bg-vupth-border my-6" />
-
-          {period === "day" && (
-            <View className="flex-row gap-3 mb-4">
-              <Numero rotulo="Na fila agora" valor={queueCount} />
-              <Numero rotulo="Espera estimada" valor={`${waitMinutes} min`} />
-            </View>
-          )}
-
-          {reportLoading ? (
-            <View className="mt-2">
-              <SkeletonList count={2} />
-            </View>
-          ) : (
-            <View className="gap-3">
-              {/* [marca-vupth] Receita e o card-heroi (brandGreen, primeira
-                  posição) — o Pencil (PROF · 03) da esse tratamento pro
-                  faturado, o único número em dinheiro da tela. */}
-              {/* Relatorio SEM os 6% (bloqueava a publicacao): o heroi e o que
-                  o profissional recebeu. Backend antigo sem `netRevenue` cai no
-                  total, como antes. Rotulos a validar com o Design. */}
-              <View className="flex-row gap-3">
-                <Numero
-                  rotulo={contaDoPeriodo || report?.netRevenue != null ? "Você recebeu" : "Receita"}
-                  valor={formatarReais(contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0)}
-                  destaque
-                />
-                <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
-              </View>
-
-              <View className="flex-row gap-3">
-                <Numero
-                  rotulo="Duração média"
-                  valor={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
-                  tamanho="text-xl"
-                />
-                <Numero
-                  rotulo="Serviço mais feito"
-                  valor={humanizeService(report?.topService ?? null)}
-                  tamanho="text-md"
-                />
-              </View>
-
-              {contaDoPeriodo ? (
-                <SecaoRecolhivel testID="conta-do-periodo-secao" titulo="A conta do período">
-                  <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
-                </SecaoRecolhivel>
-              ) : (
-                report?.netRevenue != null && (
-                  <Text className="font-body text-xs text-vupth-textSecondary">
-                    {`Clientes pagaram ${formatarReais(Number(report?.totalRevenue ?? 0))}. A conta linha a linha está no fim do histórico.`}
-                  </Text>
-                )
+          {aba === "pendentes" && (
+            <>
+              <PagamentosPendentes itens={pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
+              {pagamentos.length === 0 && (
+                <Text testID="pendentes-vazio" className="font-body text-sm text-vupth-textSecondary mt-4">
+                  Nenhum pagamento pendente.
+                </Text>
               )}
-              <PendenciasDoRelatorio report={report} />
-              <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
-              {avisoDoPrecoAntigo(precoAntigo) && (
-                <View className="bg-vupth-warning p-3 rounded-card">
-                  <Text className="font-body text-xs text-vupth-onAccentPeach">{avisoDoPrecoAntigo(precoAntigo)}</Text>
-                </View>
-              )}
-
-              <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
-                {period === "day" ? "Hoje" : period === "week" ? "Últimos 7 dias" : "Últimos 30 dias"} •
-                atendimentos finalizados
-              </Text>
-            </View>
+            </>
           )}
 
-          <View className="h-px bg-vupth-border my-6" />
+          {aba === "dividas" && <DividasDoRelatorio />}
 
-          <Text className="font-heading text-xl text-vupth-textPrimary mb-3">Histórico</Text>
-
-          <View className="flex-row flex-wrap gap-2 mb-4">
-            {filters.map((f) => (
-              <Chip key={f.key} label={f.label} ativo={filter === f.key} onPress={() => setFilter(f.key)} />
-            ))}
-          </View>
-
-          {historyLoading && (
-            <View className="mt-2">
-              <SkeletonList count={3} />
-            </View>
-          )}
-
-          {historyError && (
-            <View className="bg-vupth-warning p-4 rounded-card mt-2">
-              <Text className="font-body text-vupth-onAccentPeach text-center">{historyError}</Text>
-              <Pressable onPress={loadHistory} accessibilityRole="button" className="mt-2 active:opacity-70">
-                <Text className="font-body text-sm text-vupth-onAccentPeach text-center">Tentar novamente</Text>
-              </Pressable>
-            </View>
-          )}
-
-          {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
-            <Text className="font-body text-vupth-textSecondary text-center mt-6">
-              {period === "day"
-                ? "Nenhum atendimento hoje"
-                : period === "week"
-                  ? "Nenhum atendimento nos últimos 7 dias"
-                  : "Nenhum atendimento nos últimos 30 dias"}
-            </Text>
-          )}
-
-          {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
-            <View>
-              {history.map((item) => (
-                <AttendanceHistoryCard
-                  key={item.id}
-                  item={item}
-                  conta={composicaoDoAtendimento(item, myServices)}
-                />
+          {aba === "historico" && (
+            <>
+            <View className="flex-row flex-wrap gap-2 mt-4">
+              {periods.map((p) => (
+                <Chip key={p.key} label={p.label} ativo={period === p.key} onPress={() => setPeriod(p.key)} />
               ))}
-              {carregandoMais && (
-                <View testID="historico-carregando-mais" className="mt-2">
-                  <SkeletonList count={2} />
-                </View>
-              )}
             </View>
+
+            <ExpedienteCard periodo={period} workdays={report?.workdays} />
+            {/* ocultar-quanto-cobrar-relatorios (Andre, 24/10): so esconder; o codigo fica. */}
+            {MOSTRAR_QUANTO_COBRAR && <QuantoCobrarCard />}
+
+            <View className="h-px bg-vupth-border my-6" />
+
+            {period === "day" && (
+              <View className="flex-row gap-3 mb-4">
+                <Numero rotulo="Na fila agora" valor={queueCount} />
+                <Numero rotulo="Espera estimada" valor={`${waitMinutes} min`} />
+              </View>
+            )}
+
+            {reportLoading ? (
+              <View className="mt-2">
+                <SkeletonList count={2} />
+              </View>
+            ) : (
+              <View className="gap-3">
+                {/* [marca-vupth] Receita e o card-heroi (brandGreen, primeira
+                    posição) — o Pencil (PROF · 03) da esse tratamento pro
+                    faturado, o único número em dinheiro da tela. */}
+                {/* Relatorio SEM os 6% (bloqueava a publicacao): o heroi e o que
+                    o profissional recebeu. Backend antigo sem `netRevenue` cai no
+                    total, como antes. Rotulos a validar com o Design. */}
+                <View className="flex-row gap-3">
+                  <Numero
+                    rotulo={contaDoPeriodo || report?.netRevenue != null ? "Você recebeu" : "Receita"}
+                    valor={formatarReais(contaDoPeriodo?.voceRecebeu ?? report?.netRevenue ?? report?.totalRevenue ?? 0)}
+                    destaque
+                  />
+                  <Numero rotulo="Atendimentos" valor={report?.totalAttendances ?? 0} />
+                </View>
+
+                <View className="flex-row gap-3">
+                  <Numero
+                    rotulo="Duração média"
+                    valor={`${Math.round(report?.avgDurationMinutes ?? 0)} min`}
+                    tamanho="text-xl"
+                  />
+                  <Numero
+                    rotulo="Serviço mais feito"
+                    valor={humanizeService(report?.topService ?? null)}
+                    tamanho="text-md"
+                  />
+                </View>
+
+                {contaDoPeriodo ? (
+                  <SecaoRecolhivel testID="conta-do-periodo-secao" titulo="A conta do período">
+                    <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
+                  </SecaoRecolhivel>
+                ) : (
+                  report?.netRevenue != null && (
+                    <Text className="font-body text-xs text-vupth-textSecondary">
+                      {`Clientes pagaram ${formatarReais(Number(report?.totalRevenue ?? 0))}. A conta linha a linha está no fim do histórico.`}
+                    </Text>
+                  )
+                )}
+                <PendenciasDoRelatorio report={report} />
+                <SaldosComOApp report={report} />
+                <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
+                {avisoDoPrecoAntigo(precoAntigo) && (
+                  <View className="bg-vupth-warning p-3 rounded-card">
+                    <Text className="font-body text-xs text-vupth-onAccentPeach">{avisoDoPrecoAntigo(precoAntigo)}</Text>
+                  </View>
+                )}
+
+                <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
+                  {period === "day" ? "Hoje" : period === "week" ? "Últimos 7 dias" : "Últimos 30 dias"} •
+                  atendimentos finalizados
+                </Text>
+              </View>
+            )}
+
+            <View className="h-px bg-vupth-border my-6" />
+
+            <Text className="font-heading text-xl text-vupth-textPrimary mb-3">Histórico</Text>
+
+            <View className="flex-row flex-wrap gap-2 mb-4">
+              {filters.map((f) => (
+                <Chip key={f.key} label={f.label} ativo={filter === f.key} onPress={() => setFilter(f.key)} />
+              ))}
+            </View>
+
+            {historyLoading && (
+              <View className="mt-2">
+                <SkeletonList count={3} />
+              </View>
+            )}
+
+            {historyError && (
+              <View className="bg-vupth-warning p-4 rounded-card mt-2">
+                <Text className="font-body text-vupth-onAccentPeach text-center">{historyError}</Text>
+                <Pressable onPress={loadHistory} accessibilityRole="button" className="mt-2 active:opacity-70">
+                  <Text className="font-body text-sm text-vupth-onAccentPeach text-center">Tentar novamente</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
+              <Text className="font-body text-vupth-textSecondary text-center mt-6">
+                {period === "day"
+                  ? "Nenhum atendimento hoje"
+                  : period === "week"
+                    ? "Nenhum atendimento nos últimos 7 dias"
+                    : "Nenhum atendimento nos últimos 30 dias"}
+              </Text>
+            )}
+
+            {!historyLoading && historyLoaded && !historyError && history.length > 0 && (
+              <View>
+                {history.map((item) => (
+                  <AttendanceHistoryCard
+                    key={item.id}
+                    item={item}
+                    conta={composicaoDoAtendimento(item, myServices)}
+                  />
+                ))}
+                {carregandoMais && (
+                  <View testID="historico-carregando-mais" className="mt-2">
+                    <SkeletonList count={2} />
+                  </View>
+                )}
+              </View>
+            )}
+            </>
           )}
         </View>
       </ScrollView>

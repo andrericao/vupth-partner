@@ -230,18 +230,16 @@ export function QueueOptions({
       )}
 
       <Section title="Hoje" />
-      {pendingRequests > 0 && (
-        <Row
-          icon={<Inbox size={18} color={cores.textPrimary} />}
-          label="Solicitações"
-          hint="fila fechada — pedidos de corte"
-          badge={pendingRequests}
-          onPress={() => {
-            if (onOpenRequests) onOpenRequests();
-            else comingSoon("Aceitar ou recusar solicitações de corte");
-          }}
-        />
-      )}
+      <Row
+        icon={<Inbox size={18} color={cores.textPrimary} />}
+        label="Solicitações"
+        hint={pendingRequests > 0 ? "o que os clientes pedem" : "nada pedido agora"}
+        badge={pendingRequests > 0 ? pendingRequests : undefined}
+        onPress={() => {
+          if (onOpenRequests) onOpenRequests();
+          else comingSoon("Aceitar ou recusar solicitações de corte");
+        }}
+      />
       <Row
         icon={<UtensilsCrossed size={18} color={cores.textPrimary} />}
         label={mealLabel ?? "Refeições"}

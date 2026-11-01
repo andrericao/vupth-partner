@@ -1,0 +1,28 @@
+Rodada 2026-10-31_174548 · TAG 174548 · commit esperado f25bda8,799721b,73200e1,0a886ae,acb895f,44d451e
+✅ 00_atualizacao
+❌ etapa_01a — parou em 01.01 · roda cadastrar
+   print: .maestro/logs/2026-10-31_174548/FALHA_01.01_roda-cadastrar.png
+❌ etapa_01b — parou em 01.17 · espera Semana
+   print: .maestro/logs/2026-10-31_174548/FALHA_01.17_espera-semana.png
+✅ etapa_02
+⏭  etapa_03 (já passou no 73200e1 — a completa roda de novo)
+❌ etapa_04a — parou em 04.17a · preco · o cliente paga R$ 32.90
+   print: .maestro/logs/2026-10-31_174548/FALHA_04.17a_preco-o-cliente-paga-r-32-90.png
+✅ etapa_04b
+⏭  etapa_05a (já passou no 73200e1 — a completa roda de novo)
+✅ etapa_05b
+✅ etapa_06
+❌ etapa_07a — parou em 07.02 · confere Você está: Fora…
+   print: .maestro/logs/2026-10-31_174548/FALHA_07.02_confere-voce-esta-fora.png
+❌ etapa_07b — parou em 07.60a · pix-do-dono · rola ate Oferecer o Pix do dono
+   print: .maestro/logs/2026-10-31_174548/FALHA_07.60a_pix-do-dono-rola-ate-oferecer-o-pix-do-dono.png
+✅ etapa_08a
+⏭  etapa_08b (já passou no 73200e1 — a completa roda de novo)
+⏭  etapa_09 (já passou no 73200e1 — a completa roda de novo)
+⏭  etapa_10a (já passou no 73200e1 — a completa roda de novo)
+⏭  etapa_10b (já passou no 73200e1 — a completa roda de novo)
+⏭  etapa_11 (já passou no 73200e1 — a completa roda de novo)
+✅ etapa_12
+⏭  etapa_14 (já passou no 73200e1 — a completa roda de novo)
+⏭  etapa_15a (já passou no 73200e1 — a completa roda de novo)
+⏭  etapa_15b (já passou no 73200e1 — a completa roda de novo)

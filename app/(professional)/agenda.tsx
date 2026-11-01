@@ -2,6 +2,7 @@ import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from "react-na
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { EditorDeHorarios } from "@components/EditorDeHorarios";
+import { AbrirAgenda } from "@components/AbrirAgenda";
 import { useProfessionalStore } from "@store/professional.store";
 import {
   buscarAgenda,
@@ -37,6 +38,9 @@ export default function AgendaScreen() {
             subtitle="Os dias e horários em que você atende."
             onBack={() => router.navigate("/(professional)/settings" as any)}
           />
+          <View className="mt-4 mb-6">
+            <AbrirAgenda />
+          </View>
           <EditorDeHorarios
             chave={id}
             chamadas={{

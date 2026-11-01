@@ -53,6 +53,25 @@ env:
     visible: "Como você vai usar o Vupth?"
     timeout: 10000
     label: "00.04 · espera a entrada"
+# maestro-atualizacao-por-commit (Andre, 28/10): o setup.sh guarda o commit ja
+# verificado (aparelho + instalacao + commit). Igual ao de agora, PULAR_ATUALIZACAO=1:
+# nao toca em "Verificar atualizacao"; o commit instalado vem do rodape da entrada
+# (app-commit) e o 00.12 confere do mesmo jeito.
+- evalScript:
+    script: "${output.PULAR = typeof PULAR_ATUALIZACAO !== 'undefined' && String(PULAR_ATUALIZACAO) === '1'}"
+    label: "00.04b · o commit ja foi verificado? (PULAR_ATUALIZACAO)"
+- runFlow:
+    when:
+      true: ${output.PULAR}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "app-commit"
+          timeout: 20000
+          label: "00.04c · espera o commit no rodape da entrada"
+      - copyTextFrom:
+          id: "app-commit"
+      - evalScript: ${output.INSTALADO = String(maestro.copiedText).trim()}
 - runFlow:
     file: ../apoio/entrar.yaml
     env:
@@ -66,7 +85,16 @@ env:
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "00.07 · roda fechar_aviso"
+# A memoria do commit verificado pode mentir (emulador restaurado, OTA nao aplicado:
+# 30/10, instalado 41914ff com a memoria de 44d451e). Se o rodape nao bate com o
+# esperado, a 00 atualiza em vez de reprovar de cara.
+- evalScript:
+    script: >-
+      ${output.ATUALIZAR = !output.PULAR || !String(typeof COMMIT === 'undefined' ? '' : COMMIT).split(',').map(function (c) { return c.trim(); }).filter(function (c) { return c; }).some(function (e) { var i = String(output.INSTALADO || '').trim(); return i && (i.indexOf(e) === 0 || e.indexOf(i) === 0); })}
+    label: "00.07b · precisa verificar atualização? (memória não bate com o rodapé)"
 - runFlow:
+    when:
+      true: ${output.ATUALIZAR}
     file: ../apoio/atualizar.yaml
     label: "00.08 · Perfil → Versão do app → Verificar atualização"
 - runScript:
