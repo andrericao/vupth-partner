@@ -10,6 +10,7 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
+import { NOME_MAX } from "@lib/limitesDeTexto";
 import { SelectService } from "@components/SelectService";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -96,6 +97,7 @@ export default function EstablishmentScreen() {
               placeholder="Ex: João Silva"
               value={ownerName}
               onChangeText={setOwnerName}
+              maxLength={NOME_MAX}
               error={isInvalid ? "Nome obrigatório" : ""}
             />
 
@@ -104,6 +106,7 @@ export default function EstablishmentScreen() {
               placeholder="Rei do Corte LTDA"
               value={name}
               onChangeText={setName}
+              maxLength={NOME_MAX}
               error={isInvalid ? "Nome obrigatório" : ""}
             />
 
