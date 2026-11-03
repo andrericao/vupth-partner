@@ -99,4 +99,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           MSG: ${{ github.event.head_commit.message }}
-        run: eas update --branch production --environment production --message "$MSG" --non-interactive
+        # ota-gradual (DEC-174): a producao recebe 10% dos usuarios primeiro. Olhar o Sentry e o painel
+        # do Expo; depois promover (eas update:edit <GRUPO> --rollout-percentage 100) ou voltar atras
+        # (eas update:revert-update-rollout). A guarda de compatibilidade (DEC-152) segue valendo.
+        # Sem --force de proposito: um rollout em andamento barra o proximo publish ate ser decidido.
+        run: eas update --branch production --environment production --rollout-percentage 10 --message "$MSG" --non-interactive
