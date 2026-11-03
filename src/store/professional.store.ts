@@ -92,6 +92,22 @@ export type ProfessionalReport = {
   net_total?: number | null;
 };
 
+/** Para quem vai cada parcela (Backend 91da259). */
+export type DestinoDaParcela = "professional" | "gateway" | "app";
+
+/** relatorio-explica-valores (DEC-166, BAK 91da259): a composicao de cada corte. Corte antigo vem sem gateway_fee/app_fee. */
+export type ComposicaoDoCorte = {
+  service?: number | null;
+  gateway_fee?: number | null;
+  app_fee?: number | null;
+  penalty?: number | null;
+  /** O que o cliente paga. */
+  total?: number | null;
+  /** false = modo teste (taxas nao cobradas); true = passou pelo gateway. */
+  charged?: boolean | null;
+  goes_to?: Partial<Record<"service" | "gateway_fee" | "app_fee" | "penalty", DestinoDaParcela>> | null;
+};
+
 export type CorteDoRelatorio = {
   attendance_id: string;
   finished_at?: string | null;
@@ -103,6 +119,8 @@ export type CorteDoRelatorio = {
   pending_debt_simulated?: number | null;
   /** DEC-127: o calculo do corte, com a flag PAGAMENTO COM DESCONTO (discounted). */
   breakdown?: Calculo | null;
+  /** DEC-166: o que o cliente pagou, parcela a parcela, e para quem vai. */
+  composition?: ComposicaoDoCorte | null;
 };
 
 type ProfessionalState = {
