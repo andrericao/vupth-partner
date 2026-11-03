@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Updates from "expo-updates";
 
 import { resolveApiEnv } from "@lib/apiEnv";
+import { cookiesDoNavegador, modoCookieLigado, prepararPedidoCookie } from "@lib/modoCookieWeb";
 
 // Render = ambiente de TESTE; Railway = PRODUCAO. Quem testa bate no Render:
 // o app via Expo/APK de `preview` e a web pelo link `dev*` (Andre 2026-09-06).
@@ -224,6 +225,9 @@ export function getApiErrorMessage(error: any, fallback: string): string {
 }
 
 api.interceptors.request.use(async (config) => {
+  // token-web-httponly (DEC-179): na web com a chave ligada o token esta no
+  // cookie HttpOnly; nada de Bearer, e o CSRF vai nas escritas.
+  if (modoCookieLigado()) return prepararPedidoCookie(config, cookiesDoNavegador());
   const token = await SecureStore.getItemAsync("vupth_access_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -261,9 +265,21 @@ let refreshEmVoo: Promise<Tokens> | null = null;
 /** Sem refresh token salvo: nao ha o que renovar. */
 export const SEM_REFRESH = "SEM_REFRESH";
 
+/** Modo cookie (DEC-179): a renovacao devolve 204 e os tokens ficam no cookie. */
+export const SEM_TOKENS_NO_CORPO: Tokens = { access_token: "", refresh_token: "" };
+
 export function renovarSessao(): Promise<Tokens> {
   if (!refreshEmVoo) {
     refreshEmVoo = (async () => {
+      if (modoCookieLigado()) {
+        // 401 aqui = sessao vencida: sobe, e o interceptor nao reenvia.
+        await axios.post(
+          `${BASE_URL}/auth/web/refresh`,
+          null,
+          prepararPedidoCookie({ method: "post", headers: {} }, cookiesDoNavegador())
+        );
+        return SEM_TOKENS_NO_CORPO;
+      }
       const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
       if (!refreshToken) throw new Error(SEM_REFRESH);
       const { data } = await axios.post<Tokens>(`${BASE_URL}/auth/refresh`, { refresh_token: refreshToken });
@@ -325,12 +341,13 @@ api.interceptors.response.use(
     originalRequest._retry = true;
     try {
       const { access_token } = await renovarSessao();
-      originalRequest.headers.Authorization = `Bearer ${access_token}`;
+      // No modo cookie nao ha token no corpo: o reenvio vai com o cookie novo.
+      if (access_token) originalRequest.headers.Authorization = `Bearer ${access_token}`;
       return api(originalRequest);
     } catch (refreshError: any) {
       // Sem refresh salvo nao se apaga nada; refresh recusado derruba a sessao
       // (um logout so, mesmo com varias requisicoes esperando).
-      if (refreshError?.message !== SEM_REFRESH) {
+      if (refreshError?.message !== SEM_REFRESH && !modoCookieLigado()) {
         await SecureStore.deleteItemAsync("vupth_access_token");
         await SecureStore.deleteItemAsync("vupth_refresh_token");
       }
