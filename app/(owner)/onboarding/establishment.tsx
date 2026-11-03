@@ -18,6 +18,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { useProfessionalStore } from "@store/professional.store";
 import { voltaDoCadastroDaLoja } from "@lib/lojaPropria";
+import { SaidasSemLoja } from "@components/SaidasSemLoja";
 
 export default function EstablishmentScreen() {
   // from=professional: o profissional abrindo a propria loja pelo Perfil (S23).
@@ -117,6 +118,10 @@ export default function EstablishmentScreen() {
               onPress={handleSubmit}
               isLoading={isLoading}
             />
+
+            {/* sem-loja-tela-de-saida (DEC-173): quem esta sem loja (nao veio do Perfil de quem ja atende)
+                tambem pode entrar em outra loja, ver os dados pessoais (Excluir conta) ou sair. */}
+            {from !== "professional" && <SaidasSemLoja />}
           </View>
         </View>
       </ScrollView>

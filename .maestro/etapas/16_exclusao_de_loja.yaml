@@ -3,8 +3,8 @@
 # nada fica na conta de teste. Contas e loja sao so desta etapa (TAG); nunca a conta real do Andre.
 #   16.0x cadastro e loja   16.1x confere a loja   16.2x apaga a loja   16.3x volta a criar uma
 # NAO prova: o apagamento no banco (isso e do Newman); so o que o app mostra.
-# PENDENTE: a exclusao da CONTA (settings-account) nao e alcancada por quem acabou de apagar a loja
-# (a tela de criar loja nao tem menu). Ver Solicitadas do Partner.
+#   16.4x exclui a CONTA: a tela sem loja (DEC-173, opcao B) leva a Dados pessoais → Excluir conta
+#   16.5x a conta some: o login com ela e recusado
 # env: EMAIL_DONO, LOJA, TAG, SENHA
 appId: ${APP_ID}
 ---
@@ -54,3 +54,47 @@ appId: ${APP_ID}
 - assertNotVisible:
     text: ${output.LOJA}
     label: "16.31 · o nome da loja apagada nao aparece mais"
+- scrollUntilVisible:
+    element:
+      id: "sem-loja-dados"
+    direction: DOWN
+    label: "16.40 · rola ate Dados pessoais (menu da tela sem loja)"
+- tapOn:
+    id: "sem-loja-dados"
+    label: "16.41 · abre Dados pessoais"
+- scrollUntilVisible:
+    element:
+      id: "delete-account"
+    direction: DOWN
+    label: "16.42 · rola ate Excluir conta"
+- tapOn:
+    id: "delete-account"
+    label: "16.43 · toca em Excluir conta"
+- tapOn:
+    id: "delete-account-password"
+    label: "16.44 · toca na senha"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "delete-account-confirm"
+    label: "16.45 · confirma"
+- assertNotVisible:
+    id: "delete-account-error"
+    label: "16.46 · sem erro"
+- extendedWaitUntil:
+    visible: "Como você vai usar o Vupth?"
+    timeout: 30000
+    label: "16.47 · voltou para a entrada"
+- runFlow:
+    file: ../apoio/entrar.yaml
+    env:
+      EMAIL: ${output.EMAIL_DONO}
+    label: "16.50 · tenta entrar com a conta apagada"
+- extendedWaitUntil:
+    visible:
+      id: "login-submit"
+    timeout: 30000
+    label: "16.51 · a conta apagada nao entra: continua na tela de login"
+- assertNotVisible:
+    id: "aba-menu"
+    label: "16.52 · nao chegou a nenhuma tela de dentro do app"
