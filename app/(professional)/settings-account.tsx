@@ -20,10 +20,11 @@ import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { ExcluirContaModal } from "@components/ExcluirContaModal";
 import { DesativarContaModal } from "@components/DesativarContaModal";
 import { mensagemDaExclusao, mensagemDaDesativacao } from "@lib/exclusaoDeConta";
-import { maskPhone } from "@lib/masks";
+import { maskCPF, maskPhone } from "@lib/masks";
+import { cpfParaMostrar, erroDoCpf } from "@lib/cpf";
 import { erroDoTelefoneDeContato, telefoneParaMostrar } from "@lib/telefoneDeContato";
 
-type Editing = null | "name" | "nickname" | "phone" | "email" | "password";
+type Editing = null | "name" | "nickname" | "phone" | "cpf" | "email" | "password";
 
 // Nav v2 etapa 3 (Andre 2026-07-23): "as configuracoes do profissional deve ser
 // melhor dividida". Esta tela concentra os DADOS CADASTRAIS (nome, apelido,
@@ -91,6 +92,7 @@ export default function SettingsAccountScreen() {
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
   const updateNickname = useProfessionalStore((s) => s.updateNickname);
   const setContactPhone = useProfessionalStore((s) => s.setContactPhone);
+  const setCpf = useProfessionalStore((s) => s.setCpf);
   const user = useAuthStore((s) => s.user);
   const updateEmail = useAuthStore((s) => s.updateEmail);
   const updatePassword = useAuthStore((s) => s.updatePassword);
@@ -148,6 +150,7 @@ export default function SettingsAccountScreen() {
     editar === "nickname" ? professional?.nickname ?? "" : ""
   );
   const [phone, setPhone] = useState("");
+  const [cpf, setCpfTexto] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
@@ -160,6 +163,7 @@ export default function SettingsAccountScreen() {
     setNickname(field === "nickname" ? professional?.nickname ?? "" : "");
     const atual = telefoneParaMostrar(professional?.contact_phone);
     setPhone(field === "phone" && atual !== "—" ? atual : "");
+    setCpfTexto("");
     setEmail("");
     setCurrentPassword("");
     setPassword("");
@@ -182,6 +186,7 @@ export default function SettingsAccountScreen() {
     setName("");
     setNickname("");
     setPhone("");
+    setCpfTexto("");
     setEmail("");
     setCurrentPassword("");
     setPassword("");
@@ -232,6 +237,27 @@ export default function SettingsAccountScreen() {
 
   // telefone-de-contato (Andre, 05/10): opcional. Vazio = o cliente nao ve
   // telefone nenhum em "Informacoes do profissional".
+  // campo-cpf-no-perfil (DEC-164): opcional; vazio apaga. O CPF nunca vai a log.
+  const handleSaveCpf = async () => {
+    const erro = erroDoCpf(cpf);
+    if (erro) {
+      setFieldError(erro);
+      return;
+    }
+    setFieldError(null);
+    setIsSaving(true);
+    try {
+      await setCpf(cpf);
+      setEditing(null);
+      Alert.alert("CPF", cpf.trim() ? "Seu CPF foi salvo." : "Seu CPF foi removido.");
+    } catch (error: any) {
+      const invalido = error?.response?.data?.code === "CPF_INVALID";
+      Alert.alert("Erro", invalido ? "CPF inválido. Confira os 11 números." : getApiErrorMessage(error, "Não foi possível salvar o CPF."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSavePhone = async () => {
     const erro = erroDoTelefoneDeContato(phone);
     if (erro) {
@@ -425,6 +451,30 @@ export default function SettingsAccountScreen() {
               <Text className="font-body text-xs text-vupth-textSecondary mb-2">
                 Aparece em “Informações do profissional”, no app do cliente. Deixe vazio
                 para não mostrar.
+              </Text>
+            </FieldCard>
+
+            <FieldCard
+              label="CPF (opcional)"
+              value={cpfParaMostrar(professional?.cpf)}
+              editing={editing === "cpf"}
+              onEdit={() => startEdit("cpf")}
+              onCancel={cancelEdit}
+              onSave={handleSaveCpf}
+              isSaving={isSaving}
+              error={fieldError}
+            >
+              <NwInput
+                label="CPF"
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChangeText={(t) => setCpfTexto(maskCPF(t))}
+                keyboardType="number-pad"
+                autoCapitalize="none"
+                testID="cpf-do-profissional"
+              />
+              <Text className="font-body text-xs text-vupth-textSecondary mb-2">
+                O CPF será pedido quando o app passar a cobrar taxas. Deixe vazio para remover.
               </Text>
             </FieldCard>
               </>

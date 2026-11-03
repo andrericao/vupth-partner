@@ -36,6 +36,8 @@ type Professional = {
   show_position?: boolean;
   /** Telefone que o cliente ve (Backend 02dd5ef). null = nao expoe. */
   contact_phone?: string | null;
+  /** CPF MASCARADO pelo Backend (***.456.789-**) ou null; so o proprio le (campo-cpf-no-perfil, DEC-164). */
+  cpf?: string | null;
   /**
    * avaliacao-no-resumo (Andre, 18/10): a nota do proprio profissional no resumo
    * do Perfil. Hoje so o professionals-with-queue traz; o /me ainda nao (pedido em
@@ -131,6 +133,7 @@ type ProfessionalState = {
   setAcceptingNew: (value: boolean) => Promise<void>;
   setShowPosition: (value: boolean) => Promise<void>;
   setContactPhone: (phone: string) => Promise<void>;
+  setCpf: (cpf: string) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (
     itemId: string,
@@ -160,6 +163,7 @@ export function normalizeProfessional(data: any): Professional {
     operation_mode: data.operation_mode ?? data.operationMode ?? "QUEUE",
     show_position: data.show_position ?? data.showPosition ?? true,
     contact_phone: data.contact_phone ?? data.contactPhone ?? null,
+    cpf: data.cpf ?? null,
     rating_average: data.rating_average ?? data.ratingAverage ?? null,
     rating_count: data.rating_count ?? data.ratingCount ?? null,
     message: data.message ?? "",
@@ -300,6 +304,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   // telefone. O backend e a fonte da verdade — re-le no /me.
   setContactPhone: async (phone) => {
     await api.patch("/professional/me", { contact_phone: phone.trim() });
+    await get().fetchMe();
+  },
+
+  // campo-cpf-no-perfil (DEC-164, Backend 93c088e): opcional. PATCH com cpf poe ou troca; ""
+  // apaga. 422 CPF_INVALID sobe para a tela. O CPF nunca vai a log: so o corpo da chamada.
+  setCpf: async (cpf) => {
+    await api.patch("/professional/me", { cpf: cpf.trim() });
     await get().fetchMe();
   },
 
