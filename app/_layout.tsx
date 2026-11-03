@@ -17,6 +17,7 @@ import * as NavigationBar from "expo-navigation-bar";
 // (2026-08-27). Travado por teste em `brandTokens.test.ts`.
 import { useFonts } from "expo-font";
 import { Loading } from "@components/Loading";
+import { FaixaDeAmbiente } from "@components/FaixaDeAmbiente";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { useContextoDoSentry } from "@hooks/useContextoDoSentry";
 import { instalarAlertWeb } from "../web-shims/alert";
@@ -199,6 +200,7 @@ export default function RootLayout() {
             {/* baixar-do-parceiro (11/10): so no site, so fora do iPhone. */}
             <FaixaBaixarApp />
             <AvisoModoSeguro />
+            <FaixaDeAmbiente />
             {/* A tela so entra com o tema ja lido do aparelho: quem escolheu o
                 escuro nao ve a abertura piscar em claro. */}
             {(fontLoaded || fontError) && temaRestaurado ? <Slot /> : <Loading />}
