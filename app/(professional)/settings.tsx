@@ -21,7 +21,7 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ArrowLeftRight,
-  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket, Bug } from "lucide-react-native";
+  Info, Share2, Star, Palette, Store, CalendarDays, QrCode, LifeBuoy, Ticket, Bug, MessageSquare } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
 import { useProfessionalStore } from "@store/professional.store";
 import { useAuthStore } from "@store/auth.store";
@@ -33,6 +33,7 @@ import { confirmar } from "@lib/confirmar";
 import { abrirSuporte } from "@lib/suporte";
 import { sentryLigado } from "@lib/sentry";
 import { ReportarProblema } from "@components/ReportarProblema";
+import { EnviarFeedback } from "@components/EnviarFeedback";
 import { CUPOM_NO_AR } from "@lib/campanhas";
 import { useTema } from "@hooks/useTema";
 
@@ -113,6 +114,7 @@ export default function ProfessionalSettingsScreen() {
   const rolagemRef = useVoltarAoTopo();
   const pilula = usePilulaTopo(rolagemRef);
   const [reportando, setReportando] = useState(false);
+  const [enviandoFeedback, setEnviandoFeedback] = useState(false);
 
   const insets = useSafeAreaInsets();
   const { cores } = useTema();
@@ -373,8 +375,15 @@ export default function ProfessionalSettingsScreen() {
               icon={LifeBuoy}
               title="Suporte"
               hint="dúvidas e passo a passo do app"
-              last={!sentryLigado()}
               onPress={() => abrirSuporte("profissional")}
+            />
+            {/* feedback-no-app (PAR-8, DEC-167): caixa de texto, sem sair do app. */}
+            <MenuCard
+              icon={MessageSquare}
+              title="Enviar feedback"
+              hint="conte o que achou do app"
+              last={!sentryLigado()}
+              onPress={() => setEnviandoFeedback(true)}
             />
             {/* sentry-feedback-do-usuario: so com o Sentry ligado no binario. */}
             {sentryLigado() && (
@@ -399,6 +408,7 @@ export default function ProfessionalSettingsScreen() {
       </ScrollView>
       <PilulaVoltarAoTopo visivel={pilula.visivel} onPress={pilula.subir} />
       <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
+      <EnviarFeedback visivel={enviandoFeedback} onFechar={() => setEnviandoFeedback(false)} />
     </View>
   );
 }
