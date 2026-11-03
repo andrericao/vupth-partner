@@ -42,4 +42,10 @@ describe("AbrirAgenda", () => {
     render(<AbrirAgenda hoje={hoje} buscar={jest.fn().mockRejectedValue(new Error("x"))} abrir={jest.fn()} repetir={jest.fn()} />);
     expect(await screen.findByText("Não foi possível carregar a sua agenda.")).toBeTruthy();
   });
+
+  it("mostra o mes e o ano da agenda e acompanha a virada do mes", async () => {
+    const buscar = jest.fn().mockResolvedValue([dia("2026-11-02"), dia("2026-12-01")]);
+    render(<AbrirAgenda hoje={hoje} buscar={buscar} abrir={jest.fn()} repetir={jest.fn()} />);
+    expect(await screen.findByText("Novembro e dezembro de 2026")).toBeTruthy();
+  });
 });

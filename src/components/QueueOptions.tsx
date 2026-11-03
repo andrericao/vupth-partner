@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { View, Text, Pressable } from "react-native";
-import { Unlock, Lock, Inbox, UtensilsCrossed } from "lucide-react-native";
+import { Unlock, Lock, Inbox, UtensilsCrossed, CalendarDays, CalendarCheck } from "lucide-react-native";
 import { router } from "expo-router";
 import { comingSoon } from "@components/comingSoon";
 import { NotificationBadge } from "@components/NotificationBadge";
@@ -246,6 +246,19 @@ export function QueueOptions({
         hint={mealHint}
         dot={mealDot}
         onPress={() => router.push("/(professional)/meals?from=queue-options" as any)}
+      />
+      {/* agenda-no-menu-da-fila (Andre, 01/11): os mesmos destinos de Configuracoes. */}
+      <Row
+        icon={<CalendarCheck size={18} color={cores.textPrimary} />}
+        label="Agendamentos"
+        hint="quem marcou horário com você"
+        onPress={() => router.push("/(professional)/agendados" as any)}
+      />
+      <Row
+        icon={<CalendarDays size={18} color={cores.textPrimary} />}
+        label="Minha agenda"
+        hint="os dias e horários em que você atende"
+        onPress={() => router.push("/(professional)/agenda" as any)}
       />
     </View>
   );

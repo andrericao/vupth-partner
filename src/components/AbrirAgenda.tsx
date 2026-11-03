@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { NwButton } from "@components/nw/Button";
 import { getApiErrorMessage } from "@lib/api";
+import { rotuloDoMes } from "@lib/mesDaAgenda";
 import {
   abrirDias,
   buscarAgendaAberta,
@@ -87,10 +88,16 @@ export function AbrirAgenda({
   if (!dias) return null;
   const abertos = dias.filter((d) => d.openedByMe).length;
   const escolhidos = dias.filter((d) => marcados.includes(d.date));
+  const rotulo = rotuloDoMes(dias.map((d) => d.date));
 
   return (
     <View testID="abrir-agenda" className="bg-vupth-surface rounded-card p-4 gap-3">
       <Text className="font-heading text-base text-vupth-textPrimary">Abrir a agenda</Text>
+      {!!rotulo && (
+        <Text testID="agenda-mes-ano" className="font-heading text-sm text-vupth-textSecondary">
+          {rotulo}
+        </Text>
+      )}
       <Text className="font-body text-xs text-vupth-textSecondary">
         {abertos === 0
           ? "Você ainda não abriu nenhum dia. Toque nos dias que quer abrir (até 1 mês) ou repita a sua agenda padrão."

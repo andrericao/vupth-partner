@@ -1,0 +1,101 @@
+# TESTE DE FUMACA (smoke test; teste-do-essencial, DEC-157): o essencial do Partner, abaixo de 5 min.
+# Prova: o app instalado abre e entra com e-mail e senha; a fila mostra o cliente; iniciar e finalizar um
+# atendimento; abrir um dia em "Minha agenda" e ver "Agendamentos" (pelo menu da fila); fechar a fila.
+# NAO prova: push real, camera, Pix/QR e dinheiro (isso e do Backend: sandbox e Newman).
+# Limpeza: conta, loja e o dia aberto sao so desta etapa (TAG, criados pela API); nada toca a conta real.
+# Comeca logado como o profissional (a avulsa faz o login). env: EMAIL_PROF, TAG
+appId: ${APP_ID}
+tags:
+  - smoke
+---
+- runScript:
+    file: ../scripts/clientes_na_fila.js
+    env:
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      TAG: ${output.TAG}
+      QTD: "1"
+      PELO_ANDRE: "0"
+    label: "00b.01 · um cliente entra na fila pela API"
+- tapOn:
+    id: "aba-fila"
+    label: "00b.02 · abre a fila"
+- extendedWaitUntil:
+    visible: ${output.CLIENTE1}
+    timeout: 60000
+    label: "00b.03 · a fila mostra o cliente"
+- tapOn:
+    text: "Iniciar próximo"
+    label: "00b.04 · inicia o atendimento"
+- extendedWaitUntil:
+    visible: "Finalizar"
+    timeout: 20000
+    label: "00b.05 · espera Finalizar"
+- tapOn:
+    text: "Finalizar"
+    label: "00b.06 · finaliza"
+- runFlow:
+    file: ../apoio/responder_pagamento.yaml
+    env:
+      RESPOSTA: "Recebi"
+    label: "00b.07 · responde o pagamento"
+- extendedWaitUntil:
+    notVisible: ${output.CLIENTE1}
+    timeout: 20000
+    label: "00b.08 · o cliente sai da fila"
+- tapOn:
+    text: "Opções da fila"
+    label: "00b.09 · menu da fila"
+- scrollUntilVisible:
+    element: "Minha agenda"
+    direction: DOWN
+    label: "00b.10 · rola ate Minha agenda"
+- tapOn:
+    text: "Minha agenda"
+    label: "00b.11 · abre Minha agenda"
+- extendedWaitUntil:
+    visible: ".* de 20[0-9][0-9].*"
+    timeout: 20000
+    label: "00b.12 · a agenda mostra mes e ano"
+- tapOn:
+    text: "Dia .*, fechado, toque para abrir"
+    label: "00b.13 · marca o primeiro dia livre"
+- tapOn:
+    text: "Abrir 1 dia"
+    label: "00b.14 · abre o dia"
+- extendedWaitUntil:
+    visible: "Dias abertos."
+    timeout: 20000
+    label: "00b.15 · dia aberto"
+- tapOn:
+    id: "aba-fila"
+    label: "00b.16 · volta a fila"
+- tapOn:
+    text: "Opções da fila"
+    label: "00b.17 · menu da fila"
+- scrollUntilVisible:
+    element: "Agendamentos"
+    direction: DOWN
+    label: "00b.18 · rola ate Agendamentos"
+- tapOn:
+    text: "Agendamentos"
+    label: "00b.19 · abre Agendamentos"
+- extendedWaitUntil:
+    visible: "Os clientes marcados nos próximos.*"
+    timeout: 20000
+    label: "00b.20 · a tela de Agendamentos abre"
+- tapOn:
+    id: "aba-fila"
+    label: "00b.21 · volta a fila"
+- tapOn:
+    text: "Opções da fila"
+    label: "00b.22 · menu da fila"
+- tapOn:
+    text: "Fechar fila"
+    label: "00b.23 · fecha a fila"
+- runFlow:
+    file: ../apoio/confirmar.yaml
+    label: "00b.24 · confirma"
+- extendedWaitUntil:
+    visible: "Reabrir fila"
+    timeout: 20000
+    label: "00b.25 · a fila fechou"
