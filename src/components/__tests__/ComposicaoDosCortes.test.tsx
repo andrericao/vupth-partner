@@ -28,4 +28,12 @@ describe("ComposicaoDosCortes", () => {
     expect(getByText("Vai para você")).toBeTruthy();
     expect(getByText("Cliente pagou")).toBeTruthy();
   });
+
+  it("mostra 'Declarado' e a marca discreta de contestado", () => {
+    const r = { cuts: [{ attendance_id: "a1", payment_declared: true }, { attendance_id: "a2", payment_declared: true, payment_contested: true }] } as any;
+    const { getByTestId, getByText } = render(<ComposicaoDosCortes report={r} />);
+    fireEvent.press(getByText("Para onde vai cada valor"));
+    expect(getByTestId("corte-declarado")).toHaveTextContent("Declarado por você");
+    expect(getByTestId("corte-contestado")).toHaveTextContent("Contestado pelo cliente");
+  });
 });

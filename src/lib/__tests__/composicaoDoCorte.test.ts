@@ -1,4 +1,4 @@
-import { linhasDaComposicao, temComposicao } from "../composicaoDoCorte";
+import { linhasDaComposicao, marcaDoPagamento, temComposicao } from "../composicaoDoCorte";
 
 describe("composicaoDoCorte (relatorio-explica-valores, DEC-166)", () => {
   it("modo teste: taxas riscadas com 'Não cobrada no teste' e multa para o profissional", () => {
@@ -36,5 +36,13 @@ describe("composicaoDoCorte (relatorio-explica-valores, DEC-166)", () => {
     expect(temComposicao(null)).toBe(false);
     expect(temComposicao([{ composition: null }])).toBe(false);
     expect(temComposicao([{ composition: { total: 10 } }])).toBe(true);
+  });
+
+  it("marca do pagamento: declarado ate o cliente confirmar; contestado vale mais", () => {
+    expect(marcaDoPagamento({})).toBeNull();
+    expect(marcaDoPagamento({ payment_declared: false })).toBeNull();
+    expect(marcaDoPagamento({ payment_declared: true })).toMatchObject({ texto: "Declarado por você", contestado: false });
+    expect(marcaDoPagamento({ payment_declared: true, payment_contested: true })).toMatchObject({ contestado: true });
+    expect(temComposicao([{ payment_declared: true }])).toBe(true);
   });
 });

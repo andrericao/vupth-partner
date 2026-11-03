@@ -121,6 +121,10 @@ export type CorteDoRelatorio = {
   breakdown?: Calculo | null;
   /** DEC-166: o que o cliente pagou, parcela a parcela, e para quem vai. */
   composition?: ComposicaoDoCorte | null;
+  /** BAK b4be2cb: o profissional declarou o recebimento e o cliente ainda nao confirmou. */
+  payment_declared?: boolean | null;
+  /** O cliente contestou o pagamento declarado. */
+  payment_contested?: boolean | null;
 };
 
 type ProfessionalState = {

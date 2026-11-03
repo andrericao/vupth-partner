@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 
 import { SecaoRecolhivel } from "@components/SecaoRecolhivel";
 import { formatarReais } from "@lib/dinheiro";
-import { linhasDaComposicao, temComposicao } from "@lib/composicaoDoCorte";
+import { corteTemConteudo, linhasDaComposicao, marcaDoPagamento, temComposicao } from "@lib/composicaoDoCorte";
 import { horaDoCorte } from "@lib/pendenciasDoRelatorio";
 import type { ProfessionalReport } from "@store/professional.store";
 
@@ -19,11 +19,19 @@ export function ComposicaoDosCortes({ report }: { report: ProfessionalReport | n
     <SecaoRecolhivel testID="composicao-dos-cortes-secao" titulo="Para onde vai cada valor">
       <View className="gap-3">
         {cortes
-          .filter((c) => linhasDaComposicao(c.composition).length > 0)
+          .filter(corteTemConteudo)
           .map((c) => (
             <View key={c.attendance_id} testID="composicao-do-corte" className="gap-0.5">
               {horaDoCorte(c) !== "" && (
                 <Text className="font-heading text-f11 text-vupth-textSecondary">{horaDoCorte(c)}</Text>
+              )}
+              {marcaDoPagamento(c) && (
+                <Text
+                  testID={marcaDoPagamento(c)!.contestado ? "corte-contestado" : "corte-declarado"}
+                  className="font-body text-xs text-vupth-textSecondary"
+                >
+                  {marcaDoPagamento(c)!.texto}
+                </Text>
               )}
               {linhasDaComposicao(c.composition).map((l) => (
                 <View key={l.chave} className="mt-0.5">

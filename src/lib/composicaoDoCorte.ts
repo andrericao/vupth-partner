@@ -48,7 +48,19 @@ export function linhasDaComposicao(c: ComposicaoDoCorte | null | undefined): Lin
   return linhas;
 }
 
+/** pagamento-declarado-contestavel (BAK b4be2cb): as marcas do corte, ou null. Contestado vale mais que declarado. */
+export function marcaDoPagamento(c: { payment_declared?: boolean | null; payment_contested?: boolean | null }): { texto: string; contestado: boolean } | null {
+  if (c.payment_contested === true) return { texto: "Contestado pelo cliente", contestado: true };
+  if (c.payment_declared === true) return { texto: "Declarado por você", contestado: false };
+  return null;
+}
+
+/** O corte tem algo para mostrar na secao (composicao ou marca)? */
+export function corteTemConteudo(c: { composition?: ComposicaoDoCorte | null; payment_declared?: boolean | null; payment_contested?: boolean | null }): boolean {
+  return linhasDaComposicao(c.composition).length > 0 || marcaDoPagamento(c) !== null;
+}
+
 /** Algum corte do periodo traz composicao? (a secao so aparece se sim) */
-export function temComposicao(cortes: { composition?: ComposicaoDoCorte | null }[] | null | undefined): boolean {
-  return (cortes ?? []).some((c) => linhasDaComposicao(c.composition).length > 0);
+export function temComposicao(cortes: { composition?: ComposicaoDoCorte | null; payment_declared?: boolean | null; payment_contested?: boolean | null }[] | null | undefined): boolean {
+  return (cortes ?? []).some(corteTemConteudo);
 }
