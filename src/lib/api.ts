@@ -52,6 +52,8 @@ export const api = axios.create({
 
 // Mensagens do backend vem em ingles; traduzimos as conhecidas por codigo.
 const ERROR_MESSAGES_PT: Record<string, string> = {
+  // aviso-7-dias-banner (DEC-163): passado o prazo, sem CPF, nao abre nem comeca a atender.
+  ACCOUNT_INCOMPLETE: "Conta incompleta. Informe seu CPF em Configurações para atender.",
   // agenda-do-profissional (05/10): a agenda do profissional cabe no horario
   // da loja.
   PROFESSIONAL_HOURS_OUTSIDE_ESTABLISHMENT:

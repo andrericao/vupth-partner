@@ -3,6 +3,7 @@ import type { NaoRealizados } from "@lib/relatorioDasLojas";
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+import { levarSeContaIncompleta } from "@lib/contaIncompleta";
 import type { DiaDeExpediente } from "@lib/expediente";
 
 const STORAGE_KEY = "vupth_professional";
@@ -296,7 +297,12 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   // e 409 PROFESSIONAL_HAS_ACTIVE_ATTENDANCES (ficar OFF com fila/atendimento).
   // O fetchMe re-le o work_status do DTO do /me.
   updateMyStatus: async (status) => {
-    await api.patch("/professional/me/status", { status });
+    try {
+      await api.patch("/professional/me/status", { status });
+    } catch (error) {
+      levarSeContaIncompleta(error);
+      throw error;
+    }
     await get().fetchMe();
   },
 

@@ -86,7 +86,7 @@ export default function SettingsAccountScreen() {
   // PERFIL PROFISSIONAL — quem nao tem um nao vê esses campos, senao a tela
   // ofereceria editar algo que nao existe. E-mail e senha sao do usuario e
   // valem para os dois.
-  const { from, editar } = useLocalSearchParams<{ from?: string; editar?: string }>();
+  const { from, editar, aviso } = useLocalSearchParams<{ from?: string; editar?: string; aviso?: string }>();
   const temPerfilProfissional = !!professional;
   const minhaFoto = useMinhaFoto();
   const updateMyProfile = useProfessionalStore((s) => s.updateMyProfile);
@@ -385,6 +385,19 @@ export default function SettingsAccountScreen() {
             </View>
           )}
 
+          {/* aviso-7-dias-banner (DEC-163): vindo do 422 ACCOUNT_INCOMPLETE (ou do banner da Fila). */}
+          {(aviso === "conta-incompleta" || aviso === "cpf") && (
+            <View testID="aviso-conta-incompleta" className="mt-4 bg-vupth-greenTint rounded-card px-4 py-3">
+              <Text className="font-heading text-sm text-vupth-textPrimary">
+                {aviso === "conta-incompleta" ? "Conta incompleta" : "Informe seu CPF"}
+              </Text>
+              <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
+                {aviso === "conta-incompleta"
+                  ? "Para abrir a loja e atender, informe o seu CPF em Dados cadastrais. Atendimentos em andamento não são afetados."
+                  : "O CPF será pedido quando o app passar a cobrar taxas. Informe em Dados cadastrais."}
+              </Text>
+            </View>
+          )}
           <View className="mt-6 gap-3">
             {/* Nome e apelido moram no PERFIL PROFISSIONAL. Dono sem esse perfil
                 nao os vê — oferecer edicao de algo inexistente e pior que a tela

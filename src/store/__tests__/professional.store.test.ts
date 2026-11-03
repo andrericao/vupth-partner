@@ -49,6 +49,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
+
 describe("professional.store", () => {
   describe("register", () => {
     it("calls POST /professional/register with name and specialty", async () => {
@@ -440,6 +442,16 @@ describe("professional.store", () => {
       await expect(useProfessionalStore.getState().setOperationMode("QUEUE")).rejects.toMatchObject({
         response: { status: 409 },
       });
+    });
+  });
+
+  describe("updateMyStatus: 422 ACCOUNT_INCOMPLETE (aviso-7-dias-banner, BAK 5a59cbd)", () => {
+    it("leva as Configuracoes e sobe o erro; nao re-le o /me", async () => {
+      const { router } = jest.requireMock("expo-router");
+      mock.onPatch("/professional/me/status").reply(422, { code: "ACCOUNT_INCOMPLETE" });
+      await expect(useProfessionalStore.getState().updateMyStatus("WORKING")).rejects.toBeTruthy();
+      expect(router.push).toHaveBeenCalledWith({ pathname: "/(professional)/settings-account", params: { aviso: "conta-incompleta" } });
+      expect(mock.history.get).toHaveLength(0);
     });
   });
 
