@@ -1,0 +1,56 @@
+# maestro-exclusao-de-loja (PAR-10, DEC-166): o dono cria a conta e a loja PELO APP, confere que a loja
+# abre, e a APAGA pelo app (Dados do estabelecimento → Excluir loja, com a senha). Fecha o ciclo:
+# nada fica na conta de teste. Contas e loja sao so desta etapa (TAG); nunca a conta real do Andre.
+#   16.0x cadastro e loja   16.1x confere a loja   16.2x apaga a loja   16.3x volta a criar uma
+# NAO prova: o apagamento no banco (isso e do Newman); so o que o app mostra.
+# PENDENTE: a exclusao da CONTA (settings-account) nao e alcancada por quem acabou de apagar a loja
+# (a tela de criar loja nao tem menu). Ver Solicitadas do Partner.
+# env: EMAIL_DONO, LOJA, TAG, SENHA
+appId: ${APP_ID}
+---
+- runFlow:
+    file: 01a_dono_cadastra_a_loja.yaml
+    label: "16.01 · o dono cria a conta e a loja pelo app"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "16.02 · fecha o aviso"
+- tapOn:
+    id: "aba-menu"
+    label: "16.10 · abre o menu"
+- scrollUntilVisible:
+    element: "Dados do estabelecimento"
+    direction: DOWN
+    label: "16.11 · rola ate Dados do estabelecimento"
+- tapOn:
+    text: "Dados do estabelecimento"
+    label: "16.12 · abre Dados do estabelecimento"
+- extendedWaitUntil:
+    visible: ${output.LOJA}
+    timeout: 20000
+    label: "16.13 · a loja criada aparece com o nome"
+- scrollUntilVisible:
+    element:
+      id: "delete-store"
+    direction: DOWN
+    label: "16.20 · rola ate Excluir loja"
+- tapOn:
+    id: "delete-store"
+    label: "16.21 · toca em Excluir loja"
+- tapOn:
+    id: "delete-store-password"
+    label: "16.22 · toca na senha"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "delete-store-confirm"
+    label: "16.23 · confirma"
+- assertNotVisible:
+    id: "delete-store-error"
+    label: "16.24 · sem erro"
+- extendedWaitUntil:
+    visible: "Dados da loja"
+    timeout: 30000
+    label: "16.30 · a loja saiu; o dono volta a criar uma"
+- assertNotVisible:
+    text: ${output.LOJA}
+    label: "16.31 · o nome da loja apagada nao aparece mais"
