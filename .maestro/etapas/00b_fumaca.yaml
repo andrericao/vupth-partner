@@ -1,6 +1,7 @@
 # TESTE DE FUMACA (smoke test; teste-do-essencial, DEC-157): o essencial do Partner, abaixo de 5 min.
 # Prova: o app instalado abre e entra com e-mail e senha; a fila mostra o cliente; iniciar e finalizar um
 # atendimento; abrir um dia em "Minha agenda" e ver "Agendamentos" (pelo menu da fila); fechar a fila.
+# Pagamento (DEC-168): a conta nova nao tem chave Pix e o "Recebi" do atendente quita o atendimento.
 # NAO prova: push real, camera, Pix/QR e dinheiro (isso e do Backend: sandbox e Newman).
 # Limpeza: conta, loja e o dia aberto sao so desta etapa (TAG, criados pela API); nada toca a conta real.
 # Comeca logado como o profissional (a avulsa faz o login). env: EMAIL_PROF, TAG
@@ -33,11 +34,18 @@ tags:
 - tapOn:
     text: "Finalizar"
     label: "00b.06 · finaliza"
+# fumaca-pagamento-modo-teste (PAR-11, DEC-168): a conta da fumaca e nova e NAO tem chave Pix; mesmo assim
+# a pergunta aparece e a palavra do atendente vale ("Recebi" quita). Antes o apoio so tocava se a pergunta
+# aparecesse; agora a fumaca a exige.
+- extendedWaitUntil:
+    visible: "Recebeu o pagamento?"
+    timeout: 20000
+    label: "00b.06a · sem chave Pix, a pergunta do pagamento aparece"
 - runFlow:
     file: ../apoio/responder_pagamento.yaml
     env:
       RESPOSTA: "Recebi"
-    label: "00b.07 · responde o pagamento"
+    label: "00b.07 · vale a palavra do atendente: Recebi"
 - extendedWaitUntil:
     notVisible: ${output.CLIENTE1}
     timeout: 20000
