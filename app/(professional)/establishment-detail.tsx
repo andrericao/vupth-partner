@@ -23,6 +23,7 @@ import {
 import { parseApiTime } from "@lib/time";
 import { maskPhone } from "@lib/masks";
 import { avisar } from "@lib/confirmar";
+import { posicaoValida } from "@lib/posicaoNaLista";
 import { useTema } from "@hooks/useTema";
 
 function formatAddress(a: EstablishmentDetail["address"]): string | null {
@@ -64,8 +65,10 @@ export default function EstablishmentDetailScreen() {
     name?: string;
     serviceType?: string;
     openStatus?: string;
+    listPosition?: string;
   }>();
   const id = params.id;
+  const listPosition = posicaoValida(params.listPosition) ?? undefined;
 
   const [detail, setDetail] = useState<EstablishmentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +84,7 @@ export default function EstablishmentDetailScreen() {
       try {
         const data = await useEstablishmentStore
           .getState()
-          .fetchEstablishmentById(id);
+          .fetchEstablishmentById(id, listPosition);
         if (active) setDetail(data);
       } catch {
         // mantem os dados basicos vindos por params
@@ -99,7 +102,7 @@ export default function EstablishmentDetailScreen() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, listPosition]);
 
   const name = detail?.name ?? params.name ?? "Estabelecimento";
   const serviceType = serviceTypeLabel(detail?.service_type ?? params.serviceType);

@@ -5,6 +5,7 @@ import { levarSeContaIncompleta } from "@lib/contaIncompleta";
 import type { DiaDeExpediente } from "@lib/expediente";
 import type { LocationStatus } from "@lib/pontoNoMapa";
 import type { NaoRealizados } from "@lib/relatorioDasLojas";
+import { paramsDaPosicao } from "@lib/posicaoNaLista";
 
 const STORAGE_KEY = "vupth_establishment";
 
@@ -262,7 +263,8 @@ type EstablishmentState = {
     }>
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
-  fetchEstablishmentById: (id: string) => Promise<EstablishmentDetail>;
+  /** listPosition: posicao da loja na lista de busca (DEC-176), so quando veio dela. */
+  fetchEstablishmentById: (id: string, listPosition?: number) => Promise<EstablishmentDetail>;
   searchProfessionals: (name?: string, specialty?: string) => Promise<ProfessionalSearchResult[]>;
   inviteProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   inviteByEmail: (establishmentId: string, email: string) => Promise<EmailInviteResult>;
@@ -389,8 +391,9 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     return data;
   },
 
-  fetchEstablishmentById: async (id) => {
-    const { data } = await api.get(`/establishment/id/${id}`);
+  fetchEstablishmentById: async (id, listPosition) => {
+    const params = paramsDaPosicao(listPosition);
+    const { data } = await api.get(`/establishment/id/${id}`, params ? { params } : undefined);
     return normalizeEstablishmentDetail(data);
   },
 
