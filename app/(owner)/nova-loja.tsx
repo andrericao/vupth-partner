@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { View, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
+import { NOME_MAX } from "@lib/limitesDeTexto";
 import { SelectService } from "@components/SelectService";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -56,6 +57,7 @@ export default function NovaLojaScreen() {
               placeholder="Rei do Corte Centro"
               value={name}
               onChangeText={setName}
+              maxLength={NOME_MAX}
               error={isInvalid && !name.trim() ? "Nome obrigatório" : ""}
             />
             <SelectService value={serviceType} onValueChange={setServiceType} />

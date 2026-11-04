@@ -117,11 +117,13 @@ export default function FindEstablishmentScreen() {
     }
   };
 
-  const openDetail = (establishment: EstablishmentResult) => {
+  // posicao: 1 = primeira da lista (DEC-176, list_position).
+  const openDetail = (establishment: EstablishmentResult, posicao: number) => {
     router.push({
       pathname: "/(professional)/establishment-detail",
       params: {
         id: establishment.id,
+        listPosition: String(posicao),
         name: establishment.name,
         serviceType: establishment.serviceType,
         openStatus: establishment.openStatus,
@@ -240,10 +242,10 @@ export default function FindEstablishmentScreen() {
                 </View>
               )}
 
-              {results.map((est) => (
+              {results.map((est, i) => (
                 <Pressable
                   key={est.id}
-                  onPress={() => openDetail(est)}
+                  onPress={() => openDetail(est, i + 1)}
                   className="py-4 px-4 bg-vupth-surface rounded-card mb-2"
                 >
                   <View className="flex-row justify-between items-center">

@@ -565,6 +565,16 @@ describe("establishment.store", () => {
   });
 
   describe("fetchEstablishmentById", () => {
+    it("manda ?list_position=N quando a loja veio da lista (DEC-176) e nada quando nao", async () => {
+      mock.onGet("/establishment/id/e9").reply(200, { id: "e9", name: "X" });
+
+      await useEstablishmentStore.getState().fetchEstablishmentById("e9", 4);
+      await useEstablishmentStore.getState().fetchEstablishmentById("e9");
+
+      expect(mock.history.get[0].params).toEqual({ list_position: 4 });
+      expect(mock.history.get[1].params).toBeUndefined();
+    });
+
     it("calls GET /establishment/id/{id} and returns normalized detail", async () => {
       mock.onGet("/establishment/id/estab-uuid-1").reply(200, {
         id: "estab-uuid-1",

@@ -49,6 +49,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
+
 describe("professional.store", () => {
   describe("register", () => {
     it("calls POST /professional/register with name and specialty", async () => {
@@ -71,6 +73,7 @@ describe("professional.store", () => {
         operation_mode: "QUEUE",
         show_position: true,
         contact_phone: null,
+        cpf: null,
         rating_average: null,
         rating_count: null,
       });
@@ -439,6 +442,46 @@ describe("professional.store", () => {
       await expect(useProfessionalStore.getState().setOperationMode("QUEUE")).rejects.toMatchObject({
         response: { status: 409 },
       });
+    });
+  });
+
+  describe("updateMyStatus: 422 ACCOUNT_INCOMPLETE (aviso-7-dias-banner, BAK 5a59cbd)", () => {
+    it("leva as Configuracoes e sobe o erro; nao re-le o /me", async () => {
+      const { router } = jest.requireMock("expo-router");
+      mock.onPatch("/professional/me/status").reply(422, { code: "ACCOUNT_INCOMPLETE" });
+      await expect(useProfessionalStore.getState().updateMyStatus("WORKING")).rejects.toBeTruthy();
+      expect(router.push).toHaveBeenCalledWith({ pathname: "/(professional)/settings-account", params: { aviso: "conta-incompleta" } });
+      expect(mock.history.get).toHaveLength(0);
+    });
+  });
+
+  describe("setCpf (campo-cpf-no-perfil, Backend 93c088e)", () => {
+    it("PATCH /professional/me {cpf} e re-le o CPF mascarado no /me", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, cpf: "***.982.247-**" });
+
+      await useProfessionalStore.getState().setCpf("529.982.247-25");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ cpf: "529.982.247-25" });
+      expect(useProfessionalStore.getState().professional?.cpf).toBe("***.982.247-**");
+    });
+
+    it("apagar: envia string vazia e o CPF fica null", async () => {
+      useProfessionalStore.setState({ professional: { ...AFFILIATE_RESPONSE, cpf: "***.982.247-**" } as any });
+      mock.onPatch("/professional/me").reply(200, {});
+      mock.onGet("/professional/me").reply(200, { ...AFFILIATE_RESPONSE, cpf: null });
+
+      await useProfessionalStore.getState().setCpf("  ");
+
+      expect(JSON.parse(mock.history.patch[0].data)).toEqual({ cpf: "" });
+      expect(useProfessionalStore.getState().professional?.cpf).toBeNull();
+    });
+
+    it("422 CPF_INVALID sobe para a tela", async () => {
+      useProfessionalStore.setState({ professional: AFFILIATE_RESPONSE });
+      mock.onPatch("/professional/me").reply(422, { code: "CPF_INVALID" });
+      await expect(useProfessionalStore.getState().setCpf("529.982.247-26")).rejects.toBeTruthy();
     });
   });
 

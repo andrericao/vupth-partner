@@ -4,6 +4,7 @@ import { NwButton } from "@components/nw/Button";
 import { CommitDoCodigo } from "@components/CommitDoCodigo";
 import { EASE, MS, movimentoReduzido } from "@lib/motion";
 import { useTema } from "@hooks/useTema";
+import { fraseDestaAbertura } from "@lib/frasesDaAbertura";
 
 // Tela do portao de readiness (ver src/lib/readiness.ts): o app espera a API
 // responder antes de liberar login e cadastro.
@@ -56,6 +57,17 @@ export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props)
   const laco = useRef<Animated.CompositeAnimation | null>(null);
   const vivo = useRef(true);
   const aoSair = useRef(onSaiu);
+  // frases-na-abertura (PAR-7, DEC-167): uma frase por abertura, sob o V.
+  const [frase, setFrase] = useState<string | null>(null);
+  useEffect(() => {
+    let vivoFrase = true;
+    fraseDestaAbertura().then((f) => {
+      if (vivoFrase) setFrase(f);
+    });
+    return () => {
+      vivoFrase = false;
+    };
+  }, []);
 
   // O callback e lido na hora de sair, nao na de montar.
   useEffect(() => {
@@ -172,6 +184,14 @@ export function ServerWarmup({ failed, onRetry, pronto = false, onSaiu }: Props)
               </Animated.View>
             </Animated.View>
           </Animated.View>
+        )}
+        {!failed && frase && (
+          <Text
+            testID="abertura-frase"
+            className="font-body text-sm text-vupth-textSecondary text-center"
+          >
+            {frase}
+          </Text>
         )}
         {failed && (
           <>

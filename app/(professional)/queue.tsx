@@ -41,6 +41,7 @@ import { AceitandoNovos } from "@components/AceitandoNovos";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { AvisoCienciaDePreco } from "@components/AvisoCienciaDePreco";
 import { AvisoDeAgenda } from "@components/AvisoDeAgenda";
+import { AvisoDeSeteDias } from "@components/AvisoDeSeteDias";
 import { useAvisoDaVespera } from "@hooks/useAvisoDaVespera";
 import { usePendingFitIns } from "@hooks/usePendingFitIns";
 import { useQuery } from "@tanstack/react-query";
@@ -931,6 +932,7 @@ export default function ProfessionalQueueScreen() {
   
           <AvisoCienciaDePreco />
           <AvisoDeAgenda />
+          <AvisoDeSeteDias />
           <CarrosselDeCampanhas />
 
           {myProfessional && ratingLabel(myProfessional.rating_average, myProfessional.rating_count) && (

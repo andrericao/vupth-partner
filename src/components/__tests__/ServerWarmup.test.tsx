@@ -8,6 +8,10 @@ jest.mock("expo-constants", () => ({
   default: { expoConfig: { extra: { commit: "abc1234" } } },
 }));
 
+jest.mock("@lib/frasesDaAbertura", () => ({
+  fraseDestaAbertura: jest.fn(async () => "Frase de teste"),
+}));
+
 // abertura-profissional (PAR-10, DEC-40): a abertura e a da marca — o V e um
 // indicador discreto, sem citar servidor nem tempo de espera.
 describe("ServerWarmup", () => {
@@ -19,6 +23,15 @@ describe("ServerWarmup", () => {
     expect(UNSAFE_queryAllByType(ActivityIndicator)).toHaveLength(0);
     expect(queryByText(/servidor/i)).toBeNull();
     expect(queryByText(/50s/)).toBeNull();
+  });
+
+  // frases-na-abertura (PAR-7, DEC-167)
+  it("abrindo: mostra a frase da abertura; falhou: nao mostra", async () => {
+    const { findByTestId, queryByTestId } = render(<ServerWarmup />);
+    expect(await findByTestId("abertura-frase")).toHaveTextContent("Frase de teste");
+    const falhou = render(<ServerWarmup failed />);
+    expect(falhou.queryByTestId("abertura-frase")).toBeNull();
+    expect(queryByTestId("abertura-frase")).toBeTruthy();
   });
 
   it("falhou: explica sem falar de servidor e oferece tentar de novo", () => {

@@ -19,6 +19,7 @@ import { ExpedienteCard } from "@components/ExpedienteCard";
 import { QuantoCobrarCard, MOSTRAR_QUANTO_COBRAR } from "@components/QuantoCobrarCard";
 import { PendenciasDoRelatorio } from "@components/PendenciasDoRelatorio";
 import { SaldosComOApp } from "@components/SaldosComOApp";
+import { ComposicaoDosCortes } from "@components/ComposicaoDosCortes";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { AbasDoRelatorio, type AbaDoRelatorio } from "@components/AbasDoRelatorio";
 import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
@@ -464,6 +465,7 @@ export default function MyDayScreen() {
                   )
                 )}
                 <PendenciasDoRelatorio report={report} />
+                <ComposicaoDosCortes report={report} />
                 <SaldosComOApp report={report} />
                 <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
                 {avisoDoPrecoAntigo(precoAntigo) && (

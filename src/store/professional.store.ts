@@ -3,6 +3,7 @@ import type { NaoRealizados } from "@lib/relatorioDasLojas";
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+import { levarSeContaIncompleta } from "@lib/contaIncompleta";
 import type { DiaDeExpediente } from "@lib/expediente";
 
 const STORAGE_KEY = "vupth_professional";
@@ -36,6 +37,8 @@ type Professional = {
   show_position?: boolean;
   /** Telefone que o cliente ve (Backend 02dd5ef). null = nao expoe. */
   contact_phone?: string | null;
+  /** CPF MASCARADO pelo Backend (***.456.789-**) ou null; so o proprio le (campo-cpf-no-perfil, DEC-164). */
+  cpf?: string | null;
   /**
    * avaliacao-no-resumo (Andre, 18/10): a nota do proprio profissional no resumo
    * do Perfil. Hoje so o professionals-with-queue traz; o /me ainda nao (pedido em
@@ -90,6 +93,22 @@ export type ProfessionalReport = {
   net_total?: number | null;
 };
 
+/** Para quem vai cada parcela (Backend 91da259). */
+export type DestinoDaParcela = "professional" | "gateway" | "app";
+
+/** relatorio-explica-valores (DEC-166, BAK 91da259): a composicao de cada corte. Corte antigo vem sem gateway_fee/app_fee. */
+export type ComposicaoDoCorte = {
+  service?: number | null;
+  gateway_fee?: number | null;
+  app_fee?: number | null;
+  penalty?: number | null;
+  /** O que o cliente paga. */
+  total?: number | null;
+  /** false = modo teste (taxas nao cobradas); true = passou pelo gateway. */
+  charged?: boolean | null;
+  goes_to?: Partial<Record<"service" | "gateway_fee" | "app_fee" | "penalty", DestinoDaParcela>> | null;
+};
+
 export type CorteDoRelatorio = {
   attendance_id: string;
   finished_at?: string | null;
@@ -101,6 +120,12 @@ export type CorteDoRelatorio = {
   pending_debt_simulated?: number | null;
   /** DEC-127: o calculo do corte, com a flag PAGAMENTO COM DESCONTO (discounted). */
   breakdown?: Calculo | null;
+  /** DEC-166: o que o cliente pagou, parcela a parcela, e para quem vai. */
+  composition?: ComposicaoDoCorte | null;
+  /** BAK b4be2cb: o profissional declarou o recebimento e o cliente ainda nao confirmou. */
+  payment_declared?: boolean | null;
+  /** O cliente contestou o pagamento declarado. */
+  payment_contested?: boolean | null;
 };
 
 type ProfessionalState = {
@@ -131,6 +156,7 @@ type ProfessionalState = {
   setAcceptingNew: (value: boolean) => Promise<void>;
   setShowPosition: (value: boolean) => Promise<void>;
   setContactPhone: (phone: string) => Promise<void>;
+  setCpf: (cpf: string) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
   updateMyServiceItem: (
     itemId: string,
@@ -160,6 +186,7 @@ export function normalizeProfessional(data: any): Professional {
     operation_mode: data.operation_mode ?? data.operationMode ?? "QUEUE",
     show_position: data.show_position ?? data.showPosition ?? true,
     contact_phone: data.contact_phone ?? data.contactPhone ?? null,
+    cpf: data.cpf ?? null,
     rating_average: data.rating_average ?? data.ratingAverage ?? null,
     rating_count: data.rating_count ?? data.ratingCount ?? null,
     message: data.message ?? "",
@@ -270,7 +297,12 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   // e 409 PROFESSIONAL_HAS_ACTIVE_ATTENDANCES (ficar OFF com fila/atendimento).
   // O fetchMe re-le o work_status do DTO do /me.
   updateMyStatus: async (status) => {
-    await api.patch("/professional/me/status", { status });
+    try {
+      await api.patch("/professional/me/status", { status });
+    } catch (error) {
+      levarSeContaIncompleta(error);
+      throw error;
+    }
     await get().fetchMe();
   },
 
@@ -300,6 +332,13 @@ export const useProfessionalStore = create<ProfessionalState>((set, get) => ({
   // telefone. O backend e a fonte da verdade — re-le no /me.
   setContactPhone: async (phone) => {
     await api.patch("/professional/me", { contact_phone: phone.trim() });
+    await get().fetchMe();
+  },
+
+  // campo-cpf-no-perfil (DEC-164, Backend 93c088e): opcional. PATCH com cpf poe ou troca; ""
+  // apaga. 422 CPF_INVALID sobe para a tela. O CPF nunca vai a log: so o corpo da chamada.
+  setCpf: async (cpf) => {
+    await api.patch("/professional/me", { cpf: cpf.trim() });
     await get().fetchMe();
   },
 

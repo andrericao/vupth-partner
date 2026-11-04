@@ -7,6 +7,7 @@ import { useProfessionalStore } from "@store/professional.store";
 import { useAttendanceStore } from "@store/attendance.store";
 import { unregisterDevice } from "@lib/push";
 import { limparUltimaFila } from "@lib/ultimaFila";
+import { CABECALHO_MODO, modoCookieLigado, papeisDoUsuario } from "@lib/modoCookieWeb";
 
 type User = {
   id: string;
@@ -62,6 +63,24 @@ export const useAuthStore = create<AuthState>((set) => ({
   avisoDeReativar: null,
 
   login: async (email, password) => {
+    // token-web-httponly (DEC-179): na web com a chave ligada, os tokens vem so
+    // em cookie HttpOnly e os papeis saem do user da resposta.
+    if (modoCookieLigado()) {
+      const { data } = await api.post(
+        "/auth/login",
+        { email, password },
+        { headers: { [CABECALHO_MODO]: "cookie" } }
+      );
+      const desativada = data.deactivated === true;
+      set({
+        user: { id: data.user.id, email: data.user.email, roles: papeisDoUsuario(data.user) },
+        isAuthenticated: true,
+        contaDesativada: desativada,
+        avisoDeReativar: desativada ? "boas-vindas" : null,
+      });
+      return;
+    }
+
     const { data } = await api.post("/auth/login", { email, password });
 
     await SecureStore.setItemAsync(
@@ -94,6 +113,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   updateEmail: async (email) => {
     const { data } = await api.patch("/profile/update-email/me", { email });
 
+    // Modo cookie (DEC-179): nada de token guardado no navegador.
+    if (modoCookieLigado()) {
+      set((state) => ({
+        user: state.user ? { ...state.user, email: data.user?.email ?? email } : null,
+      }));
+      return;
+    }
     await SecureStore.setItemAsync("vupth_access_token", data.tokens.access_token);
     await SecureStore.setItemAsync("vupth_refresh_token", data.tokens.refresh_token);
 
@@ -114,6 +140,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       password: newPassword,
     });
 
+    // Modo cookie (DEC-179): nada de token guardado no navegador.
+    if (modoCookieLigado()) {
+      set((state) => ({
+        user: state.user ? { ...state.user, email: data.user?.email ?? state.user.email } : null,
+      }));
+      return;
+    }
     await SecureStore.setItemAsync("vupth_access_token", data.tokens.access_token);
     await SecureStore.setItemAsync("vupth_refresh_token", data.tokens.refresh_token);
 
@@ -137,6 +170,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   refreshToken: async () => {
+    // Modo cookie: renova pelo cookie (204); os papeis nao mudam numa renovacao.
+    if (modoCookieLigado()) {
+      await renovarSessao();
+      return;
+    }
     const refreshToken = await SecureStore.getItemAsync("vupth_refresh_token");
     if (!refreshToken) return;
 
@@ -161,7 +199,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {}
 
     try {
-      await api.post("/auth/logout");
+      await api.post(modoCookieLigado() ? "/auth/web/logout" : "/auth/logout");
     } catch {}
 
     await limparSessaoLocal();
@@ -220,6 +258,26 @@ export const useAuthStore = create<AuthState>((set) => ({
   soConsultar: () => set({ avisoDeReativar: null }),
 
   loadStoredTokens: async () => {
+    // Modo cookie: o app nao le o token (HttpOnly). Quem diz se ha sessao e o
+    // GET /profile/me; sem sessao (401 que nem a renovacao salva), vai ao login.
+    if (modoCookieLigado()) {
+      try {
+        const { data } = await api.get("/profile/me");
+        await Promise.all([
+          useEstablishmentStore.getState().restoreEstablishment(),
+          useProfessionalStore.getState().restoreProfessional(),
+        ]);
+        set({
+          user: { id: data.id ?? "", email: data.email ?? "", roles: papeisDoUsuario(data) },
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } catch {
+        set({ isLoading: false });
+      }
+      return;
+    }
+
     const token = await SecureStore.getItemAsync("vupth_access_token");
     if (!token) {
       set({ isLoading: false });

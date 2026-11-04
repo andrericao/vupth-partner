@@ -10,6 +10,7 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
+import { NOME_MAX } from "@lib/limitesDeTexto";
 import { SelectService } from "@components/SelectService";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
@@ -17,6 +18,7 @@ import { useAuthStore } from "@store/auth.store";
 import { getApiErrorMessage } from "@lib/api";
 import { useProfessionalStore } from "@store/professional.store";
 import { voltaDoCadastroDaLoja } from "@lib/lojaPropria";
+import { SaidasSemLoja } from "@components/SaidasSemLoja";
 
 export default function EstablishmentScreen() {
   // from=professional: o profissional abrindo a propria loja pelo Perfil (S23).
@@ -96,6 +98,7 @@ export default function EstablishmentScreen() {
               placeholder="Ex: João Silva"
               value={ownerName}
               onChangeText={setOwnerName}
+              maxLength={NOME_MAX}
               error={isInvalid ? "Nome obrigatório" : ""}
             />
 
@@ -104,6 +107,7 @@ export default function EstablishmentScreen() {
               placeholder="Rei do Corte LTDA"
               value={name}
               onChangeText={setName}
+              maxLength={NOME_MAX}
               error={isInvalid ? "Nome obrigatório" : ""}
             />
 
@@ -114,6 +118,10 @@ export default function EstablishmentScreen() {
               onPress={handleSubmit}
               isLoading={isLoading}
             />
+
+            {/* sem-loja-tela-de-saida (DEC-173): quem esta sem loja (nao veio do Perfil de quem ja atende)
+                tambem pode entrar em outra loja, ver os dados pessoais (Excluir conta) ou sair. */}
+            {from !== "professional" && <SaidasSemLoja />}
           </View>
         </View>
       </ScrollView>

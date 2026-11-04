@@ -1,9 +1,11 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { api } from "@lib/api";
+import { levarSeContaIncompleta } from "@lib/contaIncompleta";
 import type { DiaDeExpediente } from "@lib/expediente";
 import type { LocationStatus } from "@lib/pontoNoMapa";
 import type { NaoRealizados } from "@lib/relatorioDasLojas";
+import { paramsDaPosicao } from "@lib/posicaoNaLista";
 
 const STORAGE_KEY = "vupth_establishment";
 
@@ -261,7 +263,8 @@ type EstablishmentState = {
     }>
   ) => Promise<any>;
   searchByName: (name: string) => Promise<EstablishmentSearchResult[]>;
-  fetchEstablishmentById: (id: string) => Promise<EstablishmentDetail>;
+  /** listPosition: posicao da loja na lista de busca (DEC-176), so quando veio dela. */
+  fetchEstablishmentById: (id: string, listPosition?: number) => Promise<EstablishmentDetail>;
   searchProfessionals: (name?: string, specialty?: string) => Promise<ProfessionalSearchResult[]>;
   inviteProfessional: (establishmentId: string, professionalId: string) => Promise<void>;
   inviteByEmail: (establishmentId: string, email: string) => Promise<EmailInviteResult>;
@@ -301,9 +304,16 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
   updateOpenStatus: async (id, status) => {
     set({ isLoading: true, error: null });
 
-    const { data } = await api.patch(`/establishment/${id}/open-status`, {
-      openStatus: status,
-    });
+    let data;
+    try {
+      ({ data } = await api.patch(`/establishment/${id}/open-status`, {
+        openStatus: status,
+      }));
+    } catch (error) {
+      set({ isLoading: false });
+      levarSeContaIncompleta(error);
+      throw error;
+    }
 
     const establishment = normalizeEstablishment(data);
     await persistEstablishment(establishment);
@@ -381,8 +391,9 @@ export const useEstablishmentStore = create<EstablishmentState>((set) => ({
     return data;
   },
 
-  fetchEstablishmentById: async (id) => {
-    const { data } = await api.get(`/establishment/id/${id}`);
+  fetchEstablishmentById: async (id, listPosition) => {
+    const params = paramsDaPosicao(listPosition);
+    const { data } = await api.get(`/establishment/id/${id}`, params ? { params } : undefined);
     return normalizeEstablishmentDetail(data);
   },
 

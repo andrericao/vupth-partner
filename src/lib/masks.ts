@@ -24,6 +24,15 @@ export function maskPhone(value: string): string {
   return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`;
 }
 
+/** 000.000.000-00 */
+export function maskCPF(value: string): string {
+  const d = onlyDigits(value).slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
 /** DD/MM/AAAA */
 export function maskDate(value: string): string {
   const d = onlyDigits(value).slice(0, 8);

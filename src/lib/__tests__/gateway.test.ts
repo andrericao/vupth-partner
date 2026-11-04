@@ -9,17 +9,23 @@ describe("gateway", () => {
 
   it("le a conexao em GET /payment-gateway", async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: { connected: true, mode: "SANDBOX" } });
-    await expect(buscarGateway()).resolves.toEqual({ connected: true, mode: "SANDBOX" });
+    await expect(buscarGateway()).resolves.toEqual({ connected: true, mode: "SANDBOX", notice: null });
     expect(api.get).toHaveBeenCalledWith("/payment-gateway");
     (api.get as jest.Mock).mockResolvedValue({ data: { connected: false } });
-    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null });
+    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null, notice: null });
+  });
+
+  it("traz o aviso de 7 dias enquanto o Backend o manda (DEC-163)", async () => {
+    const notice = { opened_at: "2026-11-10T10:00:00", changes_at: "2026-11-17T10:00:00" };
+    (api.get as jest.Mock).mockResolvedValue({ data: { connected: false, notice } });
+    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null, notice });
   });
 
   it("sem resposta util, desconectado: o fluxo de sempre", async () => {
     (api.get as jest.Mock).mockRejectedValue(new Error("404"));
-    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null });
+    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null, notice: null });
     (api.get as jest.Mock).mockResolvedValue(undefined);
-    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null });
+    await expect(buscarGateway()).resolves.toEqual({ connected: false, mode: null, notice: null });
   });
 
   it("so sai pelo app quando conectado e a partir de R$ 5,00", () => {

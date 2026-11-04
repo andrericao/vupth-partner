@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from "r
 import { router } from "expo-router";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { NwInput } from "@components/nw/Input";
+import { NOME_MAX, INSTAGRAM_MAX } from "@lib/limitesDeTexto";
 import { NwButton } from "@components/nw/Button";
 import { useEstablishmentStore } from "@store/establishment.store";
 import { getApiErrorMessage } from "@lib/api";
@@ -86,6 +87,7 @@ export default function EstablishmentRegistrationScreen() {
                   placeholder="Nome do estabelecimento"
                   value={nameValue}
                   onChangeText={setNameValue}
+                  maxLength={NOME_MAX}
                   autoCapitalize="words"
                 />
                 <NwInput
@@ -101,6 +103,7 @@ export default function EstablishmentRegistrationScreen() {
                   placeholder="@seuestabelecimento"
                   value={instagramValue}
                   onChangeText={setInstagramValue}
+                  maxLength={INSTAGRAM_MAX}
                   autoCapitalize="none"
                 />
                 <View className="flex-row gap-2">

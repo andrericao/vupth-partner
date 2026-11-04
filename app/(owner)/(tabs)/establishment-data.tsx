@@ -14,6 +14,12 @@ import { CompletionCard } from "@components/CompletionCard";
 import { useAnuncioPronto } from "@hooks/useAnuncioPronto";
 import { useOwnerCompletion } from "@hooks/useOwnerCompletion";
 import { ApagarLojaModal } from "@components/ApagarLojaModal";
+import {
+  impedimentosDaExclusao,
+  mensagemDoRemoverDaLoja,
+  semProfissional,
+  type ImpedimentoDaLoja,
+} from "@lib/impedimentosDaLoja";
 import { mensagemDaRemocaoDaLoja } from "@lib/exclusaoDeConta";
 
 type MenuItemProps = {
@@ -51,17 +57,38 @@ export default function EstablishmentDataScreen() {
   const [apagarAberto, setApagarAberto] = useState(false);
   const [apagando, setApagando] = useState(false);
   const [erroApagar, setErroApagar] = useState<string | null>(null);
+  // remover-profissionais-ao-excluir-loja (DEC-173): o que impede, do 409, e o remover em curso.
+  const [impedimentos, setImpedimentos] = useState<ImpedimentoDaLoja[]>([]);
+  const [removendoId, setRemovendoId] = useState<string | null>(null);
+  const removeProfessional = useEstablishmentStore((s) => s.removeProfessional);
+
+  const removerDaLoja = async (profissionalId: string) => {
+    if (!establishment) return;
+    setRemovendoId(profissionalId);
+    setErroApagar(null);
+    try {
+      await removeProfessional(establishment.id, profissionalId);
+      setImpedimentos((atual) => semProfissional(atual, profissionalId));
+    } catch (error: any) {
+      setErroApagar(mensagemDoRemoverDaLoja(error));
+    } finally {
+      setRemovendoId(null);
+    }
+  };
 
   const apagarLoja = async (senhaAtual: string) => {
     if (!establishment) return;
     setApagando(true);
     setErroApagar(null);
+    setImpedimentos([]);
     try {
       await deleteEstablishment(establishment.id, senhaAtual);
       setApagarAberto(false);
       router.replace("/(owner)/onboarding/establishment" as any);
     } catch (error: any) {
-      setErroApagar(mensagemDaRemocaoDaLoja(error));
+      const barrado = impedimentosDaExclusao(error);
+      setImpedimentos(barrado);
+      setErroApagar(barrado.length > 0 ? null : mensagemDaRemocaoDaLoja(error));
     } finally {
       setApagando(false);
     }
@@ -166,6 +193,7 @@ export default function EstablishmentDataScreen() {
         <Pressable
           onPress={() => {
             setErroApagar(null);
+            setImpedimentos([]);
             setApagarAberto(true);
           }}
           className="mt-10 self-center py-2"
@@ -182,8 +210,18 @@ export default function EstablishmentDataScreen() {
         nomeDaLoja={establishment?.name ?? "A loja"}
         isDeleting={apagando}
         error={erroApagar}
+        impedimentos={impedimentos}
+        removendoId={removendoId}
+        onRemoverProfissional={removerDaLoja}
+        onAtalho={(rota) => {
+          setApagarAberto(false);
+          router.push(rota as any);
+        }}
         onConfirm={apagarLoja}
-        onClose={() => setApagarAberto(false)}
+        onClose={() => {
+          setApagarAberto(false);
+          setImpedimentos([]);
+        }}
       />
     </ScrollView>
   );
