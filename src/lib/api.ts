@@ -157,6 +157,7 @@ const ERROR_MESSAGES_PT: Record<string, string> = {
   ATTENDANCE_NO_ROOM_FOR_SERVICE: "Não há tempo para este serviço no atendimento.",
   ATTENDANCE_SERVICE_ITEM_NOT_FOUND: "Serviço do atendimento não encontrado.",
   NO_SHOW_TOO_EARLY: "Ainda é cedo para marcar a falta.",
+  LATE_TOO_EARLY: "Primeiro horário do dia: ainda está na tolerância de 10 minutos.",
   NO_SHOW_REMOVED: "Este atendimento já foi retirado da fila.",
   CUT_REQUEST_EXPIRED: "Este pedido de corte expirou.",
   CUT_REQUEST_NOT_PENDING: "Este pedido de corte já foi respondido.",
