@@ -54,6 +54,9 @@ appId: ${APP_ID}
 - assertNotVisible:
     text: ${output.LOJA}
     label: "16.31 · o nome da loja apagada nao aparece mais"
+- assertVisible:
+    id: "saidas-sem-loja"
+    label: "16.32 · DEC-183: e a tela sem loja, com o menu de saida"
 - scrollUntilVisible:
     element:
       id: "sem-loja-dados"
@@ -85,6 +88,9 @@ appId: ${APP_ID}
     visible: "Como você vai usar o Vupth?"
     timeout: 30000
     label: "16.47 · voltou para a entrada"
+- assertVisible:
+    id: "go-login"
+    label: "16.48 · DEC-183: a entrada oferece Entrar (e os cartoes de criar conta)"
 - runFlow:
     file: ../apoio/entrar.yaml
     env:
