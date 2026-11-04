@@ -44,6 +44,10 @@ export const WS_URL = `${BASE_URL.replace(/^http/, "ws")}/ws/websocket`;
 // portao de cold start do Render (ver src/lib/readiness.ts + PRD_BACKEND 18c).
 export const READINESS_URL = `${BASE_URL}/actuator/health/readiness`;
 
+// F20 (DEC-181/184): GET publico que diz em que ambiente a API roda
+// ({"env": "production" | "staging" | "local"}); ver src/lib/ambienteDaApi.ts.
+export const INFO_URL = `${BASE_URL}/actuator/info`;
+
 // axios.create e o uso idiomatico (metodo do default export), nao um named export.
 // eslint-disable-next-line import/no-named-as-default-member
 export const api = axios.create({

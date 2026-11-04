@@ -5,6 +5,7 @@ import { ServerWarmup } from "@components/ServerWarmup";
 import { useAuthStore } from "@store/auth.store";
 import { getPostLoginRoute } from "@lib/routing";
 import { waitForBackend } from "@lib/readiness";
+import { ambienteDaApiConfere } from "@lib/ambienteDaApi";
 
 type WarmupPhase = "warming" | "failed" | "ready";
 
@@ -23,7 +24,9 @@ export default function RootIndex() {
     // espera inventada, mesmo com o servidor quente. O unico tempo fixo e a
     // varredura de entrada do V (0,6 s), que o ServerWarmup espera por conta propria.
     const ok = await waitForBackend();
-    setPhase(ok ? "ready" : "failed");
+    // F20 (DEC-184): o build de producao nao segue se a API disser staging.
+    const ambienteOk = ok && (await ambienteDaApiConfere());
+    setPhase(ambienteOk ? "ready" : "failed");
   }, []);
 
   useEffect(() => {
