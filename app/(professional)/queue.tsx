@@ -45,7 +45,15 @@ import { AvisoDeSeteDias } from "@components/AvisoDeSeteDias";
 import { useAvisoDaVespera } from "@hooks/useAvisoDaVespera";
 import { usePendingFitIns } from "@hooks/usePendingFitIns";
 import { useQuery } from "@tanstack/react-query";
-import { buscarNoShowStatus, dentroDaTolerancia, avisoDaTolerancia, faixaDaTolerancia } from "@lib/tolerancia";
+import {
+  buscarNoShowStatus,
+  dentroDaTolerancia,
+  avisoDaTolerancia,
+  faixaDaTolerancia,
+  liberacaoDoAtraso,
+  atrasoTravado,
+  avisoDoPrimeiroDoDia,
+} from "@lib/tolerancia";
 import { WORK_TO_KEY, KEY_TO_WORK, avisoDeLoja, type StatusKey } from "@lib/workStatus";
 import { usePendingCutRequests } from "@hooks/usePendingCutRequests";
 import { SolicitacoesCard } from "@components/SolicitacoesCard";
@@ -324,6 +332,8 @@ export default function ProfessionalQueueScreen() {
   const [refreshing, setRefreshing] = useState(false);
   // Cliente cujo menu ⋮ esta aberto (action sheet), ou null.
   const [menuTarget, setMenuTarget] = useState<AttendanceInQueue | null>(null);
+  // DEC-185: atendimento -> available_at do 409 LATE_TOO_EARLY (primeiro agendado do dia).
+  const [atrasoLiberaEm, setAtrasoLiberaEm] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const handler = BackHandler.addEventListener("hardwareBackPress", () => true);
@@ -718,7 +728,20 @@ export default function ProfessionalQueueScreen() {
       mensagem: mensagemDoAtraso(),
       artigo: "atraso",
     });
-    if (ok) handleAction(() => markLate(att.id));
+    if (!ok) return;
+    try {
+      await markLate(att.id);
+      await refetch();
+    } catch (error: any) {
+      // DEC-185: o primeiro agendado do dia so vira atrasado depois de horario + 10.
+      const liberaEm = liberacaoDoAtraso(error);
+      if (liberaEm) {
+        setAtrasoLiberaEm((m) => ({ ...m, [att.id]: liberaEm }));
+        Alert.alert("Tolerância", avisoDoPrimeiroDoDia(liberaEm));
+        return;
+      }
+      Alert.alert("Erro", getApiErrorMessage(error, "Erro ao executar ação."));
+    }
   };
 
   // "Remover": acao do profissional (status REMOVIDO). Sem pre-requisito — pode
@@ -779,7 +802,11 @@ export default function ProfessionalQueueScreen() {
   const naTolerancia = dentroDaTolerancia(noShow);
   // Sozinho na fila e dentro da tolerancia: "Nao chegou" desativado. Com outros: segue
   // valendo, e a faixa mostra quanto falta.
-  const naoChegouDesativado = naTolerancia && waitingList.length <= 1;
+  // DEC-185: o 409 LATE_TOO_EARLY do primeiro agendado do dia trava o "Nao chegou"
+  // dele ate o available_at (o relogio do menu e o do refetch de 15 s).
+  const liberaDoAlvo = menuTarget ? atrasoLiberaEm[menuTarget.id] : undefined;
+  const primeiroDoDiaTravado = atrasoTravado(liberaDoAlvo, agoraDosPedidos);
+  const naoChegouDesativado = (naTolerancia && waitingList.length <= 1) || primeiroDoDiaTravado;
   const faixaDeTolerancia = naTolerancia && waitingList.length > 1 ? faixaDaTolerancia(noShow) : null;
 
   const runMenuAction = (action: QueueAction, att: AttendanceInQueue) => {
@@ -1204,7 +1231,10 @@ export default function ProfessionalQueueScreen() {
                       accessibilityState={{ disabled: desativado }}
                       onPress={() => {
                         if (desativado) {
-                          Alert.alert("Tolerância", avisoDaTolerancia(noShow));
+                          Alert.alert(
+                            "Tolerância",
+                            primeiroDoDiaTravado ? avisoDoPrimeiroDoDia(liberaDoAlvo) : avisoDaTolerancia(noShow)
+                          );
                           return;
                         }
                         const t = menuTarget;

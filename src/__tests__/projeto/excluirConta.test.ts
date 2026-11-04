@@ -49,6 +49,14 @@ describe("apagar a loja tem caminho no app", () => {
     expect(tela).toContain("deleteEstablishment(");
     expect(tela).toContain("mensagemDaRemocaoDaLoja(");
   });
+
+  // DEC-183 (André, 04/11): excluir a LOJA leva o dono à tela sem loja, com
+  // o menu de saída; excluir a CONTA vai sempre à entrada (teste de cima).
+  it("depois de apagar a loja, o dono cai na tela sem loja com o menu de saida", () => {
+    const tela = ler("app/(owner)/(tabs)/establishment-data.tsx");
+    expect(tela).toContain('router.replace("/(owner)/onboarding/establishment"');
+    expect(ler("app/(owner)/onboarding/establishment.tsx")).toContain("<SaidasSemLoja />");
+  });
 });
 
 // passar a posse a qualquer momento (Andre, 08/10): no menu da loja.
