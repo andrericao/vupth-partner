@@ -23,6 +23,14 @@ import { ComposicaoDosCortes } from "@components/ComposicaoDosCortes";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { PremiosPendentes } from "@components/PremiosPendentes";
 import { meusPremios, premiosPendentes, CHAVE_PREMIOS } from "@lib/premios";
+import {
+  filtrarPendentes,
+  diaCurto,
+  TIPOS_DE_PENDENTE,
+  PERIODOS_DE_PENDENTE,
+  type TipoDePendente,
+  type PeriodoDePendente,
+} from "@lib/filtrosDePendentes";
 import { AbasDoRelatorio, type AbaDoRelatorio } from "@components/AbasDoRelatorio";
 import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
 import { buscarDivida, CHAVE_DIVIDA } from "@lib/dividaPorFora";
@@ -157,9 +165,10 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
 }
 
 /** Chip de escolha (periodo e filtro). Escolhido: forest com texto verde. */
-function Chip({ label, ativo, onPress }: { label: string; ativo: boolean; onPress: () => void }) {
+function Chip({ label, ativo, onPress, testID }: { label: string; ativo: boolean; onPress: () => void; testID?: string }) {
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: ativo }}
@@ -212,6 +221,10 @@ export default function MyDayScreen() {
   // premio-em-pendentes (Andre, 05/11): os premios de indicacao ainda nao recebidos.
   const { data: premios } = useQuery({ queryKey: CHAVE_PREMIOS, queryFn: meusPremios, staleTime: 60_000, retry: false });
   const premiosAbertos = premiosPendentes(premios ?? []);
+  // Pendentes com filtros (opcao a do Andre): por tipo e por periodo do corte.
+  const [tipoPend, setTipoPend] = useState<TipoDePendente>("TODOS");
+  const [periodoPend, setPeriodoPend] = useState<PeriodoDePendente>("TUDO");
+  const pendFiltrados = filtrarPendentes({ pagamentos, premios: premiosAbertos }, tipoPend, periodoPend);
   const recebi = async (attendanceId: string, jaConfirmou = false) => {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
     const ok =
@@ -254,13 +267,15 @@ export default function MyDayScreen() {
   const { data } = useQueuePolling(professional?.establishment_id ?? null);
 
   const [period, setPeriod] = useState<Period>("day");
+  // "Ver o dia" do premio: o Historico de um dia escolhido (null = os periodos de sempre).
+  const [diaEscolhido, setDiaEscolhido] = useState<Date | null>(null);
   // O resumo de cada periodo fica guardado: voltar a aba pinta o numero na
   // hora e atualiza por tras (fila do partner, 25/09).
   const {
     dados: report,
     carregando: reportLoading,
     recarregar: loadReport,
-  } = useRelatorioDoPeriodo("profissional", professional?.id, period, fetchMyReport);
+  } = useRelatorioDoPeriodo("profissional", professional?.id, period, fetchMyReport, diaEscolhido);
 
   const [filter, setFilter] = useState<Filter>("ALL");
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -297,7 +312,10 @@ export default function MyDayScreen() {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      const { hasNext } = await fetchHistoryPage(paramsDoHistorico(professional.id, filter, period), 0);
+      const { hasNext } = await fetchHistoryPage(
+        paramsDoHistorico(professional.id, filter, period, diaEscolhido ?? undefined),
+        0
+      );
       setPagina(0);
       setTemMais(hasNext);
       setHistoryLoaded(true);
@@ -306,7 +324,7 @@ export default function MyDayScreen() {
     } finally {
       setHistoryLoading(false);
     }
-  }, [professional?.id, filter, period, fetchHistoryPage]);
+  }, [professional?.id, filter, period, diaEscolhido, fetchHistoryPage]);
 
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const carregarMais = useCallback(async () => {
@@ -314,7 +332,10 @@ export default function MyDayScreen() {
     setCarregandoMais(true);
     try {
       const proxima = pagina + 1;
-      const { hasNext } = await fetchHistoryPage(paramsDoHistorico(professional.id, filter, period), proxima);
+      const { hasNext } = await fetchHistoryPage(
+        paramsDoHistorico(professional.id, filter, period, diaEscolhido ?? undefined),
+        proxima
+      );
       setPagina(proxima);
       setTemMais(hasNext);
     } catch {
@@ -322,7 +343,7 @@ export default function MyDayScreen() {
     } finally {
       setCarregandoMais(false);
     }
-  }, [professional?.id, temMais, carregandoMais, historyLoading, pagina, filter, period, fetchHistoryPage]);
+  }, [professional?.id, temMais, carregandoMais, historyLoading, pagina, filter, period, diaEscolhido, fetchHistoryPage]);
 
   const aoRolar = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     pilula.onScroll(e);
@@ -354,7 +375,7 @@ export default function MyDayScreen() {
   ];
 
   const filters: { key: Filter; label: string }[] = [
-    { key: "ALL", label: rotuloDoFiltroSemStatus(period) },
+    { key: "ALL", label: diaEscolhido ? (diaCurto(diaEscolhido.toISOString()) ?? "Dia") : rotuloDoFiltroSemStatus(period) },
     { key: "FINISHED", label: "Finalizados" },
     { key: "CANCELLED", label: "Cancelados" },
     // A loja retirou (backend, 18/09) — separado de quem desistiu.
@@ -392,13 +413,44 @@ export default function MyDayScreen() {
 
           {aba === "pendentes" && (
             <>
-              <PagamentosPendentes itens={pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
-              {pagamentos.length === 0 && premiosAbertos.length === 0 && (
+              <View testID="pendentes-filtros" className="mt-4 gap-2">
+                <View className="flex-row flex-wrap gap-2">
+                  {TIPOS_DE_PENDENTE.map((t) => (
+                    <Chip
+                      key={t.key}
+                      testID={`pendentes-tipo-${t.key}`}
+                      label={t.rotulo}
+                      ativo={tipoPend === t.key}
+                      onPress={() => setTipoPend(t.key)}
+                    />
+                  ))}
+                </View>
+                <View className="flex-row flex-wrap gap-2">
+                  {PERIODOS_DE_PENDENTE.map((t) => (
+                    <Chip
+                      key={t.key}
+                      testID={`pendentes-periodo-${t.key}`}
+                      label={t.rotulo}
+                      ativo={periodoPend === t.key}
+                      onPress={() => setPeriodoPend(t.key)}
+                    />
+                  ))}
+                </View>
+              </View>
+              <PagamentosPendentes itens={pendFiltrados.pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
+              {pendFiltrados.pagamentos.length === 0 && pendFiltrados.premios.length === 0 && (
                 <Text testID="pendentes-vazio" className="font-body text-sm text-vupth-textSecondary mt-4">
-                  Nenhum pagamento pendente.
+                  {tipoPend === "TODOS" && periodoPend === "TUDO" ? "Nenhum pagamento pendente." : "Nada pendente neste filtro."}
                 </Text>
               )}
-              <PremiosPendentes itens={premiosAbertos} />
+              <PremiosPendentes
+                itens={pendFiltrados.premios}
+                onVerDia={(iso) => {
+                  setDiaEscolhido(new Date(iso));
+                  setPeriod("day");
+                  setAba("historico");
+                }}
+              />
             </>
           )}
 
@@ -408,8 +460,24 @@ export default function MyDayScreen() {
             <>
             <View className="flex-row flex-wrap gap-2 mt-4">
               {periods.map((p) => (
-                <Chip key={p.key} label={p.label} ativo={period === p.key} onPress={() => setPeriod(p.key)} />
+                <Chip
+                  key={p.key}
+                  label={p.label}
+                  ativo={!diaEscolhido && period === p.key}
+                  onPress={() => {
+                    setDiaEscolhido(null);
+                    setPeriod(p.key);
+                  }}
+                />
               ))}
+              {diaEscolhido ? (
+                <Chip
+                  testID="historico-dia-escolhido"
+                  label={`Dia ${diaCurto(diaEscolhido.toISOString()) ?? ""}`}
+                  ativo
+                  onPress={() => setDiaEscolhido(null)}
+                />
+              ) : null}
             </View>
 
             <ExpedienteCard periodo={period} workdays={report?.workdays} />
@@ -418,7 +486,7 @@ export default function MyDayScreen() {
 
             <View className="h-px bg-vupth-border my-6" />
 
-            {period === "day" && (
+            {period === "day" && !diaEscolhido && (
               <View className="flex-row gap-3 mb-4">
                 <Numero rotulo="Na fila agora" valor={queueCount} />
                 <Numero rotulo="Espera estimada" valor={`${waitMinutes} min`} />
@@ -481,7 +549,14 @@ export default function MyDayScreen() {
                 )}
 
                 <Text className="font-body text-xs text-vupth-textSecondary text-center mt-2">
-                  {period === "day" ? "Hoje" : period === "week" ? "Últimos 7 dias" : "Últimos 30 dias"} •
+                  {diaEscolhido
+                    ? `Dia ${diaCurto(diaEscolhido.toISOString())}`
+                    : period === "day"
+                      ? "Hoje"
+                      : period === "week"
+                        ? "Últimos 7 dias"
+                        : "Últimos 30 dias"}{" "}
+                  •
                   atendimentos finalizados
                 </Text>
               </View>
@@ -514,7 +589,9 @@ export default function MyDayScreen() {
 
             {!historyLoading && historyLoaded && !historyError && history.length === 0 && (
               <Text className="font-body text-vupth-textSecondary text-center mt-6">
-                {period === "day"
+                {diaEscolhido
+                  ? `Nenhum atendimento em ${diaCurto(diaEscolhido.toISOString())}`
+                  : period === "day"
                   ? "Nenhum atendimento hoje"
                   : period === "week"
                     ? "Nenhum atendimento nos últimos 7 dias"

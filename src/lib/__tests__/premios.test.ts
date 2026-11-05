@@ -64,7 +64,11 @@ describe("premiosPendentes e linhaDoPremio", () => {
   it("Seu dia soma os premios na aba Pendentes e os mostra abaixo dos pagamentos", () => {
     const tela = fs.readFileSync(path.resolve(__dirname, "../../../app/(professional)/my-day.tsx"), "utf8");
     expect(tela).toContain("pendentes={pagamentos.length + premiosAbertos.length}");
-    expect(tela).toContain("<PremiosPendentes itens={premiosAbertos} />");
-    expect(tela).toContain("pagamentos.length === 0 && premiosAbertos.length === 0");
+    expect(tela).toContain("itens={pendFiltrados.premios}");
+    expect(tela).toContain("pendFiltrados.pagamentos.length === 0 && pendFiltrados.premios.length === 0");
+    // "Ver o dia": o Historico naquele dia
+    expect(tela).toMatch(/onVerDia=\{\(iso\) => \{\s*setDiaEscolhido\(new Date\(iso\)\);\s*setPeriod\("day"\);\s*setAba\("historico"\);/);
+    expect(tela).toContain("useRelatorioDoPeriodo(\"profissional\", professional?.id, period, fetchMyReport, diaEscolhido)");
+    expect(tela).toContain("paramsDoHistorico(professional.id, filter, period, diaEscolhido ?? undefined)");
   });
 });

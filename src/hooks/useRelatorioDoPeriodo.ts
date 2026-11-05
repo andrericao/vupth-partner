@@ -19,14 +19,16 @@ export function useRelatorioDoPeriodo<T>(
   nome: string,
   dono: string | null | undefined,
   periodo: Periodo,
-  buscar: (dateFrom: string, dateTo: string) => Promise<T>
+  buscar: (dateFrom: string, dateTo: string) => Promise<T>,
+  /** premio-em-pendentes ("Ver o dia"): o periodo conta a partir deste dia, nao de hoje. */
+  referencia?: Date | null
 ): {
   dados: T | undefined;
   carregando: boolean;
   erro: string | null;
   recarregar: () => Promise<unknown>;
 } {
-  const { dateFrom, dateTo } = periodRange(periodo);
+  const { dateFrom, dateTo } = periodRange(periodo, referencia ?? new Date());
   const focado = useIsFocused();
 
   const q = useQuery({

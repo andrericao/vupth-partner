@@ -45,6 +45,23 @@ appId: ${APP_ID}
 - tapOn:
     id: "aba-relatorio-pendentes"
     label: "PJ15.09 · aba Pendentes"
+- assertVisible:
+    id: "pendentes-filtros"
+    label: "PJ15.09a · os filtros de Pendentes (tipo e periodo)"
+- tapOn:
+    id: "pendentes-tipo-BONIFICACAO"
+    label: "PJ15.09b · filtro Bonificação"
+- runFlow:
+    when:
+      notVisible:
+        id: "premios-pendentes"
+    commands:
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: premio-em-pendentes
+            O_QUE: "Seu dia → Pendentes com os filtros (sem a lista de premios do Backend ainda)"
+          label: "PJ15.11b · print para o Andre (Pendentes sem premio)"
 - runFlow:
     when:
       visible:
@@ -53,9 +70,31 @@ appId: ${APP_ID}
       - assertVisible:
           text: "PRÊMIOS DE INDICAÇÃO"
           label: "PJ15.10 · a linha do premio em Pendentes"
-- runFlow:
-    file: ../apoio/para_o_andre.yaml
-    env:
-      NOME: premio-em-pendentes
-      O_QUE: "Seu dia → Pendentes com a linha do premio de indicacao (campanha, R$ 5,00, estado, cliente e data)"
-    label: "PJ15.11 · print para o Andre (premio-em-pendentes)"
+      - assertVisible:
+          text: ".*atendimentos? (gerou|geraram) R\\$.*"
+          label: "PJ15.10a · o resumo: N atendimentos geraram R$ X"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: premio-em-pendentes
+            O_QUE: "Seu dia → Pendentes, filtro Bonificação: o resumo por campanha e a linha do premio (campanha, R$ 5,00, estado, cliente e data)"
+          label: "PJ15.11 · print para o Andre (premio-em-pendentes)"
+      - tapOn:
+          id: "premio-pendente"
+          index: 0
+          label: "PJ15.12 · toca no premio: abre a janela"
+      - assertVisible:
+          id: "premio-janela-resumo"
+          label: "PJ15.13 · a janela com o resumo no topo"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: premio-janela
+            O_QUE: "a janela do premio: resumo no topo, cliente, dia do corte, campanha, valor e Ver o dia"
+          label: "PJ15.14 · print para o Andre (premio-janela)"
+      - tapOn:
+          id: "premio-janela-ver-dia"
+          label: "PJ15.15 · Ver o dia"
+      - assertVisible:
+          id: "historico-dia-escolhido"
+          label: "PJ15.16 · o Historico naquele dia"
