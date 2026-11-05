@@ -67,3 +67,34 @@ appId: ${APP_ID}
       - assertVisible:
           text: ".*chegaram.*"
           label: "15b.13c · o andamento da campanha"
+# promocoes-em-secoes (Andre, 05/11): a campanha em que entrou fica em ATIVAS, com o
+# link, os numeros e o dinheiro num bloco so; o print das secoes vai para o Andre.
+- runFlow:
+    when:
+      true: ${output.FIM_PASSOU != 'sim' && output.SEM_VAGA != 'sim'}
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "promocoes-ativas"
+          direction: UP
+          label: "15b.14a · a secao ATIVAS"
+      - assertVisible:
+          text: "ATIVAS"
+          label: "15b.14b · o titulo ATIVAS"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: promocoes-secoes
+            O_QUE: "Promoções em secoes: ATIVAS (o cartao da campanha com link, numeros e a receber), DISPONÍVEIS e PASSADAS"
+          label: "15b.14c · print para o Andre (promocoes-secoes)"
+      - scrollUntilVisible:
+          element:
+            id: "cupom-codigo"
+          direction: DOWN
+          label: "15b.14d · rola ate o campo Cupom (DISPONÍVEIS e PASSADAS no caminho)"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: promocoes-secoes-baixo
+            O_QUE: "a parte de baixo de Promoções: DISPONÍVEIS, PASSADAS, o campo Cupom e o Credito"
+          label: "15b.14e · print para o Andre (promocoes-secoes-baixo)"

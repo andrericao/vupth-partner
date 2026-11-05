@@ -2,6 +2,7 @@ import { View, ScrollView, useWindowDimensions } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { CardDeCampanha } from "@components/CardDeCampanha";
+import { idsEmQueParticipo, soDisponiveis } from "@lib/secoesDePromocoes";
 import {
   campanhasAtivas,
   beneficioDaCampanha,
@@ -22,13 +23,25 @@ type Props = {
   /** "owner" abre Promocoes pela rota do dono. */
   de?: "owner" | "professional";
   aoTocar?: (c: Campanha) => void;
+  /** promocoes-em-secoes (05/11): ids das campanhas de que a pessoa ja participa. */
+  participo?: () => Promise<string[]>;
 };
 
-export function CarrosselDeCampanhas({ listar = campanhasAtivas, de = "professional", aoTocar }: Props) {
+// promocoes-em-secoes (Andre, 05/11): o carrossel so mostra as Disponiveis. A campanha
+// de que a pessoa ja participa (ou o cupom que ja ativou) e a encerrada nao entram.
+export function CarrosselDeCampanhas({
+  listar = campanhasAtivas,
+  de = "professional",
+  aoTocar,
+  participo = idsEmQueParticipo,
+}: Props) {
   const { width } = useWindowDimensions();
   const { data } = useQuery({
     queryKey: ["campanhas-ativas", de],
-    queryFn: listar,
+    queryFn: async () => {
+      const [noAr, ids] = await Promise.all([listar(), participo().catch(() => [] as string[])]);
+      return soDisponiveis(noAr, ids);
+    },
     staleTime: 60_000,
     retry: false,
   });
