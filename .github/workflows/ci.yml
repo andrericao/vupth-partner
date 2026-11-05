@@ -103,4 +103,15 @@ jobs:
         # do Expo; depois promover (eas update:edit <GRUPO> --rollout-percentage 100) ou voltar atras
         # (eas update:revert-update-rollout). A guarda de compatibilidade (DEC-152) segue valendo.
         # Sem --force de proposito: um rollout em andamento barra o proximo publish ate ser decidido.
-        run: eas update --branch production --environment production --rollout-percentage 10 --message "$MSG" --non-interactive
+        # ci-ota-rollout-em-andamento: esse barramento nao deixa o CI vermelho. O EAS recusa sem
+        # publicar nada; o passo vira aviso amarelo (OTA pulado) e o codigo vai no proximo OTA,
+        # depois que o Andre promover ou reverter. Qualquer outra falha do EAS continua reprovando.
+        run: |
+          set +e
+          eas update --branch production --environment production --rollout-percentage 10 --message "$MSG" --non-interactive 2>&1 | tee ota.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ] && grep -q "Cannot start a rollout while another rollout is in progress" ota.log; then
+            echo "::warning title=OTA de producao pulado::ja ha um rollout em andamento (DEC-174). Promover: eas update:edit <GRUPO> --rollout-percentage 100 --branch production. Reverter: eas update:revert-update-rollout --branch production. Depois, novo push na main publica este codigo."
+            exit 0
+          fi
+          exit "$rc"
