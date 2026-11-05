@@ -16,7 +16,8 @@ const API_URLS: Record<string, string> = {
   local: `http://${process.env.EXPO_PUBLIC_API_LOCAL_IP ?? "192.168.0.16"}:8080`,
   staging: "https://vupth-backend-ia.onrender.com",
   dev: "https://vupth-backend-ia.onrender.com",
-  prod: "https://vupth-backend-ia-production.up.railway.app",
+  // api-no-dominio-nos-perfis (DEC-180, 05/11): producao no dominio proprio.
+  prod: "https://api.vupth.com",
 };
 
 // O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando
