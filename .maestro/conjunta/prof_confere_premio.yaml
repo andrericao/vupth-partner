@@ -36,3 +36,26 @@ appId: ${APP_ID}
       NOME: premio-do-link
       O_QUE: "os R$ 5 do cliente que entrou pelo link da campanha ${NOME_CAMPANHA}, em Promoções"
     label: "PJ15.07 · print para o Andre (premio-do-link)"
+# premio-em-pendentes (Andre, 05/11): o premio tambem em Seu dia → Pendentes. A linha
+# so aparece com o GET /referrals/me/credits do Backend no ar; sem ele, o print mostra
+# a aba como esta (o Andre ve que falta) e o fluxo nao falha por isso.
+- tapOn:
+    id: "aba-relatorios"
+    label: "PJ15.08 · abre Seu dia"
+- tapOn:
+    id: "aba-relatorio-pendentes"
+    label: "PJ15.09 · aba Pendentes"
+- runFlow:
+    when:
+      visible:
+        id: "premios-pendentes"
+    commands:
+      - assertVisible:
+          text: "PRÊMIOS DE INDICAÇÃO"
+          label: "PJ15.10 · a linha do premio em Pendentes"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: premio-em-pendentes
+      O_QUE: "Seu dia → Pendentes com a linha do premio de indicacao (campanha, R$ 5,00, estado, cliente e data)"
+    label: "PJ15.11 · print para o Andre (premio-em-pendentes)"

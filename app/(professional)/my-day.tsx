@@ -21,6 +21,8 @@ import { PendenciasDoRelatorio } from "@components/PendenciasDoRelatorio";
 import { SaldosComOApp } from "@components/SaldosComOApp";
 import { ComposicaoDosCortes } from "@components/ComposicaoDosCortes";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
+import { PremiosPendentes } from "@components/PremiosPendentes";
+import { meusPremios, premiosPendentes, CHAVE_PREMIOS } from "@lib/premios";
 import { AbasDoRelatorio, type AbaDoRelatorio } from "@components/AbasDoRelatorio";
 import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
 import { buscarDivida, CHAVE_DIVIDA } from "@lib/dividaPorFora";
@@ -207,6 +209,9 @@ export default function MyDayScreen() {
   const [aba, setAba] = useState<AbaDoRelatorio>("historico");
   const { data: divida } = useQuery({ queryKey: CHAVE_DIVIDA, queryFn: buscarDivida, staleTime: 60_000, retry: false });
   const { data: gateway } = useQuery({ queryKey: CHAVE_GATEWAY, queryFn: buscarGateway, staleTime: 60_000, retry: false });
+  // premio-em-pendentes (Andre, 05/11): os premios de indicacao ainda nao recebidos.
+  const { data: premios } = useQuery({ queryKey: CHAVE_PREMIOS, queryFn: meusPremios, staleTime: 60_000, retry: false });
+  const premiosAbertos = premiosPendentes(premios ?? []);
   const recebi = async (attendanceId: string, jaConfirmou = false) => {
     const p = pagamentos.find((x) => x.attendance_id === attendanceId);
     const ok =
@@ -380,7 +385,7 @@ export default function MyDayScreen() {
           <AbasDoRelatorio
             aba={aba}
             onMudar={setAba}
-            pendentes={pagamentos.length}
+            pendentes={pagamentos.length + premiosAbertos.length}
             dividas={divida?.items?.length ?? 0}
             precisaConferir={aguardando > 0}
           />
@@ -388,11 +393,12 @@ export default function MyDayScreen() {
           {aba === "pendentes" && (
             <>
               <PagamentosPendentes itens={pagamentos} onRecebi={recebi} onRecusar={recusar} gateway={gateway} />
-              {pagamentos.length === 0 && (
+              {pagamentos.length === 0 && premiosAbertos.length === 0 && (
                 <Text testID="pendentes-vazio" className="font-body text-sm text-vupth-textSecondary mt-4">
                   Nenhum pagamento pendente.
                 </Text>
               )}
+              <PremiosPendentes itens={premiosAbertos} />
             </>
           )}
 
