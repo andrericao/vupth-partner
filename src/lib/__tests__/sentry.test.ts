@@ -230,3 +230,39 @@ describe("capturarErro e marcarOta", () => {
     expect(typeof lerOta()).toBe("object");
   });
 });
+
+// sentry-tag-do-update (Andre, 05/11): cada evento diz qual update, canal e runtime o gerou.
+// O lerOta faz require("expo-updates") na hora; o mock mutavel troca o que ele le.
+const mockUpdates: Record<string, unknown> = {};
+jest.mock("expo-updates", () => mockUpdates);
+
+describe("tags do update no padrao do Expo", () => {
+  const marcarCom = (valores: Record<string, unknown>) => {
+    Object.keys(mockUpdates).forEach((k) => delete mockUpdates[k]);
+    Object.assign(mockUpdates, valores);
+    const sdk = { setTag: jest.fn() } as any;
+    marcarOta(sdk);
+    return sdk.setTag;
+  };
+
+  it("le o expo-updates e marca expo-update-id, expo-channel e expo-runtime-version", () => {
+    const setTag = marcarCom({ updateId: "grupo-10pct", runtimeVersion: "rv-1", channel: "production", isEmbeddedLaunch: false });
+    expect(setTag).toHaveBeenCalledWith("expo-update-id", "grupo-10pct");
+    expect(setTag).toHaveBeenCalledWith("expo-channel", "production");
+    expect(setTag).toHaveBeenCalledWith("expo-runtime-version", "rv-1");
+  });
+
+  it("bundle embutido (sem update) vira embedded", () => {
+    const setTag = marcarCom({ updateId: null, runtimeVersion: null, channel: null, isEmbeddedLaunch: true });
+    expect(setTag).toHaveBeenCalledWith("expo-update-id", "embedded");
+    expect(setTag).toHaveBeenCalledWith("expo-channel", "desconhecido");
+    expect(setTag).toHaveBeenCalledWith("expo-runtime-version", "desconhecido");
+  });
+
+  it("a raiz do app marca o OTA logo depois de ligar o Sentry", () => {
+    const fs = jest.requireActual("fs");
+    const path = jest.requireActual("path");
+    const raiz = fs.readFileSync(path.resolve(__dirname, "../../../app/_layout.tsx"), "utf8");
+    expect(raiz.indexOf("marcarOta();")).toBeGreaterThan(raiz.indexOf("iniciarSentry({"));
+  });
+});
