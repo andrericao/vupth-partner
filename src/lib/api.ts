@@ -5,7 +5,7 @@ import * as Updates from "expo-updates";
 import { resolveApiEnv } from "@lib/apiEnv";
 import { cookiesDoNavegador, modoCookieLigado, prepararPedidoCookie } from "@lib/modoCookieWeb";
 
-// Render = ambiente de TESTE; Railway = PRODUCAO. Quem testa bate no Render:
+// Render = ambiente de TESTE; PRODUCAO = api.vupth.com (DEC-180). Quem testa bate no Render:
 // o app via Expo/APK de `preview` e a web pelo link `dev*` (Andre 2026-09-06).
 //
 // `staging` e `dev` sao o MESMO host de proposito: este app batizou de
