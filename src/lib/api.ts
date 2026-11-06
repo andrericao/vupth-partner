@@ -5,7 +5,7 @@ import * as Updates from "expo-updates";
 import { resolveApiEnv } from "@lib/apiEnv";
 import { cookiesDoNavegador, modoCookieLigado, prepararPedidoCookie } from "@lib/modoCookieWeb";
 
-// Render = ambiente de TESTE; Railway = PRODUCAO. Quem testa bate no Render:
+// Render = ambiente de TESTE; PRODUCAO = api.vupth.com (DEC-180). Quem testa bate no Render:
 // o app via Expo/APK de `preview` e a web pelo link `dev*` (Andre 2026-09-06).
 //
 // `staging` e `dev` sao o MESMO host de proposito: este app batizou de
@@ -16,7 +16,8 @@ const API_URLS: Record<string, string> = {
   local: `http://${process.env.EXPO_PUBLIC_API_LOCAL_IP ?? "192.168.0.16"}:8080`,
   staging: "https://vupth-backend-ia.onrender.com",
   dev: "https://vupth-backend-ia.onrender.com",
-  prod: "https://vupth-backend-ia-production.up.railway.app",
+  // api-no-dominio-nos-perfis (DEC-180, 05/11): producao no dominio proprio.
+  prod: "https://api.vupth.com",
 };
 
 // O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando

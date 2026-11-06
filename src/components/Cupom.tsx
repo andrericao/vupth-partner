@@ -27,9 +27,19 @@ type Props = {
   listar?: () => Promise<Campanha[]>;
   /** promocoes-ticket-do-profissional-como-cliente: as campanhas no ar, para o ticket com Ativar. */
   disponiveis?: () => Promise<Campanha[]>;
+  /** promocoes-em-secoes (05/11): false = so o campo e o aviso; a lista vai para as secoes. */
+  comLista?: boolean;
+  /** Avisa que um cupom foi ativado (as secoes recarregam). */
+  aoAtivar?: (c: Campanha) => void;
 };
 
-export function Cupom({ usar = usarCupom, listar = minhasCampanhas, disponiveis = campanhasAtivas }: Props) {
+export function Cupom({
+  usar = usarCupom,
+  listar = minhasCampanhas,
+  disponiveis = campanhasAtivas,
+  comLista = true,
+  aoAtivar,
+}: Props) {
   const [codigo, setCodigo] = useState("");
   const [usando, setUsando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -42,16 +52,18 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas, disponiveis 
   const [ativandoId, setAtivandoId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!comLista) return;
     listar()
       .then(setCampanhas)
       .catch(() => {});
-  }, [listar]);
+  }, [listar, comLista]);
 
   useEffect(() => {
+    if (!comLista) return;
     disponiveis()
       .then(setNoAr)
       .catch(() => {});
-  }, [disponiveis]);
+  }, [disponiveis, comLista]);
 
   // promocoes-ticket-do-profissional-como-cliente (Andre, 25/10): como um cliente, ele ve o
   // ticket da campanha (cupom: desconto ou sem taxa) com o codigo e o botao Ativar. So entra
@@ -100,6 +112,7 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas, disponiveis 
       setCodigo("");
       setAtivado(nova);
       setSaibaMais(false);
+      aoAtivar?.(nova);
     } catch (e) {
       const fora = motivoDoErro(e);
       if (fora) {
@@ -157,7 +170,7 @@ export function Cupom({ usar = usarCupom, listar = minhasCampanhas, disponiveis 
         </View>
       )}
 
-      {(campanhas.length > 0 || ativaveis.length > 0) && (
+      {comLista && (campanhas.length > 0 || ativaveis.length > 0) && (
         <View className="mt-6 gap-2">
           <Text className="font-body text-f11 font-bold tracking-wider text-vupth-textSecondary">SEUS CUPONS</Text>
           {ativaveis.map((c) => (

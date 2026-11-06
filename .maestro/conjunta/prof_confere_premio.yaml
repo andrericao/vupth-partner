@@ -1,0 +1,100 @@
+# teste-link-de-participacao (Andre, 05/11): depois que o Client concluiu o corte
+# do cliente novo que entrou pelo link, o profissional (ja logado) ve os R$ 5 em
+# Promoções ("R$ 5,00 a receber" ou "R$ 5,00 a liberar pelo VUPTH": o premio da
+# campanha de teste nasce travado) e sai o print para o Andre (DEC-184).
+# A API confere antes (GET /referrals/me): sem premio, o passo falha com o valor.
+# env: EMAIL, NOME_CAMPANHA; VALOR (opcional, texto na tela; padrao "R\\$ 5,00")
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../scripts/link_da_campanha.js
+    env:
+      EMAIL: ${EMAIL}
+      NOME: ${NOME_CAMPANHA}
+    label: "PJ15.01 · pela API: o premio de /referrals/me"
+- assertTrue:
+    condition: ${Number(output.PREMIO) >= 5}
+    label: "PJ15.02 · a API ja tem os R$ 5 (premio = ${output.PREMIO})"
+- tapOn:
+    id: "aba-perfil"
+    label: "PJ15.03 · abre o Perfil"
+- scrollUntilVisible:
+    element: "Promoções"
+    direction: DOWN
+    label: "PJ15.04 · rola ate Promoções"
+- tapOn:
+    text: "Promoções"
+    label: "PJ15.05 · abre Promoções"
+- extendedWaitUntil:
+    visible:
+      text: ".*${typeof VALOR !== 'undefined' && VALOR ? VALOR : 'R\\$ 5,00'} a (receber|liberar).*"
+    timeout: 20000
+    label: "PJ15.06 · o R$ 5 aparece (a receber ou a liberar)"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: premio-do-link
+      O_QUE: "os R$ 5 do cliente que entrou pelo link da campanha ${NOME_CAMPANHA}, em Promoções"
+    label: "PJ15.07 · print para o Andre (premio-do-link)"
+# premio-em-pendentes (Andre, 05/11): o premio tambem em Seu dia → Pendentes. A linha
+# so aparece com o GET /referrals/me/credits do Backend no ar; sem ele, o print mostra
+# a aba como esta (o Andre ve que falta) e o fluxo nao falha por isso.
+- tapOn:
+    id: "aba-relatorios"
+    label: "PJ15.08 · abre Seu dia"
+- tapOn:
+    id: "aba-relatorio-pendentes"
+    label: "PJ15.09 · aba Pendentes"
+- assertVisible:
+    id: "pendentes-filtros"
+    label: "PJ15.09a · os filtros de Pendentes (tipo e periodo)"
+- tapOn:
+    id: "pendentes-tipo-BONIFICACAO"
+    label: "PJ15.09b · filtro Bonificação"
+- runFlow:
+    when:
+      notVisible:
+        id: "premios-pendentes"
+    commands:
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: premio-em-pendentes
+            O_QUE: "Seu dia → Pendentes com os filtros (sem a lista de premios do Backend ainda)"
+          label: "PJ15.11b · print para o Andre (Pendentes sem premio)"
+- runFlow:
+    when:
+      visible:
+        id: "premios-pendentes"
+    commands:
+      - assertVisible:
+          text: "PRÊMIOS DE INDICAÇÃO"
+          label: "PJ15.10 · a linha do premio em Pendentes"
+      - assertVisible:
+          text: ".*atendimentos? (gerou|geraram) R\\$.*"
+          label: "PJ15.10a · o resumo: N atendimentos geraram R$ X"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: premio-em-pendentes
+            O_QUE: "Seu dia → Pendentes, filtro Bonificação: o resumo por campanha e a linha do premio (campanha, R$ 5,00, estado, cliente e data)"
+          label: "PJ15.11 · print para o Andre (premio-em-pendentes)"
+      - tapOn:
+          id: "premio-pendente"
+          index: 0
+          label: "PJ15.12 · toca no premio: abre a janela"
+      - assertVisible:
+          id: "premio-janela-resumo"
+          label: "PJ15.13 · a janela com o resumo no topo"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: premio-janela
+            O_QUE: "a janela do premio: resumo no topo, cliente, dia do corte, campanha, valor e Ver o dia"
+          label: "PJ15.14 · print para o Andre (premio-janela)"
+      - tapOn:
+          id: "premio-janela-ver-dia"
+          label: "PJ15.15 · Ver o dia"
+      - assertVisible:
+          id: "historico-dia-escolhido"
+          label: "PJ15.16 · o Historico naquele dia"

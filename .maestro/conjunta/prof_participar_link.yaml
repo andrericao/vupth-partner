@@ -1,0 +1,46 @@
+# teste-link-de-participacao (Andre, 05/11): o profissional (ja logado, na Fila)
+# toca em Participar na campanha de link e fica com o link pessoal dela. Se ja
+# participa, so confere o cartao. Depois, o Client pega o link pela API com
+# ../scripts/link_da_campanha.js (saidas LINK_CAMPANHA, CODIGO_LINK, CAMPANHA_ID).
+# env: NOME_CAMPANHA (nome exato; ex.: "Teste de Lançamento")
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "aba-perfil"
+    label: "PJ14.01 · abre o Perfil"
+- scrollUntilVisible:
+    element: "Promoções"
+    direction: DOWN
+    label: "PJ14.02 · rola ate Promoções"
+- tapOn:
+    text: "Promoções"
+    label: "PJ14.03 · abre Promoções"
+- extendedWaitUntil:
+    visible:
+      id: "link-indicacao"
+    timeout: 20000
+    label: "PJ14.04 · espera o bloco do link"
+- runFlow:
+    when:
+      visible:
+        id: "link-indicacao-aberta"
+    commands:
+      - scrollUntilVisible:
+          element: ${NOME_CAMPANHA}
+          direction: DOWN
+          label: "PJ14.05 · a campanha aparece entre as abertas"
+      - tapOn:
+          text: ${NOME_CAMPANHA}
+          label: "PJ14.06 · toca no card: abre a explicacao"
+      - tapOn:
+          text: "Participar"
+          label: "PJ14.07 · Participar"
+    label: "PJ14.05a · ainda nao participa: entra na campanha"
+- scrollUntilVisible:
+    element:
+      id: "link-indicacao-campanha"
+    direction: UP
+    label: "PJ14.08 · o cartao da campanha com o link pessoal"
+- assertVisible:
+    text: "Compartilhar link"
+    label: "PJ14.09 · o botao Compartilhar link"

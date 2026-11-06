@@ -176,7 +176,12 @@ export function capturarErro(erro: unknown, sdk: Sentry | null = sdkLigado): voi
   }
 }
 
-export type DadosDoOta = { updateId?: string | null; runtimeVersion?: string | null; embutido?: boolean | null };
+export type DadosDoOta = {
+  updateId?: string | null;
+  runtimeVersion?: string | null;
+  embutido?: boolean | null;
+  canal?: string | null;
+};
 
 /** Qual OTA e qual runtime estavam rodando: liga a queda ao OTA (log-de-falha-na-abertura). */
 export function lerOta(): DadosDoOta {
@@ -186,6 +191,7 @@ export function lerOta(): DadosDoOta {
       updateId: Updates.updateId ?? null,
       runtimeVersion: Updates.runtimeVersion ?? null,
       embutido: Updates.isEmbeddedLaunch ?? null,
+      canal: Updates.channel ?? null,
     };
   } catch {
     return {};
@@ -199,6 +205,11 @@ export function marcarOta(sdk: Sentry | null = sdkLigado, dados: () => DadosDoOt
     sdk.setTag("ota", d.updateId ?? "embutido");
     sdk.setTag("runtime", d.runtimeVersion ?? "desconhecido");
     if (d.embutido != null) sdk.setTag("bundle_embutido", String(d.embutido));
+    // sentry-tag-do-update (Andre, 05/11): saber se o OTA passou nos 10% do rollout. Nomes
+    // padrao do Expo, para buscar no Sentry (has:expo-update-id) e separar por update e canal.
+    sdk.setTag("expo-update-id", d.updateId ?? "embedded");
+    sdk.setTag("expo-channel", d.canal ?? "desconhecido");
+    sdk.setTag("expo-runtime-version", d.runtimeVersion ?? "desconhecido");
   } catch {
     // enfeite: nunca derruba o app
   }

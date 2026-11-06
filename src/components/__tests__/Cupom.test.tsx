@@ -186,4 +186,22 @@ describe("Cupom", () => {
       await waitFor(() => expect(r.queryByTestId("cupom-ativavel")).toBeNull());
     });
   });
+
+  // promocoes-em-secoes (Andre, 05/11): na tela, a lista vai para as secoes; o campo fica.
+  it("sem a lista: nem busca os cupons, so o campo; ativar avisa quem esta em volta", async () => {
+    const listar = jest.fn().mockResolvedValue([CAMPANHA]);
+    const disponiveis = jest.fn().mockResolvedValue([]);
+    const aoAtivar = jest.fn();
+    const r = render(
+      <Cupom usar={jest.fn().mockResolvedValue(CAMPANHA)} listar={listar} disponiveis={disponiveis} comLista={false} aoAtivar={aoAtivar} />
+    );
+    fireEvent.changeText(r.getByTestId("cupom-codigo"), "vupth10");
+    fireEvent.press(r.getByTestId("cupom-usar"));
+    expect((await r.findByTestId("cupom-ativado")).props.children).toBe("Cupom ativado");
+    expect(aoAtivar).toHaveBeenCalledWith(CAMPANHA);
+    expect(listar).not.toHaveBeenCalled();
+    expect(disponiveis).not.toHaveBeenCalled();
+    expect(r.queryByText("SEUS CUPONS")).toBeNull();
+    expect(r.queryByTestId("cupom-campanha")).toBeNull();
+  });
 });
