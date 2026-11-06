@@ -1,4 +1,3 @@
-import type { FormaDeRecebimento } from "@lib/pagamento";
 import { create } from "zustand";
 import { api } from "@lib/api";
 import { normalizarAtendimento } from "@lib/atendimentoAtual";
@@ -51,8 +50,7 @@ type AttendanceState = {
    */
   finishAttendance: (
     attendanceId: string,
-    pagamentoRecebido?: boolean,
-    forma?: FormaDeRecebimento
+    pagamentoRecebido?: boolean
   ) => Promise<string | null>;
   pauseAttendance: (attendanceId: string) => Promise<void>;
   resumeAttendance: (attendanceId: string) => Promise<AttendanceInProgress>;
@@ -128,12 +126,12 @@ export const useAttendanceStore = create<AttendanceState>((set) => ({
     return data;
   },
 
-  finishAttendance: async (attendanceId, pagamentoRecebido, forma) => {
+  finishAttendance: async (attendanceId, pagamentoRecebido) => {
     const { data } = await api.patch(
       `/attendances/${attendanceId}/finish`,
       pagamentoRecebido === undefined
         ? undefined
-        : { payment_received: pagamentoRecebido, ...(forma ? { payment_method: forma } : {}) }
+        : { payment_received: pagamentoRecebido }
     );
     // Limpa SEMPRE, nao so quando o id casa. Comparar ids dependia de o payload
     // trazer `id` no formato esperado — e quando nao trazia, sobrava um card

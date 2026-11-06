@@ -16,7 +16,6 @@ appId: ${APP_ID}
       visible: "Recebeu o pagamento?"
     commands:
       - tapOn: "${RESPOSTA == 'Confirmar' ? 'Recebi' : RESPOSTA}"
-      - runFlow: pular_forma.yaml
       - extendedWaitUntil:
           notVisible: "Recebeu o pagamento?"
           timeout: 20000

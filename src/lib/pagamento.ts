@@ -1,6 +1,5 @@
 import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
-import { abrirDialogo } from "@store/dialogo.store";
 import { formatarReais } from "@lib/dinheiro";
 import { textoDoCalculo, type Calculo } from "@lib/bonificacao";
 
@@ -75,59 +74,16 @@ export async function obterPagamentosPendentes(): Promise<{ awaiting_count: numb
   return { awaiting_count: data?.awaiting_count ?? 0, items: data?.items ?? [] };
 }
 
-/**
- * forma-de-recebimento (Andre, fase de testes sem gateway; Backend 8b158e3): como
- * o profissional recebeu. So registro — nao aparece para o cliente nem nos
- * relatorios, e e opcional.
- */
-export type FormaDeRecebimento = "PIX" | "CARTAO" | "DINHEIRO" | "NOTA";
-
-export const FORMAS_DE_RECEBIMENTO: { valor: FormaDeRecebimento; rotulo: string }[] = [
-  { valor: "PIX", rotulo: "Pix" },
-  { valor: "CARTAO", rotulo: "Cartão" },
-  { valor: "DINHEIRO", rotulo: "Dinheiro" },
-  { valor: "NOTA", rotulo: "Nota" },
-];
-
-// ocultar-forma-nota (Andre, 25/10): "Nota" e redundante com dinheiro; some da caixa, mas fica
-// no tipo e na lista do Backend (so esconder). Religar e trocar a flag.
-export const MOSTRAR_FORMA_NOTA = false;
-
-/** As formas que a caixa mostra. */
-export function formasVisiveis(): { valor: FormaDeRecebimento; rotulo: string }[] {
-  return FORMAS_DE_RECEBIMENTO.filter((f) => MOSTRAR_FORMA_NOTA || f.valor !== "NOTA");
-}
-
-/** Depois do "Recebi": como? `undefined` = pulou (o fluxo segue igual). */
-export async function perguntarForma(
-  deps: { perguntar?: typeof abrirDialogo } = {}
-): Promise<FormaDeRecebimento | undefined> {
-  const perguntar = deps.perguntar ?? abrirDialogo;
-  const escolha = await perguntar({
-    titulo: "Como recebeu?",
-    mensagem: "Só para o seu registro. Pode pular.",
-    botoes: [
-      ...formasVisiveis().map((f) => ({ texto: f.rotulo })),
-      { texto: "Pular", estilo: "cancel" as const },
-    ],
-  });
-  return formasVisiveis()[escolha]?.valor;
-}
-
 /** "Recebi": de PENDING ou AWAITING_CONFIRMATION para PAID (push ao cliente). */
 export async function confirmarRecebimento(
   attendanceId: string,
-  forma?: FormaDeRecebimento,
   valorRecebido?: number
 ): Promise<void> {
+  // tirar-forma-de-pagamento (Andre, 06/11): so o "Recebi", sem method.
   // received_amount (DEC-127): so quando o cliente pagou diferente do valor com desconto.
-  const corpo = {
-    ...(forma ? { method: forma } : {}),
-    ...(valorRecebido !== undefined ? { received_amount: valorRecebido } : {}),
-  };
   await api.post(
     `/attendances/${attendanceId}/payment/confirm`,
-    Object.keys(corpo).length > 0 ? corpo : undefined
+    valorRecebido !== undefined ? { received_amount: valorRecebido } : undefined
   );
 }
 

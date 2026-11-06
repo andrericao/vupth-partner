@@ -38,7 +38,7 @@ import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
 import { buscarDivida, CHAVE_DIVIDA } from "@lib/dividaPorFora";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
-import { confirmarRecebimento, formatarReais, perguntarForma, recusarRecebimento } from "@lib/pagamento";
+import { confirmarRecebimento, formatarReais, recusarRecebimento } from "@lib/pagamento";
 import { confirmar } from "@lib/confirmar";
 import { perguntarValorRecebido } from "@lib/bonificacao";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -245,9 +245,8 @@ export default function MyDayScreen() {
       }));
     if (!ok) return;
     const valorRecebido = await perguntarValorRecebido(attendanceId);
-    const forma = await perguntarForma();
     try {
-      await confirmarRecebimento(attendanceId, forma, valorRecebido);
+      await confirmarRecebimento(attendanceId, valorRecebido);
       await queryClient.invalidateQueries({ queryKey: ["pending-payments"] });
     } catch (error: any) {
       Alert.alert("Erro", getApiErrorMessage(error, "Não foi possível confirmar o pagamento."));

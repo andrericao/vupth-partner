@@ -19,7 +19,7 @@ import type { AttendanceInQueue } from "@lib/types";
 import { getApiErrorMessage, API_ENV } from "@lib/api";
 import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
-import { confirmarRecebimento, perguntarPagamento, perguntarForma } from "@lib/pagamento";
+import { confirmarRecebimento, perguntarPagamento } from "@lib/pagamento";
 import { perguntarValorRecebido } from "@lib/bonificacao";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
@@ -636,7 +636,7 @@ export default function ProfessionalQueueScreen() {
 
   // finalizar-e-depois-receber (Andre, 22/10): todo Finalizar passa por aqui. O
   // corte e finalizado NA HORA, sem corpo; so depois vem "Recebeu o pagamento?".
-  // Recebi -> a forma (Pix, cartao, dinheiro, nota) e o payment/confirm (PAID).
+  // Recebi -> o payment/confirm (PAID).
   // Ainda nao -> o pagamento fica pendente e ele marca depois em Relatorios.
   // A pergunta so aparece quando ha o que receber (ja pago ou sem pagamento: nada).
   const finalizarComPagamento = async (attendanceId: string) => {
@@ -647,9 +647,8 @@ export default function ProfessionalQueueScreen() {
     if (recebido === undefined) return;
     if (recebido) {
       const valorRecebido = await perguntarValorRecebido(attendanceId);
-      const forma = await perguntarForma();
       try {
-        await confirmarRecebimento(attendanceId, forma, valorRecebido);
+        await confirmarRecebimento(attendanceId, valorRecebido);
       } catch (error: any) {
         Alert.alert(
           "Atendimento finalizado",
