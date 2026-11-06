@@ -120,9 +120,10 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Quer amanhã às.*"
     label: "07.08f · confere Quer amanhã"
-# texto-do-aceite (ba38b81): aceitar o de outro dia o agenda naquele dia.
+# texto-do-aceite (ba38b81): aceitar o de outro dia o agenda naquele dia. Sem a semana
+# montada, o pedido nasce agenda_requested (BAK dce1562) e o texto muda (log 2026-11-06_162133).
 - assertVisible:
-    text: ".*fica agendado para esse dia.*"
+    text: ".*(fica agendado para esse dia|abre a agenda desse dia).*"
     label: "07.08f2 · confere fica agendado para esse dia"
 - tapOn:
     text: "Recusar"
