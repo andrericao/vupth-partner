@@ -1,5 +1,0 @@
-Rodada 2026-11-06_092951 · TAG 092951 · commit esperado 5b161fc
-✅ 00_atualizacao
-❌ etapa_00b_fumaca — parou em ? — TRAVOU: passou de 300s (reprovada pelo limite de tempo)
-   print: .maestro/logs/2026-11-06_092951/FALHA_etapa_00b_fumaca.png
-   ⛔ a fumaca falhou: o resto da bateria nao rodou
