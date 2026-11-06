@@ -19,7 +19,13 @@ appId: ${APP_ID}
     text: "Dados do estabelecimento"
     label: "01.15 · toca em Dados do estabelecimento"
 # Log 2026-10-31_174548 (01.17): "Horário de funcionamento" também é uma linha da
-# lista de passos (sem toque, e vem antes do card); toca na descrição do card.
+# lista de passos (vem antes do card); toca na descrição do card.
+# Logs 2026-11-06_162133 e _193916: com o card de passos, a descrição fica abaixo
+# da dobra; rola até ela antes de tocar.
+- scrollUntilVisible:
+    element: "Abertura e fechamento"
+    direction: DOWN
+    label: "01.15a · rola até Abertura e fechamento"
 - tapOn:
     text: "Abertura e fechamento"
     label: "01.16 · toca em Horário de Funcionamento"
