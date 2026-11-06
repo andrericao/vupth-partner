@@ -136,15 +136,6 @@ if (etapa >= 5 || so04b) {
   if (prof.accepting_new === false || prof.acceptingNew === false) {
     pedir("PATCH", "/professional/me/accepting-new", { value: true }, tokenProf);
   }
-  // A fumaca abre um dia em Minha agenda. O POST /professional/me/hours/open grava uma
-  // excecao por data e responde BUSINESS_HOURS_INVALID sem a semana do profissional
-  // (bateria 2026-11-06_100733, 00b.15). So quem pede: outras etapas dependem da agenda vazia.
-  if (typeof SEMANA_DO_PROF !== "undefined" && SEMANA_DO_PROF === "1") {
-    var semana = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-    pedir("PUT", "/professional/me/hours/weekly", {
-      days: semana.map(function (d) { return { day: d, closed: false, opens: "00:00", closes: "00:00" }; })
-    }, tokenProf);
-  }
 }
 
 // ── 06 e 08: um atendimento Finalizado e um Retirado hoje (o que a 05 faz) ──
