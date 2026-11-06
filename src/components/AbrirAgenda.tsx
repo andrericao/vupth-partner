@@ -87,6 +87,7 @@ export function AbrirAgenda({
 
   if (!dias) return null;
   const abertos = dias.filter((d) => d.openedByMe).length;
+  const soSolicitacoes = dias.some((d) => d.openedByMe && !d.agendaReleased);
   const escolhidos = dias.filter((d) => marcados.includes(d.date));
   const rotulo = rotuloDoMes(dias.map((d) => d.date));
 
@@ -103,6 +104,11 @@ export function AbrirAgenda({
           ? "Você ainda não abriu nenhum dia. Toque nos dias que quer abrir (até 1 mês) ou repita a sua agenda padrão."
           : `Você abriu ${abertos} ${abertos === 1 ? "dia" : "dias"}. Toque nos vazios para abrir mais.`}
       </Text>
+      {soSolicitacoes && (
+        <Text testID="agenda-so-solicitacoes" className="font-body text-xs text-vupth-textSecondary">
+          Nos dias abertos, por enquanto só chegam solicitações. Para o cliente agendar direto, monte a sua agenda.
+        </Text>
+      )}
       <View className="flex-row flex-wrap gap-2">
         {dias.map((d) => {
           const marcado = marcados.includes(d.date);

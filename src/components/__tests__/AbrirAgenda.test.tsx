@@ -3,7 +3,7 @@ import { AbrirAgenda } from "../AbrirAgenda";
 import type { DiaDaAgenda } from "@lib/agendaAberta";
 
 const dia = (date: string, extra: Partial<DiaDaAgenda> = {}): DiaDaAgenda => ({
-  date, closed: false, opens: "09:00:00", closes: "18:00:00", storeOpen: true, openedByMe: false, ...extra,
+  date, closed: false, opens: "09:00:00", closes: "18:00:00", storeOpen: true, openedByMe: false, agendaReleased: true, ...extra,
 });
 const hoje = new Date(2026, 10, 1);
 
@@ -20,6 +20,22 @@ describe("AbrirAgenda", () => {
     await waitFor(() => expect(abrir).toHaveBeenCalledWith([dias[0]]));
     expect(await screen.findByText("Dias abertos.")).toBeTruthy();
     expect(buscar).toHaveBeenCalledTimes(2);
+  });
+
+  it("dia aberto sem agenda disponivel avisa que so chegam solicitacoes", async () => {
+    const buscar = jest.fn().mockResolvedValue([dia("2026-11-02", { openedByMe: true, agendaReleased: false })]);
+    render(<AbrirAgenda hoje={hoje} buscar={buscar} abrir={jest.fn()} repetir={jest.fn()} />);
+    expect(await screen.findByTestId("agenda-so-solicitacoes")).toBeTruthy();
+  });
+
+  it("sem aviso quando a agenda esta disponivel ou o dia nao foi aberto", async () => {
+    const buscar = jest.fn().mockResolvedValue([
+      dia("2026-11-02", { openedByMe: true }),
+      dia("2026-11-03", { agendaReleased: false }),
+    ]);
+    render(<AbrirAgenda hoje={hoje} buscar={buscar} abrir={jest.fn()} repetir={jest.fn()} />);
+    await screen.findByTestId("abrir-agenda");
+    expect(screen.queryByTestId("agenda-so-solicitacoes")).toBeNull();
   });
 
   it("repete a agenda padrao para a janela toda", async () => {

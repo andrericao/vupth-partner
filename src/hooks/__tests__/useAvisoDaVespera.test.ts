@@ -32,7 +32,7 @@ describe("useAvisoDaVespera", () => {
 
   it("com dia aberto na semana que vem, nao pergunta", async () => {
     const buscar = jest.fn().mockResolvedValue([
-      { date: "2026-11-03", closed: false, opens: "09:00", closes: "18:00", storeOpen: true, openedByMe: true },
+      { date: "2026-11-03", closed: false, opens: "09:00", closes: "18:00", storeOpen: true, openedByMe: true, agendaReleased: true },
     ]);
     const perguntar = jest.fn();
     renderHook(() => useAvisoDaVespera(true, { agora: domingo, buscar, perguntar }));
