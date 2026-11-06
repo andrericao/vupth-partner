@@ -1,4 +1,0 @@
-Rodada 2026-11-06_092047 · TAG 092047 · commit esperado 5b161fc
-❌ 00_atualizacao — parou em ?
-   print: .maestro/logs/2026-11-06_092047/FALHA_00_atualizacao.png
-   (as etapas nao rodaram: com a versao errada o teste nao serve)
