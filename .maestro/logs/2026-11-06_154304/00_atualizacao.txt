@@ -30,10 +30,7 @@ Running on vupth_android11
 00.04 · espera a entrada... COMPLETED
 00.04b · o commit ja foi verificado? (PULAR_ATUALIZACAO)... COMPLETED
 Run flow when ${output.PULAR} is true...
-  00.04c · espera o commit no rodape da entrada... COMPLETED
-  Copy text from element with id: app-commit... COMPLETED
-  Run ${output.INSTALADO = String(maestro.copiedText).trim()}... COMPLETED
-Run flow when true is true... COMPLETED
+Run flow when false is true... SKIPPED
 00.05 · entra como o profissional da 00...
   Tap on id: go-login... COMPLETED
   Tap on id: login-email... COMPLETED

@@ -5,7 +5,7 @@ Running on vupth_android11
 00b.A3 · e-mail do profissional... COMPLETED
 00b.A4 · nome da loja... COMPLETED
 00b.A5 · nome do profissional... COMPLETED
-00b.A6 · preparo pela API (loja, vinculo, servico, Trabalhando)... COMPLETED
+00b.A6 · preparo pela API (loja, vinculo, servico, Trabalhando, semana do profissional)... COMPLETED
 00b.A7 · abre o app do zero, ja com o OTA...
   Run fechar_cortina.yaml...
     Run fechar_anr.yaml...
@@ -44,7 +44,9 @@ Running on vupth_android11
     Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 50%, timeout 20000 ms, with centering disabled... COMPLETED
     Tap on "Sair da conta"... COMPLETED
     Run flow when id: dialogo-botao-1 is not visible...
-    Run flow when id: dialogo-botao-1 is not visible... SKIPPED
+      Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 50%, timeout 20000 ms, with centering disabled... COMPLETED
+      Tap on "Sair da conta"... COMPLETED
+    Run flow when id: dialogo-botao-1 is not visible... COMPLETED
     Run confirmar.yaml...
       Assert that id: dialogo-botao-1 is visible... COMPLETED
       Tap on id: dialogo-botao-1... COMPLETED
@@ -125,12 +127,25 @@ Running on vupth_android11
   00b.12 · a agenda mostra mes e ano... COMPLETED
   00b.13 · marca o primeiro dia livre... COMPLETED
   00b.14 · abre o dia... COMPLETED
-  00b.15 · dia aberto... FAILED
+  00b.15 · dia aberto... COMPLETED
+  00b.16 · volta a fila... COMPLETED
+  00b.17 · menu da fila... COMPLETED
+  00b.18 · rola ate Agendamentos... COMPLETED
+  00b.19 · abre Agendamentos... COMPLETED
+  00b.20 · a tela de Agendamentos abre... COMPLETED
+  00b.21 · volta a fila... COMPLETED
+  00b.22 · menu da fila... COMPLETED
+  00b.23 · fecha a fila... COMPLETED
+  00b.24 · confirma...
+    Assert that id: dialogo-botao-1 is visible... COMPLETED
+    Tap on id: dialogo-botao-1... COMPLETED
+  00b.24 · confirma... COMPLETED
+  00b.25 · a fila fechou... FAILED
 00b.00 · roda 00b_fumaca... FAILED
 
-Assertion is false: "Dias abertos." is visible
+Assertion is false: "Reabrir fila" is visible
 
-Assertion '"Dias abertos." is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+Assertion '"Reabrir fila" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
@@ -139,4 +154,4 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth-partner/.maestro/logs/2026-11-06_100733/etapa_00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth-partner/.maestro/logs/2026-11-06_154304/etapa_00b_fumaca
