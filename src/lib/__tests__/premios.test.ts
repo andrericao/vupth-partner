@@ -53,6 +53,7 @@ describe("premiosPendentes e linhaDoPremio", () => {
     });
     expect(linhaDoPremio({ ...P, status: "TO_PAY", amount: "7.5" }).estado).toBe("a receber");
     expect(linhaDoPremio({ ...P, status: "OUTRO" }).estado).toBe("a receber");
+    expect(linhaDoPremio({ ...P, test: true }).estado).toBe("prêmio de teste");
   });
 
   it("sem cliente ou sem data, o detalhe encolhe; sem nenhum, some", () => {

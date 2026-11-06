@@ -54,7 +54,8 @@ export function linhaDoPremio(p: PremioDeIndicacao): { titulo: string; valor: st
   return {
     titulo: p.campaign_name,
     valor: formatarReais(Number(p.amount)),
-    estado: ESTADO[p.status] ?? "a receber",
+    // test (BAK-9): premio de teste nao entra no "a pagar", mesmo vindo como LOCKED.
+    estado: p.test ? "prêmio de teste" : (ESTADO[p.status] ?? "a receber"),
     detalhe: detalhe || null,
   };
 }

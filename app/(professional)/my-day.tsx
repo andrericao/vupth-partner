@@ -23,6 +23,8 @@ import { ComposicaoDosCortes } from "@components/ComposicaoDosCortes";
 import { PagamentosPendentes } from "@components/PagamentosPendentes";
 import { PremiosPendentes } from "@components/PremiosPendentes";
 import { meusPremios, premiosPendentes, CHAVE_PREMIOS } from "@lib/premios";
+import { PagamentosRecebidos } from "@components/PagamentosRecebidos";
+import { meusPagamentos, CHAVE_PAGAMENTOS_RECEBIDOS } from "@lib/pagamentosRecebidos";
 import {
   filtrarPendentes,
   diaCurto,
@@ -221,6 +223,13 @@ export default function MyDayScreen() {
   // premio-em-pendentes (Andre, 05/11): os premios de indicacao ainda nao recebidos.
   const { data: premios } = useQuery({ queryKey: CHAVE_PREMIOS, queryFn: meusPremios, staleTime: 60_000, retry: false });
   const premiosAbertos = premiosPendentes(premios ?? []);
+  // pago-no-relatorio (Andre, 06/11): o que o VUPTH ja pagou, no Historico.
+  const { data: pagamentosRecebidos } = useQuery({
+    queryKey: CHAVE_PAGAMENTOS_RECEBIDOS,
+    queryFn: meusPagamentos,
+    staleTime: 60_000,
+    retry: false,
+  });
   // Pendentes com filtros (opcao a do Andre): por tipo e por periodo do corte.
   const [tipoPend, setTipoPend] = useState<TipoDePendente>("TODOS");
   const [periodoPend, setPeriodoPend] = useState<PeriodoDePendente>("TUDO");
@@ -458,6 +467,7 @@ export default function MyDayScreen() {
 
           {aba === "historico" && (
             <>
+            <PagamentosRecebidos itens={pagamentosRecebidos ?? []} />
             <View className="flex-row flex-wrap gap-2 mt-4">
               {periods.map((p) => (
                 <Chip
