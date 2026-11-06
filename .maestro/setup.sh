@@ -396,10 +396,11 @@ fi
 
 # Limites de tempo (maestro-trava-na-atualizacao): a 00 (atualizacao) e cada etapa.
 # No emulador valem FATOR vezes, como as esperas dos fluxos. Mude por variavel:
-# ETAPA_MAX=3600 ATUALIZACAO_MAX=900 bash .maestro/setup.sh ...
+# ETAPA_MAX=3600 ATUALIZACAO_MAX=900 FUMACA_MAX=900 bash .maestro/setup.sh ...
 MULT=1; [ "$EMULADOR" = "1" ] && MULT="${FATOR:-2}"
 ATUALIZACAO_MAX="${ATUALIZACAO_MAX:-$((600 * MULT))}"
 ETAPA_MAX="${ETAPA_MAX:-$((2400 * MULT))}"
+FUMACA_MAX="${FUMACA_MAX:-$((300 * MULT))}"
 
 # maestro-atualizacao-por-commit (Andre, 28/10): o commit ja verificado fica em
 # .maestro/.commit_verificado (no .gitignore), junto do aparelho e da hora da
@@ -427,7 +428,7 @@ else
   FUMACA_OK=1
   if grep -qx "00b $MARCA" "$APROVADOS"; then
     echo "⏭  etapa_00b (fumaca ja passou neste commit)" >> "$RELATORIO"
-  elif rodar "etapa_00b_fumaca" "$FLUXOS/avulsas/00b_fumaca.yaml" 300; then
+  elif rodar "etapa_00b_fumaca" "$FLUXOS/avulsas/00b_fumaca.yaml" "$FUMACA_MAX"; then
     aprovar 00b
   else
     FUMACA_OK=0
