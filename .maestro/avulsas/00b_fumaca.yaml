@@ -31,7 +31,8 @@ env:
     env:
       TAG: ${output.TAG}
       ETAPA: "5"
-    label: "00b.A6 · preparo pela API (loja, vinculo, servico, Trabalhando)"
+      SEMANA_DO_PROF: "1"
+    label: "00b.A6 · preparo pela API (loja, vinculo, servico, Trabalhando, semana do profissional)"
 - runFlow:
     file: ../apoio/abrir_com_ota.yaml
     label: "00b.A7 · abre o app do zero, ja com o OTA"
