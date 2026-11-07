@@ -12,9 +12,11 @@ env:
 # etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
 # test direto), as expressoes testam typeof.
 ---
+# Prefixo x: a 16 cadastra pelo app, e a 01a ja usou o e-mail da TAG da rodada
+# ("Este e-mail ja esta cadastrado", log 2026-11-06_193916, 01.02).
 - evalScript:
-    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
-    label: "16.A1 · etiqueta da rodada (TAG)"
+    script: "${output.TAG = 'x' + (typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6))}"
+    label: "16.A1 · etiqueta da etapa (x + TAG da rodada)"
 - evalScript:
     script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
     label: "16.A2 · e-mail do dono"
