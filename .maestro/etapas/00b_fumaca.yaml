@@ -41,6 +41,11 @@ tags:
     visible: "Recebeu o pagamento?"
     timeout: 20000
     label: "00b.06a · sem chave Pix, a pergunta do pagamento aparece"
+# taxas-riscadas-e-modal-unico (PAR-6): com a chave de taxas desligada no staging,
+# a pergunta traz as taxas riscadas.
+- assertVisible:
+    id: "dialogo-taxa-riscada"
+    label: "00b.06b · a pergunta mostra as taxas riscadas"
 - runFlow:
     file: ../apoio/responder_pagamento.yaml
     env:

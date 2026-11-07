@@ -2,6 +2,7 @@ import { api } from "@lib/api";
 import { confirmar } from "@lib/confirmar";
 import { formatarReais } from "@lib/dinheiro";
 import { textoDoCalculo, type Calculo } from "@lib/bonificacao";
+import type { LinhaDoDialogo } from "@store/dialogo.store";
 
 // pagamento-pix (contrato do Backend 2a2b0ec; adendos 1a0616c e 62295f1). O
 // pagamento e uma flag do atendimento, aberta na criacao. Antes do Finalizar
@@ -13,6 +14,44 @@ import { textoDoCalculo, type Calculo } from "@lib/bonificacao";
 type StatusDoPagamento = "PENDING" | "AWAITING_CONFIRMATION" | "PAID";
 
 const reais = formatarReais;
+
+type TaxasDoPagamento = {
+  app_percent_fee?: number | null;
+  rounding_fee?: number | null;
+  gateway_fee_simulated?: number | null;
+  fees_active?: boolean | null;
+};
+
+/** PAR-6 (BAK 4b1fb2c): as taxas do corte; riscadas com fees_active falso. Servico legado nao traz. */
+export function linhasDasTaxas(p: TaxasDoPagamento | null | undefined): LinhaDoDialogo[] {
+  if (typeof p?.fees_active !== "boolean") return [];
+  const riscada = !p.fees_active;
+  const linhas: LinhaDoDialogo[] = [];
+  const taxa = (rotulo: string, v: number | null | undefined) => {
+    if (typeof v === "number" && Number.isFinite(v)) linhas.push({ rotulo, valor: reais(v), riscada });
+  };
+  taxa("Taxa do app (2%)", p.app_percent_fee);
+  taxa("Arredondamento", p.rounding_fee);
+  taxa("Taxa da empresa de pagamento", p.gateway_fee_simulated);
+  return linhas;
+}
+
+/** As linhas das taxas de um atendimento; sem resposta em `prazoMs`, abre a caixa sem elas. */
+export async function buscarTaxas(attendanceId: string, prazoMs = 2000): Promise<LinhaDoDialogo[]> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limite = new Promise<LinhaDoDialogo[]>((resolve) => {
+    timer = setTimeout(() => resolve([]), prazoMs);
+  });
+  const leitura = api
+    .get(`/attendances/${attendanceId}/payment`)
+    .then(({ data }) => linhasDasTaxas(data))
+    .catch(() => []);
+  try {
+    return await Promise.race([leitura, limite]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 /**
  * undefined = nao perguntar (ja pago, atendimento sem pagamento ou falha ao
@@ -26,11 +65,13 @@ export async function perguntarPagamento(
   let status: StatusDoPagamento;
   let valor: number;
   let calculo: Calculo | null = null;
+  let taxas: LinhaDoDialogo[] = [];
   try {
     const { data } = await api.get(`/attendances/${attendanceId}/payment`);
     status = data?.status;
     valor = Number(data?.amount ?? 0);
     calculo = data?.breakdown ?? null;
+    taxas = linhasDasTaxas(data);
   } catch {
     return undefined;
   }
@@ -47,6 +88,7 @@ export async function perguntarPagamento(
         : `${quem}${reais(valor)}. Se ainda não, fica pendente.`) +
       // recebi-mostra-cliente-e-app (DEC-127): com desconto, a flag e o calculo que bate.
       (textoDoCalculo(calculo) ? `\n\n${textoDoCalculo(calculo)}` : ""),
+    ...(taxas.length > 0 ? { linhas: taxas } : {}),
     confirmar: "Recebi",
     cancelar: "Não recebi",
   });

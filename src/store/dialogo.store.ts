@@ -22,9 +22,13 @@ export type BotaoDialogo = {
   estilo?: "default" | "cancel" | "destructive";
 };
 
+/** Linha de valor abaixo da mensagem; `riscada` e a taxa que nao vale (PAR-6). */
+export type LinhaDoDialogo = { rotulo: string; valor: string; riscada?: boolean };
+
 export type PedidoDialogo = {
   titulo: string;
   mensagem?: string;
+  linhas?: LinhaDoDialogo[];
   botoes?: BotaoDialogo[];
   /**
    * Identidade do aviso (faixa + selo; design-modais, 17/10). Sem `tipo` o
@@ -38,6 +42,7 @@ export type PedidoDialogo = {
 export type DialogoNaTela = {
   titulo: string;
   mensagem?: string;
+  linhas?: LinhaDoDialogo[];
   botoes: Required<BotaoDialogo>[];
   tipo?: TipoDeDialogo;
   selo?: string;
@@ -88,6 +93,7 @@ export function abrirDialogo(pedido: PedidoDialogo): Promise<number> {
     useDialogoStore.getState().enfileirar({
       titulo: pedido.titulo,
       mensagem: pedido.mensagem,
+      linhas: pedido.linhas,
       botoes: normalizar(pedido.botoes),
       // Um tipo que nao existe (JS solto, valor de API) vira diálogo sem tipo:
       // melhor a caixa de sempre do que uma tela sem selo e sem explicação.

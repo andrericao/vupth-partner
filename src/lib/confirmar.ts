@@ -1,6 +1,6 @@
 import { Alert, Platform } from "react-native";
 
-import { abrirDialogo, useDialogoStore, type BotaoDialogo } from "@store/dialogo.store";
+import { abrirDialogo, useDialogoStore, type BotaoDialogo, type LinhaDoDialogo } from "@store/dialogo.store";
 import type { TipoDeDialogo } from "@lib/tipoDeDialogo";
 
 // A flag que o shim do web crava ao instalar (web-shims/alert.js) — mesmo nome
@@ -34,6 +34,8 @@ const alertWebInstalado = () =>
 type Texto = {
   titulo: string;
   mensagem: string;
+  /** Linhas de valor. Sem o DialogoVupth, entram na mensagem, como texto. */
+  linhas?: LinhaDoDialogo[];
   /** Rotulo do botao que confirma (default "Confirmar"). */
   confirmar?: string;
   /** Rotulo do botao que cancela (default "Cancelar"). */
@@ -69,16 +71,23 @@ type Deps = {
  * melhor que um aviso que ninguem desenha.
  */
 function pelaCaixaComTipo(
-  texto: { titulo: string; mensagem: string; tipo?: TipoDeDialogo; selo?: string },
+  texto: { titulo: string; mensagem: string; linhas?: LinhaDoDialogo[]; tipo?: TipoDeDialogo; selo?: string },
   deps: Deps,
   plataforma: typeof Platform.OS
 ): ((botoes: BotaoDialogo[]) => Promise<number>) | null {
-  if (!texto.tipo || plataforma === "web") return null;
+  if ((!texto.tipo && !texto.linhas?.length) || plataforma === "web") return null;
   const hostMontado = deps.hostMontado ?? (() => useDialogoStore.getState().hostMontado);
   if (!hostMontado()) return null;
   const abrir = deps.dialogoImpl ?? abrirDialogo;
   return (botoes) =>
-    abrir({ titulo: texto.titulo, mensagem: texto.mensagem, tipo: texto.tipo, selo: texto.selo, botoes });
+    abrir({ titulo: texto.titulo, mensagem: texto.mensagem, linhas: texto.linhas, tipo: texto.tipo, selo: texto.selo, botoes });
+}
+
+/** A caixa do sistema so tem texto: as linhas entram na mensagem, e o risco vira palavra. */
+function mensagemComLinhas({ mensagem, linhas }: Pick<Texto, "mensagem" | "linhas">): string {
+  if (!linhas?.length) return mensagem;
+  const texto = linhas.map((l) => `${l.rotulo}: ${l.valor}${l.riscada ? " (não cobrada)" : ""}`);
+  return `${mensagem}\n\n${texto.join("\n")}`;
 }
 
 export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
@@ -93,7 +102,7 @@ export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
     try {
       // A caixa do navegador tem UMA linha: sem o titulo junto, "Tem certeza?"
       // fica sem dizer certeza do que.
-      return Promise.resolve(confirmImpl(`${texto.titulo}\n\n${texto.mensagem}`) === true);
+      return Promise.resolve(confirmImpl(`${texto.titulo}\n\n${mensagemComLinhas(texto)}`) === true);
     } catch {
       // Bloqueado (iframe com sandbox, extensao): na duvida, NAO executa.
       return Promise.resolve(false);
@@ -112,7 +121,7 @@ export function confirmar(texto: Texto, deps: Deps = {}): Promise<boolean> {
 
   const alertImpl = deps.alertImpl ?? Alert.alert;
   return new Promise<boolean>((resolve) => {
-    alertImpl(texto.titulo, texto.mensagem, [
+    alertImpl(texto.titulo, mensagemComLinhas(texto), [
       { text: rotuloCancelar, style: "cancel", onPress: () => resolve(false) },
       {
         text: rotuloOk,

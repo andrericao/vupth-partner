@@ -3,7 +3,7 @@ import { View, Text, Pressable } from "react-native";
 import { abrirDialogo } from "@store/dialogo.store";
 import { NwButton } from "@components/nw/Button";
 import { PendingDot } from "@components/PendingDot";
-import { formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@lib/pagamento";
+import { buscarTaxas, formatarReais, observacaoDoPagamento, type PagamentoPendente } from "@lib/pagamento";
 import { buscarCalculoComPrazo, textoDoCalculo, type Calculo } from "@lib/bonificacao";
 import { avisoDeTeste, pagaPeloApp, type Gateway } from "@lib/gateway";
 
@@ -20,6 +20,7 @@ export function PagamentosPendentes({
   gateway,
   abrir = abrirDialogo,
   buscarCalculo = buscarCalculoComPrazo,
+  buscarTaxasDoPagamento = buscarTaxas,
 }: {
   itens: PagamentoPendente[];
   /** `jaConfirmou`: o profissional ja confirmou na caixa do card; nao pergunta de novo. */
@@ -29,6 +30,7 @@ export function PagamentosPendentes({
   abrir?: typeof abrirDialogo;
   /** O calculo do desconto (DEC-127) do atendimento; null = sem desconto. Injetavel nos testes. */
   buscarCalculo?: (attendanceId: string) => Promise<Calculo | null>;
+  buscarTaxasDoPagamento?: typeof buscarTaxas;
   /** DEC-119: com o Asaas conectado, o webhook quita sozinho, mas o "Recebi" segue visivel. */
   gateway?: Gateway | null;
 }) {
@@ -54,10 +56,15 @@ export function PagamentosPendentes({
       { texto: "Fechar", estilo: "cancel" as const },
     ];
     // recebi-mostra-cliente-e-app (DEC-127): com desconto, a flag e o calculo vem junto.
-    const calculo = textoDoCalculo(await buscarCalculo(p.attendance_id));
+    const [dadosDoCalculo, linhas] = await Promise.all([
+      buscarCalculo(p.attendance_id),
+      buscarTaxasDoPagamento(p.attendance_id),
+    ]);
+    const calculo = textoDoCalculo(dadosDoCalculo);
     const escolha = await abrir({
       titulo: p.client_name,
       mensagem: `${formatarReais(p.amount)} · ${observacaoDoPagamento(p.status)}${calculo ? `\n\n${calculo}` : ""}`,
+      ...(linhas.length > 0 ? { linhas } : {}),
       botoes,
     });
     if (escolha === 0) await recebi(p.attendance_id, true);

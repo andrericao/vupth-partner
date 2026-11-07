@@ -4,6 +4,8 @@ import {
   obterPagamentosPendentes,
   confirmarRecebimento,
   isPaymentEvent,
+  buscarTaxas,
+  linhasDasTaxas,
   observacaoDoPagamento,
   rotuloDoPagamento,
 } from "@lib/pagamento";
@@ -15,6 +17,39 @@ jest.mock("@lib/confirmar", () => ({ confirmar: (...a: unknown[]) => mockConfirm
 // pagamento-pix (adendos 1a0616c e 62295f1): antes do Finalizar ou do Iniciar
 // proximo, o app le o pagamento. PAID -> sem pergunta; PENDING ou
 // AWAITING_CONFIRMATION -> "Recebeu o pagamento?".
+describe("taxas do Recebi (PAR-6, BAK 4b1fb2c)", () => {
+  beforeEach(() => jest.resetAllMocks());
+  const TAXAS = { app_percent_fee: 1.08, rounding_fee: 0.74, gateway_fee_simulated: 2.08 };
+
+  it("servico legado, sem fees_active: nenhuma linha", () => {
+    expect(linhasDasTaxas({ app_percent_fee: 1 })).toEqual([]);
+    expect(linhasDasTaxas(null)).toEqual([]);
+  });
+
+  it("fees_active falso risca; verdadeiro nao", () => {
+    const riscadas = linhasDasTaxas({ ...TAXAS, fees_active: false });
+    expect(riscadas.map((l) => l.rotulo)).toEqual(["Taxa do app (2%)", "Arredondamento", "Taxa da empresa de pagamento"]);
+    expect(riscadas.every((l) => l.riscada)).toBe(true);
+    expect(linhasDasTaxas({ ...TAXAS, fees_active: true }).some((l) => l.riscada)).toBe(false);
+  });
+
+  it("a pergunta do Recebi leva as linhas", async () => {
+    const pergunta = jest.fn().mockResolvedValue(true);
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 53.9, ...TAXAS, fees_active: false } });
+    await perguntarPagamento("a1", { perguntar: pergunta });
+    expect(pergunta.mock.calls[0][0].linhas).toHaveLength(3);
+  });
+
+  it("buscarTaxas: falha ou demora abre sem as linhas", async () => {
+    (api.get as jest.Mock).mockRejectedValueOnce(new Error("rede"));
+    await expect(buscarTaxas("a1")).resolves.toEqual([]);
+    (api.get as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+    await expect(buscarTaxas("a1", 1)).resolves.toEqual([]);
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { ...TAXAS, fees_active: true } });
+    await expect(buscarTaxas("a1")).resolves.toHaveLength(3);
+  });
+});
+
 describe("perguntarPagamento", () => {
   beforeEach(() => jest.resetAllMocks());
   const pergunta = jest.fn();

@@ -11,6 +11,26 @@ import { useDialogoStore } from "@store/dialogo.store";
 // implementa o Alert com botoes**: a caixa nunca aparece, o callback nunca roda,
 // e o toque parece nao ter efeito. Sao 22 chamadas assim no app.
 describe("confirmar()", () => {
+  it("PAR-6: com linhas, usa o DialogoVupth mesmo sem tipo", async () => {
+    const dialogo = jest.fn().mockResolvedValue(1);
+    const linhas = [{ rotulo: "Arredondamento", valor: "R$ 0,74", riscada: true }];
+    const ok = await confirmar(
+      { titulo: "Recebeu?", mensagem: "R$ 53,90", linhas },
+      { plataforma: "android", hostMontado: () => true, dialogoImpl: dialogo }
+    );
+    expect(ok).toBe(true);
+    expect(dialogo.mock.calls[0][0].linhas).toEqual(linhas);
+  });
+
+  it("PAR-6: sem o host, as linhas entram na mensagem e o risco vira palavra", async () => {
+    const alert = jest.fn((_t, _m, botoes: any[]) => botoes[1].onPress?.());
+    await confirmar(
+      { titulo: "Recebeu?", mensagem: "R$ 53,90", linhas: [{ rotulo: "Arredondamento", valor: "R$ 0,74", riscada: true }] },
+      { plataforma: "android", hostMontado: () => false, alertImpl: alert as any }
+    );
+    expect(alert.mock.calls[0][1]).toBe("R$ 53,90\n\nArredondamento: R$ 0,74 (não cobrada)");
+  });
+
   it("no NATIVO usa o Alert e resolve true quando o usuario confirma", async () => {
     const alert = jest.fn((_t, _m, botoes: any[]) => {
       botoes.find((b) => b.style !== "cancel")?.onPress?.();
