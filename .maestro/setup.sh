@@ -452,6 +452,12 @@ else
   # uma com a sua aprovacao; a F repete so a parte que falhou.
   [ "$FUMACA_OK" = 1 ] && for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do
     NN=$(basename "$ARQ" .yaml)
+    # Logs 2026-11-07_044841 e _071747: o push nao chega neste emulador (causa nao
+    # confirmada). A 12 fica so no celular; no emulador, vai ao teste manual do Andre.
+    if [ "$EMULADOR" = "1" ] && [ "$NN" = "12" ]; then
+      echo "⏭  etapa_12 (push: nao roda no emulador — teste manual do Andre)" >> "$RELATORIO"
+      continue
+    fi
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"
       continue
