@@ -24,10 +24,11 @@ appId: ${APP_ID}
 - tapOn:
     text: "Dados do estabelecimento"
     label: "16.12 · abre Dados do estabelecimento"
+# Log 2026-11-07_044841 (16.13): esta tela mostra so as iniciais da loja, nao o nome.
 - extendedWaitUntil:
-    visible: ${output.LOJA}
+    visible: "Pronto para atender"
     timeout: 20000
-    label: "16.13 · a loja criada aparece com o nome"
+    label: "16.13 · a tela da loja criada abre"
 - scrollUntilVisible:
     element:
       id: "delete-store"

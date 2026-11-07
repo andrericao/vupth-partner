@@ -96,9 +96,12 @@ appId: ${APP_ID}
 - tapOn:
     text: "Minha agenda"
     label: "09.21b · toca em Minha agenda"
+# Log 2026-11-07_044841 (09.21c): o botao para rente a barra de abas e nunca chega a
+# 100% visivel. Basta metade, como na 01.29.
 - scrollUntilVisible:
     element: "Salvar semana"
     direction: DOWN
+    visibilityPercentage: 50
     label: "09.21c · rola ate Salvar semana"
 - tapOn:
     text: "Salvar semana"
