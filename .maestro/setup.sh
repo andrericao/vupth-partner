@@ -76,6 +76,19 @@ if [ -z "$DEVICE" ]; then
   exit 1
 fi
 echo "Celular: $DEVICE"
+# Log 2026-11-07_020056: o celular entrou no adb no meio da rodada e, sem --device,
+# o Maestro trocou do emulador para ele da 04b em diante. Fixa o aparelho do inicio;
+# com dois no adb e sem --device, para em vez de adivinhar.
+if [ -z "$APARELHO" ]; then
+  if [ "$(adb devices | grep -cw "device")" -gt 1 ]; then
+    echo "ERRO: mais de um aparelho no adb. Escolha um: bash .maestro/setup.sh --device <serial>"
+    adb devices
+    exit 1
+  fi
+  APARELHO=$(echo "$DEVICE" | awk '{print $1}')
+  export ANDROID_SERIAL="$APARELHO"
+  MAESTRO_APARELHO=(--device "$APARELHO")
+fi
 
 # 2. APK de preview instalado
 if ! adb shell pm list packages | grep -q "com.vupth.partner.preview"; then
