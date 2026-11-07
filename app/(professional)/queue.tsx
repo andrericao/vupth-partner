@@ -21,6 +21,7 @@ import { confirmar, avisar } from "@lib/confirmar";
 import { confirmarComArtigo } from "@lib/confirmarComArtigo";
 import { confirmarRecebimento, perguntarPagamento } from "@lib/pagamento";
 import { perguntarValorRecebido } from "@lib/bonificacao";
+import { mostrarAvisoDeTaxas } from "@lib/avisoDeTaxas";
 import { parseApiTime, isoDate } from "@lib/time";
 import { professionalCompletion } from "@lib/completion";
 import { mensagemDoAtraso, queueMenuActions, formatServices, QUEUE_ACTION_LABEL, type QueueAction } from "@lib/queueCard";
@@ -641,6 +642,12 @@ export default function ProfessionalQueueScreen() {
   // A pergunta so aparece quando ha o que receber (ja pago ou sem pagamento: nada).
   const finalizarComPagamento = async (attendanceId: string) => {
     await finishAttendance(attendanceId);
+    await receberPagamento(attendanceId);
+    // PAR-6: o modal unico vem depois do corte concluido; o Backend diz se mostra.
+    await mostrarAvisoDeTaxas();
+  };
+
+  const receberPagamento = async (attendanceId: string) => {
     const recebido = await perguntarPagamento(attendanceId, {
       cliente: currentAttendance?.id === attendanceId ? currentAttendance.clientName : null,
     });

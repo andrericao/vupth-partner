@@ -39,4 +39,14 @@ describe("PendenciasDoRelatorio", () => {
     expect(r.queryByTestId("pendencias-divida")).toBeNull();
     expect(r.queryByTestId("pendencias-cortes")).toBeNull();
   });
+
+  it("PAR-6: sem as taxas ativas, risca o total e a parte de taxas do corte", () => {
+    const report = { ...BASE, receives_total: 27, fees_total: 3, cuts: [{ attendance_id: "a", receives: 27, fees: 3 }] };
+    const riscado = { textDecorationLine: "line-through" };
+    const r = render(<PendenciasDoRelatorio report={report} taxasAtivas={false} />);
+    fireEvent.press(r.getByTestId("pendencias-secao-titulo"));
+    expect(r.getByText("R$ 3,00").props.style).toEqual(riscado);
+    expect(r.getByText(" · Taxas R$ 3,00").props.style).toEqual(riscado);
+    expect(r.getByText("Recebe R$ 27,00").props.style).toBeUndefined();
+  });
 });

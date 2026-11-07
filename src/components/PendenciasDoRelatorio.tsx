@@ -2,13 +2,20 @@ import { View, Text } from "react-native";
 
 import { SecaoRecolhivel } from "@components/SecaoRecolhivel";
 import { formatarReais } from "@lib/dinheiro";
-import { resumoDePendencias, linhaDoCorte, horaDoCorte } from "@lib/pendenciasDoRelatorio";
+import { resumoDePendencias, linhaDoCorte, partesDoCorte, horaDoCorte } from "@lib/pendenciasDoRelatorio";
 import type { ProfessionalReport } from "@store/professional.store";
 
 // relatorio-com-pendencias: "Recebe, taxas e dívida", recolhido como as outras
 // secoes de Relatorios. Total do periodo e, por corte, o que recebeu, as taxas
 // e a divida. Sem multa nem lucro do app (DEC-94).
-export function PendenciasDoRelatorio({ report }: { report: ProfessionalReport | null | undefined }) {
+// PAR-6: sem as taxas ativas, o valor delas aparece riscado.
+export function PendenciasDoRelatorio({
+  report,
+  taxasAtivas = true,
+}: {
+  report: ProfessionalReport | null | undefined;
+  taxasAtivas?: boolean;
+}) {
   const r = resumoDePendencias(report);
   if (!r) return null;
   const cortes = (report?.cuts ?? []).filter((c) => linhaDoCorte(c) !== "");
@@ -17,7 +24,7 @@ export function PendenciasDoRelatorio({ report }: { report: ProfessionalReport |
     <SecaoRecolhivel testID="pendencias-secao" titulo="Recebe, taxas e dívida">
       <View testID="pendencias-totais" className="gap-1">
         {r.recebe !== null && <Linha rotulo="Você recebe" valor={formatarReais(r.recebe)} />}
-        {r.taxas !== null && <Linha rotulo="Taxas" valor={formatarReais(r.taxas)} />}
+        {r.taxas !== null && <Linha rotulo="Taxas" valor={formatarReais(r.taxas)} riscado={!taxasAtivas} />}
         {r.divida > 0 ? (
           <Linha rotulo="Dívida por fora" valor={formatarReais(r.divida)} testID="pendencias-divida" />
         ) : r.simulada > 0 ? (
@@ -31,7 +38,14 @@ export function PendenciasDoRelatorio({ report }: { report: ProfessionalReport |
               {horaDoCorte(c) !== "" && (
                 <Text className="font-body text-f11 text-vupth-textSecondary">{horaDoCorte(c)}</Text>
               )}
-              <Text className="font-body text-xs text-vupth-textPrimary">{linhaDoCorte(c)}</Text>
+              <Text className="font-body text-xs text-vupth-textPrimary">
+                {partesDoCorte(c).map((p, i) => (
+                  <Text key={p.texto} style={p.taxa && !taxasAtivas ? RISCADO : undefined}>
+                    {i > 0 ? " · " : ""}
+                    {p.texto}
+                  </Text>
+                ))}
+              </Text>
             </View>
           ))}
         </View>
@@ -40,11 +54,13 @@ export function PendenciasDoRelatorio({ report }: { report: ProfessionalReport |
   );
 }
 
-function Linha({ rotulo, valor, testID }: { rotulo: string; valor: string; testID?: string }) {
+const RISCADO = { textDecorationLine: "line-through" } as const;
+
+function Linha({ rotulo, valor, testID, riscado = false }: { rotulo: string; valor: string; testID?: string; riscado?: boolean }) {
   return (
     <View className="flex-row justify-between">
       <Text className="font-body text-sm text-vupth-textSecondary">{rotulo}</Text>
-      <Text testID={testID} className="font-mono text-sm text-vupth-textPrimary">
+      <Text testID={testID} className="font-mono text-sm text-vupth-textPrimary" style={riscado ? RISCADO : undefined}>
         {valor}
       </Text>
     </View>

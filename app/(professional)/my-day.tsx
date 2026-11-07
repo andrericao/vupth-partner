@@ -36,6 +36,7 @@ import {
 import { AbasDoRelatorio, type AbaDoRelatorio } from "@components/AbasDoRelatorio";
 import { DividasDoRelatorio } from "@components/DividasDoRelatorio";
 import { buscarDivida, CHAVE_DIVIDA } from "@lib/dividaPorFora";
+import { buscarAvisoDeTaxas, CHAVE_AVISO_DE_TAXAS } from "@lib/avisoDeTaxas";
 import { LinhaDoPagamento } from "@components/LinhaDoPagamento";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { confirmarRecebimento, formatarReais, recusarRecebimento } from "@lib/pagamento";
@@ -82,13 +83,27 @@ function humanizeService(value: string | null): string {
 }
 
 /** Uma linha da composicao: rotulo a esquerda, valor a direita. */
-function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor: number; forte?: boolean }) {
+function LinhaDaConta({
+  rotulo,
+  valor,
+  forte = false,
+  riscada = false,
+}: {
+  rotulo: string;
+  valor: number;
+  forte?: boolean;
+  riscada?: boolean;
+}) {
   return (
     <View className="flex-row justify-between mt-1">
       <Text className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}>
         {rotulo}
       </Text>
-      <Text className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}>
+      <Text
+        testID={riscada ? "conta-taxa-riscada" : undefined}
+        className={`font-body text-xs ${forte ? "text-vupth-textPrimary font-semibold" : "text-vupth-textSecondary"}`}
+        style={riscada ? { textDecorationLine: "line-through" } : undefined}
+      >
         {formatarReais(valor)}
       </Text>
     </View>
@@ -99,13 +114,21 @@ function LinhaDaConta({ rotulo, valor, forte = false }: { rotulo: string; valor:
  * relatorio-todas-as-linhas (DEC-55): todas as parcelas, e a soma fecha no
  * "Cliente pagou". Serve ao atendimento e ao total do periodo.
  */
-function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { conta: Composicao; testID?: string }) {
+function ContaDoAtendimento({
+  conta,
+  taxasAtivas,
+  testID = "composicao-do-atendimento",
+}: {
+  conta: Composicao;
+  taxasAtivas: boolean;
+  testID?: string;
+}) {
   return (
     <View testID={testID} className="mt-3 pt-2 border-t border-vupth-border">
       <LinhaDaConta rotulo="Você recebe" valor={conta.voceRecebeu} forte />
-      <LinhaDaConta rotulo="Empresa de pagamento" valor={conta.empresaDePagamento} />
-      <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} />
-      <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} />
+      <LinhaDaConta rotulo="Empresa de pagamento" valor={conta.empresaDePagamento} riscada={!taxasAtivas} />
+      <LinhaDaConta rotulo="App Vupth (2%)" valor={conta.app} riscada={!taxasAtivas} />
+      <LinhaDaConta rotulo="Arredondamento" valor={conta.arredondamento} riscada={!taxasAtivas} />
       <LinhaDaConta rotulo="Outros ajustes" valor={conta.outros} />
       <LinhaDaConta rotulo="Cliente pagou" valor={conta.clientePagou} forte />
       {conta.estimados.length > 0 && (
@@ -117,7 +140,15 @@ function ContaDoAtendimento({ conta, testID = "composicao-do-atendimento" }: { c
   );
 }
 
-function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; conta: Composicao }) {
+function AttendanceHistoryCard({
+  item,
+  conta,
+  taxasAtivas,
+}: {
+  item: AttendanceHistoryItem;
+  conta: Composicao;
+  taxasAtivas: boolean;
+}) {
   const [aberto, setAberto] = useState(false);
   // Rotulo e cor vem da lib compartilhada com Atendimentos do dono —
   // inclusive o REMOVED (a loja retirou), que antes cairia cru na tela.
@@ -161,7 +192,7 @@ function AttendanceHistoryCard({ item, conta }: { item: AttendanceHistoryItem; c
         <Text className="font-heading text-vupth-textPrimary">{formatarReais(item.totalValue)}</Text>
       </View>
       <LinhaDoPagamento status={item.payment_status} />
-      {aberto && <ContaDoAtendimento conta={conta} />}
+      {aberto && <ContaDoAtendimento conta={conta} taxasAtivas={taxasAtivas} />}
     </Pressable>
   );
 }
@@ -218,6 +249,9 @@ export default function MyDayScreen() {
   const { itens: pagamentos, aguardando } = usePagamentosPendentes(!!professional?.id);
   // dividas-e-pendentes-no-relatorio: as abas do topo; a divida com o app saiu da Fila.
   const [aba, setAba] = useState<AbaDoRelatorio>("historico");
+  // PAR-6: na duvida, vale como desligado (Recursos do app): as taxas aparecem riscadas.
+  const { data: avisoDeTaxas } = useQuery({ queryKey: CHAVE_AVISO_DE_TAXAS, queryFn: buscarAvisoDeTaxas });
+  const taxasAtivas = avisoDeTaxas?.taxasAtivas ?? false;
   const { data: divida } = useQuery({ queryKey: CHAVE_DIVIDA, queryFn: buscarDivida, staleTime: 60_000, retry: false });
   const { data: gateway } = useQuery({ queryKey: CHAVE_GATEWAY, queryFn: buscarGateway, staleTime: 60_000, retry: false });
   // premio-em-pendentes (Andre, 05/11): os premios de indicacao ainda nao recebidos.
@@ -538,7 +572,7 @@ export default function MyDayScreen() {
 
                 {contaDoPeriodo ? (
                   <SecaoRecolhivel testID="conta-do-periodo-secao" titulo="A conta do período">
-                    <ContaDoAtendimento conta={contaDoPeriodo} testID="conta-do-periodo" />
+                    <ContaDoAtendimento conta={contaDoPeriodo} taxasAtivas={taxasAtivas} testID="conta-do-periodo" />
                   </SecaoRecolhivel>
                 ) : (
                   report?.netRevenue != null && (
@@ -547,7 +581,7 @@ export default function MyDayScreen() {
                     </Text>
                   )
                 )}
-                <PendenciasDoRelatorio report={report} />
+                <PendenciasDoRelatorio report={report} taxasAtivas={taxasAtivas} />
                 <ComposicaoDosCortes report={report} />
                 <SaldosComOApp report={report} />
                 <NaoRealizadosCard naoRealizados={report?.notRealized} concluidosComAtraso={report?.finishedLate} />
@@ -615,6 +649,7 @@ export default function MyDayScreen() {
                     key={item.id}
                     item={item}
                     conta={composicaoDoAtendimento(item, myServices)}
+                    taxasAtivas={taxasAtivas}
                   />
                 ))}
                 {carregandoMais && (
