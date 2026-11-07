@@ -1,0 +1,30 @@
+Rodada 2026-11-07_044841 · TAG 044841 · commit esperado 3509068
+✅ 00_atualizacao
+✅ etapa_00b_fumaca
+✅ etapa_01a
+✅ etapa_01b
+✅ etapa_02
+✅ etapa_03
+✅ etapa_04a
+✅ etapa_04b
+❌ etapa_05a — parou em 05.05d · tolerancia · o aviso diz a hora em que o atraso libera
+   print: .maestro/logs/2026-11-07_044841/FALHA_05.05d_tolerancia-o-aviso-diz-a-hora-em-que-o-atraso-libera.png
+✅ etapa_05b
+✅ etapa_06
+❌ etapa_07a — parou em 07.02 · confere Fora
+   print: .maestro/logs/2026-11-07_044841/FALHA_07.02_confere-fora.png
+❌ etapa_07b — parou em ?
+✅ etapa_08a
+✅ etapa_08b
+❌ etapa_09 — parou em 09.21c · rola ate Salvar semana
+   print: .maestro/logs/2026-11-07_044841/FALHA_09.21c_rola-ate-salvar-semana.png
+✅ etapa_10a
+✅ etapa_10b
+✅ etapa_11
+❌ etapa_12 — parou em 12.07 · espera o push Pedido de vínculo
+   print: .maestro/logs/2026-11-07_044841/FALHA_12.07_espera-o-push-pedido-de-vinculo.png
+✅ etapa_14
+✅ etapa_15a
+✅ etapa_15b
+❌ etapa_16 — parou em 16.13 · a loja criada aparece com o nome
+   print: .maestro/logs/2026-11-07_044841/FALHA_16.13_a-loja-criada-aparece-com-o-nome.png
