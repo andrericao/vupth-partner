@@ -97,11 +97,11 @@ appId: ${APP_ID}
     env:
       EMAIL: ${output.EMAIL_DONO}
     label: "16.50 · tenta entrar com a conta apagada"
+# Log 2026-11-07_071747 (16.51): a caixa do erro cobre o botao de entrar.
 - extendedWaitUntil:
-    visible:
-      id: "login-submit"
+    visible: "Não há conta com este e-mail"
     timeout: 30000
-    label: "16.51 · a conta apagada nao entra: continua na tela de login"
+    label: "16.51 · a conta apagada nao entra: o app diz que nao ha conta"
 - assertNotVisible:
     id: "aba-menu"
     label: "16.52 · nao chegou a nenhuma tela de dentro do app"
