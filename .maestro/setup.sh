@@ -147,7 +147,8 @@ foto_na_frente() {
   # a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
   local nome
   nome=$(basename "$FOTO")
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
+  # Rodada de 07/11 08:24: 10 s nao bastaram com o emulador recem-ligado.
+  for _ in $(seq 1 40); do
     adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$nome" && return 0
     sleep 1
   done
