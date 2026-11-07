@@ -41,6 +41,11 @@ tags:
     visible: "Recebeu o pagamento?"
     timeout: 20000
     label: "00b.06a · sem chave Pix, a pergunta do pagamento aparece"
+# taxas-riscadas-e-modal-unico (PAR-6): com a chave de taxas desligada no staging,
+# a pergunta traz as taxas riscadas.
+- assertVisible:
+    id: "dialogo-taxa-riscada"
+    label: "00b.06b · a pergunta mostra as taxas riscadas"
 - runFlow:
     file: ../apoio/responder_pagamento.yaml
     env:
@@ -74,6 +79,19 @@ tags:
     visible: "Dias abertos."
     timeout: 20000
     label: "00b.15 · dia aberto"
+# abrir-dia-sem-semana (PAR-6, BAK dce1562): a conta nao montou a semana, entao o dia abre
+# so para solicitacoes, e a tela avisa. Log 2026-11-06_100733: antes o Backend recusava.
+- extendedWaitUntil:
+    visible:
+      id: "agenda-so-solicitacoes"
+    timeout: 20000
+    label: "00b.15a · avisa que so chegam solicitacoes"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: agenda-so-solicitacoes
+      O_QUE: "Minha agenda: dia aberto sem a semana montada, com o aviso de que so chegam solicitacoes"
+    label: "00b.15b · print para o Andre (agenda-so-solicitacoes)"
 - tapOn:
     id: "aba-fila"
     label: "00b.16 · volta a fila"
@@ -103,6 +121,10 @@ tags:
 - runFlow:
     file: ../apoio/confirmar.yaml
     label: "00b.24 · confirma"
+# Log 2026-11-06_154304: o profissional e o ultimo, e o aviso "Loja fechada" cobre "Reabrir fila".
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "00b.24a · fecha o aviso Loja fechada"
 - extendedWaitUntil:
     visible: "Reabrir fila"
     timeout: 20000

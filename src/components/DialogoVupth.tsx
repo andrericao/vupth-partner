@@ -81,6 +81,34 @@ type Cartao = {
   cores: Cores;
 };
 
+function LinhasDoDialogo({
+  linhas,
+  fs,
+  cor,
+}: {
+  linhas: DialogoNaTela["linhas"];
+  fs: (n: number) => number;
+  cor: string;
+}) {
+  if (!linhas?.length) return null;
+  const texto = { fontFamily: "Inter_400Regular", fontSize: fs(13), color: cor };
+  return (
+    <View style={{ gap: 4 }}>
+      {linhas.map((l) => (
+        <View key={l.rotulo} style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
+          <Text style={texto}>{l.rotulo}</Text>
+          <Text
+            testID={l.riscada ? "dialogo-taxa-riscada" : undefined}
+            style={[texto, l.riscada ? { textDecorationLine: "line-through" } : null]}
+          >
+            {l.valor}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export function DialogoVupth() {
   const fs = useFs();
   const { tema, cores, veu } = useTema();
@@ -197,6 +225,7 @@ function CartaoSemTipo({ atual, responder, fs, cores }: Cartao) {
           </Text>
         </ScrollView>
       )}
+      <LinhasDoDialogo linhas={atual.linhas} fs={fs} cor={cores.textSecondary} />
 
       <View style={{ gap: 12 }}>
         {atual.botoes.map((botao, i) => {
@@ -318,6 +347,7 @@ function CartaoComTipo({
           </Text>
         </ScrollView>
       )}
+      <LinhasDoDialogo linhas={atual.linhas} fs={fs} cor={cores.textSecondary} />
 
       {/* Primário em cima, "Cancelar" embaixo. O índice devolvido é o da lista
           original — o `dialogo-botao-N` da bateria não muda de lugar. */}

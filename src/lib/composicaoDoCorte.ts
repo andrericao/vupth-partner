@@ -6,12 +6,20 @@ import type { ComposicaoDoCorte, DestinoDaParcela } from "@store/professional.st
 // Corte antigo pode vir sem gateway_fee/app_fee: a linha e omitida. So o Partner usa isto.
 
 export type LinhaDaComposicao = {
-  chave: "service" | "gateway_fee" | "app_fee" | "penalty" | "total";
+  chave:
+    | "service"
+    | "gateway_fee"
+    | "app_fee"
+    | "app_percent_fee"
+    | "rounding_fee"
+    | "gateway_fee_simulated"
+    | "penalty"
+    | "total";
   rotulo: string;
   valor: number;
   /** Taxa nao cobrada no teste: o valor aparece riscado. */
   riscada: boolean;
-  /** "Não cobrada no teste", ou "Vai para: …". */
+  /** "Não cobrada", "Não cobrada no teste", ou "Vai para: …". */
   nota: string | null;
   forte: boolean;
 };
@@ -35,12 +43,25 @@ export function linhasDaComposicao(c: ComposicaoDoCorte | null | undefined): Lin
   const linhas: LinhaDaComposicao[] = [];
   const servico = numero(c.service);
   if (servico != null) linhas.push({ chave: "service", rotulo: "Serviço", valor: servico, riscada: false, nota: destino("service"), forte: false });
-  const gateway = numero(c.gateway_fee);
-  if (gateway != null)
-    linhas.push({ chave: "gateway_fee", rotulo: "Taxa da empresa de pagamento", valor: gateway, riscada: teste, nota: teste ? "Não cobrada no teste" : destino("gateway_fee"), forte: false });
-  const app = numero(c.app_fee);
-  if (app != null)
-    linhas.push({ chave: "app_fee", rotulo: "Taxa do app", valor: app, riscada: teste, nota: teste ? "Não cobrada no teste" : destino("app_fee"), forte: false });
+  if (typeof c.fees_active === "boolean") {
+    // PAR-6 (BAK-10): com as taxas separadas, elas substituem as duas linhas antigas.
+    const riscada = !c.fees_active;
+    const nota = riscada ? "Não cobrada" : null;
+    const taxa = (chave: LinhaDaComposicao["chave"], rotulo: string, v: number | null | undefined) => {
+      const valor = numero(v);
+      if (valor != null) linhas.push({ chave, rotulo, valor, riscada, nota, forte: false });
+    };
+    taxa("app_percent_fee", "Taxa do app (2%)", c.app_percent_fee);
+    taxa("rounding_fee", "Arredondamento", c.rounding_fee);
+    taxa("gateway_fee_simulated", "Taxa da empresa de pagamento", c.gateway_fee_simulated);
+  } else {
+    const gateway = numero(c.gateway_fee);
+    if (gateway != null)
+      linhas.push({ chave: "gateway_fee", rotulo: "Taxa da empresa de pagamento", valor: gateway, riscada: teste, nota: teste ? "Não cobrada no teste" : destino("gateway_fee"), forte: false });
+    const app = numero(c.app_fee);
+    if (app != null)
+      linhas.push({ chave: "app_fee", rotulo: "Taxa do app", valor: app, riscada: teste, nota: teste ? "Não cobrada no teste" : destino("app_fee"), forte: false });
+  }
   const multa = numero(c.penalty);
   if (multa != null && multa > 0) linhas.push({ chave: "penalty", rotulo: "Multa", valor: multa, riscada: false, nota: destino("penalty"), forte: false });
   const total = numero(c.total);

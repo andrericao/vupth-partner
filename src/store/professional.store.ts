@@ -107,6 +107,12 @@ export type ComposicaoDoCorte = {
   /** false = modo teste (taxas nao cobradas); true = passou pelo gateway. */
   charged?: boolean | null;
   goes_to?: Partial<Record<"service" | "gateway_fee" | "app_fee" | "penalty", DestinoDaParcela>> | null;
+  /** BAK-10: as taxas separadas. Servico legado nao traz. */
+  app_percent_fee?: number | null;
+  rounding_fee?: number | null;
+  gateway_fee_simulated?: number | null;
+  /** false = taxas riscadas: o profissional nao paga. */
+  fees_active?: boolean | null;
 };
 
 export type CorteDoRelatorio = {

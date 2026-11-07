@@ -32,6 +32,25 @@ describe("composicaoDoCorte (relatorio-explica-valores, DEC-166)", () => {
     expect(linhasDaComposicao({ service: NaN as any, total: null })).toEqual([]);
   });
 
+  it("PAR-6: fees_active false risca as tres taxas e tira as linhas antigas", () => {
+    const l = linhasDaComposicao({
+      service: 50, gateway_fee: 1.99, app_fee: 1, total: 53.9, charged: false,
+      app_percent_fee: 1.08, rounding_fee: 0.74, gateway_fee_simulated: 2.08, fees_active: false,
+    });
+    expect(l.map((x) => x.chave)).toEqual(["service", "app_percent_fee", "rounding_fee", "gateway_fee_simulated", "total"]);
+    expect(l.find((x) => x.chave === "rounding_fee")).toMatchObject({ riscada: true, nota: "Não cobrada", valor: 0.74 });
+    expect(l.find((x) => x.chave === "total")).toMatchObject({ riscada: false });
+  });
+
+  it("PAR-6: fees_active true mostra as taxas sem riscar, e a multa segue igual", () => {
+    const l = linhasDaComposicao({
+      service: 50, penalty: 5, total: 58.9, charged: false,
+      app_percent_fee: 1.08, rounding_fee: 0.74, gateway_fee_simulated: 2.08, fees_active: true,
+    });
+    expect(l.find((x) => x.chave === "app_percent_fee")).toMatchObject({ riscada: false, nota: null });
+    expect(l.find((x) => x.chave === "penalty")).toMatchObject({ riscada: false, valor: 5 });
+  });
+
   it("temComposicao", () => {
     expect(temComposicao(null)).toBe(false);
     expect(temComposicao([{ composition: null }])).toBe(false);

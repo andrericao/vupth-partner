@@ -41,6 +41,15 @@ appId: ${APP_ID}
     start: "50%, 0%"
     end: "50%, 80%"
     label: "12.06 · abre a gaveta de notificações"
+# Log 2026-11-06_193916: o print da 12.07 mostra a tela inicial, sem a gaveta aberta.
+- runFlow:
+    when:
+      notVisible: "(Clear all|Limpar tudo|Manage|Gerenciar|No notifications|Sem notificações|Pedido de vínculo)"
+    commands:
+      - swipe:
+          start: "50%, 0%"
+          end: "50%, 80%"
+    label: "12.06a · a gaveta nao abriu: puxa de novo"
 - extendedWaitUntil:
     visible: "Pedido de vínculo"
     timeout: 90000

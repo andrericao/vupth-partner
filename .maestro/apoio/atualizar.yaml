@@ -3,9 +3,20 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "aba-perfil"
+# bateria 05/11 16:39: o item estava na tela, mas a rolagem (100% visivel, sem
+# centralizar) dava "No visible element" com a pilula "Voltar ao topo" surgindo.
+# Agora centraliza, aceita 60% visivel, rola mais devagar e confere depois.
 - scrollUntilVisible:
     element:
       text: "Versão do app"
+    direction: DOWN
+    speed: 30
+    visibilityPercentage: 60
+    centerElement: true
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "Versão do app"
+    timeout: 5000
 - tapOn:
     text: "Versão do app"
 - tapOn:
@@ -47,6 +58,11 @@ appId: ${APP_ID}
       - scrollUntilVisible:
           element:
             text: "Versão do app"
+          direction: DOWN
+          speed: 30
+          visibilityPercentage: 60
+          centerElement: true
+          timeout: 30000
       - tapOn:
           text: "Versão do app"
 

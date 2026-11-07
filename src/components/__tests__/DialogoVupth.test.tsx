@@ -24,6 +24,22 @@ describe("DialogoVupth (o diálogo do app no nativo)", () => {
     expect(toJSON()).toBeNull();
   });
 
+  it("PAR-6: desenha as linhas e risca a taxa que não vale", () => {
+    const { getByText, getByTestId, rerender } = render(<DialogoVupth />);
+    act(
+      () =>
+        void abrirDialogo({
+          titulo: "Recebeu o pagamento?",
+          linhas: [{ rotulo: "Arredondamento", valor: "R$ 0,74", riscada: true }],
+        })
+    );
+    rerender(<DialogoVupth />);
+    expect(getByText("Arredondamento")).toBeTruthy();
+    expect(StyleSheet.flatten(getByTestId("dialogo-taxa-riscada").props.style)).toMatchObject({
+      textDecorationLine: "line-through",
+    });
+  });
+
   it("mostra título e mensagem do pedido", () => {
     const { getByText, rerender } = render(<DialogoVupth />);
     act(() => void abrirDialogo({ titulo: "Erro", mensagem: "Senha incorreta" }));

@@ -76,6 +76,19 @@ if [ -z "$DEVICE" ]; then
   exit 1
 fi
 echo "Celular: $DEVICE"
+# Log 2026-11-07_020056: o celular entrou no adb no meio da rodada e, sem --device,
+# o Maestro trocou do emulador para ele da 04b em diante. Fixa o aparelho do inicio;
+# com dois no adb e sem --device, para em vez de adivinhar.
+if [ -z "$APARELHO" ]; then
+  if [ "$(adb devices | grep -cw "device")" -gt 1 ]; then
+    echo "ERRO: mais de um aparelho no adb. Escolha um: bash .maestro/setup.sh --device <serial>"
+    adb devices
+    exit 1
+  fi
+  APARELHO=$(echo "$DEVICE" | awk '{print $1}')
+  export ANDROID_SERIAL="$APARELHO"
+  MAESTRO_APARELHO=(--device "$APARELHO")
+fi
 
 # 2. APK de preview instalado
 if ! adb shell pm list packages | grep -q "com.vupth.partner.preview"; then
@@ -134,7 +147,8 @@ foto_na_frente() {
   # a envia ao staging (log 06/10, 07.44). Confere no MediaStore antes de seguir.
   local nome
   nome=$(basename "$FOTO")
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
+  # Rodada de 07/11 08:24: 10 s nao bastaram com o emulador recem-ligado.
+  for _ in $(seq 1 40); do
     adb shell content query --uri content://media/external/images/media --projection _display_name 2>/dev/null | grep -q "$nome" && return 0
     sleep 1
   done
@@ -396,10 +410,11 @@ fi
 
 # Limites de tempo (maestro-trava-na-atualizacao): a 00 (atualizacao) e cada etapa.
 # No emulador valem FATOR vezes, como as esperas dos fluxos. Mude por variavel:
-# ETAPA_MAX=3600 ATUALIZACAO_MAX=900 bash .maestro/setup.sh ...
+# ETAPA_MAX=3600 ATUALIZACAO_MAX=900 FUMACA_MAX=900 bash .maestro/setup.sh ...
 MULT=1; [ "$EMULADOR" = "1" ] && MULT="${FATOR:-2}"
 ATUALIZACAO_MAX="${ATUALIZACAO_MAX:-$((600 * MULT))}"
 ETAPA_MAX="${ETAPA_MAX:-$((2400 * MULT))}"
+FUMACA_MAX="${FUMACA_MAX:-$((300 * MULT))}"
 
 # maestro-atualizacao-por-commit (Andre, 28/10): o commit ja verificado fica em
 # .maestro/.commit_verificado (no .gitignore), junto do aparelho e da hora da
@@ -427,7 +442,7 @@ else
   FUMACA_OK=1
   if grep -qx "00b $MARCA" "$APROVADOS"; then
     echo "⏭  etapa_00b (fumaca ja passou neste commit)" >> "$RELATORIO"
-  elif rodar "etapa_00b_fumaca" "$FLUXOS/avulsas/00b_fumaca.yaml" 300; then
+  elif rodar "etapa_00b_fumaca" "$FLUXOS/avulsas/00b_fumaca.yaml" "$FUMACA_MAX"; then
     aprovar 00b
   else
     FUMACA_OK=0
@@ -438,6 +453,12 @@ else
   # uma com a sua aprovacao; a F repete so a parte que falhou.
   [ "$FUMACA_OK" = 1 ] && for ARQ in $(ls "$FLUXOS"/avulsas/ | grep -E '^[0-9]{2}[a-z]?\.yaml$' | sort | sed "s#^#$FLUXOS/avulsas/#"); do
     NN=$(basename "$ARQ" .yaml)
+    # Logs 2026-11-07_044841 e _071747: o push nao chega neste emulador (causa nao
+    # confirmada). A 12 fica so no celular; no emulador, vai ao teste manual do Andre.
+    if [ "$EMULADOR" = "1" ] && [ "$NN" = "12" ]; then
+      echo "⏭  etapa_12 (push: nao roda no emulador — teste manual do Andre)" >> "$RELATORIO"
+      continue
+    fi
     if aprovada "$NN"; then
       echo "⏭  etapa_$NN (já passou no $(grep "^$NN " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RELATORIO"
       continue

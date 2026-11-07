@@ -24,10 +24,11 @@ appId: ${APP_ID}
 - tapOn:
     text: "Dados do estabelecimento"
     label: "16.12 · abre Dados do estabelecimento"
+# Log 2026-11-07_044841 (16.13): esta tela mostra so as iniciais da loja, nao o nome.
 - extendedWaitUntil:
-    visible: ${output.LOJA}
+    visible: "Pronto para atender"
     timeout: 20000
-    label: "16.13 · a loja criada aparece com o nome"
+    label: "16.13 · a tela da loja criada abre"
 - scrollUntilVisible:
     element:
       id: "delete-store"
@@ -96,11 +97,11 @@ appId: ${APP_ID}
     env:
       EMAIL: ${output.EMAIL_DONO}
     label: "16.50 · tenta entrar com a conta apagada"
+# Log 2026-11-07_071747 (16.51): a caixa do erro cobre o botao de entrar.
 - extendedWaitUntil:
-    visible:
-      id: "login-submit"
+    visible: "Não há conta com este e-mail"
     timeout: 30000
-    label: "16.51 · a conta apagada nao entra: continua na tela de login"
+    label: "16.51 · a conta apagada nao entra: o app diz que nao ha conta"
 - assertNotVisible:
     id: "aba-menu"
     label: "16.52 · nao chegou a nenhuma tela de dentro do app"

@@ -11,9 +11,13 @@ env:
 # etapa avulsa fazia a sua TAG). O setup.sh os passa por -e; sem eles (maestro
 # test direto), as expressoes testam typeof.
 ---
+# Prefixo f: a conta e so da fumaca. Com a TAG da rodada, a 01 tentava cadastrar o mesmo
+# e-mail e parava em "Este e-mail ja esta cadastrado" (log 2026-11-06_162133, 01.02).
+# Prefixo, nao sufixo: "Loja M193916f" casava com a busca da 02 e o profissional pedia
+# vinculo a loja da fumaca (log 2026-11-06_193916, 02.14; a 03 em diante caiu por isso).
 - evalScript:
-    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
-    label: "00b.A1 · etiqueta da rodada (TAG)"
+    script: "${output.TAG = 'f' + (typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6))}"
+    label: "00b.A1 · etiqueta da fumaca (f + TAG da rodada)"
 - evalScript:
     script: ${output.EMAIL_DONO = 'prop_m' + output.TAG + '@teste.com'}
     label: "00b.A2 · e-mail do dono"

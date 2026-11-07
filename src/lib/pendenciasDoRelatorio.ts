@@ -28,18 +28,25 @@ export function resumoDePendencias(r: ProfessionalReport | null | undefined): Re
   return { recebe, taxas, divida: divida ?? 0, simulada: simulada ?? 0 };
 }
 
+export type ParteDoCorte = { texto: string; taxa: boolean };
+
 /** "Recebe R$ 27,00 · Taxas R$ 3,00 · Dívida R$ 2,90"; so o que vier. */
 export function linhaDoCorte(c: CorteDoRelatorio): string {
-  const partes: string[] = [];
+  return partesDoCorte(c).map((p) => p.texto).join(" · ");
+}
+
+/** As partes da linha do corte; a de taxas vem marcada, para a tela riscar (PAR-6). */
+export function partesDoCorte(c: CorteDoRelatorio): ParteDoCorte[] {
+  const partes: ParteDoCorte[] = [];
   const recebe = numero(c.receives);
   const taxas = numero(c.fees);
   const divida = numero(c.pending_debt) ?? 0;
   const simulada = numero(c.pending_debt_simulated) ?? 0;
-  if (recebe !== null) partes.push(`Recebe ${formatarReais(recebe)}`);
-  if (taxas !== null) partes.push(`Taxas ${formatarReais(taxas)}`);
-  if (divida > 0) partes.push(`Dívida ${formatarReais(divida)}`);
-  else if (simulada > 0) partes.push(`Dívida ${formatarReais(simulada)} (teste)`);
-  return partes.join(" · ");
+  if (recebe !== null) partes.push({ texto: `Recebe ${formatarReais(recebe)}`, taxa: false });
+  if (taxas !== null) partes.push({ texto: `Taxas ${formatarReais(taxas)}`, taxa: true });
+  if (divida > 0) partes.push({ texto: `Dívida ${formatarReais(divida)}`, taxa: false });
+  else if (simulada > 0) partes.push({ texto: `Dívida ${formatarReais(simulada)} (teste)`, taxa: false });
+  return partes;
 }
 
 /** "14:30" do fim do corte, na hora do aparelho; sem data valida, "". */

@@ -14,6 +14,8 @@ export type DiaDaAgenda = {
   closes: string | null;
   storeOpen: boolean;
   openedByMe: boolean;
+  /** abrir-dia-sem-semana (BAK-9): falso = o dia abriu, mas so chegam solicitacoes. */
+  agendaReleased: boolean;
 };
 
 /** GET /professional/me/agenda: os dias de hoje ate `to` (no maximo 31 dias). */
@@ -26,6 +28,7 @@ export async function buscarAgendaAberta(from: string, to: string): Promise<DiaD
     closes: d.closes ?? null,
     storeOpen: d.store_open !== false,
     openedByMe: !!d.opened_by_me,
+    agendaReleased: d.agenda_released !== false,
   }));
 }
 

@@ -28,8 +28,10 @@ appId: ${APP_ID}
       id: "conta-do-periodo"
     direction: DOWN
     label: "06.03a2 · conta · a conta do periodo aparece aberta"
-- assertVisible:
-    text: "Arredondamento"
+# Log 2026-11-06_162133: a conta aberta passa da dobra e a linha fica abaixo da tela.
+- scrollUntilVisible:
+    element: "Arredondamento"
+    direction: DOWN
     label: "06.03b · conta · com todas as linhas"
 # relatorio-sem-multa (PAR, DEC-83, Backend 0112396): o CLIENTE2 saiu pela loja
 # (05.22, Remover), entao o resumo traz "Nao realizados" com o motivo, sem valor
@@ -63,6 +65,10 @@ appId: ${APP_ID}
 - assertVisible:
     text: "Você recebe"
     label: "06.05c · conta · mostra a parte do profissional"
+# PAR-6: a chave profissional_paga_taxa nasce desligada no staging; as taxas vem riscadas.
+- assertVisible:
+    id: "conta-taxa-riscada"
+    label: "06.05c1 · conta · as taxas aparecem riscadas"
 - runFlow:
     file: ../apoio/para_o_andre.yaml
     env:

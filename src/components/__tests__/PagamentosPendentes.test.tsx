@@ -23,6 +23,7 @@ const ITENS = [
 // Sem rede no teste: o calculo do desconto (DEC-127) vem injetado. Antes o card chamava a API de
 // verdade e o CI, mais lento que o PC, estourava o waitFor (29/10).
 const semCalculo = async () => null;
+const semTaxas = async () => [];
 
 describe("PagamentosPendentes", () => {
   it("sem pendencia, nao aparece", () => {
@@ -82,7 +83,7 @@ describe("PagamentosPendentes", () => {
       const abrir = jest.fn().mockResolvedValue(0);
       const onRecebi = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={jest.fn()} abrir={abrir} buscarCalculo={semCalculo} />
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={jest.fn()} abrir={abrir} buscarCalculo={semCalculo} buscarTaxasDoPagamento={semTaxas} />
       );
       fireEvent.press(getByTestId("pagamento-a1"));
       await waitFor(() => expect(onRecebi).toHaveBeenCalledWith("a1", true));
@@ -95,7 +96,7 @@ describe("PagamentosPendentes", () => {
       const abrir = jest.fn().mockResolvedValue(1);
       const onRecusar = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} />
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} buscarTaxasDoPagamento={semTaxas} />
       );
       fireEvent.press(getByTestId("pagamento-a1"));
       await waitFor(() => expect(onRecusar).toHaveBeenCalledWith("a1"));
@@ -106,7 +107,7 @@ describe("PagamentosPendentes", () => {
       const onRecusar = jest.fn();
       const onRecebi = jest.fn();
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} />
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} buscarTaxasDoPagamento={semTaxas} />
       );
       fireEvent.press(getByTestId("pagamento-a2"));
       await waitFor(() => expect(abrir).toHaveBeenCalled());
@@ -120,7 +121,7 @@ describe("PagamentosPendentes", () => {
       const onRecebi = jest.fn();
       const onRecusar = jest.fn();
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} />
+        <PagamentosPendentes itens={ITENS} onRecebi={onRecebi} onRecusar={onRecusar} abrir={abrir} buscarCalculo={semCalculo} buscarTaxasDoPagamento={semTaxas} />
       );
       fireEvent.press(getByTestId("pagamento-a1"));
       await waitFor(() => expect(abrir).toHaveBeenCalled());
@@ -140,7 +141,7 @@ describe("PagamentosPendentes", () => {
         app_pays: 7.1,
       };
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} abrir={abrir} buscarCalculo={async () => calculo} />
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} abrir={abrir} buscarCalculo={async () => calculo} buscarTaxasDoPagamento={semTaxas} />
       );
       fireEvent.press(getByTestId("pagamento-a2"));
       await waitFor(() => expect(abrir).toHaveBeenCalled());
@@ -153,7 +154,7 @@ describe("PagamentosPendentes", () => {
     it("sem desconto: a mensagem fica como era", async () => {
       const abrir = jest.fn().mockResolvedValue(2);
       const { getByTestId } = render(
-        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} abrir={abrir} buscarCalculo={semCalculo} />
+        <PagamentosPendentes itens={ITENS} onRecebi={jest.fn()} abrir={abrir} buscarCalculo={semCalculo} buscarTaxasDoPagamento={semTaxas} />
       );
       fireEvent.press(getByTestId("pagamento-a2"));
       await waitFor(() => expect(abrir).toHaveBeenCalled());

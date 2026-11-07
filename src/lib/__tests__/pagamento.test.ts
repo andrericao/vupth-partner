@@ -4,6 +4,8 @@ import {
   obterPagamentosPendentes,
   confirmarRecebimento,
   isPaymentEvent,
+  buscarTaxas,
+  linhasDasTaxas,
   observacaoDoPagamento,
   rotuloDoPagamento,
 } from "@lib/pagamento";
@@ -15,6 +17,39 @@ jest.mock("@lib/confirmar", () => ({ confirmar: (...a: unknown[]) => mockConfirm
 // pagamento-pix (adendos 1a0616c e 62295f1): antes do Finalizar ou do Iniciar
 // proximo, o app le o pagamento. PAID -> sem pergunta; PENDING ou
 // AWAITING_CONFIRMATION -> "Recebeu o pagamento?".
+describe("taxas do Recebi (PAR-6, BAK 4b1fb2c)", () => {
+  beforeEach(() => jest.resetAllMocks());
+  const TAXAS = { app_percent_fee: 1.08, rounding_fee: 0.74, gateway_fee_simulated: 2.08 };
+
+  it("servico legado, sem fees_active: nenhuma linha", () => {
+    expect(linhasDasTaxas({ app_percent_fee: 1 })).toEqual([]);
+    expect(linhasDasTaxas(null)).toEqual([]);
+  });
+
+  it("fees_active falso risca; verdadeiro nao", () => {
+    const riscadas = linhasDasTaxas({ ...TAXAS, fees_active: false });
+    expect(riscadas.map((l) => l.rotulo)).toEqual(["Taxa do app (2%)", "Arredondamento", "Taxa da empresa de pagamento"]);
+    expect(riscadas.every((l) => l.riscada)).toBe(true);
+    expect(linhasDasTaxas({ ...TAXAS, fees_active: true }).some((l) => l.riscada)).toBe(false);
+  });
+
+  it("a pergunta do Recebi leva as linhas", async () => {
+    const pergunta = jest.fn().mockResolvedValue(true);
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { status: "PENDING", amount: 53.9, ...TAXAS, fees_active: false } });
+    await perguntarPagamento("a1", { perguntar: pergunta });
+    expect(pergunta.mock.calls[0][0].linhas).toHaveLength(3);
+  });
+
+  it("buscarTaxas: falha ou demora abre sem as linhas", async () => {
+    (api.get as jest.Mock).mockRejectedValueOnce(new Error("rede"));
+    await expect(buscarTaxas("a1")).resolves.toEqual([]);
+    (api.get as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+    await expect(buscarTaxas("a1", 1)).resolves.toEqual([]);
+    (api.get as jest.Mock).mockResolvedValueOnce({ data: { ...TAXAS, fees_active: true } });
+    await expect(buscarTaxas("a1")).resolves.toHaveLength(3);
+  });
+});
+
 describe("perguntarPagamento", () => {
   beforeEach(() => jest.resetAllMocks());
   const pergunta = jest.fn();
@@ -129,14 +164,14 @@ describe("pagamentos pendentes do profissional (adendo 1a0616c)", () => {
   it("Recebi: POST /attendances/{id}/payment/confirm", async () => {
     (api.post as jest.Mock).mockResolvedValueOnce({});
     await confirmarRecebimento("a1");
-    // sem a forma, sem corpo: continua valendo como antes (Backend 8b158e3)
+    // tirar-forma-de-pagamento (Andre, 06/11): sem method, sem corpo.
     expect(api.post).toHaveBeenCalledWith("/attendances/a1/payment/confirm", undefined);
   });
 
-  it("com a forma, manda o method no corpo", async () => {
+  it("com o valor recebido, manda so o received_amount", async () => {
     (api.post as jest.Mock).mockResolvedValueOnce({});
-    await confirmarRecebimento("a1", "PIX");
-    expect(api.post).toHaveBeenCalledWith("/attendances/a1/payment/confirm", { method: "PIX" });
+    await confirmarRecebimento("a1", 25);
+    expect(api.post).toHaveBeenCalledWith("/attendances/a1/payment/confirm", { received_amount: 25 });
   });
 
   it("os eventos do WS de pagamento (PAYMENT_CLAIMED, PAYMENT_CONFIRMED)", () => {
@@ -162,44 +197,5 @@ describe("rotuloDoPagamento (adendo 62295f1: ao lado de qualquer status)", () =>
     expect(rotuloDoPagamento(null)).toBeNull();
     expect(rotuloDoPagamento(undefined)).toBeNull();
     expect(rotuloDoPagamento("OUTRO")).toBeNull();
-  });
-});
-
-// forma-de-recebimento (Backend 8b158e3): so registro, opcional.
-describe("forma de recebimento", () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { perguntarForma, FORMAS_DE_RECEBIMENTO, MOSTRAR_FORMA_NOTA, formasVisiveis } = require("@lib/pagamento");
-
-  it("tem as quatro formas do Backend", () => {
-    expect(FORMAS_DE_RECEBIMENTO.map((f: { valor: string }) => f.valor)).toEqual([
-      "PIX",
-      "CARTAO",
-      "DINHEIRO",
-      "NOTA",
-    ]);
-  });
-
-  // ocultar-forma-nota (Andre, 25/10): a Nota esta escondida (flag), sem apagar.
-  it("a Nota esta escondida da caixa, mas continua na lista do Backend", () => {
-    expect(MOSTRAR_FORMA_NOTA).toBe(false);
-    expect(formasVisiveis().map((f: { valor: string }) => f.valor)).toEqual(["PIX", "CARTAO", "DINHEIRO"]);
-    expect(FORMAS_DE_RECEBIMENTO.map((f: { valor: string }) => f.valor)).toContain("NOTA");
-  });
-
-  it("devolve a forma escolhida; pular devolve undefined", async () => {
-    expect(await perguntarForma({ perguntar: async () => 1 })).toBe("CARTAO");
-    expect(await perguntarForma({ perguntar: async () => 2 })).toBe("DINHEIRO");
-    expect(await perguntarForma({ perguntar: async () => 3 })).toBeUndefined();
-  });
-
-  it("a caixa tem Pix, Cartao e Dinheiro e o Pular (sem Nota)", async () => {
-    let botoes: { texto: string }[] = [];
-    await perguntarForma({
-      perguntar: async (p: { botoes: { texto: string }[] }) => {
-        botoes = p.botoes;
-        return 3;
-      },
-    });
-    expect(botoes.map((b) => b.texto)).toEqual(["Pix", "Cartão", "Dinheiro", "Pular"]);
   });
 });

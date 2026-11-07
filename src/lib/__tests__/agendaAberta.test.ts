@@ -18,6 +18,7 @@ const dia = (date: string, extra: Partial<DiaDaAgenda> = {}): DiaDaAgenda => ({
   closes: "18:00:00",
   storeOpen: true,
   openedByMe: false,
+  agendaReleased: true,
   ...extra,
 });
 
@@ -32,6 +33,14 @@ describe("agendaAberta — chamadas", () => {
     const r = await buscarAgendaAberta("2026-11-01", "2026-12-01");
     expect(api.get).toHaveBeenCalledWith("/professional/me/agenda", { params: { from: "2026-11-01", to: "2026-12-01" } });
     expect(r).toEqual([dia("2026-11-02", { openedByMe: true })]);
+  });
+
+  it("agenda_released falso vira agendaReleased falso; sem o campo, fica verdadeiro", async () => {
+    (api.get as jest.Mock).mockResolvedValueOnce({
+      data: { days: [{ date: "2026-11-02", agenda_released: false }, { date: "2026-11-03" }] },
+    });
+    const r = await buscarAgendaAberta("2026-11-01", "2026-12-01");
+    expect(r.map((d) => d.agendaReleased)).toEqual([false, true]);
   });
 
   it("sem dias na resposta devolve lista vazia", async () => {

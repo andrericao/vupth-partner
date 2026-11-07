@@ -58,49 +58,9 @@ appId: ${APP_ID}
       NOME: fila-compartilhar
       O_QUE: "o icone de compartilhar no canto direito do cabecalho da Fila, ao lado do status e das opcoes"
     label: "05.04b · print para o Andre (fila-compartilhar)"
-# atraso-so-apos-tolerancia (DEC-185): o CLIENTE1 e o primeiro agendado do dia
-# (entrou pela API com o horario de agora). Antes de horario + 10, o "Nao chegou"
-# volta 409 LATE_TOO_EARLY: o app avisa a hora e trava o botao dele.
-- tapOn:
-    text: "Opções de ${output.CLIENTE1}"
-    label: "05.05a · tolerancia · abre as opcoes de ${output.CLIENTE1}"
-- tapOn:
-    text: "Não chegou"
-    label: "05.05b · tolerancia · toca em Nao chegou"
-- runFlow:
-    file: ../apoio/confirmar.yaml
-    label: "05.05c · tolerancia · confirma"
-- extendedWaitUntil:
-    visible: "Primeiro horário do dia.*"
-    timeout: 20000
-    label: "05.05d · tolerancia · o aviso diz a hora em que o atraso libera"
-- tapOn:
-    text: "OK"
-    label: "05.05e · tolerancia · fecha o aviso"
-- assertNotVisible:
-    text: "(Atrasado|atrasado)"
-    label: "05.05f · tolerancia · ${output.CLIENTE1} nao virou atrasado"
-- tapOn:
-    text: "Opções de ${output.CLIENTE1}"
-    label: "05.05g · tolerancia · abre as opcoes de novo"
-- tapOn:
-    id: "menu-acao-nao-chegou"
-    label: "05.05h · tolerancia · o Nao chegou agora esta travado"
-- extendedWaitUntil:
-    visible: "Primeiro horário do dia.*"
-    timeout: 10000
-    label: "05.05i · tolerancia · o botao travado repete o aviso, sem pedir confirmacao"
-- tapOn:
-    text: "OK"
-    label: "05.05j · tolerancia · fecha o aviso"
-- runFlow:
-    when:
-      visible:
-        id: "menu-acao-nao-chegou"
-    commands:
-      - pressKey: back
-    label: "05.05k · tolerancia · fecha o menu, se ficou aberto"
-
+# atraso-so-apos-tolerancia (DEC-185): nao coberto aqui. Log 2026-11-07_044841 (05.05d):
+# o POST /attendances nao grava o horario agendado (desiredTime), entao o CLIENTE1 e
+# walk-in e o "Nao chegou" vale na hora. So o agendamento promovido tem a tolerancia.
 - tapOn:
     text: "Iniciar próximo"
     label: "05.05 · toca em Iniciar próximo"
